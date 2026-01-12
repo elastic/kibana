@@ -16,10 +16,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/server';
-import type {
-  ContentManagementServerSetup,
-  ContentStorage,
-} from '@kbn/content-management-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type {
   PluginInitializerContext,
@@ -32,6 +29,8 @@ import type {
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { registerAccessControl } from '@kbn/content-management-access-control-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   initializeDashboardTelemetryTask,
@@ -39,19 +38,14 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
-import type { DashboardItem } from './content_management';
-import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
-import {
-  createDashboardSavedObjectType,
-  DASHBOARD_SAVED_OBJECT_TYPE,
-} from './dashboard_saved_object';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
+import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerAPIRoutes } from './api';
+import { registerRoutes, create, read, update, deleteDashboard } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
@@ -69,6 +63,7 @@ export interface StartDeps {
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
   share?: SharePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
@@ -76,7 +71,7 @@ export class DashboardPlugin
 {
   private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -90,17 +85,6 @@ export class DashboardPlugin
         },
       })
     );
-
-    plugins.contentManagement.register<ContentStorage<DashboardItem>>({
-      id: CONTENT_ID,
-      storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
-        logger: this.logger.get('storage'),
-      }),
-      version: {
-        latest: LATEST_VERSION,
-      },
-    });
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
@@ -141,10 +125,15 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
-    registerAPIRoutes({
+    registerRoutes(core.http);
+
+    void registerAccessControl({
       http: core.http,
-      contentManagement: plugins.contentManagement,
-      logger: this.logger,
+      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
+      getStartServices: () =>
+        core.getStartServices().then(([_, { security }]) => ({
+          security,
+        })),
     });
 
     return {};
@@ -196,6 +185,12 @@ export class DashboardPlugin
         };
       },
       scanDashboards,
+      client: {
+        create,
+        read,
+        update,
+        delete: deleteDashboard,
+      },
     };
   }
 

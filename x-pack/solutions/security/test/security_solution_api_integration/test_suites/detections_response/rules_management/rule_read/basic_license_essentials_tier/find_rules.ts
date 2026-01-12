@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getComplexRule,
@@ -16,7 +17,6 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

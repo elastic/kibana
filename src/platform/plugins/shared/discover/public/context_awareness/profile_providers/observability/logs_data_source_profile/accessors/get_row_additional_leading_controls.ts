@@ -12,7 +12,7 @@ import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discove
 import { retrieveMetadataColumns } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-language';
 import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
 import type { LogsDataSourceProfileProvider } from '../profile';
 import type { RowControlsExtensionParams } from '../../../../types';

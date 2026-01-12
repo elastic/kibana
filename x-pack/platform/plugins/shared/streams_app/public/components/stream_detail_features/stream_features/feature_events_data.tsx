@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
-
 import React from 'react';
-import { Chart, BarSeries, Settings } from '@elastic/charts';
-import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Streams, System } from '@kbn/streams-schema';
 import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import { conditionToESQL } from '@kbn/streamlang';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { useStreamFeatureEventsData } from './hooks/use_stream_feature_events_data';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamDetail } from '../../../hooks/use_stream_detail';
+import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
 
-export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
-  const chartBaseTheme = useElasticChartsTheme();
-
-  const events = useStreamFeatureEventsData(feature);
-
+export const FeatureEventsData = ({
+  feature,
+  definition,
+}: {
+  feature: System;
+  definition: Streams.all.Definition;
+}) => {
   const {
     dependencies: {
       start: { share },
@@ -32,8 +30,7 @@ export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
   } = useKibana();
   const useUrl = share.url.locators.useUrl;
 
-  const { definition } = useStreamDetail();
-  const esqlQuery = `FROM ${getIndexPatternsForStream(definition.stream).join(',')}
+  const esqlQuery = `FROM ${getIndexPatternsForStream(definition).join(',')}
       | WHERE ${conditionToESQL(feature.filter)}`;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
@@ -49,13 +46,15 @@ export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.streams.identifiedFeatureEvents.label', {
-              defaultMessage: 'Identified feature events',
-            })}
-          </EuiText>
+          <EuiTitle size="xxs">
+            <h3>
+              {i18n.translate('xpack.streams.identifiedFeatureEvents.label', {
+                defaultMessage: 'Detected feature events',
+              })}
+            </h3>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {discoverLink ? (
@@ -68,6 +67,7 @@ export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
                   defaultMessage: 'Open in Discover',
                 }
               )}
+              data-test-subj="feature_identification_existing_open_in_discover_button"
             >
               {i18n.translate('xpack.streams.identifiedFeatureEvents.viewAllLinkText', {
                 defaultMessage: 'Open in Discover',
@@ -76,10 +76,13 @@ export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
           ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
-      <Chart size={{ height: 64 }}>
-        <Settings baseTheme={chartBaseTheme} showLegend={false} />
-        <BarSeries id="numbers" data={events} xAccessor={0} yAccessors={[1]} />
-      </Chart>
+
+      <FeatureEventsSparklineLast24hrs
+        feature={feature}
+        definition={definition}
+        hideAxis={false}
+        height={200}
+      />
     </>
   );
 };

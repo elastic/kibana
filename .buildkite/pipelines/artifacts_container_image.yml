@@ -7,4 +7,4 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       diskSizeGb: 150
-    timeout_in_minutes: 60
+    timeout_in_minutes: 90

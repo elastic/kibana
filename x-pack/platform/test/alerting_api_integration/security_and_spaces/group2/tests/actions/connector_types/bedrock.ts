@@ -11,7 +11,7 @@ import {
   BedrockSimulator,
   bedrockClaude2SuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
-import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { DEFAULT_TOKEN_LIMIT } from '@kbn/connector-schemas/bedrock/constants';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';

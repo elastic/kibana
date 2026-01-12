@@ -31,6 +31,7 @@ import {
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
+import { EnhanceQRadarRule } from '../../vendor/rules/qradar.gen';
 import {
   LangSmithOptions,
   SiemMigrationResourceData,
@@ -296,6 +297,35 @@ export const InstallMigrationRulesResponse = z.object({
    * Indicates the number of successfully installed migration rules.
    */
   installed: z.number(),
+});
+
+export type RuleMigrationEnhanceRuleRequestParams = z.infer<
+  typeof RuleMigrationEnhanceRuleRequestParams
+>;
+export const RuleMigrationEnhanceRuleRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type RuleMigrationEnhanceRuleRequestParamsInput = z.input<
+  typeof RuleMigrationEnhanceRuleRequestParams
+>;
+
+export type RuleMigrationEnhanceRuleRequestBody = z.infer<
+  typeof RuleMigrationEnhanceRuleRequestBody
+>;
+export const RuleMigrationEnhanceRuleRequestBody = EnhanceQRadarRule;
+export type RuleMigrationEnhanceRuleRequestBodyInput = z.input<
+  typeof RuleMigrationEnhanceRuleRequestBody
+>;
+
+/**
+ * Response from rule enhancement operation
+ */
+export type RuleMigrationEnhanceRuleResponse = z.infer<typeof RuleMigrationEnhanceRuleResponse>;
+export const RuleMigrationEnhanceRuleResponse = z.object({
+  /**
+   * whether the update was applied successfully
+   */
+  updated: z.boolean(),
 });
 
 export type StartRuleMigrationRequestParams = z.infer<typeof StartRuleMigrationRequestParams>;

@@ -6,25 +6,20 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import { firstValueFrom } from 'rxjs';
-import type { Streams, Feature } from '@kbn/streams-schema';
-import type { IdentifiedFeaturesEvent } from '@kbn/streams-plugin/server/routes/internal/streams/features/types';
+import type { Streams, System } from '@kbn/streams-schema';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
+import type { SystemIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/systems/route';
 import { useKibana } from './use_kibana';
+import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
-  upsertQuery: (
-    featureName: string,
-    request: Pick<Feature, 'filter' | 'description'>
-  ) => Promise<void>;
-  identifyFeatures: (
-    connectorId: string,
-    to: string,
-    from: string
-  ) => Promise<IdentifiedFeaturesEvent>;
-  addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
-  removeFeaturesFromStream: (featureNames: string[]) => Promise<StorageClientBulkResponse>;
-  abort: () => void;
+  getSystemIdentificationStatus: () => Promise<SystemIdentificationTaskResult>;
+  scheduleSystemIdentificationTask: (connectorId: string) => Promise<void>;
+  cancelSystemIdentificationTask: () => Promise<void>;
+  acknowledgeSystemIdentificationTask: () => Promise<void>;
+  addSystemsToStream: (systems: System[]) => Promise<StorageClientBulkResponse>;
+  removeSystemsFromStream: (systems: Pick<System, 'name'>[]) => Promise<StorageClientBulkResponse>;
+  upsertSystem: (system: System) => Promise<void>;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -34,80 +29,120 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         streams: { streamsRepositoryClient },
       },
     },
+    services: { telemetryClient },
   } = useKibana();
 
-  const { signal, abort, refresh } = useAbortController();
+  const { signal } = useAbortController();
 
   return {
-    identifyFeatures: async (connectorId: string, to: string, from: string) => {
-      const events$ = streamsRepositoryClient.stream(
-        'POST /internal/streams/{name}/features/_identify',
+    getSystemIdentificationStatus: async () => {
+      return await streamsRepositoryClient.fetch('GET /internal/streams/{name}/systems/_status', {
+        signal,
+        params: {
+          path: { name: definition.name },
+        },
+      });
+    },
+    scheduleSystemIdentificationTask: async (connectorId: string) => {
+      const now = Date.now();
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          body: {
+            action: 'schedule',
+            to: new Date(now).toISOString(),
+            from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+            connectorId,
+          },
+        },
+      });
+    },
+    cancelSystemIdentificationTask: async () => {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          body: {
+            action: 'cancel',
+          },
+        },
+      });
+    },
+    acknowledgeSystemIdentificationTask: async () => {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_task', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          body: {
+            action: 'acknowledge',
+          },
+        },
+      });
+    },
+    addSystemsToStream: async (systems: System[]) => {
+      const response = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/systems/_bulk',
         {
           signal,
           params: {
-            path: { name: definition.name },
-            query: {
-              connectorId,
-              to,
-              from,
+            path: {
+              name: definition.name,
+            },
+            body: {
+              operations: systems.map((system) => ({
+                index: { system },
+              })),
             },
           },
         }
       );
 
-      return firstValueFrom(events$);
+      telemetryClient.trackFeaturesSaved({
+        count: systems.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
+      });
+
+      return response;
     },
-    addFeaturesToStream: async (features: Feature[]) => {
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
+    removeSystemsFromStream: async (systems: Pick<System, 'name'>[]) => {
+      const response = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/systems/_bulk',
+        {
+          signal,
+          params: {
+            path: {
+              name: definition.name,
+            },
+            body: {
+              operations: systems.map((system) => ({
+                delete: { system: { name: system.name } },
+              })),
+            },
+          },
+        }
+      );
+
+      telemetryClient.trackFeaturesDeleted({
+        count: systems.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
+      });
+
+      return response;
+    },
+    upsertSystem: async (system: System) => {
+      await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
         signal,
         params: {
           path: {
             name: definition.name,
+            systemName: system.name,
           },
-          body: {
-            operations: features.map((feature) => ({
-              index: {
-                feature,
-              },
-            })),
-          },
+          body: system,
         },
       });
-    },
-    removeFeaturesFromStream: async (featureNames: string[]) => {
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-          },
-          body: {
-            operations: featureNames.map((feature) => ({
-              delete: {
-                feature: {
-                  name: feature,
-                },
-              },
-            })),
-          },
-        },
-      });
-    },
-    upsertQuery: async (featureName, request) => {
-      await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/features/{featureName}', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-            featureName,
-          },
-          body: request,
-        },
-      });
-    },
-    abort: () => {
-      abort();
-      refresh();
     },
   };
 }

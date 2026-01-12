@@ -10,11 +10,15 @@ import type { IngestPipelineProcessor } from '../../../types/processors/ingest_p
 
 import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import { conditionToPainless } from '../../conditions/condition_to_painless';
-import type { ActionToIngestType } from './processors/processor';
-import { processorFieldRenames } from './processors/pre_processing';
 import { processManualIngestPipelineProcessors } from './processors/manual_pipeline_processor';
+import { processMathProcessor } from './processors/math_processor';
+import {
+  applyPreProcessing,
+  processorFieldRenames,
+  renameFields,
+} from './processors/pre_processing';
+import type { ActionToIngestType } from './processors/processor';
 import { processRemoveByPrefixProcessor } from './processors/remove_by_prefix_processor';
-import { applyPreProcessing, renameFields } from './processors/pre_processing';
 
 import type { IngestPipelineTranspilationOptions } from '.';
 
@@ -64,6 +68,15 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       return processRemoveByPrefixProcessor(
         processorWithCompiledConditions as Parameters<typeof processRemoveByPrefixProcessor>[0]
       );
+    }
+
+    if (action === 'math') {
+      // Math processor outputs a script processor
+      return [
+        processMathProcessor(
+          processorWithCompiledConditions as Parameters<typeof processMathProcessor>[0]
+        ),
+      ];
     }
 
     return applyPreProcessing(action, processorWithCompiledConditions as IngestPipelineProcessor);

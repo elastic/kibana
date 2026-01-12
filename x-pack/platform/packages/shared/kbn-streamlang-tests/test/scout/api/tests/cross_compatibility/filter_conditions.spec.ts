@@ -472,6 +472,10 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       { attributes: { service_name: 'prefix-synth-service-2-suffix' } },
       { attributes: { service_name: 'synth-service-1' } },
       { attributes: { service_name: 'other-service' } },
+      // Test case-insensitive matching
+      { attributes: { service_name: 'SYNTH-SERVICE-2' } },
+      { attributes: { service_name: 'prefix-Synth-Service-2-suffix' } },
+      { attributes: { service_name: 'SyNtH-sErViCe-2' } },
     ];
 
     await testBed.ingest('ingest-contains', docs, processors);
@@ -491,6 +495,19 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     );
     expect(ingestResult[2].attributes).not.toHaveProperty('matched');
     expect(ingestResult[3].attributes).not.toHaveProperty('matched');
+    // Case-insensitive matches
+    expect(ingestResult[4].attributes).toStrictEqual(
+      expect.objectContaining({ service_name: 'SYNTH-SERVICE-2', matched: 'matched' })
+    );
+    expect(ingestResult[5].attributes).toStrictEqual(
+      expect.objectContaining({
+        service_name: 'prefix-Synth-Service-2-suffix',
+        matched: 'matched',
+      })
+    );
+    expect(ingestResult[6].attributes).toStrictEqual(
+      expect.objectContaining({ service_name: 'SyNtH-sErViCe-2', matched: 'matched' })
+    );
 
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({
@@ -514,6 +531,25 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
       expect.objectContaining({
         'attributes.service_name': 'other-service',
         'attributes.matched': null,
+      })
+    );
+    // Case-insensitive matches for ES|QL
+    expect(esqlResult.documentsOrdered[5]).toStrictEqual(
+      expect.objectContaining({
+        'attributes.service_name': 'SYNTH-SERVICE-2',
+        'attributes.matched': 'matched',
+      })
+    );
+    expect(esqlResult.documentsOrdered[6]).toStrictEqual(
+      expect.objectContaining({
+        'attributes.service_name': 'prefix-Synth-Service-2-suffix',
+        'attributes.matched': 'matched',
+      })
+    );
+    expect(esqlResult.documentsOrdered[7]).toStrictEqual(
+      expect.objectContaining({
+        'attributes.service_name': 'SyNtH-sErViCe-2',
+        'attributes.matched': 'matched',
       })
     );
   });
@@ -931,6 +967,59 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
         'attributes.url_path': '/admin/users',
         'attributes.is_api_path': null,
       })
+    );
+  });
+
+  apiTest('should handle single-element arrays in filter conditions', async ({ testBed, esql }) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'set',
+          to: 'attributes.matched',
+          value: 'yes',
+          where: {
+            field: 'attributes.tag',
+            eq: 'important',
+          },
+        } as SetProcessor,
+      ],
+    };
+
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { query } = transpileEsql(streamlangDSL);
+
+    const mappingDoc = { attributes: { tag: 'null', matched: 'null' } };
+    const docs = [
+      { attributes: { tag: ['important'] } }, // single-element array - should match
+      { attributes: { tag: 'important' } }, // regular string - should match
+      { attributes: { tag: ['other'] } }, // single-element array - should NOT match
+      { attributes: { tag: 'other' } }, // regular string - should NOT match
+    ];
+
+    await testBed.ingest('ingest-single-array', docs, processors);
+    const ingestResult = await testBed.getDocsOrdered('ingest-single-array');
+
+    await testBed.ingest('esql-single-array', [mappingDoc, ...docs]);
+    const esqlResult = await esql.queryOnIndex('esql-single-array', query);
+
+    // Single-element array ['important'] should match like 'important'
+    expect(ingestResult[0].attributes).toStrictEqual(expect.objectContaining({ matched: 'yes' }));
+    expect(ingestResult[1].attributes).toStrictEqual(expect.objectContaining({ matched: 'yes' }));
+    expect(ingestResult[2].attributes).not.toHaveProperty('matched');
+    expect(ingestResult[3].attributes).not.toHaveProperty('matched');
+
+    // ES|QL should produce the same results
+    expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': 'yes' })
+    );
+    expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': 'yes' })
+    );
+    expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': null })
+    );
+    expect(esqlResult.documentsOrdered[4]).toStrictEqual(
+      expect.objectContaining({ 'attributes.matched': null })
     );
   });
 });

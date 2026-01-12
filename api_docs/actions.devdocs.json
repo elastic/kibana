@@ -811,35 +811,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1551,6 +1525,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ScrollResponse",
+              "<TDocument, TAggregations>>; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
               "<TDocument, TAggregations>>; }; searchApplication: ",
               "default",
               "; searchMvt: { (this: That, params: ",
@@ -2607,6 +2607,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionType.subFeature",
             "type": "string",
             "tags": [],
@@ -2626,6 +2640,22 @@
             "tags": [],
             "label": "isDeprecated",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [
+              "\nAllows multiple instances of the same system action in a single rule.\nBy default, system actions can only be used once per rule.\nSet to true to allow the same system action connector to be used multiple times.\nOnly applies to system actions (isSystemActionType: true)."
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -2707,6 +2737,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.globalAuthHeaders",
+            "type": "Object",
+            "tags": [],
+            "label": "globalAuthHeaders",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "AxiosHeaderValue",
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3052,6 +3098,22 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.globalAuthHeaders",
+            "type": "Object",
+            "tags": [],
+            "label": "globalAuthHeaders",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "AxiosHeaderValue",
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionTypeExecutorOptions.taskInfo",
             "type": "Object",
             "tags": [],
@@ -3367,6 +3429,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\""
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ConnectorType.subFeature",
             "type": "string",
             "tags": [],
@@ -3386,6 +3462,20 @@
             "tags": [],
             "label": "isDeprecated",
             "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3784,104 +3874,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
-        "id": "def-server.SSLSettings",
-        "type": "Interface",
-        "tags": [],
-        "label": "SSLSettings",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.verificationMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "verificationMode",
-            "description": [],
-            "signature": [
-              "\"none\" | \"certificate\" | \"full\" | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.pfx",
-            "type": "Object",
-            "tags": [],
-            "label": "pfx",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.cert",
-            "type": "Object",
-            "tags": [],
-            "label": "cert",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.key",
-            "type": "Object",
-            "tags": [],
-            "label": "key",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.passphrase",
-            "type": "string",
-            "tags": [],
-            "label": "passphrase",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.ca",
-            "type": "Object",
-            "tags": [],
-            "label": "ca",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -4034,7 +4026,9 @@
           "ActionTypeSecrets",
           ">)[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
-          ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
+          ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; getAxiosInstance: (actionId: string) => Promise<",
+          "AxiosInstance",
+          ">; bulkEnqueueExecution: (options: ",
           "ExecuteOptions",
           "[]) => Promise<",
           "ExecutionResponse",
@@ -4185,6 +4179,42 @@
               "signature": [
                 "SubActionConnectorType",
                 "<Config, Secrets>"
+              ],
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.getAxiosInstanceWithAuth",
+          "type": "Function",
+          "tags": [],
+          "label": "getAxiosInstanceWithAuth",
+          "description": [],
+          "signature": [
+            "(opts: ",
+            "GetAxiosInstanceWithAuthFnOpts",
+            ") => Promise<",
+            "AxiosInstance",
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.getAxiosInstanceWithAuth.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "opts",
+              "description": [],
+              "signature": [
+                "GetAxiosInstanceWithAuthFnOpts"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
               "deprecated": false,
@@ -5446,6 +5476,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-common.ActionType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-common.ActionType.subFeature",
             "type": "string",
             "tags": [],
@@ -5465,6 +5509,20 @@
             "tags": [],
             "label": "isDeprecated",
             "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6140,6 +6198,21 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.ActionTypeSource",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionTypeSource",
+        "description": [],
+        "signature": [
+          "\"spec\" | \"yml\" | \"stack\""
+        ],
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.AlertHistoryDefaultIndexName",
         "type": "string",
         "tags": [],
@@ -6557,6 +6630,21 @@
         "description": [],
         "signature": [
           "\"uptime\""
+        ],
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.WorkflowsConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "WorkflowsConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"workflows\""
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -7018,6 +7106,53 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.WorkflowsConnectorFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "WorkflowsConnectorFeature",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.WorkflowsConnectorFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.WorkflowsConnectorFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.WorkflowsConnectorFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",

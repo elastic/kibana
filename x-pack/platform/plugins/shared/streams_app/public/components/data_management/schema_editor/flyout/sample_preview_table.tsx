@@ -23,7 +23,15 @@ import { convertToFieldDefinitionConfig } from '../utils';
 interface SamplePreviewTableProps {
   stream: Streams.ingest.all.Definition;
   nextField: SchemaField;
-  onValidate?: ({ isValid, isIgnored }: { isValid: boolean; isIgnored: boolean }) => void;
+  onValidate?: ({
+    isValid,
+    isIgnored,
+    isExpensiveQueries,
+  }: {
+    isValid: boolean;
+    isIgnored: boolean;
+    isExpensiveQueries: boolean;
+  }) => void;
 }
 
 export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
@@ -69,6 +77,9 @@ const SamplePreviewTableContent = ({
 
   useEffect(() => {
     if (onValidate) {
+      const isExpensiveQueriesError =
+        error && getFormattedError(error)?.message.includes('allow_expensive_queries');
+
       onValidate({
         isValid: value?.status === 'failure' || error ? false : true,
         isIgnored:
@@ -78,6 +89,7 @@ const SamplePreviewTableContent = ({
           )
             ? true
             : false,
+        isExpensiveQueries: isExpensiveQueriesError ?? false,
       });
     }
   }, [value, error, onValidate]);
@@ -110,6 +122,27 @@ const SamplePreviewTableContent = ({
 
   if ((value && value.status === 'failure') || error) {
     const formattedError = error && getFormattedError(error);
+
+    const isExpensiveQueries = formattedError?.message.includes('allow_expensive_queries');
+
+    if (isExpensiveQueries) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="warning"
+          title={i18n.translate('xpack.streams.samplePreviewTable.warningTitle', {
+            defaultMessage: 'Some fields are failing when simulating ingestion.',
+          })}
+        >
+          {i18n.translate('xpack.streams.samplePreviewTable.expensiveQueriesDisabledWarning', {
+            defaultMessage:
+              'Field simulation is unavailable because expensive queries are disabled on your cluster. ' +
+              'The schema changes can still be applied, but field compatibility cannot be verified in advance. ' +
+              'Proceed with caution - incompatible field types may cause ingestion errors.',
+          })}
+        </EuiCallOut>
+      );
+    }
     return (
       <EuiCallOut
         announceOnMount

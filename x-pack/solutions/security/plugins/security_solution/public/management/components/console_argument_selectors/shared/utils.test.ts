@@ -8,6 +8,7 @@
 import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 import { transformCustomScriptsToOptions, checkActionCancelPermission } from './utils';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 
 describe('utils', () => {
   describe('transformCustomScriptsToOptions', () => {
@@ -45,53 +46,7 @@ describe('utils', () => {
   });
 
   describe('checkActionCancelPermission', () => {
-    const mockEndpointPrivileges: EndpointAuthz = {
-      canWriteSecuritySolution: true,
-      canReadSecuritySolution: true,
-      canAccessFleet: true,
-      canReadFleetAgentPolicies: true,
-      canReadFleetAgents: true,
-      canWriteFleetAgents: true,
-      canWriteIntegrationPolicies: true,
-      canAccessEndpointManagement: true,
-      canAccessEndpointActionsLogManagement: true,
-      canCreateArtifactsByPolicy: true,
-      canWriteEndpointList: true,
-      canReadEndpointList: true,
-      canWritePolicyManagement: true,
-      canReadPolicyManagement: true,
-      canWriteActionsLogManagement: true,
-      canReadActionsLogManagement: true,
-      canIsolateHost: true,
-      canUnIsolateHost: true,
-      canKillProcess: true,
-      canSuspendProcess: true,
-      canGetRunningProcesses: true,
-      canAccessResponseConsole: true,
-      canCancelAction: true,
-      canWriteExecuteOperations: true,
-      canWriteFileOperations: true,
-      canWriteScanOperations: true,
-      canWriteTrustedApplications: true,
-      canReadTrustedApplications: true,
-      canWriteTrustedDevices: true,
-      canReadTrustedDevices: true,
-      canWriteHostIsolationExceptions: true,
-      canReadHostIsolationExceptions: true,
-      canAccessHostIsolationExceptions: true,
-      canDeleteHostIsolationExceptions: true,
-      canWriteBlocklist: true,
-      canReadBlocklist: true,
-      canWriteEventFilters: true,
-      canReadEventFilters: true,
-      canReadEndpointExceptions: true,
-      canWriteEndpointExceptions: true,
-      canManageGlobalArtifacts: true,
-      canWriteWorkflowInsights: true,
-      canReadWorkflowInsights: true,
-      canReadAdminData: true,
-      canWriteAdminData: true,
-    };
+    const mockEndpointPrivileges: EndpointAuthz = getEndpointAuthzInitialStateMock();
 
     describe('with valid permissions', () => {
       test('returns canCancel: true for isolate command when user has canIsolateHost permission', () => {

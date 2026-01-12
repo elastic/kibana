@@ -39,6 +39,7 @@ export class ApiService {
   private client: HttpSetup | undefined;
   private reindexService: ReindexService | undefined;
   private clusterUpgradeStateListeners: ClusterUpgradeStateListener[] = [];
+  private lastClusterUpgradeErrorKey: string | null = null;
 
   private handleClusterUpgradeError(error: ResponseError | null) {
     const isClusterUpgradeError = Boolean(error && error.statusCode === 426);
@@ -55,21 +56,21 @@ export class ApiService {
       throw new Error('API service has not been initialized.');
     }
     const response = _useRequest<R, ResponseError>(this.client, config);
-    // NOTE: This will cause an infinite render loop in any component that both
-    // consumes the hook calling this useRequest function and also handles
-    // cluster upgrade errors. Note that sendRequest doesn't have this problem.
-    //
-    // This is due to React's fundamental expectation that hooks be idempotent,
-    // so it can render a component as many times as necessary and thereby call
-    // the hook on each render without worrying about that triggering subsequent
-    // renders.
-    //
-    // In this case we call handleClusterUpgradeError every time useRequest is
-    // called, which is on every render. If handling the cluster upgrade error
-    // causes a state change in the consuming component, that will trigger a
-    // render, which will call useRequest again, calling handleClusterUpgradeError,
-    // causing a state change in the consuming component, and so on.
-    this.handleClusterUpgradeError(response.error);
+    // Avoid triggering synchronous render-phase updates. If we detect a cluster-upgrade error,
+    // defer notifying listeners to the next macrotask tick.
+    const upgradeError =
+      response.error && response.error.statusCode === 426 ? response.error : null;
+    const nextKey = upgradeError
+      ? `${upgradeError.statusCode}:${Boolean(upgradeError.attributes?.allNodesUpgraded)}`
+      : null;
+
+    if (nextKey !== this.lastClusterUpgradeErrorKey) {
+      this.lastClusterUpgradeErrorKey = nextKey;
+      if (upgradeError) {
+        setTimeout(() => this.handleClusterUpgradeError(upgradeError), 0);
+      }
+    }
+
     return response;
   }
 
@@ -315,7 +316,6 @@ export class ApiService {
         nodeId: string;
         nodeName: string;
         available: string;
-        lowDiskWatermarkSetting: string;
       }>
     >({
       path: `${API_BASE_PATH}/node_disk_space`,

@@ -14,6 +14,7 @@ const getDataView = (name: string, dataViewFields: DataView['fields'], timeField
   dataViewFields.getByName = (fieldName: string) => {
     return dataViewFields.find((field) => field.name === fieldName);
   };
+
   return {
     id: `${name}-id`,
     title: name,
@@ -27,6 +28,9 @@ const getDataView = (name: string, dataViewFields: DataView['fields'], timeField
     isPersisted: () => true,
     toSpec: () => ({}),
     toMinimalSpec: () => ({}),
+    isTSDBMode: jest.fn(() =>
+      dataViewFields.some((field) => field.timeSeriesMetric || field.timeSeriesDimension)
+    ),
   } as unknown as DataView;
 };
 
@@ -175,5 +179,30 @@ describe('getInitialESQLQuery', () => {
     expect(getInitialESQLQuery(dataView, true, { language: 'unknown', query: 'error' })).toBe(
       'FROM logs*'
     );
+  });
+
+  it('should use TS command when dataView is in TSDB mode', () => {
+    const fields = [
+      {
+        name: '@timestamp',
+        displayName: '@timestamp',
+        type: 'date',
+        scripted: false,
+        filterable: true,
+        aggregatable: true,
+        sortable: true,
+      },
+      {
+        name: 'system.cpu.usage',
+        displayName: 'system.cpu.usage',
+        type: 'number',
+        timeSeriesMetric: 'gauge',
+        scripted: false,
+        filterable: false,
+      },
+    ] as DataView['fields'];
+    const dataView = getDataView('metrics-*', fields, '@timestamp');
+
+    expect(getInitialESQLQuery(dataView)).toBe('TS metrics-* | LIMIT 10');
   });
 });

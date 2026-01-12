@@ -18,6 +18,7 @@ const createAlertsClientMock = () => {
     getAuthorizedAlertsIndices: jest.fn(),
     bulkUpdate: jest.fn(),
     bulkUpdateCases: jest.fn(),
+    bulkUpdateTags: jest.fn(),
     find: jest.fn(),
     getGroupAggregations: jest.fn(),
     getBrowserFields: jest.fn(),

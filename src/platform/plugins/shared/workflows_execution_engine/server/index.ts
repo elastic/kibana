@@ -22,3 +22,12 @@ export type {
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
+
+export type {
+  LogsRepository,
+  WorkflowLogEvent,
+  LogSearchResult,
+  SearchLogsParams,
+} from './repositories/logs_repository';
+
+export type { IWorkflowEventLoggerService } from './workflow_event_logger';

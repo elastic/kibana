@@ -10,8 +10,8 @@
 /**
  * Utility function for getting focusable elements.
  *
- * @param container The container element to search within.
- * @returns An array of focusable elements.
+ * @param container - the container element to search within.
+ * @returns an array of focusable elements.
  */
 export const getFocusableElements = (container: HTMLElement) => {
   return Array.from(container.querySelectorAll('button, a')).filter(

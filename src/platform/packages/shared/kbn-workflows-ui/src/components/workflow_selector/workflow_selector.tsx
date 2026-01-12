@@ -70,7 +70,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     isLoading,
     error: fetchError,
   } = useWorkflows({
-    limit: 1000,
+    size: 1000,
     page: 1,
     query: '',
   });
@@ -136,6 +136,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     };
 
     const content = (
+      // @ts-expect-error upgrade typescript v5.9.3
       <>
         <>
           {getPrependContent(option)}

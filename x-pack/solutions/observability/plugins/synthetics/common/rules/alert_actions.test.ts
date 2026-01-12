@@ -416,9 +416,9 @@ describe('Alert Actions factory', () => {
           subActionParams: {
             alias: '{{rule.id}}:{{alert.id}}',
             description:
-              'Monitor "{{context.monitorName}}" is {{{context.status}}} from {{context.locationNames}}.{{{context.pendingLastRunAt}}} - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationNames}}  \n- Reason: {{{context.reason}}} \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+              'Monitor "{{context.monitorName}}" is {{{context.status}}} from {{context.locationNames}}.{{{context.pendingLastRunAt}}} - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationNames}}  \n- Reason: {{{context.reason}}} \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.failedStepInfo}}}  \n{{{context.linkMessage}}}',
             message:
-              'Monitor "{{context.monitorName}}" ({{context.locationNames}}) is down - Elastic Synthetics',
+              'Monitor "{{context.monitorName}}" ({{context.locationNames}}) is down{{#context.failedStepName}} at step {{context.failedStepNumber}} "{{context.failedStepName}}"{{/context.failedStepName}} - Elastic Synthetics',
             priority: 'P2',
             tags: ['{{rule.tags}}'],
           },

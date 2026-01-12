@@ -13,11 +13,12 @@ This plugin provides access to App Monitoring features provided by Elastic. It a
 - [Queries and data model](./dev_docs/apm_queries.md)
 - [Telemetry](./dev_docs/telemetry.md)
 - [Routing and Linking](./dev_docs/routing_and_linking.md)
+- [Metrics tab](./dev_docs/metrics_tab.md)
 
 ### Tooling
 - [VSCode setup instructions](./dev_docs/vscode_setup.md)
 - [Github PR commands](./dev_docs/github_commands.md)
-- [Synthtrace (data generation)](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-apm-synthtrace/README.md)
+- [Synthtrace (data generation)](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-synthtrace/README.md)
 - [Query debugging in development and production](./dev_docs/query_debugging_in_development_and_production.md)
 
 ### Other resources

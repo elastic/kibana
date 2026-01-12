@@ -37,6 +37,18 @@
     "misc": [
       {
         "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_CONFIG_PATH_GLOB",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_CONFIG_PATH_GLOB",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.SCOUT_OUTPUT_ROOT",
         "type": "string",
         "tags": [],
@@ -208,8 +220,54 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB",
+        "type": "string",
+        "tags": [],
+        "label": "TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB",
+        "description": [],
+        "signature": [
+          "\"{src/platform,x-pack/**}/{plugins,packages}/**/test/scout\""
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_CONFIG_PATH_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "SCOUT_CONFIG_PATH_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

@@ -40,6 +40,13 @@ export const dsl = {
       },
     };
   },
+  matchTitles(titles: string[]): QueryDslQueryContainer {
+    return {
+      terms: {
+        'original_rule.title.keyword': titles,
+      },
+    };
+  },
   isInstallable(): QueryDslQueryContainer {
     return { bool: { must: [genericDsl.isFullyTranslated(), dsl.isNotInstalled()] } };
   },

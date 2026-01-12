@@ -205,6 +205,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     uiSettings: uiSettingsMock,
     http: {
       basePath: '/',
+      get: jest.fn().mockResolvedValue(''),
     },
     dataViewEditor: {
       openEditor: jest.fn(),

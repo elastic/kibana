@@ -11,7 +11,7 @@ import {
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
-import { SUB_ACTION } from '../../../common/thehive/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/thehive';
 
 function mapSeverity(severity: string): number {
   switch (severity) {

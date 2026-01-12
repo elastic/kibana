@@ -60,12 +60,12 @@ import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
-import { MsearchError } from './lib/msearch_error';
-import { BulkUpdateError } from './lib/bulk_update_error';
+import { BulkUpdateError, MsearchError } from './lib/errors';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
+import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -117,6 +117,7 @@ export interface FetchResult {
 export interface BulkUpdateOpts {
   validate: boolean;
   mergeAttributes?: boolean;
+  options?: ApiKeyOptions;
 }
 
 export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
@@ -215,6 +216,25 @@ export class TaskStore {
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
       });
     }
+    return this.savedObjectsRepository;
+  }
+
+  private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
+    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+    if (options?.request && !hasEncryptedFields) {
+      this.logger.debug(
+        'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
+      );
+    }
+
+    // Return scoped client if request is defined AND at least one document has encrypted fields
+    if (options?.request && this.getIsSecurityEnabled() && hasEncryptedFields) {
+      return this.savedObjectsService.getScopedClient(options.request, {
+        includedHiddenTypes: [TASK_SO_NAME],
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      });
+    }
+
     return this.savedObjectsRepository;
   }
 
@@ -519,8 +539,10 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    { validate, mergeAttributes = true }: BulkUpdateOpts
+    { validate, mergeAttributes = true, options }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
+    const soClientToUpdate = this.getSoClientForUpdate(docs, options);
+
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
@@ -531,7 +553,11 @@ export class TaskStore {
             type: 'task',
             id: doc.id,
             version: doc.version,
-            attributes: taskInstanceToAttributes(taskInstance, doc.id),
+            attributes: {
+              ...taskInstanceToAttributes(taskInstance, doc.id),
+              ...(doc?.apiKey ? { apiKey: doc.apiKey } : {}),
+              ...(doc?.userScope ? { userScope: doc.userScope } : {}),
+            },
             mergeAttributes,
           });
         } catch (e) {
@@ -547,7 +573,7 @@ export class TaskStore {
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
-        await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+        await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
           Array.from(newDocs.values()),
           {
             refresh: false,
@@ -675,7 +701,11 @@ export class TaskStore {
 
     if (apiKey && userScope) {
       if (!userScope.apiKeyCreatedByUser) {
-        await this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [userScope.apiKeyId] });
+        await bulkMarkApiKeysForInvalidation({
+          apiKeyIds: [userScope.apiKeyId],
+          logger: this.logger,
+          savedObjectsClient: this.savedObjectsRepository,
+        });
       }
     }
 
@@ -708,8 +738,10 @@ export class TaskStore {
     });
 
     if (apiKeyIdsToRemove.length) {
-      await this.security.authc.apiKeys.invalidateAsInternalUser({
-        ids: [...new Set(apiKeyIdsToRemove)],
+      await bulkMarkApiKeysForInvalidation({
+        apiKeyIds: apiKeyIdsToRemove,
+        logger: this.logger,
+        savedObjectsClient: this.savedObjectsRepository,
       });
     }
 
@@ -967,7 +999,6 @@ export class TaskStore {
   public async aggregate<TSearchRequest extends AggregationOpts>({
     aggs,
     query,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     runtime_mappings,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
@@ -990,13 +1021,11 @@ export class TaskStore {
 
   public async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     const { sort, ...rest } = opts;
     try {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { total, updated, version_conflicts } = await this.esClient.updateByQuery(
         {
           index: this.index,

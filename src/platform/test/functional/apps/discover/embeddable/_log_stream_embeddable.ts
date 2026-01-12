@@ -8,9 +8,9 @@
  */
 
 import moment from 'moment';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, timerange } from '@kbn/synthtrace-client';
 import path from 'path';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

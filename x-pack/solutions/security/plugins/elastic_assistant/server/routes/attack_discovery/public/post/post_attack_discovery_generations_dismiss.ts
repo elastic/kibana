@@ -18,7 +18,6 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED } from '../../../../../common/constants';
 import { performChecks } from '../../../helpers';
-import { throwIfPublicApiDisabled } from '../../helpers/throw_if_public_api_disabled';
 import { writeAttackDiscoveryEvent } from './helpers/write_attack_discovery_event';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
@@ -74,8 +73,6 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
         }
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const eventLogIndex = (await context.elasticAssistant).eventLogIndex;
           const eventLogger = (await context.elasticAssistant).eventLogger;
           const spaceId = (await context.elasticAssistant).getSpaceId();

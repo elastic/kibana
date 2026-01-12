@@ -652,6 +652,49 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.useRuleTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "useRuleTemplate",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "UseRuleTemplateProps",
+          ") => { isLoading: boolean; isError: boolean; error: unknown; data: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTemplate",
+            "text": "RuleTemplate"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/common/hooks/use_rule_template.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.useRuleTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "UseRuleTemplateProps"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/common/hooks/use_rule_template.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1651,6 +1694,27 @@
                 "docId": "kibContentManagementPluginApi",
                 "section": "def-public.ContentManagementPublicStart",
                 "text": "ContentManagementPublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormPlugins.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
               },
               " | undefined"
             ],
@@ -2846,7 +2910,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"enabled\" | \"monitoring\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"enabled\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -3284,17 +3348,64 @@
         "label": "RuleDashboardsPlugins",
         "description": [],
         "signature": [
-          "{ contentManagement?: ",
+          "{ uiActions?: ",
           {
-            "pluginId": "contentManagement",
+            "pluginId": "uiActions",
             "scope": "public",
-            "docId": "kibContentManagementPluginApi",
-            "section": "def-public.ContentManagementPublicStart",
-            "text": "ContentManagementPublicStart"
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.RuleTemplate",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTemplate",
+        "description": [],
+        "signature": [
+          "{ params: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          "; id: string; name: string; tags: string[]; schedule: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.IntervalSchedule",
+            "text": "IntervalSchedule"
+          },
+          "; alertDelay?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.AlertDelay",
+            "text": "AlertDelay"
+          },
+          " | null | undefined; flapping?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Flapping",
+            "text": "Flapping"
+          },
+          " | null | undefined; ruleTypeId: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

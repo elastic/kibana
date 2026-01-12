@@ -38,7 +38,7 @@ export const StatusColumn: React.FunctionComponent<{
                   .join(' OR ')})`
               : ''
           }`
-        : `policy_id:"${agentPolicyId}" AND agent.version:"${version}"`;
+        : `policy_id:"${agentPolicyId}" AND (agent.version:"${version}" OR upgrade_details.target_version:"${version}") `;
       return getHref('agent_list', {
         kuery: encodeURIComponent(kuery),
       });
@@ -60,6 +60,7 @@ export const StatusColumn: React.FunctionComponent<{
         version,
         agents: 0,
         failedUpgradeAgents: 0,
+        inProgressUpgradeAgents: 0,
       }
     );
   }, [autoUpgradeAgentsStatus, version]);
@@ -110,7 +111,10 @@ export const StatusColumn: React.FunctionComponent<{
 
     if (agentVersionCounts.failedUpgradeAgents > 0) {
       statusButton = failedStatus;
-    } else if (agentVersionCounts.agents === 0) {
+    } else if (
+      agentVersionCounts.agents === 0 &&
+      agentVersionCounts.inProgressUpgradeAgents === 0
+    ) {
       statusButton = notStartedStatus;
     } else {
       const currPercentage = calcPercentage(agentVersionCounts.agents);

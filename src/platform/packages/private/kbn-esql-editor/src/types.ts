@@ -15,13 +15,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
-  ESQLControlVariable,
-  IndicesAutocompleteResult,
-  RecommendedQuery,
-  RecommendedField,
-} from '@kbn/esql-types';
-import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,
@@ -82,6 +76,8 @@ export interface ESQLEditorProps {
   hideTimeFilterInfo?: boolean;
   /** hide query history **/
   hideQueryHistory?: boolean;
+  /** hide quick search **/
+  hideQuickSearch?: boolean;
   /** adds border in the editor **/
   hasOutline?: boolean;
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
@@ -102,27 +98,22 @@ export interface ESQLEditorProps {
   formLabel?: string;
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
+  /** If true, automatically opens the quick search visor when the editor initially loads with a query that has only source commands */
+  openVisorOnSourceCommands?: boolean;
 }
 
 interface ESQLVariableService {
-  areSuggestionsEnabled: boolean;
+  isCreateControlSuggestionEnabled: boolean;
   esqlVariables: ESQLControlVariable[];
-  enableSuggestions: () => void;
-  disableSuggestions: () => void;
+  enableCreateControlSuggestion: () => void;
+  disableCreateControlSuggestion: () => void;
   clearVariables: () => void;
   addVariable: (variable: ESQLControlVariable) => void;
 }
 
 export interface EsqlPluginStartBase {
-  getJoinIndicesAutocomplete: (remoteClusters?: string) => Promise<IndicesAutocompleteResult>;
-  getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
-  getEditorExtensionsAutocomplete: (
-    queryString: string,
-    activeSolutionId: string
-  ) => Promise<{ recommendedQueries: RecommendedQuery[]; recommendedFields: RecommendedField[] }>;
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
-  getInferenceEndpointsAutocomplete: () => Promise<InferenceEndpointsAutocompleteResult>;
   isServerless: boolean;
 }
 

@@ -497,7 +497,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     if (!dataStreamDetails || Object.keys(dataStreamDetails).length === 0) {
       return {} as DataStreamDetails;
     }
-    const details = { ...dataStreamDetails };
+    const details = { ...dataStreamDetails, isServerless };
 
     if (!isServerless && details.defaultRetentionPeriod === undefined) {
       details.defaultRetentionPeriod = await getDataStreamDefaultRetentionPeriod({

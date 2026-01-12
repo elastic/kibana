@@ -188,6 +188,30 @@ export const summaryPanelQualityGoodText = i18n.translate(
   }
 );
 
+export const qualityIndicatorGoodTooltipText = i18n.translate(
+  'xpack.datasetQuality.qualityIndicatorGoodTooltipText',
+  {
+    defaultMessage:
+      'All expected fields are present and values look healthy. No issues detected with ingestion or structure.',
+  }
+);
+
+export const qualityIndicatorDegradedTooltipText = i18n.translate(
+  'xpack.datasetQuality.qualityIndicatorDegradedTooltipText',
+  {
+    defaultMessage:
+      'Some documents have missing or malformed fields. Ingestion is working but data may be incomplete or inconsistent.',
+  }
+);
+
+export const qualityIndicatorPoorTooltipText = i18n.translate(
+  'xpack.datasetQuality.qualityIndicatorPoorTooltipText',
+  {
+    defaultMessage:
+      'More than 3% of documents have missing or malformed fields, or are failing ingestion.',
+  }
+);
+
 export const summaryPanelDatasetsActivityText = i18n.translate(
   'xpack.datasetQuality.summaryPanelDatasetsActivityText',
   {
@@ -753,6 +777,14 @@ export const failedDocsErrorsColumnName = i18n.translate(
   }
 );
 
+export const failedDocsErrorsColumnNameTooltip = i18n.translate(
+  'xpack.datasetQuality.details.failedDocs.errorsTooltip',
+  {
+    defaultMessage:
+      'Sample of error messages for each error type. For more details, open the error type in Discover.',
+  }
+);
+
 export const readMore = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.flyout.message.readMore',
   {
@@ -821,5 +853,33 @@ export const enableFailureStoreButtonLabel = i18n.translate(
   'xpack.datasetQuality.enableFailureStore',
   {
     defaultMessage: 'Enable failure store',
+  }
+);
+
+export const modifyFieldValue = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.modifyFieldValueLink',
+  {
+    defaultMessage: 'Modify field value',
+  }
+);
+
+export const increaseFieldCharacterLimit = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.increaseFieldCharacterLimitLink',
+  {
+    defaultMessage: 'Increase field character limit',
+  }
+);
+
+export const changeFieldTypeInSchema = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.changeFieldTypeInSchemaLink',
+  {
+    defaultMessage: 'Change field type in schema',
+  }
+);
+
+export const createConvertProcessor = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.createConvertProcessorLink',
+  {
+    defaultMessage: 'Create a convert processor',
   }
 );

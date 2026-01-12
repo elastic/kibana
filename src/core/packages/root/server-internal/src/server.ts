@@ -310,7 +310,7 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const dataStreamsSetup = this.dataStreams.setup();
+    const dataStreamsSetup = await this.dataStreams.setup();
 
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,

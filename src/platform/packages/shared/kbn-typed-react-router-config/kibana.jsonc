@@ -2,8 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/typed-react-router-config",
   "owner": [
-    "@elastic/obs-knowledge-team",
-    "@elastic/obs-ux-infra_services-team"
+    "@elastic/obs-presentation-team"
   ],
   "group": "platform",
   "visibility": "shared"

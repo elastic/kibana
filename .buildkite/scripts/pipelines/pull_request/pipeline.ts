@@ -15,7 +15,6 @@
             }
         ] */
 
-import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import {
@@ -23,6 +22,8 @@ import {
   doAnyChangesMatch,
   getAgentImageConfig,
   emitPipeline,
+  getPipeline,
+  prHasFIPSLabel,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -36,11 +37,6 @@ if (!prConfig) {
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
-
-const getPipeline = (filename: string, removeSteps = true) => {
-  const str = fs.readFileSync(filename).toString();
-  return removeSteps ? str.replace(/^steps:/, '') : str;
-};
 
 (async () => {
   const pipeline: string[] = [];
@@ -71,7 +67,14 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
     }
 
+    if (prHasFIPSLabel()) {
+      pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
+
+    // A temporary pipeline for UIAM tests that should be removed when the main Scout pipeline supports custom configs.
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_uiam_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
@@ -101,7 +104,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/observability\/plugins\/apm/,
-        /^src\/platform\/packages\/shared\/kbn-apm-synthtrace/,
+        /^src\/platform\/packages\/shared\/kbn-synthtrace/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -132,18 +135,35 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
+    const aiInfraPaths = [
+      /^x-pack\/platform\/packages\/shared\/ai-infra/,
+      /^x-pack\/platform\/plugins\/shared\/ai_infra/,
+      /^x-pack\/platform\/plugins\/shared\/inference/,
+    ];
+    const aiConnectorPaths = [
+      /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/bedrock/,
+      /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/gemini/,
+      /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/openai/,
+      /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/inference/,
+    ];
+    const agentBuilderPaths = [
+      /^x-pack\/platform\/plugins\/shared\/agent_builder/,
+      /^x-pack\/platform\/packages\/shared\/agent_builder/,
+    ];
+
     if (
-      (await doAnyChangesMatch([
-        /^x-pack\/platform\/packages\/shared\/ai-infra/,
-        /^x-pack\/platform\/plugins\/shared\/ai_infra/,
-        /^x-pack\/platform\/plugins\/shared\/inference/,
-        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/bedrock/,
-        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/gemini/,
-        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/openai/,
-      ])) ||
+      (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths])) ||
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths, ...agentBuilderPaths])) ||
+      GITHUB_PR_LABELS.includes('agent-builder:run-smoke-tests') ||
+      GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/agent_builder_smoke_tests.yml'));
     }
 
     if (
@@ -174,6 +194,12 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (GITHUB_PR_LABELS.includes('ci:build-docker-fips')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml'));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:entity-store-performance')) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/trigger_entity_store_performance.yml')
+      );
     }
 
     if (
@@ -442,6 +468,21 @@ const getPipeline = (filename: string, removeSteps = true) => {
         getPipeline(
           '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml'
         )
+      );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/fleet/,
+        /^x-pack\/packages\/kbn-cloud-security-posture/,
+        /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/custom\/cspm_agentless/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:cloud-security-posture-scout')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml')
       );
     }
 

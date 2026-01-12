@@ -464,398 +464,6 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
-        "id": "def-common.ESQLCallbacks",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESQLCallbacks",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getSources",
-            "type": "Function",
-            "tags": [],
-            "label": "getSources",
-            "description": [],
-            "signature": [
-              "CallbackFn<{}, ",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLSourceResult",
-                "text": "ESQLSourceResult"
-              },
-              "> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getColumnsFor",
-            "type": "Function",
-            "tags": [],
-            "label": "getColumnsFor",
-            "description": [],
-            "signature": [
-              "CallbackFn<{ query: string; }, ",
-              "ESQLFieldWithMetadata",
-              "> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getPolicies",
-            "type": "Function",
-            "tags": [],
-            "label": "getPolicies",
-            "description": [],
-            "signature": [
-              "CallbackFn<{}, { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[]; }> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getPreferences",
-            "type": "Function",
-            "tags": [],
-            "label": "getPreferences",
-            "description": [],
-            "signature": [
-              "(() => Promise<{ histogramBarTarget: number; }>) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getFieldsMetadata",
-            "type": "Object",
-            "tags": [],
-            "label": "getFieldsMetadata",
-            "description": [],
-            "signature": [
-              "Promise<",
-              "PartialFieldsMetadataClient",
-              "> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getVariables",
-            "type": "Function",
-            "tags": [],
-            "label": "getVariables",
-            "description": [],
-            "signature": [
-              "(() => ",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlVariable",
-                "text": "ESQLControlVariable"
-              },
-              "[] | undefined) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.canSuggestVariables",
-            "type": "Function",
-            "tags": [],
-            "label": "canSuggestVariables",
-            "description": [],
-            "signature": [
-              "(() => boolean) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getJoinIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getJoinIndices",
-            "description": [],
-            "signature": [
-              "((cacheOptions?: { forceRefresh?: boolean | undefined; } | undefined) => Promise<{ indices: ",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.IndexAutocompleteItem",
-                "text": "IndexAutocompleteItem"
-              },
-              "[]; }>) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/monaco",
-                "id": "def-common.ESQLCallbacks.getJoinIndices.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "cacheOptions",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/monaco",
-                    "id": "def-common.ESQLCallbacks.getJoinIndices.$1.forceRefresh",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "forceRefresh",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getTimeseriesIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getTimeseriesIndices",
-            "description": [],
-            "signature": [
-              "(() => Promise<{ indices: ",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.IndexAutocompleteItem",
-                "text": "IndexAutocompleteItem"
-              },
-              "[]; }>) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getEditorExtensions",
-            "type": "Function",
-            "tags": [],
-            "label": "getEditorExtensions",
-            "description": [],
-            "signature": [
-              "((queryString: string) => Promise<{ recommendedQueries: ",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.RecommendedQuery",
-                "text": "RecommendedQuery"
-              },
-              "[]; recommendedFields: ",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.RecommendedField",
-                "text": "RecommendedField"
-              },
-              "[]; }>) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/monaco",
-                "id": "def-common.ESQLCallbacks.getEditorExtensions.$1",
-                "type": "string",
-                "tags": [],
-                "label": "queryString",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getInferenceEndpoints",
-            "type": "Function",
-            "tags": [],
-            "label": "getInferenceEndpoints",
-            "description": [],
-            "signature": [
-              "((taskType: ",
-              "InferenceTaskType",
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.InferenceEndpointsAutocompleteResult",
-                "text": "InferenceEndpointsAutocompleteResult"
-              },
-              ">) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/monaco",
-                "id": "def-common.ESQLCallbacks.getInferenceEndpoints.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "taskType",
-                "description": [],
-                "signature": [
-                  "InferenceTaskType"
-                ],
-                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getLicense",
-            "type": "Function",
-            "tags": [],
-            "label": "getLicense",
-            "description": [],
-            "signature": [
-              "(() => Promise<Pick<",
-              {
-                "pluginId": "@kbn/licensing-types",
-                "scope": "common",
-                "docId": "kibKbnLicensingTypesPluginApi",
-                "section": "def-common.ILicense",
-                "text": "ILicense"
-              },
-              ", \"hasAtLeast\"> | undefined>) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getActiveProduct",
-            "type": "Function",
-            "tags": [],
-            "label": "getActiveProduct",
-            "description": [],
-            "signature": [
-              "(() => ",
-              "PricingProduct",
-              " | undefined) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.canCreateLookupIndex",
-            "type": "Function",
-            "tags": [],
-            "label": "canCreateLookupIndex",
-            "description": [],
-            "signature": [
-              "((indexName: string) => Promise<boolean>) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/monaco",
-                "id": "def-common.ESQLCallbacks.canCreateLookupIndex.$1",
-                "type": "string",
-                "tags": [],
-                "label": "indexName",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.isServerless",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isServerless",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/monaco",
         "id": "def-common.LangModuleType",
         "type": "Interface",
         "tags": [],
@@ -1208,7 +816,7 @@
             "label": "kind",
             "description": [],
             "signature": [
-              "\"type\" | \"keyword\" | \"property\" | \"field\" | \"class\" | \"method\" | \"constructor\""
+              "\"type\" | \"keyword\" | \"method\" | \"property\" | \"field\" | \"class\" | \"constructor\""
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/types.ts",
             "deprecated": false,
@@ -1670,7 +1278,7 @@
         "label": "PainlessCompletionKind",
         "description": [],
         "signature": [
-          "\"type\" | \"keyword\" | \"property\" | \"field\" | \"class\" | \"method\" | \"constructor\""
+          "\"type\" | \"keyword\" | \"method\" | \"property\" | \"field\" | \"class\" | \"constructor\""
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/types.ts",
         "deprecated": false,
@@ -1894,9 +1502,9 @@
             "signature": [
               "(esqlCallbacks: Pick<",
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLCallbacks",
                 "text": "ESQLCallbacks"
               },
@@ -1918,9 +1526,9 @@
                 "signature": [
                   "Pick<",
                   {
-                    "pluginId": "@kbn/esql-validation-autocomplete",
+                    "pluginId": "@kbn/esql-types",
                     "scope": "common",
-                    "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                    "docId": "kibKbnEsqlTypesPluginApi",
                     "section": "def-common.ESQLCallbacks",
                     "text": "ESQLCallbacks"
                   },
@@ -2327,13 +1935,13 @@
               "editor",
               ".ITextModel, code: string, callbacks?: ",
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLCallbacks",
                 "text": "ESQLCallbacks"
               },
-              " | undefined) => Promise<{ errors: ",
+              " | undefined, options?: { invalidateColumnsCache?: boolean | undefined; } | undefined) => Promise<{ errors: ",
               {
                 "pluginId": "@kbn/monaco",
                 "scope": "common",
@@ -2395,9 +2003,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/esql-validation-autocomplete",
+                    "pluginId": "@kbn/esql-types",
                     "scope": "common",
-                    "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                    "docId": "kibKbnEsqlTypesPluginApi",
                     "section": "def-common.ESQLCallbacks",
                     "text": "ESQLCallbacks"
                   },
@@ -2407,6 +2015,33 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.validate.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/monaco",
+                    "id": "def-common.ESQLLang.validate.$4.invalidateColumnsCache",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "invalidateColumnsCache",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -2450,6 +2085,59 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLLang.getInlineCompletionsProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getInlineCompletionsProvider",
+            "description": [],
+            "signature": [
+              "(callbacks?: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLCallbacks",
+                "text": "ESQLCallbacks"
+              },
+              " | undefined) => ",
+              "languages",
+              ".InlineCompletionsProvider<",
+              "languages",
+              ".InlineCompletions<",
+              "languages",
+              ".InlineCompletion>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.getInlineCompletionsProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "callbacks",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLCallbacks",
+                    "text": "ESQLCallbacks"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
             "id": "def-common.ESQLLang.getSuggestionProvider",
             "type": "Function",
             "tags": [],
@@ -2469,6 +2157,43 @@
               {
                 "parentPluginId": "@kbn/monaco",
                 "id": "def-common.ESQLLang.getSuggestionProvider.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "ESQLDependencies",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLLang.getSignatureProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getSignatureProvider",
+            "description": [],
+            "signature": [
+              "(deps?: ",
+              "ESQLDependencies",
+              " | undefined) => ",
+              "languages",
+              ".SignatureHelpProvider"
+            ],
+            "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.getSignatureProvider.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "deps",

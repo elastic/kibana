@@ -9,3 +9,14 @@
 export interface SearchHomepagePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchHomepagePluginStart {}
+
+export interface RouterContextData {
+  isServerless: boolean;
+}
+
+export interface StatsResponse {
+  sizeStats: {
+    size: string;
+    documents: number;
+  };
+}

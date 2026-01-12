@@ -15,6 +15,7 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import * as i18n from './translations';
 import type {
@@ -23,7 +24,6 @@ import type {
   VisualizationTablesWithMeta,
 } from '../../../common/components/visualization_actions/types';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsTrendAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_trend_area';
 import { CostSavingsKeyInsight } from './cost_savings_key_insight';
@@ -112,7 +112,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
             id={`${ID}-area-embeddable`}
             height={300}
             inspectTitle={i18n.COST_SAVINGS_TREND}
-            scopeId={SourcererScopeName.detections}
+            scopeId={PageScope.alerts}
             withActions={[
               VisualizationContextMenuActions.addToExistingCase,
               VisualizationContextMenuActions.addToNewCase,

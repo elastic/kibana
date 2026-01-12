@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { getZodTypeName } from './get_zod_type_name';
 import {
   getCompactTypeDescription,
   getDetailedTypeDescription,
   getJsonSchemaDescription,
   getTypeScriptLikeDescription,
 } from './zod_type_description';
-import { getZodTypeName } from './zod_utils';
 
 describe('zod_type_description', () => {
   describe('getDetailedTypeDescription', () => {
@@ -82,18 +82,18 @@ describe('zod_type_description', () => {
         const result = getDetailedTypeDescription(schema);
         const expected = `{
   user: {
-  id: string;
-  profile: {
-  firstName: string;
-  lastName: string;
-  age?: number
-}
-};
+    id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+      age?: number
+    }
+  };
   settings: {
-  theme: string;
-  notifications: boolean
-}
-}`;
+    theme: string;
+    notifications: boolean
+  }
+}`.trim();
         expect(result).toBe(expected);
       });
 
@@ -109,7 +109,13 @@ describe('zod_type_description', () => {
         });
 
         const result = getDetailedTypeDescription(schema, { maxDepth: 2 });
-        expect(result).toBe('{\n  level1: {\n  level2: object\n}\n}');
+        expect(result).toBe(
+          `{
+  level1: {
+    level2: object
+  }
+}`.trim()
+        );
       });
     });
 
@@ -139,10 +145,10 @@ describe('zod_type_description', () => {
         const result = getDetailedTypeDescription(schema);
         const expected = `{
   users: {
-  id: string;
-  name: string;
-  active?: boolean
-}[]
+    id: string;
+    name: string;
+    active?: boolean
+  }[]
 }`;
         expect(result).toBe(expected);
       });
@@ -173,13 +179,13 @@ describe('zod_type_description', () => {
         const result = getDetailedTypeDescription(schema);
         const expected = `{
   data: ({
-  type: "user";
-  userId: string
-} | {
-  type: "group";
-  groupId: string;
-  memberCount: number
-})
+    type: "user";
+    userId: string
+  } | {
+    type: "group";
+    groupId: string;
+    memberCount: number
+  })
 }`;
         expect(result).toBe(expected);
       });
@@ -221,14 +227,14 @@ describe('zod_type_description', () => {
 
         const result = getDetailedTypeDescription(schema);
         const expected = `{
-  item: discriminatedUnion<type>({
-  type: "text";
-  content: string
-} | {
-  type: "image";
-  url: string;
-  alt?: string
-})
+  item: ({
+    type: "text";
+    content: string
+  } | {
+    type: "image";
+    url: string;
+    alt?: string
+  })
 }`;
         expect(result).toBe(expected);
       });
@@ -294,9 +300,9 @@ describe('zod_type_description', () => {
   id: string;
   name?: string;
   settings: {
-  theme: string;
-  darkMode: boolean
-}
+    theme: string;
+    darkMode: boolean
+  }
 }`;
       expect(result).toBe(expected);
     });
@@ -308,7 +314,7 @@ describe('zod_type_description', () => {
             z.object({
               id: z.string(),
               type: z.enum(['action', 'condition']),
-              config: z.record(z.any()),
+              config: z.record(z.string(), z.any()),
             })
           ),
         }),
@@ -317,7 +323,7 @@ describe('zod_type_description', () => {
       const result = getTypeScriptLikeDescription(schema);
       expect(result).toContain('steps: {');
       expect(result).toContain('type: "action" | "condition"');
-      expect(result).toContain('config: Record<string, any>');
+      expect(result).toContain('config: record<string, any>');
     });
   });
 
@@ -335,13 +341,10 @@ describe('zod_type_description', () => {
     });
 
     it('should return compact descriptions for complex types', () => {
-      const complexSchema = z.union([
-        z.object({ type: z.literal('a') }),
-        z.object({ type: z.literal('b') }),
-      ]);
+      const complexSchema = z.union([z.object({ type: z.literal('a') }), z.array(z.string())]);
 
       const result = getCompactTypeDescription(complexSchema);
-      expect(result).toBe('(object | object)');
+      expect(result).toBe('(object | string[])');
     });
   });
 
@@ -435,8 +438,8 @@ describe('zod_type_description', () => {
 
     it('should handle objects with record types', () => {
       const schema = z.object({
-        metadata: z.record(z.string()),
-        config: z.record(z.any()),
+        metadata: z.record(z.string(), z.any()),
+        config: z.record(z.string(), z.any()),
       });
 
       const result = getDetailedTypeDescription(schema);
@@ -492,7 +495,12 @@ describe('zod_type_description', () => {
         )
         .default([{ id: '1', value: 10 }]);
       const result = getDetailedTypeDescription(schema);
-      expect(result).toBe('{\n  id: string;\n  value: number\n}[]');
+      expect(result).toBe(
+        `{
+  id: string;
+  value: number
+}[]`.trim()
+      );
     });
   });
 
@@ -515,16 +523,16 @@ describe('zod_type_description', () => {
   });
 
   describe('Union array type detection', () => {
-    it('should detect union of arrays as array type', () => {
+    it('should unwrap union of arrays as array type', () => {
       const schema = z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]);
       const result = getZodTypeName(schema);
-      expect(result).toBe('array');
+      expect(result).toBe('(string[] | number[] | boolean[])');
     });
 
     it('should detect mixed union as union type', () => {
       const schema = z.union([z.string(), z.number(), z.boolean()]);
       const result = getZodTypeName(schema);
-      expect(result).toBe('union');
+      expect(result).toBe('(string | number | boolean)');
     });
   });
 });

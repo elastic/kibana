@@ -291,6 +291,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Cases table', function () {
       before(async () => {
         await cases.navigation.navigateToApp();
+        await testSubjects.click('superDatePickerToggleQuickMenuButton');
+        await testSubjects.click('show-all-cases-link');
       });
 
       it('does not show any error toasters', async () => {

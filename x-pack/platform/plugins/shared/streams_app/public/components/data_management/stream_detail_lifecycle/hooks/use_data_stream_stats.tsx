@@ -7,7 +7,10 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import type { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
-import type { FailureStoreStatsResponse } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import {
+  isEnabledFailureStore,
+  type FailureStoreStatsResponse,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -67,7 +70,7 @@ export const useDataStreamStats = ({
 
       const [dsAggregations, fsAggregations] = await Promise.all([
         getAggregations({ definition, timeState, core, search, signal }),
-        failureStore.config.enabled
+        isEnabledFailureStore(definition.effective_failure_store)
           ? getAggregations({ definition, timeState, core, search, signal, isFailureStore: true })
           : undefined,
       ]);
@@ -111,7 +114,6 @@ export const useDataStreamStats = ({
                   }),
                 }
               : undefined,
-          config: failureStore.config,
           aggregations: fsAggregations,
         },
       };

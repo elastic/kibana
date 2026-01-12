@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await testSubjects.click('queryCancelButton');
       await retry.try(async () => {
-        expect(await discover.hasNoResults()).to.be(true);
+        expect(await testSubjects.exists('searchResponseWarningsEmptyPrompt')).to.be(true);
         await testSubjects.existOrFail('querySubmitButton');
         await testSubjects.missingOrFail('queryCancelButton');
       });

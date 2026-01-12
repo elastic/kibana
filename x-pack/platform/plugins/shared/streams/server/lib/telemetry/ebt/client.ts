@@ -6,14 +6,22 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import type { StreamEndpointLatencyProps, StreamsStateErrorProps } from './types';
-import { STREAMS_ENDPOINT_LATENCY_EVENT, STREAMS_STATE_ERROR_EVENT } from './constants';
+import type {
+  StreamEndpointLatencyProps,
+  StreamsStateErrorProps,
+  StreamsSystemIdentificationIdentifiedProps,
+} from './types';
+import {
+  STREAMS_ENDPOINT_LATENCY_EVENT,
+  STREAMS_STATE_ERROR_EVENT,
+  STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
+} from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
   'POST /api/streams/{name}/processing/_simulate 2023-10-31',
   'POST /api/streams/{name}/processing/_suggestions 2023-10-31',
   'POST /api/streams/{name}/_fork 2023-10-31',
-  'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+  'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
   'PUT /api/streams/{name} 2023-10-31',
   'PUT /api/streams/{name}/_group 2023-10-31',
   'PUT /api/streams/{name}/_ingest 2023-10-31',
@@ -52,5 +60,9 @@ export class EbtTelemetryClient {
     };
 
     this.analytics.reportEvent(STREAMS_STATE_ERROR_EVENT, errorData);
+  }
+
+  public trackSystemsIdentified(params: StreamsSystemIdentificationIdentifiedProps) {
+    this.analytics.reportEvent(STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE, params);
   }
 }

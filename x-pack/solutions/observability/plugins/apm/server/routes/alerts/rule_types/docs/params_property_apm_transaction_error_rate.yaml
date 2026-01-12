@@ -1,6 +1,10 @@
 # @kbn-doc-linker partial
 
-
+title: APM transaction error rate
+description: >
+  The parameters for the APM transaction error rate rule.
+  These parameters are appropriate when `rule_type_id` is `apm.transaction_error_rate`.
+type: object
 required:
   - windowSize
   - windowUnit

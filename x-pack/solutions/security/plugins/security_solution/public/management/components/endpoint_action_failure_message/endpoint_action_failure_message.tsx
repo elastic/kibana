@@ -29,17 +29,20 @@ const ERROR_INFO_LABELS = Object.freeze<Record<string, string>>({
 
 interface EndpointActionFailureMessageProps {
   action: MaybeImmutable<ActionDetails>;
+  /** If defined, then only errors for the given agent id will be returned */
+  agentId?: string;
   'data-test-subj'?: string;
 }
 
 // logic for determining agent host/errors info
-const getAgentErrors = (action: MaybeImmutable<ActionDetails>) => {
+const getAgentErrors = (action: MaybeImmutable<ActionDetails>, agentId?: string) => {
   const allAgentErrors: Array<{ name: string; errors: string[] }> = [];
 
   if (action.outputs || (action.errors && action.errors.length)) {
-    for (const agent of action.agents) {
-      const endpointAgentOutput = action.outputs?.[agent];
+    const agentList = agentId ? [agentId] : action.agents;
 
+    for (const agent of agentList) {
+      const endpointAgentOutput = action.outputs?.[agent];
       const agentState = action.agentState[agent];
       const hasErrors = agentState && agentState.errors;
       const hasOutputCode: boolean =
@@ -78,7 +81,7 @@ const getAgentErrors = (action: MaybeImmutable<ActionDetails>) => {
 };
 
 export const EndpointActionFailureMessage = memo<EndpointActionFailureMessageProps>(
-  ({ action, 'data-test-subj': dataTestSubj }) => {
+  ({ action, agentId, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return useMemo(() => {
@@ -86,12 +89,12 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         return null;
       }
 
-      const allAgentErrors = getAgentErrors(action);
+      const allAgentErrors = getAgentErrors(action, agentId);
 
       const errorCount = allAgentErrors
         .map((agentErrorInfo) => agentErrorInfo.errors)
         .flat().length;
-      const isMultiAgentAction = errorCount && action.agents.length > 1;
+      const isMultiAgentAction = errorCount && !agentId && action.agents.length > 1;
 
       return (
         <div data-test-subj={getTestId('response-action-failure-info')}>
@@ -127,7 +130,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
           </>
         </div>
       );
-    }, [action, getTestId]);
+    }, [action, agentId, getTestId]);
   }
 );
 EndpointActionFailureMessage.displayName = 'EndpointActionFailureMessage';

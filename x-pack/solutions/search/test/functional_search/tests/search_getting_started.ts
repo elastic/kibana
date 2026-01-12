@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchGettingStarted',
     'searchHomePage',
     'searchNavigation',
+    'solutionNavigation',
   ]);
   const searchSpace = getService('searchSpace');
   const browser = getService('browser');
@@ -112,6 +113,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const endpointValue = await testSubjects.getVisibleText('endpointValueField');
             expect(endpointValue).to.contain('https://');
           });
+
+          it('shows checkmark icon feedback when copy button is clicked', async () => {
+            await testSubjects.existOrFail('copyEndpointButton');
+            await testSubjects.click('copyEndpointButton');
+            // After clicking, the button should show copied state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton-copied');
+            });
+            // After 1 second, it should revert back to normal state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton');
+              await testSubjects.missingOrFail('copyEndpointButton-copied');
+            });
+          });
         });
 
         describe('View connection details', function () {
@@ -121,6 +136,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('opens the connection flyout when the button is clicked', async () => {
             await testSubjects.click('viewConnectionDetailsLink');
             await testSubjects.existOrFail('connectionDetailsModalTitle');
+          });
+          it('should show both tabs in connection details flyout', async () => {
+            await testSubjects.click('viewConnectionDetailsLink');
+            await testSubjects.existOrFail('connectionDetailsModalTitle');
+            // Both tabs should exist
+            await testSubjects.existOrFail('connectionDetailsTabBtn-endpoints');
+            await testSubjects.existOrFail('connectionDetailsTabBtn-apiKeys');
           });
         });
 
@@ -177,9 +199,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const href = await testSubjects.getAttribute('gettingStartedSearchLabs-btn', 'href');
             expect(href).to.contain('search-labs');
           });
-          it('renders Python Notebooks callout and navigates correctly', async () => {
-            const href = await testSubjects.getAttribute('gettingStartedOpenNotebooks-btn', 'href');
-            expect(href).to.contain('search-labs/tutorials/examples');
+          it('renders Elastic Training callout and navigates correctly', async () => {
+            const href = await testSubjects.getAttribute(
+              'gettingStartedElasticTraining-btn',
+              'href'
+            );
+            expect(href).to.contain('training');
           });
           it('renders Elasticsearch Documentation callout and navigates correctly', async () => {
             const href = await testSubjects.getAttribute(

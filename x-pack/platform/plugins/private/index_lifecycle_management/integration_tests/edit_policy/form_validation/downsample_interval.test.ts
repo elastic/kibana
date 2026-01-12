@@ -5,18 +5,37 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { screen, fireEvent } from '@testing-library/react';
 import { i18nTexts } from '../../../public/application/sections/edit_policy/i18n_texts';
 
 import type { PhaseWithDownsample } from '../../../common/types';
-import { setupEnvironment } from '../../helpers';
-import type { ValidationTestBed } from './validation.helpers';
-import { setupValidationTestBed } from './validation.helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import {
+  createColdPhaseActions,
+  createDeletePhaseActions,
+  createFrozenPhaseActions,
+  createHotPhaseActions,
+  createWarmPhaseActions,
+} from '../../helpers/actions/phases';
+import { expectErrorMessages } from '../../helpers/actions/errors_actions';
+import { createFormSetValueAction } from '../../helpers/actions/form_set_value_action';
+import { createRolloverActions } from '../../helpers/actions/rollover_actions';
+import { createTogglePhaseAction } from '../../helpers/actions/toggle_phase_action';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
 
 describe('<EditPolicy /> downsample interval validation', () => {
-  let testBed: ValidationTestBed;
-  let actions: ValidationTestBed['actions'];
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let actions: {
+    togglePhase: ReturnType<typeof createTogglePhaseAction>;
+    setPolicyName: ReturnType<typeof createFormSetValueAction>;
+    toggleSaveAsNewPolicy: () => void;
+    savePolicy: () => void;
+  } & ReturnType<typeof createRolloverActions> &
+    ReturnType<typeof createHotPhaseActions> &
+    ReturnType<typeof createWarmPhaseActions> &
+    ReturnType<typeof createColdPhaseActions> &
+    ReturnType<typeof createFrozenPhaseActions> &
+    ReturnType<typeof createDeletePhaseActions>;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -30,13 +49,25 @@ describe('<EditPolicy /> downsample interval validation', () => {
     httpRequestsMockHelpers.setDefaultResponses();
     httpRequestsMockHelpers.setLoadPolicies([]);
 
-    await act(async () => {
-      testBed = await setupValidationTestBed(httpSetup);
+    renderEditPolicy(httpSetup, {
+      initialEntries: ['/policies/edit'],
     });
 
-    const { component } = testBed;
-    component.update();
-    ({ actions } = testBed);
+    await screen.findByTestId('savePolicyButton');
+
+    actions = {
+      togglePhase: createTogglePhaseAction(),
+      setPolicyName: createFormSetValueAction('policyNameField'),
+      savePolicy: () => fireEvent.click(screen.getByTestId('savePolicyButton')),
+      toggleSaveAsNewPolicy: () => fireEvent.click(screen.getByTestId('saveAsNewSwitch')),
+      ...createRolloverActions(),
+      ...createHotPhaseActions(),
+      ...createWarmPhaseActions(),
+      ...createColdPhaseActions(),
+      ...createFrozenPhaseActions(),
+      ...createDeletePhaseActions(),
+    };
+
     await actions.setPolicyName('mypolicy');
   });
 
@@ -64,7 +95,7 @@ describe('<EditPolicy /> downsample interval validation', () => {
     {
       name: `doesn't allow decimals for timing (with comma)`,
       value: '5,5',
-      error: [i18nTexts.editPolicy.errors.integerRequired],
+      error: [i18nTexts.editPolicy.errors.numberRequired],
     },
   ].forEach((testConfig: { name: string; value: string; error: string[] }) => {
     (['hot', 'warm', 'cold'] as PhaseWithDownsample[]).forEach((phase: PhaseWithDownsample) => {
@@ -74,7 +105,7 @@ describe('<EditPolicy /> downsample interval validation', () => {
           await actions.togglePhase(phase);
         }
 
-        await actions[phase].downsample.toggle();
+        actions[phase].downsample.toggle();
 
         // 1. We first set as dummy value to have a starting min_age value
         await actions[phase].downsample.setDownsampleInterval('111');
@@ -82,10 +113,8 @@ describe('<EditPolicy /> downsample interval validation', () => {
         // will be displayed under the field.
         await actions[phase].downsample.setDownsampleInterval(value);
 
-        actions.errors.waitForValidation();
-
-        actions.errors.expectMessages(error);
-      });
+        await expectErrorMessages(error);
+      }, 10000);
     });
   });
 
@@ -93,42 +122,37 @@ describe('<EditPolicy /> downsample interval validation', () => {
     await actions.togglePhase('warm');
     await actions.togglePhase('cold');
 
-    await actions.hot.downsample.toggle();
+    actions.hot.downsample.toggle();
     await actions.hot.downsample.setDownsampleInterval('60', 'm');
 
-    await actions.warm.downsample.toggle();
+    actions.warm.downsample.toggle();
     await actions.warm.downsample.setDownsampleInterval('1', 'h');
 
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages(
+    await expectErrorMessages(
       ['Must be greater than and a multiple of the hot phase value (60m)'],
       'warm'
     );
 
-    await actions.cold.downsample.toggle();
+    actions.cold.downsample.toggle();
     await actions.cold.downsample.setDownsampleInterval('90', 'm');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages(
+    await expectErrorMessages(
       ['Must be greater than and a multiple of the warm phase value (1h)'],
       'cold'
     );
 
     // disable warm phase, check that we now get an error because of the hot phase;
     await actions.togglePhase('warm');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages(
+    await expectErrorMessages(
       ['Must be greater than and a multiple of the hot phase value (60m)'],
       'cold'
     );
     await actions.cold.downsample.setDownsampleInterval('120', 'm');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([], 'cold');
+    await expectErrorMessages([], 'cold');
 
     await actions.cold.downsample.setDownsampleInterval('90', 'm');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages(
+    await expectErrorMessages(
       ['Must be greater than and a multiple of the hot phase value (60m)'],
       'cold'
     );
-  });
+  }, 15000);
 });

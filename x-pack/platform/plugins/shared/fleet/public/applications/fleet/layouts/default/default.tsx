@@ -130,7 +130,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                 defaultMessage="We've added new privileges that let you define more granularly who can view or edit Fleet agents, policies, and settings. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
-                    <EuiLink href={docLinks.links.fleet.roleAndPrivileges} external>
+                    <EuiLink href={docLinks.links.fleet.roleAndPrivileges} external target="_blank">
                       <strong>
                         <FormattedMessage
                           id="xpack.fleet.granularPrivileges.learnMoreLinkText"

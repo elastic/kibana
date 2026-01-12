@@ -93,18 +93,22 @@ export default function (providerContext: FtrProviderContext) {
       statusCode: 403,
     },
   ];
+
   const ROUTES = [
     {
       method: 'GET',
       path: '/api/fleet/cloud_connectors',
       scenarios: READ_SCENARIOS,
     },
-    {
+    // Generate unique POST routes for each scenario to avoid duplicate name validation errors
+    ...ALL_SCENARIOS.map((scenario, index) => ({
       method: 'POST',
       path: '/api/fleet/cloud_connectors',
-      scenarios: ALL_SCENARIOS,
+      scenarios: [scenario],
       send: {
-        name: 'test-cloud-connector',
+        name: `test-cloud-connector-${scenario.user.username}-${index}-${Date.now()}-${Math.random()
+          .toString(36)
+          .substr(2, 9)}`,
         cloudProvider: 'aws',
         vars: {
           role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
@@ -117,7 +121,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         },
       },
-    },
+    })),
   ];
 
   describe('Cloud Connector Privileges', () => {
@@ -126,11 +130,12 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await setupTestUsers(getService('security'));
 
+      // Create a test connector for GET tests to work with
       await supertest
         .post(`/api/fleet/cloud_connectors`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'test-cloud-connector',
+          name: `test-cloud-connector-privileges-${Date.now()}`,
           cloudProvider: 'aws',
           vars: {
             role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },

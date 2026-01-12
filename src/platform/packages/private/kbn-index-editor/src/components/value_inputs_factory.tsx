@@ -9,8 +9,8 @@
 
 import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES, getKbnFieldType } from '@kbn/field-types';
 
 export interface ValueInputProps {
   onError?: (error: string | null) => void;
@@ -58,13 +58,17 @@ export const BooleanInput = ({ onError, onChange, ...restOfProps }: ValueInputPr
   );
 };
 
-export function getInputComponentForType(
-  type: DatatableColumnType | undefined
-): React.FC<ValueInputProps> {
-  switch (type) {
-    case 'number':
+export function getInputComponentForType(type: string | undefined): React.FC<ValueInputProps> {
+  if (!type) {
+    return StringInput;
+  }
+
+  const kibanaFieldType = getKbnFieldType(type);
+
+  switch (kibanaFieldType.name) {
+    case KBN_FIELD_TYPES.NUMBER:
       return NumberInput;
-    case 'boolean':
+    case KBN_FIELD_TYPES.BOOLEAN:
       return BooleanInput;
     default:
       return StringInput;

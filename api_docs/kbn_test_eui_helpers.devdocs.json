@@ -25,7 +25,7 @@
         "tags": [],
         "label": "EuiButtonGroupTestHarness",
         "description": [],
-        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,23 +36,7 @@
             "tags": [],
             "label": "#testId",
             "description": [],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiButtonGroupTestHarness.buttonGroup",
-            "type": "Object",
-            "tags": [],
-            "label": "#buttonGroup",
-            "description": [
-              "\nReturns button group or throws"
-            ],
-            "signature": [
-              "HTMLElement"
-            ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -66,7 +50,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -80,7 +64,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -97,57 +81,63 @@
             "description": [
               "\nReturns `data-test-subj` of button group"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiButtonGroupTestHarness.self",
-            "type": "CompoundType",
+            "id": "def-common.EuiButtonGroupTestHarness.getElement",
+            "type": "Function",
             "tags": [],
-            "label": "self",
+            "label": "getElement",
             "description": [
-              "\nReturns button group if found, otherwise `null`"
+              "\nReturns button group element if found, otherwise `null`."
             ],
             "signature": [
-              "HTMLElement | null"
+              "() => HTMLElement | null"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiButtonGroupTestHarness.options",
-            "type": "Array",
+            "id": "def-common.EuiButtonGroupTestHarness.getOptions",
+            "type": "Function",
             "tags": [],
-            "label": "options",
+            "label": "getOptions",
             "description": [
-              "\nReturns all options of button groups"
+              "\nReturns all options of button groups.\nReturns empty array if button group is not found."
             ],
             "signature": [
-              "HTMLElement[]"
+              "() => HTMLButtonElement[]"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiButtonGroupTestHarness.selected",
-            "type": "Object",
+            "id": "def-common.EuiButtonGroupTestHarness.getSelected",
+            "type": "Function",
             "tags": [],
-            "label": "selected",
+            "label": "getSelected",
             "description": [
-              "\nReturns selected option of button group"
+              "\nReturns selected option of button group, or `null` if none is selected or button group is not found."
             ],
             "signature": [
-              "HTMLElement"
+              "() => HTMLButtonElement | null"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
@@ -161,7 +151,7 @@
             "signature": [
               "(optionName: string | RegExp) => void"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -175,7 +165,1463 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_button_group_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiComboBoxTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiComboBoxTestHarness",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "#testId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.containerEl",
+            "type": "Object",
+            "tags": [],
+            "label": "#containerEl",
+            "description": [
+              "\nReturns combobox container or throws"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.inputEl",
+            "type": "Object",
+            "tags": [],
+            "label": "#inputEl",
+            "description": [
+              "\nReturns the input element (role=\"combobox\")\nFinds it within or near the container"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiComboBoxTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "testId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [
+              "\nReturns `data-test-subj` of combobox"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.getElement",
+            "type": "Function",
+            "tags": [],
+            "label": "getElement",
+            "description": [
+              "\nReturns combobox container if found, otherwise `null`."
+            ],
+            "signature": [
+              "() => HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.getSelected",
+            "type": "Function",
+            "tags": [],
+            "label": "getSelected",
+            "description": [
+              "\nReturns selected values as array of strings.\n\nReads from pills with `data-test-subj=\"euiComboBoxPill\"`.\nReturns empty array if combobox is not found."
+            ],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.select",
+            "type": "Function",
+            "tags": [],
+            "label": "select",
+            "description": [
+              "\nSelect an option by typing its label and pressing Enter\n\nIMPORTANT: Must use the exact display label, not the internal value\nExample: Use 'Semantic text' not 'semantic_text'\n"
+            ],
+            "signature": [
+              "(label: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiComboBoxTestHarness.select.$1",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [
+                  "- The display label of the option to select"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.selectAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "selectAsync",
+            "description": [],
+            "signature": [
+              "(searchText: string) => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiComboBoxTestHarness.selectAsync.$1",
+                "type": "string",
+                "tags": [],
+                "label": "searchText",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.clear",
+            "type": "Function",
+            "tags": [],
+            "label": "clear",
+            "description": [
+              "\nClear all selected options and wait for the UI to settle.\n\nNotes:\n- Some EUI combobox usages render `comboBoxClearButton` outside of the element that carries the\n  consumer-provided `data-test-subj` (e.g. on a wrapper). This method searches a broader scope.\n- If the clear button is not available, it falls back to removing pills via Backspace."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiContextMenuTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiContextMenuTestHarness",
+        "description": [
+          "\nHarness for context menus rendered inside EUI popovers.\n\nNote: EUI context menu items may render as `<button>` or `<a>` depending on props."
+        ],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiContextMenuTestHarness.panelEl",
+            "type": "Object",
+            "tags": [],
+            "label": "#panelEl",
+            "description": [],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiContextMenuTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiContextMenuTestHarness.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "panelEl",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiContextMenuTestHarness.getElement",
+            "type": "Function",
+            "tags": [],
+            "label": "getElement",
+            "description": [
+              "\nReturns the popover panel element if it is still in the DOM, otherwise `null`."
+            ],
+            "signature": [
+              "() => HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiContextMenuTestHarness.getMenuItem",
+            "type": "Function",
+            "tags": [],
+            "label": "getMenuItem",
+            "description": [
+              "\nGet a clickable context menu item (button or link) by its accessible name.\nReturns `null` if not found."
+            ],
+            "signature": [
+              "(label: string | RegExp) => HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiContextMenuTestHarness.getMenuItem.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string | RegExp"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiContextMenuTestHarness.clickMenuItem",
+            "type": "Function",
+            "tags": [],
+            "label": "clickMenuItem",
+            "description": [],
+            "signature": [
+              "(label: string | RegExp) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiContextMenuTestHarness.clickMenuItem.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string | RegExp"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiContextMenuTestHarness.clickMenuItemAndWaitForClose",
+            "type": "Function",
+            "tags": [],
+            "label": "clickMenuItemAndWaitForClose",
+            "description": [],
+            "signature": [
+              "(label: string | RegExp) => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiContextMenuTestHarness.clickMenuItemAndWaitForClose.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string | RegExp"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_context_menu_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiListTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiListTestHarness",
+        "description": [
+          "\nGeneric harness for EUI \"list-ish\" UIs (selectables, list groups, option lists) where:\n- Items are rendered as repeated DOM nodes containing an item label text\n- Row actions are rendered somewhere \"near\" the label (often not a strict parent/child relationship)\n\nThis harness encapsulates the common pattern:\n- locate item by visible label text\n- walk up a bounded number of ancestors until the action button is found\n- click it"
+        ],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiListTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "#testId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiListTestHarness.options",
+            "type": "Object",
+            "tags": [],
+            "label": "#options",
+            "description": [],
+            "signature": [
+              "EuiListTestHarnessOptions",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiListTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiListTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "testId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiListTestHarness.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "EuiListTestHarnessOptions",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiListTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiListTestHarness.getElement",
+            "type": "Function",
+            "tags": [],
+            "label": "getElement",
+            "description": [
+              "\nReturns list container element if found, otherwise `null`."
+            ],
+            "signature": [
+              "() => HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiListTestHarness.getRowRoot",
+            "type": "Function",
+            "tags": [],
+            "label": "#getRowRoot",
+            "description": [],
+            "signature": [
+              "(labelEl: HTMLElement, containerEl: HTMLElement) => HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiListTestHarness.getRowRoot.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "labelEl",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiListTestHarness.getRowRoot.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "containerEl",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiListTestHarness.clickAction",
+            "type": "Function",
+            "tags": [],
+            "label": "clickAction",
+            "description": [
+              "\nClick an action button associated with an item label.\n"
+            ],
+            "signature": [
+              "(itemLabel: string, actionTestId: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiListTestHarness.clickAction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "itemLabel",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiListTestHarness.clickAction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "actionTestId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiListTestHarness.getActionElement",
+            "type": "Function",
+            "tags": [],
+            "label": "getActionElement",
+            "description": [
+              "\nReturn the action element for an item label (bounded ancestor walk).\nExposed to enable assertions before clicking if needed.\nReturns `null` if not found."
+            ],
+            "signature": [
+              "(labelEl: HTMLElement, actionTestId: string) => HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiListTestHarness.getActionElement.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "labelEl",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiListTestHarness.getActionElement.$2",
+                "type": "string",
+                "tags": [],
+                "label": "actionTestId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_list_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiPaginationTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiPaginationTestHarness",
+        "description": [
+          "\nHarness for EUI pagination (EuiPagination / EuiTablePagination).\n\nEncapsulates the DOM details of locating pagination buttons."
+        ],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPaginationTestHarness.root",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "#root",
+            "description": [],
+            "signature": [
+              "HTMLElement | Document"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPaginationTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiPaginationTestHarness.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  "Root"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPaginationTestHarness.queries",
+            "type": "Function",
+            "tags": [],
+            "label": "#queries",
+            "description": [],
+            "signature": [
+              "() => { getByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T; getAllByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; queryByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T | null; queryAllByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; findByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T; getAllByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; queryByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T | null; queryAllByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; findByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T; getAllByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T[]; queryByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T | null; queryAllByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T[]; findByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; } & { getByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement; getAllByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; queryByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; findByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement; getAllByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; queryByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; findByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement; getAllByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement[]; queryByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement | null; queryAllByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement[]; findByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; }"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPaginationTestHarness.getButtons",
+            "type": "Function",
+            "tags": [],
+            "label": "getButtons",
+            "description": [],
+            "signature": [
+              "() => HTMLButtonElement[]"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPaginationTestHarness.getButtonByLabel",
+            "type": "Function",
+            "tags": [],
+            "label": "getButtonByLabel",
+            "description": [],
+            "signature": [
+              "(label: string) => HTMLButtonElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiPaginationTestHarness.getButtonByLabel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPaginationTestHarness.click",
+            "type": "Function",
+            "tags": [],
+            "label": "click",
+            "description": [],
+            "signature": [
+              "(label: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiPaginationTestHarness.click.$1",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_pagination_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiPopoverPanelTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiPopoverPanelTestHarness",
+        "description": [
+          "\nFinder for EUI popover panels (`[data-popover-panel]`).\n\nEuiPopoverPanel renders a stable `data-popover-panel` attribute (see EUI source).\n\nThis harness is intentionally discovery-focused and returns `HTMLElement`s and/or\nother harness instances that operate on a specific panel."
+        ],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPopoverPanelTestHarness.root",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "#root",
+            "description": [],
+            "signature": [
+              "HTMLElement | Document"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPopoverPanelTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiPopoverPanelTestHarness.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  "Root"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPopoverPanelTestHarness.getOpenPanels",
+            "type": "Function",
+            "tags": [],
+            "label": "getOpenPanels",
+            "description": [
+              "\nEuiPopover panels are marked with the stable attribute `data-popover-panel`."
+            ],
+            "signature": [
+              "() => HTMLElement[]"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPopoverPanelTestHarness.getTopOpenPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "getTopOpenPanel",
+            "description": [],
+            "signature": [
+              "() => HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPopoverPanelTestHarness.findTopOpenPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "findTopOpenPanel",
+            "description": [],
+            "signature": [
+              "() => Promise<HTMLElement>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPopoverPanelTestHarness.findPanelContainingMenuItem",
+            "type": "Function",
+            "tags": [],
+            "label": "findPanelContainingMenuItem",
+            "description": [],
+            "signature": [
+              "(label: string | RegExp) => Promise<HTMLElement>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiPopoverPanelTestHarness.findPanelContainingMenuItem.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string | RegExp"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiPopoverPanelTestHarness.findContextMenuContainingItem",
+            "type": "Function",
+            "tags": [],
+            "label": "findContextMenuContainingItem",
+            "description": [],
+            "signature": [
+              "(label: string | RegExp) => Promise<",
+              {
+                "pluginId": "@kbn/test-eui-helpers",
+                "scope": "common",
+                "docId": "kibKbnTestEuiHelpersPluginApi",
+                "section": "def-common.EuiContextMenuTestHarness",
+                "text": "EuiContextMenuTestHarness"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiPopoverPanelTestHarness.findContextMenuContainingItem.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string | RegExp"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_popover_panel_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -193,7 +1639,7 @@
         "tags": [],
         "label": "EuiSelectTestHarness",
         "description": [],
-        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -204,23 +1650,7 @@
             "tags": [],
             "label": "#testId",
             "description": [],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiSelectTestHarness.selectEl",
-            "type": "Object",
-            "tags": [],
-            "label": "#selectEl",
-            "description": [
-              "\nReturns select or throws"
-            ],
-            "signature": [
-              "HTMLElement"
-            ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -234,7 +1664,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -248,7 +1678,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -265,54 +1695,63 @@
             "description": [
               "\nReturns `data-test-subj` of select"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiSelectTestHarness.self",
-            "type": "CompoundType",
+            "id": "def-common.EuiSelectTestHarness.getElement",
+            "type": "Function",
             "tags": [],
-            "label": "self",
+            "label": "getElement",
             "description": [
-              "\nReturns button select if found, otherwise `null`"
+              "\nReturns select element if found, otherwise `null`."
             ],
             "signature": [
-              "HTMLElement | null"
+              "() => HTMLElement | null"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiSelectTestHarness.options",
-            "type": "Array",
+            "id": "def-common.EuiSelectTestHarness.getOptions",
+            "type": "Function",
             "tags": [],
-            "label": "options",
+            "label": "getOptions",
             "description": [
-              "\nReturns all options of select"
+              "\nReturns all options of select.\nReturns empty array if select is not found."
             ],
             "signature": [
-              "HTMLOptionElement[]"
+              "() => HTMLOptionElement[]"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiSelectTestHarness.selected",
-            "type": "string",
+            "id": "def-common.EuiSelectTestHarness.getSelected",
+            "type": "Function",
             "tags": [],
-            "label": "selected",
+            "label": "getSelected",
             "description": [
-              "\nReturns selected option"
+              "\nReturns selected option value.\nReturns empty string if select is not found."
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
@@ -326,7 +1765,7 @@
             "signature": [
               "(optionName: string | RegExp) => void"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -340,7 +1779,7 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_select_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -358,10 +1797,520 @@
         "tags": [],
         "label": "EuiSuperDatePickerTestHarness",
         "description": [],
-        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.root",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "#root",
+            "description": [],
+            "signature": [
+              "HTMLElement | Document"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperDatePickerTestHarness.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  "HTMLElement | Document"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.queries",
+            "type": "Function",
+            "tags": [],
+            "label": "#queries",
+            "description": [],
+            "signature": [
+              "() => { getByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T; getAllByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; queryByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T | null; queryAllByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; findByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T; getAllByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; queryByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T | null; queryAllByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; findByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T; getAllByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T[]; queryByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T | null; queryAllByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T[]; findByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; } & { getByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement; getAllByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; queryByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; findByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement; getAllByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; queryByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; findByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement; getAllByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement[]; queryByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement | null; queryAllByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement[]; findByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; }"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
             "id": "def-common.EuiSuperDatePickerTestHarness.currentCommonlyUsedRange",
@@ -371,23 +2320,23 @@
             "description": [
               "\nThis method returns the currently selected commonly-used range as a string\n\nThe empty string is returned if a commonly-used range is not currently selected"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
             "id": "def-common.EuiSuperDatePickerTestHarness.currentRange",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "currentRange",
             "description": [
-              "\nThis method returns the currently selected range as a pair of strings"
+              "\nThis method returns the currently selected range as a pair of strings.\nReturns `null` if the date picker is not found or not properly initialized."
             ],
             "signature": [
-              "{ from: string | null; to: string | null; }"
+              "{ from: string; to: string; } | null"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -403,7 +2352,7 @@
             "signature": [
               "(range: { from: number; to: number; }, expect: jest.Expect) => void"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -414,7 +2363,7 @@
                 "tags": [],
                 "label": "range",
                 "description": [],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -425,7 +2374,7 @@
                     "tags": [],
                     "label": "from",
                     "description": [],
-                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -436,7 +2385,7 @@
                     "tags": [],
                     "label": "to",
                     "description": [],
-                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -452,7 +2401,7 @@
                 "signature": [
                   "jest.Expect"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -470,9 +2419,9 @@
               "\nOpens the popover for the date picker"
             ],
             "signature": [
-              "() => Promise<void>"
+              "() => void"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -490,7 +2439,7 @@
             "signature": [
               "(label: string) => Promise<void>"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -504,7 +2453,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -522,12 +2471,802 @@
               "\nActivates the refresh button"
             ],
             "signature": [
-              "() => Promise<void>"
+              "() => void"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_date_picker_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiSuperSelectTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiSuperSelectTestHarness",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "#testId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.container",
+            "type": "Object",
+            "tags": [],
+            "label": "#container",
+            "description": [],
+            "signature": [
+              "HTMLElement | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.query",
+            "type": "Function",
+            "tags": [],
+            "label": "#query",
+            "description": [],
+            "signature": [
+              "() => { getByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T; getAllByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; queryByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T | null; queryAllByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; findByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByLabelText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByPlaceholderText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T; getAllByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; queryByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T | null; queryAllByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined): T[]; findByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByAltText<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByTitle<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByDisplayValue<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T; getAllByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T[]; queryByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T | null; queryAllByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined): T[]; findByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByRole<T extends HTMLElement = HTMLElement>(role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; getByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T; getAllByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; queryByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T | null; queryAllByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined): T[]; findByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T>; findAllByTestId<T extends HTMLElement = HTMLElement>(id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined): Promise<T[]>; } & { getByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement; getAllByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; queryByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; findByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByLabelText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByPlaceholderText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement; getAllByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; queryByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined) => HTMLElement[]; findByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "SelectorMatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByAltText: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByTitle: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByDisplayValue: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement; getAllByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement[]; queryByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement | null; queryAllByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined) => HTMLElement[]; findByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByRole: (role: ",
+              "ByRoleMatcher",
+              ", options?: ",
+              "ByRoleOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; getByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement; getAllByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; queryByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement | null; queryAllByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined) => HTMLElement[]; findByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement>; findAllByTestId: (id: ",
+              "Matcher",
+              ", options?: ",
+              "MatcherOptions",
+              " | undefined, waitForElementOptions?: ",
+              "waitForOptions",
+              " | undefined) => Promise<HTMLElement[]>; }"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.resolveElementFromMatches",
+            "type": "Function",
+            "tags": [],
+            "label": "#resolveElementFromMatches",
+            "description": [],
+            "signature": [
+              "(matches: HTMLElement[]) => HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperSelectTestHarness.resolveElementFromMatches.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "matches",
+                "description": [],
+                "signature": [
+                  "HTMLElement[]"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.containerEl",
+            "type": "Object",
+            "tags": [],
+            "label": "#containerEl",
+            "description": [
+              "\nReturns super select container or throws"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.buttonEl",
+            "type": "Object",
+            "tags": [],
+            "label": "#buttonEl",
+            "description": [
+              "\nReturns the button element that opens the dropdown.\n\nNote: depending on how `data-test-subj` is applied, the element returned by\n`getByTestId()` may itself be the `<button>` control (not a wrapper). In\nthat case `within(container).getByRole('button')` would fail because the\ncontainer has no descendants."
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperSelectTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "testId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperSelectTestHarness.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiSuperSelectTestHarness.Unnamed.$2.container",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "container",
+                    "description": [],
+                    "signature": [
+                      "HTMLElement | undefined"
+                    ],
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [
+              "\nReturns `data-test-subj` of super select"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.getElement",
+            "type": "Function",
+            "tags": [],
+            "label": "getElement",
+            "description": [
+              "\nReturns super select element if found, otherwise `null`."
+            ],
+            "signature": [
+              "() => HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.getSelected",
+            "type": "Function",
+            "tags": [],
+            "label": "getSelected",
+            "description": [
+              "\nPreferred alias for selected option.\nReturns empty string if super select is not found."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.select",
+            "type": "Function",
+            "tags": [],
+            "label": "select",
+            "description": [
+              "\nSelect an option by opening the dropdown and clicking the option\n"
+            ],
+            "signature": [
+              "(optionTestSubj: string, options?: { allowMultiple?: boolean | undefined; index?: number | undefined; } | undefined) => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperSelectTestHarness.select.$1",
+                "type": "string",
+                "tags": [],
+                "label": "optionTestSubj",
+                "description": [
+                  "- The data-test-subj of the option to select"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperSelectTestHarness.select.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiSuperSelectTestHarness.select.$2.allowMultiple",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "allowMultiple",
+                    "description": [
+                      "\nIf multiple options match the same `data-test-subj`, set this to true and use `index`\nto select a specific option."
+                    ],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiSuperSelectTestHarness.select.$2.index",
+                    "type": "number",
+                    "tags": [],
+                    "label": "index",
+                    "description": [
+                      "Which matching option to click (defaults to 0). Only used when allowMultiple is true."
+                    ],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperSelectTestHarness.selectById",
+            "type": "Function",
+            "tags": [],
+            "label": "selectById",
+            "description": [
+              "\nSelect an option by its DOM id (EUI often sets `id` on options to the option value).\n\nUseful when options don't have stable/unique `data-test-subj`."
+            ],
+            "signature": [
+              "(optionId: string) => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperSelectTestHarness.selectById.$1",
+                "type": "string",
+                "tags": [],
+                "label": "optionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_super_select_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -540,7 +3279,7 @@
         "tags": [],
         "label": "EuiTableTestHarness",
         "description": [],
-        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -551,23 +3290,7 @@
             "tags": [],
             "label": "#testId",
             "description": [],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiTableTestHarness.tableEl",
-            "type": "Object",
-            "tags": [],
-            "label": "#tableEl",
-            "description": [
-              "\nReturns table element or throws"
-            ],
-            "signature": [
-              "HTMLElement"
-            ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -581,7 +3304,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -595,7 +3318,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -612,71 +3335,159 @@
             "description": [
               "\nReturns `data-test-subj` of table"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiTableTestHarness.self",
-            "type": "CompoundType",
+            "id": "def-common.EuiTableTestHarness.getElement",
+            "type": "Function",
             "tags": [],
-            "label": "self",
+            "label": "getElement",
             "description": [
-              "\nReturns table if found, otherwise `null`"
+              "\nReturns table element if found, otherwise `null`."
             ],
             "signature": [
-              "HTMLElement | null"
+              "() => HTMLElement | null"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiTableTestHarness.body",
-            "type": "CompoundType",
+            "id": "def-common.EuiTableTestHarness.getBody",
+            "type": "Function",
             "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "HTMLTableSectionElement | null"
+            "label": "getBody",
+            "description": [
+              "\nReturns the table body (`<tbody>`) if found, otherwise `null`."
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "signature": [
+              "() => HTMLTableSectionElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiTableTestHarness.rows",
-            "type": "Array",
+            "id": "def-common.EuiTableTestHarness.getRows",
+            "type": "Function",
             "tags": [],
-            "label": "rows",
+            "label": "getRows",
             "description": [
               "\nGet table row elements for direct interaction with cells.\nUseful when you need to click buttons, checkboxes, or other interactive elements within rows.\n"
             ],
             "signature": [
-              "HTMLElement[]"
+              "() => HTMLElement[]"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "Array of table row elements (empty array if table/body not found)"
+            ]
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiTableTestHarness.cellValues",
-            "type": "Array",
+            "id": "def-common.EuiTableTestHarness.getRowByCellText",
+            "type": "Function",
             "tags": [],
-            "label": "cellValues",
+            "label": "getRowByCellText",
             "description": [
-              "\nGet table cell values as a 2D array.\nUseful for asserting table data in a structured way.\n"
+              "\nFind a row by visible text content in any cell.\nWorks for EUI tables rendered with semantic <tr>/<td>.\nReturns `null` if the text is not found or not inside a table row."
             ],
             "signature": [
-              "string[][]"
+              "(text: string) => HTMLElement | null"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiTableTestHarness.getRowByCellText.$1",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.getCellValues",
+            "type": "Function",
+            "tags": [],
+            "label": "getCellValues",
+            "description": [
+              "\nGet table cell values (tbody only) as a 2D array.\n\nDefaults are geared towards typical test assertions (trimmed + whitespace-collapsed)."
+            ],
+            "signature": [
+              "(options?: { trim?: boolean | undefined; collapseWhitespace?: boolean | undefined; }) => string[][]"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiTableTestHarness.getCellValues.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiTableTestHarness.getCellValues.$1.trim",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "trim",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiTableTestHarness.getCellValues.$1.collapseWhitespace",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "collapseWhitespace",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_table_test_harness.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -689,11 +3500,13 @@
         "type": "Function",
         "tags": [],
         "label": "getSelectedButtonInGroup",
-        "description": [],
+        "description": [
+          "\nHelper function to get the selected button in a button group"
+        ],
         "signature": [
           "(testId: string, container?: any) => () => HTMLElement"
         ],
-        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/util/get_selected_button_in_group.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -707,7 +3520,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/util/get_selected_button_in_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -722,7 +3535,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/util/get_selected_button_in_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

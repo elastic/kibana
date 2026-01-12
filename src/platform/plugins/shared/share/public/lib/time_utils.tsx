@@ -25,6 +25,15 @@ export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) =
   const mathPart = dateString.split('/')[0]; // Ignore rounding part for matching
   const roundingPart = dateString.includes('/') ? dateString.split('/')[1] : undefined;
 
+  // Handle plain 'now' without offset
+  if (mathPart === 'now') {
+    return {
+      value: 0,
+      unit: 'second',
+      roundingUnit: undefined,
+    };
+  }
+
   const match = mathPart.match(/^now([+-]\d+)([smhdwMy])$/);
   if (!match) return;
 

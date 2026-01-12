@@ -26,6 +26,10 @@ import {
   handleProcessingGrokSuggestions,
   processingGrokSuggestionsSchema,
 } from './grok_suggestions_handler';
+import {
+  handleProcessingDissectSuggestions,
+  processingDissectSuggestionsSchema,
+} from './dissect_suggestions_handler';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 const paramsSchema = z.object({
@@ -91,6 +95,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<GrokSuggestionResponse> => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
@@ -112,11 +117,68 @@ export const processingGrokSuggestionRoute = createServerRoute({
         scopedClusterClient,
         fieldsMetadataClient,
         signal: getRequestAbortSignal(request),
+        logger,
       })
     ).pipe(
       map((grokProcessor) => ({
         grokProcessor,
         type: 'grok_suggestion' as const,
+      }))
+    );
+  },
+});
+
+type DissectSuggestionResponse = Observable<
+  ServerSentEventBase<
+    'dissect_suggestion',
+    { dissectProcessor: Awaited<ReturnType<typeof handleProcessingDissectSuggestions>> }
+  >
+>;
+
+export const processingDissectSuggestionRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/processing/_suggestions/dissect',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: processingDissectSuggestionsSchema,
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<DissectSuggestionResponse> => {
+    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
+    if (!isAvailableForTier) {
+      throw new SecurityError('Cannot access API on the current pricing tier');
+    }
+
+    const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
+      await getScopedClients({
+        request,
+      });
+
+    // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
+    // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
+    return from(
+      handleProcessingDissectSuggestions({
+        params,
+        inferenceClient,
+        streamsClient,
+        scopedClusterClient,
+        fieldsMetadataClient,
+        signal: getRequestAbortSignal(request),
+        logger,
+      })
+    ).pipe(
+      map((dissectProcessor) => ({
+        dissectProcessor,
+        type: 'dissect_suggestion' as const,
       }))
     );
   },
@@ -158,5 +220,6 @@ export const processingDateSuggestionsRoute = createServerRoute({
 export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
   ...processingGrokSuggestionRoute,
+  ...processingDissectSuggestionRoute,
   ...processingDateSuggestionsRoute,
 };

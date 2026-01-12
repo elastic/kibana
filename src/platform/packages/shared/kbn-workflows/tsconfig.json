@@ -9,6 +9,7 @@
     "@kbn/zod",
     "@kbn/es-query",
     "@kbn/utility-types",
-    "@kbn/core"  ],
+    "@kbn/core",
+    "@kbn/repo-info"  ],
   "exclude": ["target/**/*"]
 }

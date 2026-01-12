@@ -9,8 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import TheHiveParamsFields from './params';
-import { SUB_ACTION } from '../../../common/thehive/constants';
-import type { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
+import { SUB_ACTION } from '@kbn/connector-schemas/thehive/constants';
+import type { ExecutorParams, ExecutorSubActionPushParams } from '@kbn/connector-schemas/thehive';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('TheHiveParamsFields renders', () => {

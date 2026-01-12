@@ -61,18 +61,21 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
-import type { GetPanelPlacementSettings } from './panel_placement';
-import { registerDashboardPanelSettings } from './panel_placement';
+import {
+  DASHBOARD_APP_ID,
+  LANDING_PAGE_PATH,
+  SEARCH_SESSION_ID,
+} from '../common/page_bundle_constants';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
+import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/performance/dashboard_duration_start_mark';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -112,6 +115,7 @@ export interface DashboardStartDependencies {
   noDataPage?: NoDataPagePluginStart;
   lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  cps?: CPSPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -119,10 +123,6 @@ interface DashboardSetup {}
 
 export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelSettings: <SerializedState extends object = object>(
-    embeddableType: string,
-    getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
-  ) => void;
 }
 
 export class DashboardPlugin
@@ -139,7 +139,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, home, data, contentManagement, urlForwarding }: DashboardSetupDependencies
+    { share, home, data, urlForwarding }: DashboardSetupDependencies
   ) {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
@@ -222,6 +222,7 @@ export class DashboardPlugin
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
+        performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
         const [{ mountApp }] = await Promise.all([
@@ -276,15 +277,6 @@ export class DashboardPlugin
       });
     }
 
-    // register content management
-    contentManagement.registry.register({
-      id: CONTENT_ID,
-      version: {
-        latest: LATEST_VERSION,
-      },
-      name: dashboardAppTitle,
-    });
-
     return {};
   }
 
@@ -298,8 +290,12 @@ export class DashboardPlugin
       return searchAction;
     });
 
+    plugins.uiActions.registerActionAsync('getDashboardsByIdsAction', async () => {
+      const { getDashboardsByIdsAction } = await import('./dashboard_client');
+      return getDashboardsByIdsAction;
+    });
+
     return {
-      registerDashboardPanelSettings,
       findDashboardsService: async () => {
         const { findService } = await import('./dashboard_client');
         return findService;

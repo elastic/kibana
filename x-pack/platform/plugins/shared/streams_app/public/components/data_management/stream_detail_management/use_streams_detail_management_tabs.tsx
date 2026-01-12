@@ -24,7 +24,7 @@ export function useStreamsDetailManagementTabs({
     isLoading,
   } = useStreamsPrivileges();
 
-  const isSignificantEventsEnabled = !!significantEvents?.available;
+  const isSignificantEventsEnabled = !!significantEvents?.enabled;
 
   return {
     isLoading,
@@ -36,7 +36,7 @@ export function useStreamsDetailManagementTabs({
         defaultMessage: 'Processing',
       }),
     },
-    ...(groupStreams?.enabled
+    ...(groupStreams.enabled
       ? {
           references: {
             content: <StreamDetailReferencesView definition={definition} />,
@@ -49,7 +49,12 @@ export function useStreamsDetailManagementTabs({
     ...(isSignificantEventsEnabled
       ? {
           significantEvents: {
-            content: <StreamDetailSignificantEventsView definition={definition} />,
+            content: (
+              <StreamDetailSignificantEventsView
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
+            ),
             label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
               defaultMessage: 'Significant events',
             }),

@@ -8,12 +8,14 @@
 import { get, isObject } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
 import type { BaseStream } from '@kbn/streams-schema/src/models/base';
+import { isRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import { set } from '@kbn/safer-lodash-set';
 import type { Condition } from '@kbn/streamlang';
 import { isNeverCondition } from '@kbn/streamlang';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,
+  migrateWhereBlocksToCondition,
 } from './migrate_to_streamlang_on_read';
 
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
@@ -126,6 +128,67 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
       group: {
         ...migratedDefinition.group,
         tags: [],
+      },
+    };
+    hasBeenMigrated = true;
+  }
+
+  // Add failure_store to ingest streams if missing
+  if (isObject(migratedDefinition.ingest) && !('failure_store' in migratedDefinition.ingest)) {
+    const streamName = migratedDefinition.name;
+
+    if (
+      'wired' in migratedDefinition.ingest &&
+      typeof streamName === 'string' &&
+      isRoot(streamName)
+    ) {
+      set(migratedDefinition, 'ingest.failure_store', {
+        lifecycle: { enabled: { data_retention: '30d' } },
+      });
+    } else {
+      set(migratedDefinition, 'ingest.failure_store', { inherit: {} });
+    }
+    hasBeenMigrated = true;
+  }
+
+  // Migrate where blocks to use 'condition' property instead of 'where'
+  if (
+    isObject(migratedDefinition.ingest) &&
+    isObject((migratedDefinition.ingest as any).processing) &&
+    Array.isArray((migratedDefinition.ingest as any).processing.steps)
+  ) {
+    const steps = (migratedDefinition.ingest as any).processing.steps;
+    const migratedSteps = migrateWhereBlocksToCondition(steps);
+
+    if (migratedSteps.migrated) {
+      set(migratedDefinition, 'ingest.processing.steps', migratedSteps.steps);
+      hasBeenMigrated = true;
+    }
+  }
+  // Add required updated_at to all stream types
+  if (typeof migratedDefinition.updated_at !== 'string') {
+    migratedDefinition = {
+      ...migratedDefinition,
+      updated_at: new Date(0).toISOString(),
+    };
+    hasBeenMigrated = true;
+  }
+
+  // Add updated_at to processing for ingest streams
+  if (
+    isObject(migratedDefinition.ingest) &&
+    'processing' in migratedDefinition.ingest &&
+    isObject(migratedDefinition.ingest.processing) &&
+    !('updated_at' in migratedDefinition.ingest.processing)
+  ) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      ingest: {
+        ...migratedDefinition.ingest,
+        processing: {
+          ...migratedDefinition.ingest.processing,
+          updated_at: new Date(0).toISOString(),
+        },
       },
     };
     hasBeenMigrated = true;

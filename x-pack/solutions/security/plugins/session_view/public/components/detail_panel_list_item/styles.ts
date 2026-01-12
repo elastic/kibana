@@ -30,9 +30,11 @@ export const useStyles = ({ display }: StylesDeps) => {
 
       '& .euiToolTipAnchor': {
         width: `calc(100% - ${euiTheme.size.xl})`,
+        minWidth: 0,
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
+        display: 'block',
       },
     };
 

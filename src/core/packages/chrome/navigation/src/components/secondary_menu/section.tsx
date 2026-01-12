@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, useEuiTheme } from '@elastic/eui';
-import type { ReactNode } from 'react';
 import React from 'react';
+import type { ReactNode } from 'react';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface SecondaryMenuSectionProps {
@@ -17,60 +17,70 @@ export interface SecondaryMenuSectionProps {
   label?: string;
 }
 
-/**
- * To reflect the design perfectly while maintaining a logical structure,
- * we need to use `6px` and `10px` which are not multiples of 4, hence why
- * `euiTheme` is not used for padding here.
- *
- * Furthermore, `236px` is not available in `euiTheme` as a constant,
- * so we use it directly.
- *
- * `EuiTitle` provides styles inconsistent with design, and `EuiText` doesn't allow
- * `h5` usage so semantically, the structure could use improvement.
- */
 export const SecondaryMenuSectionComponent = ({
   children,
   label,
 }: SecondaryMenuSectionProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme, highContrastMode } = euiThemeContext;
 
   const sectionId = label ? label.replace(/\s+/g, '-').toLowerCase() : undefined;
 
-  return (
-    <nav
-      css={css`
-        padding: ${euiTheme.size.m};
+  const secondaryMenuWrapperStyles = css`
+    padding: ${euiTheme.size.m};
+    position: relative;
 
-        &:not(:last-child) {
-          border-bottom: 1px ${euiTheme.colors.borderBaseSubdued} solid;
+    &:not(:last-child) {
+      ${highContrastMode
+        ? `
+        border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
+        margin-left: ${euiTheme.size.m};
+        margin-right: ${euiTheme.size.m};
+        padding-left: 0;
+        padding-right: 0;
+      `
+        : `
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: ${euiTheme.size.m};
+          right: ${euiTheme.size.m};
+          height: ${euiTheme.border.width.thin};
+          background-color: ${euiTheme.colors.borderBaseSubdued};
         }
       `}
-      aria-labelledby={sectionId || undefined}
-    >
+    }
+  `;
+
+  /**
+   * To reflect the design perfectly while maintaining a logical structure,
+   * we need to use `6px` which isn't a multiple of 4 and there's no token for it,
+   * hence why we're not using `euiTheme` here.
+   */
+  const labelStyles = css`
+    font-size: ${euiTheme.size.m};
+    color: ${euiTheme.colors.subduedText};
+    padding: 6px ${euiTheme.size.s};
+  `;
+
+  const listStyles = css`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: ${euiTheme.size.xxs};
+  `;
+
+  return (
+    <div css={secondaryMenuWrapperStyles} role="group" aria-labelledby={sectionId || undefined}>
       {label && (
-        <EuiText
-          id={sectionId}
-          css={css`
-            font-size: ${euiTheme.size.m};
-            color: ${euiTheme.colors.subduedText};
-            // 6px comes from Figma, no token
-            padding: 6px ${euiTheme.size.s};
-          `}
-          component="span"
-        >
+        <EuiText id={sectionId} css={labelStyles} component="span">
           {label}
         </EuiText>
       )}
-      <ul
-        css={css`
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-          gap: ${euiTheme.size.xxs};
-        `}
-      >
+      <ul css={listStyles} role="none">
         {children}
       </ul>
-    </nav>
+    </div>
   );
 };

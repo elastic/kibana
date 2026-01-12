@@ -12,7 +12,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
+import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getLogsForDataset, defaultNamespace, processors } from './data';
 

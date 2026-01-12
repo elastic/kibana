@@ -69,6 +69,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"agentBuilder:externalMcp\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.AGENT_BUILDER_NAV_ENABLED_SETTING_ID",
         "type": "string",
         "tags": [],
@@ -106,6 +121,21 @@
         "description": [],
         "signature": [
           "\"aiAssistant:preferredAIAssistantType\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AI_CHAT_EXPERIENCE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AI_CHAT_EXPERIENCE_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiAssistant:preferredChatExperience\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1464,6 +1494,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY",
+        "description": [],
+        "signature": [
+          "\"observability:streamsEnableSignificantEventsDiscovery\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.QUERY_ALLOW_LEADING_WILDCARDS_ID",
         "type": "string",
         "tags": [],
@@ -1636,6 +1681,51 @@
         "description": [],
         "signature": [
           "\"securitySolution:defaultThreatIndex\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES",
+        "description": [],
+        "signature": [
+          "\"securitySolution:defaultValueReportMinutes\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE",
+        "description": [],
+        "signature": [
+          "\"securitySolution:defaultValueReportRate\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE",
+        "description": [],
+        "signature": [
+          "\"securitySolution:defaultValueReportTitle\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

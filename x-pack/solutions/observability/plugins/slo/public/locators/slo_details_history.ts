@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { sloDetailsHistoryLocatorID } from '@kbn/observability-plugin/common';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
+import {
+  sloDetailsHistoryLocatorID,
+  type SloDetailsHistoryLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
-import type { SerializableRecord } from '@kbn/utility-types';
-
-export interface SloDetailsHistoryLocatorParams extends SerializableRecord {
-  id: string;
-  instanceId?: string;
-  encodedAppState?: string;
-}
 
 export class SloDetailsHistoryLocatorDefinition
   implements LocatorDefinition<SloDetailsHistoryLocatorParams>

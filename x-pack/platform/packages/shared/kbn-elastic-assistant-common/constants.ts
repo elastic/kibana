@@ -105,47 +105,17 @@ export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
 
-// Attack discovery internal API (depreciated)
+// Attack discovery internal API
 export const ATTACK_DISCOVERY_INTERNAL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
-export const ATTACK_DISCOVERY_INTERNAL_BULK = `${ATTACK_DISCOVERY_INTERNAL}/_bulk` as const;
-export const ATTACK_DISCOVERY_INTERNAL_FIND = `${ATTACK_DISCOVERY_INTERNAL}/_find` as const;
-export const ATTACK_DISCOVERY_GENERATIONS_INTERNAL =
-  `${ATTACK_DISCOVERY_INTERNAL}/generations` as const;
-export const ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID =
-  `${ATTACK_DISCOVERY_GENERATIONS_INTERNAL}/{execution_uuid}` as const;
-export const ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS =
-  `${ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID}/_dismiss` as const;
-
-// Attack discovery internal schedules API (depreciated)
-export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES =
-  `${ATTACK_DISCOVERY_INTERNAL}/schedules` as const;
-export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID =
-  `${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/{id}` as const;
-export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE =
-  `${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/{id}/_enable` as const;
-export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE =
-  `${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/{id}/_disable` as const;
-export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND =
-  `${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/_find` as const;
+export const ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES =
+  `${ATTACK_DISCOVERY_INTERNAL}/_missing_privileges` as const;
 
 /** A fake `kibana.alert.rule.uuid` for ad hock rules */
 export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id' as const;
 
 /** A fake `kibana.alert.rule.rule_type_id` for ad hock rules */
 export const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
-
-/**
- * This feature flag enables the Attack discoveries public API feature.
- *
- * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
- * ```
- * feature_flags.overrides:
- *   securitySolution.attackDiscoveryPublicApiEnabled: true
- * ```
- */
-export const ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG =
-  'securitySolution.attackDiscoveryPublicApiEnabled' as const;
 
 /**
  * The common prefix for all (ad hoc and scheduled) Attack discovery alerts indices

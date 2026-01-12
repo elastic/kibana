@@ -4,30 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
-import { htmlIdGenerator } from '@elastic/eui';
-import {
-  assign,
-  enqueueActions,
-  forwardTo,
-  setup,
-  sendTo,
-  stopChild,
-  and,
-  raise,
-  stateIn,
-  cancel,
-} from 'xstate5';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { Streams } from '@kbn/streams-schema';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate5';
+
 import {
-  ALWAYS_CONDITION,
-  convertStepsForUI,
-  type StreamlangProcessorDefinition,
+  addDeterministicCustomIdentifiers,
+  checkAdditiveChanges,
+  validateStreamlang,
+  validateStreamlangModeCompatibility,
 } from '@kbn/streamlang';
-import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
+import {
+  isStreamlangDSLSchema,
+  streamlangDSLSchema,
+  type StreamlangDSL,
+} from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type {
@@ -36,7 +30,6 @@ import type {
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { getDefaultGrokProcessor, stepConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -44,39 +37,30 @@ import {
 } from './upsert_stream_actor';
 
 import {
-  simulationMachine,
-  createSimulationMachineImplementations,
-} from '../simulation_state_machine';
-import { stepMachine } from '../steps_state_machine';
-import {
-  collectDescendantIds,
-  defaultEnrichmentUrlState,
-  findInsertIndex,
-  getConfiguredSteps,
-  getActiveDataSourceSamples,
-  getDataSourcesUrlState,
-  getUpsertFields,
-  getStepsForSimulation,
-  insertAtIndex,
-  spawnDataSource,
-  spawnStep,
-  reorderSteps,
-  getActiveSimulationMode,
-  selectDataSource,
-} from './utils';
-import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
-import {
   createDataSourceMachineImplementations,
   dataSourceMachine,
 } from '../data_source_state_machine';
+import { interactiveModeMachine } from '../interactive_mode_machine';
+import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
+import {
+  createSimulationMachineImplementations,
+  simulationMachine,
+} from '../simulation_state_machine';
+import { yamlModeMachine } from '../yaml_mode_machine';
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
-import { selectPreviewRecords } from '../simulation_state_machine/selectors';
-import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
+import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
+import {
+  defaultEnrichmentUrlState,
+  getActiveDataSourceRef,
+  getActiveDataSourceSamples,
+  getDataSourcesUrlState,
+  getUpsertFields,
+  selectDataSource,
+  spawnDataSource,
+} from './utils';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
-
-const createId = htmlIdGenerator();
 
 export const streamEnrichmentMachine = setup({
   types: {
@@ -89,144 +73,137 @@ export const streamEnrichmentMachine = setup({
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
     dataSourceMachine: getPlaceholderFor(() => dataSourceMachine),
     setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
-    stepMachine: getPlaceholderFor(() => stepMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
+    interactiveModeMachine: getPlaceholderFor(() => interactiveModeMachine),
+    yamlModeMachine: getPlaceholderFor(() => yamlModeMachine),
   },
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
     refreshDefinition: () => {},
+    /* Validation actions */
+    computeValidation: assign(({ context }) => {
+      // First, check for schema errors (Zod parsing)
+      const parseResult = streamlangDSLSchema.safeParse(context.nextStreamlangDSL);
+      if (!parseResult.success) {
+        const schemaErrors = parseResult.error.issues.map((issue) => {
+          const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
+          return `${path}: ${issue.message}`;
+        });
+        // Skip full validation if schema is invalid
+        return {
+          schemaErrors,
+          validationErrors: new Map(),
+          fieldTypesByProcessor: new Map(),
+        };
+      }
+
+      const isWiredStream = Streams.WiredStream.Definition.is(context.definition.stream);
+
+      const validationResult = validateStreamlang(context.nextStreamlangDSL, {
+        reservedFields: [],
+        streamType: isWiredStream ? 'wired' : 'classic',
+      });
+
+      const errorsByStep = new Map<string, typeof validationResult.errors>();
+      validationResult.errors.forEach((error) => {
+        if (error.processorId) {
+          const existing = errorsByStep.get(error.processorId) || [];
+          errorsByStep.set(error.processorId, [...existing, error]);
+        }
+      });
+
+      return {
+        schemaErrors: [],
+        validationErrors: errorsByStep,
+        fieldTypesByProcessor: validationResult.fieldTypesByProcessor,
+      };
+    }),
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
       urlState: params.urlState,
     })),
     syncUrlState: getPlaceholderFor(createUrlSyncAction),
+    // Definition updates are handled outside of the machine, and sent in via an event.
     storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
-    /* Steps actions */
-    setupSteps: assign((assignArgs) => {
-      // Clean-up pre-existing steps
-      assignArgs.context.stepRefs.forEach(stopChild);
-      // Setup processors from the stream definition
-      const uiSteps = convertStepsForUI(assignArgs.context.definition.stream.ingest.processing);
-      const stepRefs = uiSteps.map((step) => {
-        return spawnStep(step, assignArgs);
+    // When the definition is refreshed (outside of the machine), this resets state back to match it.
+    resetStateFromDefinition: assign(({ context }) => {
+      const dslWithIdentifiers = addDeterministicCustomIdentifiers(
+        context.definition.stream.ingest.processing
+      );
+      return {
+        previousStreamlangDSL: dslWithIdentifiers,
+        nextStreamlangDSL: dslWithIdentifiers,
+        hasChanges: false,
+        schemaErrors: [],
+        validationErrors: new Map(),
+        fieldTypesByProcessor: new Map(),
+      };
+    }),
+    updateDSL: assign(({ context }, params: { dsl: StreamlangDSL }) => ({
+      nextStreamlangDSL: params.dsl,
+      hasChanges: hasChanges(params.dsl, context.previousStreamlangDSL),
+    })),
+    /* Mode machine spawning */
+    spawnInteractiveMode: assign(({ context, spawn, self }) => {
+      const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+      const activeDataSourceSnapshot = activeDataSourceRef?.getSnapshot();
+      const simulationMode = activeDataSourceSnapshot?.context.simulationMode ?? 'partial';
+
+      const additiveChanges = checkAdditiveChanges(
+        context.previousStreamlangDSL,
+        context.nextStreamlangDSL
+      );
+      return {
+        interactiveModeRef: spawn('interactiveModeMachine', {
+          id: 'interactiveMode',
+          input: {
+            dsl: context.nextStreamlangDSL,
+            parentRef: self,
+            privileges: context.definition.privileges,
+            newStepIds: additiveChanges.newStepIds ?? [],
+            simulationMode,
+            streamName: context.definition.stream.name,
+          },
+        }),
+        yamlModeRef: undefined, // Clear YAML mode ref when switching to interactive
+      };
+    }),
+    spawnYamlMode: assign(({ context, spawn, self }) => {
+      const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+      const activeDataSourceSnapshot = activeDataSourceRef?.getSnapshot();
+      const simulationMode = activeDataSourceSnapshot?.context.simulationMode ?? 'partial';
+
+      /**
+       * YAML mode does not yet support filtering by condition,
+       * so all state related to filtering should be reset prior to
+       * switching.
+       */
+      context.interactiveModeRef?.send({
+        type: 'step.clearConditionFilter',
+      });
+      context.simulatorRef.send({
+        type: 'simulation.clearConditionFilter',
       });
 
       return {
-        initialStepRefs: stepRefs,
-        stepRefs,
+        yamlModeRef: spawn('yamlModeMachine', {
+          id: 'yamlMode',
+          input: {
+            previousStreamlangDSL: addDeterministicCustomIdentifiers(context.previousStreamlangDSL),
+            nextStreamlangDSL: addDeterministicCustomIdentifiers(context.nextStreamlangDSL),
+            parentRef: self,
+            privileges: context.definition.privileges,
+            simulationMode,
+          },
+        }),
+        interactiveModeRef: undefined, // Clear interactive mode ref when switching to YAML
       };
     }),
-    addProcessor: assign(
-      (
-        assignArgs,
-        {
-          processor,
-          options,
-        }: {
-          processor?: StreamlangProcessorDefinition;
-          options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
-        }
-      ) => {
-        if (!processor) {
-          processor = getDefaultGrokProcessor({
-            sampleDocs: selectPreviewRecords(assignArgs.context.simulatorRef.getSnapshot().context),
-          });
-        }
-
-        const conversionOptions = options ?? { parentId: null };
-        const convertedProcessor = stepConverter.toUIDefinition(processor, conversionOptions);
-
-        const newProcessorRef = spawnStep(convertedProcessor, assignArgs, { isNew: true });
-        const insertIndex = findInsertIndex(
-          assignArgs.context.stepRefs,
-          conversionOptions.parentId
-        );
-
-        return {
-          stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
-        };
-      }
-    ),
-    duplicateProcessor: assign((assignArgs, params: { processorStepId: string }) => {
-      const targetStepUIDefinition = assignArgs.context.stepRefs
-        .map((stepRef) => stepRef.getSnapshot().context.step)
-        .find((stepDefinition) => {
-          return stepDefinition.customIdentifier === params.processorStepId;
-        });
-
-      if (!targetStepUIDefinition) {
-        return {};
-      }
-
-      const parentId = targetStepUIDefinition.parentId;
-      const newProcessorRef = spawnStep(
-        {
-          ...targetStepUIDefinition,
-          customIdentifier: createId(),
-        },
-        assignArgs,
-        {
-          isNew: true,
-        }
-      );
-      const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId);
-
-      return {
-        stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
-      };
-    }),
-    addCondition: assign(
-      (
-        assignArgs,
-        {
-          condition,
-          options,
-        }: {
-          condition?: StreamlangWhereBlock;
-          options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
-        }
-      ) => {
-        if (!condition) {
-          condition = {
-            where: {
-              ...ALWAYS_CONDITION,
-              steps: [],
-            },
-          };
-        }
-
-        const conversionOptions = options ?? { parentId: null };
-        const convertedCondition = stepConverter.toUIDefinition(condition, conversionOptions);
-
-        const newProcessorRef = spawnStep(convertedCondition, assignArgs, { isNew: true });
-        const insertIndex = findInsertIndex(
-          assignArgs.context.stepRefs,
-          conversionOptions.parentId
-        );
-
-        return {
-          stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
-        };
-      }
-    ),
-    deleteStep: assign(({ context }, params: { id: string }) => {
-      const idsToDelete = collectDescendantIds(params.id, context.stepRefs);
-      idsToDelete.add(params.id);
-      return {
-        stepRefs: context.stepRefs.filter((proc) => !idsToDelete.has(proc.id)),
-      };
-    }),
-    reorderSteps: assign(({ context }, params: { stepId: string; direction: 'up' | 'down' }) => {
-      return {
-        stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
-      };
-    }),
-    reassignSteps: assign(({ context }) => ({
-      stepRefs: [...context.stepRefs],
-    })),
+    stopInteractiveMode: stopChild('interactiveMode'),
+    stopYamlMode: stopChild('yamlMode'),
     /* Data sources actions */
     setupDataSources: assign((assignArgs) => ({
       dataSourcesRefs: assignArgs.context.urlState.dataSources.map((dataSource) =>
@@ -239,7 +216,9 @@ export const streamEnrichmentMachine = setup({
       const dataSourcesRefs = [newDataSourceRef, ...assignArgs.context.dataSourcesRefs];
       selectDataSource(dataSourcesRefs, newDataSourceRef.id);
 
-      return { dataSourcesRefs };
+      return {
+        dataSourcesRefs,
+      };
     }),
     deleteDataSource: assign(({ context }, params: { id: string }) => ({
       dataSourcesRefs: context.dataSourcesRefs.filter((proc) => proc.id !== params.id),
@@ -249,67 +228,88 @@ export const streamEnrichmentMachine = setup({
         dataSourceRef.send({ type: 'dataSource.refresh' })
       );
     },
-    /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
-    sendStepsEventToSimulator: enqueueActions(
-      ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
-        const simulationMode = getActiveSimulationMode(context);
-        const isPartialSimulation = simulationMode === 'partial';
-        /**
-         * When any processor is before persisted, we need to reset the simulator
-         * because the processors are not in a valid order.
-         * If the order allows it, notify the simulator to run the simulation based on the received event.
-         */
-        if (isPartialSimulation && selectWhetherAnyProcessorBeforePersisted(context)) {
-          enqueue('sendResetEventToSimulator');
-        } else {
-          enqueue.sendTo('simulator', {
-            type: params?.type ?? 'simulation.receive_steps',
-            steps: getStepsForSimulation({ stepRefs: context.stepRefs, isPartialSimulation }),
-          });
-        }
-      }
-    ),
+    notifyActiveDataSourceChange: ({ context }) => {
+      const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+      const activeDataSourceSnapshot = activeDataSourceRef?.getSnapshot();
+      const simulationMode = activeDataSourceSnapshot?.context.simulationMode ?? 'partial';
+
+      context.interactiveModeRef?.send({
+        type: 'dataSource.activeChanged',
+        simulationMode,
+      });
+      context.yamlModeRef?.send({
+        type: 'dataSource.activeChanged',
+        simulationMode,
+      });
+    },
     sendDataSourcesSamplesToSimulator: sendTo('simulator', ({ context }) => ({
       type: 'simulation.receive_samples',
       samples: getActiveDataSourceSamples(context),
     })),
+
+    sendResetToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
+
+    filterByCondition: ({ context }, params: { conditionId: string }) => {
+      context.interactiveModeRef?.send({
+        type: 'step.filterByCondition',
+        conditionId: params.conditionId,
+      });
+      context.simulatorRef.send({
+        type: 'simulation.filterByCondition',
+        conditionId: params.conditionId,
+      });
+    },
+    clearConditionFilter: ({ context }) => {
+      context.interactiveModeRef?.send({
+        type: 'step.clearConditionFilter',
+      });
+      context.simulatorRef.send({
+        type: 'simulation.clearConditionFilter',
+      });
+    },
   },
   guards: {
-    hasStagedChanges: ({ context }) => {
-      const { initialStepRefs, stepRefs } = context;
-      return (
-        // Deleted steps
-        initialStepRefs.length !== stepRefs.length ||
-        // New/updated processors
-        stepRefs.some((processorRef) => {
-          const state = processorRef.getSnapshot();
-          return state.matches('configured') && state.context.isUpdated;
-        }) ||
-        // Step order changed
-        stepRefs.some((stepRef, pos) => initialStepRefs[pos]?.id !== stepRef.id)
-      );
-    },
+    /* Staged changes are determined by comparing previous and next DSL */
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
-    canUpdateStream: and(['hasStagedChanges', stateIn('#managingProcessors.idle')]),
-    isStagedStep: ({ context }, params: { id: string }) => {
-      const stepRef = context.stepRefs.find((p) => p.id === params.id);
+    canUpdateStream: ({ context }) => {
+      const hasSchemaErrors = context.schemaErrors.length > 0;
+      const hasValidationErrors = context.validationErrors.size > 0;
+      const hasDslChanges = hasChanges(context.nextStreamlangDSL, context.previousStreamlangDSL);
 
-      if (!stepRef) return false;
-      return stepRef.getSnapshot().context.isNew;
+      return !hasSchemaErrors && !hasValidationErrors && hasDslChanges;
     },
+    canSwitchToInteractiveMode: ({ context }) => {
+      // Can't switch to interactive mode if there are schema errors
+      if (context.schemaErrors.length > 0) {
+        return false;
+      }
+      // Valid DSL, but can it actually be represented in the UI?
+      const modeCompatibility = validateStreamlangModeCompatibility(context.nextStreamlangDSL);
+      return modeCompatibility.canBeRepresentedInInteractiveMode;
+    },
+    hasNoValidationErrors: ({ context }) => context.validationErrors.size === 0,
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qkOPIGIBtABgC6iUAAcA9rFoYxKYSAAeiALQB2AIwAWChoAcAZgBMavgY16ArGsMAaEAE9lxgGx8KKlUYCcV85afmNAF9A21RMXA5SSmopRhY2SO4eNSEkEHFJOhk5RQQlJ08nCgNzJyc9FT4+Qo01J1sHPM9PVz01FrUdDQ6XT2DQ9Gx8IiiqGjo41hQoADE0MTIAVTQGLgBXFbHYpmZIflTRCSlstNz8zx0KT18dcza+Sz1yhuUdPkun9Qs+NRLPAz0-XAgwiI3IFFgYAIaxEAHF5gBrADCYgYDDAWCyKC4EBkYDGADcxAj8ZDoXDESi0Risfs5BljrJTsoNFUKDoVHo+Hpak9fHcXnknN0KMY1KUdMYSuZPCogWEholKGSYfDiVT0ZjpNiwGh5mgKCIGCQCAAzMRoZVQ1WU1Ga2mCelHLE5FmeCh8YW1Xx6bwtPQ6QWqSraKyeMwlPgqTxPeUg4acSicCB2LiwMFJjFgDAEvaOtIMl1pRpKO4GbTNDQGcPCyztWy5MNFHnGPRtcUXIIhYHhBOjZN2CEZqgQdFp4fEMl0gvO7WuhBlNSipwcwwqJwGFTmAyB+yINTGcxuC7VTfmHSSjRdga9pUUAdDxMjsfpp8wiAmsDTw6ZOfMvJVkeuilH6ZhOL8grGNcFDlC0fDei4F5xreE6kCmj6jO+JpsDieKEsS+IwpCaAEEqACCmIWt+6SzicoBnIU2hXlWpicmo7gWJBnquCuMoaAUVQxt4yGKqhJDoa+mEiB+dDTFwur6oaxpmhalBEbqpEZhRBBUfmP6MvOmhHhY1ZtEYUYqKuXEqFodQGDubSsg8nQiaCT4PgquBkKgBDrJssB2CgWDUYWf70YgARFJWdRch4mhdIKhgep0K46Bc24yu4rl9uCHnxt5KC+TJJB4GIGxYPiuAkNMX56TRv50QoEUAsU4bXMKnrtNGQZWK4VgGOBhR-Nc2V3nlvYFUVJolWVaAVRQxVIjg1UwCFtFMuFCAaFuVw6KYwqdIUMqaEGXJaEYPI2RdMorqNYnoZ5OCTQtGCwEaJB2AkGBkGsynalwIjzBVsCwBasAUOJEBrQ1G1NXkFR6KKXgcrU+i9PUe7w2YbgPACUZcuY8Fyt2j1jWhg6Pc9ECve9n3THg32-dhMgA0DcCg2g4PEBaEC6tDBn-qWS7mOoGgBDy3Q6INp3Y5U26xQTRN3e55MUJTPkvW9xp0+wjN-SzgNiMDHMUFVNX80Wm3nOWdS+PFNnqNcMuI3LeOcg8Ssk-GZPiRT+Ua9TWsfV9P369ihvGxaEIkLmFthXDSj-CorUxeu-rsWozs4-L+Me9t5jK-2qvq4Vmu0yHTNYmmevMyg95gKak44HHjWNvoMHrr6tzruB3K7iWnQ2+47ybntvxlE4he5cX-ul4H5f0zXWIUASGBgAA7gAItNAAKxCrxv1eh7XK9r1vUI0pAMxrwwECwC3sNnMKiOdOeNmHvZBiCiu2jqBx-jpQeFPTMvs1azwIGXbWFcw6nw3tvAgJA95gAPuvI+ldtSm2WjVJBKDN5G1gNfBgBA+Z1VCq3ZQ-wjyFAeP8bo7g0qnSApKHkbwbi6GvD2USKtQElwgfPKBi9j7L1wbvfeZ9WbILPlSNYZAUDgwAFQP3nKWC4FAAjeHKNyboXIv6Y0Tpca4xgPDnisBeAawD648PAZA4Ogj0EyFgefYhmIr43zvmgmBIiEE4LPkowWwpLguAMD8X4XQ2zrkgk8Nwmh1CSgsiLHkFjxpDCpjTARushEYNwRfFxEBr5gFvrADxJ9TRuIUX4q20Z2SclMFUUofJZSCjFhWbcITDAo09EkmeE0NZkGqiQKAbB4EzXKnAU2DAJCQBxNNUqozwZiBEKgAAsv0mAk0KkJ1oaKK6f8PDlE5E0pKlQWgchFlGH4fQvYoW4Q9axfSUADKGTM2awMKALNQNMhBsy5pjKwBMyEKyHlrJ8hsp+RyLzuFlL6QoG5DnlmOe8LclRKjtC6VYnppd7mPOmMM75rz3nYmKnisZkNQWvA3FcXi4EAxlAloKUoUU2JOEsrUcMaLbkYogViwZOLnlzLeYswlfKfkLQKRfMlQpPQwXDE8KsB4oUaHpeUdkV51znhlFUXQ7K-acooNytge8jbszBs+MArMjUgxNaS0h61lHigPMUbcll1w2VuDGHqMEdwmFqNKEe4EC5XK4UXdFKTemrINWzS1nNTXmsjtG7maBeZoAlUoe1S4SijxdcBd1eiRQbjeKYX4vg-XarAbq-V0xDVxvBlgTgskoCxuNQaWAMdaoHHqgLK28UlzlFKFUdi2a9CRK0CYPaJQUbdDqDoUtvC9XhsrZGjmNa604Qjk2021UKoMBTd2mCFgXA-FdTKIdmNTDlhcL2xFV4NHTsDW5YNHLQ2YvnVAKtTbl2kHrY2qNatqYEB3boHt+7+1HpzY0AmopPTfAnd4YmN4g3TxDV5MNQKI0WqXabFdck10-rNqtG1MM7WAb3X2w9g7ErMpglBwmMH2IzruS+t9UbwaQCkNhxdVqIBQwI52hOmhvAeghSUAdbqT2NG2kUToqq37Xro3enKIDH3Iefahhd6GTWsa-Thk2vN0TEIAwJ94HJhOgbE4gcCS4uhRnHTZSdcHOH3sQ0pp6KHsWvo49GzTq6PPR1jjxy2fHJ2CeM5YUzQZZSeoLT64te1J7yZ9s556Fb3Pqc83+7zqWN1BQKQZpcRnjEiePT1Zp+bvVFpo+YoEKAxC83gGkUmGYnSEcFp0KWbgnUcmZeRvRB5LBuDintKMaU-gWJiBMHYCRGszma1bC47oLD8W+N6AtPUoMensnUaMpROTnlG+MegE3phzAWMsBgTXeNnHUEUASAI0otEA54cLphtB3DbNucU9lowWJVBSdUdoaTxzIY-Fk7cxYHl+L12UF5FV6K26GVkA1mXj0SfF4cUBbTUi1DIGYJAMAMA2GAc7AXcgAi0NuDknIkXin4uYIM7glzeF9NGOyplLnwcc4pxo+lieOH0JcLcmauuiaDMdbOphVyyjKBwhrNzBySXIET+OZxtqI2AgUdoYEIKYxaEedoB49q+BsrKezMuH1y+HBgUchPpsXccGUDuNSzHsV8CUQUzRz3eH4n8AaZhASo9lxhcEWF62K-IXkdo5YzCtfKMyionpaeY1+PZHGLr-CfYKLe9nCnLGJZ8qH4H4foyuAF86oXRXc1tGKLjJ4bQCiVE6f7s3Zan18LSbYjJ9jYZA+UVCylNDTDG4YXogEqu6zcmaIJBb9HdX8PbwzTJDivGILERvfPyipbJ1ZB0SyLg1xmYXJcba7FOQANuEAxvTmdUt5sTrefnfHGbxycQvJZS1+C1r8lA8tL+KdAeN-Q-uyDSZ+m40+1+yWuKLycAb+s2Hg2yVYuyA0CMgoiOFAXIlYJQlk541YoBymXKL6EB-KfykyEA0BCcK4yc-gC21YF4aMmcmMFgiMbw7uXg3qe00u3s90V+uBc6qmUABBPy8ygqpBT8kobgbBJilQ5QAI9K3IxQD23I4u8qcWWeCWXBLmKmbmTGS6whjgV07WguYWw+bYSMbw3IlO7ETwbODm2eyS3ByWWhJqlu6IOh4eBQWgJenWhhA8kWZWvqsW4oOB6heBvBDh0atan6bALhqabh+hpeXh+4SUHI7QBQrSG46ggRSWjGHmLG6W0wURdQ4YsRnh3WjQA0ycFQyRtezKG4AaKhqEoMDAuYEAAASmIGIJpImFEV3OyFYB2DHm0G0KtsKMUHFAED6ANFLMEMEEAA */
   id: 'enrichStream',
   context: ({ input, spawn }) => ({
     definition: input.definition,
+    previousStreamlangDSL: addDeterministicCustomIdentifiers(
+      input.definition.stream.ingest.processing
+    ),
+    nextStreamlangDSL: addDeterministicCustomIdentifiers(input.definition.stream.ingest.processing),
+    hasChanges: false,
+    schemaErrors: [], // Schema errors from Zod parsing
     dataSourcesRefs: [],
     grokCollection: new GrokCollection(),
-    initialStepRefs: [],
-    stepRefs: [],
+    interactiveModeRef: undefined, // Will be spawned when in interactive mode
+    yamlModeRef: undefined, // Will be spawned when in YAML mode
     urlState: defaultEnrichmentUrlState,
+    validationErrors: new Map(),
+    fieldTypesByProcessor: new Map(),
+    suggestedPipeline: undefined,
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
       input: {
@@ -351,9 +351,10 @@ export const streamEnrichmentMachine = setup({
       id: 'ready',
       type: 'parallel',
       entry: [
-        { type: 'setupSteps' },
+        { type: 'resetStateFromDefinition' },
+        { type: 'computeValidation' },
         { type: 'setupDataSources' },
-        { type: 'sendStepsEventToSimulator' },
+        { type: 'notifyActiveDataSourceChange' },
       ],
       on: {
         'stream.received': {
@@ -372,7 +373,7 @@ export const streamEnrichmentMachine = setup({
             idle: {
               on: {
                 'stream.reset': {
-                  guard: 'hasStagedChanges',
+                  guard: 'canUpdateStream',
                   target: '#ready',
                   actions: [{ type: 'sendResetEventToSimulator' }],
                   reenter: true,
@@ -390,8 +391,10 @@ export const streamEnrichmentMachine = setup({
                 src: 'upsertStream',
                 input: ({ context }) => ({
                   definition: context.definition,
-                  steps: getConfiguredSteps(context),
+                  streamlangDSL: context.nextStreamlangDSL,
                   fields: getUpsertFields(context),
+                  configurationMode:
+                    context.interactiveModeRef !== undefined ? 'interactive' : 'yaml',
                 }),
                 onDone: {
                   target: 'idle',
@@ -426,12 +429,13 @@ export const streamEnrichmentMachine = setup({
             'dataSources.select': {
               actions: [
                 ({ context, event }) => selectDataSource(context.dataSourcesRefs, event.id),
-                { type: 'sendStepsEventToSimulator' },
+                { type: 'notifyActiveDataSourceChange' },
               ],
             },
             'dataSource.change': {
               actions: [
                 cancel('sync-on-change'),
+                { type: 'notifyActiveDataSourceChange' },
                 raise({ type: 'url.sync' }, { id: 'sync-on-change', delay: 300 }),
               ],
             },
@@ -483,14 +487,15 @@ export const streamEnrichmentMachine = setup({
                     'dataSources.add': {
                       actions: [
                         { type: 'addDataSource', params: ({ event }) => event },
+                        { type: 'notifyActiveDataSourceChange' },
                         raise({ type: 'url.sync' }),
-                        { type: 'sendStepsEventToSimulator' },
                       ],
                     },
                     'dataSource.delete': {
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteDataSource', params: ({ event }) => event },
+                        { type: 'notifyActiveDataSourceChange' },
                         raise({ type: 'url.sync' }),
                       ],
                     },
@@ -500,98 +505,88 @@ export const streamEnrichmentMachine = setup({
             },
             managingProcessors: {
               id: 'managingProcessors',
-              initial: 'idle',
+              initial: 'evaluatingMode',
               states: {
-                idle: {
-                  entry: [{ type: 'sendStepsEventToSimulator' }],
+                evaluatingMode: {
+                  always: [
+                    {
+                      guard: ({ context }) =>
+                        context.yamlModeRef !== undefined ||
+                        !validateStreamlangModeCompatibility(context.nextStreamlangDSL)
+                          .canBeRepresentedInInteractiveMode,
+                      target: 'yaml',
+                    },
+                    {
+                      target: 'interactive',
+                    },
+                  ],
+                },
+                interactive: {
+                  entry: ['spawnInteractiveMode'],
+                  exit: 'stopInteractiveMode',
                   on: {
-                    'step.edit': {
-                      guard: 'hasSimulatePrivileges',
-                      target: 'editing',
+                    'mode.switchToYAML': {
+                      target: 'yaml',
                     },
-                    'step.reorder': {
-                      guard: 'hasSimulatePrivileges',
-                      actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
-                      target: 'idle',
-                      reenter: true,
-                    },
-                    'step.delete': {
-                      target: 'idle',
-                      guard: 'hasManagePrivileges',
+                    'mode.dslUpdated': {
                       actions: [
-                        stopChild(({ event }) => event.id),
-                        { type: 'deleteStep', params: ({ event }) => event },
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                        { type: 'updateDSL', params: ({ event }) => ({ dsl: event.dsl }) },
+                        { type: 'computeValidation' },
                       ],
                     },
-                    'step.duplicateProcessor': {
-                      target: 'creating',
-                      guard: 'hasManagePrivileges',
+                    'simulation.reset': {
+                      actions: 'sendResetToSimulator',
+                    },
+                    'simulation.updateSteps': {
+                      actions: forwardTo('simulator'),
+                    },
+                    'simulation.filterByCondition': {
                       actions: [
                         {
-                          type: 'duplicateProcessor',
-                          params: ({ event }) => event,
+                          type: 'filterByCondition',
+                          params: ({ event }) => ({ conditionId: event.conditionId }),
                         },
-                        { type: 'sendStepsEventToSimulator' },
                       ],
                     },
-                    'step.addProcessor': {
-                      guard: 'hasSimulatePrivileges',
-                      target: 'creating',
-                      actions: [{ type: 'addProcessor', params: ({ event }) => event }],
+                    'simulation.clearConditionFilter': {
+                      actions: [
+                        {
+                          type: 'clearConditionFilter',
+                        },
+                      ],
                     },
-                    'step.addCondition': {
-                      guard: 'hasSimulatePrivileges',
-                      target: 'creating',
-                      actions: [{ type: 'addCondition', params: ({ event }) => event }],
+                    // Forward other step events to interactive mode machine
+                    'step.*': {
+                      actions: forwardTo('interactiveMode'),
+                    },
+                    'suggestion.*': {
+                      actions: forwardTo('interactiveMode'),
                     },
                   },
                 },
-                creating: {
-                  id: 'creatingStep',
-                  entry: [{ type: 'sendStepsEventToSimulator' }],
+                yaml: {
+                  entry: ['spawnYamlMode'],
+                  exit: 'stopYamlMode',
                   on: {
-                    'step.change': {
+                    'mode.switchToInteractive': {
+                      guard: 'canSwitchToInteractiveMode',
+                      target: 'interactive',
+                    },
+                    'mode.dslUpdated': {
                       actions: [
-                        { type: 'reassignSteps' },
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                        { type: 'updateDSL', params: ({ event }) => ({ dsl: event.dsl }) },
+                        { type: 'computeValidation' },
                       ],
                     },
-                    'step.delete': {
-                      target: 'idle',
-                      guard: 'hasManagePrivileges',
-                      actions: [
-                        stopChild(({ event }) => event.id),
-                        { type: 'deleteStep', params: ({ event }) => event },
-                      ],
+                    'simulation.reset': {
+                      actions: 'sendResetToSimulator',
                     },
-                    'step.save': {
-                      target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
+                    'simulation.updateSteps': {
+                      actions: forwardTo('simulator'),
                     },
-                  },
-                },
-                editing: {
-                  id: 'editingStep',
-                  entry: [{ type: 'sendStepsEventToSimulator' }],
-                  on: {
-                    'step.change': {
-                      actions: [
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
-                      ],
-                    },
-                    'step.cancel': 'idle',
-                    'step.delete': {
-                      target: 'idle',
-                      guard: 'hasManagePrivileges',
-                      actions: [
-                        stopChild(({ event }) => event.id),
-                        { type: 'deleteStep', params: ({ event }) => event },
-                      ],
-                    },
-                    'step.save': {
-                      target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
+                    // Forward yaml events to YAML mode machine
+                    'yaml.*': {
+                      actions: forwardTo('yamlMode'),
                     },
                   },
                 },
@@ -618,9 +613,21 @@ export const createStreamEnrichmentMachineImplementations = ({
     initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient, telemetryClient }),
     setupGrokCollection: setupGrokCollectionActor(),
-    stepMachine,
+    interactiveModeMachine: interactiveModeMachine.provide(
+      createInteractiveModeMachineImplementations({
+        toasts: core.notifications.toasts,
+        telemetryClient,
+        streamsRepositoryClient,
+        notifications: core.notifications,
+      })
+    ),
+    yamlModeMachine,
     dataSourceMachine: dataSourceMachine.provide(
-      createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })
+      createDataSourceMachineImplementations({
+        data,
+        toasts: core.notifications.toasts,
+        telemetryClient,
+      })
     ),
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
@@ -641,3 +648,18 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
   },
 });
+
+const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: StreamlangDSL) => {
+  const isValidSchema = isStreamlangDSLSchema(nextStreamlangDSL);
+
+  // Previous DSL is always a valid schema since it comes from a saved definition
+  // We don't want to try and strip identifiers etc on potentially partial schemas
+  if (!isValidSchema) {
+    return true;
+  } else {
+    return (
+      JSON.stringify(sanitiseForEditing(nextStreamlangDSL)) !==
+      JSON.stringify(sanitiseForEditing(previousStreamlangDSL))
+    );
+  }
+};

@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import type { LogsRepository } from '../repositories/logs_repository';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -23,14 +17,7 @@ export async function resumeWorkflow({
   workflowRunId,
   spaceId,
   taskAbortController,
-  workflowExecutionRepository,
-  stepExecutionRepository,
-  logsRepository,
   dependencies,
-  coreStart,
-  esClient,
-  actions,
-  taskManager,
   logger,
   config,
   fakeRequest,
@@ -38,13 +25,6 @@ export async function resumeWorkflow({
   workflowRunId: string;
   spaceId: string;
   taskAbortController: AbortController;
-  coreStart: CoreStart;
-  esClient: Client;
-  workflowExecutionRepository: WorkflowExecutionRepository;
-  stepExecutionRepository: StepExecutionRepository;
-  logsRepository: LogsRepository;
-  actions: ActionsPluginStartContract;
-  taskManager: WorkflowsExecutionEnginePluginStartDeps['taskManager'];
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
@@ -57,24 +37,11 @@ export async function resumeWorkflow({
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
-    clientToUse,
-    fakeRequest: fakeRequestFromContainer,
-    coreStart: coreStartFromContainer,
-  } = await setupDependencies(
-    workflowRunId,
-    spaceId,
-    actions,
-    taskManager,
     esClient,
-    logger,
-    config,
+    workflowTaskManager,
     workflowExecutionRepository,
-    stepExecutionRepository,
-    logsRepository,
-    coreStart,
-    dependencies,
-    fakeRequest // Provided by Task Manager's first-class API key support
-  );
+  } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
+
   await workflowRuntime.resume();
 
   await workflowExecutionLoop({
@@ -85,9 +52,10 @@ export async function resumeWorkflow({
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
-    esClient: clientToUse,
-    fakeRequest: fakeRequestFromContainer,
-    coreStart: coreStartFromContainer,
+    esClient,
+    fakeRequest,
+    coreStart: dependencies.coreStart,
     taskAbortController,
+    workflowTaskManager,
   });
 }

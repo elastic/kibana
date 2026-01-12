@@ -41,19 +41,22 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
 export type {
-  DashboardCreateRequestBody,
-  DashboardCreateResponseBody,
-  DashboardSearchRequestBody,
-  DashboardSearchResponseBody,
-} from './api';
-export type {
   DashboardState,
+  DashboardControlsState,
   DashboardPanel,
   DashboardSection,
   DashboardFilter,
+  DashboardOptions,
   DashboardQuery,
-} from './content_management';
+  DashboardCreateRequestBody,
+  DashboardCreateResponseBody,
+  DashboardReadResponseBody,
+  DashboardSearchRequestBody,
+  DashboardSearchResponseBody,
+  DashboardUpdateResponseBody,
+  GridData,
+} from './api';
 export type { DashboardSavedObjectAttributes, SavedDashboardPanel } from './dashboard_saved_object';
 export type { ScanDashboardsResult } from './scan_dashboards';
 
-export { PUBLIC_API_PATH } from './api/constants';
+export { DASHBOARD_API_PATH } from '../common/constants';

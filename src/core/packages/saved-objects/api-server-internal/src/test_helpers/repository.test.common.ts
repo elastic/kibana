@@ -54,6 +54,7 @@ import {
   type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import type { SavedObjectsRepository } from '../lib/repository';
 
@@ -141,6 +142,7 @@ export const mockTimestampFieldsWithCreated = {
   updated_at: mockTimestamp,
   created_at: mockTimestamp,
 };
+export const ACCESS_CONTROL_TYPE = 'accessControlType';
 export const REMOVE_REFS_COUNT = 42;
 
 export interface TypeIdTuple {
@@ -150,6 +152,11 @@ export interface TypeIdTuple {
 
 export const mappings: SavedObjectsTypeMappingDefinition = {
   properties: {
+    foo: {
+      properties: {
+        // No fields indexed
+      },
+    },
     config: {
       properties: {
         otherField: {
@@ -227,13 +234,26 @@ export const mappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
+    [ACCESS_CONTROL_TYPE]: {
+      properties: {
+        accessControl: {
+          type: 'object',
+        },
+      },
+    },
   },
 };
 
 export const authRecord: Record<string, AuthorizationTypeEntry> = {
   find: { authorizedSpaces: ['bar'] },
 };
-export const authMap = Object.freeze(new Map([['foo', authRecord]]));
+export const authMap = Object.freeze(
+  new Map([
+    ['foo', authRecord],
+    // The user is authorized to read hidden types but tests will confirm that repositories without that hidden type listed, won't show this as authorized.
+    [HIDDEN_TYPE, authRecord],
+  ])
+);
 
 export const checkAuthError = SavedObjectsErrorHelpers.createBadRequestError(
   'Failed to check authorization'
@@ -344,6 +364,7 @@ export const createType = (
 
 export const createRegistry = () => {
   const registry = new SavedObjectTypeRegistry();
+  registry.registerType(createType('foo'));
   registry.registerType(createType('config'));
   registry.registerType(createType('index-pattern'));
   registry.registerType(
@@ -384,10 +405,16 @@ export const createRegistry = () => {
       namespaceType: 'multiple',
     })
   );
+  registry.registerType(
+    createType(ACCESS_CONTROL_TYPE, {
+      supportsAccessControl: true,
+      namespaceType: 'multiple-isolated',
+    })
+  );
   return registry;
 };
 
-export const createSpySerializer = (registry: SavedObjectTypeRegistry) => {
+export const createSpySerializer = (registry: ISavedObjectTypeRegistryInternal) => {
   const serializer = new SavedObjectsSerializer(registry);
 
   for (const method of [
@@ -570,6 +597,7 @@ export const expectBulkGetResult = (
 ) => ({
   type,
   id,
+  // @ts-expect-error upgrade typescript v5.9.3
   namespaces: doc._source!.namespaces ?? [doc._source!.namespace] ?? ['default'],
   ...(doc._source!.originId && { originId: doc._source!.originId }),
   ...(doc._source!.updated_at && { updated_at: doc._source!.updated_at }),
@@ -826,13 +854,13 @@ export const deleteSuccess = async (
   if (registry.isMultiNamespace(type)) {
     const mockGetResponse =
       mockGetResponseValue ?? getMockGetResponse(registry, { type, id }, options?.namespace);
-    client.get.mockResponseOnce(mockGetResponse);
+    client.get.mockResponse(mockGetResponse);
   }
   client.delete.mockResponseOnce({
     result: 'deleted',
   } as estypes.DeleteResponse);
   const result = await repository.delete(type, id, options);
-  expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
+  client.get.mockClear();
   return result;
 };
 

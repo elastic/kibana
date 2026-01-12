@@ -15,7 +15,6 @@ interface Props {
     nodeId: string;
     nodeName: string;
     available: string;
-    lowDiskWatermarkSetting: string;
   }>;
 }
 export const NodesLowSpaceCallOut: React.FunctionComponent<Props> = ({ nodes }) => {

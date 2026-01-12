@@ -51,6 +51,7 @@ export const interceptFindBackfills = () => {
           start: '2024-05-21T13:00:00.000Z',
           status: 'pending',
           created_at: '2024-05-27T15:19:43.543Z',
+          initiator: 'user',
           space_id: 'default',
           schedule: [
             {
@@ -79,6 +80,7 @@ export const interceptFindBackfills = () => {
           id: 'c51259fb-7c55-4210-8137-b50f0c0dbff6',
           duration: '5h',
           enabled: true,
+          initiator: 'user',
           end: '2024-05-22T14:05:00.000Z',
           start: '2024-05-21T13:00:00.000Z',
           status: 'running',

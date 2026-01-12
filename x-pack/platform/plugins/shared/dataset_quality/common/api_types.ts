@@ -265,6 +265,7 @@ export const dataStreamDetailsRt = rt.partial({
   userPrivileges: userPrivilegesRt,
   defaultRetentionPeriod: rt.string,
   customRetentionPeriod: rt.string,
+  isServerless: rt.boolean,
 });
 
 export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;

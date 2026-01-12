@@ -14,7 +14,7 @@ import { DocCallouts } from './doc_callouts';
 export const DiveDeeperWithElasticsearch: React.FC = () => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   return (
-    <EuiFlexGroup direction={currentBreakpoint === 'xl' ? 'row' : 'column'}>
+    <EuiFlexGroup direction={currentBreakpoint === 'xl' ? 'row' : 'column'} gutterSize="xl">
       <EuiFlexItem data-test-subj="searchLabsSection">
         <DocCallouts
           title={i18n.translate('xpack.searchHomepage.searchLabs.title', {

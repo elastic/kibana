@@ -12,6 +12,7 @@ import {
   LanguageDocumentationPopoverContent,
 } from '@kbn/language-documentation';
 import { css } from '@emotion/react';
+import { css as cssClassName } from '@emotion/css';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
@@ -158,7 +159,11 @@ export function FormulaEditor({
     const node1 = (overflowDiv1.current = document.createElement('div'));
     node1.setAttribute('data-test-subj', 'lnsFormulaWidget');
     // Monaco CSS is targeted on the monaco-editor class
-    node1.classList.add('lnsFormulaOverflow', 'monaco-editor');
+    node1.classList.add(
+      'lnsFormulaOverflow',
+      'monaco-editor',
+      cssClassName(sharedEditorStyles.overflowWidget(euiThemeContext))
+    );
     document.body.appendChild(node1);
   }
 
@@ -983,11 +988,6 @@ const sharedEditorStyles = {
         }
       }
 
-      .lnsFormulaOverflow {
-        // Needs to be higher than the modal and all flyouts
-        z-index: ${euiTheme.levels.toast} + 1;
-      }
-
       .lnsFormula__editorContent {
         background-color: ${euiTheme.colors.backgroundBasePlain};
         min-height: 0;
@@ -995,6 +995,10 @@ const sharedEditorStyles = {
       }
     `;
   },
+  overflowWidget: ({ euiTheme }: UseEuiTheme) => `
+    // Needs to be higher than the modal and all flyouts
+    z-index: ${Number(euiTheme.levels.toast) + 1};
+  `,
   formulaDocs: ({ euiTheme }: UseEuiTheme) => css`
     display: flex;
     flex-direction: column;

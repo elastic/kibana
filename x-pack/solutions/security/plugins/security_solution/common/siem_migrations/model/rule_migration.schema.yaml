@@ -60,6 +60,11 @@ components:
         severity:
           type: string
           description: The original rule's severity or some representation of it.
+        threat:
+          type: array
+          description: The MITRE ATT&CK threat information for this rule.
+          items:
+            $ref: '../../api/detection_engine/model/rule_schema/common_attributes.schema.yaml#/components/schemas/Threat'
 
     ElasticRule:
       type: object
@@ -100,6 +105,11 @@ components:
         id:
           description: The Elastic rule id installed as a result.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        threat:
+          type: array
+          description: The MITRE ATT&CK threat information for this rule.
+          items:
+            $ref: '../../api/detection_engine/model/rule_schema/common_attributes.schema.yaml#/components/schemas/Threat'
 
     ElasticRulePartial:
       description: The partial version of the migrated elastic rule.

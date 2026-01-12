@@ -63,7 +63,7 @@ function createRawEventLoopDelaysDailyDocs() {
     createRawObject(moment()),
     createRawObject(moment()),
     createRawObject(moment().subtract(1, 'days')),
-    createRawObject(moment().subtract(2.5, 'days')), // could be considered 4 days if we use 3 and the check is performed the following hour
+    createRawObject(moment().subtract(2, 'days')),
   ];
 
   const outdatedRawEventLoopDelaysDaily = [
@@ -111,8 +111,8 @@ describe.skip(`daily rollups integration test`, () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('deletes documents older that 3 days from the saved objects repository', async () => {

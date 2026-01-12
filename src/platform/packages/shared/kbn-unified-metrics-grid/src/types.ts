@@ -7,8 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
-
-export interface MetricsExperienceService {
-  client: MetricsExperienceClient;
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
+interface ChartSectionActions {
+  openInNewTab?: (params: {
+    query?: Query | AggregateQuery;
+    tabLabel?: string;
+    timeRange?: TimeRange;
+  }) => void;
+  updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 }
+
+export interface UnifiedMetricsGridProps extends ChartSectionProps {
+  actions: ChartSectionActions;
+}
+
+export interface Dimension {
+  name: string;
+  type: ES_FIELD_TYPES;
+}
+
+export interface MetricField {
+  name: string;
+  index: string;
+  type: string;
+  instrument?: MappingTimeSeriesMetricType;
+  unit?: MetricUnit;
+  dimensions: Dimension[];
+}
+
+export type MetricUnit =
+  | 'ns'
+  | 'us'
+  | 'ms'
+  | 's'
+  | 'm'
+  | 'h'
+  | 'd'
+  | 'percent'
+  | 'bytes'
+  | 'count'
+  | `{${string}}`; // otel special units of count

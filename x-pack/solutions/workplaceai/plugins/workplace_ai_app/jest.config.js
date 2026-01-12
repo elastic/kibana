@@ -6,8 +6,13 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/workplaceai/plugins/workplace_ai_app'],
-  testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/workplaceai/plugins/workplace_ai_app',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/solutions/workplaceai/plugins/workplace_ai_app/{public,server}/**/*.{ts,tsx}',
+  ],
 };

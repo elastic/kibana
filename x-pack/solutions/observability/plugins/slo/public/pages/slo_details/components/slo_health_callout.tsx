@@ -5,39 +5,32 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
+import { i18n } from '@kbn/i18n';
 import kbnRison from '@kbn/rison';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '../../../hooks/use_kibana';
+import React from 'react';
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
-import { useActionModal } from '../../../context/action_modal';
-import { getSloHealthStateText } from '../../../lib/slo_health_helpers';
-import { getSLOTransformId, getSLOSummaryTransformId } from '../../../../common/constants';
-import { ContentWithResetCta } from './health_callout/content_with_reset_cta';
+import { useKibana } from '../../../hooks/use_kibana';
+import { usePermissions } from '../../../hooks/use_permissions';
+import { useRepairSlo } from '../../../hooks/use_repair_slo';
 import { ContentWithInspectCta } from './health_callout/content_with_inspect_cta';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
-  const { isLoading, isError, data: resultData } = useFetchSloHealth({ list: [slo] });
-  const { data } = resultData ?? {};
+  const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
 
   const {
     share: {
       url: { locators },
     },
   } = useKibana().services;
-  const { triggerAction } = useActionModal();
 
-  const handleReset = () => {
-    triggerAction({
-      type: 'reset',
-      item: slo,
-    });
-  };
+  const { data: permissions } = usePermissions();
+  const { mutate: repairSlo } = useRepairSlo({ id: slo.id, name: slo.name });
 
+  const health = data?.[0]?.health;
   const managementLocator = locators.get(MANAGEMENT_APP_LOCATOR);
 
   const getUrl = (transformId: string) => {
@@ -52,102 +45,105 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
       }) || ''
     );
   };
+  if (!health) return null;
 
-  const rollupTransformId = useMemo(
-    () => getSLOTransformId(slo.id, slo.revision),
-    [slo.id, slo.revision]
-  );
+  const links: Array<{
+    transformId: string;
+    transformName: string;
+    status: string;
+    url: string;
+  }> = [];
 
-  const summaryTransformId = useMemo(
-    () => getSLOSummaryTransformId(slo.id, slo.revision),
-    [slo.id, slo.revision]
-  );
+  // Add rollup transform inspect link if unhealthy (not missing)
+  if (health.rollup?.status === 'unhealthy') {
+    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+    links.push({
+      transformId: rollupTransformId,
+      transformName: rollupTransformId,
+      status: health.rollup.status,
+      url: getUrl(rollupTransformId),
+    });
+  }
 
-  const rollupUrl = getUrl(rollupTransformId);
-  const summaryUrl = getUrl(summaryTransformId);
+  // Add summary transform inspect link if unhealthy (not missing)
+  if (health.summary?.status === 'unhealthy') {
+    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+    links.push({
+      transformId: summaryTransformId,
+      transformName: summaryTransformId,
+      status: health.summary.status,
+      url: getUrl(summaryTransformId),
+    });
+  }
 
   if (isLoading || isError || data === undefined || data?.length !== 1) {
     return null;
   }
 
-  const health = data[0].health;
-  if (health.overall === 'healthy') {
+  if (!health.isProblematic) {
     return null;
   }
 
-  const unhealthyRollup = health.rollup.status === 'unhealthy';
-  const unhealthySummary = health.summary.status === 'unhealthy';
-  const missingRollup = health.rollup.status === 'missing';
-  const missingSummary = health.summary.status === 'missing';
-
-  const unhealthyRollupContent = `${rollupTransformId} (unhealthy)`;
-  const unhealthySummaryContent = `${summaryTransformId} (unhealthy)`;
-  const missingRollupContent = `${rollupTransformId} (missing)`;
-  const missingSummaryContent = `${summaryTransformId} (missing)`;
-
-  const count = [unhealthyRollup, unhealthySummary, missingRollup, missingSummary].filter(
-    Boolean
-  ).length;
-
-  const stateText = getSloHealthStateText(
-    unhealthyRollup || unhealthySummary,
-    missingRollup || missingSummary
-  );
+  const showRepairButton =
+    !!permissions?.hasAllWriteRequested &&
+    (health.rollup.missing ||
+      health.summary.missing ||
+      !health.rollup.stateMatches ||
+      !health.summary.stateMatches);
 
   return (
     <EuiCallOut
       color="danger"
-      iconType="warning"
-      title={i18n.translate('xpack.slo.sloDetails.healthCallout.title', {
-        defaultMessage: 'This SLO has issues with its transforms',
-      })}
-    >
-      <EuiFlexGroup direction="column" alignItems="flexStart">
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.slo.sloDetails.healthCallout.description"
-            defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state. You can inspect {count, plural, it {one} other {each one}} here:"
-            values={{ count, stateText }}
+      title={
+        <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
+          {i18n.translate('xpack.slo.sloDetails.healthCallout.title', {
+            defaultMessage: 'This SLO has issues with its transforms',
+          })}
+          <EuiIconTip
+            type="info"
+            color="danger"
+            content={i18n.translate('xpack.slo.sloDetails.healthCallout.infoTooltip', {
+              defaultMessage:
+                'When an SLO has problems with transforms, data may not be processed and the SLO may not function properly. Repairing the SLO will attempt to resolve simple issues with transforms automatically. Transforms labeled as "unhealthy" may require manual intervention.',
+            })}
           />
-          <ul>
-            {health.rollup.status === 'unhealthy' && !!rollupUrl && (
-              <li key={`${slo.id}-rollup-unhealthy`}>
-                <ContentWithInspectCta
-                  textSize="s"
-                  content={unhealthyRollupContent}
-                  url={rollupUrl}
-                />
-              </li>
-            )}
-            {health.summary.status === 'unhealthy' && !!summaryUrl && (
-              <li key={`${slo.id}-summary-unhealthy`}>
-                <ContentWithInspectCta
-                  textSize="s"
-                  content={unhealthySummaryContent}
-                  url={summaryUrl}
-                />
-              </li>
-            )}
-            {health.rollup.status === 'missing' && (
-              <li key={`${slo.id}-rollup-missing`}>
-                <ContentWithResetCta
-                  textSize="s"
-                  content={missingRollupContent}
-                  handleReset={handleReset}
-                />
-              </li>
-            )}
-            {health.summary.status === 'missing' && (
-              <li key={`${slo.id}-summary-missing`}>
-                <ContentWithResetCta
-                  textSize="s"
-                  content={missingSummaryContent}
-                  handleReset={handleReset}
-                />
-              </li>
-            )}
-          </ul>
-        </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+        {links.length > 0 && (
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+              {links.map(({ transformId, transformName, url }) => (
+                <EuiFlexItem key={transformId}>
+                  <ContentWithInspectCta
+                    url={url}
+                    textSize="s"
+                    content={`${transformName} (${i18n.translate(
+                      'xpack.slo.sloDetails.healthCallout.transformStatus.unhealthy',
+                      { defaultMessage: 'unhealthy' }
+                    )})`}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+        {showRepairButton && (
+          <EuiFlexItem>
+            <EuiButton
+              data-test-subj="sloSloHealthCalloutRepairButton"
+              iconSide="left"
+              iconType="wrench"
+              color="accent"
+              onClick={() => repairSlo()}
+            >
+              {i18n.translate('xpack.slo.sloDetails.sloHealthCallout.repairButtonLabel', {
+                defaultMessage: 'Repair',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiCallOut>
   );

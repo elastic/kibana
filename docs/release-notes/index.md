@@ -21,6 +21,149 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.2.4 [kibana-9.2.4-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.2.4-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+### Fixes [kibana-9.2.4-fixes]
+
+**Alerting and cases**:
+* Adds maximum character validation to the email connector params and configuration [#246453]({{kib-pull}}246453).
+* Adds encoding to search terms in the **Cases** page to prevent decoding errors [#247992]({{kib-pull}}247992).
+* Updates total events in {{es}} document when attaching an event to a case [#247996]({{kib-pull}}247996).
+
+**Dashboards and Visualizations**:
+* Fixes compound filters showing unsaved changes on dashboard load [#247309]({{kib-pull}}247309).
+
+**Discover**:
+* Fixes default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes `createAuditEvents` always returning failure as the outcome [#247152]({{kib-pull}}247152).
+
+**Kibana security**:
+* Adds case sensitivity to the index privileges fields on the **Edit roles** page [#246069]({{kib-pull}}246069).
+
+**Machine Learning**:
+* Disables field statistics for ES|QL with TS command [#247641]({{kib-pull}}247641).
+* Fixes the display of map view in Data Visualizer for small screen sizes [#247615]({{kib-pull}}247615).
+* Fixes an issue with queries getting malformed in anomaly charts, which was preventing the charts from rendering [#246841]({{kib-pull}}246841).
+
+**Platform**:
+* Unifies the flow for clients partially and fully authorized to saved objects, and applies the intersection of allowed and authorized lists [#244967]({{kib-pull}}244967).
+
+**Search**:
+* Fixes an issue where users running {{es}} with basic licenses would encounter errors when updating index mappings. Now, the Machine Learning saved object check will only run if saving semantic text mapping [#248462]({{kib-pull}}248462).
+
+## 9.2.3 [kibana-9.2.3-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.2.3-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Adds the background task `FleetPolicyRevisionsCleanupTask` which removes excess policy revisions from the `.fleet-policies` index [#242612]({{kib-pull}}242612).
+
+**Kibana platform**:
+* The **API keys** management page now defaults to showing personal API keys only [#245261]({{kib-pull}}245261).
+* Adds a warning when deleting API keys currently used by alerting rules [#243353]({{kib-pull}}243353).
+
+
+### Fixes [kibana-9.2.3-fixes]
+
+**Alerting**:
+* Fixes an issue that caused the Security alerts table to not update columns correctly when switching view modes [#245253]({{kib-pull}}245253).
+* Adds `consecutiveMatches` to action context [#244997]({{kib-pull}}244997).
+
+**Discover**:
+* Fixes an issue with Discover tabs that occurs when navigating to a different tab while the previous tab is still initializing [#245752]({{kib-pull}}245752).
+* Fixes Discover's trace waterfall behavior with duplicate spans [#244984]({{kib-pull}}244984).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.3 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.3 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes "now" and mixed-format date handling in the **Share** menu [#245539]({{kib-pull}}245539).
+* Fixes an issue with authentication when multiple OIDC providers are configured [#243869]({{kib-pull}}243869).
+* Fixes an ECS incompatibility with the `kibana_started.elasticsearch.waitTime` value in logs [#245706]({{kib-pull}}245706).
+* Fixes the serialization of `meta.error` in JSON layouts. If it is an `Error` instance, only `message`, `name`, and `stack` are included. Other fields are no longer returned in the logs [#244364]({{kib-pull}}244364).
+* Fixes JVM metric conflicts with explicit cast [#244151]({{kib-pull}}244151).
+
+
+## 9.2.2 [kibana-9.2.2-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.2.2-features-enhancements]
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.2.2-fixes]
+
+**Alerting and cases**:
+* Captures connector errors without interrupting the case creation flow. Issues with connectors can be resolved on the case details page [#244188]({{kib-pull}}244188).
+* Improves error message for {{ibm-r}} connector failing to create an incident [#244012]({{kib-pull}}244012).
+* Fixes auto-extraction of observables when alerts are added to a case using the bulk actions menu [#242325]({{kib-pull}}242325).
+* Fixes pagination for the **Alerts** table, which was getting stuck on rule details pages [#242275]({{kib-pull}}242275).
+
+**Dashboards and Visualizations**:
+* Uses `max_value` instead of `infinity` for the default maximum height of a panel [#243572]({{kib-pull}}243572).
+* Fixes issue with saving dashboards after changing the dashboard link to an external link [#243134]({{kib-pull}}243134).
+* Fixes error that occurs when you deselect the **(blank)** option from the filter controls menu [#242036]({{kib-pull}}242036).
+
+**Data ingestion and Fleet**:
+* Uses long expiration for upgrading agents [#243443]({{kib-pull}}243443).
+* Fixes retrying agents stuck in auto-upgrade logic [#243326]({{kib-pull}}243326).
+* Adds retry behavior for `/api/fleet/agents` when transient issues with {{es}} are encountered [#243105]({{kib-pull}}243105).
+* Fixes Docker image in the **Add agent** Kubernetes manifest [#242691]({{kib-pull}}242691).
+
+**Discover**:
+* Fixes truncation for longer text in the Discover table [#241440]({{kib-pull}}241440).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes the production build favicon's CSS specificity [#243351]({{kib-pull}}243351).
+* Fixes an issue on the **Index management** page where screen reader text was different from visible text [#243802]({{kib-pull}}243802).
+* Fixes an issue with keyboard focus getting trapped on pages using document preview [#243791]({{kib-pull}}243791).
+
+**Machine Learning**:
+* Ensures deleted text in AI connector or Inference endpoint forms is not sent as empty strings [#244059]({{kib-pull}}244059).
+* Fixes data views showing runtime fields twice [#242557]({{kib-pull}}242557).
+* Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs [#242263]({{kib-pull}}242263).
+
+**Search**:
+* Turns off custom suggestions on embedded console [#241516]({{kib-pull}}241516).
+
 ## 9.2.1 [kibana-9.2.1-release-notes]
 
 % ::::{NOTE}
@@ -210,6 +353,136 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset [#237877]({{kib-pull}}237877).
 * Fixes an issue with a null property being read in Playground [#230729]({{kib-pull}}230729).
 
+## 9.1.10 [kibana-9.1.10-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.1.10-features-enhancements]
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.10 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.1.10-fixes]
+
+**Alerting and cases**:
+* Adds maximum character validation to the email connector params and configuration [#246453]({{kib-pull}}246453).
+* Adds encoding to search terms in the **Cases** page to prevent decoding errors [#247992]({{kib-pull}}247992).
+
+**Dashboards and Visualizations**:
+* Fixes compound filters showing unsaved changes on dashboard load [#247309]({{kib-pull}}247309).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.10 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.10 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes `createAuditEvents` always returning failure as the outcome [#247152]({{kib-pull}}247152).
+
+**Kibana security**:
+* Adds case sensitivity to the index privileges fields on the **Edit roles** page [#246069]({{kib-pull}}246069).
+
+**Machine Learning**:
+* Fixes the display of map view in Data Visualizer for small screen sizes [#247615]({{kib-pull}}247615).
+
+**Platform**:
+* Unifies the flow for clients partially and fully authorized to saved objects, and applies the intersection of allowed and authorized lists [#244967]({{kib-pull}}244967).
+
+**Search**:
+* Fixes an issue where users running {{es}} with basic licenses would encounter errors when updating index mappings. Now, the Machine Learning saved object check will only run if saving semantic text mapping [#248462]({{kib-pull}}248462).
+
+## 9.1.9 [kibana-9.1.9-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.1.9-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Adds the background task `FleetPolicyRevisionsCleanupTask` which removes excess policy revisions from the `.fleet-policies` index [#242612]({{kib-pull}}242612).
+
+**Kibana platform**:
+* The **API keys** management page now defaults to showing personal API keys only [#245261]({{kib-pull}}245261).
+* Adds a warning when deleting API keys currently used by alerting rules [#243353]({{kib-pull}}243353).
+
+
+### Fixes [kibana-9.1.9-fixes]
+
+**Alerting**:
+* Fixes an issue that caused the Security alerts table not to update columns correctly when switching view modes [#245253]({{kib-pull}}245253).
+* Adds `consecutiveMatches` to action context [#244997]({{kib-pull}}244997).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.9 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.9 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes "now" and mixed-format date handling in the **Share** menu [#245539]({{kib-pull}}245539).
+* Fixes an issue with authentication when multiple OIDC providers are configured [#243869]({{kib-pull}}243869).
+* Fixes an ECS incompatibility with the `kibana_started.elasticsearch.waitTime` value in logs [#245706]({{kib-pull}}245706).
+* Fixes the serialization of `meta.error` in JSON layouts: if the error is an `Error` instance, only `message`, `name`, and `stack` are included. Other fields are no longer returned in the logs [#244364]({{kib-pull}}244364).
+
+**Machine Learning**:
+* Hiding the alerts table popover no longer clears the cell selection in Anomaly Explorer [#244183]({{kib-pull}}244183).
+
+
+## 9.1.8 [kibana-9.1.8-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.1.8-features-enhancements]
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.8 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.8 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.1.8-fixes]
+
+**Alerting and cases**:
+* Captures connector errors without interrupting the case creation flow. Issues with connectors can be resolved on the case details page  [#244188]({{kib-pull}}244188).
+* Fixes pagination for the **Alerts** table, which was getting stuck on rule details pages [#242275]({{kib-pull}}242275).
+* Fetches tracked alerts without depending on the task state [#235253]({{kib-pull}}235253).
+
+**Dashboards and Visualizations**:
+* Fixes error that occurs when you deselect the **(blank)** option from the filter controls menu [#242036]({{kib-pull}}242036).
+
+**Data ingestion and Fleet**:
+* Uses long expiration for upgrading agents [#243443]({{kib-pull}}243443).
+* Fixes retrying agents stuck in auto-upgrade logic [#243326]({{kib-pull}}243326).
+* Adds retry behavior for `/api/fleet/agents` when transient issues with {{es}} are encountered [#243105]({{kib-pull}}243105).
+* Fixes Docker image in the **Add agent** Kubernetes manifest [#242691]({{kib-pull}}242691).
+* Fixes {{fleet}} policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
+* Fixes `ignore_above` mapping for `flattened` fields [#238890]({{kib-pull}}238890).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.8 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.8 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes the production build favicon's CSS specificity [#243351]({{kib-pull}}243351).
+* Fixes an issue on the **Index management** page where screen reader text was different from visible text [#243802]({{kib-pull}}243802).
+* Fixes an issue with keyboard focus getting trapped on pages using document preview [#243791]({{kib-pull}}243791).
+
+**Machine Learning**:
+* Ensures deleted text in AI connector or Inference endpoint forms is not sent as empty strings [#244059]({{kib-pull}}244059).
+* Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs [#242263]({{kib-pull}}242263).
 
 ## 9.1.7 [kibana-9.1.7-release-notes]
 

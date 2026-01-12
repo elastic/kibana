@@ -98,7 +98,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('With a test index', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/241358
+    describe.skip('With a test index', () => {
       it('profiles a simple query', async () => {
         await PageObjects.searchProfiler.setIndexName(testIndex);
         await PageObjects.searchProfiler.setQuery(testQuery);

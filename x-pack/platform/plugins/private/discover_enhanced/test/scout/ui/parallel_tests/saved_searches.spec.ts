@@ -25,12 +25,6 @@ const assertNoFilterAndEmptyQuery = async (
   ).toHaveText('');
 };
 
-const assertDataViewIsSelected = async (page: ExtParallelRunTestFixtures['page'], name: string) =>
-  await expect(
-    page.testSubj.locator('*dataView-switch-link'),
-    'Incorrect data view is selected'
-  ).toHaveText(name);
-
 spaceTest.describe(
   'Discover app - saved searches',
   { tag: ['@ess', '@svlSearch', '@svlOblt'] },
@@ -85,7 +79,9 @@ spaceTest.describe(
       `should unselect saved search when navigating to a 'new'`,
       async ({ pageObjects, page }) => {
         await pageObjects.discover.goto();
-        await assertDataViewIsSelected(page, testData.DATA_VIEW_NAME.ECOMMERCE);
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
+          testData.DATA_VIEW_NAME.ECOMMERCE
+        );
         await pageObjects.filterBar.addFilter({
           ...filterFieldAndValue,
           operator: 'is',
@@ -113,20 +109,30 @@ spaceTest.describe(
 
         // create new search
         await pageObjects.discover.clickNewSearch();
-        await assertDataViewIsSelected(page, testData.DATA_VIEW_NAME.ECOMMERCE);
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
+          testData.DATA_VIEW_NAME.ECOMMERCE
+        );
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // change data view
         await pageObjects.discover.selectDataView(testData.DATA_VIEW_NAME.LOGSTASH);
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
+          testData.DATA_VIEW_NAME.LOGSTASH
+        );
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // change data view again
         await pageObjects.discover.selectDataView(testData.DATA_VIEW_NAME.ECOMMERCE);
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
+          testData.DATA_VIEW_NAME.ECOMMERCE
+        );
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // create new search again
         await pageObjects.discover.clickNewSearch();
-        await assertDataViewIsSelected(page, testData.DATA_VIEW_NAME.ECOMMERCE);
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
+          testData.DATA_VIEW_NAME.ECOMMERCE
+        );
       }
     );
   }

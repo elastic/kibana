@@ -166,9 +166,49 @@ export const FILTERED_ALERTS_2 = i18n.translate('xpack.securitySolution.aiValue.
     ' were automatically filtered out by AI, meaning analysts didn’t have to review them manually. This drastically cuts down noise and routine triage work',
 });
 
+export const FILTERED_ALERTS_2_NONE = i18n.translate(
+  'xpack.securitySolution.aiValue.filteredAlerts2None',
+  {
+    defaultMessage:
+      ' were automatically filtered out by AI, meaning analysts reviewed no alerts manually.',
+  }
+);
+
+export const FILTERED_ALERTS_2_ALL = i18n.translate(
+  'xpack.securitySolution.aiValue.filteredAlerts2All',
+  {
+    defaultMessage:
+      ' were automatically filtered out by AI, meaning analysts reviewed all alerts manually.',
+  }
+);
+
 export const ESCALATED_ALERTS_1 = ({ percentage, count }: { percentage: string; count: string }) =>
   i18n.translate('xpack.securitySolution.reports.aiValue.escalatedAlerts1', {
     defaultMessage: 'Focused escalations: Only {percentage} of alerts ({count})',
+    values: { percentage, count },
+  });
+
+export const ESCALATED_ALERTS_1_ALL = ({
+  percentage,
+  count,
+}: {
+  percentage: string;
+  count: string;
+}) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.escalatedAlerts1All', {
+    defaultMessage: 'Focused escalations: {percentage} of alerts ({count})',
+    values: { percentage, count },
+  });
+
+export const ESCALATED_ALERTS_1_NONE = ({
+  percentage,
+  count,
+}: {
+  percentage: string;
+  count: string;
+}) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.escalatedAlerts1None', {
+    defaultMessage: 'Focused escalations: {percentage} of alerts ({count})',
     values: { percentage, count },
   });
 
@@ -177,6 +217,22 @@ export const ESCALATED_ALERTS_2 = i18n.translate(
   {
     defaultMessage:
       ' were escalated for analyst review — highlighting that Elastic’s Attack Discovery surfaces only the alerts that matter and are more likely tied to actual threats',
+  }
+);
+
+export const ESCALATED_ALERTS_2_ALL = i18n.translate(
+  'xpack.securitySolution.aiValue.escalatedAlerts2All',
+  {
+    defaultMessage:
+      ' were escalated for analyst review — indicating that Elastic’s Attack Discovery surfaced all alerts for investigation in this period',
+  }
+);
+
+export const ESCALATED_ALERTS_2_NONE = i18n.translate(
+  'xpack.securitySolution.aiValue.escalatedAlerts2None',
+  {
+    defaultMessage:
+      ' were escalated for analyst review — indicating that Elastic’s Attack Discovery did not escalate any alerts in this period',
   }
 );
 export const AI_FILTERED = i18n.translate('xpack.securitySolution.reports.aiValue.aiFiltered', {
@@ -206,6 +262,13 @@ export const COST_CALCULATION = ({
 export const CHANGE_RATE = i18n.translate('xpack.securitySolution.reports.aiValue.changeRate', {
   defaultMessage: 'Change rate in advanced settings',
 });
+
+export const CHANGE_RATE_EXPORT_MODE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.exportMode.changeRate',
+  {
+    defaultMessage: 'Value report rates configured in advanced settings.',
+  }
+);
 
 export const EDIT_TITLE = i18n.translate('xpack.securitySolution.reports.aiValue.editTitle', {
   defaultMessage: 'Edit title inline',
@@ -265,5 +328,12 @@ export const EXECUTIVE_SUMMARY_SECONDARY_TEXT = i18n.translate(
   {
     defaultMessage:
       'By reducing the manual burden of high-volume alert review, the AI SOC enhances efficiency, lowers operational costs, and enables teams to focus on higher-value security work. At the same time, it increases threat detection coverage — helping organizations respond faster, with fewer resources.',
+  }
+);
+
+export const TOTAL_ALERTS_PROCESSED = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.totalAlertsProcessed',
+  {
+    defaultMessage: 'Total alerts processed',
   }
 );

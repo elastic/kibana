@@ -10,14 +10,16 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, svlCommonPage } = getPageObjects([
+  const { common, discover, unifiedTabs, svlCommonPage } = getPageObjects([
     'common',
     'discover',
+    'unifiedTabs',
     'svlCommonPage',
   ]);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
+  const esql = getService('esql');
 
   describe('extension getDocViewer', function () {
     before(async () => {
@@ -55,6 +57,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('docViewerTab-doc_view_source');
         await testSubjects.existOrFail('docViewerTab-doc_view_example');
         expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
+      });
+
+      it('should update the ES|QL query when clicking custom "Update ES|QL query" button', async () => {
+        const state = kbnRison.encode({
+          dataSource: { type: 'esql' },
+          query: { esql: 'from my-example-logs | sort @timestamp desc' },
+        });
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
+        });
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickRowToggle({ rowIndex: 0, defaultTabId: 'doc_view_example' });
+        await testSubjects.click('exampleDataSourceProfileDocViewUpdateEsqlQuery');
+        await discover.waitUntilTabIsLoaded();
+        expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled']);
+        expect(await unifiedTabs.getSelectedTabLabel()).to.be('Untitled');
+        expect(await esql.getEsqlEditorQuery()).to.be('FROM my-example-logs | LIMIT 5');
+      });
+
+      it('should open a new tab when clicking custom "Open new tab" button', async () => {
+        const state = kbnRison.encode({
+          dataSource: { type: 'esql' },
+          query: { esql: 'from my-example-logs | sort @timestamp desc' },
+        });
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
+        });
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickRowToggle({ rowIndex: 0, defaultTabId: 'doc_view_example' });
+        await testSubjects.click('exampleDataSourceProfileDocViewOpenNewTab');
+        await discover.waitUntilTabIsLoaded();
+        expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled', 'My new tab']);
+        expect(await unifiedTabs.getSelectedTabLabel()).to.be('My new tab');
+        expect(await esql.getEsqlEditorQuery()).to.be('FROM my-example-logs | LIMIT 5');
       });
     });
 

@@ -115,7 +115,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
             openAlertFlyout={openAlertFlyout}
             displayActions={{
               displayCreateRuleButton: selectedQualityCard === 'degraded',
-              displayEditFailureStore: selectedQualityCard === 'failed' && view !== 'wired', // Don't allow editing failure store for Wired Streams
+              displayEditFailureStore: selectedQualityCard === 'failed',
             }}
           />
         </EuiSplitPanel.Inner>

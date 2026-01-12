@@ -70,6 +70,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       })
     );
 
+    const now = new Date().toISOString();
     const cascadingChanges: StreamChange[] = existsAsDataStream
       .filter((member): member is string => member !== null)
       .map((member) => ({
@@ -77,11 +78,13 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
         definition: {
           name: member,
           description: '',
+          updated_at: now,
           ingest: {
             classic: {},
             lifecycle: { inherit: {} },
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: now },
             settings: {},
+            failure_store: { inherit: {} },
           },
         },
       }));
@@ -258,7 +261,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
         },
       },
       {
-        type: 'unlink_features',
+        type: 'unlink_systems',
         request: {
           name: this._definition.name,
         },

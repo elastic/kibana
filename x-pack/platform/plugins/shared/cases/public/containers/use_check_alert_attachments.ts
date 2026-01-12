@@ -8,34 +8,45 @@
 import { useMemo } from 'react';
 import type { CaseUI } from './types';
 import { type GetAttachments } from '../components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { useFindCasesContainingAllSelectedAlerts } from './use_find_cases_containing_all_selected_alerts';
+import { useFindCasesContainingAllSelectedDocuments } from './use_find_cases_containing_all_selected_alerts';
 
 export interface UseCheckAlertAttachmentsProps {
   cases: Pick<CaseUI, 'id'>[];
   getAttachments?: GetAttachments;
 }
 
-function hasAlertId<T>(arg: T): arg is T & { alertId: string[] | string } {
+function hasDocumentId<T>(
+  arg: T
+): arg is T & { alertId?: string[] | string; eventId?: string | string[] } {
   const candidate = arg as unknown;
-  return (
-    typeof candidate === 'object' &&
-    candidate !== null &&
+
+  if (candidate === null || typeof candidate !== 'object') {
+    return false;
+  }
+
+  const hasAlertId =
     'alertId' in candidate &&
-    (Array.isArray(candidate.alertId) || typeof candidate.alertId === 'string')
-  );
+    (Array.isArray(candidate.alertId) || typeof candidate.alertId === 'string');
+
+  const hasEventId =
+    'eventId' in candidate &&
+    (Array.isArray(candidate.eventId) || typeof candidate.eventId === 'string');
+
+  return hasAlertId || hasEventId;
 }
 
-export const useCheckAlertAttachments = ({
+export const useCheckDocumentAttachments = ({
   cases,
   getAttachments,
 }: UseCheckAlertAttachmentsProps): { disabledCases: Set<string>; isLoading: boolean } => {
-  const selectedAlerts = (getAttachments?.({ theCase: undefined }) ?? [])
-    .filter(hasAlertId)
-    .map(({ alertId }) => alertId)
-    .flatMap((arrayOrString) => arrayOrString);
+  const selectedDocuments = (getAttachments?.({ theCase: undefined }) ?? [])
+    .filter(hasDocumentId)
+    .map(({ alertId, eventId }) => [alertId, eventId])
+    .flatMap((arrayOrString) => arrayOrString)
+    .filter(Boolean) as string[];
 
-  const { data, isFetching } = useFindCasesContainingAllSelectedAlerts(
-    selectedAlerts,
+  const { data, isFetching } = useFindCasesContainingAllSelectedDocuments(
+    selectedDocuments,
     cases.map(({ id }) => id)
   );
 
@@ -44,4 +55,4 @@ export const useCheckAlertAttachments = ({
   return { disabledCases, isLoading: isFetching };
 };
 
-export type UseCheckAlertAttachments = ReturnType<typeof useCheckAlertAttachments>;
+export type UseCheckDocumentAttachments = ReturnType<typeof useCheckDocumentAttachments>;

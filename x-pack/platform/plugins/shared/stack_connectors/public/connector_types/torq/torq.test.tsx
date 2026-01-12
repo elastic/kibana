@@ -36,7 +36,7 @@ describe('torq action params validation', () => {
       body: '{"message": "{test}"}',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: [] },
     });
   });
@@ -46,7 +46,7 @@ describe('torq action params validation', () => {
       body: '{"message": {{number}}}',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: [] },
     });
   });
@@ -56,7 +56,7 @@ describe('torq action params validation', () => {
       body: '',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: ['Body is required.'],
       },
@@ -68,7 +68,7 @@ describe('torq action params validation', () => {
       body: 'some text',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: ['Body must be a valid JSON.'],
       },
