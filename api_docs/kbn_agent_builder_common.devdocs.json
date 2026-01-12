@@ -2893,6 +2893,23 @@
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.Conversation.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\nInternal representation of the prompt storage state for the conversation.\nKeeps track of which prompts have been answered and the response."
+            ],
+            "signature": [
+              "ConversationInternalState",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3281,6 +3298,18 @@
               },
               {
                 "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/services/agents/modes/utils/preflight_checks.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/services/agents/modes/utils/preflight_checks.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/services/agents/modes/utils/preflight_checks.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/agents/modes/utils/prepare_conversation.test.ts"
               },
               {
@@ -3336,15 +3365,17 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-common",
-            "id": "def-common.ConverseInput.prompt_response",
+            "id": "def-common.ConverseInput.prompts",
             "type": "Object",
             "tags": [],
-            "label": "prompt_response",
+            "label": "prompts",
             "description": [
-              "\nResponse from the user to an prompt request."
+              "\nResponse from the user to prompt requests."
             ],
             "signature": [
-              "Record<string, unknown> | undefined"
+              "Record<string, ",
+              "ConfirmationPromptResponse",
+              "> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
             "deprecated": false,
@@ -3661,6 +3692,23 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.RoundCompleteEventData.conversation_state",
+            "type": "Object",
+            "tags": [],
+            "label": "conversation_state",
+            "description": [
+              "if the prompt state was updated during the round, contains the up-to-date version"
+            ],
+            "signature": [
+              "ConversationInternalState",
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
             "deprecated": false,
@@ -5505,7 +5553,9 @@
             "section": "def-common.UserIdAndName",
             "text": "UserIdAndName"
           },
-          "; created_at: string; updated_at: string; attachments?: ",
+          "; state?: ",
+          "ConversationInternalState",
+          " | undefined; created_at: string; updated_at: string; attachments?: ",
           {
             "pluginId": "@kbn/agent-builder-common",
             "scope": "common",
