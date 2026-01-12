@@ -195,7 +195,8 @@ async function fetchAlertContext({
           esClient,
           start,
           end: alertStart,
-          terms: { 'service.name': serviceName },
+          kqlFilter: `service.name: "${serviceName}"`,
+          fields: ['service.name'],
         });
         const hasCategories =
           (result.highSeverityCategories?.categories?.length ?? 0) > 0 ||

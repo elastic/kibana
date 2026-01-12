@@ -40,11 +40,13 @@ export async function getToolHandler({
   fields: string[];
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
-  const baseFilters = timeRangeFilter('@timestamp', {
+  const baseFilters = [
+    ...timeRangeFilter('@timestamp', {
+      start: parseDatemath(start),
+      end: parseDatemath(end, { roundUp: true }),
+    }),
     ...kqlFilter(kuery),
-    start: parseDatemath(start),
-    end: parseDatemath(end, { roundUp: true }),
-  });
+  ];
 
   // Filters for standard logs with message field
   const messageFilters = [...baseFilters, { exists: { field: 'message' } }];
@@ -189,7 +191,7 @@ export async function getFilteredLogCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: ['message', '@timestamp', ...fields],
+                  fields: [field, '@timestamp', ...fields],
                   sort: {
                     '@timestamp': { order: 'desc' },
                   },
