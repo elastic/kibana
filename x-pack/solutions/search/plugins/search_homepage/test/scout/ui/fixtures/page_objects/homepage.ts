@@ -99,7 +99,7 @@ export class Homepage {
     return this.page.testSubj.locator('search-homepage');
   }
 
-  // V1 Homepage - Elasticsearch endpoint and API Keys
+  // Elasticsearch endpoint and copy functionality
   async getCopyEndpointButton() {
     return this.page.testSubj.locator('copyEndpointButton');
   }
@@ -110,124 +110,5 @@ export class Homepage {
 
   async getEndpointValueField() {
     return this.page.testSubj.locator('endpointValueField');
-  }
-
-  async getCreateApiKeyButton() {
-    return this.page.testSubj.locator('createApiKeyButton');
-  }
-
-  async clickCreateApiKeyButton() {
-    await this.page.testSubj.locator('createApiKeyButton').click();
-  }
-
-  async getCreateApiKeyFlyoutHeader() {
-    return this.page.locator('.euiFlyoutHeader');
-  }
-
-  // V1 Homepage - Connect To Elasticsearch Side Panel
-  async getUploadFileButton() {
-    // There are 2 elements with this test subject (a card div and a button), so we target the button specifically
-    return this.page.locator('button[data-test-subj="uploadFileButton"]');
-  }
-
-  async clickUploadFileButton() {
-    await this.page.locator('button[data-test-subj="uploadFileButton"]').click();
-  }
-
-  async getCreateIndexCard() {
-    return this.page.testSubj.locator('gettingStartedCreateIndexButton');
-  }
-
-  async getCreateIndexButton() {
-    return this.page.testSubj.locator('createIndexButton');
-  }
-
-  async clickCreateIndexButton() {
-    await this.page.testSubj.locator('createIndexButton').click();
-  }
-
-  async getSampleDataSection() {
-    return this.page.testSubj.locator('sampleDataSection');
-  }
-
-  async getInstallSampleDataButton() {
-    return this.page.testSubj.locator('installSampleBtn');
-  }
-
-  async getViewDataButton() {
-    return this.page.testSubj.locator('viewDataBtn');
-  }
-
-  // V1 Homepage - Get started with API (Console Tutorials)
-  async getConsoleTutorial(tutorialId: string) {
-    return this.page.testSubj.locator(`console_tutorials_${tutorialId}`);
-  }
-
-  async getConsoleTutorialButton(tutorialId: string) {
-    return this.page.testSubj.locator(`console_tutorials_${tutorialId}_console_btn`);
-  }
-
-  async clickConsoleTutorialButton(tutorialId: string) {
-    await this.page.testSubj.locator(`console_tutorials_${tutorialId}_console_btn`).click();
-  }
-
-  async getConsoleEditorContainer() {
-    return this.page.testSubj.locator('consoleEditorContainer');
-  }
-
-  // V1 Homepage - Alternate Solutions (Observability section)
-  async getObservabilitySection() {
-    return this.page.testSubj.locator('observabilitySection');
-  }
-
-  // V1 Homepage - Alternate Solutions (Security section)
-  async getSecuritySection() {
-    return this.page.testSubj.locator('securitySection');
-  }
-
-  async getSetupElasticDefendLink() {
-    return this.page.testSubj.locator('setupElasticDefendLink');
-  }
-
-  async clickSetupElasticDefendLink() {
-    await this.page.testSubj.locator('setupElasticDefendLink').scrollIntoViewIfNeeded();
-    await this.page.testSubj.locator('setupElasticDefendLink').click();
-  }
-
-  // V1 Homepage - Dive deeper with Elasticsearch
-  async getSearchLabsSection() {
-    return this.page.testSubj.locator('searchLabsSection');
-  }
-
-  async getSearchLabsButton() {
-    return this.page.testSubj.locator('searchLabsButton');
-  }
-
-  async clickSearchLabsButton() {
-    await this.page.testSubj.locator('searchLabsButton').click();
-  }
-
-  async getPythonNotebooksSection() {
-    return this.page.testSubj.locator('pythonNotebooksSection');
-  }
-
-  async getOpenNotebooksButton() {
-    return this.page.testSubj.locator('openNotebooksButton');
-  }
-
-  async clickOpenNotebooksButton() {
-    await this.page.testSubj.locator('openNotebooksButton').click();
-  }
-
-  async getElasticsearchDocumentationSection() {
-    return this.page.testSubj.locator('elasticsearchDocumentationSection');
-  }
-
-  async getViewDocumentationButton() {
-    return this.page.testSubj.locator('viewDocumentationButton');
-  }
-
-  async clickViewDocumentationButton() {
-    await this.page.testSubj.locator('viewDocumentationButton').click();
   }
 }
