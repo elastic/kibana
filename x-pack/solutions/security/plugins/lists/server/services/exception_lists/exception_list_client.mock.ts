@@ -150,7 +150,6 @@ export const getUpdateExceptionListItemOptionsMock = (): UpdateExceptionListItem
 export const getExceptionListSoSchemaMock = (
   overrides: Partial<ExceptionListSoSchema> = {}
 ): ExceptionListSoSchema => {
-  /* eslint-disable @typescript-eslint/naming-convention */
   const {
     comments,
     created_at,
@@ -167,7 +166,6 @@ export const getExceptionListSoSchemaMock = (
     type,
     updated_by,
   } = getExceptionListItemSchemaMock();
-  /* eslint-enable @typescript-eslint/naming-convention */
 
   const soSchema: ExceptionListSoSchema = {
     comments,
