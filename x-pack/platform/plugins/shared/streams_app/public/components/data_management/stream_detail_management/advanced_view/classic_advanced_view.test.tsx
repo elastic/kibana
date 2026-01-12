@@ -57,7 +57,7 @@ jest.mock('../../../../hooks/use_ai_features', () => ({
 jest.mock('../../../../hooks/use_stream_features_api', () => ({
   useStreamFeaturesApi: () => ({
     identifyFeatures: jest.fn(),
-    getSystemIdentificationTask: jest.fn().mockResolvedValue({ status: 'idle' }),
+    getSystemIdentificationStatus: jest.fn().mockResolvedValue({ status: 'idle' }),
     scheduleSystemIdentificationTask: jest.fn(),
     cancelSystemIdentificationTask: jest.fn(),
     acknowledgeSystemIdentificationTask: jest.fn(),
