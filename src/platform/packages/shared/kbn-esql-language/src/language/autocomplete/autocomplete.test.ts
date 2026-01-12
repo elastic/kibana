@@ -1094,4 +1094,22 @@ describe('autocomplete', () => {
       );
     });
   });
+
+  describe('Unmmapped fields', () => {
+    describe('should suggest unmmaped field after its first ussage if unmmaped_fields is LOAD or NULLIFY', () => {
+      testSuggestions('SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | KEEP /', [
+        ...getFieldNamesByType('any'),
+        { text: 'unmappedField' },
+      ]);
+      testSuggestions(
+        'SET unmapped_fields = "NULLIFY"; FROM a | WHERE unmappedField > 0 | KEEP /',
+        [...getFieldNamesByType('any'), { text: 'unmappedField' }]
+      );
+    });
+    describe('should not suggest unmmaped field after its first ussage if unmmaped_fields is FAIL', () => {
+      testSuggestions('SET unmapped_fields = "FAIL"; FROM a | WHERE unmappedField > 0 | KEEP /', [
+        ...getFieldNamesByType('any'),
+      ]);
+    });
+  });
 });
