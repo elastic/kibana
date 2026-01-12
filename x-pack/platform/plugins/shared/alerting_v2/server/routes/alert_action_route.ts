@@ -5,55 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { Request, Response } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from './constants';
-
-const ackBodySchema = z.object({}).optional();
-const unackBodySchema = z.object({});
-const tagBodySchema = z.object({ tags: z.array(z.string()) });
-const untagBodySchema = z.object({ tags: z.array(z.string()) });
-const snoozeBodySchema = z.object({});
-const unsnoozeBodySchema = z.object({});
-const setSeverityBodySchema = z.object({ sev_level: z.number() });
-const clearSeverityBodySchema = z.object({});
-const activateBodySchema = z.object({ reason: z.string() });
-const deactivateBodySchema = z.object({ reason: z.string() });
-
-const alertActionBodySchema = z.union([
-  ackBodySchema,
-  unackBodySchema,
-  tagBodySchema,
-  untagBodySchema,
-  snoozeBodySchema,
-  unsnoozeBodySchema,
-  setSeverityBodySchema,
-  clearSeverityBodySchema,
-  activateBodySchema,
-  deactivateBodySchema,
-]);
-
-const alertActionParamsSchema = z.object({
-  alert_series_id: z.string(),
-  action_type: z.enum([
-    'ack',
-    'unack',
-    'tag',
-    'untag',
-    'snooze',
-    'unsnooze',
-    'set_severity',
-    'clear_severity',
-    'activate',
-    'deactivate',
-  ]),
-});
-
-export type AlertActionParams = z.infer<typeof alertActionParamsSchema>;
-export type AlertActionBody = z.infer<typeof alertActionBodySchema>;
+import {
+  alertActionBodySchema,
+  alertActionParamsSchema,
+  alertActionSchema,
+  type AlertActionBody,
+  type AlertActionParams,
+} from './schemas/alert_action_schema';
 
 @injectable()
 export class AlertActionRoute {
@@ -79,6 +42,16 @@ export class AlertActionRoute {
   ) {}
 
   async handle() {
-    return this.response.ok({ body: {} });
+    const { action_type } = this.request.params;
+    const body = this.request.body ?? {};
+    const result = alertActionSchema.safeParse({ action_type, ...body });
+
+    if (!result.success) {
+      return this.response.badRequest({
+        body: { message: result.error.message },
+      });
+    }
+
+    return this.response.ok({ body: { result } });
   }
 }
