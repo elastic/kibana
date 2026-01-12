@@ -57,4 +57,3 @@ export interface DocView {
   enabled?: boolean;
   render: (props: DocViewRenderProps) => ReactElement;
 }
-
