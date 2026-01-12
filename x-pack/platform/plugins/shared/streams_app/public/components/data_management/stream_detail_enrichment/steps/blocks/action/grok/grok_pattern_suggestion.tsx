@@ -68,7 +68,11 @@ export const GrokPatternAISuggestions = ({
   }, [previewDocuments, fieldValue]);
 
   // Show inline message when LLM couldn't generate suggestions
-  if (suggestionsState.error && isNoSuggestionsError(suggestionsState.error) && !suggestionsState.loading) {
+  if (
+    suggestionsState.error &&
+    isNoSuggestionsError(suggestionsState.error) &&
+    !suggestionsState.loading
+  ) {
     return (
       <>
         <EuiCallOut
