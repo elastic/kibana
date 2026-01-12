@@ -12,7 +12,7 @@ import type { ToolHandlerFn } from './handler';
 import type {
   ToolAvailabilityContext,
   ToolAvailabilityResult,
-  ToolHistoryCleanerFn,
+  ToolReturnSummarizerFn,
 } from './builtin';
 import type { LlmDescriptionHandler } from '../runner';
 
@@ -42,11 +42,11 @@ export interface InternalToolDefinition<
    */
   getLlmDescription?: LlmDescriptionHandler<TConfig>;
   /**
-   * Optional function to clean tool results for conversation history.
+   * Optional function to summarize a tool return for conversation history.
    * When provided, this function will be called when processing conversation history
    * to replace large tool results with compact summaries.
    */
-  cleanHistory?: ToolHistoryCleanerFn;
+  summarizeToolReturn?: ToolReturnSummarizerFn;
 }
 
 export type InternalToolAvailabilityHandler = (

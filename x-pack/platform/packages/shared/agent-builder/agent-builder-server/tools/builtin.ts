@@ -69,19 +69,19 @@ export interface ToolAvailabilityConfig {
 }
 
 /**
- * Function to clean tool results for conversation history.
- * Used to reduce context size by replacing large tool results with summaries.
+ * Function to summarize a tool return for conversation history.
+ * Used to reduce context size by replacing large tool results with compact summaries.
  *
  * This function receives all results from a single tool call, allowing it to
  * aggregate and summarize multiple results together (e.g., converting 10 search
  * results into a single summary like "search returned 10 docs, ids are: ...").
  *
  * @param toolReturn - All results from a single tool call
- * @returns The cleaned results, or undefined if no cleaning should be applied
+ * @returns The summarized results, or undefined if no summarization should be applied
  */
-export type ToolHistoryCleanerFn = (
+export type ToolReturnSummarizerFn = (
   toolReturn: ToolCallWithResult
-) => ToolCallWithResult["results"] | undefined;
+) => ToolCallWithResult['results'] | undefined;
 
 /**
  * Built-in tool, as registered as static tool.
@@ -106,12 +106,12 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
    */
   availability?: ToolAvailabilityConfig;
   /**
-   * Optional function to clean tool results for conversation history.
+   * Optional function to summarize a tool return for conversation history.
    * When provided, this function will be called when processing conversation history
    * to replace large tool results with compact summaries.
    * This helps prevent context bloat in long conversations.
    */
-  cleanHistory?: ToolHistoryCleanerFn;
+  summarizeToolReturn?: ToolReturnSummarizerFn;
 }
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> & {

@@ -67,8 +67,8 @@ const markResultAsCleaned = (result: ToolResult): ToolResult => {
 };
 
 /**
- * Cleans all tool results from a single tool call using the tool's cleanHistory function.
- * This allows the cleaner to see all results together and aggregate/summarize them.
+ * Summarizes all tool results from a single tool call using the tool's `summarizeToolReturn` function.
+ * This allows the summarizer to see all results together and aggregate/summarize them.
  */
 const cleanToolResults = async (
   step: ToolCallWithResult,
@@ -84,16 +84,16 @@ const cleanToolResults = async (
 
   try {
     const tool = await toolRegistry.get(step.tool_id);
-    if (!tool?.cleanHistory) {
+    if (!tool?.summarizeToolReturn) {
       return step.results;
     }
 
-    const cleanedReturn = tool.cleanHistory(step);
-    if (!cleanedReturn) {
+    const summarizedResults = tool.summarizeToolReturn(step);
+    if (!summarizedResults) {
       return step.results;
     }
 
-    return cleanedReturn.map(markResultAsCleaned);
+    return summarizedResults.map(markResultAsCleaned);
   } catch {
     return step.results;
   }
@@ -122,12 +122,12 @@ const cleanStep = async (
  * Cleans tool results in conversation history using tool cleaners from the registry.
  * Replaces large tool results with compact summaries to prevent context bloat.
  *
- * Tools can provide a `cleanHistory` function to define how their results should be cleaned.
+ * Tools can provide a `summarizeToolReturn` function to define how their results should be summarized.
  * This is crucial for long conversations - without cleaning, large tool results
  * would be repeated in history, quickly exhausting the LLM's context window.
  *
  * @param rounds - The conversation rounds to clean
- * @param toolRegistry - The tool registry to look up tools and their cleanHistory functions
+ * @param toolRegistry - The tool registry to look up tools and their summarizeToolReturn functions
  * @returns Cleaned conversation rounds
  */
 export const cleanToolCallHistory = async (

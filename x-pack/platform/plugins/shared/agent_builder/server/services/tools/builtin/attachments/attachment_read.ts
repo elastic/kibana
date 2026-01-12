@@ -78,7 +78,7 @@ export const createAttachmentReadTool = ({
       ],
     };
   },
-  cleanHistory: (toolReturn) => {
+  summarizeToolReturn: (toolReturn) => {
     if (toolReturn.results.length === 0) return undefined;
     const result = toolReturn.results[0];
     if (!isOtherResult(result)) return undefined;

@@ -12,7 +12,7 @@ import {
   ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { InternalToolDefinition, ToolHistoryCleanerFn } from '@kbn/agent-builder-server';
+import type { InternalToolDefinition, ToolReturnSummarizerFn } from '@kbn/agent-builder-server';
 import type { ToolRegistry } from '../../../tools';
 import {
   cleanToolCallHistory,
@@ -51,7 +51,7 @@ const createToolResult = (data: Record<string, unknown>): ToolResult => ({
 
 // Mock cleaner that generates a summary
 const createMockCleaner =
-  (prefix: string): ToolHistoryCleanerFn =>
+  (prefix: string): ToolReturnSummarizerFn =>
   (toolReturn) => {
     if (toolReturn.results.length === 0) return undefined;
     const result = toolReturn.results[0];
@@ -71,7 +71,7 @@ const createMockCleaner =
   };
 
 // Create a mock tool registry
-const createMockToolRegistry = (cleaners: Map<string, ToolHistoryCleanerFn>): ToolRegistry => {
+const createMockToolRegistry = (cleaners: Map<string, ToolReturnSummarizerFn>): ToolRegistry => {
   return {
     has: jest.fn(async (toolId: string) => cleaners.has(toolId)),
     get: jest.fn(async (toolId: string) => {
@@ -81,7 +81,7 @@ const createMockToolRegistry = (cleaners: Map<string, ToolHistoryCleanerFn>): To
       }
       return {
         id: toolId,
-        cleanHistory: cleaner,
+        summarizeToolReturn: cleaner,
       } as unknown as InternalToolDefinition;
     }),
     list: jest.fn(),
@@ -93,8 +93,8 @@ const createMockToolRegistry = (cleaners: Map<string, ToolHistoryCleanerFn>): To
 };
 
 // Create a registry with mock cleaners for all attachment tools
-const createMockCleaners = (): Map<string, ToolHistoryCleanerFn> => {
-  const cleaners = new Map<string, ToolHistoryCleanerFn>();
+const createMockCleaners = (): Map<string, ToolReturnSummarizerFn> => {
+  const cleaners = new Map<string, ToolReturnSummarizerFn>();
 
   cleaners.set(platformCoreTools.attachmentRead, createMockCleaner('Read'));
   cleaners.set(platformCoreTools.attachmentUpdate, createMockCleaner('Updated'));

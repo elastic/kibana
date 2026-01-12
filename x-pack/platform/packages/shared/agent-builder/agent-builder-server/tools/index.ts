@@ -15,8 +15,7 @@ export type {
   ToolAvailabilityHandler,
   ToolAvailabilityResult,
   ToolAvailabilityConfig,
-  CleanedHistoryResult,
-  ToolHistoryCleanerFn,
+  ToolReturnSummarizerFn,
 } from './builtin';
 export {
   type ToolHandlerFn,
