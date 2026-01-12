@@ -43,6 +43,7 @@ const defaultProps: Parameters<typeof TableSection>[0] = {
   pageFilters: [],
   statusFilter: [],
   dataView,
+  selectedConnectorNames: [],
 };
 
 describe('<TableSection />', () => {
