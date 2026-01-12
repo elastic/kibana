@@ -47,6 +47,7 @@ export const getManagedUserTableColumns = (contextID: string): ManagedUsersTable
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
         />
       ) : (
+        // @ts-expect-error upgrade typescript v5.9.3
         defaultToEmptyTag(value)
       );
     },

@@ -20,7 +20,7 @@ import {
   getWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getEventLog } from '../../../../../common/lib';
+import { getEventLog, ObjectRemover } from '../../../../../common/lib';
 
 const defaultValues: Record<string, any> = {
   headers: null,
@@ -40,6 +40,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
   const retry = getService('retry');
+  const objectRemover = new ObjectRemover(supertest);
 
   async function createWebhookAction(
     webhookSimulatorURL: string,
@@ -71,6 +72,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
+    objectRemover.add('default', createdAction.id, 'connector', 'actions', false);
+
     return createdAction.id;
   }
 
@@ -99,6 +102,10 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           proxyHaveBeenCalled = true;
         }
       );
+    });
+
+    afterEach(async () => {
+      await objectRemover.removeAll();
     });
 
     it('should return 200 when creating a webhook action successfully', async () => {
@@ -576,9 +583,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // waits enough for the token to be expired
+        // waits enough for the token to be expired plus some buffer
         await new Promise((resolve) =>
-          setTimeout(() => resolve(true), oauth2Server.getTokenExpirationTime() * 1000)
+          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000)
         );
 
         // this second call should trigger a second call to the auth server because

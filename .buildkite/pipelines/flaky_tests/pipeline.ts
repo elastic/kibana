@@ -48,6 +48,40 @@ function getScoutConfigGroupType(configPath: string): string | null {
   return null;
 }
 
+function getScoutServerRunFlags(configPath: string): string[] {
+  const groupType = getScoutConfigGroupType(configPath);
+
+  if (!groupType) {
+    throw new Error(
+      `Unable to determine scout config group type from path: ${configPath}. ` +
+        `Expected path to match platform pattern (x-pack/platform/... or src/platform/...) ` +
+        `or solution pattern (x-pack/solutions/<solution>/plugins/...)`
+    );
+  }
+
+  if (groupType === 'platform') {
+    return ['--stateful', '--serverless=es', '--serverless=oblt', '--serverless=security'];
+  }
+
+  if (groupType === 'workplaceai') {
+    return ['--serverless=workplace-ai'];
+  }
+
+  const flags = ['--stateful'];
+
+  if (groupType === 'observability') {
+    flags.push('--serverless=oblt');
+  } else if (groupType === 'security') {
+    flags.push('--serverless=security');
+  } else if (groupType === 'search') {
+    flags.push('--serverless=search');
+  } else {
+    throw new Error(`Unknown solution type: ${groupType}.`);
+  }
+
+  return flags;
+}
+
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
     console.error('+++ Invalid test config provided');
@@ -192,12 +226,14 @@ for (const testSuite of testSuites) {
   if (testSuite.type === 'scoutConfig') {
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
     const scoutConfigGroupType = getScoutConfigGroupType(testSuite.scoutConfig);
+    const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
 
     steps.push({
       command: `.buildkite/scripts/steps/test/scout_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
         SCOUT_CONFIG_GROUP_TYPE: scoutConfigGroupType!,
+        SCOUT_SERVER_RUN_FLAGS: serverRunFlags.join('\n'),
       },
       key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
       label: `${testSuite.scoutConfig}`,

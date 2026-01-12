@@ -18,6 +18,7 @@ import {
   createInternalStateStore,
   createRuntimeStateManager,
   fromSavedSearchToSavedObjectTab,
+  selectTab,
   selectTabRuntimeState,
 } from '../application/main/state_management/redux';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
@@ -31,6 +32,12 @@ import { internalStateActions } from '../application/main/state_management/redux
 import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
+import { updateSavedSearch } from '../application/main/state_management/utils/update_saved_search';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
+import {
+  getCurrentUrlState,
+  getInitialState,
+} from '../application/main/state_management/discover_app_state_container';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -137,6 +144,7 @@ export function getDiscoverStateMock({
       { discoverSessionId: finalSavedSearch?.id }
     )
   );
+
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,
     services,
@@ -146,6 +154,16 @@ export function getDiscoverStateMock({
     runtimeStateManager,
     searchSessionManager,
   });
+  container.appState.set(
+    getInitialState({
+      initialUrlState: getCurrentUrlState(stateStorageContainer, services),
+      persistedTab: persistedDiscoverSession?.tabs[0],
+      dataView: finalSavedSearch?.searchSource.getField('index'),
+      services,
+    })
+  );
+  container.appState.resetToState(container.appState.get());
+
   const tabRuntimeState = selectTabRuntimeState(
     runtimeStateManager,
     internalState.getState().tabs.unsafeCurrentId
@@ -155,8 +173,27 @@ export function getDiscoverStateMock({
     cleanup: async () => {},
   });
   tabRuntimeState.stateContainer$.next(container);
+
   if (finalSavedSearch) {
-    container.savedSearchState.set(finalSavedSearch);
+    const currentTab = selectTab(internalState.getState(), container.getCurrentTab().id);
+    const dataView = finalSavedSearch.searchSource.getField('index');
+
+    container.savedSearchState.set(
+      updateSavedSearch({
+        savedSearch: finalSavedSearch,
+        dataView,
+        initialInternalState: undefined,
+        appState: container.appState.get(),
+        globalState: currentTab.globalState,
+        services,
+      })
+    );
+
+    if (dataView) {
+      internalState.dispatch(
+        internalStateActions.loadDataViewList.fulfilled([dataView as DataViewListItem], 'requestId')
+      );
+    }
   }
 
   return container;

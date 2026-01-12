@@ -4,13 +4,15 @@ plugins:
     - apm
     - console
     - discover_enhanced
+    - index_management
     - maps
     - observability
     - observability_onboarding
     - painless_lab
     - security_solution
-    - streams_app
     - slo
+    - spaces
+    - streams_app
   disabled:
 
 packages:

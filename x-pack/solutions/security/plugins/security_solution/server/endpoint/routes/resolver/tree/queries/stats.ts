@@ -50,6 +50,7 @@ export class StatsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: { [this.schema.id]: nodes },
             },
@@ -93,6 +94,7 @@ export class StatsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: { [this.schema.id]: nodes },
             },

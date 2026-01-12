@@ -252,10 +252,12 @@
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/rrule",
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
     "@kbn/react-query",
-    "@kbn/tour-queue"
+    "@kbn/tour-queue",
+    "@kbn/onechat-genai-utils"
   ]
 }

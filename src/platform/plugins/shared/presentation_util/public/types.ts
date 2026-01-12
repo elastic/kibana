@@ -12,6 +12,10 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { registerExpressionsLanguage } from '.';
 import { type PresentationLabsService } from '.';
+import type {
+  getPanelPlacementSettings,
+  registerPanelPlacementSettings,
+} from './registries/panel_placement';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
@@ -19,6 +23,8 @@ export interface PresentationUtilPluginSetup {}
 export interface PresentationUtilPluginStart {
   labsService: PresentationLabsService;
   registerExpressionsLanguage: typeof registerExpressionsLanguage;
+  registerPanelPlacementSettings: typeof registerPanelPlacementSettings;
+  getPanelPlacementSettings: typeof getPanelPlacementSettings;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetupDeps {}

@@ -32,7 +32,7 @@ import type { AgentPolicy, PackagePolicyPackage } from '../types';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
-  from?: 'fleet-policy-list' | undefined;
+  from?: 'fleet-policy-list' | 'installed-integrations' | undefined;
   packagePolicyPackage?: PackagePolicyPackage;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }

@@ -91,8 +91,11 @@ export const AppearanceForm: FunctionComponent<Props> = ({
 };
 
 AppearanceForm.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   padding: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  // @ts-expect-error upgrade typescript v5.9.3
   opacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  // @ts-expect-error upgrade typescript v5.9.3
   overflow: PropTypes.oneOf(['hidden', 'visible']),
   onChange: PropTypes.func.isRequired,
 };

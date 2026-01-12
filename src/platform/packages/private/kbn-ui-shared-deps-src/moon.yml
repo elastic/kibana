@@ -21,9 +21,10 @@ dependsOn:
   - '@kbn/ui-shared-deps-npm'
 tags:
   - is-webpack-built
-  - platform
-  - private
+  - package
   - prod
+  - group-platform
+  - private
 fileGroups:
   src:
     - '**/*.ts'

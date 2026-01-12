@@ -34,7 +34,7 @@ export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
           const tabId = tabState.id;
           return {
             ...acc,
-            [tabId]: getPreviewDataObservable(runtimeStateManager, tabId, tabState.initialAppState),
+            [tabId]: getPreviewDataObservable(runtimeStateManager, tabId, tabState),
           };
         }, {})
       ),
@@ -93,15 +93,15 @@ const getPreviewQuery = (query: TabPreviewData['query'] | undefined): TabPreview
 const getPreviewDataObservable = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string,
-  initialAppState: TabState['initialAppState'] | undefined
+  tabState: TabState
 ) =>
   selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
         return of({
           status: TabStatus.DEFAULT,
-          query: initialAppState?.query
-            ? getPreviewQuery(initialAppState.query)
+          query: tabState.initialAppState?.query
+            ? getPreviewQuery(tabState.initialAppState.query)
             : DEFAULT_PREVIEW_QUERY,
         });
       }
@@ -115,7 +115,7 @@ const getPreviewDataObservable = (
         map(([{ fetchStatus }, { query }]) => ({ fetchStatus, query })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         map(({ fetchStatus, query }) => ({
-          status: getPreviewStatus(fetchStatus),
+          status: tabState.forceFetchOnSelect ? TabStatus.DEFAULT : getPreviewStatus(fetchStatus),
           query: getPreviewQuery(query),
         }))
       );

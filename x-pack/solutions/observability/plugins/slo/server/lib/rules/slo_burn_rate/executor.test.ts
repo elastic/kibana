@@ -170,6 +170,8 @@ describe('BurnRateRuleExecutor', () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     soClientMock = savedObjectsClientMock.create();
     loggerMock = loggingSystemMock.createLogger();
+    searchSourceClientMock = jest.fn() as any;
+    uiSettingsClientMock = jest.fn() as any;
     servicesMock = {
       savedObjectsClient: soClientMock,
       scopedClusterClient: {

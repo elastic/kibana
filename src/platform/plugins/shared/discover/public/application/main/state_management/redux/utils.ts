@@ -15,6 +15,9 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { ControlPanelsState } from '@kbn/controls-plugin/public';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { isObject } from 'lodash';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,
@@ -69,6 +72,40 @@ export const createTabItem = (allTabs: TabState[]): TabItem => {
   const label = nextNumber ? `${baseLabel} ${nextNumber}` : baseLabel;
 
   return { id, label };
+};
+
+/**
+ * Gets a minimal representation of the data view in a serialized
+ * search source. Useful when you want e.g. the time field name
+ * and don't have access to the full data view.
+ */
+export const getSerializedSearchSourceDataViewDetails = (
+  serializedSearchSource: SerializedSearchSourceFields | undefined,
+  savedDataViews: DataViewListItem[]
+): Pick<DataView, 'id' | 'timeFieldName'> | undefined => {
+  const dataViewIdOrSpec = serializedSearchSource?.index;
+
+  if (!dataViewIdOrSpec) {
+    return undefined;
+  }
+
+  if (isObject(dataViewIdOrSpec)) {
+    return {
+      id: dataViewIdOrSpec.id,
+      timeFieldName: dataViewIdOrSpec.timeFieldName,
+    };
+  }
+
+  const dataViewListItem = savedDataViews.find((item) => item.id === dataViewIdOrSpec);
+
+  if (!dataViewListItem) {
+    return undefined;
+  }
+
+  return {
+    id: dataViewListItem.id,
+    timeFieldName: dataViewListItem.timeFieldName,
+  };
 };
 
 /**

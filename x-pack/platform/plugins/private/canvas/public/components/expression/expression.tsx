@@ -211,10 +211,15 @@ export const Expression: FC<Props> = ({
 };
 
 Expression.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   functionDefinitions: PropTypes.array,
+  // @ts-expect-error upgrade typescript v5.9.3
   formState: PropTypes.object,
+  // @ts-expect-error upgrade typescript v5.9.3
   updateValue: PropTypes.func,
+  // @ts-expect-error upgrade typescript v5.9.3
   setExpression: PropTypes.func,
+  // @ts-expect-error upgrade typescript v5.9.3
   done: PropTypes.func,
   error: PropTypes.string,
 };

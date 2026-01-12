@@ -29,14 +29,16 @@ const report = new SavedReport({
 
 describe('retryOnError', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    jest.spyOn(global, 'setTimeout');
     jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
-
   it(`doesn't retry if operation is successful`, async () => {
     const operationMock = jest.fn().mockResolvedValue('success');
     expect(await retryOnError({ operation: operationMock, retries: 3, report, logger })).toEqual(
@@ -47,22 +49,33 @@ describe('retryOnError', () => {
     expect(logger.info).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
+    expect(setTimeout).not.toHaveBeenCalled();
   });
 
-  it('logs a warning message on retry', async () => {
+  it('logs an error message on retry', async () => {
     const error = new Error('fail');
     const operationMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
 
-    await retryOnError({ operation: operationMock, retries: 3, report, logger });
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn.mock.calls[0][0]).toEqual(
+    const retryPromise = retryOnError({ operation: operationMock, retries: 3, report, logger });
+    await Promise.resolve();
+
+    jest.runAllTimers();
+    await retryPromise;
+
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledWith(
+      expect.any(Function),
+      2000 * (1 + randomDelayMultiplier)
+    );
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error.mock.calls[0][0]).toEqual(
       `Retrying report generation for report[${
         report._id
-      }] after [2s] due to error: ${error.toString()} ${error.stack} - attempt 1 of 4 failed.`
+      }] after [2s] due to error: ${error.toString()} - attempt 1 of 4 failed.`
     );
-    expect(logger.error).not.toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalledWith(
-      `Report generation for report[290357209345723095] succeeded on attempt 2.`
+      `Report generation for report[290357209345723095] succeeded on attempt 2.`,
+      { tags: [report._id] }
     );
     // initial attempt + 1 retry
     expect(operationMock).toHaveBeenCalledTimes(2);
@@ -78,6 +91,7 @@ describe('retryOnError', () => {
     expect(logger.info).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
+    expect(setTimeout).not.toHaveBeenCalled();
     expect(operationMock).toHaveBeenCalledTimes(1);
   });
 
@@ -93,6 +107,7 @@ describe('retryOnError', () => {
     expect(logger.info).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
+    expect(setTimeout).not.toHaveBeenCalled();
     expect(operationMock).toHaveBeenCalledTimes(1);
   });
 
@@ -105,30 +120,48 @@ describe('retryOnError', () => {
       .mockRejectedValueOnce(error)
       .mockResolvedValue('success');
 
-    expect(await retryOnError({ operation: operationMock, retries: 3, report, logger })).toEqual(
-      'success'
-    );
+    const retryPromise = retryOnError({ operation: operationMock, retries: 3, report, logger });
+    await Promise.resolve();
+
+    jest.runAllTimersAsync().catch(() => {});
+    expect(await retryPromise).toEqual('success');
     // initial attempt + 3 retries
+    expect(setTimeout).toHaveBeenCalledTimes(3);
+    expect(setTimeout).toHaveBeenNthCalledWith(
+      1,
+      expect.any(Function),
+      2000 * (1 + randomDelayMultiplier)
+    );
+    expect(setTimeout).toHaveBeenNthCalledWith(
+      2,
+      expect.any(Function),
+      4000 * (1 + randomDelayMultiplier)
+    );
+    expect(setTimeout).toHaveBeenNthCalledWith(
+      3,
+      expect.any(Function),
+      8000 * (1 + randomDelayMultiplier)
+    );
     expect(operationMock).toHaveBeenCalledTimes(4);
-    expect(logger.warn).toHaveBeenCalledTimes(3);
-    expect(logger.warn.mock.calls[0][0]).toEqual(
+    expect(logger.error).toHaveBeenCalledTimes(3);
+    expect(logger.error.mock.calls[0][0]).toEqual(
       `Retrying report generation for report[${
         report._id
-      }] after [2s] due to error: ${error.toString()} ${error.stack} - attempt 1 of 4 failed.`
+      }] after [2s] due to error: ${error.toString()} - attempt 1 of 4 failed.`
     );
-    expect(logger.warn.mock.calls[1][0]).toEqual(
+    expect(logger.error.mock.calls[1][0]).toEqual(
       `Retrying report generation for report[${
         report._id
-      }] after [4s] due to error: ${error.toString()} ${error.stack} - attempt 2 of 4 failed.`
+      }] after [4s] due to error: ${error.toString()} - attempt 2 of 4 failed.`
     );
-    expect(logger.warn.mock.calls[2][0]).toEqual(
+    expect(logger.error.mock.calls[2][0]).toEqual(
       `Retrying report generation for report[${
         report._id
-      }] after [8s] due to error: ${error.toString()} ${error.stack} - attempt 3 of 4 failed.`
+      }] after [8s] due to error: ${error.toString()} - attempt 3 of 4 failed.`
     );
-    expect(logger.error).not.toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalledWith(
-      `Report generation for report[290357209345723095] succeeded on attempt 4.`
+      `Report generation for report[290357209345723095] succeeded on attempt 4.`,
+      { tags: [report._id] }
     );
   });
 
@@ -136,35 +169,51 @@ describe('retryOnError', () => {
     const error = new Error('fail');
     const operationMock = jest.fn().mockRejectedValue(error);
 
-    await expect(
-      retryOnError({ operation: operationMock, retries: 3, report, logger })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"fail"`);
-    expect(logger.warn).toHaveBeenCalledTimes(3);
+    const retryPromise = retryOnError({ operation: operationMock, retries: 3, report, logger });
+    await Promise.resolve();
+
+    jest.runAllTimersAsync().catch(() => {});
+    await expect(retryPromise).rejects.toThrowErrorMatchingInlineSnapshot(`"fail"`);
 
     // initial attempt + 3 retries
     expect(operationMock).toHaveBeenCalledTimes(4);
+    expect(setTimeout).toHaveBeenCalledTimes(3);
+    expect(setTimeout).toHaveBeenNthCalledWith(
+      1,
+      expect.any(Function),
+      2000 * (1 + randomDelayMultiplier)
+    );
+    expect(setTimeout).toHaveBeenNthCalledWith(
+      2,
+      expect.any(Function),
+      4000 * (1 + randomDelayMultiplier)
+    );
+    expect(setTimeout).toHaveBeenNthCalledWith(
+      3,
+      expect.any(Function),
+      8000 * (1 + randomDelayMultiplier)
+    );
+    expect(logger.error.mock.calls[0][0]).toEqual(
+      `Retrying report generation for report[${
+        report._id
+      }] after [2s] due to error: ${error.toString()} - attempt 1 of 4 failed.`
+    );
+    expect(logger.error.mock.calls[1][0]).toEqual(
+      `Retrying report generation for report[${
+        report._id
+      }] after [4s] due to error: ${error.toString()} - attempt 2 of 4 failed.`
+    );
+    expect(logger.error.mock.calls[2][0]).toEqual(
+      `Retrying report generation for report[${
+        report._id
+      }] after [8s] due to error: ${error.toString()} - attempt 3 of 4 failed.`
+    );
 
-    expect(logger.warn.mock.calls[0][0]).toEqual(
-      `Retrying report generation for report[${
-        report._id
-      }] after [2s] due to error: ${error.toString()} ${error.stack} - attempt 1 of 4 failed.`
-    );
-    expect(logger.warn.mock.calls[1][0]).toEqual(
-      `Retrying report generation for report[${
-        report._id
-      }] after [4s] due to error: ${error.toString()} ${error.stack} - attempt 2 of 4 failed.`
-    );
-    expect(logger.warn.mock.calls[2][0]).toEqual(
-      `Retrying report generation for report[${
-        report._id
-      }] after [8s] due to error: ${error.toString()} ${error.stack} - attempt 3 of 4 failed.`
-    );
-
-    expect(logger.info).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith(
+    expect(logger.info).toHaveBeenCalledWith(
       `No retries left for report generation for report[${
         report._id
-      }]. No report generated after 4 attempts due to error: ${error.toString()} ${error.stack}`
+      }]. No report generated after 4 attempts due to error: ${error.toString()}`,
+      { tags: [report._id] }
     );
   });
 });

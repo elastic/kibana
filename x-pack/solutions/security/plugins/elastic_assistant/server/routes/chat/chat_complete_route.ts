@@ -29,6 +29,8 @@ import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
   getIsKnowledgeBaseInstalled,
+  getSystemPromptFromPromptId,
+  getSystemPromptFromUserConversation,
   langChainExecute,
   performChecks,
 } from '../helpers';
@@ -105,6 +107,8 @@ export const chatCompleteRoute = (
 
           const anonymizationFieldsDataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
+
+          const promptsDataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
           let messages;
           const existingConversationId = request.body.conversationId;
@@ -205,6 +209,34 @@ export const chatCompleteRoute = (
             ? existingConversationId ?? newConversation?.id
             : undefined;
 
+          const systemPromptParts: string[] = [];
+
+          if (conversationsDataClient && promptsDataClient && existingConversationId) {
+            const conversationSystemPrompt = await getSystemPromptFromUserConversation({
+              conversationsDataClient,
+              conversationId: existingConversationId,
+              promptsDataClient,
+            });
+
+            if (conversationSystemPrompt) {
+              systemPromptParts.push(conversationSystemPrompt);
+            }
+          }
+
+          if (promptsDataClient && request.body.promptId) {
+            const requestSystemPrompt = await getSystemPromptFromPromptId({
+              promptId: request.body.promptId,
+              promptsDataClient,
+            });
+
+            if (requestSystemPrompt) {
+              systemPromptParts.push(requestSystemPrompt);
+            }
+          }
+
+          const systemPrompt =
+            systemPromptParts.length > 0 ? systemPromptParts.join('\n\n') : undefined;
+
           const contentReferencesStore = newContentReferencesStore({
             disabled: contentReferencesDisabled ?? false,
           });
@@ -212,7 +244,8 @@ export const chatCompleteRoute = (
           const onLlmResponse = async (
             content: string,
             traceData: Message['traceData'] = {},
-            isError = false
+            isError = false,
+            refusal?: string
           ): Promise<void> => {
             if (conversationId && conversationsDataClient) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
@@ -224,6 +257,7 @@ export const chatCompleteRoute = (
                 conversationId,
                 conversationsDataClient,
                 messageContent: prunedContent,
+                messageRefusal: refusal,
                 replacements: latestReplacements,
                 isError,
                 traceData,
@@ -255,6 +289,7 @@ export const chatCompleteRoute = (
               telemetry,
               responseLanguage: request.body.responseLanguage,
               savedObjectsClient,
+              systemPrompt,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
             }),
             timeout,

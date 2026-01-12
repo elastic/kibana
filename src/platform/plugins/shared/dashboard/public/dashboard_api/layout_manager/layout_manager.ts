@@ -42,16 +42,13 @@ import {
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
+import type { PanelResizeSettings } from '@kbn/presentation-util-plugin/public';
+import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
 import type { DashboardPanel } from '../../../server';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
-import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
-import { placeClonePanel } from '../../panel_placement/place_clone_panel_strategy';
-import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
-import type { PanelResizeSettings } from '../../panel_placement/types';
-import { PanelPlacementStrategy } from '../../plugin_constants';
 import { coreServices, usageCollectionService } from '../../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
@@ -59,6 +56,11 @@ import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
+import {
+  getPanelSettings,
+  placeClonePanel,
+  runPanelPlacementStrategy,
+} from '../../panel_placement';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,

@@ -410,6 +410,8 @@
       "@kbn/core-elasticsearch-server-internal/*": ["src/core/packages/elasticsearch/server-internal/*"],
       "@kbn/core-elasticsearch-server-mocks": ["src/core/packages/elasticsearch/server-mocks"],
       "@kbn/core-elasticsearch-server-mocks/*": ["src/core/packages/elasticsearch/server-mocks/*"],
+      "@kbn/core-elasticsearch-server-utils": ["src/core/packages/elasticsearch/server-utils"],
+      "@kbn/core-elasticsearch-server-utils/*": ["src/core/packages/elasticsearch/server-utils/*"],
       "@kbn/core-environment-server-internal": ["src/core/packages/environment/server-internal"],
       "@kbn/core-environment-server-internal/*": ["src/core/packages/environment/server-internal/*"],
       "@kbn/core-environment-server-mocks": ["src/core/packages/environment/server-mocks"],
@@ -1784,6 +1786,8 @@
       "@kbn/scout-release-testing/*": ["x-pack/platform/packages/private/kbn-scout-release-testing/*"],
       "@kbn/scout-reporting": ["src/platform/packages/private/kbn-scout-reporting"],
       "@kbn/scout-reporting/*": ["src/platform/packages/private/kbn-scout-reporting/*"],
+      "@kbn/scout-search": ["x-pack/solutions/search/packages/kbn-scout-search"],
+      "@kbn/scout-search/*": ["x-pack/solutions/search/packages/kbn-scout-search/*"],
       "@kbn/scout-security": ["x-pack/solutions/security/packages/kbn-scout-security"],
       "@kbn/scout-security/*": ["x-pack/solutions/security/packages/kbn-scout-security/*"],
       "@kbn/screenshot-mode-example-plugin": ["examples/screenshot_mode_example"],
@@ -2428,6 +2432,10 @@
       "@a2a-js/sdk/server": [
         "typings/@a2a-js-sdk/server"
       ],
+      "zod": ["typings/zod/v3"],
+      "zod/v4": ["typings/zod/v4"],
+      "vega-lite": ["typings/vega/vega_lite"],
+      "vega-tooltip": ["typings/vega/vega_tooltip"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

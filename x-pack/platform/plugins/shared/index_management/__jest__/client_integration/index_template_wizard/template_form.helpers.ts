@@ -402,6 +402,6 @@ export type TestSubjects =
   | 'valueDataRetentionField'
   | 'formWizardStep-5'
   | 'lifecycleValue'
-  | 'mappingsEditor.formTab'
   | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle'
-  | 'previewIndexTemplate';
+  | 'previewIndexTemplate'
+  | 'advancedOptionsTab';

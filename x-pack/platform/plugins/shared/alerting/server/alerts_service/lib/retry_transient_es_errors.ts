@@ -6,21 +6,9 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { errors as EsErrors } from '@elastic/elasticsearch';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 
 const MAX_ATTEMPTS = 3;
-
-const retryResponseStatuses = [
-  503, // ServiceUnavailable
-  408, // RequestTimeout
-  410, // Gone
-];
-
-const isRetryableError = (e: Error) =>
-  e instanceof EsErrors.NoLivingConnectionsError ||
-  e instanceof EsErrors.ConnectionError ||
-  e instanceof EsErrors.TimeoutError ||
-  (e instanceof EsErrors.ResponseError && retryResponseStatuses.includes(e?.statusCode!));
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -37,7 +25,7 @@ export const retryTransientEsErrors = async <T>(
   try {
     return await esCall();
   } catch (e) {
-    if (attempt < MAX_ATTEMPTS && isRetryableError(e)) {
+    if (attempt < MAX_ATTEMPTS && isRetryableEsClientError(e)) {
       const retryCount = attempt + 1;
       const retryDelaySec: number = Math.min(Math.pow(2, retryCount), 30); // 2s, 4s, 8s, 16s, 30s, 30s, 30s...
 

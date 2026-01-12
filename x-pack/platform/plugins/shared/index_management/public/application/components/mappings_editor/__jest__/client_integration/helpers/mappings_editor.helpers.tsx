@@ -314,8 +314,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   // --- Other ---
   const selectTab = async (tab: 'fields' | 'runtimeFields' | 'templates' | 'advanced') => {
     const index = ['fields', 'runtimeFields', 'templates', 'advanced'].indexOf(tab);
+    const dataTestSubjValues = ['fieldsTab', 'runtimeTab', 'templatesTab', 'advancedOptionsTab'];
 
-    const tabElement = find('formTab').at(index);
+    const tabElement = find(dataTestSubjValues[index]);
     if (tabElement.length === 0) {
       throw new Error(`Tab not found: "${tab}"`);
     }

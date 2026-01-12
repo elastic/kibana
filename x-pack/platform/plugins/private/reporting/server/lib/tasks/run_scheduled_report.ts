@@ -192,7 +192,8 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         errorLogger(
           this.logger,
           `Error in saving execution warning ${report._id}`,
-          failedToSaveWarning
+          failedToSaveWarning,
+          [report._id]
         );
       });
     }

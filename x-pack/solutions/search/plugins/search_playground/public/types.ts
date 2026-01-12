@@ -188,8 +188,6 @@ export interface ElasticsearchIndex {
   uuid?: Uuid;
 }
 
-export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | JSONValue[];
-
 export interface ChatRequestOptions {
   options?: RequestOptions;
   data?: ChatRequestData;

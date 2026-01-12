@@ -52,11 +52,7 @@ describe('getConnectToExternalServer', () => {
         version: '1.0.0',
       },
       {
-        capabilities: {
-          prompts: {},
-          resources: {},
-          tools: {},
-        },
+        capabilities: {},
       }
     );
     expect(mockClient.connect).toHaveBeenCalledWith(mockTransport);

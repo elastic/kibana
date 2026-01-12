@@ -85,7 +85,7 @@ pageLoadAssetSize:
   inspectComponent: 4900
   inspector: 18000
   interactiveSetup: 42153
-  intercepts: 19011
+  intercepts: 21246
   kibanaOverview: 6339
   kibanaReact: 25470
   kibanaUsageCollection: 1736
@@ -119,9 +119,9 @@ pageLoadAssetSize:
   onechat: 19088
   osquery: 47588
   painlessLab: 6299
-  presentationPanel: 11484
-  presentationUtil: 9000
-  productDocBase: 3083
+  presentationPanel: 11418
+  presentationUtil: 9948
+  productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
   reindexService: 3601
@@ -145,7 +145,7 @@ pageLoadAssetSize:
   searchInferenceEndpoints: 8071
   searchNavigation: 7404
   searchNotebooks: 18826
-  searchPlayground: 10993
+  searchPlayground: 11100
   searchprofiler: 18361
   searchQueryRules: 6689
   searchSynonyms: 6371

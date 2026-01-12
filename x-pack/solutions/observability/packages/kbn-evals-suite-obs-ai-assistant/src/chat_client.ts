@@ -195,6 +195,7 @@ export class ObservabilityAIAssistantEvaluationChatClient {
 
         const decoder = new TextDecoder();
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const iterator: NodeJS.AsyncIterator<string> = {
           async next() {
             const { done, value } = await reader.read();

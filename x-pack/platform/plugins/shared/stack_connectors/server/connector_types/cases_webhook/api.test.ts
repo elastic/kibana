@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { externalServiceMock, apiParams } from './mock';
 import type { ExternalService } from './types';
 import { api } from './api';
-let mockedLogger: jest.Mocked<Logger>;
 
 describe('api', () => {
   let externalService: jest.Mocked<ExternalService>;
@@ -19,6 +18,7 @@ describe('api', () => {
   });
 
   describe('create incident - cases', () => {
+    const mockedLogger = loggerMock.create();
     test('it creates an incident', async () => {
       const params = { ...apiParams, externalId: null };
       const res = await api.pushToService({
@@ -101,6 +101,7 @@ describe('api', () => {
   });
 
   describe('update incident', () => {
+    const mockedLogger = loggerMock.create();
     test('it updates an incident', async () => {
       const res = await api.pushToService({
         externalService,

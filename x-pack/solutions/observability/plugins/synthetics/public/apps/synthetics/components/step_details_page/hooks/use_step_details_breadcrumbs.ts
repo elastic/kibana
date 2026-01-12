@@ -33,6 +33,10 @@ export const useStepDetailsBreadcrumbs = (extraCrumbs?: Array<{ text: string; hr
       }`,
     },
 
-    { text: `${currentStep?.synthetics.step?.index}. ${currentStep?.synthetics.step?.name}` ?? '' },
+    {
+      text: `${currentStep?.synthetics.step?.index ?? ''}. ${
+        currentStep?.synthetics.step?.name ?? ''
+      }`,
+    },
   ]);
 };

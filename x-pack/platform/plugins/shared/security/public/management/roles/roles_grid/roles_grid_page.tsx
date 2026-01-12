@@ -513,6 +513,9 @@ export const RolesGridPage: FC<Props> = ({
           data-test-subj={`${!isLoading ? 'rolesTable' : 'rolesTableLoading'}`}
           itemId="name"
           columns={getColumnConfig()}
+          tableCaption={i18n.translate('xpack.security.management.roles.rolesTableCaption', {
+            defaultMessage: 'List of roles',
+          })}
           selection={
             readOnly
               ? undefined
