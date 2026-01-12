@@ -68,6 +68,27 @@ export interface ToolAvailabilityConfig {
   cacheTtl?: number;
 }
 
+export type ToolConfirmationPolicyMode = 'once' | 'always' | 'never';
+
+export interface ToolConfirmationPolicy {
+  /**
+   * If true, will prompt the user for confirmation when the agent wants to execute the tool, before the actual execution.
+   */
+  askUser?: ToolConfirmationPolicyMode;
+}
+
+export interface BuiltInToolSpecificConfig {
+  /**
+   * Optional dynamic availability configuration.
+   * Refer to {@link ToolAvailabilityConfig}
+   */
+  availability?: ToolAvailabilityConfig;
+  /**
+   * Optional tool call policy to control tool call confirmation behavior
+   */
+  confirmation?: ToolConfirmationPolicy;
+}
+
 /**
  * Function to summarize a tool return for conversation history.
  * Used to reduce context size by replacing large tool results with compact summaries.
@@ -87,7 +108,8 @@ export type ToolReturnSummarizerFn = (
  * Built-in tool, as registered as static tool.
  */
 export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
-  extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'> {
+  extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'>,
+    BuiltInToolSpecificConfig {
   /**
    * built-in tool types
    */
@@ -114,13 +136,8 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
   summarizeToolReturn?: ToolReturnSummarizerFn;
 }
 
-type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> & {
-  /**
-   * Optional dynamic availability configuration.
-   * Refer to {@link ToolAvailabilityConfig}
-   */
-  availability?: ToolAvailabilityConfig;
-};
+type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> &
+  BuiltInToolSpecificConfig;
 
 export type StaticEsqlTool = StaticToolRegistrationMixin<EsqlToolDefinition>;
 export type StaticIndexSearchTool = StaticToolRegistrationMixin<IndexSearchToolDefinition>;

@@ -13,6 +13,7 @@ import type {
   ToolAvailabilityContext,
   ToolAvailabilityResult,
   ToolReturnSummarizerFn,
+  ToolConfirmationPolicy,
 } from './builtin';
 import type { LlmDescriptionHandler } from '../runner';
 
@@ -47,6 +48,10 @@ export interface InternalToolDefinition<
    * to replace large tool results with compact summaries.
    */
   summarizeToolReturn?: ToolReturnSummarizerFn;
+  /**                                           
+   * Tool call policy to control tool call confirmation behavior
+   */
+  confirmation?: ToolConfirmationPolicy;
 }
 
 export type InternalToolAvailabilityHandler = (

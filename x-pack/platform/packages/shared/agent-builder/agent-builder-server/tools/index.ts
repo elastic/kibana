@@ -16,6 +16,8 @@ export type {
   ToolAvailabilityResult,
   ToolAvailabilityConfig,
   ToolReturnSummarizerFn,
+  ToolConfirmationPolicy,
+  ToolConfirmationPolicyMode,
 } from './builtin';
 export {
   type ToolHandlerFn,

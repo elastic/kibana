@@ -38,6 +38,7 @@ export const convertTool = ({
       tags: tool.tags,
       configuration: {},
       readonly: true,
+      confirmation: tool.confirmation ?? { askUser: 'never' },
       isAvailable: async (ctx) => {
         if (tool.availability) {
           return cache.getOrCompute(tool.id, tool.availability, ctx);
@@ -64,6 +65,7 @@ export const convertTool = ({
       description: tool.description,
       tags: tool.tags,
       readonly: true,
+      confirmation: tool.confirmation ?? { askUser: 'never' },
       isAvailable: (ctx) => {
         if (tool.availability) {
           return cache.getOrCompute(tool.id, tool.availability, ctx);
