@@ -58,11 +58,12 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
     }
 
     if (result != null && indexName) {
-      const hasIndexWrite = result.index[indexName].create ||
-          result.index[indexName].create_doc ||
-          result.index[indexName].index ||
-          result.index[indexName].write
-      const hasIndexRead = result.index[indexName].read
+      const hasIndexWrite =
+        result.index[indexName].create ||
+        result.index[indexName].create_doc ||
+        result.index[indexName].index ||
+        result.index[indexName].write;
+      const hasIndexRead = result.index[indexName].read;
       return {
         isAuthenticated: result.is_authenticated,
         hasEncryptionKey: result.has_encryption_key,
