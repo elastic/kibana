@@ -49,18 +49,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_RESPONSE = 'This is a successful response after retry';
       const MOCKED_TITLE = 'Error Handling Test';
 
+      log.debug('>>> [DEBUG] Step 1: Navigating to new conversation');
       await agentBuilder.navigateToApp('conversations/new');
 
       // DON'T set up any interceptors for the first attempt - this will cause a 404 error
 
+      log.debug('>>> [DEBUG] Step 2: Typing and sending message (expecting error)');
       await agentBuilder.typeMessage(MOCKED_INPUT);
       await agentBuilder.sendMessage();
 
       const isErrorVisible = await agentBuilder.isErrorVisible();
+      log.debug(`>>> [DEBUG] Step 3: isErrorVisible = ${isErrorVisible}`);
       expect(isErrorVisible).to.be(true);
 
       await testSubjects.find('agentBuilderRoundError');
       await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
+      log.debug('>>> [DEBUG] Step 4: Error UI elements found');
 
       // Now set up the LLM proxy to work correctly for the retry
       await setupAgentDirectAnswer({
@@ -68,23 +72,47 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         title: MOCKED_TITLE,
         response: MOCKED_RESPONSE,
       });
+      log.debug('>>> [DEBUG] Step 5: LLM proxy interceptors set up');
 
       // Click the retry button
+      log.debug('>>> [DEBUG] Step 6: Clicking retry button');
       await agentBuilder.clickRetryButton();
 
       // Wait for all interceptors to be called (backend processing complete)
+      log.debug('>>> [DEBUG] Step 7: Waiting for all interceptors to be called');
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      log.debug('>>> [DEBUG] Step 8: All interceptors called');
 
       // Assert the successful response is visible
+      let attemptCount = 0;
       await retry.try(async () => {
+        attemptCount++;
         const responseElements = await testSubjects.findAll('agentBuilderRoundResponse');
+        log.debug(
+          `>>> [DEBUG] Step 9 (attempt ${attemptCount}): Found ${responseElements.length} agentBuilderRoundResponse elements`
+        );
+
+        // Log content of each response element
+        for (let i = 0; i < responseElements.length; i++) {
+          const text = await responseElements[i].getVisibleText();
+          const truncated = text.substring(0, 150).replace(/\n/g, '\\n');
+          const suffix = text.length > 150 ? '...' : '';
+          log.debug(`>>> [DEBUG] Response element ${i}: "${truncated}${suffix}"`);
+        }
+
         const lastResponse = responseElements[responseElements.length - 1];
         const responseText = await lastResponse.getVisibleText();
+        log.debug(
+          `>>> [DEBUG] Using last response (index ${responseElements.length - 1}), ` +
+            `text length: ${responseText.length}`
+        );
         expect(responseText).to.contain(MOCKED_RESPONSE);
       });
+      log.debug('>>> [DEBUG] Step 10: Response assertion passed');
 
       // Assert the error is no longer visible
       const isErrorStillVisible = await agentBuilder.isErrorVisible();
+      log.debug(`>>> [DEBUG] Step 11: isErrorStillVisible = ${isErrorStillVisible}`);
       expect(isErrorStillVisible).to.be(false);
     });
 
