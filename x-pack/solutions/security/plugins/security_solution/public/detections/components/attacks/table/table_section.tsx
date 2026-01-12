@@ -40,7 +40,7 @@ import type { AssigneesIdsSelection } from '../../../../common/components/assign
 
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
-import { EmptyResultsContainer } from './empty_results/container';
+import { EmptyResultsPrompt } from './empty_results_prompt';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
 
@@ -236,7 +236,7 @@ export const TableSection = React.memo(
     );
 
     const emptyGroupingComponent = useMemo(
-      () => <EmptyResultsContainer openSchedulesFlyout={openSchedulesFlyout} />,
+      () => <EmptyResultsPrompt openSchedulesFlyout={openSchedulesFlyout} />,
       [openSchedulesFlyout]
     );
 

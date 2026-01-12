@@ -21,7 +21,7 @@ import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { groupingOptions, groupingSettings } from './grouping_configs';
-import { EmptyResultsContainer } from './empty_results/container';
+import { EmptyResultsPrompt } from './empty_results_prompt';
 
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
@@ -31,8 +31,8 @@ jest.mock('../../alerts_table/alerts_grouping', () => ({
   ...jest.requireActual('../../alerts_table/alerts_grouping'),
   GroupedAlertsTable: jest.fn(),
 }));
-jest.mock('./empty_results/container', () => ({
-  EmptyResultsContainer: jest.fn(() => <div data-test-subj="mock-empty-results-container" />),
+jest.mock('./empty_results_prompt', () => ({
+  EmptyResultsPrompt: jest.fn(() => <div data-test-subj="mock-empty-results-prompt" />),
 }));
 
 const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
@@ -41,7 +41,7 @@ const dataView: DataView = createStubDataView({ spec: dataViewSpec });
 const mockUseGetDefaultGroupTitleRenderers = useGetDefaultGroupTitleRenderers as jest.Mock;
 const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
 const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
-const mockEmptyResultsContainer = EmptyResultsContainer as unknown as jest.Mock;
+const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
 
 describe('<TableSection />', () => {
   const openSchedulesFlyout = jest.fn();
@@ -133,7 +133,7 @@ describe('<TableSection />', () => {
     });
   });
 
-  it('should pass EmptyResultsContainer to GroupedAlertsTable', async () => {
+  it('should pass EmptyResultsPrompt to GroupedAlertsTable', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <TableSection {...defaultProps} />
@@ -141,10 +141,10 @@ describe('<TableSection />', () => {
     );
 
     await waitFor(() => {
-      expect(getByTestId('mock-empty-results-container')).toBeInTheDocument();
+      expect(getByTestId('mock-empty-results-prompt')).toBeInTheDocument();
     });
 
-    expect(mockEmptyResultsContainer).toHaveBeenCalledWith(
+    expect(mockEmptyResultsPrompt).toHaveBeenCalledWith(
       expect.objectContaining({ openSchedulesFlyout }),
       expect.anything()
     );
