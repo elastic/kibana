@@ -38,6 +38,7 @@ import {
   apiPublishesUnsavedChanges,
   getTitle,
   logStateDiff,
+  shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
@@ -531,8 +532,13 @@ export function initializeLayoutManager(
               ).length;
               if (!(layoutIsEqual && childrenAreEqual)) {
                 const { panels } = serializeLayout(currentLayout, currentChildState);
-                const { panels: oldPanels } = serializeLayout(lastSavedLayout, lastSavedChildState);
-                logStateDiff('dashboard panels', oldPanels, panels);
+                if (shouldLogStateDiff()) {
+                  const { panels: oldPanels } = serializeLayout(
+                    lastSavedLayout,
+                    lastSavedChildState
+                  );
+                  logStateDiff('dashboard panels', oldPanels, panels);
+                }
                 return { panels };
               }
               return {};
@@ -546,11 +552,13 @@ export function initializeLayoutManager(
               ).length;
               if (!(layoutIsEqual && childrenAreEqual)) {
                 const { controlGroupInput } = serializeLayout(currentLayout, currentChildState);
-                const { controlGroupInput: oldControlGroupInput } = serializeLayout(
-                  lastSavedLayout,
-                  lastSavedChildState
-                );
-                logStateDiff('dashboard pinned panels', oldControlGroupInput, controlGroupInput);
+                if (shouldLogStateDiff()) {
+                  const { controlGroupInput: oldControlGroupInput } = serializeLayout(
+                    lastSavedLayout,
+                    lastSavedChildState
+                  );
+                  logStateDiff('dashboard pinned panels', oldControlGroupInput, controlGroupInput);
+                }
                 return { controlGroupInput };
               }
               return {};
