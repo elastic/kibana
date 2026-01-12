@@ -59,19 +59,19 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * The webhook connector now allows the following HTTP request methods: POST(default), PUT, PATCH, GET, or DELETE [#238072]({{kib-pull}}238072).
 
 **Dashboards and Visualizations**:
-* [Metric] Improve Primary Metric editor by removing "Supporting visualization" title in *Lens* [#245979]({{kib-pull}}245979).
+* Removes the **Supporting visualization** section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under **Appearance**. [#245979]({{kib-pull}}245979).
 % !!TODO!! The above PR had a lengthy release note description:
 % Removed the "Supporting visualization" section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under "Appearance". The "Type" field has been renamed to "Background chart" and the "Panel" option has been renamed to "None".
-* [Metric] Improve "Supporting visualization" section in *Lens* [#243608]({{kib-pull}}243608).
+* Updates the color settings in the Primary Metric editor.  [#243608]({{kib-pull}}243608).
 % !!TODO!! The above PR had a lengthy release note description:
 % The color settings in the Primary Metric editor have been reorganized and renamed. For numeric metrics, the "Color by value" and "Color mapping" / "Color" settings are now located under the chart type field. The settings have been renamed as follows: "Color by value" is now "Color mode", "Color mapping" is now "Dynamic color mapping", and "Color" is now "Select color".
-* Use flyout toolbar for visualization configuration: appearance, titles and text, axis, and legend settings in *Lens* [#240804]({{kib-pull}}240804).
+* Enables the flyout toolbar for visualization configuration: appearance, titles and text, axis, and legend settings in Lens. [#240804]({{kib-pull}}240804).
 % !!TODO!! The above PR had a lengthy release note description:
 % In **dashboard visualization in-line editing** and **Lens workspace**, the 'Appearance', 'Titles and text', 'Axis', and 'Legend' settings have been moved from a popover into a dedicated flyout panel.
-* Moves the Lens visualization toolbar from the workspace section to the config panel. in *Lens* [#239879]({{kib-pull}}239879).
-* Moves the Lens visualization toolbar in the edit flyout from the visualization parameters section to the flyout header. in *Lens* [#239176]({{kib-pull}}239176).
-* Top Nav Save Menu [#237211]({{kib-pull}}237211).
-* Display layers as tabs instead of vertically stacked panels in *Lens* [#235372]({{kib-pull}}235372).
+* Moves the Lens visualization toolbar from the workspace section to the configuration panel. [#239879]({{kib-pull}}239879).
+* Moves the Lens visualization toolbar in the edit flyout from the visualization parameters section to the flyout header. [#239176]({{kib-pull}}239176).
+* Moves the **Save as** and **Reset** options under the top nav **Save** button when the dashboard is in edit mode. [#237211]({{kib-pull}}237211).
+* Updates the Lens configuration panel to display layers as tabs instead of vertically stacked panels. [#235372]({{kib-pull}}235372).
 % !!TODO!! The above PR had a lengthy release note description:
 % The Lens configuration flyout has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines.
 
@@ -270,15 +270,16 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Separate sync alert and auto-extract updates in activity [#236519]({{kib-pull}}236519).
 
 **Dashboards and Visualizations**:
-* Fixes compound filters showing unsaved changes on dashboard load [#247309]({{kib-pull}}247309).
-* Use max_value instead of infinity [#243572]({{kib-pull}}243572).
-* Fixes Can not save Dashboard after switching a Dashboard Link to an External Link [#243134]({{kib-pull}}243134).
-* Silence URL restore errors for Discover & Dashboards [#242788]({{kib-pull}}242788).
+* Cleans filters as they’re updated from Unified Search, adds extra cleanup for compound filters by removing undefined properties, and fixes unsaved badges appearing when dashboards with compound filters are loaded. [#247309]({{kib-pull}}247309).
+* Uses `Number.MAX_VALUE` instead of `Infinity` for the default maximum height of a panel. [#243572]({{kib-pull}}243572).
+* Fixes an issue where saving a dashboard after switching a Dashboard Link to an External Link caused the save function to throw an error. [#243134]({{kib-pull}}243134).
+* Fixes the silence warnings by silencing error notifications in Discover and Dashboards and changing the built-in URL restore error to a `console.warn`. [#242788]({{kib-pull}}242788).
 * Fixes print mode regression in Dashboard [#242780]({{kib-pull}}242780).
-* Fixes 'sync colors' and 'sync tooltips' must be ON by default [#242442]({{kib-pull}}242442).
-* Fixes deselecting (blank) option from options list [#242036]({{kib-pull}}242036).
-* Fixes layout issues for markdown embeddables in small panels [#240806]({{kib-pull}}240806).
-* Show labels after saving edits while staying on Vector tiles (… [#240728]({{kib-pull}}240728).
+* Fixes the issue that sync colors and sync tooltips were turned on by default for new dashboards. Now, those options are turned off by default for new dashboards.
+ [#242442]({{kib-pull}}242442).
+* Fixes an error with deselecting a (blank) option from an options list. [#242036]({{kib-pull}}242036).
+* Fixes layout issues for Markdown embeddables in small dashboard panels using CSS container queries. When a markdown panel is shorter than 120px, the UI now adapts to a compact layout that maximizes usable space. [#240806]({{kib-pull}}240806).
+* Labels in the **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after save), without requiring a scaling toggle. (… [#240728]({{kib-pull}}240728).
 % !!TODO!! The above PR had a lengthy release note description:
 % **Fix:** Labels in the **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after save), without requiring a scaling toggle.
 * Fixes unable to reset unsaved change when enabling timeRestore and setting time range [#239992]({{kib-pull}}239992).
@@ -287,14 +288,14 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Fixes a bug in *Lens* that incorrectly assigned unsaved (ad-hoc) dataview references [#239431]({{kib-pull}}239431).
 * Pause fetch until initialized [#239228]({{kib-pull}}239228).
 * Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula. in *Lens* [#239222]({{kib-pull}}239222).
-* Fixes metric color assignment when breakdown and a max dimension are defined in *Lens* [#238901]({{kib-pull}}238901).
+* Fixes metric color assignment when breakdown and a max dimension are defined in Lens. [#238901]({{kib-pull}}238901).
 * Fixes Adhoc dataviews from ES|QL charts are being filtered out in the KQL search bar [#238731]({{kib-pull}}238731).
-* Improve list error handling in *Visualize* [#238355]({{kib-pull}}238355).
+* Fixes an error in the **Visualize Listing** page in which an error in the visualization could cause the entire page to error. This improves the error handling to make it easier to identify which visualization is causing the problem in order to address it. [#238355]({{kib-pull}}238355).
 % !!TODO!! The above PR had a lengthy release note description:
 % Fixes an error in the **Visualize Listing** page in which an error in the vis could cause the entire page to error. This improves the error handling to make it easier to identity which visualization is causing the problem in order to address it.
-* Soften validation on filter schema [#237477]({{kib-pull}}237477).
+* Fixes a bug where dashboards can not be saved when a filter pill has a combined filter using OR or AND operations. [#237477]({{kib-pull}}237477).
 * Fixes panels in sections from URL state are not transformed [#237382]({{kib-pull}}237382).
-* Fixs controls cause double fetch [#237169]({{kib-pull}}237169).
+* Prevents a double fetch when panels would fetch data while controls were building filters and then fetch data again once controls filters are available. [#237169]({{kib-pull}}237169).
 
 **Data ingestion and Fleet**:
 * Use long expiration for upgrade agents [#243443]({{kib-pull}}243443).
