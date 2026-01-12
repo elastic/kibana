@@ -108,7 +108,8 @@ export const getTooltip = ({
 
 export const mapAppMenuItemToPanelItem = (
   item: AppMenuPopoverItem,
-  childPanelId?: number
+  childPanelId?: number,
+  onClose?: () => void
 ): EuiContextMenuPanelItemDescriptor => {
   const { content, title } = getTooltip({
     tooltipContent: item?.tooltipContent,
@@ -119,7 +120,15 @@ export const mapAppMenuItemToPanelItem = (
     if (isDisabled(item?.disableButton)) {
       return;
     }
+
+    const shouldClosePopover =
+      !item?.href && childPanelId === undefined && item.run?.length === 0 && onClose;
+
     item.run?.();
+
+    if (shouldClosePopover) {
+      onClose();
+    }
   };
 
   return {
@@ -175,10 +184,10 @@ export const getPopoverActionItems = ({
     return [];
   }
 
-  const seperator = createSeparatorItem('action-items-separator');
+  const separator = createSeparatorItem('action-items-separator');
 
   return [
-    seperator,
+    separator,
     {
       key: 'action-items',
       renderItem: () => (
@@ -199,11 +208,13 @@ export const getPopoverPanels = ({
   primaryActionItem,
   secondaryActionItem,
   startPanelId = 0,
+  onClose,
 }: {
   items: AppMenuPopoverItem[];
   primaryActionItem?: AppMenuPrimaryActionItem;
   secondaryActionItem?: AppMenuSecondaryActionItem;
   startPanelId?: number;
+  onClose?: () => void;
 }): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
   const hasActionItems = Boolean(primaryActionItem || secondaryActionItem);
@@ -217,7 +228,7 @@ export const getPopoverPanels = ({
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
     itemsToProcess.forEach((item) => {
-      if (item.seperator === 'above') {
+      if (item.separator === 'above') {
         panelItems.push(createSeparatorItem(`separator-${item.id}`));
       }
 
@@ -226,12 +237,12 @@ export const getPopoverPanels = ({
         const childPanelId = currentPanelId;
 
         processItems(item.items, childPanelId, item.label);
-        panelItems.push(mapAppMenuItemToPanelItem(item, childPanelId));
+        panelItems.push(mapAppMenuItemToPanelItem(item, childPanelId, onClose));
       } else {
-        panelItems.push(mapAppMenuItemToPanelItem(item));
+        panelItems.push(mapAppMenuItemToPanelItem(item, undefined, onClose));
       }
 
-      if (item.seperator === 'below') {
+      if (item.separator === 'below') {
         panelItems.push(createSeparatorItem(`separator-${item.id}`));
       }
     });
