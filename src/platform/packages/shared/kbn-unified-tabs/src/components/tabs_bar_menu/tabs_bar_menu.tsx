@@ -31,8 +31,9 @@ import type { TabItem } from '../../types';
 import { TabPreview } from '../tab_preview';
 
 interface OptionData {
-  tabItem: RecentlyClosedTabItem | TabItem;
-  formattedTime?: string;
+  // lowercase names because EUI applies these to the DOM and React warns against non-lowercase attributes
+  tabitem: RecentlyClosedTabItem | TabItem;
+  formattedtime?: string;
 }
 
 const getOpenedTabsList = (
@@ -43,7 +44,7 @@ const getOpenedTabsList = (
     label: tab.label,
     checked: selectedTab && tab.id === selectedTab.id ? 'on' : undefined,
     key: tab.id,
-    tabItem: tab,
+    tabitem: tab,
   }));
 };
 
@@ -58,8 +59,8 @@ const getRecentlyClosedTabsList = (
       label: tab.label,
       key: tab.id,
       'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
-      tabItem: tab,
-      formattedTime,
+      tabitem: tab,
+      formattedtime: formattedTime,
     };
   });
 };
@@ -124,9 +125,9 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         const itemContents = (
           <>
             {option.label}
-            {option.formattedTime && (
+            {option.formattedtime && (
               <EuiText size="xs" color="subdued" className="eui-displayBlock">
-                {option.formattedTime}
+                {option.formattedtime}
               </EuiText>
             )}
           </>
@@ -136,7 +137,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           return itemContents;
         }
 
-        const previewData = getPreviewData(option.tabItem);
+        const previewData = getPreviewData(option.tabitem);
 
         return (
           <TabPreview
