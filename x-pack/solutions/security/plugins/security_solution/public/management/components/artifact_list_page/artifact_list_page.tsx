@@ -120,6 +120,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       doesDataExist,
       error,
       refetch: refetchListData,
+      dataUpdatedAt,
     } = useWithArtifactListData(apiClient, searchableFields);
 
     useEffect(() => {
@@ -416,6 +417,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               contentClassName="card-container"
               data-test-subj={getTestId('list')}
               CardDecorator={CardDecorator}
+              dataUpdatedAt={dataUpdatedAt}
             />
           </>
         )}
