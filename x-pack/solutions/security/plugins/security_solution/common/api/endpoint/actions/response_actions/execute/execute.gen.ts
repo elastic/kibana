@@ -16,14 +16,17 @@
 
 import { z } from '@kbn/zod';
 
-import { BaseActionSchema, Command, Timeout } from '../../../model/schema/common.gen';
+import { BaseActionSchema, Command } from '../../../model/schema/common.gen';
 
 export type ExecuteRouteRequestBody = z.infer<typeof ExecuteRouteRequestBody>;
 export const ExecuteRouteRequestBody = BaseActionSchema.merge(
   z.object({
     parameters: z.object({
       command: Command,
-      timeout: Timeout.optional(),
+      /**
+       * The maximum timeout value in seconds before the command is terminated.
+       */
+      timeout: z.number().int().min(1).optional(),
     }),
   })
 );
