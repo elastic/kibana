@@ -94,6 +94,13 @@ export const TopCategoriesTable = styled(
       [expandedCategories, logViewReference, timeRange]
     );
 
+    const tableCaption =
+      topCategories.length === 0
+        ? i18n.translate('xpack.infra.logs.logEntryCategories.noCategoriesTableCaption', {
+            defaultMessage: 'Table has no data',
+          })
+        : '';
+
     return (
       <EuiBasicTable
         columns={columns}
@@ -103,6 +110,7 @@ export const TopCategoriesTable = styled(
         rowProps={{ className: `${className} euiTableRow--topAligned` }}
         onChange={handleTableChange}
         sorting={tableSortOptions}
+        tableCaption={tableCaption}
       />
     );
   }

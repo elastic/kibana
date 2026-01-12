@@ -15,6 +15,7 @@ import type {
 } from '@elastic/eui';
 import {
   EuiCallOut,
+  EuiCode,
   EuiDataGrid,
   EuiPanel,
   EuiLink,
@@ -24,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -32,8 +34,9 @@ import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../common/constants';
 import { useActionResults } from '../action_results/use_action_results';
-import { generateEmptyDataMessage } from './translations';
+import { generateEmptyDataMessage, PAGINATION_LIMIT_TITLE } from './translations';
 import {
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
@@ -43,6 +46,31 @@ import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
 import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
+
+const PaginationLimitToastContent = () => (
+  <>
+    <p>
+      <FormattedMessage
+        id="xpack.osquery.results.paginationLimitDescription"
+        defaultMessage="Results limited to first 10,000 documents. To see all results, please use the {viewInDiscoverButton} button."
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          viewInDiscoverButton: <strong>&quot;View in Discover&quot;</strong>,
+        }}
+      />
+    </p>
+    <p>
+      <FormattedMessage
+        id="xpack.osquery.results.paginationLimitIndexAccess"
+        defaultMessage="Read access to {indexName} index is required."
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          indexName: <EuiCode>logs-osquery_manager.results</EuiCode>,
+        }}
+      />
+    </p>
+  </>
+);
 
 const euiDataGridCss = {
   ':not(.euiDataGrid--fullScreen)': {
@@ -99,8 +127,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     application: { getUrlForApp },
     appName,
     timelines,
+    notifications: { toasts },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
-
   const getFleetAppUrl = useCallback(
     (agentId: any) =>
       getUrlForApp('fleet', {
@@ -109,19 +139,35 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [getUrlForApp]
   );
 
+  const showPaginationLimitToast = useCallback(() => {
+    toasts.addWarning({
+      title: PAGINATION_LIMIT_TITLE,
+      text: toMountPoint(<PaginationLimitToastContent />, { i18n: i18nStart, theme }),
+    });
+  }, [i18nStart, theme, toasts]);
+
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
-    (pageSize: any) =>
+    (pageSize: any) => {
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
         pageIndex: 0,
-      })),
+      }));
+    },
     [setPagination]
   );
   const onChangePage = useCallback(
-    (pageIndex: any) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
-    [setPagination]
+    (pageIndex: any) => {
+      if ((pageIndex + 1) * pagination.pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+        showPaginationLimitToast();
+
+        return;
+      }
+
+      setPagination((currentPagination) => ({ ...currentPagination, pageIndex }));
+    },
+    [pagination.pageSize, setPagination, showPaginationLimitToast]
   );
 
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([

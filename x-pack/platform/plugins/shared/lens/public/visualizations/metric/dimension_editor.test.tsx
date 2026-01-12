@@ -938,7 +938,7 @@ describe('dimension editor', () => {
       );
 
       const supportingVisOptions = {
-        panel: screen.queryByTitle(/panel/i),
+        none: screen.queryByTitle(/none/i),
         // in eui when bar or line become disabled they change from input to button so we have to do this weird check
         bar: screen.queryByTitle(/bar/i) || screen.queryByRole('button', { name: /bar/i }),
         trendline: screen.queryByTitle(/line/i) || screen.queryByRole('button', { name: /line/i }),
@@ -947,7 +947,7 @@ describe('dimension editor', () => {
       const clickOnSupportingVis = async (type: SupportingVisType) => {
         const supportingVis = supportingVisOptions[type];
         if (!supportingVis) {
-          throw new Error(`Supporting visualization ${type} not found`);
+          throw new Error(`Background chart ${type} not found`);
         }
         await userEvent.click(supportingVis);
       };
@@ -1011,18 +1011,18 @@ describe('dimension editor', () => {
       expect(container).toBeEmptyDOMElement();
     });
 
-    describe('supporting visualizations', () => {
+    describe('background visualizations', () => {
       const stateWOTrend = {
         ...metricAccessorState,
         trendlineLayerId: undefined,
       };
 
       describe('reflecting visualization state', () => {
-        it('when `showBar` is false and maximum value is not defined, option `panel` should be selected', () => {
+        it('when `showBar` is false and maximum value is not defined, option `none` should be selected', () => {
           const { supportingVisOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
           });
-          expect(supportingVisOptions.panel).toHaveAttribute('aria-pressed', 'true');
+          expect(supportingVisOptions.none).toHaveAttribute('aria-pressed', 'true');
         });
 
         it('when `showBar` is true and maximum value is not defined, bar should be selected', () => {
@@ -1123,17 +1123,17 @@ describe('dimension editor', () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: stateWOTrend,
           });
-          await clickOnSupportingVis('panel');
+          await clickOnSupportingVis('none');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.removeLayer).not.toHaveBeenCalled();
         });
 
-        it('selects panel from trendline', async () => {
+        it('selects none from trendline', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: metricAccessorState,
           });
-          await clickOnSupportingVis('panel');
+          await clickOnSupportingVis('none');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
@@ -1141,7 +1141,7 @@ describe('dimension editor', () => {
           expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
         });
 
-        it('selects trendline from panel with apply color to value', async () => {
+        it('selects trendline from none with apply color to value', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: {
               ...stateWOTrend,
@@ -1154,7 +1154,7 @@ describe('dimension editor', () => {
           );
         });
 
-        it('selects bar from panel with apply color to value', async () => {
+        it('selects bar from none with apply color to value', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: {
               ...metricAccessorState,
@@ -1197,7 +1197,7 @@ describe('dimension editor', () => {
       });
 
       describe('`apply color to` controls', () => {
-        it('should show `apply color to` button group when `Panel` option is selected', async () => {
+        it('should show `apply color to` button group when `None` option is selected', async () => {
           const { applyColorToBtnGroup, applyColorToOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
           });
@@ -1230,7 +1230,7 @@ describe('dimension editor', () => {
           expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'background' });
         });
 
-        it('should show help message when color mode static, supporting visualization is panel, apply color to value', () => {
+        it('should show help message when color mode static, supporting visualization is none, apply color to value', () => {
           renderAdditionalSectionEditor({
             state: {
               ...stateWOTrend,
@@ -1246,7 +1246,7 @@ describe('dimension editor', () => {
           );
         });
 
-        it('should show help message when color mode dynamic, supporting visualization is panel, apply color to value', () => {
+        it('should show help message when color mode dynamic, supporting visualization is none, apply color to value', () => {
           renderAdditionalSectionEditor({
             state: {
               ...stateWOTrend,

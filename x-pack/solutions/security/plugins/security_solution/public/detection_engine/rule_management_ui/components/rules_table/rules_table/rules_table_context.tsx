@@ -15,7 +15,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
 import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { useGetGapsSummaryByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
@@ -30,6 +29,7 @@ import type {
   RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
+import type { WarningSchema } from '../../../../../../common/api/detection_engine';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
@@ -131,6 +131,10 @@ export interface RulesTableState {
    * Rules snooze settings for the current rules
    */
   rulesSnoozeSettings: RulesSnoozeSettings;
+  /**
+   * Warning, such as when the number of rules with gaps is greater than the limit.
+   */
+  warnings?: WarningSchema[];
 }
 
 export type LoadingRuleAction =
@@ -215,8 +219,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     enabled: savedFilter?.enabled,
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
-    gapSearchRange: DEFAULT_FILTER_OPTIONS.gapSearchRange,
-    showRulesWithGaps: false,
+    gapFillStatuses: DEFAULT_FILTER_OPTIONS.gapFillStatuses,
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -234,10 +237,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [page, setPage] = useState(savedPagination?.page ?? DEFAULT_PAGE);
   const [perPage, setPerPage] = useState(savedPagination?.perPage ?? DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
-  const [gapRangeForSearch, setGapRangeForSearch] = useState<{
-    start: string;
-    end: string;
-  }>();
   const autoRefreshBeforePause = useRef<boolean | null>(null);
 
   const isActionInProgress = loadingRules.ids.length > 0;
@@ -265,6 +264,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       tags: DEFAULT_FILTER_OPTIONS.tags,
       enabled: undefined,
       ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
+      gapFillStatuses: undefined,
     });
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
@@ -292,17 +292,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }
   }, [selectedRuleIds, isRefreshOn]);
 
-  useEffect(() => {
-    if (filterOptions.showRulesWithGaps) {
-      setGapRangeForSearch(getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue));
-    } else {
-      setGapRangeForSearch(undefined);
-    }
-  }, [filterOptions.showRulesWithGaps, filterOptions.gapSearchRange]);
-
   // Fetch rules
   const {
-    data: { rules, total } = { rules: [], total: 0 },
+    data: { rules, total, warnings } = { rules: [], total: 0, warnings: [] },
     refetch,
     dataUpdatedAt,
     isFetched,
@@ -314,7 +306,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       filterOptions,
       sortingOptions,
       pagination,
-      ...(gapRangeForSearch ? { gapsRange: gapRangeForSearch } : {}),
     },
     {
       // We don't need refreshes on windows focus and reconnects if auto-refresh if off
@@ -340,7 +331,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const { data: rulesGapInfoByRuleIds, refetch: refetchGapInfo } = useGetGapsSummaryByRuleIds(
     {
       ruleIds: rules.map((x) => x.id),
-      gapRange: filterOptions.gapSearchRange ?? defaultRangeValue,
+      gapRange: defaultRangeValue,
     },
     {
       enabled: rules.length > 0,
@@ -428,6 +419,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
           perPage,
           total,
         }),
+        warnings,
       },
       actions,
     };
@@ -455,6 +447,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     selectedRuleIds,
     sortingOptions,
     actions,
+    warnings,
   ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;

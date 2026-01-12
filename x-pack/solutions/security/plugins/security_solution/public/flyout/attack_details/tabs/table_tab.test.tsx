@@ -13,22 +13,30 @@ import { TableTab } from './table_tab';
 import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
 
-// mock context to return browserFields + dataFormattedForFieldBrowser
+// mock context to return browserFields + dataFormattedForFieldBrowser + attackId
 jest.mock('../context', () => ({
   useAttackDetailsContext: () => ({
     browserFields: {},
     dataFormattedForFieldBrowser: [],
+    attackId: 'test-attack-id',
   }),
 }));
 
-// mock getTableTabItems
 jest.mock('../utils/table_tab_items', () => ({
   getTableTabItems: jest.fn().mockReturnValue([
     {
       field: 'title',
-      values: 'Test attack title',
+      values: ['Test attack title'],
+      type: 'string',
+      isObjectArray: false,
     },
   ]),
+}));
+
+jest.mock('../components/table_field_value_cell', () => ({
+  TableFieldValueCell: ({ values }: { values: string[] | null | undefined }) => (
+    <span>{Array.isArray(values) ? values.join(', ') : values}</span>
+  ),
 }));
 
 describe('<TableTab /> (attack details)', () => {

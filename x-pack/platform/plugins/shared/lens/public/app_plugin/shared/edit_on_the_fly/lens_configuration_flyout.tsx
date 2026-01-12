@@ -18,9 +18,12 @@ import {
   euiScrollBarStyles,
   EuiWindowEvent,
   keys,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
-import { getLanguageDisplayName, isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { useIsDevMode } from '@kbn/react-env';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
 import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
@@ -36,6 +39,8 @@ import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
+import { ConvertToEsqlModal } from './convert_to_esql_modal';
+import { useEsqlConversion } from './use_esql_conversion';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -289,6 +294,30 @@ export function LensEditConfigurationFlyout({
     }
   };
 
+  const layerIds = useMemo(() => {
+    return activeVisualization && visualization.state
+      ? activeVisualization.getLayerIds(visualization.state)
+      : [];
+  }, [activeVisualization, visualization.state]);
+
+  const isDevMode = useIsDevMode();
+
+  const showConvertToEsqlButton = useMemo(() => {
+    return isDevMode && !textBasedMode;
+  }, [isDevMode, textBasedMode]);
+
+  const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip, convertibleLayers } =
+    useEsqlConversion(
+      showConvertToEsqlButton,
+      { datasourceId, datasourceStates, layerIds, visualization, activeVisualization },
+      { framePublicAPI, coreStart, startDependencies }
+    );
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const closeModal = () => setIsModalVisible(false);
+  const showModal = () => setIsModalVisible(true);
+
   if (isLoading) return null;
 
   const toolbar = (
@@ -297,6 +326,25 @@ export function LensEditConfigurationFlyout({
         <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
+      {showConvertToEsqlButton ? (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="top" content={convertToEsqlButtonTooltip}>
+            <EuiButtonIcon
+              color="success"
+              display="base"
+              size="s"
+              iconType="code"
+              aria-label={i18n.translate('xpack.lens.config.convertToEsqlLabel', {
+                defaultMessage: 'Convert to ES|QL',
+              })}
+              isDisabled={isConvertToEsqlButtonDisabled}
+              onClick={() => {
+                showModal();
+              }}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      ) : null}
     </>
   );
 
@@ -314,6 +362,7 @@ export function LensEditConfigurationFlyout({
     return (
       <>
         {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
+
         <FlyoutWrapper
           isInlineFlyoutVisible={isInlineFlyoutVisible}
           displayFlyoutHeader={displayFlyoutHeader}
@@ -362,163 +411,171 @@ export function LensEditConfigurationFlyout({
         onApply={onApply}
         isSaveable={isSaveable}
         isScrollable
-        language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
         toolbar={toolbar}
         layerTabs={layerTabs}
       >
-        <EuiFlexGroup
-          css={css`
-            block-size: 100%;
-            .euiFlexItem,
-            .euiAccordion,
-            .euiAccordion__triggerWrapper,
-            .euiAccordion__childWrapper {
-              min-block-size: 0;
-            }
-            .euiAccordion {
-              display: flex;
-              flex: 1;
-              flex-direction: column;
-            }
-            .euiAccordion-isOpen {
+        <>
+          <EuiFlexGroup
+            css={css`
+              block-size: 100%;
+              .euiFlexItem,
+              .euiAccordion,
+              .euiAccordion__triggerWrapper,
               .euiAccordion__childWrapper {
-                // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
-                block-size: auto ${textBasedMode ? '!important' : ''};
+                min-block-size: 0;
+              }
+              .euiAccordion {
+                display: flex;
                 flex: 1;
+                flex-direction: column;
               }
-            }
-            .euiAccordion__childWrapper {
-              ${euiScrollBarStyles(euiTheme)}
-              overflow-y: auto !important;
-              pointer-events: none;
-
-              padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
-              margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
-              > * {
-                pointer-events: auto;
+              .euiAccordion-isOpen {
+                .euiAccordion__childWrapper {
+                  // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
+                  block-size: auto ${textBasedMode ? '!important' : ''};
+                  flex: 1;
+                }
               }
-            }
-            .lnsIndexPatternDimensionEditor-advancedOptions {
               .euiAccordion__childWrapper {
-                flex: none;
-                overflow: hidden !important;
-              }
-            }
-          `}
-          direction="column"
-          gutterSize="none"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              css={css`
+                ${euiScrollBarStyles(euiTheme)}
+                overflow-y: auto !important;
+                pointer-events: none;
+
+                padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
+                margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
                 > * {
-                  flex-grow: 0;
+                  pointer-events: auto;
+                }
+              }
+              .lnsIndexPatternDimensionEditor-advancedOptions {
+                .euiAccordion__childWrapper {
+                  flex: none;
+                  overflow: hidden !important;
+                }
+              }
+            `}
+            direction="column"
+            gutterSize="none"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                css={css`
+                  > * {
+                    flex-grow: 0;
+                  }
+                `}
+                gutterSize="none"
+                direction="column"
+                ref={editorContainer}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={isLayerAccordionOpen ? 1 : false}
+              css={css`
+                .euiAccordion__childWrapper {
+                  flex: ${isLayerAccordionOpen ? 1 : 'none'};
+                }
+                padding: 0 ${euiTheme.euiTheme.size.base};
+              `}
+            >
+              <EuiAccordion
+                id="layer-configuration"
+                buttonContent={
+                  <EuiTitle
+                    size="xxs"
+                    css={css`
+                      padding: 2px;
+                    `}
+                  >
+                    <h5>
+                      {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
+                        defaultMessage: 'Visualization parameters',
+                      })}
+                    </h5>
+                  </EuiTitle>
+                }
+                buttonProps={{
+                  paddingSize: 'm',
+                }}
+                initialIsOpen={isLayerAccordionOpen}
+                forceState={isLayerAccordionOpen ? 'open' : 'closed'}
+                onToggle={(status) => {
+                  if (status && isSuggestionsAccordionOpen) {
+                    setIsSuggestionsAccordionOpen(!status);
+                  }
+                  if (status && isESQLResultsAccordionOpen) {
+                    setIsESQLResultsAccordionOpen(!status);
+                  }
+                  setIsLayerAccordionOpen(!isLayerAccordionOpen);
+                }}
+              >
+                <>
+                  <LayerConfiguration
+                    attributes={attributes}
+                    dataLoading$={dataLoading$}
+                    lensAdapters={lensAdapters}
+                    getUserMessages={getUserMessages}
+                    coreStart={coreStart}
+                    startDependencies={startDependencies}
+                    datasourceId={datasourceId}
+                    framePublicAPI={framePublicAPI}
+                    setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+                    updateSuggestion={updateSuggestion}
+                    setCurrentAttributes={setCurrentAttributes}
+                    closeFlyout={closeFlyout}
+                    parentApi={parentApi}
+                    panelId={panelId}
+                    canEditTextBasedQuery={canEditTextBasedQuery}
+                    editorContainer={editorContainer.current || undefined}
+                  />
+                </>
+              </EuiAccordion>
+            </EuiFlexItem>
+
+            <EuiFlexItem
+              grow={isSuggestionsAccordionOpen ? 1 : false}
+              data-test-subj="InlineEditingSuggestions"
+              css={css`
+                border-top: ${euiTheme.euiTheme.border.thin};
+                border-bottom: ${euiTheme.euiTheme.border.thin};
+                padding-left: ${euiTheme.euiTheme.size.base};
+                padding-right: ${euiTheme.euiTheme.size.base};
+                .euiAccordion__childWrapper {
+                  flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
                 }
               `}
-              gutterSize="none"
-              direction="column"
-              ref={editorContainer}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={isLayerAccordionOpen ? 1 : false}
-            css={css`
-              .euiAccordion__childWrapper {
-                flex: ${isLayerAccordionOpen ? 1 : 'none'};
-              }
-              padding: 0 ${euiTheme.euiTheme.size.base};
-            `}
-          >
-            <EuiAccordion
-              id="layer-configuration"
-              buttonContent={
-                <EuiTitle
-                  size="xxs"
-                  css={css`
-                    padding: 2px;
-                  `}
-                >
-                  <h5>
-                    {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
-                      defaultMessage: 'Visualization parameters',
-                    })}
-                  </h5>
-                </EuiTitle>
-              }
-              buttonProps={{
-                paddingSize: 'm',
-              }}
-              initialIsOpen={isLayerAccordionOpen}
-              forceState={isLayerAccordionOpen ? 'open' : 'closed'}
-              onToggle={(status) => {
-                if (status && isSuggestionsAccordionOpen) {
-                  setIsSuggestionsAccordionOpen(!status);
-                }
-                if (status && isESQLResultsAccordionOpen) {
-                  setIsESQLResultsAccordionOpen(!status);
-                }
-                setIsLayerAccordionOpen(!isLayerAccordionOpen);
-              }}
             >
-              <>
-                <LayerConfiguration
-                  attributes={attributes}
-                  dataLoading$={dataLoading$}
-                  lensAdapters={lensAdapters}
-                  getUserMessages={getUserMessages}
-                  coreStart={coreStart}
-                  startDependencies={startDependencies}
-                  datasourceId={datasourceId}
-                  framePublicAPI={framePublicAPI}
-                  setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-                  updateSuggestion={updateSuggestion}
-                  setCurrentAttributes={setCurrentAttributes}
-                  closeFlyout={closeFlyout}
-                  parentApi={parentApi}
-                  panelId={panelId}
-                  canEditTextBasedQuery={canEditTextBasedQuery}
-                  editorContainer={editorContainer.current || undefined}
-                />
-              </>
-            </EuiAccordion>
-          </EuiFlexItem>
-
-          <EuiFlexItem
-            grow={isSuggestionsAccordionOpen ? 1 : false}
-            data-test-subj="InlineEditingSuggestions"
-            css={css`
-              border-top: ${euiTheme.euiTheme.border.thin};
-              border-bottom: ${euiTheme.euiTheme.border.thin};
-              padding-left: ${euiTheme.euiTheme.size.base};
-              padding-right: ${euiTheme.euiTheme.size.base};
-              .euiAccordion__childWrapper {
-                flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
-              }
-            `}
-          >
-            <SuggestionPanel
-              ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-              frame={framePublicAPI}
-              core={coreStart}
-              nowProvider={startDependencies.data.nowProvider}
-              showOnlyIcons
-              wrapSuggestions
-              isAccordionOpen={isSuggestionsAccordionOpen}
-              toggleAccordionCb={(status) => {
-                if (!status && isLayerAccordionOpen) {
-                  setIsLayerAccordionOpen(status);
-                }
-                if (status && isESQLResultsAccordionOpen) {
-                  setIsESQLResultsAccordionOpen(!status);
-                }
-                setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
-              }}
+              <SuggestionPanel
+                ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+                frame={framePublicAPI}
+                core={coreStart}
+                nowProvider={startDependencies.data.nowProvider}
+                showOnlyIcons
+                wrapSuggestions
+                isAccordionOpen={isSuggestionsAccordionOpen}
+                toggleAccordionCb={(status) => {
+                  if (!status && isLayerAccordionOpen) {
+                    setIsLayerAccordionOpen(status);
+                  }
+                  if (status && isESQLResultsAccordionOpen) {
+                    setIsESQLResultsAccordionOpen(!status);
+                  }
+                  setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {isModalVisible ? (
+            <ConvertToEsqlModal
+              layers={convertibleLayers}
+              onCancel={closeModal}
+              onConfirm={closeModal}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          ) : null}
+        </>
       </FlyoutWrapper>
     </>
   );

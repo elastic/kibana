@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TITLE = i18n.translate(
+export const AI_ASSISTANT_VISIBILITY_TITLE = i18n.translate(
   'aiAssistantManagementSelection.preferredAIAssistantTypeSettingName',
   {
     defaultMessage: 'AI Assistant visibility',
@@ -31,4 +31,20 @@ export const SECURITY_IN_OTHER_APPS = i18n.translate(
 export const HIDE_ALL_ASSISTANTS = i18n.translate(
   'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
   { defaultMessage: 'Hide all assistants' }
+);
+
+export const CHAT_EXPERIENCE_TITLE = i18n.translate(
+  'aiAssistantManagementSelection.preferredChatExperienceSettingName',
+  {
+    defaultMessage: 'Chat Experience',
+  }
+);
+
+export const CLASSIC_AI_ASSISTANT = i18n.translate(
+  'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueClassic',
+  { defaultMessage: 'Classic AI Assistant' }
+);
+export const AI_AGENT = i18n.translate(
+  'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueAgent',
+  { defaultMessage: 'AI Agent (Beta)' }
 );

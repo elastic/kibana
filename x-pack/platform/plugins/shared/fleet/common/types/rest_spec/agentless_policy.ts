@@ -44,6 +44,8 @@ export const CreateAgentlessPolicyRequestSchema = {
         ),
         name: schema.maybe(
           schema.string({
+            minLength: 1,
+            maxLength: 255,
             meta: {
               description:
                 'Optional name for the cloud connector. If not provided, will be auto-generated from credentials.',

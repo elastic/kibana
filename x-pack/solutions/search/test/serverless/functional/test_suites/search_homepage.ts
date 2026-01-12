@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   // Skip the tests until timeout flakes can be diagnosed and resolved
   describe.skip('Search Homepage', function () {
@@ -70,6 +71,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('copyEndpointButton');
           await testSubjects.existOrFail('endpointValueField');
           await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
+        });
+
+        it('shows checkmark icon feedback when copy button is clicked', async () => {
+          await testSubjects.existOrFail('copyEndpointButton');
+          await testSubjects.click('copyEndpointButton');
+          // After clicking, the button should show copied state
+          await retry.try(async () => {
+            await testSubjects.existOrFail('copyEndpointButton-copied');
+          });
+          // After 1 second, it should revert back to normal state
+          await retry.try(async () => {
+            await testSubjects.existOrFail('copyEndpointButton');
+            await testSubjects.missingOrFail('copyEndpointButton-copied');
+          });
         });
       });
 

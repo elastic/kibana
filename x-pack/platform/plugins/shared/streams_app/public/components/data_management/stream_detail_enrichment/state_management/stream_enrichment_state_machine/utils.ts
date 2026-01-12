@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { type StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,6 +17,7 @@ import type {
   LatestSamplesDataSource,
 } from '../../../../../../common/url_schema';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
 import { dataSourceConverter } from '../../utils';
 import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
@@ -29,7 +28,7 @@ import {
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
 import type { StepActorRef } from '../steps_state_machine';
-import { isStepUnderEdit } from '../steps_state_machine';
+import { collectDescendantStepIds } from '../utils';
 import type { StreamEnrichmentContextType } from './types';
 
 export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
@@ -96,43 +95,6 @@ export function getActiveDataSourceSamples(
   }));
 }
 
-/**
- * Gets processors for simulation based on current editing state.
- * - If no processor is being edited: returns all new processors
- * - If a processor is being edited: returns new processors up to and including the one being edited
- */
-export function getStepsForSimulation({
-  stepRefs,
-  isPartialSimulation,
-}: Pick<StreamEnrichmentContextType, 'stepRefs'> & { isPartialSimulation: boolean }) {
-  let newStepSnapshots = stepRefs
-    .map((procRef) => procRef.getSnapshot())
-    .filter(
-      (snapshot) =>
-        isWhereBlock(snapshot.context.step) || (isPartialSimulation ? snapshot.context.isNew : true)
-    );
-
-  // Find if any processor is currently being edited
-  const editingProcessorIndex = newStepSnapshots.findIndex(
-    (snapshot) => isActionBlock(snapshot.context.step) && isStepUnderEdit(snapshot)
-  );
-
-  // If a processor is being edited, set new processors up to and including the one being edited
-  if (editingProcessorIndex !== -1) {
-    newStepSnapshots = newStepSnapshots.slice(0, editingProcessorIndex + 1);
-  }
-
-  // Return processors
-  return newStepSnapshots.map((snapshot) => snapshot.context.step);
-}
-
-export function getConfiguredSteps(context: StreamEnrichmentContextType) {
-  return context.stepRefs
-    .map((proc) => proc.getSnapshot())
-    .filter((proc) => proc.matches('configured'))
-    .map((proc) => proc.context.step);
-}
-
 export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefinition | undefined {
   if (!context.simulatorRef) {
     return undefined;
@@ -159,26 +121,6 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
 
-export const spawnStep = <
-  TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
->(
-  step: StreamlangStepWithUIAttributes,
-  assignArgs: TAssignArgs,
-  options?: { isNew: boolean; isUpdated?: boolean }
-) => {
-  const { spawn, self } = assignArgs;
-
-  return spawn('stepMachine', {
-    id: step.customIdentifier,
-    input: {
-      parentRef: self,
-      step,
-      isNew: options?.isNew ?? false,
-      isUpdated: options?.isUpdated ?? false,
-    },
-  });
-};
-
 export const spawnDataSource = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
@@ -193,10 +135,31 @@ export const spawnDataSource = <
     input: {
       parentRef: self,
       streamName: context.definition.stream.name,
+      streamType: getStreamTypeFromDefinition(context.definition.stream),
       dataSource: dataSourceWithUIAttributes,
     },
   });
 };
+
+/**
+ * Recursively finds a place for a new place step for a step with given parent step.
+ * Takes into account nested conditions and their descendants.
+ */
+function findNewSiblingStepIndex(stepRefs: StepActorRef[], parentId: string): number {
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+  const descendantStepIds = collectDescendantStepIds(steps, parentId);
+  const lastDescendantId = Array.from(descendantStepIds).at(-1);
+
+  const lastDescendantIndex = stepRefs.findIndex((stepRef) => {
+    return stepRef.getSnapshot().context.step.customIdentifier === lastDescendantId;
+  });
+
+  if (lastDescendantIndex !== -1) {
+    return lastDescendantIndex + 1;
+  }
+
+  return -1;
+}
 
 /* Find insert index based on step hierarchy */
 export function findInsertIndex(stepRefs: StepActorRef[], parentId: string | null): number {
@@ -204,19 +167,15 @@ export function findInsertIndex(stepRefs: StepActorRef[], parentId: string | nul
   const parentIndex = parentId ? stepRefs.findIndex((step) => step.id === parentId) : -1;
 
   // Find the last index of any step with the same parentId
-  let lastSiblingIndex = -1;
+  let newSiblingIndex = -1;
 
   if (parentId !== null) {
-    for (let i = 0; i < stepRefs.length; i++) {
-      if (stepRefs[i].getSnapshot().context.step.parentId === parentId) {
-        lastSiblingIndex = i;
-      }
-    }
+    newSiblingIndex = findNewSiblingStepIndex(stepRefs, parentId);
   }
 
-  if (lastSiblingIndex !== -1) {
+  if (newSiblingIndex !== -1) {
     // Insert after the last sibling with the same parentId
-    return lastSiblingIndex + 1;
+    return newSiblingIndex;
   } else if (parentIndex !== -1) {
     // Insert right after the parent if no siblings
     return parentIndex + 1;
@@ -245,7 +204,8 @@ export function reorderSteps(
   direction: 'up' | 'down'
 ): StepActorRef[] {
   // 1. Collect all descendant ids for the block to move
-  const children = collectDescendantIds(stepId, stepRefs);
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+  const children = collectDescendantStepIds(steps, stepId);
   const allBlockIds = new Set([stepId, ...children]);
 
   // 2. Find the start and end index of the block in the original array
@@ -288,7 +248,7 @@ export function reorderSteps(
         // Find the end of this next block in withoutBlock
         let candidateBlockEnd = withoutBlock.findIndex((step) => step.id === candidate.id);
         // Find the last descendant of this block
-        const candidateDescendants = collectDescendantIds(candidate.id, stepRefs);
+        const candidateDescendants = collectDescendantStepIds(steps, candidate.id);
         if (candidateDescendants.size > 0) {
           const lastDescendantId = Array.from(candidateDescendants).pop();
           const lastDescendantIdx = withoutBlock.findIndex((step) => step.id === lastDescendantId);
@@ -303,20 +263,6 @@ export function reorderSteps(
     // If not found, insert at the end among siblings
     return [...withoutBlock.slice(0, insertIndex), ...block, ...withoutBlock.slice(insertIndex)];
   }
-}
-
-export function collectDescendantIds(id: string, stepRefs: StepActorRef[]): Set<string> {
-  const ids = new Set<string>();
-  function collect(currentId: string) {
-    stepRefs
-      .filter((step) => step.getSnapshot().context.step.parentId === currentId)
-      .forEach((child) => {
-        ids.add(child.id);
-        collect(child.id);
-      });
-  }
-  collect(id);
-  return ids;
 }
 
 export type RootLevelMap = Map<string, string>;
@@ -374,3 +320,15 @@ export function selectDataSource(
     }
   });
 }
+
+export const canDataSourceTypeBeOutdated = (
+  dataSourceType: EnrichmentDataSource['type']
+): boolean => {
+  switch (dataSourceType) {
+    case 'latest-samples':
+    case 'kql-samples':
+      return true;
+    default:
+      return false;
+  }
+};

@@ -52,6 +52,8 @@ export const GlobalHeader = React.memo(() => {
     application: { capabilities },
   } = useKibana().services;
   const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
+  const canReadFleet = capabilities.fleet.read === true;
+  const canAddData = canReadFleet && !hasSearchAILakeConfigurations;
   const { pathname } = useLocation();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -103,7 +105,7 @@ export const GlobalHeader = React.memo(() => {
 
         <EuiHeaderSectionItem>
           <EuiHeaderLinks>
-            {!hasSearchAILakeConfigurations && (
+            {canAddData && (
               <EuiHeaderLink
                 color="primary"
                 data-test-subj="add-data"

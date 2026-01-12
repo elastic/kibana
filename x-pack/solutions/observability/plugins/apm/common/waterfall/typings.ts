@@ -71,6 +71,9 @@ export interface WaterfallSpan {
   child?: { id: string[] };
 }
 
+/**
+ * @deprecated Use Error instead
+ */
 export interface WaterfallError {
   id: string;
   timestamp: TimestampUs;

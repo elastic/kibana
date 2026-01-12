@@ -8,7 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*",
+    "types/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -121,9 +121,12 @@
     "@kbn/shared-ux-card-no-data-types",
     "@kbn/licensing-types",
     "@kbn/apm-types",
+    "@kbn/control-group-renderer",
     "@kbn/react-query",
     "@kbn/deeplinks-analytics",
     "@kbn/esql-composer",
+    "@kbn/fleet-plugin",
+    "@kbn/observability-agent-builder-plugin"
   ],
   "exclude": ["target/**/*"]
 }

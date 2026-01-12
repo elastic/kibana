@@ -111,6 +111,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 }); // The tour does not appear after refresh
       });
 
+      it('should navigate to space settings when clicking the Space settings button', async () => {
+        await updateSolutionDefaultSpace('es');
+        await PageObjects.common.sleep(500);
+        await removeGlobalSettings();
+        await browser.refresh();
+
+        await testSubjects.existOrFail('spaceSolutionTour', { timeout: 3000 });
+        await testSubjects.existOrFail('spaceSettingsTourBtn', { timeout: 3000 });
+
+        await testSubjects.click('spaceSettingsTourBtn');
+
+        // Verify navigation to space settings
+        await retry.waitFor('navigation to space settings', async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          return currentUrl.includes('/management/kibana/spaces');
+        });
+
+        // Tour should be closed after clicking
+        await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+      });
+
       it('does not show the solution tour after updating the default space from classic to solution', async () => {
         await updateSolutionDefaultSpace('es'); // set a solution
         await PageObjects.common.sleep(500);

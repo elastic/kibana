@@ -70,6 +70,8 @@ class DocumentationService {
   private updateExistingDS: string = '';
   private enrichIngestData: string = '';
   private mappingReference: string = '';
+  private elasticInferenceService: string = '';
+  private elasticInferenceServicePricing: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -133,6 +135,8 @@ class DocumentationService {
     this.bulkApi = links.enterpriseSearch.bulkApi;
     this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;
     this.enrichIngestData = links.ingest.enrich;
+    this.elasticInferenceService = links.enterpriseSearch.elasticInferenceService;
+    this.elasticInferenceServicePricing = links.enterpriseSearch.elasticInferenceServicePricing;
   }
 
   public getEsDocsBase() {
@@ -371,6 +375,14 @@ class DocumentationService {
 
   public getEnrichIngestDataLink() {
     return this.enrichIngestData;
+  }
+
+  public getEisDocumentationLink() {
+    return this.elasticInferenceService;
+  }
+
+  public getEisPricingDocumentationLink() {
+    return this.elasticInferenceServicePricing;
   }
 
   public getWellKnownTextLink() {

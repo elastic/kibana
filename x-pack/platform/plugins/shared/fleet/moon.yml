@@ -133,5 +133,9 @@ fileGroups:
     - server/**/*.json
     - scripts/**/*
     - package.json
+    - cypress.config.ts
+    - cypress.config.space_awareness.ts
+    - '!cypress.config.ts'
+    - '!cypress.config.space_awareness.ts'
     - '!target/**/*'
 tasks: {}

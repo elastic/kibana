@@ -27,11 +27,11 @@ import {
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
-import type { StreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 
 export function DocumentsColumn({
   indexPattern,
@@ -40,14 +40,14 @@ export function DocumentsColumn({
   numDataPoints,
 }: {
   indexPattern: string;
-  histogramQueryFetch: StreamDocCountsFetch;
+  histogramQueryFetch: Promise<UnparsedEsqlResponse>;
   timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
 }) {
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
-  const histogramQueryResult = useAsync(() => histogramQueryFetch.docCount, [histogramQueryFetch]);
+  const histogramQueryResult = useAsync(() => histogramQueryFetch, [histogramQueryFetch]);
 
   const allTimeseries = React.useMemo(
     () =>

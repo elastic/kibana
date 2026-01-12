@@ -7,21 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type {
-  StreamQueryKql,
-  Streams,
-  Feature,
-  GeneratedSignificantEventQuery,
-  FeatureType,
-} from '@kbn/streams-schema';
-import { useTimefilter } from '../../hooks/use_timefilter';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useKibana } from '../../hooks/use_kibana';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
 import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 export const EditSignificantEventFlyout = ({
+  refreshDefinition,
   queryToEdit,
   definition,
   isEditFlyoutOpen,
@@ -32,50 +27,54 @@ export const EditSignificantEventFlyout = ({
   setQueryToEdit,
   features,
   refresh,
+  refreshFeatures,
+  generateOnMount,
+  aiFeatures,
 }: {
+  refreshDefinition: () => void;
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
-  selectedFeatures: Feature[];
-  setSelectedFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
-  features: Feature[];
+  selectedFeatures: System[];
+  setSelectedFeatures: React.Dispatch<React.SetStateAction<System[]>>;
+  features: System[];
   queryToEdit?: StreamQueryKql;
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  refreshFeatures: () => void;
+  generateOnMount: boolean;
+  aiFeatures: AIFeatures | null;
 }) => {
   const {
     core: { notifications },
     services: { telemetryClient },
   } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
 
   const { upsertQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
-    start,
-    end,
   });
+
+  const onCloseFlyout = () => {
+    setIsEditFlyoutOpen(false);
+    setQueryToEdit(undefined);
+    setSelectedFeatures([]);
+  };
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
-      definition={definition.stream}
+      generateOnMount={generateOnMount}
+      refreshDefinition={refreshDefinition}
+      refreshFeatures={refreshFeatures}
+      definition={definition}
       query={queryToEdit}
+      aiFeatures={aiFeatures}
       onSave={async (data: SaveData) => {
         const streamType = getStreamTypeFromDefinition(definition.stream);
 
         switch (data.type) {
           case 'single':
-            await upsertQuery({
-              ...data.query,
-              feature: data.query.feature
-                ? {
-                    name: data.query.feature.name,
-                    filter: data.query.feature.filter,
-                  }
-                : undefined,
-            }).then(
+            await upsertQuery(data.query).then(
               () => {
                 notifications.toasts.addSuccess({
                   title: i18n.translate(
@@ -84,19 +83,14 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
+                onCloseFlyout();
+                refresh();
+
                 telemetryClient.trackSignificantEventsCreated({
                   count: 1,
-                  count_by_feature_type: {
-                    system: 0,
-                    ...(data.query.feature && {
-                      [(data.query.feature as GeneratedSignificantEventQuery['feature'])!.type]: 1,
-                    }),
-                  },
                   stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
-                setIsEditFlyoutOpen(false);
-                refresh();
               },
               (error) => {
                 notifications.showErrorDialog({
@@ -112,15 +106,7 @@ export const EditSignificantEventFlyout = ({
           case 'multiple':
             await bulk(
               data.queries.map((query) => ({
-                index: {
-                  ...query,
-                  feature: query.feature
-                    ? {
-                        name: query.feature.name,
-                        filter: query.feature.filter,
-                      }
-                    : undefined,
-                },
+                index: query,
               }))
             ).then(
               () => {
@@ -131,26 +117,14 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
+                setIsEditFlyoutOpen(false);
+                refresh();
+
                 telemetryClient.trackSignificantEventsCreated({
                   count: data.queries.length,
-                  count_by_feature_type: data.queries.reduce(
-                    (acc, query) => {
-                      if (query.feature) {
-                        const type = (query.feature as GeneratedSignificantEventQuery['feature'])!
-                          .type as FeatureType;
-                        acc[type] = acc[type] + 1;
-                      }
-                      return acc;
-                    },
-                    {
-                      system: 0,
-                    } satisfies Record<FeatureType, number>
-                  ),
                   stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
-                setIsEditFlyoutOpen(false);
-                refresh();
               },
               (error) => {
                 notifications.showErrorDialog({
@@ -165,11 +139,7 @@ export const EditSignificantEventFlyout = ({
             break;
         }
       }}
-      onClose={() => {
-        setIsEditFlyoutOpen(false);
-        setQueryToEdit(undefined);
-        setSelectedFeatures([]);
-      }}
+      onClose={onCloseFlyout}
       initialFlow={initialFlow}
       initialSelectedFeatures={selectedFeatures}
       features={features}

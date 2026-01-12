@@ -7,7 +7,65 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// kibana
+// Alert Triage:
+// * Update alert status (operationId: SetAlertsStatus)
+// * Assign ownership (operationId: SetAlertAssignees)
+// * Apply tags (operationId: SetAlertTags)
+// * Read tags (operationId: ReadTags)
+// Case Management:
+// * Create case (operationId: createCaseDefaultSpace)
+// * Update case (operationId: updateCaseDefaultSpace)
 export const KIBANA_SAMPLE_STEPS = [
+  {
+    name: 'set_alerts_status_by_ids',
+    type: 'kibana.SetAlertsStatus',
+    with: {
+      status: 'closed',
+      signal_ids: ['123'],
+    },
+  },
+  {
+    name: 'set_alerts_status_by_query',
+    type: 'kibana.SetAlertsStatus',
+    with: {
+      status: 'closed',
+      query: {
+        match: {
+          'kibana.alert.uuid': '123',
+        },
+      },
+    },
+  },
+  // NOTE: kibana.SetAlertAssignees is not currently available in generated connectors
+  // {
+  //   name: 'set_alert_assignees_by_ids',
+  //   type: 'kibana.SetAlertAssignees',
+  //   with: {
+  //     assignees: {
+  //       add: ['123'],
+  //       remove: [],
+  //     },
+  //     ids: ['123'],
+  //   },
+  // },
+  {
+    name: 'set_alert_tags',
+    type: 'kibana.SetAlertTags',
+    with: {
+      tags: {
+        tags_to_add: ['123'],
+        tags_to_remove: [],
+      },
+      ids: ['123'],
+    },
+  },
+  // NOTE: kibana.ReadTags is not currently available in generated connectors
+  // {
+  //   name: 'read_tags',
+  //   type: 'kibana.ReadTags',
+  //   with: {},
+  // },
   {
     name: 'create_case',
     type: 'kibana.createCaseDefaultSpace',
@@ -27,6 +85,19 @@ export const KIBANA_SAMPLE_STEPS = [
         type: '.none',
         fields: null,
       },
+    },
+  },
+  {
+    name: 'update_case',
+    type: 'kibana.updateCaseDefaultSpace',
+    with: {
+      cases: [
+        {
+          id: '123',
+          version: '123',
+          description: 'New Description',
+        },
+      ],
     },
   },
 ];

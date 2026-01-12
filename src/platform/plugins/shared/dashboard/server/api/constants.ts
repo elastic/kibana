@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PUBLIC_API_PATH = '/api/dashboards/dashboard';
 /**
  * INTERNAL_API_VERSION is the temporary version for the internal API until the
  * public API is fully implemented and stable. When the public API is ready, this

@@ -92,14 +92,17 @@ test.describe('Stream data routing - AI suggestions interactions', { tag: ['@ess
     await expect(page.getByTestId('streamsAppReviewPartitioningSuggestionsCallout')).toBeVisible();
   });
 
-  test('should update suggestion name when editing and accepting', async ({ page }) => {
+  test('should update suggestion name when editing and accepting', async ({
+    page,
+    pageObjects,
+  }) => {
     const originalStreamName = getStreamName(MOCK_SUGGESTIONS_MULTIPLE[0].name);
     await clickSuggestionEditButton(page, originalStreamName);
 
     const nameInput = page.getByTestId('streamsAppRoutingStreamEntryNameField');
     await expect(nameInput).toBeVisible();
 
-    await nameInput.fill('debug');
+    await pageObjects.streams.fillRoutingRuleName('debug');
 
     const acceptButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateAndAcceptButton');
     await expect(acceptButton).toBeEnabled();

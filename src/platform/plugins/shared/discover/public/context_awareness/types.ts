@@ -24,12 +24,15 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { ChartSectionConfiguration } from '@kbn/unified-histogram/types';
+import type {
+  ChartSectionProps,
+  UnifiedHistogramTopPanelHeightContext,
+} from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
-import type { TabState } from '../application/main/state_management/redux';
 
 /**
  * Supports extending the Discover app menu
@@ -99,6 +102,24 @@ export interface AppMenuExtensionParams {
   authorizedRuleTypeIds: string[];
 }
 
+/**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
+  /**
+   * The query to open in the new tab
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TimeRange;
+}
+
 export interface ChartSectionConfigurationExtensionParams {
   /**
    * Available actions for the chart section configuration
@@ -112,9 +133,37 @@ export interface ChartSectionConfigurationExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
   };
 }
+
+/**
+ * Supports customizing the chart (UnifiedHistogram) section in Discover
+ */
+export type ChartSectionConfiguration<T extends object = object> =
+  | {
+      /**
+       * The render function for the chart section
+       */
+      renderChartSection: (
+        props: ChartSectionProps & RestorableStateProviderProps<T>
+      ) => React.ReactElement;
+      /**
+       * Controls whether or not to replace the default histogram and activate the custom chart
+       */
+      replaceDefaultChart: true;
+      /**
+       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
+       */
+      localStorageKeyPrefix?: string;
+      /**
+       * The default chart section height
+       */
+      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+    }
+  | {
+      replaceDefaultChart: false;
+    };
 
 /**
  * Supports customizing the Discover document viewer flyout
@@ -364,24 +413,6 @@ export interface AdditionalCellAction {
 }
 
 /**
- * Parameters passed to the open in new tab action
- */
-export interface OpenInNewTabParams {
-  /**
-   * The query to open in the new tab
-   */
-  query?: TabState['appState']['query'];
-  /**
-   * The label of the new tab
-   */
-  tabLabel?: string;
-  /**
-   * The time range to open in the new tab
-   */
-  timeRange?: TabState['globalState']['timeRange'];
-}
-
-/**
  * The core profile interface for Discover context awareness.
  * Each of the available methods map to a specific extension point in the Discover application.
  */
@@ -479,6 +510,22 @@ export interface Profile {
   getPaginationConfig: () => PaginationConfigExtension;
 
   /**
+   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
+   * Example use case is to overwrite the column header display name or to add icons to the column headers.
+   */
+  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Field list
+   */
+
+  /**
+   * Allows passing additional fields (recommended fields) to the field list area.
+   * @returns The additional fields to display in the Field List under Recommended fields section
+   */
+  getRecommendedFields: () => FieldListExtension;
+
+  /**
    * Document viewer flyout
    */
 
@@ -505,16 +552,4 @@ export interface Profile {
    * @returns The app menu extension
    */
   getAppMenu: (params: AppMenuExtensionParams) => AppMenuExtension;
-
-  /**
-   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
-   * Example use case is to overwrite the column header display name or to add icons to the column headers.
-   */
-  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
-
-  /**
-   * Allows passing additional fields (recommended fields) to the field list area.
-   * @returns The additional fields to display in the Field List under Recommended fields section
-   */
-  getRecommendedFields: () => FieldListExtension;
 }

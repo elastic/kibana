@@ -34,9 +34,8 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -322,28 +321,3 @@ export interface ChartSectionProps {
    */
   isComponentVisible: boolean;
 }
-/**
- * Supports customizing the chart (UnifiedHistogram) section in Discover
- */
-export type ChartSectionConfiguration<T extends object = object> =
-  | {
-      /**
-       * The component to render for the chart section
-       */
-      Component: React.ComponentType<ChartSectionProps & RestorableStateProviderProps<T>>;
-      /**
-       * Controls whether or not to replace the default histogram and activate the custom chart
-       */
-      replaceDefaultChart: true;
-      /**
-       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
-       */
-      localStorageKeyPrefix?: string;
-      /**
-       * The default chart section height
-       */
-      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
-    }
-  | {
-      replaceDefaultChart: false;
-    };

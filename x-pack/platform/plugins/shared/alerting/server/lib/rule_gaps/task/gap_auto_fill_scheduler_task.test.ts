@@ -390,7 +390,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         const result = await taskRunner.run();
 
         expect(result).toEqual({ state: {} });
-        expectFinalLog('skipped', 'no rules with gaps');
+        expectFinalLog('no_gaps', 'no rules with gaps');
         expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledWith(
           expect.objectContaining({
             start: expect.any(String),
@@ -1068,6 +1068,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         startISO,
         endISO,
         taskInstanceId: 'test-task',
+        numRetries: mockSchedulerConfig.numRetries,
       });
 
       expect(result.state).toBe(SchedulerLoopState.COMPLETED);
@@ -1149,6 +1150,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         startISO,
         endISO,
         taskInstanceId: 'test-task',
+        numRetries: mockSchedulerConfig.numRetries,
       });
 
       expect(result.state).toBe(SchedulerLoopState.CAPACITY_EXHAUSTED);
@@ -1173,6 +1175,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         startISO,
         endISO,
         taskInstanceId: 'test-task',
+        numRetries: mockSchedulerConfig.numRetries,
       });
 
       expect(result.state).toBe(SchedulerLoopState.CANCELLED);
@@ -1218,6 +1221,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         startISO,
         taskInstanceId: 'test-task',
         toProcessRuleIds: ['rule-1'],
+        numRetries: mockSchedulerConfig.numRetries,
       });
 
       expect(result.state).toBe(SchedulerLoopState.COMPLETED);
@@ -1268,6 +1272,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         startISO,
         taskInstanceId: 'test-task',
         toProcessRuleIds: ['rule-1'],
+        numRetries: mockSchedulerConfig.numRetries,
       });
 
       expect(result.state).toBe(SchedulerLoopState.CAPACITY_EXHAUSTED);
@@ -1308,6 +1313,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         startISO,
         taskInstanceId: 'test-task',
         toProcessRuleIds: ['rule-1'],
+        numRetries: mockSchedulerConfig.numRetries,
       });
 
       expect(result.state).toBe(SchedulerLoopState.CANCELLED);

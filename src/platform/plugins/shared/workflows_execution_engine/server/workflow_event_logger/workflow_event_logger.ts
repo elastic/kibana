@@ -253,7 +253,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     try {
       await this.logsRepository.createLogs(events);
 
-      this.logger.info(`Successfully indexed ${events.length} workflow events`);
+      this.logger.debug(`Successfully indexed ${events.length} workflow events`);
     } catch (error) {
       this.logger.error(`Failed to index workflow events: ${error.message}`, {
         eventsCount: events.length,

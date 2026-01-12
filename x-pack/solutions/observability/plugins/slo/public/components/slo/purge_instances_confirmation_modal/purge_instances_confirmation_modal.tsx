@@ -11,6 +11,7 @@ import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFormRow,
+  EuiI18n,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
@@ -27,6 +28,16 @@ interface Props {
   onCancel: () => void;
   onConfirm: () => void;
 }
+
+const STALE_SLO_THRESHOLD_LABEL = i18n.translate(
+  'xpack.slo.purgeInstancesConfirmationModal.staleSloThresholdLabel',
+  { defaultMessage: 'Stale SLOs threshold' }
+);
+
+const STALE_THRESHOLD_LABEL = i18n.translate(
+  'xpack.slo.purgeInstancesConfirmationModal.staleThresholdLabel',
+  { defaultMessage: 'Stale threshold' }
+);
 
 export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: Props) {
   const { mutate: purgeInstances } = usePurgeInstances({ onConfirm });
@@ -49,6 +60,8 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
   const isFormValid =
     Number.isInteger(staleDuration) && staleDuration > 0 && (!requireOverride || override);
 
+  const hasSelectedSlos = items && items.length > 0;
+
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
@@ -57,7 +70,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
       confirmButtonDisabled={!isFormValid}
       data-test-subj="purgeInstancesConfirmationModal"
       title={i18n.translate('xpack.slo.purgeInstancesConfirmationModal.title', {
-        defaultMessage: 'Purge stale instances?',
+        defaultMessage: 'Purge stale instances',
       })}
       cancelButtonText={i18n.translate(
         'xpack.slo.purgeInstancesConfirmationModal.cancelButtonLabel',
@@ -78,10 +91,26 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiText>
-          {i18n.translate('xpack.slo.purgeInstancesConfirmationModal.descriptionText', {
-            defaultMessage:
-              'This action will permanently delete all stale SLO instances based on the stale duration threshold defined in your settings. You can override this threshold below.',
-          })}
+          {hasSelectedSlos ? (
+            <EuiI18n
+              token="xpack.slo.purgeInstancesConfirmationModal.descriptionTextWithSelection"
+              default="Permanently delete all stale instances from the {count} selected SLOs based on the {settingsLabel} setting. Override this setting by updating the following {inputLabel}."
+              values={{
+                count: items.length,
+                settingsLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
+                inputLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
+              }}
+            />
+          ) : (
+            <EuiI18n
+              token="xpack.slo.purgeInstancesConfirmationModal.descriptionText"
+              default="Permanently delete all stale SLO instances based on the {settingsLabel} setting. Override this setting by updating the following {inputLabel}."
+              values={{
+                settingsLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
+                inputLabel: <strong>{STALE_THRESHOLD_LABEL}</strong>,
+              }}
+            />
+          )}
         </EuiText>
 
         <EuiSpacer size="m" />
@@ -89,7 +118,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
         <EuiFormRow
           label={i18n.translate(
             'xpack.slo.purgeInstancesConfirmationModal.euiFormRow.staleDurationLabel',
-            { defaultMessage: 'Stale duration' }
+            { defaultMessage: 'Stale threshold' }
           )}
           helpText="In hours"
           isInvalid={!Number.isInteger(staleDuration) || staleDuration <= 0}
@@ -104,7 +133,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
             onChange={(e) => setStaleDuration(Number(e.target.value))}
             aria-label={i18n.translate(
               'xpack.slo.purgeInstancesConfirmationModal.euiFieldNumber.staleDurationInHoursLabel',
-              { defaultMessage: 'Stale duration in hours' }
+              { defaultMessage: 'Stale threshold in hours' }
             )}
           />
         </EuiFormRow>
@@ -112,14 +141,21 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
         <EuiFormRow>
           <EuiCheckbox
             id={checkboxId}
+            data-test-subj="sloPurgeInstancesConfirmationModalOverrideCheckbox"
             checked={override}
             disabled={!requireOverride}
             onChange={(e) => {
               setOverride(e.target.checked);
             }}
-            label={i18n.translate('xpack.slo.purgeInstancesConfirmationModal.forcePurge', {
-              defaultMessage: 'Override stale threshold settings',
-            })}
+            label={
+              <EuiI18n
+                token="xpack.slo.purgeInstancesConfirmationModal.forcePurge"
+                default="Override the {settingsLabel} setting"
+                values={{
+                  settingsLabel: <strong>{STALE_SLO_THRESHOLD_LABEL}</strong>,
+                }}
+              />
+            }
           />
         </EuiFormRow>
       </EuiFlexGroup>

@@ -12,6 +12,7 @@ import { useAbortController } from '@kbn/react-hooks';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import React, { useState } from 'react';
+import { omit } from 'lodash';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { getFormattedError } from '../../../../util/errors';
@@ -62,6 +63,7 @@ export const StreamDetailGeneralData = ({
       const body = {
         ingest: {
           ...definition.stream.ingest,
+          processing: omit(definition.stream.ingest.processing, 'updated_at'),
           lifecycle,
         },
       };

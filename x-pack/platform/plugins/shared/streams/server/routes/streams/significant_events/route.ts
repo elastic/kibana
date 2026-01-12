@@ -5,14 +5,17 @@
  * 2.0.
  */
 import {
-  featureSchema,
+  systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { conditionSchema } from '@kbn/streamlang';
-import { from as fromRxjs, map } from 'rxjs';
+import { from as fromRxjs, map, catchError } from 'rxjs';
+import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
+import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
+import { resolveConnectorId } from '../../utils/resolve_connector_id';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
@@ -36,6 +39,7 @@ const previewSignificantEventsRoute = createServerRoute({
           .object({
             name: z.string(),
             filter: conditionSchema,
+            type: z.literal('system'),
           })
           .optional(),
         kql: z.object({
@@ -93,7 +97,92 @@ const previewSignificantEventsRoute = createServerRoute({
   },
 });
 
-const readSignificantEventsRoute = createServerRoute({
+const readAllSignificantEventsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_significant_events 2023-10-31',
+  params: z.object({
+    query: z.object({
+      from: dateFromString.describe('Start of the time range'),
+      to: dateFromString.describe('End of the time range'),
+      bucketSize: z.string().describe('Size of time buckets for aggregation'),
+    }),
+  }),
+  options: {
+    access: 'public',
+    summary: 'Read all significant events',
+    description: 'Read all significant events',
+    availability: {
+      since: '9.4.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              readAllExample: {
+                value: {},
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Successfully retrieved all significant events',
+          content: {
+            'application/json': {
+              examples: {
+                readAllResponse: {
+                  value: {
+                    significant_events: [
+                      {
+                        kql: { query: 'log.level: error' },
+                        occurrences: [{ date: '2024-01-01T00:00:00.000Z', count: 10 }],
+                        change_points: { type: {} },
+                      },
+                    ],
+                    aggregated_occurrences: [{ date: '2024-01-01T00:00:00.000Z', count: 10 }],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  },
+
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SignificantEventsGetResponse> => {
+    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { from, to, bucketSize } = params.query;
+
+    return await readSignificantEventsFromAlertsIndices(
+      {
+        from,
+        to,
+        bucketSize,
+      },
+      { queryClient, scopedClusterClient }
+    );
+  },
+});
+
+const readStreamSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
@@ -101,6 +190,10 @@ const readSignificantEventsRoute = createServerRoute({
       from: dateFromString,
       to: dateFromString,
       bucketSize: z.string(),
+      query: z
+        .string()
+        .optional()
+        .describe('Query string to filter significant events on metadata fields'),
     }),
   }),
 
@@ -124,7 +217,7 @@ const readSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, assetClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { streamsClient, queryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -132,7 +225,7 @@ const readSignificantEventsRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
-    const { from, to, bucketSize } = params.query;
+    const { from, to, bucketSize, query } = params.query;
 
     return await readSignificantEventsFromAlertsIndices(
       {
@@ -140,8 +233,9 @@ const readSignificantEventsRoute = createServerRoute({
         from,
         to,
         bucketSize,
+        query,
       },
-      { assetClient, scopedClusterClient }
+      { queryClient, scopedClusterClient }
     );
   },
 });
@@ -151,13 +245,23 @@ const generateSignificantEventsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
-      currentDate: dateFromString.optional(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
+      sampleDocsSize: z
+        .number()
+        .optional()
+        .describe(
+          'Number of sample documents to use for generation from the current data of stream'
+        ),
     }),
     body: z.object({
-      feature: featureSchema.optional(),
+      system: systemSchema.optional(),
     }),
   }),
   options: {
@@ -181,22 +285,46 @@ const generateSignificantEventsRoute = createServerRoute({
     server,
     logger,
   }): Promise<SignificantEventsGenerateResponse> => {
-    const { streamsClient, scopedClusterClient, licensing, inferenceClient, uiSettingsClient } =
-      await getScopedClients({ request });
+    const {
+      streamsClient,
+      scopedClusterClient,
+      licensing,
+      inferenceClient,
+      uiSettingsClient,
+      soClient,
+    } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
+    const connectorId = await resolveConnectorId({
+      connectorId: params.query.connectorId,
+      uiSettingsClient,
+      logger,
+    });
+
+    const promptsConfigService = new PromptsConfigService({
+      soClient,
+      logger,
+    });
+
+    // Get connector info for error enrichment
+    const connector = await inferenceClient.getConnectorById(connectorId);
+
     const definition = await streamsClient.getStream(params.path.name);
+
+    const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
 
     return fromRxjs(
       generateSignificantEventDefinitions(
         {
           definition,
-          feature: params.body?.feature,
-          connectorId: params.query.connectorId,
+          system: params.body?.system,
+          connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
+          sampleDocsSize: params.query.sampleDocsSize,
+          systemPromptOverride: significantEventsPromptOverride,
         },
         {
           inferenceClient,
@@ -210,13 +338,17 @@ const generateSignificantEventsRoute = createServerRoute({
         type: 'generated_queries' as const,
         queries,
         tokensUsed,
-      }))
+      })),
+      catchError((error: Error) => {
+        throw createConnectorSSEError(error, connector);
+      })
     );
   },
 });
 
 export const significantEventsRoutes = {
-  ...readSignificantEventsRoute,
+  ...readAllSignificantEventsRoute,
+  ...readStreamSignificantEventsRoute,
   ...previewSignificantEventsRoute,
   ...generateSignificantEventsRoute,
 };

@@ -5,38 +5,46 @@
  * 2.0.
  */
 
-import { EuiResizableContainer, EuiSplitPanel } from '@elastic/eui';
+import { EuiSplitPanel, EuiResizableContainer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { ManagementBottomBar } from '../management_bottom_bar';
-import { RequestPreviewFlyout } from '../request_preview_flyout';
-import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import type { SchemaEditorField } from '../schema_editor/types';
 import { isFieldUncommitted } from '../schema_editor/utils';
+import { EditModeToggle } from './edit_mode_toggle';
 import { SimulationPlayground } from './simulation_playground';
+import { stepUnderEditSelector } from './state_management/interactive_mode_machine/selectors';
 import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import {
   StreamEnrichmentContextProvider,
-  useGetStreamEnrichmentState,
-  useSimulatorSelector,
-  useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
+  useGetStreamEnrichmentState,
+  useStreamEnrichmentEvents,
+  useSimulatorSelector,
+  useOptionalInteractiveModeSelector,
 } from './state_management/stream_enrichment_state_machine';
 import {
-  getConfiguredSteps,
-  getUpsertFields,
-} from './state_management/stream_enrichment_state_machine/utils';
-import { StepsEditor } from './steps_editor';
+  selectIsInteractiveMode,
+  selectStreamType,
+  selectHasAnyErrors,
+} from './state_management/stream_enrichment_state_machine/selectors';
+import { StepsEditor } from './steps/steps_editor';
+import { RunSimulationButton } from './yaml_mode/run_simulation_button';
+import { YamlEditorWrapper } from './yaml_mode/yaml_editor_wrapper';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
 import { buildUpsertStreamRequestPayload } from './utils';
+import { getUpsertFields } from './state_management/stream_enrichment_state_machine/utils';
+import { RequestPreviewFlyout } from '../request_preview_flyout';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -75,16 +83,23 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
 
 export function StreamDetailEnrichmentContentImpl() {
   const context = useKibana();
+  const isInteractiveMode = useStreamEnrichmentSelector(selectIsInteractiveMode);
+  const isYamlMode = !isInteractiveMode;
+  const interactiveModeWithStepUnderEdit = useOptionalInteractiveModeSelector(
+    (state) => Boolean(stepUnderEditSelector(state.context)),
+    false
+  );
   const { appParams, core } = context;
+  const { onPageReady } = usePerformanceContext();
 
   const getStreamEnrichmentState = useGetStreamEnrichmentState();
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
+  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
-  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
   const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
 
@@ -141,6 +156,22 @@ export function StreamDetailEnrichmentContentImpl() {
     return result;
   }, [detectedFields, fieldsInSamples, definitionFields]);
 
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (isReady && definition) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'schemaEditorFields',
+          value1: schemaEditorFields.length,
+        },
+      });
+    }
+  }, [isReady, definition, onPageReady, schemaEditorFields.length]);
+
   const hasDefinitionError = useSimulatorSelector((snapshot) =>
     Boolean(snapshot.context.simulation?.definition_error)
   );
@@ -152,14 +183,27 @@ export function StreamDetailEnrichmentContentImpl() {
     state.matches({ ready: { stream: 'updating' } })
   );
 
-  const hasChanges = canUpdate && !isSimulating;
-  const isLoadingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'generatingSuggestion' } } })
+  const hasAnyErrors = useStreamEnrichmentSelector((state) => selectHasAnyErrors(state.context));
+
+  const nextDSL = useStreamEnrichmentSelector((state) => state.context.nextStreamlangDSL);
+
+  const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
+
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
+
+  // Pipeline suggestion state from interactive mode machine (defaults to false when not in interactive mode)
+  const isLoadingSuggestion = useOptionalInteractiveModeSelector(
+    (snapshot) => snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }),
+    false
   );
-  const isViewingSuggestion = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.matches({ ready: { enrichment: { pipelineSuggestion: 'viewingSuggestion' } } })
+  const isViewingSuggestion = useOptionalInteractiveModeSelector(
+    (snapshot) => snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' }),
+    false
   );
   const isSuggestionVisible = isLoadingSuggestion || isViewingSuggestion;
+
+  const showManagementBar = hasChanges && !interactiveModeWithStepUnderEdit && !isSuggestionVisible;
+
   const {
     isRequestPreviewFlyoutOpen,
     requestPreviewFlyoutCodeContent,
@@ -171,7 +215,7 @@ export function StreamDetailEnrichmentContentImpl() {
     const { context: enrichmentContext } = getStreamEnrichmentState();
     const body = buildUpsertStreamRequestPayload(
       enrichmentContext.definition,
-      getConfiguredSteps(enrichmentContext),
+      nextDSL,
       getUpsertFields(enrichmentContext)
     );
 
@@ -235,7 +279,36 @@ export function StreamDetailEnrichmentContentImpl() {
                 paddingSize="l"
                 css={verticalFlexCss}
               >
-                <StepsEditor />
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="m"
+                  css={css`
+                    padding-bottom: ${showManagementBar ? '65px' : undefined};
+                    height: 100%;
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      alignItems="center"
+                      responsive={false}
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EditModeToggle />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow />
+                      {isYamlMode && (
+                        <EuiFlexItem grow={false}>
+                          <RunSimulationButton />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow style={{ minHeight: 0, overflow: 'auto' }}>
+                    {isYamlMode ? <YamlEditorWrapper /> : <StepsEditor />}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiResizablePanel>
               <EuiResizableButton indicator="border" />
               <EuiResizablePanel
@@ -251,7 +324,7 @@ export function StreamDetailEnrichmentContentImpl() {
           )}
         </EuiResizableContainer>
       </EuiSplitPanel.Inner>
-      {hasChanges && !isSuggestionVisible && (
+      {showManagementBar && (
         <ManagementBottomBar
           onCancel={resetChanges}
           onConfirm={
@@ -261,10 +334,11 @@ export function StreamDetailEnrichmentContentImpl() {
               : saveChanges
           }
           isLoading={isSavingChanges}
-          disabled={!hasChanges}
+          disabled={!canUpdate || isSimulating || interactiveModeWithStepUnderEdit}
           insufficientPrivileges={!canManage}
-          isInvalid={hasDefinitionError}
+          isInvalid={hasDefinitionError || hasAnyErrors}
           onViewCodeClick={onBottomBarViewCodeClick}
+          streamType={streamType}
         />
       )}
       {isRequestPreviewFlyoutOpen && (

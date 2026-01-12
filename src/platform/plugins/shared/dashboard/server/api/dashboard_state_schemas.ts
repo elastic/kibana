@@ -11,7 +11,6 @@ import type { ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
-import { referenceSchema } from '@kbn/content-management-utils';
 import { querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { embeddableService } from '../kibana_services';
@@ -111,33 +110,39 @@ export function getSectionSchema() {
 }
 
 export const optionsSchema = schema.object({
-  hidePanelTitles: schema.maybe(
+  auto_apply_filters: schema.maybe(
     schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.auto_apply_filters,
+      meta: { description: 'Auto apply control filters.' },
+    })
+  ),
+  hide_panel_titles: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.hide_panel_titles,
       meta: { description: 'Hide the panel titles in the dashboard.' },
     })
   ),
-  useMargins: schema.maybe(
+  use_margins: schema.maybe(
     schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.use_margins,
       meta: { description: 'Show margins between panels in the dashboard layout.' },
     })
   ),
-  syncColors: schema.maybe(
+  sync_colors: schema.maybe(
     schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.sync_colors,
       meta: { description: 'Synchronize colors between related panels in the dashboard.' },
     })
   ),
-  syncTooltips: schema.maybe(
+  sync_tooltips: schema.maybe(
     schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncTooltips,
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.sync_tooltips,
       meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
     })
   ),
-  syncCursor: schema.maybe(
+  sync_cursor: schema.maybe(
     schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncCursor,
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.sync_cursor,
       meta: {
         description: 'Synchronize cursor position between related panels in the dashboard.',
       },
@@ -145,18 +150,20 @@ export const optionsSchema = schema.object({
   ),
 });
 
+export const accessControlSchema = schema.maybe(
+  schema.object({
+    owner: schema.maybe(schema.string()),
+    access_mode: schema.maybe(
+      schema.oneOf([schema.literal('write_restricted'), schema.literal('default')])
+    ),
+  })
+);
+
 export function getDashboardStateSchema() {
   return schema.object({
     // unsuppoted "as code" keys
     // TODO remove before GA
     controlGroupInput: schema.maybe(controlsGroupSchema),
-    references: schema.maybe(
-      schema.arrayOf(referenceSchema, {
-        meta: {
-          deprecated: true,
-        },
-      })
-    ),
 
     // supported "as code" keys
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
@@ -169,13 +176,14 @@ export function getDashboardStateSchema() {
     ),
     project_routing: schema.maybe(schema.string()),
     query: schema.maybe(querySchema),
-    refreshInterval: schema.maybe(refreshIntervalSchema),
+    refresh_interval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(
       schema.arrayOf(
         schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } })
       )
     ),
-    timeRange: schema.maybe(timeRangeSchema),
+    time_range: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+    access_control: accessControlSchema,
   });
 }

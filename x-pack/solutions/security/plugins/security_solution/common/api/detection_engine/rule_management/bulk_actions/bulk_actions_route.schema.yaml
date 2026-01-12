@@ -1217,6 +1217,11 @@ components:
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
+        gap_fill_statuses:
+          description: Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
+          type: array
+          items:
+            $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
 
     BulkDeleteRules:
       allOf:

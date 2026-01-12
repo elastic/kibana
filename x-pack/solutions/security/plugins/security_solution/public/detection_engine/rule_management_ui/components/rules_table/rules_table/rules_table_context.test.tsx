@@ -119,8 +119,6 @@ describe('RulesTableContextProvider', () => {
         showCustomRules: true,
         showElasticRules: false,
         enabled: true,
-        gapSearchRange: 'last_24_h',
-        showRulesWithGaps: false,
       });
       expect(state.sortingOptions).toEqual({
         field: 'name',
@@ -142,8 +140,6 @@ describe('RulesTableContextProvider', () => {
         tags: DEFAULT_FILTER_OPTIONS.tags,
         showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
         showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
-        gapSearchRange: 'last_24_h',
-        showRulesWithGaps: false,
       });
       expect(state.sortingOptions).toEqual({
         field: DEFAULT_SORTING_OPTIONS.field,

@@ -11,6 +11,9 @@ import type {
   BulkDeleteInput,
   CreateSLOInput,
   FindSLODefinitionsResponse,
+  FindSLOInstancesResponse,
+  FindSLOTemplatesResponse,
+  GetSLOTemplateResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -84,6 +87,28 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
+    async enable({ sloId }: { sloId: string }, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/{id}/enable`.replace('{id}', sloId))
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(204);
+
+      return body;
+    },
+
+    async disable({ sloId }: { sloId: string }, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/{id}/disable`.replace('{id}', sloId))
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(204);
+
+      return body;
+    },
+
     async delete(id: string, roleAuthc: RoleCredentials) {
       return await supertestWithoutAuth
         .delete(`/api/observability/slos/${id}`)
@@ -140,33 +165,6 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
-    async getSavedObject(roleAuthc: RoleCredentials, sloId: string): Promise<SavedObjectResponse> {
-      const { body } = await supertestWithoutAuth
-        .get(`/api/saved_objects/_find?type=slo&filter=slo.attributes.id:(${sloId})`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send()
-        .expect(200);
-
-      return body;
-    },
-
-    async updateSavedObject(
-      roleAuthc: RoleCredentials,
-      slo: StoredSLODefinition,
-      id: string
-    ): Promise<SavedObjectResponse> {
-      const { body } = await supertestWithoutAuth
-        .put(`/api/saved_objects/slo/${id}`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({
-          attributes: slo,
-        })
-        .expect(200);
-      return body;
-    },
-
     async deleteAllSLOs(roleAuthc: RoleCredentials) {
       const response = await supertestWithoutAuth
         .get(`/api/observability/slos/_definitions`)
@@ -206,6 +204,16 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
+    async repair(list: string[], roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/_repair`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ list })
+        .expect(207);
+      return body;
+    },
+
     async purgeInstances(
       params: { list?: string[]; staleDuration?: string; force?: boolean },
       roleAuthc: RoleCredentials
@@ -228,6 +236,109 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .send()
         .expect(200);
 
+      return body;
+    },
+
+    async findInstances(
+      sloId: string,
+      params: { search?: string; size?: string; searchAfter?: string },
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<FindSLOInstancesResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/${sloId}/_instances`)
+        .query(params)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+
+      return body;
+    },
+
+    async getSettings(roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/slo/settings`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
+
+    async updateSettings(settings: Record<string, unknown>, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .put(`/internal/slo/settings`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(settings)
+        .expect(200);
+
+      return body;
+    },
+
+    async getTemplate(
+      templateId: string,
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<GetSLOTemplateResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slo_templates/${templateId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+
+      return body;
+    },
+
+    async findTemplates(
+      params: { search?: string; tags?: string[]; page?: number; perPage?: number },
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<FindSLOTemplatesResponse> {
+      const queryParams: Record<string, string | number> = {};
+      if (params.search) queryParams.search = params.search;
+      if (params.tags && params.tags.length > 0) queryParams.tags = params.tags.join(',');
+      if (params.page !== undefined) queryParams.page = params.page;
+      if (params.perPage !== undefined) queryParams.perPage = params.perPage;
+
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slo_templates`)
+        .query(queryParams)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+
+      return body;
+    },
+
+    async getSavedObject(roleAuthc: RoleCredentials, sloId: string): Promise<SavedObjectResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/saved_objects/_find?type=slo&filter=slo.attributes.id:(${sloId})`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
+
+    async updateSavedObject(
+      roleAuthc: RoleCredentials,
+      slo: StoredSLODefinition,
+      id: string
+    ): Promise<SavedObjectResponse> {
+      const { body } = await supertestWithoutAuth
+        .put(`/api/saved_objects/slo/${id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          attributes: slo,
+        })
+        .expect(200);
       return body;
     },
   };

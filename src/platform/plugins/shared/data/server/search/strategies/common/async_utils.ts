@@ -29,7 +29,7 @@ export function getCommonDefaultAsyncSubmitParams(
 ): Pick<
   AsyncSearchSubmitRequest,
   'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'
-> {
+> & { project_routing?: string } {
   const useSearchSessions =
     config.sessions.enabled && !!options.sessionId && !overrides?.disableSearchSessions;
   const keepAlive =
@@ -44,6 +44,8 @@ export function getCommonDefaultAsyncSubmitParams(
     keep_on_completion: useSearchSessions,
     // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
     keep_alive: keepAlive,
+    // Pass project routing for CPS if available
+    ...(options.projectRouting !== undefined && { project_routing: options.projectRouting }),
   };
 }
 

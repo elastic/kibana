@@ -23,6 +23,7 @@ interface ManagementBottomBarProps {
   insufficientPrivileges?: boolean;
   isLoading?: boolean;
   isInvalid?: boolean;
+  streamType?: 'classic' | 'wired' | 'unknown';
   onCancel: () => void;
   onConfirm: () => void;
   onViewCodeClick?: () => void;
@@ -34,6 +35,7 @@ export function ManagementBottomBar({
   isLoading = false,
   insufficientPrivileges = false,
   isInvalid = false,
+  streamType,
   onCancel,
   onConfirm,
   onViewCodeClick,
@@ -56,10 +58,12 @@ export function ManagementBottomBar({
         {onViewCodeClick && (
           <EuiButtonEmpty
             data-test-subj="streamsAppManagementBottomBarViewRequestButton"
+            data-stream-type={streamType}
             color="text"
             size="s"
             iconType="editorCodeBlock"
             onClick={onViewCodeClick}
+            disabled={isInvalid}
           >
             {viewCodeButtonText}
           </EuiButtonEmpty>
@@ -74,6 +78,7 @@ export function ManagementBottomBar({
           >
             <EuiButtonEmpty
               data-test-subj="streamsAppManagementBottomBarCancelChangesButton"
+              data-stream-type={streamType}
               disabled={disabled}
               color="text"
               size="s"
@@ -105,6 +110,7 @@ export function ManagementBottomBar({
             >
               <EuiButton
                 data-test-subj="streamsAppManagementBottomBarButton"
+                data-stream-type={streamType}
                 disabled={disabled || insufficientPrivileges || isInvalid}
                 color="primary"
                 fill

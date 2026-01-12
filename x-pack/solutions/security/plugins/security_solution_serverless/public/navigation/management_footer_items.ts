@@ -6,11 +6,14 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
-export const createManagementFooterItemsTree = (): NodeDefinition => ({
+export const createManagementFooterItemsTree = (
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NodeDefinition => ({
   id: 'category-management',
   title: i18nStrings.projectSettings.title,
   breadcrumbStatus: 'hidden',
@@ -140,16 +143,24 @@ export const createManagementFooterItemsTree = (): NodeDefinition => ({
         {
           title: i18nStrings.stackManagement.ai.title,
           breadcrumbStatus: 'hidden',
-          children: [
-            {
-              link: 'management:genAiSettings',
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'management:securityAiAssistantManagement',
-              breadcrumbStatus: 'hidden',
-            },
-          ],
+          children:
+            chatExperience !== AIChatExperience.Agent
+              ? [
+                  {
+                    link: 'management:genAiSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:securityAiAssistantManagement',
+                    breadcrumbStatus: 'hidden',
+                  },
+                ]
+              : [
+                  {
+                    link: 'management:genAiSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                ],
         },
         {
           title: i18nStrings.stackManagement.content.title,

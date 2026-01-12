@@ -67,6 +67,13 @@ export {
   FLEET_ENROLLMENT_API_PREFIX,
   API_VERSIONS,
   APP_API_ROUTES,
+  // Cloud Connector constants
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+  AWS_ACCOUNT_TYPE_VAR_NAME,
+  AZURE_ACCOUNT_TYPE_VAR_NAME,
+  GCP_ACCOUNT_TYPE_VAR_NAME,
+  FLEET_LOG_INDICES,
 } from './constants';
 export {
   // Route services

@@ -17,12 +17,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
-import { NO_FEATURE } from '../utils/default_query';
+import { SeveritySelector } from '../common/severity_selector';
+import { ALL_DATA_OPTION } from '../../feature_selector';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -30,7 +31,7 @@ interface Props {
   isSubmitting: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
-  features: Feature[];
+  features: System[];
   dataViews: DataView[];
 }
 
@@ -43,30 +44,28 @@ export function ManualFlowForm({
   features,
   dataViews,
 }: Props) {
-  const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
+  const [touched, setTouched] = useState({
+    title: false,
+    feature: false,
+    kql: false,
+    severity: false,
+  });
 
   const validation = validateQuery(query);
 
   useEffect(() => {
     const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
-    const isTouched = touched.title || touched.kql || touched.feature;
+    const isTouched = touched.title || touched.kql || touched.feature || touched.severity;
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched]);
 
-  const options = features
-    .map((feature) => ({
+  const options = [
+    { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
+    ...features.map((feature) => ({
       value: feature,
       inputDisplay: feature.name,
-    }))
-    .concat([
-      {
-        value: NO_FEATURE,
-        inputDisplay: i18n.translate(
-          'xpack.streams.addSignificantEventFlyout.manualFlow.noFeatureOptionLabel',
-          { defaultMessage: 'No feature' }
-        ),
-      },
-    ]);
+    })),
+  ];
 
   return (
     <EuiPanel hasShadow={false} color="subdued">
@@ -105,6 +104,25 @@ export function ManualFlowForm({
             label={
               <EuiFormLabel>
                 {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSeverityLabel',
+                  { defaultMessage: 'Severity' }
+                )}
+              </EuiFormLabel>
+            }
+          >
+            <SeveritySelector
+              severityScore={query.severity_score}
+              onChange={(score) => {
+                setQuery({ ...query, severity_score: score });
+                setTouched((prev) => ({ ...prev, severity: true }));
+              }}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={
+              <EuiFormLabel>
+                {i18n.translate(
                   'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldFeatureLabel',
                   { defaultMessage: 'Feature' }
                 )}
@@ -114,7 +132,13 @@ export function ManualFlowForm({
             <EuiSuperSelect
               options={options}
               valueOfSelected={
-                options.find((option) => option.value.name === query.feature?.name)?.value
+                query.feature
+                  ? options.find(
+                      (option) =>
+                        option.value.name === query.feature?.name &&
+                        option.value.type === query.feature?.type
+                    )?.value
+                  : ALL_DATA_OPTION.value
               }
               placeholder={i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.manualFlow.featurePlaceholder',
@@ -125,13 +149,15 @@ export function ManualFlowForm({
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}
               onChange={(value) => {
-                setQuery({
-                  ...query,
-                  feature: {
-                    name: value.name,
-                    filter: value.filter,
-                  },
-                });
+                const feature =
+                  value.type === ALL_DATA_OPTION.value.type
+                    ? undefined
+                    : {
+                        name: value.name,
+                        filter: value.filter,
+                        type: value.type,
+                      };
+                setQuery({ ...query, feature });
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}
               fullWidth

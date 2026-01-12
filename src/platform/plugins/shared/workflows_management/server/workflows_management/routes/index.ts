@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 // Import all route registration functions
@@ -31,10 +31,11 @@ import { registerPostTestStepRoute } from './post_test_step';
 import { registerPostTestWorkflowRoute } from './post_test_workflow';
 import { registerPutUpdateWorkflowRoute } from './put_update_workflow';
 import type { RouteDependencies } from './types';
+import type { WorkflowsRouter } from '../../types';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 export function defineRoutes(
-  router: IRouter,
+  router: WorkflowsRouter,
   api: WorkflowsManagementApi,
   logger: Logger,
   spaces: SpacesServiceStart

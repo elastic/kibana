@@ -15,34 +15,37 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
-  EuiLoadingElastic,
 } from '@elastic/eui';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { useWaitingForAiMessage } from '../../../hooks/use_waiting_for_ai_message';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { StreamFeaturesTable } from './stream_features_table';
 
 export const StreamFeaturesFlyout = ({
-  features,
-  closeFlyout,
-  isLoading,
   definition,
+  features,
   setFeatures,
+  closeFlyout,
+  onFeaturesAdded,
+  onFeaturesDiscarded,
 }: {
-  isLoading: boolean;
-  features: Feature[];
-  closeFlyout: () => void;
   definition: Streams.all.Definition;
-  setFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
+  features: System[];
+  setFeatures: React.Dispatch<React.SetStateAction<System[]>>;
+  closeFlyout: () => void;
+  onFeaturesAdded: () => void;
+  onFeaturesDiscarded: () => void;
 }) => {
+  const {
+    core: { notifications },
+  } = useKibana();
+
   const [selectedFeatureNames, setSelectedFeatureNames] = useState<Set<string>>(new Set());
-  const { addFeaturesToStream } = useStreamFeaturesApi(definition);
+  const { addSystemsToStream } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const selectedFeatures = useMemo(
@@ -77,23 +80,19 @@ export const StreamFeaturesFlyout = ({
           }
         `}
       >
-        {!isLoading ? (
-          <StreamFeaturesTable
-            features={features}
-            selectedFeatureNames={selectedFeatureNames}
-            setSelectedFeatureNames={setSelectedFeatureNames}
-            definition={definition}
-            setFeatures={setFeatures}
-          />
-        ) : (
-          <LoadingState closeFlyout={closeFlyout} />
-        )}
+        <StreamFeaturesTable
+          features={features}
+          selectedFeatureNames={selectedFeatureNames}
+          setSelectedFeatureNames={setSelectedFeatureNames}
+          definition={definition}
+          setFeatures={setFeatures}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              isLoading={isUpdating}
+              isDisabled={isUpdating}
               onClick={closeFlyout}
               flush="left"
               aria-label={i18n.translate(
@@ -111,60 +110,52 @@ export const StreamFeaturesFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              isLoading={isUpdating}
-              onClick={() => {
-                setIsUpdating(true);
-                addFeaturesToStream(selectedFeatures).finally(() => {
-                  closeFlyout();
-                  setIsUpdating(false);
-                });
-              }}
-              fill
-              isDisabled={selectedFeatureNames.size === 0}
-            >
-              <FormattedMessage
-                id="xpack.streams.streamFeaturesFlyout.addToStreamButton"
-                defaultMessage="Add to stream"
-              />
-            </EuiButton>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiButtonEmpty
+                  onClick={() => {
+                    onFeaturesDiscarded();
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.streams.streamFeaturesFlyout.discardButton"
+                    defaultMessage="Discard"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButton
+                  isLoading={isUpdating}
+                  onClick={() => {
+                    setIsUpdating(true);
+                    addSystemsToStream(selectedFeatures).finally(() => {
+                      notifications.toasts.addSuccess({
+                        title: i18n.translate(
+                          'xpack.streams.streamFeaturesFlyout.addFeaturesSuccessToastTitle',
+                          {
+                            defaultMessage:
+                              '{count} {count, plural, one {feature} other {features}} added to stream',
+                            values: { count: selectedFeatures.length },
+                          }
+                        ),
+                      });
+                      onFeaturesAdded();
+                      setIsUpdating(false);
+                    });
+                  }}
+                  fill
+                  isDisabled={selectedFeatureNames.size === 0}
+                >
+                  <FormattedMessage
+                    id="xpack.streams.streamFeaturesFlyout.addToStreamButton"
+                    defaultMessage="Add to stream"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
-
-function LoadingState({ closeFlyout }: { closeFlyout: () => void }) {
-  const label = useWaitingForAiMessage();
-
-  return (
-    <EuiFlexGroup
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
-      css={{ height: '100%' }}
-      gutterSize="m"
-    >
-      <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
-        <EuiLoadingElastic size="xxl" />
-        <EuiSpacer size="m" />
-        <EuiText>{label}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          onClick={closeFlyout}
-          aria-label={i18n.translate('xpack.streams.streamFeaturesFlyout.stopButtonAriaLabel', {
-            defaultMessage: 'Stop feature identification',
-          })}
-          data-test-subj="feature_identification_stop_identification_button"
-        >
-          <FormattedMessage
-            id="xpack.streams.streamFeaturesFlyout.stopButton"
-            defaultMessage="Stop"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}

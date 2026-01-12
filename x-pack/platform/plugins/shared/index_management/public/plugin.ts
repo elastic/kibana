@@ -57,6 +57,7 @@ export class IndexMgmtUIPlugin
     >
 {
   private extensionsService = new ExtensionsService();
+  private apiService?: PublicApiService;
   private locator?: IndexManagementLocator;
   private kibanaVersion: SemVer;
   private config: {
@@ -75,6 +76,7 @@ export class IndexMgmtUIPlugin
     enableFailureStoreRetentionDisabling: boolean;
   };
   private canUseSyntheticSource: boolean = false;
+  private canUseEis: boolean = false;
   private licensingSubscription?: Subscription;
 
   private capabilities$ = new Subject<Capabilities>();
@@ -146,6 +148,7 @@ export class IndexMgmtUIPlugin
               config: this.config,
               cloud,
               canUseSyntheticSource: this.canUseSyntheticSource,
+              canUseEis: this.canUseEis,
               reindexService,
             });
           },
@@ -159,8 +162,10 @@ export class IndexMgmtUIPlugin
       })
     );
 
+    this.apiService = new PublicApiService(coreSetup.http);
+
     return {
-      apiService: new PublicApiService(coreSetup.http),
+      apiService: this.apiService,
       extensionsService: this.extensionsService.setup(),
       renderIndexManagementApp: async (params: IndexManagementAppMountParams) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
@@ -174,6 +179,7 @@ export class IndexMgmtUIPlugin
           config: this.config,
           cloud,
           canUseSyntheticSource: this.canUseSyntheticSource,
+          canUseEis: this.canUseEis,
           reindexService,
         });
       },
@@ -220,6 +226,7 @@ export class IndexMgmtUIPlugin
       config: this.config,
       history: deps.history,
       canUseSyntheticSource: this.canUseSyntheticSource,
+      canUseEis: this.canUseEis,
       overlays: core.overlays,
       privs: {
         monitor: !!monitor,
@@ -245,8 +252,10 @@ export class IndexMgmtUIPlugin
 
     this.licensingSubscription = licensing?.license$.subscribe((next) => {
       this.canUseSyntheticSource = next.hasAtLeast('enterprise');
+      this.canUseEis = next.hasAtLeast('enterprise');
     });
     return {
+      apiService: this.apiService!,
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
         return (props: IndexMappingProps) => {

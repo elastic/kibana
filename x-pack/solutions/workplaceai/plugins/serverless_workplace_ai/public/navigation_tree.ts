@@ -22,7 +22,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
       {
         icon: agentsIcon, // Temp svg until we have icon in EUI
         link: 'agent_builder',
-        badgeType: 'techPreview',
       },
       {
         link: 'data_connectors',
@@ -100,7 +99,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             }),
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
-              { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
               {
                 link: 'management:observabilityAiAssistantManagement',
                 breadcrumbStatus: 'hidden',

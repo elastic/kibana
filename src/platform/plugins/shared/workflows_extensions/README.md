@@ -72,18 +72,38 @@ export const MyStepTypeId = 'myPlugin.myCustomStep';
 export const InputSchema = z.object({
   message: z.string(),
   count: z.number().optional(),
+  mode: z.enum(['partial', 'full'])
 });
 
 /**
  * Output schema for the step.
- * Defines what the step returns.
+ * 
+ * Defines the structure and types of data that this step will return.
+ * This schema is used for validation and type checking to ensure data consistency
+ * across workflow steps.
  */
-export const OutputSchema = z.object({
-  result: z.string(),
-});
+ * Defines all possible structures the step returns.
+ */
+export const OutputSchema = z.union([
+    z.object({
+    result: z.string(),
+  }),
+  z.object({
+    partialResult: z.string(),
+  })
+]);
 
 export type MyStepInput = z.infer<typeof InputSchema>;
 export type MyStepOutput = z.infer<typeof OutputSchema>;
+
+/**
+ * Config schema for the step (optional).
+ * Defines config properties that appear at the step level (outside the `with` block).
+ * Example: `id`.
+ */
+export const ConfigSchema = z.object({
+  'id': z.string(),
+});
 
 /**
  * Common step definition shared between server and public.
@@ -92,6 +112,7 @@ export const myStepCommonDefinition: CommonStepDefinition = {
   id: MyStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
+  configSchema: ConfigSchema, // Optional: only needed if step has config properties
 };
 ```
 
@@ -103,34 +124,34 @@ Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
 import type { ServerStepDefinition, StepHandler } from '@kbn/workflows-extensions/server';
 import { myStepCommonDefinition } from '../../common/step_types/my_step';
 
-// Handler function that executes the step logic
-const myStepHandler: StepHandler = async (context) => {
-  try {
-    const { message, count } = context.input;
+export const getMyStepDefinition = (coreSetup: CoreSetup) =>
+  createServerStepDefinition({
+    ...myStepCommonDefinition,
+    handler: async (context) => {
+      try {
+        const [coreStart, depsStart] = await coreSetup.getStartServices();
+        const { http } = coreStart;
+        const { message, count } = context.input;
 
-    // Access workflow context
-    const workflowContext = context.contextManager.getContext();
+        // Access workflow context
+        const workflowContext = context.contextManager.getContext();
 
-    // Use the scoped Elasticsearch client if needed
-    const esClient = context.contextManager.getScopedEsClient();
+        // Use the scoped Elasticsearch client if needed
+        const esClient = context.contextManager.getScopedEsClient();
 
-    // Log information
-    context.logger.info(`Processing step with message: ${message}`);
+        // Log information
+        context.logger.info(`Processing step with message: ${message}`);
 
-    // Perform your step logic here
-    const result = `Processed: ${message}${count ? ` (count: ${count})` : ''}`;
+        // Perform your step logic here
+        const result = `Processed: ${message}${count ? ` (count: ${count})` : ''}`;
 
-    return { output: { result } };
-  } catch (error) {
-    context.logger.error('My step execution failed', error);
-    return { error };
-  }
-};
-
-export const myStepDefinition: ServerStepDefinition = {
-  ...myStepCommonDefinition,
-  handler: myStepHandler,
-};
+        return { output: { result } };
+      } catch (error) {
+        context.logger.error('My step execution failed', error);
+        return { error };
+      }
+    }
+  })
 ```
 
 ### Step 3: Implement Public-Side Definition
@@ -138,14 +159,18 @@ export const myStepDefinition: ServerStepDefinition = {
 Create the public-side definition (e.g., `public/step_types/my_step.ts`):
 
 ```typescript
+import React from 'react';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { icon as starIcon } from '@elastic/eui/es/components/icon/assets/star';
 import { i18n } from '@kbn/i18n';
 import { MyStepTypeId, myStepCommonDefinition } from '../../common/step_types/my_step';
 
+import { StepMenuCatalog } from '@kbn/workflows-extensions/public';
+
 export const myStepDefinition: PublicStepDefinition = {
   ...myStepCommonDefinition,
-  icon: starIcon, // Must import icon from EUI, not use string
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
+  ),
   label: i18n.translate('myPlugin.myStep.label', {
     defaultMessage: 'My Custom Step',
   }),
@@ -166,10 +191,70 @@ export const myStepDefinition: PublicStepDefinition = {
 \`\`\``,
     ],
   },
+  actionsMenuCatalog: StepMenuCatalog.kibana, // Optional: determines which catalog the step appears under in the actions menu
 };
 ```
 
 **Important**: Icons must be custom components or images imported from EUI, not passed as strings. The workflows app does not fully support built-in `EuiIconType` strings (e.g., `'star'`) yet. See [EUI icon consumption guide](https://github.com/elastic/eui/blob/main/wiki/consuming-eui/README.md#failing-icon-imports) for details.
+
+
+#### Advanced Example with Dynamic Output Schema
+
+For steps that need different output schemas based on input parameters, you can use `dynamicOutputSchema`. This function is evaluated **in the workflows editor UI** to provide real-time schema validation and autocomplete based on the current step configuration. Here's an example of a data transformation step:
+
+
+```typescript
+import React from 'react';
+import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { i18n } from '@kbn/i18n';
+import { MyStepTypeId, myStepCommonDefinition } from '../../common/step_types/my_step';
+
+import { StepMenuCatalog } from '@kbn/workflows-extensions/public';
+
+export const myStepDefinition: PublicStepDefinition = {
+  ...myStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
+  ),
+  label: i18n.translate('myPlugin.myStep.label', {
+    defaultMessage: 'My Custom Step',
+  }),
+  description: i18n.translate('myPlugin.myStep.description', {
+    defaultMessage: 'Performs a custom action in workflows',
+  }),
+  documentation: {
+    details: i18n.translate('myPlugin.myStep.documentation.details', {
+      defaultMessage: 'This step processes messages and returns results.',
+    }),
+    examples: [
+      `## Basic usage
+\`\`\`yaml
+- name: process_message
+  type: ${MyStepTypeId}
+  with:
+    message: "Hello World"
+\`\`\``,
+    ],
+  },
+  actionsMenuCatalog: StepMenuCatalog.kibana, // Optional: determines which catalog the step appears under in the actions menu
+  editorHandlers: {
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => {
+        if (input.mode == 'partial') {
+          return z.object({
+            partialResult: z.string()
+          });
+        }
+
+        return z.object({
+            result: z.string()
+          });
+      }
+    }
+  }
+};
+```
+
 
 ### Step 4: Register in Plugin Setup
 
@@ -181,15 +266,20 @@ Register the step definitions in both server and public plugin setup:
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { myStepDefinition } from './workflows/step_types/my_step';
+import { getMyStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
+
 
 export interface MyPluginServerSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export class MyPlugin implements Plugin {
-  public setup(_core: CoreSetup, plugins: MyPluginServerSetupDeps) {
-    // Register server-side step definitions
-    plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
+  public setup(core: CoreSetup, plugins: MyPluginServerSetupDeps) {
+    // Create the step definition passing the necessary dependencies to factory function
+    const stepDefinition = getMyStepDefinition(core);
+
+    // Register server-side step definition using its factory function result
+    plugins.workflowsExtensions.registerStepDefinition(stepDefinition);
   }
 }
 ```
@@ -310,12 +400,14 @@ The `context` parameter provides access to runtime services and step information
 The public definition must include:
 
 - `id`: Step type identifier (must match server-side)
+- `label`: User-facing label (i18n recommended)
 - `inputSchema`: Zod schema for input validation
 - `outputSchema`: Zod schema for output validation
-- `label`: User-facing label (i18n recommended)
-- `icon`: React component (can be imported from EUI, not a string)
-- `description`: Optional user-facing description
-- `documentation`: Optional documentation with details and examples
+- `configSchema`: (Optional) Zod schema for config properties (properties outside the `with` block)
+- `icon`: (Optional) React component (can be imported from EUI assets, not a direct string), preferably lazy loaded using `React.lazy`.
+- `description`: (Optional) user-facing description
+- `documentation`: (Optional) documentation with details and examples
+- `actionsMenuCatalog`: (Optional) The catalog under which the step is displayed in the actions menu. Must be one of `StepMenuCatalog.elasticsearch`, `StepMenuCatalog.external`, `StepMenuCatalog.ai`, or `StepMenuCatalog.kibana`. Defaults to `StepMenuCatalog.kibana` if not provided.
 
 ## Dependencies
 

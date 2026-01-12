@@ -21,7 +21,7 @@ import {
 import type { Agent } from '../../types';
 
 import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
-
+import { getValidSpaceId } from '../spaces/helpers';
 import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
@@ -76,7 +76,7 @@ export async function upgradeBatch(
   },
   spaceIds?: string[]
 ): Promise<{ actionId: string }> {
-  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceIds?.[0]);
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(getValidSpaceId(spaceIds));
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);

@@ -54,7 +54,7 @@ export function addCombinedFieldsToPipeline(
 ) {
   const updatedPipeline = cloneDeep(pipeline);
   combinedFields.forEach((combinedField) => {
-    updatedPipeline.processors.push({
+    updatedPipeline.processors!.push({
       set: {
         field: combinedField.combinedFieldName,
         value: combinedField.fieldNames
@@ -75,7 +75,7 @@ export function removeCombinedFieldsFromPipeline(
   const updatedPipeline = cloneDeep(pipeline);
   return {
     ...updatedPipeline,
-    processors: updatedPipeline.processors.filter((processor) => {
+    processors: updatedPipeline.processors!.filter((processor) => {
       return 'set' in processor
         ? !combinedFields.some((combinedField) => {
             return processor.set.field === combinedField.combinedFieldName;

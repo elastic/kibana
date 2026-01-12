@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import { groupBy, orderBy } from 'lodash';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -52,7 +51,7 @@ import type {
   RolloverAction,
   UpdateDefaultIngestPipelineAction,
   UnlinkAssetsAction,
-  UnlinkFeaturesAction,
+  UnlinkSystemsAction,
   UpdateIngestSettingsAction,
   UpdateFailureStoreAction,
 } from './types';
@@ -90,7 +89,7 @@ export class ExecutionPlan {
       update_data_stream_mappings: [],
       delete_queries: [],
       unlink_assets: [],
-      unlink_features: [],
+      unlink_systems: [],
       update_ingest_settings: [],
     };
   }
@@ -181,7 +180,7 @@ export class ExecutionPlan {
         update_failure_store,
         delete_queries,
         unlink_assets,
-        unlink_features,
+        unlink_systems,
         update_ingest_settings,
         ...rest
       } = this.actionsByType;
@@ -223,7 +222,7 @@ export class ExecutionPlan {
         this.deleteIngestPipelines(delete_ingest_pipeline),
         this.deleteQueries(delete_queries),
         this.unlinkAssets(unlink_assets),
-        this.unlinkFeatures(unlink_features),
+        this.unlinkSystems(unlink_systems),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -260,14 +259,14 @@ export class ExecutionPlan {
     );
   }
 
-  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
+  private async unlinkSystems(actions: UnlinkSystemsAction[]) {
     if (actions.length === 0) {
       return;
     }
 
     return Promise.all(
       actions.map((action) =>
-        this.dependencies.featureClient.syncFeatureList(action.request.name, [])
+        this.dependencies.systemClient.syncSystemList(action.request.name, [])
       )
     );
   }

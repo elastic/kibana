@@ -12,12 +12,14 @@ import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetailsLocatorParams> {
   public readonly id = sloDetailsLocatorID;
 
-  public readonly getLocation = async ({ sloId, instanceId }: SloDetailsLocatorParams) => {
-    const queryParams =
-      !!instanceId && instanceId !== ALL_VALUE
-        ? `?instanceId=${encodeURIComponent(instanceId)}`
-        : '';
-    const path = !!sloId ? `/${encodeURIComponent(sloId)}${queryParams}` : '/';
+  public readonly getLocation = async ({ sloId, instanceId, tabId }: SloDetailsLocatorParams) => {
+    const qs = new URLSearchParams();
+    if (!!instanceId && instanceId !== ALL_VALUE) qs.append('instanceId', instanceId);
+
+    let path = `/${encodeURIComponent(sloId)}${formatQueryParams(qs)}`;
+    if (tabId) {
+      path = `/${encodeURIComponent(sloId)}/${tabId}${formatQueryParams(qs)}`;
+    }
 
     return {
       app: 'slo',
@@ -25,4 +27,11 @@ export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetails
       state: {},
     };
   };
+}
+
+function formatQueryParams(qs: URLSearchParams): string {
+  if (qs.size === 0) {
+    return '';
+  }
+  return `?${qs.toString()}`;
 }

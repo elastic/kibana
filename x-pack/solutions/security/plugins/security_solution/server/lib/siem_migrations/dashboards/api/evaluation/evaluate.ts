@@ -13,7 +13,7 @@ import { DashboardMigrationTaskExecutionSettings } from '../../../../../../commo
 import { LangSmithEvaluationOptions } from '../../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_DASHBOARD_MIGRATION_EVALUATE_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes

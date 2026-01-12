@@ -284,6 +284,7 @@ exports[`Logs should render normally 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
+    tableCaption="Recent log entries"
     tableLayout="fixed"
   />
   <EuiSpacer

@@ -12,7 +12,6 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
-import { useUserData } from '../../../../../detections/components/user_info';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { PERFORM_ALL_RULES_INSTALLATION_KEY } from '../../../../rule_management/api/hooks/prebuilt_rules/use_perform_all_rules_install_mutation';
 import {
@@ -26,6 +25,7 @@ import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 import * as i18n from './translations';
 import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
 import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -112,7 +112,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleResponse[]>([]);
 
-  const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
 
   const [filterOptions, setFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
     filter: '',
@@ -127,6 +127,11 @@ export const AddPrebuiltRulesTableContextProvider = ({
       mutationKey: PERFORM_ALL_RULES_INSTALLATION_KEY,
     }) > 0;
 
+  const isUpgradeReviewEnabled = isUpgradeReviewRequestEnabled({
+    canEditRules,
+    isUpgradingSecurityPackages,
+    prebuiltRulesStatus: prebuiltRulesStatus?.stats,
+  });
   const {
     data: { rules, stats: { tags } } = {
       rules: [],
@@ -141,11 +146,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     refetchInterval: 60000, // Refetch available rules for installation every minute
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     // Fetch rules to install only after background installation of security_detection_rules package is complete
-    enabled: isUpgradeReviewRequestEnabled({
-      canUserCRUD,
-      isUpgradingSecurityPackages,
-      prebuiltRulesStatus: prebuiltRulesStatus?.stats,
-    }),
+    enabled: isUpgradeReviewEnabled,
   });
 
   const isAnyRuleInstalling = loadingRules.length > 0 || isInstallingAllRules;
@@ -213,9 +214,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     (rule: RuleResponse, closeRulePreview: () => void) => {
       const isPreviewRuleLoading = loadingRules.includes(rule.rule_id);
       const canPreviewedRuleBeInstalled =
-        !userInfoLoading &&
-        canUserCRUD &&
-        !(isPreviewRuleLoading || isRefetching || isUpgradingSecurityPackages);
+        canEditRules && !(isPreviewRuleLoading || isRefetching || isUpgradingSecurityPackages);
 
       return (
         <EuiFlexGroup>
@@ -247,14 +246,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         </EuiFlexGroup>
       );
     },
-    [
-      loadingRules,
-      userInfoLoading,
-      canUserCRUD,
-      isRefetching,
-      isUpgradingSecurityPackages,
-      installOneRule,
-    ]
+    [loadingRules, canEditRules, isRefetching, isUpgradingSecurityPackages, installOneRule]
   );
 
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({

@@ -127,15 +127,12 @@ describe('PurgeInstancesConfirmationModal', () => {
         expect(confirmButton).toBeDisabled();
       });
 
-      // Verify override checkbox is enabled by finding it via its label text
-      const checkboxLabel = screen.getByText('Override stale threshold settings');
-      const checkbox = (checkboxLabel.previousSibling as Element)?.querySelector<HTMLInputElement>(
-        'input[type="checkbox"]'
-      );
+      // Verify override checkbox is enabled
+      const checkbox = screen.getByTestId('sloPurgeInstancesConfirmationModalOverrideCheckbox');
       expect(checkbox).not.toBeDisabled();
 
       // Check the override checkbox
-      await userEvent.click(checkbox!);
+      await userEvent.click(checkbox);
 
       await waitFor(() => {
         const confirmButton = screen.getByRole('button', { name: /Purge/i });
@@ -153,10 +150,7 @@ describe('PurgeInstancesConfirmationModal', () => {
 
       // staleDuration equals settings initially (72)
       await waitFor(() => {
-        const checkboxLabel = screen.getByText('Override stale threshold settings');
-        const checkbox = (
-          checkboxLabel.previousSibling as Element
-        )?.querySelector<HTMLInputElement>('input[type="checkbox"]');
+        const checkbox = screen.getByTestId('sloPurgeInstancesConfirmationModalOverrideCheckbox');
         expect(checkbox).toBeDisabled();
       });
 
@@ -188,10 +182,7 @@ describe('PurgeInstancesConfirmationModal', () => {
       await userEvent.type(input, '48');
 
       // Enable override
-      const checkboxLabel = screen.getByText('Override stale threshold settings');
-      const checkbox = (checkboxLabel.previousSibling as Element)?.querySelector<HTMLInputElement>(
-        'input[type="checkbox"]'
-      )!;
+      const checkbox = screen.getByTestId('sloPurgeInstancesConfirmationModalOverrideCheckbox');
       await userEvent.click(checkbox);
 
       // Click confirm

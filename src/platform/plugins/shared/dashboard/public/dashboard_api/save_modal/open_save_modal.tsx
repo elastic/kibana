@@ -9,10 +9,10 @@
 
 import React from 'react';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardSaveOptions, SaveDashboardReturn } from './types';
 import {
   coreServices,
@@ -43,11 +43,12 @@ export async function openSaveModal({
   projectRoutingRestore,
   title,
   viewMode,
+  accessControl,
 }: {
   description?: string;
   isManaged: boolean;
   lastSavedId: string | undefined;
-  serializeState: () => { dashboardState: DashboardState; references: Reference[] };
+  serializeState: () => DashboardState;
   setTimeRestore: (timeRestore: boolean) => void;
   setProjectRoutingRestore: (projectRoutingRestore: boolean) => void;
   tags?: string[];
@@ -55,6 +56,7 @@ export async function openSaveModal({
   projectRoutingRestore: boolean;
   title: string;
   viewMode: ViewMode;
+  accessControl?: Partial<SavedObjectAccessControl>;
 }) {
   try {
     if (viewMode === 'edit' && isManaged) {
@@ -69,6 +71,7 @@ export async function openSaveModal({
           newDescription,
           newCopyOnSave,
           newTimeRestore,
+          newAccessMode,
           newProjectRoutingRestore,
           onTitleDuplicate,
           isTitleDuplicateConfirmed,
@@ -95,7 +98,7 @@ export async function openSaveModal({
 
             setTimeRestore(newTimeRestore);
             setProjectRoutingRestore(newProjectRoutingRestore);
-            const { dashboardState, references } = serializeState();
+            const dashboardState = serializeState();
 
             const dashboardStateToSave: DashboardState = {
               ...dashboardState,
@@ -110,10 +113,11 @@ export async function openSaveModal({
             const beforeAddTime = window.performance.now();
 
             const saveResult = await saveDashboard({
-              references,
               saveOptions,
               dashboardState: dashboardStateToSave,
               lastSavedId,
+              // Only pass access mode for new dashboard creation (no lastSavedId)
+              accessMode: !lastSavedId && newAccessMode ? newAccessMode : undefined,
             });
 
             const addDuration = window.performance.now() - beforeAddTime;
@@ -148,7 +152,9 @@ export async function openSaveModal({
             description={description ?? ''}
             showCopyOnSave={false}
             onSave={onSaveAttempt}
+            accessControl={accessControl}
             customModalTitle={getCustomModalTitle(viewMode)}
+            isDuplicateAction={Boolean(lastSavedId)}
           />
         );
       }

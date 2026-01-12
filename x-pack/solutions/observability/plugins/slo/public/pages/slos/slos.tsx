@@ -8,8 +8,9 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { paths, SLOS_WELCOME_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
-import { paths } from '../../../common/locators/paths';
+import { useHistory } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
@@ -27,13 +28,13 @@ export const SLO_PAGE_ID = 'slo-page-container';
 
 export function SlosPage() {
   const {
-    application: { navigateToUrl },
     http: { basePath },
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const { data: permissions } = usePermissions();
+  const history = useHistory();
 
   const {
     data: { total } = { total: 0 },
@@ -56,13 +57,13 @@ export function SlosPage() {
 
   useEffect(() => {
     if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
-      navigateToUrl(basePath.prepend(paths.slosWelcome));
+      history.replace(SLOS_WELCOME_PATH);
     }
 
     if (permissions?.hasAllReadRequested === false) {
-      navigateToUrl(basePath.prepend(paths.slosWelcome));
+      history.replace(SLOS_WELCOME_PATH);
     }
-  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total, permissions]);
+  }, [history, basePath, hasAtLeast, isError, isLoading, total, permissions]);
 
   if (isLoading) {
     return <LoadingPage dataTestSubj="sloListPageLoading" />;
@@ -75,10 +76,11 @@ export function SlosPage() {
         pageTitle: i18n.translate('xpack.slo.slosPage.', { defaultMessage: 'SLOs' }),
         rightSideItems: [<CreateSloBtn />],
       }}
-      topSearchBar={<SloListSearchBar />}
     >
       <HeaderMenu />
       <SloOutdatedCallout />
+      <SloListSearchBar />
+      <EuiSpacer size="m" />
       <SLOsOverview />
       <EuiSpacer size="m" />
       <SloList />

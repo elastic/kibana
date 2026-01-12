@@ -190,6 +190,98 @@ describe('settingsSetup', () => {
 
     expect(soClientMock.update).not.toHaveBeenCalled();
   });
+
+  it('should update integration_knowledge_enabled if feature flag is enabled', async () => {
+    const soClientMock = savedObjectsClientMock.create();
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+      installIntegrationsKnowledge: true,
+    } as any);
+
+    mockedAppContextService.getConfig.mockReturnValue({
+      enabled: false,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+        fleet_server: undefined,
+      },
+    });
+
+    soClientMock.find.mockResolvedValue({
+      total: 1,
+      page: 1,
+      per_page: 10,
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: {},
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+    });
+
+    soClientMock.update.mockResolvedValueOnce({
+      id: GLOBAL_SETTINGS_ID,
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: { integration_knowledge_enabled: true },
+      references: [],
+    });
+
+    await settingsSetup(soClientMock);
+
+    expect(soClientMock.update).toHaveBeenCalled();
+  });
+
+  it('should update integration_knowledge_enabled if config is enabled', async () => {
+    const soClientMock = savedObjectsClientMock.create();
+
+    mockedAppContextService.getConfig.mockReturnValue({
+      enabled: false,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+        fleet_server: undefined,
+      },
+      experimentalFeatures: {
+        integrationKnowledge: true,
+      },
+    });
+
+    soClientMock.find.mockResolvedValue({
+      total: 1,
+      page: 1,
+      per_page: 10,
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: {},
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+    });
+
+    soClientMock.update.mockResolvedValueOnce({
+      id: GLOBAL_SETTINGS_ID,
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: { integration_knowledge_enabled: true },
+      references: [],
+    });
+
+    await settingsSetup(soClientMock);
+
+    expect(soClientMock.update).toHaveBeenCalled();
+  });
 });
 
 describe('getSettings', () => {
@@ -550,6 +642,57 @@ describe('createDefaultSettings', () => {
     expect(result).toEqual({
       prerelease_integrations_enabled: true,
       use_space_awareness_migration_status: 'success',
+    });
+  });
+
+  it('should return default settings with integration_knowledge_enabled:true if feature flag is enabled', () => {
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: true,
+      enabled: true,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+      },
+    });
+
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+      installIntegrationsKnowledge: true,
+    } as any);
+
+    const result = createDefaultSettings();
+
+    expect(result).toEqual({
+      integration_knowledge_enabled: true,
+      prerelease_integrations_enabled: true,
+    });
+  });
+
+  it('should return default settings with integration_knowledge_enabled:true if config is enabled', () => {
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: true,
+      enabled: true,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+      },
+      experimentalFeatures: {
+        integrationKnowledge: true,
+      },
+    });
+
+    const result = createDefaultSettings();
+
+    expect(result).toEqual({
+      integration_knowledge_enabled: true,
+      prerelease_integrations_enabled: true,
     });
   });
 });

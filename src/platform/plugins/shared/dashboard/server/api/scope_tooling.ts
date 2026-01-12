@@ -13,16 +13,24 @@ import type { DashboardPanel, DashboardState } from './types';
 
 export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
-  const { controlGroupInput, references, panels, ...rest } = dashboardState;
+  const { controlGroupInput, panels, ...rest } = dashboardState;
   if (controlGroupInput) {
     warnings.push(`Dropped unmapped key 'controlGroupInput' from dashboard`);
-  }
-  if (references) {
-    warnings.push(`Dropped unmapped key 'references' from dashboard`);
   }
 
   function isMappedPanelType(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
+    if (transforms?.throwOnUnmappedPanel) {
+      try {
+        transforms.throwOnUnmappedPanel(panel.config);
+      } catch (e) {
+        warnings.push(
+          `Dropped panel ${panel.uid}, panel config is not supported. Reason: ${e.message}.`
+        );
+        return false;
+      }
+    }
+
     if (!transforms?.schema) {
       warnings.push(
         `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
@@ -65,10 +73,6 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
 export function throwOnUnmappedKeys(dashboardState: DashboardState) {
   if (dashboardState.controlGroupInput) {
     throw new Error('controlGroupInput key is not supported by dashboard REST endpoints.');
-  }
-
-  if (dashboardState.references) {
-    throw new Error('references key is not supported by dashboard REST endpoints.');
   }
 
   function throwOnUnmappedPanelKeys(panel: DashboardPanel) {

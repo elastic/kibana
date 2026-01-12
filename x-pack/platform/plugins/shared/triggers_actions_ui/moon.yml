@@ -66,7 +66,6 @@ dependsOn:
   - '@kbn/lens-plugin'
   - '@kbn/react-kibana-mount'
   - '@kbn/react-kibana-context-theme'
-  - '@kbn/controls-plugin'
   - '@kbn/alerting-comparators'
   - '@kbn/alerting-types'
   - '@kbn/visualization-utils'
@@ -88,7 +87,7 @@ dependsOn:
   - '@kbn/embeddable-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/esql-utils'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/response-ops-alerts-delete'
   - '@kbn/content-management-plugin'
   - '@kbn/esql-types'
@@ -99,6 +98,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/router-utils'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/actions-types'
 tags:
   - plugin
   - prod
