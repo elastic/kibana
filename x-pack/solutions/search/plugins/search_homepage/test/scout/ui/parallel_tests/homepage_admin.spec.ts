@@ -139,4 +139,32 @@ test.describe('Homepage - Admin', { tag: ['@svlSearch'] }, () => {
       await pageObjects.homepage.goto();
     }
   });
+
+  // === Body Links Tests ===
+  test('should display all body links with external documentation', async ({ pageObjects }) => {
+    const bodyLinks = await pageObjects.homepage.getBodyLinks();
+    await expect(bodyLinks).toHaveCount(3);
+
+    // Verify specific links exist
+    const askExpertLink = await pageObjects.homepage.getBodyLinkByText(
+      'Contact customer engineering'
+    );
+    await expect(askExpertLink).toBeVisible();
+
+    const trainingLink = await pageObjects.homepage.getBodyLinkByText('Elastic Training');
+    await expect(trainingLink).toBeVisible();
+
+    const docsLink = await pageObjects.homepage.getBodyLinkByText('View documentation');
+    await expect(docsLink).toBeVisible();
+  });
+
+  test('body links should have external target attribute', async ({ pageObjects }) => {
+    const bodyLinks = await pageObjects.homepage.getBodyLinks();
+    const allLinks = await bodyLinks.all();
+
+    for (const link of allLinks) {
+      await expect(link).toHaveAttribute('target', '_blank');
+      await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    }
+  });
 });
