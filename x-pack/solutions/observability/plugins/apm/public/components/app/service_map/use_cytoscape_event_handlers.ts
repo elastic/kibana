@@ -125,7 +125,7 @@ export function useCytoscapeEventHandlers({
     );
 
     const mouseoverHandler: cytoscape.EventHandler = (event) => {
-      if (event.target.isNode()) {
+      if (event.target.isNode() || event.target.isEdge()) {
         setCursor('pointer', event);
       }
 
@@ -144,6 +144,17 @@ export function useCytoscapeEventHandlers({
       resetConnectedEdgeStyle(event.cy, event.target);
     };
     const unselectHandler: cytoscape.EventHandler = (event) => {
+      resetConnectedEdgeStyle(
+        event.cy,
+        serviceName ? event.cy.getElementById(serviceName) : undefined
+      );
+    };
+    const edgeSelectHandler: cytoscape.EventHandler = (event) => {
+      trackApmEvent({ metric: 'service_map_edge_select' });
+      event.cy.edges().removeClass('highlight');
+      event.target.addClass('highlight');
+    };
+    const edgeUnselectHandler: cytoscape.EventHandler = (event) => {
       resetConnectedEdgeStyle(
         event.cy,
         serviceName ? event.cy.getElementById(serviceName) : undefined
@@ -190,6 +201,8 @@ export function useCytoscapeEventHandlers({
       cy.on('mouseout', 'edge, node', mouseoutHandler);
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', unselectHandler);
+      cy.on('select', 'edge', edgeSelectHandler);
+      cy.on('unselect', 'edge', edgeUnselectHandler);
       cy.on('drag', 'node', dragHandler);
       cy.on('dragfree', 'node', dragfreeHandler);
       cy.on('tapstart', tapstartHandler);
@@ -208,6 +221,8 @@ export function useCytoscapeEventHandlers({
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', unselectHandler);
+        cy.removeListener('select', 'edge', edgeSelectHandler);
+        cy.removeListener('unselect', 'edge', edgeUnselectHandler);
         cy.removeListener('drag', 'node', dragHandler);
         cy.removeListener('dragfree', 'node', dragfreeHandler);
         cy.removeListener('tapstart', tapstartHandler);
