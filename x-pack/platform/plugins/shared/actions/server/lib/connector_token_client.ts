@@ -312,19 +312,23 @@ export class ConnectorTokenClient {
     connectorId,
     accessToken,
     refreshToken,
-    expiresAtMillis,
-    refreshTokenExpiresAtMillis,
+    expiresIn,
+    refreshTokenExpiresIn,
     tokenType,
   }: {
     connectorId: string;
     accessToken: string;
     refreshToken?: string;
-    expiresAtMillis?: string;
-    refreshTokenExpiresAtMillis?: string;
+    expiresIn?: number;
+    refreshTokenExpiresIn?: number;
     tokenType?: string;
   }): Promise<ConnectorToken> {
     const id = SavedObjectsUtils.generateId();
-    const createTime = Date.now();
+    const now = Date.now();
+    const expiresInMillis = expiresIn ? new Date(now + expiresIn * 1000).toISOString() : undefined;
+    const refreshTokenExpiresInMillis = refreshTokenExpiresIn
+      ? new Date(now + refreshTokenExpiresIn * 1000).toISOString()
+      : undefined;
 
     try {
       const result = await this.unsecuredSavedObjectsClient.create(
@@ -334,11 +338,11 @@ export class ConnectorTokenClient {
             connectorId,
             token: accessToken,
             refreshToken,
-            expiresAt: expiresAtMillis,
-            refreshTokenExpiresAt: refreshTokenExpiresAtMillis,
+            expiresAt: expiresInMillis,
+            refreshTokenExpiresAt: refreshTokenExpiresInMillis,
             tokenType: tokenType ?? 'access_token',
-            createdAt: new Date(createTime).toISOString(),
-            updatedAt: new Date(createTime).toISOString(),
+            createdAt: new Date(now).toISOString(),
+            updatedAt: new Date(now).toISOString(),
           },
           isUndefined
         ),

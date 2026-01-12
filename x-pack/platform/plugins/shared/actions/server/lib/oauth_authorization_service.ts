@@ -66,6 +66,13 @@ interface ConnectorWithOAuth {
   secrets: OAuthConnectorSecrets;
 }
 
+interface ConstructorOptions {
+  actionsClient: ActionsClient;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  kibanaBaseUrl: string;
+  logger: Logger;
+}
+
 /**
  * Service for handling OAuth2 Authorization Code flow operations
  *
@@ -75,19 +82,22 @@ interface ConnectorWithOAuth {
  * - Building OAuth authorization URLs with PKCE parameters
  */
 export class OAuthAuthorizationService {
-  /**
-   * Creates an instance of OAuthAuthorizationService
-   * @param actionsClient - Client for interacting with connectors
-   * @param encryptedSavedObjectsClient - Client for accessing encrypted connector secrets
-   * @param kibanaBaseUrl - The public base URL of the Kibana instance
-   * @param logger - Logger instance for debugging
-   */
-  constructor(
-    private readonly actionsClient: ActionsClient,
-    private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-    private readonly kibanaBaseUrl: string,
-    private readonly logger: Logger
-  ) {}
+  private readonly actionsClient: ActionsClient;
+  private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  private readonly kibanaBaseUrl: string;
+  private readonly logger: Logger;
+
+  constructor({
+    actionsClient,
+    encryptedSavedObjectsClient,
+    kibanaBaseUrl,
+    logger,
+  }: ConstructorOptions) {
+    this.actionsClient = actionsClient;
+    this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
+    this.kibanaBaseUrl = kibanaBaseUrl;
+    this.logger = logger;
+  }
 
   /**
    * Validates that a connector uses OAuth Authorization Code flow

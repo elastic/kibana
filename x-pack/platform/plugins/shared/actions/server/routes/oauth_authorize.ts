@@ -49,12 +49,13 @@ export const oauthAuthorizeRoute = (
         try {
           const core = await context.core;
           const routeLogger = logger.get('oauth_authorize');
+
+          // Check rate limit
           const currentUser = core.security.authc.getCurrentUser();
           if (!currentUser) {
             throw new Error('User should be authenticated to initiate OAuth authorization.');
           }
           const username = currentUser.username;
-
           oauthRateLimiter.log(username, 'authorize');
           if (oauthRateLimiter.isRateLimited(username, 'authorize')) {
             routeLogger.warn(
@@ -68,14 +69,8 @@ export const oauthAuthorizeRoute = (
             });
           }
 
-          const actionsClient = (await context.actions).getActionsClient();
-
           const [coreStart, { encryptedSavedObjects }] = await coreSetup.getStartServices();
-          const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-            includedHiddenTypes: ['action', 'oauth_state'],
-          });
           const kibanaUrl = coreStart.http.basePath.publicBaseUrl;
-
           if (!kibanaUrl) {
             return res.badRequest({
               body: {
@@ -85,24 +80,25 @@ export const oauthAuthorizeRoute = (
             });
           }
 
-          const oauthService = new OAuthAuthorizationService(
-            actionsClient,
-            encryptedSavedObjectsClient,
-            kibanaUrl,
-            routeLogger
-          );
-
           // Get OAuth configuration (validates connector and retrieves decrypted config)
+          const oauthService = new OAuthAuthorizationService({
+            actionsClient: (await context.actions).getActionsClient(),
+            encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
+              includedHiddenTypes: ['action'],
+            }),
+            kibanaBaseUrl: kibanaUrl,
+            logger: routeLogger,
+          });
           const oauthConfig = await oauthService.getOAuthConfig(connectorId);
-
           const redirectUri = oauthService.getRedirectUri(oauthConfig);
-
           // Build return URL for post-OAuth redirect
           const kibanaReturnUrl = `${kibanaUrl}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`;
 
           // Create OAuth state with PKCE
           const oauthStateClient = new OAuthStateClient({
-            encryptedSavedObjectsClient,
+            encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
+              includedHiddenTypes: ['oauth_state'],
+            }),
             unsecuredSavedObjectsClient: core.savedObjects.getClient({
               includedHiddenTypes: ['oauth_state'],
             }),
