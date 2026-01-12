@@ -68,6 +68,8 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-label-formatter'
+  - '@kbn/core-chrome-sidebar'
+  - '@kbn/shared-ux-utility'
 tags:
   - shared-browser
   - package
