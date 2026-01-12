@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -59,7 +60,7 @@ export const ConnectorsView: React.FC = () => {
 
   if (isLoading) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 400 }}>
+      <EuiFlexGroup justifyContent="center" alignItems="center" css={css({ minHeight: 400 })}>
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />
         </EuiFlexItem>

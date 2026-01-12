@@ -7,14 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiPanel,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  transparentize,
-} from '@elastic/eui';
+import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, transparentize } from '@elastic/eui';
 import type { Connector } from '../../types/connector';
 import { getConnectorIcon } from '../../utils';
 
@@ -29,12 +22,11 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({
   onClick,
   isDisabled = false,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const iconComponent = useMemo(() => getConnectorIcon(connector, 'l'), [connector]);
 
   return (
     <EuiPanel
-      css={css({
+      css={({ euiTheme }) => ({
         height: 122,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         opacity: isDisabled ? 0.5 : 1,
@@ -67,7 +59,7 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({
         <EuiFlexItem grow={false}>{iconComponent}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText
-            css={css({
+            css={({ euiTheme }) => ({
               fontWeight: euiTheme.font.weight.semiBold,
               textAlign: 'center',
             })}

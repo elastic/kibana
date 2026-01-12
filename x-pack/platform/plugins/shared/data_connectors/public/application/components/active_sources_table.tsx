@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -20,7 +19,6 @@ import {
   EuiSpacer,
   EuiTablePagination,
   EuiIcon,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -61,7 +59,6 @@ const ActionsCell: React.FC<{
   onDelete?: (source: ActiveSource) => void;
   disabled?: boolean;
 }> = ({ source, onReconnect, onEdit, onDelete, disabled = false }) => {
-  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
@@ -106,7 +103,7 @@ const ActionsCell: React.FC<{
     <EuiContextMenuItem
       key="delete"
       icon={<EuiIcon type="trash" color="danger" />}
-      css={css({
+      css={({ euiTheme }) => ({
         color: euiTheme.colors.danger,
       })}
       onClick={() => {
@@ -204,7 +201,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
         agents && agents.length > 0 ? (
           <AgentAvatarGroup agents={agents} />
         ) : (
-          <EuiText size="s">-</EuiText>
+          <EuiText size="s">-</EuiText> // Future: Add Agents which use this source
         ),
     },
     {

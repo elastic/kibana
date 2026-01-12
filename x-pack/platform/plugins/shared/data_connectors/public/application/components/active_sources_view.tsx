@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActiveSourcesTable } from './active_sources_table';
@@ -59,7 +60,7 @@ export const ActiveSourcesView: React.FC = () => {
 
   if (isLoading) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 400 }}>
+      <EuiFlexGroup justifyContent="center" alignItems="center" css={css({ minHeight: 400 })}>
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />
         </EuiFlexItem>
