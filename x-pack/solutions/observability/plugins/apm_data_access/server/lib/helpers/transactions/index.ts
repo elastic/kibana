@@ -13,9 +13,9 @@ import {
   METRICSET_NAME,
   TRANSACTION_DURATION_SUMMARY,
 } from '@kbn/apm-types/es_fields';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
-import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
 import { termsQuery } from '@kbn/observability-utils-common/es/queries/terms_query';
 import { existsQuery } from '@kbn/observability-utils-common/es/queries/exists_query';
