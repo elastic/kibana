@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 
-const CLOUD_ASSET_DISCOVERY_INTEGRATION_ID =
+export const CLOUD_ASSET_DISCOVERY_INTEGRATION_ID =
   'cloud_asset_inventory-2773feaf-50bb-43f8-9fa9-8f9a5f85e566';
 
 /**

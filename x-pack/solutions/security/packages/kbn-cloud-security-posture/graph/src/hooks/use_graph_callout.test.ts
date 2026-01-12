@@ -8,11 +8,12 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useGraphCallout } from './use_graph_callout';
 import type { NodeViewModel, EntityNodeViewModel, LabelNodeViewModel } from '../components/types';
+import { CLOUD_ASSET_DISCOVERY_INTEGRATION_ID } from './use_callout_links';
 
 // Mock dependencies
 const mockUseQuery = jest.fn();
 const mockGetUrlForApp = jest.fn();
-const mockDataViewsFind = jest.fn();
+const mockDataViewsGet = jest.fn();
 const mockKibana = {
   services: {
     http: {
@@ -22,7 +23,7 @@ const mockKibana = {
       getUrlForApp: mockGetUrlForApp,
     },
     dataViews: {
-      find: mockDataViewsFind,
+      get: mockDataViewsGet,
     },
   },
 };
@@ -53,9 +54,12 @@ describe('useGraphCallout', () => {
       }
       return `/app/${appId}`;
     });
-    // Setup default dataViews.find mock to return a resolved Promise
-    mockDataViewsFind.mockReturnValue(
-      Promise.resolve([{ id: 'cloud_asset_inventory-test-id', title: 'Cloud Asset Discovery' }])
+    // Setup default dataViews.get mock to return a resolved Promise with single dataView object
+    mockDataViewsGet.mockReturnValue(
+      Promise.resolve({
+        id: CLOUD_ASSET_DISCOVERY_INTEGRATION_ID,
+        title: 'Cloud Asset Discovery',
+      })
     );
   });
 
@@ -225,7 +229,7 @@ describe('useGraphCallout', () => {
         expect(result.current.config.title).toBe('Entity information unavailable');
         expect(result.current.config.links).toHaveLength(1);
         expect(result.current.config.links[0].href).toBe(
-          "/app/discover#/?_a=(dataSource:(dataViewId:'cloud_asset_inventory-test-id',type:dataView))"
+          `/app/discover#/?_a=(dataSource:(dataViewId:'${CLOUD_ASSET_DISCOVERY_INTEGRATION_ID}',type:dataView))`
         );
       }
     });
@@ -260,7 +264,7 @@ describe('useGraphCallout', () => {
         expect(result.current.config.title).toContain('Unknown entity type');
         expect(result.current.config.links).toHaveLength(1);
         expect(result.current.config.links[0].href).toBe(
-          "/app/discover#/?_a=(dataSource:(dataViewId:'cloud_asset_inventory-test-id',type:dataView))"
+          `/app/discover#/?_a=(dataSource:(dataViewId:'${CLOUD_ASSET_DISCOVERY_INTEGRATION_ID}',type:dataView))`
         );
       }
     });
@@ -293,7 +297,7 @@ describe('useGraphCallout', () => {
         expect(result.current.config.title).toContain('Unknown entity type');
         expect(result.current.config.links).toHaveLength(1);
         expect(result.current.config.links[0].href).toBe(
-          "/app/discover#/?_a=(dataSource:(dataViewId:'cloud_asset_inventory-test-id',type:dataView))"
+          `/app/discover#/?_a=(dataSource:(dataViewId:'${CLOUD_ASSET_DISCOVERY_INTEGRATION_ID}',type:dataView))`
         );
       }
     });
@@ -326,7 +330,7 @@ describe('useGraphCallout', () => {
         expect(result.current.config.title).toContain('Unknown entity type');
         expect(result.current.config.links).toHaveLength(1);
         expect(result.current.config.links[0].href).toBe(
-          "/app/discover#/?_a=(dataSource:(dataViewId:'cloud_asset_inventory-test-id',type:dataView))"
+          `/app/discover#/?_a=(dataSource:(dataViewId:'${CLOUD_ASSET_DISCOVERY_INTEGRATION_ID}',type:dataView))`
         );
       }
     });
