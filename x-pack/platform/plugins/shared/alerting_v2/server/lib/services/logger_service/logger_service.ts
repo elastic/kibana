@@ -6,20 +6,20 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { Logger } from '@kbn/logging';
+import type { Logger, LogMessageSource } from '@kbn/logging';
 import { Logger as BaseLogger } from '@kbn/core-di';
 import type { EcsError } from '@elastic/ecs';
 
 interface DebugParams {
-  message: string;
+  message: LogMessageSource;
 }
 
 interface InfoParams {
-  message: string;
+  message: LogMessageSource;
 }
 
 interface WarnParams {
-  message: string;
+  message: LogMessageSource;
 }
 
 interface ErrorParams {

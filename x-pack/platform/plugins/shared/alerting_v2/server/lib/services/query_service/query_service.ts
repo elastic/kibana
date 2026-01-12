@@ -28,7 +28,10 @@ export class QueryService {
 
   async executeQuery({ query, filter, params }: ExecuteQueryParams): Promise<ESQLSearchResponse> {
     try {
-      this.logger.debug({ message: 'QueryService: Executing query' });
+      this.logger.debug({
+        message: () =>
+          `QueryService: Executing query - ${JSON.stringify({ query, filter, params })}`,
+      });
 
       const request: IKibanaSearchRequest<ESQLSearchParams> = {
         params: {
