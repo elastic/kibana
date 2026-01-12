@@ -221,7 +221,6 @@ export const AgentPolicyBaseSchema = {
       ),
     ])
   ),
-  has_agent_version_conditions: schema.maybe(schema.boolean()),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
@@ -316,6 +315,10 @@ export const AgentPolicySchema = schema.object({
   ),
   updated_at: schema.string(),
   updated_by: schema.string(),
+});
+
+export const AgentPolicySchemaV3 = AgentPolicySchema.extends({
+  has_agent_version_conditions: schema.maybe(schema.boolean()),
 });
 
 export const AgentPolicyResponseSchema = AgentPolicySchema.extends({

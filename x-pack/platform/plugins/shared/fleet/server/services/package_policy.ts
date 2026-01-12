@@ -2294,7 +2294,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
         packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient, true);
-
         packageInfosandAssetsMap = await getPkgInfoAssetsMap({
           logger,
           packageInfos: [...packageInfos.values()],
