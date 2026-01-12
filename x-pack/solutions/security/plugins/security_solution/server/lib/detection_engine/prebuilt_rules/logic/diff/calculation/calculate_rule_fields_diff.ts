@@ -67,7 +67,7 @@ export const calculateRuleFieldsDiff = (
   isRuleCustomized: boolean = false
 ): RuleFieldsDiff => {
   const commonFieldsDiff = calculateCommonFieldsDiff(ruleVersions, isRuleCustomized);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   const { base_version, current_version, target_version } = ruleVersions;
   const hasBaseVersion = base_version !== MissingVersion;
 
