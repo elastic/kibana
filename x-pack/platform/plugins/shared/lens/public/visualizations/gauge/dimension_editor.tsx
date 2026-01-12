@@ -9,7 +9,7 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFormRow, EuiSwitch, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry } from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { CustomizablePalette, CUSTOM_PALETTE, applyPaletteParams } from '@kbn/coloring';
 import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
@@ -47,18 +47,19 @@ export function GaugeDimensionEditor(
     max: getMaxValue(firstRow, accessors),
   };
 
-  const activePalette = state?.palette || {
-    type: 'palette',
-    name: defaultPaletteParams.name,
-    params: {
-      ...defaultPaletteParams,
-      continuity: 'all',
-      colorStops: undefined,
-      stops: undefined,
-      rangeMin: -Infinity,
-      rangeMax: Infinity,
-    },
-  };
+  const activePalette =
+    state?.palette ||
+    ({
+      type: 'palette',
+      name: defaultPaletteParams.name,
+      params: {
+        ...defaultPaletteParams,
+        colorStops: undefined,
+        stops: undefined,
+        rangeMin: undefined,
+        rangeMax: undefined,
+      },
+    } satisfies PaletteOutput<CustomPaletteParams>);
 
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
