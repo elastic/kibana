@@ -9,7 +9,7 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import { RulesClient } from '../lib/rules_client';
-import { ResourcesService } from '../lib/services/resource_service/resources_service';
+import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { LoggerService } from '../lib/services/logger_service/logger_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import { AlertingRetryService } from '../lib/services/retry_service';
@@ -25,7 +25,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertingRetryService).toSelf().inSingletonScope();
 
   bind(LoggerService).toSelf().inSingletonScope();
-  bind(ResourcesService).toSelf().inSingletonScope();
+  bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(QueryService)
     .toDynamicValue(({ get }) => {

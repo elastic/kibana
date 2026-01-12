@@ -19,7 +19,7 @@ interface ResourceState {
 }
 
 @injectable()
-export class ResourcesService {
+export class ResourceManager {
   private readonly resources = new Map<string, ResourceState>();
   private readonly startupResourceKeys = new Set<string>();
 
@@ -42,7 +42,7 @@ export class ResourcesService {
       existing?.status === 'failed'
     ) {
       throw new Error(
-        `ResourcesService: cannot register resource [${key}] after initialization has started`
+        `ResourceManager: cannot register resource [${key}] after initialization has started`
       );
     }
 
@@ -63,6 +63,9 @@ export class ResourcesService {
     for (const key of keysToStart) {
       this.startupResourceKeys.add(key);
 
+      // Fire-and-forget: initialization errors must NOT become unhandled rejections
+      // (which would crash Kibana). The error is still stored on the resource state,
+      // and consumers will fail fast when calling `waitUntilReady()` / `ensureResourceReady()`.
       void this.startResource(key).catch(() => {});
     }
   }
@@ -91,12 +94,12 @@ export class ResourcesService {
   public async ensureResourceReady(key: string): Promise<void> {
     const state = this.resources.get(key);
     if (!state?.initializer) {
-      throw new Error(`ResourcesService: resource [${key}] is not registered`);
+      throw new Error(`ResourceManager: resource [${key}] is not registered`);
     }
 
     if (state.status === 'failed') {
       const err =
-        state.error ?? new Error(`ResourcesService: resource [${key}] failed to initialize`);
+        state.error ?? new Error(`ResourceManager: resource [${key}] failed to initialize`);
       throw err;
     }
 
@@ -123,7 +126,7 @@ export class ResourcesService {
   private async startResource(key: string): Promise<void> {
     const state = this.resources.get(key);
     if (!state?.initializer) {
-      throw new Error(`ResourcesService: resource [${key}] is not registered`);
+      throw new Error(`ResourceManager: resource [${key}] is not registered`);
     }
 
     if (state.status === 'ready') {
@@ -132,7 +135,7 @@ export class ResourcesService {
 
     if (state.status === 'failed') {
       const err =
-        state.error ?? new Error(`ResourcesService: resource [${key}] failed to initialize`);
+        state.error ?? new Error(`ResourceManager: resource [${key}] failed to initialize`);
       throw err;
     }
 
@@ -146,14 +149,14 @@ export class ResourcesService {
     state.promise = (async () => {
       try {
         this.logger.debug({
-          message: `ResourcesService: initializing resource [${key}]`,
+          message: `ResourceManager: initializing resource [${key}]`,
         });
 
         await this.retryService.retry(() => state.initializer!.initialize());
         state.status = 'ready';
 
         this.logger.debug({
-          message: `ResourcesService: resource [${key}] is ready`,
+          message: `ResourceManager: resource [${key}] is ready`,
         });
       } catch (e) {
         const err = e instanceof Error ? e : new Error(String(e));

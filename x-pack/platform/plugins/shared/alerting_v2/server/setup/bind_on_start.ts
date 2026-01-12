@@ -8,19 +8,19 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { OnStart } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
-import { ResourcesService } from '../lib/services/resource_service/resources_service';
+import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { registerResources } from '../resources/register_resources';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue((container) => {
-    const resourcesService = container.get(ResourcesService);
+    const resourceManager = container.get(ResourceManager);
     const esClient = container.get(CoreStart('elasticsearch')).client.asInternalUser;
 
     registerResources({
-      resourcesService,
+      resourceManager,
       esClient,
     });
 
-    resourcesService.startInitialization();
+    resourceManager.startInitialization();
   });
 }

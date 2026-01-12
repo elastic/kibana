@@ -8,21 +8,21 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getAlertEventsResourceDefinition } from './alert_events';
 import { ResourceInitializer } from '../lib/services/resource_service/resource_initializer';
-import type { ResourcesService } from '../lib/services/resource_service/resources_service';
+import type { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import type { ResourceDefinition } from './types';
 import { getAlertTransitionsResourceDefinition } from './alert_transitions';
 import { getAlertActionsResourceDefinition } from './alert_actions';
 
 export interface RegisterResourcesOptions {
-  resourcesService: ResourcesService;
+  resourceManager: ResourceManager;
   esClient: ElasticsearchClient;
 }
 
-export function registerResources({ resourcesService, esClient }: RegisterResourcesOptions): void {
+export function registerResources({ resourceManager, esClient }: RegisterResourcesOptions): void {
   for (const resourceDefinition of getDataStreamResourceDefinitions()) {
     const initializer = new ResourceInitializer(esClient, resourceDefinition);
 
-    resourcesService.registerResource(resourceDefinition.key, initializer);
+    resourceManager.registerResource(resourceDefinition.key, initializer);
   }
 }
 

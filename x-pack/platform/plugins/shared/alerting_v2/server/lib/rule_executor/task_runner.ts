@@ -18,7 +18,7 @@ import { spaceIdToNamespace } from '../space_id_to_namespace';
 import type { RuleExecutorTaskParams } from './types';
 import { executeEsqlRule } from './execute_esql';
 import { writeEsqlAlerts } from './write_alerts';
-import { ResourcesService } from '../services/resource_service/resources_service';
+import { ResourceManager } from '../services/resource_service/resource_manager';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 
 export function createRuleExecutorTaskRunner({
@@ -46,7 +46,7 @@ export function createRuleExecutorTaskRunner({
         }
 
         const params = taskInstance.params as RuleExecutorTaskParams;
-        const resourcesService = container.get(ResourcesService);
+        const resourcesService = container.get(ResourceManager);
         // Wait for the plugin-wide resource initialization started during plugin setup.
         await resourcesService.waitUntilReady();
 
