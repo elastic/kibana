@@ -25,6 +25,7 @@ import {
   EuiButtonEmpty,
   EuiText,
   useEuiTheme,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import type { RecentlyClosedTabItem, TabPreviewData } from '../../types';
 import type { TabItem } from '../../types';
@@ -124,7 +125,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       (option: EuiSelectableOption<OptionData>) => {
         const itemContents = (
           <>
-            {option.label}
+            <EuiTextTruncate truncation="middle" text={option.label} />
             {option.formattedtime && (
               <EuiText size="xs" color="subdued" className="eui-displayBlock">
                 {option.formattedtime}
