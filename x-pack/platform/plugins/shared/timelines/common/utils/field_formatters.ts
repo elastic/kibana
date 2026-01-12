@@ -151,7 +151,6 @@ export const getDataFromFieldsHits = (
     const isObjectArray = objArrStr.some((o) => o.isObjectArray);
 
     const isEcsField = fieldMaps[field as keyof typeof fieldMaps] !== undefined;
-    const isFullPathEcsField = fieldMaps[dotField as keyof typeof fieldMaps] !== undefined;
     const isRuleParameters = isRuleParametersFieldOrSubfield(field, prependField);
     const isThreatEnrichment = isThreatEnrichmentFieldOrSubfield(field, prependField);
 
