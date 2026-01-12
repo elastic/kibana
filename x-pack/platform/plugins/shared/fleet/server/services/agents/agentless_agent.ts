@@ -517,8 +517,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     return { fleetUrl, fleetToken };
   }
 
-  private createRequestConfigDebug(requestConfig: AxiosRequestConfig<any>) {
-    return JSON.stringify({
+  private createRedactedRequestConfig(requestConfig: AxiosRequestConfig<any>) {
+    return {
       ...requestConfig,
       data: {
         ...pick(
@@ -531,6 +531,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         ),
         agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',
+        secrets: '[REDACTED]',
+        policy_details: '[REDACTED]',
       },
       httpsAgent: {
         ...requestConfig.httpsAgent,
@@ -541,7 +543,10 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
         },
       },
-    });
+    };
+  }
+  private createRequestConfigDebug(requestConfig: AxiosRequestConfig<any>) {
+    return JSON.stringify(this.createRedactedRequestConfig(requestConfig));
   }
 
   private catchAgentlessApiError(
@@ -599,10 +604,13 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         error.response.status in ERROR_HANDLING_MESSAGES
           ? ERROR_HANDLING_MESSAGES[error.response.status][action]
           : ERROR_HANDLING_MESSAGES.unhandled_response[action];
-
+      const redactedErrorResponse = {
+        ...error.response,
+        config: this.createRedactedRequestConfig(error.response.config),
+      };
       this.handleResponseError(
         action,
-        error.response,
+        redactedErrorResponse as AxiosResponse,
         logger,
         errorMetadataWithRequestConfig,
         requestConfigDebugStatus,

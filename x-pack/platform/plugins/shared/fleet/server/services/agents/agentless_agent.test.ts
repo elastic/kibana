@@ -9,7 +9,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import type { AxiosResponse } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import { AgentlessAgentCreateFleetUnreachableError } from '../../../common/errors';
@@ -1098,7 +1098,25 @@ describe('Agentless Agent service', () => {
     );
   });
 
-  describe('error handling', () => {
+  describe('Error handling', () => {
+    const axiosRequestConfig = {
+      method: 'POST',
+      url: 'http://api.agentless.com/api/v1/serverless/deployments',
+      data: {
+        policy_id: 'mocked-agentless-agent-policy-id',
+      },
+      httpsAgent: {
+        options: {
+          cert: '/path/to/cert',
+          key: '/path/to/key',
+          ca: '/path/to/ca',
+        },
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    } as AxiosRequestConfig;
+
     it('should throw AgentlessAgentConfigError if agentless policy does not support_agentless', async () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
@@ -1368,8 +1386,9 @@ describe('Agentless Agent service', () => {
       axiosError.response = {
         status: 999,
         data: {
-          message: 'This is a fake error status that is never to be handled handled',
+          message: 'This is a fake error status that is never to be handled',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
       jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
@@ -1432,6 +1451,7 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Internal Server Error',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
 
       jest.mocked(axios).mockRejectedValueOnce(axiosError);
@@ -1469,6 +1489,13 @@ describe('Agentless Agent service', () => {
           },
         }
       );
+      const errorCalls = mockedLogger.error.mock.calls;
+      const allErrorLogs = errorCalls.map((call) => JSON.stringify(call)).join(' ');
+
+      expect(allErrorLogs).toContain('\\"agent_policy\\":\\"[REDACTED]\\"');
+      expect(allErrorLogs).toContain('\\"fleet_token\\":\\"[REDACTED]\\"');
+      expect(allErrorLogs).toContain('\\"secrets\\":\\"[REDACTED]\\"');
+      expect(allErrorLogs).toContain('\\"policy_details\\":\\"[REDACTED]\\"');
     });
 
     it('should throw an error and log and error when the Agentless API returns status 429', async () => {
@@ -1515,6 +1542,7 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Limit exceeded',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
 
       jest.mocked(axios).mockRejectedValueOnce(axiosError);
@@ -1532,6 +1560,13 @@ describe('Agentless Agent service', () => {
 
       // Assert that the error is logged
       expect(mockedLogger.error).toHaveBeenCalledTimes(1);
+      const errorCalls = mockedLogger.error.mock.calls;
+      const allErrorLogs = errorCalls.map((call) => JSON.stringify(call)).join(' ');
+
+      expect(allErrorLogs).toContain('\\"agent_policy\\":\\"[REDACTED]\\"');
+      expect(allErrorLogs).toContain('\\"fleet_token\\":\\"[REDACTED]\\"');
+      expect(allErrorLogs).toContain('\\"secrets\\":\\"[REDACTED]\\"');
+      expect(allErrorLogs).toContain('\\"policy_details\\":\\"[REDACTED]\\"');
     });
 
     it('should throw an error and log and error when the Agentless API returns status 408', async () => {
@@ -1578,6 +1613,7 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Request timed out',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
 
       jest.mocked(axios).mockRejectedValueOnce(axiosError);
@@ -1641,6 +1677,7 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Not Found',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
       jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
@@ -1703,6 +1740,7 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Forbidden',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
 
       jest.mocked(axios).mockRejectedValueOnce(axiosError);
@@ -1766,6 +1804,7 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Unauthorized',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
 
       jest.mocked(axios).mockRejectedValueOnce(axiosError);
@@ -1829,6 +1868,7 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Bad Request',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
 
       jest.mocked(axios).mockRejectedValueOnce(axiosError);
@@ -1894,9 +1934,10 @@ describe('Agentless Agent service', () => {
           code: 'FLEET_UNREACHABLE',
           message: 'Bad Request',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
       // Force axios to throw an AxiosError to simulate an error response
-      jest.mocked(axios).mockRejectedValueOnce(mockedError);
+      jest.mocked(axios).mockRejectedValue(mockedError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1911,6 +1952,13 @@ describe('Agentless Agent service', () => {
 
       // Assert that the error is logged
       expect(mockedLogger.error).toBeCalledTimes(1);
+      const errorCalls = mockedLogger.error.mock.calls;
+      const allErrorLogs = errorCalls.map((call) => JSON.stringify(call)).join(' ');
+
+      expect(allErrorLogs).toContain('\\"agent_policy\\":\\"[REDACTED]\\"');
+      expect(allErrorLogs).toContain('\\"fleet_token\\":\\"[REDACTED]\\"');
+      expect(allErrorLogs).toContain('\\"secrets\\":\\"[REDACTED]\\"');
+      expect(allErrorLogs).toContain('\\"policy_details\\":\\"[REDACTED]\\"');
     });
 
     it('should throw an error and log and error when the Agentless API returns status 429 with code OVER_PROVISIONED', async () => {
@@ -1959,6 +2007,7 @@ describe('Agentless Agent service', () => {
           code: 'OVER_PROVISIONED',
           message: 'reached limit: 5',
         },
+        config: axiosRequestConfig,
       } as AxiosResponse;
       // Force axios to throw an AxiosError to simulate an error response
       jest.mocked(axios).mockRejectedValueOnce(mockedError);
@@ -2019,6 +2068,7 @@ describe('Agentless Agent service', () => {
       mockedError.response = {
         status: 404,
         data: {},
+        config: axiosRequestConfig,
       } as AxiosResponse;
       // Force axios to throw an AxiosError to simulate an error response
       jest.mocked(axios).mockRejectedValueOnce(mockedError);
