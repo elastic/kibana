@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import SemVer from 'semver/classes/semver';
 
 import { LATEST_VERSION, MIN_VERSION_TO_UPGRADE_TO_LATEST } from '../../../common/constants';
-import { setupEnvironment } from '../helpers';
-import type { OverviewTestBed } from './overview.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
 import { setupOverviewPage } from './overview.helpers';
 
 const currentMinVersion = new SemVer(MIN_VERSION_TO_UPGRADE_TO_LATEST);
 
 describe('Overview Page', () => {
-  let testBed: OverviewTestBed;
-  beforeEach(async () => {
-    testBed = await setupOverviewPage(setupEnvironment().httpSetup);
-    testBed.component.update();
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+
+  beforeEach(() => {
+    const mockEnvironment = setupEnvironment();
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('Documentation links', () => {
-    test('Has a whatsNew link and it references target version', () => {
-      const { exists, find } = testBed;
-
-      expect(exists('whatsNewLink')).toBe(true);
-      expect(find('whatsNewLink').text()).toContain("What's new in version");
+    test('Has a whatsNew link and it references target version', async () => {
+      await setupOverviewPage(httpSetup);
+      expect(screen.getByTestId('whatsNewLink')).toBeInTheDocument();
+      expect(screen.getByTestId('whatsNewLink')).toHaveTextContent("What's new in version");
     });
 
     describe('current version can be upgrated to last one', () => {
@@ -39,26 +38,20 @@ describe('Overview Page', () => {
           currentPatch: currentMinVersion.patch,
         };
 
-        await act(async () => {
-          testBed = await setupOverviewPage(setupEnvironment().httpSetup, {
-            kibanaVersionInfo: versionMock,
-          });
+        await setupOverviewPage(httpSetup, {
+          kibanaVersionInfo: versionMock,
         });
-
-        testBed.component.update();
       });
 
       test('Has the current version and the lastest avaiblable version', () => {
-        const { find } = testBed;
-
-        expect(find('overviewPageHeader').text()).toContain(
+        expect(screen.getByTestId('overviewPageHeader')).toHaveTextContent(
           `Current version: ${currentMinVersion.version} | Latest available version: ${LATEST_VERSION}`
         );
       });
 
       test('Has not a tooltip when current version is major than min version to upgrade', () => {
-        const { find } = testBed;
-        expect(find('overviewPageHeader').find('.euiToolTipAnchor').exists()).toBe(false);
+        const header = screen.getByTestId('overviewPageHeader');
+        expect(header.querySelector('.euiToolTipAnchor')).toBeNull();
       });
     });
     describe('current version can not be upgrated to last one', () => {
@@ -70,28 +63,23 @@ describe('Overview Page', () => {
           currentPatch: 0,
         };
 
-        await act(async () => {
-          testBed = await setupOverviewPage(setupEnvironment().httpSetup, {
-            kibanaVersionInfo: versionMock,
-          });
+        await setupOverviewPage(httpSetup, {
+          kibanaVersionInfo: versionMock,
         });
-
-        testBed.component.update();
       });
 
       test('Has the current version and the lastest avaiblable version', () => {
-        const { find } = testBed;
-
-        expect(find('overviewPageHeader').text()).toContain(
+        expect(screen.getByTestId('overviewPageHeader')).toHaveTextContent(
           `Current version: ${outdatedMajor}.0.0 | Latest available version: ${LATEST_VERSION}`
         );
       });
 
       test('Has a tooltip when current version is minor than minor version to upgrade', async () => {
-        const { find } = testBed;
-
+        const header = screen.getByTestId('overviewPageHeader');
+        const tooltipAnchor = header.querySelector('.euiToolTipAnchor');
+        expect(tooltipAnchor).not.toBeNull();
+        fireEvent.mouseOver(tooltipAnchor!);
         await waitFor(() => {
-          find('overviewPageHeader').find('.euiToolTipAnchor').first().simulate('mouseOver');
           const toolTipText = document.querySelector('.euiToolTipPopover')?.textContent;
           expect(toolTipText).toBe(
             `Upgrading to v${LATEST_VERSION} requires v${MIN_VERSION_TO_UPGRADE_TO_LATEST}.`

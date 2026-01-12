@@ -140,15 +140,13 @@ export { emptyAssets } from './src/helpers/empty_assets';
 
 export {
   type Feature,
-  type SystemFeature,
-  type FeatureWithFilter,
   type FeatureType,
   isFeature,
   featureSchema,
   featureTypeSchema,
-  featureWithFilterSchema,
-  isFeatureWithFilter,
 } from './src/feature';
+
+export { type System, systemSchema, isSystem } from './src/system';
 
 export {
   type BaseSimulationError,
@@ -163,3 +161,5 @@ export {
 } from './src/models/processing_simulation';
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
+
+export { TaskStatus } from './src/tasks/types';

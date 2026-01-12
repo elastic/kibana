@@ -38,7 +38,6 @@ import {
   usePlaceholder,
   useFitToContent,
   ReBroadcastMouseDownEvents,
-  EditorWidgetsCustomizations,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -633,52 +632,47 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <ReBroadcastMouseDownEvents>
-          <EditorWidgetsCustomizations
-            editor={_editor}
-            enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
-          >
-            {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
-            <MonacoEditor
-              theme={theme}
-              language={languageId}
-              value={value}
-              onChange={onChange}
-              width={isFullScreen ? '100vw' : width}
-              height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
-              editorWillMount={_editorWillMount}
-              editorDidMount={_editorDidMount}
-              editorWillUnmount={_editorWillUnmount}
-              options={{
-                padding: allowFullScreen || isCopyable ? { top: 24 } : {},
-                renderLineHighlight: 'none',
-                scrollBeyondLastLine: false,
-                minimap: {
-                  enabled: false,
-                },
-                scrollbar: {
-                  useShadows: false,
-                  // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
-                  // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
-                  // outer scrollbars.
-                  alwaysConsumeMouseWheel: false,
-                },
-                wordBasedSuggestions: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent',
-                matchBrackets: 'never',
-                fontFamily: 'Roboto Mono',
-                fontSize: isFullScreen ? 16 : 12,
-                lineHeight: isFullScreen ? 24 : 21,
-                contextmenu: enableCustomContextMenu,
-                fixedOverflowWidgets: enableSuggestWidgetRepositioning,
-                // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
-                'bracketPairColorization.enabled': false,
-                ...options,
-                // Explicit links prop always takes precedence over any value passed in options
-                links,
-              }}
-            />
-          </EditorWidgetsCustomizations>
+          {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
+          <MonacoEditor
+            theme={theme}
+            language={languageId}
+            value={value}
+            onChange={onChange}
+            width={isFullScreen ? '100vw' : width}
+            height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
+            editorWillMount={_editorWillMount}
+            editorDidMount={_editorDidMount}
+            editorWillUnmount={_editorWillUnmount}
+            options={{
+              padding: allowFullScreen || isCopyable ? { top: 24 } : {},
+              renderLineHighlight: 'none',
+              scrollBeyondLastLine: false,
+              minimap: {
+                enabled: false,
+              },
+              scrollbar: {
+                useShadows: false,
+                // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
+                // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
+                // outer scrollbars.
+                alwaysConsumeMouseWheel: false,
+              },
+              wordBasedSuggestions: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              matchBrackets: 'never',
+              fontFamily: 'Roboto Mono',
+              fontSize: isFullScreen ? 16 : 12,
+              lineHeight: isFullScreen ? 24 : 21,
+              contextmenu: enableCustomContextMenu,
+              fixedOverflowWidgets: enableSuggestWidgetRepositioning,
+              // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
+              'bracketPairColorization.enabled': false,
+              ...options,
+              // Explicit links prop always takes precedence over any value passed in options
+              links,
+            }}
+          />
         </ReBroadcastMouseDownEvents>
       </FullScreenDisplay>
     </div>

@@ -32,6 +32,7 @@ import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
   hasDateBreakdown,
+  hasOnlySourceCommand,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1184,6 +1185,28 @@ describe('esql query helpers', () => {
           },
         ])
       ).toBe(true);
+    });
+  });
+
+  describe('hasOnlySourceCommand', () => {
+    it('should return true for queries with only FROM command', () => {
+      expect(hasOnlySourceCommand('FROM index')).toBe(true);
+    });
+
+    it('should return true for queries with only TS command', () => {
+      expect(hasOnlySourceCommand('TS index')).toBe(true);
+    });
+
+    it('should return false for queries with FROM and other commands', () => {
+      expect(hasOnlySourceCommand('FROM index | STATS count()')).toBe(false);
+    });
+
+    it('should return false for queries with TS and other commands', () => {
+      expect(hasOnlySourceCommand('TS index | WHERE field > 0')).toBe(false);
+    });
+
+    it('should return false for empty query', () => {
+      expect(hasOnlySourceCommand('')).toBe(false);
     });
   });
 });
