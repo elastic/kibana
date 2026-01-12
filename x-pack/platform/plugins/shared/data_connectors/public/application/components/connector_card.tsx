@@ -6,8 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiPanel,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  transparentize,
+} from '@elastic/eui';
 import type { Connector } from '../../types/connector';
 import { getConnectorIcon } from '../../utils';
 
@@ -17,59 +24,59 @@ interface ConnectorCardProps {
   isDisabled?: boolean;
 }
 
-const contentStyle = {
-  display: 'flex',
-  flexDirection: 'column' as const,
-  alignItems: 'center',
-  justifyContent: 'center',
-  height: '100%',
-  gap: 16,
-};
-
-const textStyle = ({ euiTheme }: UseEuiTheme) => ({
-  fontWeight: euiTheme.font.weight.semiBold,
-  textAlign: 'center' as const,
-});
-
-const getPanelStyle =
-  (isDisabled: boolean) =>
-  ({ euiTheme }: UseEuiTheme) => ({
-    height: 122,
-    cursor: isDisabled ? 'not-allowed' : 'pointer',
-    opacity: isDisabled ? 0.5 : 1,
-    border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    transition: 'all 0.2s ease',
-    '&:hover': !isDisabled
-      ? {
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          transform: 'translateY(-2px)',
-          borderColor: euiTheme.colors.primary,
-        }
-      : {},
-  });
-
 export const ConnectorCard: React.FC<ConnectorCardProps> = ({
   connector,
   onClick,
   isDisabled = false,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const iconComponent = useMemo(() => getConnectorIcon(connector, 'l'), [connector]);
 
   return (
     <EuiPanel
-      css={getPanelStyle(isDisabled)}
+      css={css({
+        height: 122,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        opacity: isDisabled ? 0.5 : 1,
+        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        transition: `all ${euiTheme.animation.fast} ease`,
+        '&:hover': !isDisabled
+          ? {
+              boxShadow: `0 ${euiTheme.size.xs} ${euiTheme.size.base} ${transparentize(
+                euiTheme.colors.shadow,
+                0.1
+              )}`,
+              transform: `translateY(-${euiTheme.size.xs})`,
+              borderColor: euiTheme.colors.primary,
+            }
+          : {},
+      })}
       paddingSize="l"
       hasShadow={false}
       hasBorder={false}
       onClick={() => !isDisabled && onClick?.(connector)}
       data-test-subj={`connectorCard-${connector.id}`}
     >
-      <div css={contentStyle}>
-        {iconComponent}
-        <EuiText css={textStyle} size="s">
-          <span>{connector.name}</span>
-        </EuiText>
-      </div>
+      <EuiFlexGroup
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        gutterSize="m"
+        css={css({ height: '100%' })}
+      >
+        <EuiFlexItem grow={false}>{iconComponent}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText
+            css={css({
+              fontWeight: euiTheme.font.weight.semiBold,
+              textAlign: 'center',
+            })}
+            size="s"
+          >
+            <span>{connector.name}</span>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
