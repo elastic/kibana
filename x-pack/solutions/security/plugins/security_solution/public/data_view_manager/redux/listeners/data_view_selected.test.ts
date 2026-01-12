@@ -8,6 +8,7 @@
 import { createDataViewSelectedListener } from './data_view_selected';
 import { selectDataViewAsync } from '../actions';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { RootState } from '../reducer';
 import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
@@ -77,6 +78,7 @@ const mockedState: RootState = {
     },
   },
 };
+const mockLogger = loggingSystemMock.createLogger();
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn(() => mockedState);
@@ -102,6 +104,7 @@ describe('createDataViewSelectedListener', () => {
     listener = createDataViewSelectedListener({
       dataViews: mockDataViewsService,
       scope: DataViewManagerScopeName.default,
+      logger: mockLogger,
       storage: mockStorage,
     });
   });
@@ -179,6 +182,7 @@ describe('createDataViewSelectedListener', () => {
       const analyzerListener = createDataViewSelectedListener({
         dataViews: mockDataViewsService,
         scope: DataViewManagerScopeName.analyzer,
+        logger: mockLogger,
         storage: mockStorage,
       });
 
@@ -206,6 +210,7 @@ describe('createDataViewSelectedListener', () => {
       const analyzerListener = createDataViewSelectedListener({
         dataViews: mockDataViewsService,
         scope: DataViewManagerScopeName.analyzer,
+        logger: mockLogger,
         storage: mockStorage,
       });
 
