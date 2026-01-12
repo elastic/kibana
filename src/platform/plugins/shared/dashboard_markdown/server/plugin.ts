@@ -9,15 +9,29 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
+import { registerRoutes } from './api/register_routes';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { SetupDeps, StartDeps } from './types';
 import { markdownEmbeddableSchema } from './schemas';
+import type { MarkdownState } from '.';
+import { markdownSavedObjectType } from './markdown_saved_object';
+import { MarkdownStorage } from './content_management/markdown_storage';
 
 export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     plugins.embeddable.registerTransforms(MARKDOWN_EMBEDDABLE_TYPE, {
       schema: markdownEmbeddableSchema,
     });
+
+    plugins.contentManagement.register({
+      id: MARKDOWN_EMBEDDABLE_TYPE,
+      storage: new MarkdownStorage(),
+      version: { latest: 1 },
+    });
+
+    core.savedObjects.registerType<MarkdownState>(markdownSavedObjectType);
+
+    registerRoutes(core.http);
   }
 
   start(core: CoreStart, plugins: StartDeps) {}

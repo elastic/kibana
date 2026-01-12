@@ -26,18 +26,27 @@ import {
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { MarkdownEditorState, MarkdownEmbeddableState } from '../server';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+import type {
+  MarkdownEmbeddableState,
+  MarkdownByValueState,
+  MarkdownByReferenceState,
+} from '../server';
+import { APP_NAME, MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { MarkdownEditorApi } from './types';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';
+import { loadFromLibrary } from './markdown_client/load_from_library';
+import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
+import { markdownClient } from './markdown_client/markdown_client';
 
-const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
+const defaultMarkdownState: WithAllKeys<MarkdownByValueState> = {
   content: '',
 };
 
-const markdownComparators: StateComparators<MarkdownEditorState> = { content: 'referenceEquality' };
+const markdownComparators: StateComparators<MarkdownByValueState> = {
+  content: 'referenceEquality',
+};
 
 export const markdownEmbeddableFactory: EmbeddableFactory<
   MarkdownEmbeddableState,
@@ -46,17 +55,41 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
   type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
-    const markdownStateManager = initializeStateManager(initialState, defaultMarkdownState);
+    const savedObjectId = (initialState as MarkdownByReferenceState).savedObjectId;
+    const intialMarkdownState = savedObjectId
+      ? await loadFromLibrary(savedObjectId)
+      : (initialState as MarkdownByValueState);
+
+    const markdownStateManager = initializeStateManager<MarkdownByValueState>(
+      intialMarkdownState,
+      defaultMarkdownState
+    );
+
+    const isByReference = savedObjectId !== undefined;
+    const defaultDescription$ = new BehaviorSubject(
+      isByReference ? initialState.description : undefined
+    );
+    const defaultTitle$ = new BehaviorSubject(isByReference ? initialState.title : undefined);
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
 
     const overrideHoverActions$ = new BehaviorSubject<boolean>(false);
 
-    const serializeState = () => ({
+    const serializeByValue = () => ({
       ...titleManager.getLatestState(),
       ...markdownStateManager.getLatestState(),
     });
+
+    const serializeByReference = (libraryId: string) => {
+      return {
+        ...titleManager.getLatestState(),
+        savedObjectId: libraryId,
+      };
+    };
+
+    const serializeState = () =>
+      isByReference ? serializeByReference(savedObjectId) : serializeByValue();
 
     const resetEditingState = () => {
       isEditing$.next(false);
@@ -67,7 +100,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       }
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges({
+    const unsavedChangesApi = initializeUnsavedChanges<MarkdownEmbeddableState>({
       uuid,
       parentApi,
       serializeState,
@@ -76,17 +109,21 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         markdownStateManager.anyStateChange$
       ).pipe(map(() => undefined)),
       getComparators: () => {
-        return { ...titleComparators, ...markdownComparators };
+        return { ...titleComparators, ...markdownComparators, savedObjectId: 'skip' };
       },
       onReset: (lastSaved) => {
         titleManager.reinitializeState(lastSaved);
-        markdownStateManager.reinitializeState(lastSaved);
+        if (!savedObjectId) {
+          markdownStateManager.reinitializeState(lastSaved as MarkdownByValueState);
+        }
       },
     });
 
     const api = finalizeApi({
       ...unsavedChangesApi,
       ...titleManager.api,
+      defaultTitle$,
+      defaultDescription$,
       serializeState,
       onEdit: async ({ isNewPanel = false } = {}) => {
         if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
@@ -100,7 +137,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         }
       },
       isEditingEnabled: () => true,
-      getTypeDisplayName: () => 'Markdown',
+      getTypeDisplayName: () => APP_NAME,
       overrideHoverActions$,
       OverriddenHoverActionsComponent: () => (
         <MarkdownEditorPreviewSwitch
@@ -111,6 +148,36 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           }}
         />
       ),
+      // Library transforms
+      saveToLibrary: async (newTitle: string) => {
+        defaultTitle$.next(newTitle);
+        const { id } = await markdownClient.create(
+          {
+            content: markdownStateManager.getLatestState().content,
+            title: newTitle,
+            description: titleManager.api.description$!.getValue(),
+          },
+          []
+        );
+        return id;
+      },
+      getSerializedStateByValue: serializeByValue,
+      getSerializedStateByReference: serializeByReference,
+      canLinkToLibrary: async () => !isByReference,
+      canUnlinkFromLibrary: async () => isByReference,
+      checkForDuplicateTitle: async (
+        newTitle: string,
+        isTitleDuplicateConfirmed: boolean,
+        onTitleDuplicate: () => void
+      ) => {
+        await checkForDuplicateTitle({
+          title: newTitle,
+          copyOnSave: false,
+          lastSavedTitle: '',
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate,
+        });
+      },
     });
 
     return {
@@ -147,9 +214,20 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
               }
               resetEditingState();
             }}
-            onSave={(value: string) => {
+            onSave={async (value: string) => {
               resetEditingState();
               markdownStateManager.api.setContent(value);
+              if (savedObjectId) {
+                await markdownClient.update(
+                  savedObjectId!,
+                  {
+                    content: value,
+                    title: titleManager.api.title$!.getValue(),
+                    description: titleManager.api.description$!.getValue(),
+                  },
+                  []
+                );
+              }
               if (isNewPanel$.getValue()) {
                 isNewPanel$.next(false);
               }

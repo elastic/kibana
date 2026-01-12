@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-
-export interface SetupDeps {
-  embeddable: EmbeddableSetup;
-  contentManagement: ContentManagementServerSetup;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDeps {}
+export { MarkdownStorage } from './markdown_storage';
+export * from './transform_utils';
+export * from './types';

@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
 
-export interface SetupDeps {
-  embeddable: EmbeddableSetup;
-  contentManagement: ContentManagementServerSetup;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDeps {}
+export type MarkdownSearchRequestBody = TypeOf<typeof searchRequestBodySchema>;
+export type MarkdownSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;

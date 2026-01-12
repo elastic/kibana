@@ -28,6 +28,17 @@ dependsOn:
   - '@kbn/embeddable-plugin'
   - '@kbn/config-schema'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/content-management-utils'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/content-management-plugin'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/presentation-util-plugin'
+  - '@kbn/core-http-server'
+  - '@kbn/object-versioning'
+  - '@kbn/utility-types'
+  - '@kbn/core-saved-objects-server'
 tags:
   - plugin
   - prod

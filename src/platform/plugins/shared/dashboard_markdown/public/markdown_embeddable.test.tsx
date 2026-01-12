@@ -160,4 +160,77 @@ describe('MarkdownEmbeddable', () => {
     await userEvent.click(discardButton);
     expect(embeddable.api.overrideHoverActions$.getValue()).toBe(false);
   });
+
+  it('switches between preview and edit mode', async () => {
+    const { embeddable } = await renderEmbeddable();
+    await embeddable.api.onEdit();
+
+    expect(screen.getByLabelText(/Dashboard markdown editor/i)).toBeInTheDocument();
+
+    const previewToggle = screen.getByRole('checkbox', { name: /Preview/i });
+    await userEvent.click(previewToggle);
+
+    expect(screen.getByTestId('markdownRenderer')).toBeInTheDocument();
+  });
+
+  it('saves to library and returns new saved object ID', async () => {
+    const { embeddable } = await renderEmbeddable({
+      initialState: { rawState: { content: 'Content to save' } },
+    });
+
+    const newTitle = 'Saved Markdown Title';
+    const newId = await embeddable.api.saveToLibrary(newTitle);
+
+    expect(newId).toBeDefined();
+    expect(typeof newId).toBe('string');
+  });
+
+  it('checks for duplicate titles when saving to library', async () => {
+    const { embeddable } = await renderEmbeddable({
+      initialState: { rawState: { content: 'Some content' } },
+    });
+
+    const duplicateTitleSpy = jest.spyOn(
+      require('./markdown_client/duplicate_title_check'),
+      'checkForDuplicateTitle'
+    );
+
+    const title = 'Duplicate Title Test';
+    await embeddable.api.saveToLibrary(title);
+
+    expect(duplicateTitleSpy).toHaveBeenCalledWith(title, undefined, expect.any(Object));
+  });
+
+  it('updates saved object when saving edits to library', async () => {
+    const { embeddable } = await renderEmbeddable({
+      initialState: {
+        rawState: { content: 'Initial Content', savedObjectId: 'existing-id' },
+      },
+    });
+
+    const updateSpy = jest.spyOn(require('./markdown_client/markdown_client'), 'update');
+
+    const newTitle = 'Updated Title';
+    await embeddable.api.saveToLibrary(newTitle);
+
+    expect(updateSpy).toHaveBeenCalledWith('existing-id', {
+      content: 'Initial Content',
+      title: newTitle,
+      description: undefined,
+      defaultTitle: undefined,
+      defaultDescription: undefined,
+    });
+  });
+
+  it('can save to library with description', async () => {
+    const { embeddable } = await renderEmbeddable({
+      initialState: { rawState: { content: 'Content with description' } },
+    });
+
+    const newTitle = 'Markdown with Description';
+    const newDescription = 'This is a description for the markdown panel.';
+
+    // Set description via title manager API
+    embeddable.api.titleManager.api.setDescription!(newDescription);
+  });
 });

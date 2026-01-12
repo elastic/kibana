@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { markdownClient } from './markdown_client';
 
-export interface SetupDeps {
-  embeddable: EmbeddableSetup;
-  contentManagement: ContentManagementServerSetup;
+export async function loadFromLibrary(libraryId: string) {
+  const { data } = await markdownClient.get(libraryId);
+  return data;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDeps {}

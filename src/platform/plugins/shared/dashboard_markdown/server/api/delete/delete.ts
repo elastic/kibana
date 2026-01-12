@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../../../common/constants';
 
-export interface SetupDeps {
-  embeddable: EmbeddableSetup;
-  contentManagement: ContentManagementServerSetup;
+export async function deleteMarkdown(requestCtx: RequestHandlerContext, id: string): Promise<void> {
+  const { core } = await requestCtx.resolve(['core']);
+  await core.savedObjects.client.delete(MARKDOWN_EMBEDDABLE_TYPE, id);
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDeps {}
