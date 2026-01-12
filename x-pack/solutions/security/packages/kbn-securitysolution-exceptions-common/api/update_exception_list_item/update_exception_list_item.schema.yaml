@@ -153,7 +153,7 @@ components:
           default: []
         _version:
           type: string
-          description: The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
+          description: The version ID, normally returned by the API when the item is retrieved. Use it to ensure updates are made against the latest version.
       required:
         - type
         - name

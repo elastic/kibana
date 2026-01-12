@@ -74,7 +74,7 @@ export const UpdateExceptionListItemBase = z.object({
   expire_time: ExceptionListItemExpireTime.optional(),
   comments: UpdateExceptionListItemCommentArray.optional().default([]),
   /**
-   * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
+   * The version ID, normally returned by the API when the item is retrieved. Use it to ensure updates are made against the latest version.
    */
   _version: z.string().optional(),
 });

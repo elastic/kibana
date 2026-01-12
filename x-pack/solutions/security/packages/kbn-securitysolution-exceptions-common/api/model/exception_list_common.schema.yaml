@@ -18,16 +18,16 @@ components:
       minLength: 1
       format: nonempty
       description: |
-        The exception list's human readable string identifier.
+        The exception list's human-readable string identifier.
 
-        For Endpoint Security artifacts, use one of the following valid `list_id` values:
+        For endpoint artifacts, use one of the following values:
 
-        * `endpoint_list`: [Endpoint Exception List](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
-        * `endpoint_trusted_apps`: [Endpoint Trusted Apps List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
-        * `endpoint_trusted_devices`: [Endpoint Trusted Devices List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
-        * `endpoint_event_filters`: [Endpoint Event Filters List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
-        * `endpoint_host_isolation_exceptions`: [Endpoint Host isolation exceptions List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
-        * `endpoint_blocklists`: [Endpoint Blocklists List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+        * `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+        * `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+        * `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+        * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+        * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
       example: 'simple_list'
 
     ExceptionListType:
@@ -69,6 +69,8 @@ components:
 
         - `single`: Only available in the Kibana space in which it is created.
         - `agnostic`: Available in all Kibana spaces.
+
+        For endpoint artifacts, the `namespace_type` must always be `agnostic`. Space awareness for endpoint artifacts is enforced based on Elastic Defend policy assignments.
 
     ExceptionListTags:
       type: array
@@ -207,8 +209,8 @@ components:
       default: []
       description: |
         Tags for categorization. Special tags for scope control:
-        * `"policy:all"` - Global artifact (applies to all policies)
-        * `"policy:<policy_id>"` - Private artifact (applies to specific policy only)
+        * `"policy:all"` - Global artifact (applies to all Elastic Defend policies)
+        * `"policy:<policy_id>"` - Private artifact (applies to specific Elastic Defend policy only, where `<policy_id>` is the Elastic Defend integration policy ID)
 
     EndpointTrustedDeviceOsTypes:
       type: array
@@ -249,7 +251,7 @@ components:
         operator:
           type: string
           enum: [included]
-          description: Must be included
+          description: Must be the value "included"
 
     TrustedDeviceUsernameEntry:
       type: object
@@ -275,7 +277,7 @@ components:
         operator:
           type: string
           enum: [included]
-          description: Must be included
+          description: Must be the value "included"
 
     BlocklistHashOrPathEntry:
       type: object
@@ -303,7 +305,7 @@ components:
         operator:
           type: string
           enum: [included]
-          description: Must be included
+          description: Must be the value "included"
 
     BlocklistWindowsCodeSignatureEntry:
       type: object
@@ -345,7 +347,7 @@ components:
               operator:
                 type: string
                 enum: [included]
-                description: Must be included
+                description: Must be the value "included"
 
     TrustedAppHashEntry:
       type: object
@@ -555,7 +557,7 @@ components:
 
     EndpointListProperties:
       type: object
-      description: Endpoint Security Exception List item properties.
+      description: Elastic Endpoint exception list item properties.
       properties:
         list_id:
           type: string
@@ -577,7 +579,7 @@ components:
 
     TrustedAppsWindowsProperties:
       type: object
-      description: Endpoint Security Trusted Apps List item properties (Windows).
+      description: Trusted applications list item properties (Windows).
       properties:
         list_id:
           type: string
@@ -607,7 +609,7 @@ components:
 
     TrustedAppsMacProperties:
       type: object
-      description: Endpoint Security Trusted Apps List item properties (macOS).
+      description: Trusted applications list item properties (macOS).
       properties:
         list_id:
           type: string
@@ -637,7 +639,7 @@ components:
 
     TrustedAppsLinuxProperties:
       type: object
-      description: Endpoint Security Trusted Apps List item properties (Linux).
+      description: Trusted applications list item properties (Linux).
       properties:
         list_id:
           type: string
@@ -666,7 +668,7 @@ components:
 
     TrustedDevicesWindowsProperties:
       type: object
-      description: Endpoint Security Trusted Devices List item properties (Windows-only, allows username field).
+      description: Trusted devices list item properties (Windows-only, allows username field).
       properties:
         list_id:
           type: string
@@ -708,7 +710,7 @@ components:
               operator:
                 type: string
                 enum: [included]
-                description: Must be included
+                description: Must be the value "included"
         os_types:
           type: array
           items:
@@ -724,7 +726,7 @@ components:
 
     TrustedDevicesMacProperties:
       type: object
-      description: Endpoint Security Trusted Devices List item properties (macOS-only, username not supported).
+      description: Trusted devices list item properties (macOS-only, username not supported).
       properties:
         list_id:
           type: string
@@ -765,7 +767,7 @@ components:
               operator:
                 type: string
                 enum: [included]
-                description: Must be included
+                description: Must be the value "included"
         os_types:
           type: array
           items:
@@ -781,7 +783,7 @@ components:
 
     TrustedDevicesWindowsMacProperties:
       type: object
-      description: Endpoint Security Trusted Devices List item properties (Windows + macOS, username not supported).
+      description: Trusted devices list item properties (Windows + macOS, username not supported).
       properties:
         list_id:
           type: string
@@ -822,7 +824,7 @@ components:
               operator:
                 type: string
                 enum: [included]
-                description: Must be included
+                description: Must be the value "included"
         os_types:
           type: array
           items:
@@ -838,7 +840,7 @@ components:
 
     EventFiltersProperties:
       type: object
-      description: Endpoint Security Event Filters List item properties.
+      description: Event filters list item properties.
       properties:
         list_id:
           type: string
@@ -862,7 +864,7 @@ components:
 
     HostIsolationProperties:
       type: object
-      description: Endpoint Security Host Isolation Exceptions List item properties.
+      description: Host isolation exceptions list item properties.
       properties:
         list_id:
           type: string
@@ -895,7 +897,7 @@ components:
               operator:
                 type: string
                 enum: [included]
-                description: Must be included
+                description: Must be the value "included"
         os_types:
           type: array
           items:
@@ -911,7 +913,7 @@ components:
 
     BlocklistWindowsProperties:
       type: object
-      description: Endpoint Security Blocklists List item properties (Windows, supports code signature).
+      description: Blocklist list item properties (Windows, supports code signature).
       properties:
         list_id:
           type: string
@@ -944,7 +946,7 @@ components:
 
     BlocklistLinuxProperties:
       type: object
-      description: Endpoint Security Blocklists List item properties (Linux, code signature not supported).
+      description: Blocklist list item properties (Linux, code signature not supported).
       properties:
         list_id:
           type: string
@@ -974,7 +976,7 @@ components:
 
     BlocklistMacProperties:
       type: object
-      description: Endpoint Security Blocklists List item properties (macOS, code signature not supported).
+      description: Blocklist list item properties (macOS, code signature not supported).
       properties:
         list_id:
           type: string

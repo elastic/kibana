@@ -27,16 +27,16 @@ export type ExceptionListId = z.infer<typeof ExceptionListId>;
 export const ExceptionListId = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
-  * The exception list's human readable string identifier.
+  * The exception list's human-readable string identifier.
 
-For Endpoint Security artifacts, use one of the following valid `list_id` values:
+For endpoint artifacts, use one of the following values:
 
-* `endpoint_list`: [Endpoint Exception List](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
-* `endpoint_trusted_apps`: [Endpoint Trusted Apps List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
-* `endpoint_trusted_devices`: [Endpoint Trusted Devices List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
-* `endpoint_event_filters`: [Endpoint Event Filters List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
-* `endpoint_host_isolation_exceptions`: [Endpoint Host isolation exceptions List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
-* `endpoint_blocklists`: [Endpoint Blocklists List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+* `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+* `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+* `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+* `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+* `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+* `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
 
   */
 export type ExceptionListHumanId = z.infer<typeof ExceptionListHumanId>;
@@ -83,6 +83,8 @@ in which it is created, where:
 
 - `single`: Only available in the Kibana space in which it is created.
 - `agnostic`: Available in all Kibana spaces.
+
+For endpoint artifacts, the `namespace_type` must always be `agnostic`. Space awareness for endpoint artifacts is enforced based on Elastic Defend policy assignments.
 
   */
 export type ExceptionNamespaceType = z.infer<typeof ExceptionNamespaceType>;
@@ -196,8 +198,8 @@ export const ExceptionListItemTags = z.array(z.string().min(1).superRefine(isNon
 
 /**
   * Tags for categorization. Special tags for scope control:
-* `"policy:all"` - Global artifact (applies to all policies)
-* `"policy:<policy_id>"` - Private artifact (applies to specific policy only)
+* `"policy:all"` - Global artifact (applies to all Elastic Defend policies)
+* `"policy:<policy_id>"` - Private artifact (applies to specific Elastic Defend policy only, where `<policy_id>` is the Elastic Defend integration policy ID)
 
   */
 export type EndpointArtifactTags = z.infer<typeof EndpointArtifactTags>;
@@ -229,7 +231,7 @@ export const TrustedDeviceCommonFieldsEntry = z.object({
   type: z.enum(['match', 'wildcard', 'match_any']),
   value: z.union([z.string(), z.array(z.string()).min(1)]),
   /**
-   * Must be included
+   * Must be the value "included"
    */
   operator: z.literal('included'),
 });
@@ -246,7 +248,7 @@ export const TrustedDeviceUsernameEntry = z.object({
   type: z.enum(['match', 'wildcard', 'match_any']),
   value: z.union([z.string(), z.array(z.string()).min(1)]),
   /**
-   * Must be included
+   * Must be the value "included"
    */
   operator: z.literal('included'),
 });
@@ -272,7 +274,7 @@ export const BlocklistHashOrPathEntry = z.object({
    */
   value: z.array(z.string()).min(1),
   /**
-   * Must be included
+   * Must be the value "included"
    */
   operator: z.literal('included'),
 });
@@ -303,7 +305,7 @@ export const BlocklistWindowsCodeSignatureEntry = z.object({
         type: z.enum(['match', 'match_any']),
         value: z.union([z.string(), z.array(z.string()).min(1)]),
         /**
-         * Must be included
+         * Must be the value "included"
          */
         operator: z.literal('included'),
       })
@@ -455,7 +457,7 @@ export type ExceptionListItemCommentArray = z.infer<typeof ExceptionListItemComm
 export const ExceptionListItemCommentArray = z.array(ExceptionListItemComment);
 
 /**
- * Endpoint Security Exception List item properties.
+ * Elastic Endpoint exception list item properties.
  */
 export type EndpointListProperties = z.infer<typeof EndpointListProperties>;
 export const EndpointListProperties = z.object({
@@ -472,7 +474,7 @@ export const EndpointListProperties = z.object({
 });
 
 /**
- * Endpoint Security Trusted Apps List item properties (Windows).
+ * Trusted applications list item properties (Windows).
  */
 export type TrustedAppsWindowsProperties = z.infer<typeof TrustedAppsWindowsProperties>;
 export const TrustedAppsWindowsProperties = z.object({
@@ -492,7 +494,7 @@ export const TrustedAppsWindowsProperties = z.object({
 });
 
 /**
- * Endpoint Security Trusted Apps List item properties (macOS).
+ * Trusted applications list item properties (macOS).
  */
 export type TrustedAppsMacProperties = z.infer<typeof TrustedAppsMacProperties>;
 export const TrustedAppsMacProperties = z.object({
@@ -512,7 +514,7 @@ export const TrustedAppsMacProperties = z.object({
 });
 
 /**
- * Endpoint Security Trusted Apps List item properties (Linux).
+ * Trusted applications list item properties (Linux).
  */
 export type TrustedAppsLinuxProperties = z.infer<typeof TrustedAppsLinuxProperties>;
 export const TrustedAppsLinuxProperties = z.object({
@@ -532,7 +534,7 @@ export const TrustedAppsLinuxProperties = z.object({
 });
 
 /**
- * Endpoint Security Trusted Devices List item properties (Windows-only, allows username field).
+ * Trusted devices list item properties (Windows-only, allows username field).
  */
 export type TrustedDevicesWindowsProperties = z.infer<typeof TrustedDevicesWindowsProperties>;
 export const TrustedDevicesWindowsProperties = z.object({
@@ -562,7 +564,7 @@ export const TrustedDevicesWindowsProperties = z.object({
         type: z.enum(['match', 'wildcard', 'match_any']),
         value: z.union([z.string(), z.array(z.string()).min(1)]),
         /**
-         * Must be included
+         * Must be the value "included"
          */
         operator: z.literal('included'),
       })
@@ -577,7 +579,7 @@ export const TrustedDevicesWindowsProperties = z.object({
 });
 
 /**
- * Endpoint Security Trusted Devices List item properties (macOS-only, username not supported).
+ * Trusted devices list item properties (macOS-only, username not supported).
  */
 export type TrustedDevicesMacProperties = z.infer<typeof TrustedDevicesMacProperties>;
 export const TrustedDevicesMacProperties = z.object({
@@ -606,7 +608,7 @@ export const TrustedDevicesMacProperties = z.object({
         type: z.enum(['match', 'wildcard', 'match_any']),
         value: z.union([z.string(), z.array(z.string()).min(1)]),
         /**
-         * Must be included
+         * Must be the value "included"
          */
         operator: z.literal('included'),
       })
@@ -621,7 +623,7 @@ export const TrustedDevicesMacProperties = z.object({
 });
 
 /**
- * Endpoint Security Trusted Devices List item properties (Windows + macOS, username not supported).
+ * Trusted devices list item properties (Windows + macOS, username not supported).
  */
 export type TrustedDevicesWindowsMacProperties = z.infer<typeof TrustedDevicesWindowsMacProperties>;
 export const TrustedDevicesWindowsMacProperties = z.object({
@@ -650,7 +652,7 @@ export const TrustedDevicesWindowsMacProperties = z.object({
         type: z.enum(['match', 'wildcard', 'match_any']),
         value: z.union([z.string(), z.array(z.string()).min(1)]),
         /**
-         * Must be included
+         * Must be the value "included"
          */
         operator: z.literal('included'),
       })
@@ -669,7 +671,7 @@ export const TrustedDevicesWindowsMacProperties = z.object({
 });
 
 /**
- * Endpoint Security Event Filters List item properties.
+ * Event filters list item properties.
  */
 export type EventFiltersProperties = z.infer<typeof EventFiltersProperties>;
 export const EventFiltersProperties = z.object({
@@ -688,7 +690,7 @@ export const EventFiltersProperties = z.object({
 });
 
 /**
- * Endpoint Security Host Isolation Exceptions List item properties.
+ * Host isolation exceptions list item properties.
  */
 export type HostIsolationProperties = z.infer<typeof HostIsolationProperties>;
 export const HostIsolationProperties = z.object({
@@ -712,7 +714,7 @@ export const HostIsolationProperties = z.object({
          */
         value: z.string(),
         /**
-         * Must be included
+         * Must be the value "included"
          */
         operator: z.literal('included'),
       })
@@ -732,7 +734,7 @@ export const HostIsolationProperties = z.object({
 });
 
 /**
- * Endpoint Security Blocklists List item properties (Windows, supports code signature).
+ * Blocklist list item properties (Windows, supports code signature).
  */
 export type BlocklistWindowsProperties = z.infer<typeof BlocklistWindowsProperties>;
 export const BlocklistWindowsProperties = z.object({
@@ -756,7 +758,7 @@ export const BlocklistWindowsProperties = z.object({
 });
 
 /**
- * Endpoint Security Blocklists List item properties (Linux, code signature not supported).
+ * Blocklist list item properties (Linux, code signature not supported).
  */
 export type BlocklistLinuxProperties = z.infer<typeof BlocklistLinuxProperties>;
 export const BlocklistLinuxProperties = z.object({
@@ -776,7 +778,7 @@ export const BlocklistLinuxProperties = z.object({
 });
 
 /**
- * Endpoint Security Blocklists List item properties (macOS, code signature not supported).
+ * Blocklist list item properties (macOS, code signature not supported).
  */
 export type BlocklistMacProperties = z.infer<typeof BlocklistMacProperties>;
 export const BlocklistMacProperties = z.object({
