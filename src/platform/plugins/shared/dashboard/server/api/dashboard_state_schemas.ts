@@ -11,7 +11,6 @@ import type { ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
-import { referenceSchema } from '@kbn/content-management-utils';
 import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
@@ -161,16 +160,6 @@ export const accessControlSchema = schema.maybe(
 
 export function getDashboardStateSchema() {
   return schema.object({
-    // unsuppoted "as code" keys
-    // TODO remove before GA
-    references: schema.maybe(
-      schema.arrayOf(referenceSchema, {
-        meta: {
-          deprecated: true,
-        },
-      })
-    ),
-
     // supported "as code" keys
     pinned_panels: schema.maybe(pinnedPanelsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),

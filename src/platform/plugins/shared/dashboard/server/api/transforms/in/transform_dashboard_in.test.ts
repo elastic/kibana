@@ -115,28 +115,6 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should return error when passed references', () => {
-    const dashboardState: DashboardState = {
-      title: 'title',
-      references: [
-        {
-          name: 'someTagRef',
-          type: 'tag',
-          id: '1',
-        },
-      ],
-    };
-
-    const output = transformDashboardIn(dashboardState);
-    expect(output).toMatchInlineSnapshot(`
-      Object {
-        "attributes": null,
-        "error": [Error: References are not supported.],
-        "references": null,
-      }
-    `);
-  });
-
   it('should transform project_routing to attributes', () => {
     const dashboardState: DashboardState = {
       title: 'title',

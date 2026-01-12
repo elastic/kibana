@@ -240,24 +240,6 @@ describe('stripUnmappedKeys', () => {
       }
     `);
   });
-
-  it('should drop references', () => {
-    const dashboardState = {
-      title: 'my dashboard',
-      references: [],
-    };
-    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "panels": Array [],
-          "title": "my dashboard",
-        },
-        "warnings": Array [
-          "Dropped unmapped key 'references' from dashboard",
-        ],
-      }
-    `);
-  });
 });
 
 describe('throwOnUnmappedKeys', () => {
@@ -332,14 +314,6 @@ describe('throwOnUnmappedKeys', () => {
           type: 'typeWithSchema',
         },
       ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
-  });
-
-  it('should throw when dashboard contains references', () => {
-    const dashboardState = {
-      title: 'my dashboard',
-      references: [],
     };
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });

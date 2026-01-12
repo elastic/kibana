@@ -13,11 +13,7 @@ import type { DashboardPanel, DashboardState } from './types';
 
 export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
-  const { references, panels, ...rest } = dashboardState;
-
-  if (references) {
-    warnings.push(`Dropped unmapped key 'references' from dashboard`);
-  }
+  const { panels, ...rest } = dashboardState;
 
   function isMappedPanelType(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
@@ -72,10 +68,6 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
 }
 
 export function throwOnUnmappedKeys(dashboardState: DashboardState) {
-  if (dashboardState.references) {
-    throw new Error('references key is not supported by dashboard REST endpoints.');
-  }
-
   function throwOnUnmappedPanelKeys(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
     if (!transforms?.schema) {

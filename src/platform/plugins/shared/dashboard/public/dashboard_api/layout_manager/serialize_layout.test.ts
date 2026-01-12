@@ -59,36 +59,20 @@ describe('serializeLayout', () => {
     } as unknown as DashboardLayout;
     const childState = {
       '1': {
-        rawState: {
-          title: 'panel One',
-        },
-        references: [
-          {
-            name: 'myRef',
-            id: 'ref1',
-            type: 'testRefType',
-          },
-        ],
+        title: 'panel One',
       },
       '3': {
-        rawState: {
-          title: 'panel Three',
-        },
-        references: [],
+        title: 'panel Three',
       },
       control1: {
-        rawState: {
-          selection: 'some value',
-        },
+        selection: 'some value',
       },
       control2: {
-        rawState: {
-          anotherValue: 'test',
-        },
+        anotherValue: 'test',
       },
     };
 
-    const { panels, pinned_panels, references } = serializeLayout(layout, childState);
+    const { panels, pinned_panels } = serializeLayout(layout, childState);
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -146,15 +130,6 @@ describe('serializeLayout', () => {
           "type": "someControl",
           "uid": "control1",
           "width": "small",
-        },
-      ]
-    `);
-    expect(references).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "ref1",
-          "name": "1:myRef",
-          "type": "testRefType",
         },
       ]
     `);

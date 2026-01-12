@@ -24,8 +24,6 @@ export type DashboardLocatorParams = Partial<
   DashboardState & {
     pinned_panels?: DashboardState['pinned_panels'];
 
-    references?: DashboardState['references'] & SerializableRecord;
-
     viewMode?: ViewMode;
 
     /**

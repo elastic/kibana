@@ -161,7 +161,7 @@ export function ShowShareModal({
 
   const unsavedDashboardStateForLocator: DashboardLocatorParams = {
     ...unsavedDashboardState,
-    references: unsavedDashboardState.references as DashboardLocatorParams['references'],
+    pinned_panels: unsavedDashboardState.pinned_panels as DashboardLocatorParams['pinned_panels'],
   };
 
   const locatorParams: DashboardLocatorParams = {
