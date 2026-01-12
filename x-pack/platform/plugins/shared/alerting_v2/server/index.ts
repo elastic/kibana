@@ -12,6 +12,7 @@ import { configSchema } from './config';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindRoutes } from './setup/bind_routes';
 import { bindServices } from './setup/bind_services';
+import { bindOnStart } from './setup/bind_on_start';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
@@ -21,6 +22,7 @@ export const module = new ContainerModule((options) => {
   bindRoutes(options);
   bindServices(options);
   bindOnSetup(options);
+  bindOnStart(options);
 });
 
 export type { PluginConfig as AlertingV2Config } from './config';

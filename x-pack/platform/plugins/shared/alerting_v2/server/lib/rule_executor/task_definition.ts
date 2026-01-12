@@ -9,10 +9,10 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { schema } from '@kbn/config-schema';
 
+import type { Container } from 'inversify';
 import type { PluginConfig } from '../../config';
 import type { AlertingServerStartDependencies } from '../../types';
 import { createRuleExecutorTaskRunner } from './task_runner';
-import type { AlertingResourcesService } from '../services/alerting_resources_service';
 
 export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting:esql' as const;
 
@@ -21,7 +21,7 @@ export function initializeRuleExecutorTaskDefinition(
   taskManager: TaskManagerSetupContract,
   coreStartServices: Promise<[CoreStart, AlertingServerStartDependencies, unknown]>,
   config: PluginConfig,
-  resourcesService: AlertingResourcesService
+  container: Container
 ) {
   taskManager.registerTaskDefinitions({
     [ALERTING_RULE_EXECUTOR_TASK_TYPE]: {
@@ -35,7 +35,7 @@ export function initializeRuleExecutorTaskDefinition(
         logger,
         coreStartServices,
         config,
-        resourcesService,
+        container,
       }),
     },
   });

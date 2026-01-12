@@ -6,15 +6,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type {
-  ClusterPutComponentTemplateRequest,
-  IndicesPutIndexTemplateRequest,
-  IlmPolicy,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import type { ResourceDefinition } from './types';
 
-// TODO ILM for new rules should be managed by the user
-export const DEFAULT_ALERTS_ILM_POLICY_NAME = '.alerts-v2-ilm-policy';
-export const DEFAULT_ALERTS_ILM_POLICY: IlmPolicy = {
+export const ALERT_EVENTS_DATA_STREAM = '.alerts-events';
+export const ALERT_EVENTS_ILM_POLICY_NAME = '.alerts-v2-ilm-policy';
+export const ALERT_EVENTS_ILM_POLICY: IlmPolicy = {
   _meta: { managed: true },
   phases: {
     hot: {
@@ -28,7 +25,7 @@ export const DEFAULT_ALERTS_ILM_POLICY: IlmPolicy = {
   },
 };
 
-const ALERTS_WRITTEN_FIELDS_MAPPINGS: estypes.MappingTypeMapping = {
+const mappings: estypes.MappingTypeMapping = {
   dynamic: false,
   properties: {
     // Timestamp when the alert event is written to the index
@@ -57,9 +54,9 @@ const ALERTS_WRITTEN_FIELDS_MAPPINGS: estypes.MappingTypeMapping = {
   },
 };
 
-export const alertsWrittenFieldsMappings = ALERTS_WRITTEN_FIELDS_MAPPINGS;
-
-export interface AlertsResourcesTemplates {
-  componentTemplate: ClusterPutComponentTemplateRequest;
-  indexTemplate: IndicesPutIndexTemplateRequest;
-}
+export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
+  key: `data_stream:${ALERT_EVENTS_DATA_STREAM}`,
+  dataStreamName: ALERT_EVENTS_DATA_STREAM,
+  mappings,
+  ilmPolicy: { name: ALERT_EVENTS_ILM_POLICY_NAME, policy: ALERT_EVENTS_ILM_POLICY },
+});
