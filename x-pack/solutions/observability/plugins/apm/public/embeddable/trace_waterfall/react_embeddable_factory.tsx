@@ -56,7 +56,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
   > = {
     type: APM_TRACE_WATERFALL_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject('serviceName' in state ? state.serviceName : '');
       const traceId$ = new BehaviorSubject(state.traceId);
@@ -80,20 +80,18 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            serviceName: serviceName$.getValue(),
-            traceId: traceId$.getValue(),
-            rangeFrom: rangeFrom$.getValue(),
-            rangeTo: rangeTo$.getValue(),
-            displayLimit: displayLimit$.getValue(),
-            docId: docId$.getValue(),
-            scrollElement: scrollElement$.getValue(),
-            onNodeClick: onNodeClick$.getValue(),
-            getRelatedErrorsHref: getRelatedErrorsHref$.getValue(),
-            onErrorClick: onErrorClick$.getValue(),
-            mode: mode$.getValue(),
-          },
+          ...titleManager.getLatestState(),
+          serviceName: serviceName$.getValue(),
+          traceId: traceId$.getValue(),
+          rangeFrom: rangeFrom$.getValue(),
+          rangeTo: rangeTo$.getValue(),
+          displayLimit: displayLimit$.getValue(),
+          docId: docId$.getValue(),
+          scrollElement: scrollElement$.getValue(),
+          onNodeClick: onNodeClick$.getValue(),
+          getRelatedErrorsHref: getRelatedErrorsHref$.getValue(),
+          onErrorClick: onErrorClick$.getValue(),
+          mode: mode$.getValue(),
         };
       }
 
@@ -132,16 +130,16 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           };
         },
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved);
 
           // reset base state
-          traceId$.next(lastSaved?.rawState.traceId ?? '');
-          rangeFrom$.next(lastSaved?.rawState.rangeFrom ?? '');
-          rangeTo$.next(lastSaved?.rawState.rangeTo ?? '');
-          mode$.next(lastSaved?.rawState.mode ?? 'summary');
+          traceId$.next(lastSaved?.traceId ?? '');
+          rangeFrom$.next(lastSaved?.rangeFrom ?? '');
+          rangeTo$.next(lastSaved?.rangeTo ?? '');
+          mode$.next(lastSaved?.mode ?? 'summary');
 
           // reset entry state
-          const entryState = lastSaved?.rawState as ApmTraceWaterfallEmbeddableEntryProps;
+          const entryState = lastSaved as ApmTraceWaterfallEmbeddableEntryProps;
           serviceName$.next(entryState?.serviceName ?? '');
           displayLimit$.next(entryState?.displayLimit ?? 0);
           scrollElement$.next(entryState?.scrollElement ?? undefined);
@@ -150,7 +148,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           onErrorClick$.next(entryState?.onErrorClick ?? undefined);
 
           // reset focused state
-          const focusedState = lastSaved?.rawState as ApmTraceWaterfallEmbeddableFocusedProps;
+          const focusedState = lastSaved as ApmTraceWaterfallEmbeddableFocusedProps;
           docId$.next(focusedState?.docId ?? '');
         },
       });
