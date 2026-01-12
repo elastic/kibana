@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     await toasts.dismissAll();
   };
 
-  describe('Session management', function describeSessionManagementTests() {
+  // Tests relying on deprecated `registerMenuItem` API
+  describe.skip('Session management', function describeSessionManagementTests() {
     describe('Discover', () => {
       before(async () => {
         await common.navigateToApp('discover');
