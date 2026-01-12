@@ -12,14 +12,14 @@ import { getSettingsCompletionItems } from '../../definitions/utils/settings';
 import {
   isBinaryExpression,
   isIdentifier,
+  isMap,
   isStringLiteral,
   isUnknownNode,
   within,
 } from '../../../..';
 import { semiColonCompleteItem, assignCompletionItem } from '../complete_items';
-import type { ICommandCallbacks } from '../types';
-import { type ISuggestionItem, type ICommandContext } from '../types';
-import { COMPLETIONS_BY_SETTING_NAME } from './utils';
+import { type ICommandCallbacks, type ICommandContext, type ISuggestionItem } from '../types';
+import { getCompletionItemsBySettingName } from './utils';
 
 // SET <setting> = <value>;
 export async function autocomplete(
@@ -47,18 +47,21 @@ export async function autocomplete(
   }
 
   // The value completions depends on the setting name.
-  const settingsValueCompletions =
-    COMPLETIONS_BY_SETTING_NAME[isIdentifier(settingLeftSide) ? settingLeftSide.text : ''] ?? [];
+  const settingsByName = getCompletionItemsBySettingName(innerText, settingRightSide);
+  const settingName = isIdentifier(settingLeftSide) ? settingLeftSide.text : '';
+  const settingsValueCompletions = settingsByName[settingName] ?? [];
 
   // SET <setting> = /
+  // SET <setting> = {
   if (
     !settingRightSide ||
     isUnknownNode(settingRightSide) ||
-    (Array.isArray(settingRightSide) && settingRightSide.length === 0)
+    (Array.isArray(settingRightSide) && settingRightSide.length === 0) ||
+    isMap(settingRightSide)
   ) {
     return settingsValueCompletions.map((item) => ({
       ...item,
-      text: `"${item.text}";`,
+      text: `${item.text}`,
     }));
   }
 
