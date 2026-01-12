@@ -18,9 +18,6 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
     await pageObjects.rulesPage.createRuleButton.click();
     await pageObjects.rulesPage.observabilityCategory.click();
     await pageObjects.rulesPage.customThresholdRuleTypeCard.click();
-
-    // Wait for the form to be fully loaded before running tests
-    await pageObjects.rulesPage.waitForFormReady();
   });
 
   test('should render the empty chart only once at bootstrap', async ({ page }) => {

@@ -438,31 +438,18 @@ export class RulesPage {
 
   /**
    * Waits for the form to be ready after data view changes
-   * This waits for form elements to be initialized with default values
    */
   async waitForFormReady() {
-    // Wait for any loading spinners to disappear
+    // Wait for loading spinner to disappear
     const loadingSpinner = this.page.locator('.euiLoadingSpinner');
     try {
       await expect(loadingSpinner).toBeHidden({ timeout: 10000 });
     } catch {
-      // Loading spinner might not appear at all, which is fine
+      // Loading spinner might not appear, which is fine
     }
 
-    // Wait for the custom equation editor to be visible (indicates criteria initialized)
-    const customEquationButton = this.page.testSubj.locator('customEquation');
-    try {
-      await expect(customEquationButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
-    } catch {
-      // If custom equation button doesn't appear, try the add condition button instead
-      const addConditionButton = this.page.testSubj.locator(
-        'thresholdRuleExpressionsAddConditionButton'
-      );
-      await expect(addConditionButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
-    }
-
-    // Ensure save button is enabled (indicates validation passed)
-    await expect(this.ruleSaveButton).toBeEnabled({ timeout: 3000 });
+    // Ensure save button is enabled
+    await expect(this.ruleSaveButton).toBeEnabled({ timeout: SHORTER_TIMEOUT });
   }
 
   /**
