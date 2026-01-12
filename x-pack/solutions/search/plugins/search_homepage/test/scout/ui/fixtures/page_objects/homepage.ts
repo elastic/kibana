@@ -31,6 +31,12 @@ export class Homepage {
     return this.page.testSubj.locator(cardId).click();
   }
 
+  async getGettingStartedButton() {
+    return this.page.testSubj.locator(
+      'searchHomepageGettingStartedBannerGetStartedWithElasticsearchButton'
+    );
+  }
+
   async clickGettingStartedButton() {
     await this.page.testSubj.waitForSelector(
       'searchHomepageGettingStartedBannerGetStartedWithElasticsearchButton'

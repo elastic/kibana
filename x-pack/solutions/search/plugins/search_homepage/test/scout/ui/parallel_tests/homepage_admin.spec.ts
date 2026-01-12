@@ -140,6 +140,21 @@ test.describe('Homepage - Admin', { tag: ['@svlSearch'] }, () => {
     }
   });
 
+  // === Getting Started Banner Tests ===
+  test('should display Getting Started banner with title and button', async ({ pageObjects }) => {
+    const gettingStartedButton = await pageObjects.homepage.getGettingStartedButton();
+    await expect(gettingStartedButton).toBeVisible();
+    await expect(gettingStartedButton).toContainText('Get started with Elasticsearch');
+  });
+
+  test('Get started button should navigate to getting started page', async ({
+    pageObjects,
+    page,
+  }) => {
+    await pageObjects.homepage.clickGettingStartedButton();
+    await expect(page).toHaveURL(new RegExp('getting_started'));
+  });
+
   // === Body Links Tests ===
   test('should display all body links with external documentation', async ({ pageObjects }) => {
     const bodyLinks = await pageObjects.homepage.getBodyLinks();
