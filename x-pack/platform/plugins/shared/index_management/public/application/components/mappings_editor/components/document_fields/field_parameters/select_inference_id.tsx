@@ -62,6 +62,13 @@ const isCompatibleTaskType = (taskType: string): taskType is CompatibleTaskType 
   return COMPATIBLE_TASK_TYPES.includes(taskType as CompatibleTaskType);
 };
 
+/**
+ * Gets the required license for an endpoint from the license map, if there is one.
+ */
+const getRequiredLicense = (inferenceId: string): string | undefined => {
+  return INFERENCE_ENDPOINT_LICENSE_MAP[inferenceId];
+};
+
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   'data-test-subj': dataTestSubj,
 }: SelectInferenceIdProps) => {
@@ -142,18 +149,6 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   );
 
   /**
-   * Gets the required license for an endpoint from the license map.
-   */
-  const getRequiredLicense = useCallback((inferenceId: string): string | undefined => {
-    if (inferenceId in INFERENCE_ENDPOINT_LICENSE_MAP) {
-      return INFERENCE_ENDPOINT_LICENSE_MAP[
-        inferenceId as keyof typeof INFERENCE_ENDPOINT_LICENSE_MAP
-      ];
-    }
-    return undefined;
-  }, []);
-
-  /**
    * Filters endpoints to only those compatible with semantic_text field type.
    */
   const compatibleEndpoints = useMemo(
@@ -196,7 +191,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     });
 
     return accessibleEndpoint?.inference_id;
-  }, [compatibleEndpoints, elserInEis, getRequiredLicense, hasEndpointAccess]);
+  }, [compatibleEndpoints, elserInEis, hasEndpointAccess]);
 
   /**
    * Computes the selectable options for the inference endpoint dropdown.
@@ -249,7 +244,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     }
 
     return selectableOptions;
-  }, [compatibleEndpoints, value, getRequiredLicense, hasEndpointAccess]);
+  }, [compatibleEndpoints, value, hasEndpointAccess]);
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
 
