@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -23,8 +23,6 @@ import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { Streams } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
