@@ -388,6 +388,73 @@ function transformExportNamedDeclaration(nodePath, state, t, barrelIndex) {
 }
 
 /**
+ * Collect all locally-defined export names from the program body.
+ * These names shadow any re-exports from `export * from` declarations.
+ *
+ * @param {import('@babel/traverse').NodePath<import('@babel/types').ExportAllDeclaration>} nodePath
+ * @returns {Set<string>} Set of locally exported names
+ */
+function collectLocalExportNames(nodePath) {
+  /** @type {Set<string>} */
+  const localExports = new Set();
+
+  // Get the program body (sibling nodes)
+  const programPath = nodePath.findParent((p) => p.isProgram());
+  if (!programPath) {
+    return localExports;
+  }
+
+  const programNode = /** @type {import('@babel/types').Program} */ (programPath.node);
+  if (!programNode.body) {
+    return localExports;
+  }
+
+  for (const stmt of programNode.body) {
+    if (stmt.type === 'ExportNamedDeclaration') {
+      // Case 1: export const/let/var/function/class/enum NAME
+      if (stmt.declaration) {
+        const decl = stmt.declaration;
+        if (decl.type === 'VariableDeclaration') {
+          for (const declarator of decl.declarations) {
+            if (declarator.id.type === 'Identifier') {
+              localExports.add(declarator.id.name);
+            }
+          }
+        } else if (
+          (decl.type === 'FunctionDeclaration' ||
+            decl.type === 'ClassDeclaration' ||
+            decl.type === 'TSEnumDeclaration') &&
+          decl.id
+        ) {
+          localExports.add(decl.id.name);
+        } else if (
+          (decl.type === 'TSTypeAliasDeclaration' || decl.type === 'TSInterfaceDeclaration') &&
+          decl.id
+        ) {
+          localExports.add(decl.id.name);
+        }
+      }
+
+      // Case 2: export { NAME } (without source - local re-export)
+      if (!stmt.source && stmt.specifiers) {
+        for (const specifier of stmt.specifiers) {
+          if (specifier.type === 'ExportSpecifier') {
+            const exported = specifier.exported;
+            const exportedName = exported.type === 'Identifier' ? exported.name : exported.value;
+            localExports.add(exportedName);
+          }
+        }
+      }
+    } else if (stmt.type === 'ExportDefaultDeclaration') {
+      // export default shadows 'default' from export *
+      localExports.add('default');
+    }
+  }
+
+  return localExports;
+}
+
+/**
  * Transform a barrel star re-export to direct re-exports.
  *
  * Example:
@@ -397,6 +464,7 @@ function transformExportNamedDeclaration(nodePath, state, t, barrelIndex) {
  *   export { Modal } from './components/Modal/Modal';
  *
  * Note: This expands the star export into individual named exports.
+ * Local exports in the same file shadow re-exports from export *.
  *
  * @param {import('@babel/traverse').NodePath<import('@babel/types').ExportAllDeclaration>} nodePath
  * @param {import('@babel/core').PluginPass} state
@@ -416,6 +484,9 @@ function transformExportAllDeclaration(nodePath, state, t, barrelIndex) {
 
   const { exports, packageName, packageRoot } = barrelEntry;
 
+  // Collect locally-defined exports that shadow re-exports
+  const localExports = collectLocalExportNames(nodePath);
+
   // Group all exports by their target path
   /** @type {Map<string, { specifiers: ExportSpecifierInfo[], publicSubpath?: string }>} */
   const newExports = new Map();
@@ -423,6 +494,11 @@ function transformExportAllDeclaration(nodePath, state, t, barrelIndex) {
   for (const [exportName, exportInfo] of Object.entries(exports)) {
     // Skip default export (export * doesn't re-export default)
     if (exportName === 'default') {
+      continue;
+    }
+
+    // Skip exports that are shadowed by local definitions
+    if (localExports.has(exportName)) {
       continue;
     }
 
@@ -439,6 +515,8 @@ function transformExportAllDeclaration(nodePath, state, t, barrelIndex) {
   }
 
   if (newExports.size === 0) {
+    // All exports are shadowed by local definitions - remove the export * entirely
+    nodePath.remove();
     return;
   }
 

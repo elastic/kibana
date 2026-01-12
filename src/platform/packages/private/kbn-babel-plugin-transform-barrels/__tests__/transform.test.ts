@@ -709,6 +709,253 @@ describe('barrel transform plugin', () => {
 
       expect(result?.code).toContain(`export * from './unknown-barrel'`);
     });
+
+    describe('local export shadowing', () => {
+      // Per ECMAScript spec, local exports shadow export * re-exports.
+      // The plugin must respect this to avoid duplicate export declarations.
+      // Uses the same COMPONENTS_BARREL_PATH as other tests to ensure proper path resolution
+      const TASK_STATE_V1_PATH = '/test/src/task_state/v1/index.ts';
+
+      it('excludes locally-shadowed const exports from export * transformation', () => {
+        const shadowingBarrelIndex: TestBarrelIndex = {
+          [TASK_STATE_V1_PATH]: {
+            exports: {
+              versionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'versionSchema',
+                importedName: 'versionSchema',
+                expectedPath: '../v1/schema',
+              },
+              throttledActionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'throttledActionSchema',
+                importedName: 'throttledActionSchema',
+                expectedPath: '../v1/schema',
+              },
+              metaSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'metaSchema',
+                importedName: 'metaSchema',
+                expectedPath: '../v1/schema',
+              },
+            },
+          },
+        };
+
+        const result = transform({
+          code: `
+            export * from '../v1';
+            export const versionSchema = {};
+          `,
+          barrelIndex: shadowingBarrelIndex,
+          filename: '/test/src/task_state/v2/schema.ts',
+        });
+
+        // Non-shadowed exports should be transformed
+        expect(result?.code).toContain('throttledActionSchema');
+        expect(result?.code).toContain('metaSchema');
+        // Shadowed export should NOT be in the transformed export *
+        expect(result?.code).not.toMatch(/export\s*{[^}]*versionSchema[^}]*}\s*from/);
+        // Local definition should remain
+        expect(result?.code).toMatch(/export const versionSchema/);
+      });
+
+      it('excludes locally-shadowed function exports from export * transformation', () => {
+        const shadowingBarrelIndex: TestBarrelIndex = {
+          [TASK_STATE_V1_PATH]: {
+            exports: {
+              versionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'versionSchema',
+                importedName: 'versionSchema',
+                expectedPath: '../v1/schema',
+              },
+              throttledActionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'throttledActionSchema',
+                importedName: 'throttledActionSchema',
+                expectedPath: '../v1/schema',
+              },
+            },
+          },
+        };
+
+        const result = transform({
+          code: `
+            export * from '../v1';
+            export function versionSchema() {}
+          `,
+          barrelIndex: shadowingBarrelIndex,
+          filename: '/test/src/task_state/v2/schema.ts',
+        });
+
+        expect(result?.code).toContain('throttledActionSchema');
+        expect(result?.code).not.toMatch(/export\s*{[^}]*versionSchema[^}]*}\s*from/);
+        expect(result?.code).toMatch(/export function versionSchema/);
+      });
+
+      it('excludes locally-shadowed class exports from export * transformation', () => {
+        const shadowingBarrelIndex: TestBarrelIndex = {
+          [TASK_STATE_V1_PATH]: {
+            exports: {
+              versionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'versionSchema',
+                importedName: 'versionSchema',
+                expectedPath: '../v1/schema',
+              },
+              throttledActionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'throttledActionSchema',
+                importedName: 'throttledActionSchema',
+                expectedPath: '../v1/schema',
+              },
+            },
+          },
+        };
+
+        const result = transform({
+          code: `
+            export * from '../v1';
+            export class versionSchema {}
+          `,
+          barrelIndex: shadowingBarrelIndex,
+          filename: '/test/src/task_state/v2/schema.ts',
+        });
+
+        expect(result?.code).toContain('throttledActionSchema');
+        expect(result?.code).not.toMatch(/export\s*{[^}]*versionSchema[^}]*}\s*from/);
+        expect(result?.code).toMatch(/export class versionSchema/);
+      });
+
+      it('excludes locally-shadowed specifier exports from export * transformation', () => {
+        // export { X } without source re-exports a local variable
+        const shadowingBarrelIndex: TestBarrelIndex = {
+          [TASK_STATE_V1_PATH]: {
+            exports: {
+              versionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'versionSchema',
+                importedName: 'versionSchema',
+                expectedPath: '../v1/schema',
+              },
+              throttledActionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'throttledActionSchema',
+                importedName: 'throttledActionSchema',
+                expectedPath: '../v1/schema',
+              },
+            },
+          },
+        };
+
+        const result = transform({
+          code: `
+            const versionSchema = {};
+            export * from '../v1';
+            export { versionSchema };
+          `,
+          barrelIndex: shadowingBarrelIndex,
+          filename: '/test/src/task_state/v2/schema.ts',
+        });
+
+        expect(result?.code).toContain('throttledActionSchema');
+        expect(result?.code).not.toMatch(
+          /export\s*{[^}]*versionSchema[^}]*}\s*from\s*['"]\.\.\/v1/
+        );
+        expect(result?.code).toMatch(/export\s*{\s*versionSchema\s*}/);
+      });
+
+      it('handles multiple shadowed exports correctly', () => {
+        const shadowingBarrelIndex: TestBarrelIndex = {
+          [TASK_STATE_V1_PATH]: {
+            exports: {
+              versionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'versionSchema',
+                importedName: 'versionSchema',
+                expectedPath: '../v1/schema',
+              },
+              throttledActionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'throttledActionSchema',
+                importedName: 'throttledActionSchema',
+                expectedPath: '../v1/schema',
+              },
+              metaSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'metaSchema',
+                importedName: 'metaSchema',
+                expectedPath: '../v1/schema',
+              },
+            },
+          },
+        };
+
+        const result = transform({
+          code: `
+            export * from '../v1';
+            export const versionSchema = {};
+            export const throttledActionSchema = {};
+          `,
+          barrelIndex: shadowingBarrelIndex,
+          filename: '/test/src/task_state/v2/schema.ts',
+        });
+
+        // Only metaSchema should be re-exported from v1
+        expect(result?.code).toContain('metaSchema');
+        expect(result?.code).toContain('../v1/schema');
+        // Both shadowed exports should be local only
+        expect(result?.code).toMatch(/export const versionSchema/);
+        expect(result?.code).toMatch(/export const throttledActionSchema/);
+        // Neither should appear in the re-export
+        expect(result?.code).not.toMatch(
+          /export\s*{[^}]*(versionSchema|throttledActionSchema)[^}]*}\s*from/
+        );
+      });
+
+      it('removes export * entirely when all exports are shadowed', () => {
+        const singleExportBarrel: TestBarrelIndex = {
+          [TASK_STATE_V1_PATH]: {
+            exports: {
+              versionSchema: {
+                path: '/test/src/task_state/v1/schema.ts',
+                type: 'named',
+                localName: 'versionSchema',
+                importedName: 'versionSchema',
+                expectedPath: '../v1/schema',
+              },
+            },
+          },
+        };
+
+        const result = transform({
+          code: `
+            export * from '../v1';
+            export const versionSchema = {};
+          `,
+          barrelIndex: singleExportBarrel,
+          filename: '/test/src/task_state/v2/schema.ts',
+        });
+
+        // No re-export should remain since all exports are shadowed
+        expect(result?.code).not.toMatch(/from\s*['"]\.\.\/v1/);
+        // Local definition should remain
+        expect(result?.code).toMatch(/export const versionSchema/);
+      });
+    });
   });
 
   describe('enum export transformations', () => {
