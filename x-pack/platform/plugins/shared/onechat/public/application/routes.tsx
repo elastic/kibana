@@ -19,7 +19,6 @@ import { OnechatToolsPage } from './pages/tools';
 import { OnechatBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tools';
 
 export const OnechatRoutes: React.FC<{}> = () => {
-  const mcpEnabled = useUiSetting(AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID, false);
   return (
     <Routes>
       <Route path="/conversations/:conversationId">
@@ -42,11 +41,9 @@ export const OnechatRoutes: React.FC<{}> = () => {
         <OnechatToolCreatePage />
       </Route>
 
-      {mcpEnabled && (
-        <Route path="/tools/bulk_import_mcp">
-          <OnechatBulkImportMcpToolsPage />
-        </Route>
-      )}
+      <Route path="/tools/bulk_import_mcp">
+        <OnechatBulkImportMcpToolsPage />
+      </Route>
 
       <Route path="/tools/:toolId">
         <OnechatToolDetailsPage />

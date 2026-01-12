@@ -95,6 +95,8 @@ Tools can come from multiple sources:
 - index_search: An agentic search tool that can be scoped to an index pattern.
 - workflow: A tool that executes a workflow.
 
+- mcp: A tool provided by an external MCP (Model Context Protocol) server.
+
 ### Registering a tool
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.

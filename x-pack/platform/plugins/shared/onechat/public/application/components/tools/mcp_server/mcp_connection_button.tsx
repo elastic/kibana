@@ -68,19 +68,15 @@ export const McpConnectionButton = () => {
               </EuiContextMenuItem>
             )}
           </EuiCopy>,
-          ...(mcpEnabled
-            ? [
-                <EuiContextMenuItem
-                  key="bulkImportMcpTools"
-                  icon="plus"
-                  href={createOnechatUrl(appPaths.tools.bulkImportMcp)}
-                >
-                  {i18n.translate('xpack.onechat.tools.bulkImportMcpToolsButton', {
-                    defaultMessage: 'Bulk import MCP tools',
-                  })}
-                </EuiContextMenuItem>,
-              ]
-            : []),
+          <EuiContextMenuItem
+            key="bulkImportMcpTools"
+            icon="plus"
+            href={createOnechatUrl(appPaths.tools.bulkImportMcp)}
+          >
+            {i18n.translate('xpack.onechat.tools.bulkImportMcpToolsButton', {
+              defaultMessage: 'Bulk import MCP tools',
+            })}
+          </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="documentation"
             icon="documentation"
