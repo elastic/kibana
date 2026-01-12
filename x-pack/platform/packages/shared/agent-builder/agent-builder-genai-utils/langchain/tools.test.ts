@@ -63,6 +63,7 @@ describe('toolToLangchain', () => {
     expect(tool.execute).toHaveBeenCalledWith({
       toolParams: { hello: 'world' },
       toolCallId: 'unknown',
+      source: 'agent',
     });
 
     expect(JSON.parse(results).results).toEqual([{ type: ToolResultType.other, data: 'foo' }]);
