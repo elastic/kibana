@@ -58,12 +58,3 @@ export interface DocView {
   render: (props: DocViewRenderProps) => ReactElement;
 }
 
-// interface DocViewWithComponent extends DocViewBase {
-//   component: DocViewerComponent;
-// }
-
-// interface DocViewWithRenderFunction extends DocViewBase {
-//   render: (props: DocViewRenderProps) => ReactElement;
-// }
-
-// export type DocView = DocViewWithComponent | DocViewWithRenderFunction;
