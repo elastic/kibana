@@ -199,7 +199,7 @@ For the {{product.security}} 9.2.1 release information, refer to [{{product.secu
 * Adds a toggle on the {{es}} output configuration page that grants agents permission to write to the `logs` and `logs.*` data streams [#233374]({{kib-pull}}233374).
 * Completes OTel configuration pipelines with an exporter [#233090]({{kib-pull}}233090).
 * Enables feature to auto-install content packages when data is ingested for datasets that match the datasets defined in the packages' `discovery` fields [#232668]({{kib-pull}}232668).
-* Adds a new `MIGRATE` action type for migrating agents to a different cluster [{{kib-pull}}239556].
+* Adds a new `MIGRATE` action type for migrating agents to a different cluster [#239556]({{kib-pull}}239556).
 * Adds the `MIGRATE` action to the `SIGNED_ACTIONS` set [#228566]({{kib-pull}}228566).
 * Adds a **Show agentless resources** toggle on the Fleet > Settings page to allow for debugging and diagnostics [#237528]({{kib-pull}}237528).
 * Updates the maximum supported version of package spec to 3.5 [#235942]({{kib-pull}}235942).
