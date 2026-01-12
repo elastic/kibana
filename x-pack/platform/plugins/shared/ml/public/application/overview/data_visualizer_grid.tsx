@@ -13,7 +13,10 @@ import { EuiFlexGrid } from '@elastic/eui';
 import { MLOverviewCard } from './overview_ml_page';
 import { ML_PAGES } from '../../locator';
 
-export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean }> = ({ isEsqlEnabled }) => (
+export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's' | 'xs' }> = ({
+  isEsqlEnabled,
+  cardTitleSize,
+}) => (
   <EuiFlexGrid gutterSize="m" columns={2}>
     {isEsqlEnabled ? (
       <MLOverviewCard
@@ -26,6 +29,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean }> = ({ isEsqlEnabl
             defaultMessage="ES|QL"
           />
         }
+        titleSize={cardTitleSize}
         description={i18n.translate(
           'xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg',
           {
@@ -50,6 +54,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean }> = ({ isEsqlEnabl
           defaultMessage="Data drift"
         />
       }
+      titleSize={cardTitleSize}
       description={i18n.translate('xpack.ml.datavisualizer.selector.dataDriftDescription', {
         defaultMessage:
           'Detecting data drifts enables you to identify potential performance issues.',
@@ -67,6 +72,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean }> = ({ isEsqlEnabl
       title={i18n.translate('xpack.ml.datavisualizer.selector.importDataTitle', {
         defaultMessage: 'Upload data files',
       })}
+      titleSize={cardTitleSize}
       description={i18n.translate('xpack.ml.datavisualizer.selector.importDataDescription', {
         defaultMessage: 'Import and analyze data from files.',
       })}
@@ -83,6 +89,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean }> = ({ isEsqlEnabl
       title={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
         defaultMessage: 'Data view',
       })}
+      titleSize={cardTitleSize}
       description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
         defaultMessage: 'Analyze data, its shape, and statistical metadata from a data view.',
       })}

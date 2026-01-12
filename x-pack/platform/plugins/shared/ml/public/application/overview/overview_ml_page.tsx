@@ -48,6 +48,7 @@ export const MLOverviewCard = ({
   layout,
   path,
   title,
+  titleSize = 's',
   description,
   iconType,
   buttonLabel,
@@ -69,7 +70,7 @@ export const MLOverviewCard = ({
         data-test-subj={cardDataTestSubj}
         hasBorder
         title={title}
-        titleSize="s"
+        titleSize={titleSize}
         titleElement="h3"
         id="mlOverviewCardTitle"
       >
@@ -184,6 +185,7 @@ export const OverviewPage: FC = () => {
                       textAlign="left"
                       layout="vertical"
                       hasBorder
+                      titleSize="xs"
                       title={
                         <FormattedMessage
                           id="xpack.ml.overview.logPatternAnalysisTitle"
@@ -191,7 +193,6 @@ export const OverviewPage: FC = () => {
                         />
                       }
                       titleElement="h3"
-                      titleSize="s"
                       description={
                         <>
                           <FormattedMessage
@@ -207,6 +208,7 @@ export const OverviewPage: FC = () => {
                           onClick={() => navigateToPath('/aiops/log_categorization_index_select')}
                           data-test-subj="mlOverviewCardLogPatternAnalysisButton"
                         >
+                          <EuiIcon type="logPatternAnalysis" />
                           <FormattedMessage
                             id="xpack.ml.overview.logPatternAnalysis.findPatternsButton"
                             defaultMessage="Find patterns"
@@ -229,7 +231,7 @@ export const OverviewPage: FC = () => {
                         />
                       }
                       titleElement="h3"
-                      titleSize="s"
+                      titleSize="xs"
                       description={
                         <>
                           <FormattedMessage
@@ -245,6 +247,7 @@ export const OverviewPage: FC = () => {
                           onClick={() => navigateToPath('/aiops/log_rate_analysis_index_select')}
                           data-test-subj="mlOverviewCardLogRateAnalysisButton"
                         >
+                          <EuiIcon type="visBarVertical" />
                           <FormattedMessage
                             id="xpack.ml.overview.logRateAnalysis.explainChangesButton"
                             defaultMessage="Explain changes"
@@ -267,7 +270,7 @@ export const OverviewPage: FC = () => {
                         />
                       }
                       titleElement="h3"
-                      titleSize="s"
+                      titleSize="xs"
                       description={
                         <>
                           <FormattedMessage
@@ -291,6 +294,7 @@ export const OverviewPage: FC = () => {
                             }
                           )}
                         >
+                          <EuiIcon type="changePointDetection" />
                           <FormattedMessage
                             id="xpack.ml.overview.changePointDetection.findChangesButton"
                             defaultMessage="Find changes"
@@ -313,73 +317,73 @@ export const OverviewPage: FC = () => {
                 })}
               </h2>
             </EuiTitle>
-            <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} />
+            <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} cardTitleSize="xs" />
           </EuiFlexGroup>
         </EuiFlexGroup>
-        <HelpMenu docLink={helpLink} />
-      </EuiPageBody>
-      <EuiHorizontalRule />
-      <EuiFlexGroup>
-        {isADEnabled || isNLPEnabled || isDFAEnabled ? (
+        <EuiHorizontalRule />
+        <EuiFlexGroup>
+          {isADEnabled || isNLPEnabled || isDFAEnabled ? (
+            <EuiFlexItem>
+              <OverviewFooterItem
+                title={i18n.translate('xpack.ml.overview.manageMlAssetsTitle', {
+                  defaultMessage: 'Manage ML assets',
+                })}
+                description={i18n.translate('xpack.ml.overview.manageMlAssetsDescription', {
+                  defaultMessage: 'Overview of your ML jobs, memory usage, and notifications.',
+                })}
+                docLink={helpLink}
+                callToAction={
+                  <EuiLink onClick={navigateToStackManagementMLOverview}>
+                    {i18n.translate('xpack.ml.overview.goToManagmentLink', {
+                      defaultMessage: 'Go to management',
+                    })}
+                  </EuiLink>
+                }
+              />
+            </EuiFlexItem>
+          ) : null}
+          {isNLPEnabled || isDFAEnabled ? (
+            <EuiFlexItem>
+              <OverviewFooterItem
+                title={i18n.translate('xpack.ml.overview.trainedModelsTitle', {
+                  defaultMessage: 'Trained models',
+                })}
+                description={i18n.translate('xpack.ml.overview.trainedModelsDescription', {
+                  defaultMessage:
+                    'Add or manage trained models. See deployment stats or add a new deployment.',
+                })}
+                docLink={trainedModelsDocLink}
+                callToAction={
+                  <EuiLink onClick={navigateToTrainedModels}>
+                    {i18n.translate('xpack.ml.overview.manageTrainedModelsLink', {
+                      defaultMessage: 'Manage trained models',
+                    })}
+                  </EuiLink>
+                }
+              />
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem>
             <OverviewFooterItem
-              title={i18n.translate('xpack.ml.overview.manageMlAssetsTitle', {
-                defaultMessage: 'Manage ML assets',
+              title={i18n.translate('xpack.ml.overview.browseDocumentationTitle', {
+                defaultMessage: 'Browse documentation',
               })}
-              description={i18n.translate('xpack.ml.overview.manageMlAssetsDescription', {
-                defaultMessage: 'Overview of your ML jobs, memory usage, and notifications.',
+              description={i18n.translate('xpack.ml.overview.browseDocumentationDescription', {
+                defaultMessage: 'In-depth guides on Elastic Machine Learning.',
               })}
               docLink={helpLink}
               callToAction={
-                <EuiLink onClick={navigateToStackManagementMLOverview}>
-                  {i18n.translate('xpack.ml.overview.goToManagmentLink', {
-                    defaultMessage: 'Go to management',
+                <EuiLink href={helpLink} external target="_blank">
+                  {i18n.translate('xpack.ml.overview.startReadingDocsLink', {
+                    defaultMessage: 'Start reading',
                   })}
                 </EuiLink>
               }
             />
           </EuiFlexItem>
-        ) : null}
-        {isNLPEnabled || isDFAEnabled ? (
-          <EuiFlexItem>
-            <OverviewFooterItem
-              title={i18n.translate('xpack.ml.overview.trainedModelsTitle', {
-                defaultMessage: 'Trained models',
-              })}
-              description={i18n.translate('xpack.ml.overview.trainedModelsDescription', {
-                defaultMessage:
-                  'Add or manage trained models. See deployment stats or add a new deployment.',
-              })}
-              docLink={trainedModelsDocLink}
-              callToAction={
-                <EuiLink onClick={navigateToTrainedModels}>
-                  {i18n.translate('xpack.ml.overview.manageTrainedModelsLink', {
-                    defaultMessage: 'Manage trained models',
-                  })}
-                </EuiLink>
-              }
-            />
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem>
-          <OverviewFooterItem
-            title={i18n.translate('xpack.ml.overview.browseDocumentationTitle', {
-              defaultMessage: 'Browse documentation',
-            })}
-            description={i18n.translate('xpack.ml.overview.browseDocumentationDescription', {
-              defaultMessage: 'In-depth guides on Elastic Machine Learning.',
-            })}
-            docLink={helpLink}
-            callToAction={
-              <EuiLink href={helpLink} external target="_blank">
-                {i18n.translate('xpack.ml.overview.startReadingDocsLink', {
-                  defaultMessage: 'Start reading',
-                })}
-              </EuiLink>
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+        <HelpMenu docLink={helpLink} />
+      </EuiPageBody>
     </>
   );
 };
