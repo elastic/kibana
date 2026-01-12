@@ -71,4 +71,53 @@ test.describe('Homepage - Viewer', { tag: ['@svlSearch'] }, () => {
     const apiKeysButton = await pageObjects.homepage.getApiKeyButton();
     await expect(apiKeysButton).toBeDisabled();
   });
+
+  // === Embedded Console Tests ===
+  test('should have embedded dev console that can be toggled', async ({ pageObjects }) => {
+    await pageObjects.homepage.expectEmbeddedConsoleControlBarExists();
+
+    // Console body should be hidden initially
+    const consoleBodyInitial = await pageObjects.homepage.getEmbeddedConsoleBody();
+    await expect(consoleBodyInitial).toBeHidden();
+
+    // Click to open console
+    await pageObjects.homepage.clickEmbeddedConsoleControlBar();
+
+    // Verify console is open and fullscreen toggle is visible
+    const fullscreenToggle = await pageObjects.homepage.getFullscreenToggleButton();
+    await expect(fullscreenToggle).toBeVisible();
+
+    const consoleBodyOpen = await pageObjects.homepage.getEmbeddedConsoleBody();
+    await expect(consoleBodyOpen).toBeVisible();
+
+    // Click to close console
+    await pageObjects.homepage.clickEmbeddedConsoleControlBar();
+
+    const consoleBodyClosed = await pageObjects.homepage.getEmbeddedConsoleBody();
+    await expect(consoleBodyClosed).toBeHidden();
+  });
+
+  // === Endpoint Copy Functionality Tests ===
+  test('should show Elasticsearch endpoint with copy functionality', async ({ pageObjects }) => {
+    const endpointValueField = await pageObjects.homepage.getEndpointValueField();
+    await expect(endpointValueField).toBeVisible();
+
+    const copyEndpointButton = await pageObjects.homepage.getCopyEndpointButton();
+    await expect(copyEndpointButton).toBeVisible();
+  });
+
+  test('should show checkmark feedback when copy button is clicked', async ({ pageObjects }) => {
+    const copyEndpointButton = await pageObjects.homepage.getCopyEndpointButton();
+    await expect(copyEndpointButton).toBeVisible();
+
+    await copyEndpointButton.click();
+
+    // After clicking, the button should show copied state
+    const copiedButton = await pageObjects.homepage.getCopyEndpointButtonCopied();
+    await expect(copiedButton).toBeVisible();
+
+    // After a short delay, it should revert back to normal state
+    const normalButton = await pageObjects.homepage.getCopyEndpointButton();
+    await expect(normalButton).toBeVisible();
+  });
 });
