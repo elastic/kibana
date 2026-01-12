@@ -41,7 +41,6 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       const { savedObjectId, ...rest } = stateWithStoredTitles;
       return {
         state: {
-          ...stateWithStoredTitles,
           ...rest,
           ...(enhancementsState
             ? {

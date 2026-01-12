@@ -45,13 +45,13 @@ describe('titles api', () => {
     expect(serializedTitles).toMatchInlineSnapshot(`
         Object {
           "description": "less cool description",
-          "hidePanelTitles": false,
+          "hide_title": false,
           "title": "UH OH, A TITLE",
         }
       `);
   });
 
-  it('should correctly compare hidePanelTitles with custom comparator', () => {
+  it('should correctly compare hide_title with custom comparator', () => {
     const comparator = titleComparators.hide_title as ComparatorFunction<
       SerializedTitles,
       'hide_title'
