@@ -97,17 +97,33 @@ export class TaskManagerService {
       dataStreamId: params.dataStreamId,
     });
 
-    const taskInstance = await this.taskManager.schedule({
-      id: taskId,
-      taskType: DATA_STREAM_CREATION_TASK_TYPE,
-      params,
-      state: { task_status: TASK_STATUSES.pending },
-      scope: ['automaticImport'],
-    });
+    try {
+      const taskInstance = await this.taskManager.schedule({
+        id: taskId,
+        taskType: DATA_STREAM_CREATION_TASK_TYPE,
+        params,
+        state: { task_status: TASK_STATUSES.pending },
+        scope: ['automaticImport'],
+      });
 
-    this.logger.info(`Task scheduled: ${taskInstance.id}`);
-
-    return { taskId: taskInstance.id };
+      this.logger.info(`Task scheduled: ${taskInstance.id}`);
+      return { taskId: taskInstance.id };
+    } catch (error: any) {
+      // If task already exists (version conflict), return the existing task ID
+      if (error.statusCode === 409 || error.message?.includes('version conflict')) {
+        this.logger.debug(`Task ${taskId} already exists, returning existing task ID`);
+        try {
+          const existingTask = await this.taskManager.get(taskId);
+          return { taskId: existingTask.id };
+        } catch (getError) {
+          // If we can't get the task, re-throw the original error
+          this.logger.error(`Failed to get existing task ${taskId}:`, getError);
+          throw error;
+        }
+      }
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   public async removeDataStreamCreationTask(dataStreamParams: DataStreamParams): Promise<void> {

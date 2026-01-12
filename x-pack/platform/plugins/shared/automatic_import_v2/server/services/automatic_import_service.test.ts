@@ -648,6 +648,27 @@ describe('AutomaticImportSetupService', () => {
         state: { task_status: 'pending' },
       };
 
+      // Mock core setup and plugins to simulate error
+      const mockCoreStart = {
+        elasticsearch: {
+          client: {
+            asScoped: jest.fn().mockReturnValue({
+              asCurrentUser: {},
+            }),
+          },
+        },
+      };
+
+      const mockPluginsStart = {
+        inference: {
+          getChatModel: jest.fn().mockRejectedValue(new Error('Agent invocation failed')),
+        },
+      };
+
+      const coreSetupMock = {
+        getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
+      };
+
       (taskManagerService as any).agentService = {
         invokeAutomaticImportAgent: jest.fn(),
       };
@@ -665,7 +686,7 @@ describe('AutomaticImportSetupService', () => {
           return originalRunTask.call(
             taskManagerService,
             taskInstance,
-            mockCoreSetup,
+            coreSetupMock,
             savedObjectService
           );
         });
