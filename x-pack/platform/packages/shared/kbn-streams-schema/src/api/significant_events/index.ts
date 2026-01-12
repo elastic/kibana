@@ -73,7 +73,7 @@ type SignificantEventsGenerateResponse = Observable<
 
 interface SignificantEventsQueriesGenerationResult {
   queries: GeneratedSignificantEventQuery[];
-  tokensUsed: ChatCompletionTokenCount;
+  tokensUsed: Pick<ChatCompletionTokenCount, 'prompt' | 'completion'>;
 }
 
 type SignificantEventsQueriesGenerationTaskResult =

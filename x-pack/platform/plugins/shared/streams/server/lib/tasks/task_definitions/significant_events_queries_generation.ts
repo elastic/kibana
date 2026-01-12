@@ -104,10 +104,9 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                       acc.queries.push(...result.queries);
                       acc.tokensUsed.prompt += result.tokensUsed.prompt;
                       acc.tokensUsed.completion += result.tokensUsed.completion;
-                      acc.tokensUsed.total += result.tokensUsed.total ?? 0;
                       return acc;
                     },
-                    { queries: [], tokensUsed: { prompt: 0, completion: 0, total: 0 } }
+                    { queries: [], tokensUsed: { prompt: 0, completion: 0 } }
                   );
 
                 taskContext.telemetry.trackSignificantEventsQueriesGenerated({
