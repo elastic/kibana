@@ -14,7 +14,7 @@ export const CONTEXT = '%context%';
 export const TIMEFIELD = '%timefield%';
 
 export const getRequestName = (name: string | undefined, index: number) =>
-  name ||
+  name ??
   i18n.translate('visTypeVega.queryParser.unnamedRequest', {
     defaultMessage: 'Unnamed request #{index}',
     values: { index },
