@@ -13,6 +13,7 @@ import type {
   TelemetryQuerySubmittedProps,
   ESQLVariableType,
   ControlTriggerSource,
+  BaseLatencyPayload,
   InputLatencyPayload,
   SuggestionsLatencyPayload,
   ValidationLatencyPayload,
@@ -56,6 +57,22 @@ export class ESQLEditorTelemetryService {
       // eslint-disable-next-line no-console
       console.log('Failed to report performance metric event', error);
     }
+  }
+
+  private _buildBaseLatencyEvent(eventName: string, payload: BaseLatencyPayload) {
+    return {
+      eventName,
+      duration: Math.round(payload.duration),
+      key1: 'query_length' as const,
+      value1: payload.queryLength,
+      key2: 'query_lines' as const,
+      value2: payload.queryLines,
+      meta: {
+        ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
+        ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
+        ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
+      },
+    };
   }
 
   /**
@@ -196,7 +213,6 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  // component mount → editor ready
   public trackInitLatency(duration: number, sessionId?: string) {
     this._reportPerformanceEvent({
       eventName: 'esql_editor_init_latency',
@@ -207,57 +223,25 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  // keystroke → React re-render
   public trackInputLatency(payload: InputLatencyPayload) {
-    this._reportPerformanceEvent({
-      eventName: 'esql_editor_input_latency',
-      duration: Math.round(payload.duration),
-      key1: 'query_length',
-      value1: payload.queryLength,
-      key2: 'query_lines',
-      value2: payload.queryLines,
-      meta: {
-        ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
-        ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
-        ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
-      },
-    });
+    this._reportPerformanceEvent(this._buildBaseLatencyEvent('esql_editor_input_latency', payload));
   }
 
-  // keystroke → suggestions ready
   public trackSuggestionsLatency(payload: SuggestionsLatencyPayload) {
+    const baseEvent = this._buildBaseLatencyEvent('esql_editor_suggestions_latency', payload);
     this._reportPerformanceEvent({
-      eventName: 'esql_editor_suggestions_latency',
-      duration: Math.round(payload.duration),
-      key1: 'query_length',
-      value1: payload.queryLength,
-      key2: 'query_lines',
-      value2: payload.queryLines,
+      ...baseEvent,
       meta: {
-        ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
-        ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
-        ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
+        ...baseEvent.meta,
         keystroke_to_trigger_ms: Math.round(payload.keystrokeToTriggerDuration),
         fetch_ms: Math.round(payload.fetchDuration),
         post_fetch_ms: Math.round(payload.postFetchDuration),
       },
     });
   }
-
-  // validation execution only
   public trackValidationLatency(payload: ValidationLatencyPayload) {
-    this._reportPerformanceEvent({
-      eventName: 'esql_editor_validation_latency',
-      duration: Math.round(payload.duration),
-      key1: 'query_length',
-      value1: payload.queryLength,
-      key2: 'query_lines',
-      value2: payload.queryLines,
-      meta: {
-        ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
-        ...(payload.interactionId ? { interaction_id: payload.interactionId } : {}),
-        ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
-      },
-    });
+    this._reportPerformanceEvent(
+      this._buildBaseLatencyEvent('esql_editor_validation_latency', payload)
+    );
   }
 }

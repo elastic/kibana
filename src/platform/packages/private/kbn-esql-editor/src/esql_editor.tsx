@@ -1280,6 +1280,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     // Track editor init time (first event always captured)
                     if (initTrackingRef.current.startTime > 0) {
                       const initDuration = performance.now() - initTrackingRef.current.startTime;
+
                       telemetryService.trackInitLatency(initDuration, sessionIdRef.current);
                       initTrackingRef.current.startTime = 0;
                     }

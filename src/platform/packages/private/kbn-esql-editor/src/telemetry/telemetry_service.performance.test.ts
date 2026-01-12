@@ -28,7 +28,9 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
   });
 
   it('reports init latency payload', () => {
-    const analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+    const analytics = {
+      reportEvent: jest.fn(),
+    } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
     const service = new ESQLEditorTelemetryService(analytics);
 
     service.trackInitLatency(123, 'session-1');
@@ -45,7 +47,9 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
   });
 
   it('reports input latency payload', () => {
-    const analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+    const analytics = {
+      reportEvent: jest.fn(),
+    } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
     const service = new ESQLEditorTelemetryService(analytics);
 
     service.trackInputLatency({
@@ -75,7 +79,9 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
   });
 
   it('reports suggestions latency payload', () => {
-    const analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+    const analytics = {
+      reportEvent: jest.fn(),
+    } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
     const service = new ESQLEditorTelemetryService(analytics);
 
     service.trackSuggestionsLatency({
@@ -111,7 +117,9 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
   });
 
   it('reports validation latency payload', () => {
-    const analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+    const analytics = {
+      reportEvent: jest.fn(),
+    } as Pick<AnalyticsServiceStart, 'reportEvent'> as AnalyticsServiceStart;
     const service = new ESQLEditorTelemetryService(analytics);
 
     service.trackValidationLatency({

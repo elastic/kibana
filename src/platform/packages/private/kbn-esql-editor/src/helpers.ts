@@ -25,7 +25,7 @@ import {
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
 
-export interface BaseTracking {
+interface BaseTracking {
   hasFirstSample: boolean;
   startTime: number;
   queryLength: number;
@@ -62,7 +62,7 @@ export const startLatencyTracking = (
   tracking.interactionId = interactionId;
 };
 
-export interface LatencyTrackingResult {
+interface LatencyTrackingResult {
   duration: number;
   queryLength: number;
   queryLines: number;
@@ -70,7 +70,7 @@ export interface LatencyTrackingResult {
   isInitialLoad: boolean;
 }
 
-export interface SuggestionsLatencyResult extends LatencyTrackingResult {
+interface SuggestionsLatencyResult extends LatencyTrackingResult {
   keystrokeToTriggerDuration: number;
   fetchDuration: number;
   postFetchDuration: number;
@@ -88,12 +88,15 @@ export const endLatencyTracking = (tracking: BaseTracking): LatencyTrackingResul
   };
 
   tracking.hasFirstSample = true;
-  tracking.startTime = 0;
-  tracking.queryLength = 0;
-  tracking.queryLines = 0;
-  tracking.interactionId = 0;
+  resetTracking(tracking);
 
   return result;
+};
+
+const resetSuggestionsFields = (tracking: SuggestionsTracking): void => {
+  tracking.triggerTime = 0;
+  tracking.fetchStartTime = 0;
+  tracking.fetchEndTime = 0;
 };
 
 export const endSuggestionsLatencyTracking = (
@@ -106,9 +109,7 @@ export const endSuggestionsLatencyTracking = (
   const baseResult = endLatencyTracking(tracking);
 
   if (!baseResult) {
-    tracking.triggerTime = 0;
-    tracking.fetchStartTime = 0;
-    tracking.fetchEndTime = 0;
+    resetSuggestionsFields(tracking);
     return null;
   }
 
@@ -119,15 +120,11 @@ export const endSuggestionsLatencyTracking = (
 
   // Guard against out-of-order timestamps (e.g. fetchEndTime recorded before fetchStartTime).
   if (keystrokeToTriggerDuration < 0 || fetchDuration < 0 || postFetchDuration < 0) {
-    tracking.triggerTime = 0;
-    tracking.fetchStartTime = 0;
-    tracking.fetchEndTime = 0;
+    resetSuggestionsFields(tracking);
     return null;
   }
 
-  tracking.triggerTime = 0;
-  tracking.fetchStartTime = 0;
-  tracking.fetchEndTime = 0;
+  resetSuggestionsFields(tracking);
 
   return {
     ...baseResult,
