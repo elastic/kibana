@@ -137,6 +137,23 @@ export const SharepointOnline: ConnectorSpec = {
       },
     },
 
+    getSiteListItems: {
+      isTool: true,
+      input: z.object({
+        siteId: z.string().describe('Site ID'),
+        listId: z.string().describe('List ID'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {siteId: string, listId: string};
+
+        ctx.log.debug(`SharePoint getting all items of list ${typedInput.listId} of site ${typedInput.siteId}`);
+        const response = await ctx.client.get(
+          `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/${typedInput.listId}/items/`
+        );
+        return response.data;
+      },
+    },
+
     search: {
       isTool: true,
       input: z.object({
