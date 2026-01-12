@@ -84,6 +84,7 @@
     "**/@types/node": "22.19.1",
     "**/@types/prop-types": "15.7.5",
     "**/@typescript-eslint/utils": "8.46.3",
+    "**/baseline-browser-mapping": "2.9.14",
     "**/chokidar": "^3.5.3",
     "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
     "**/globule/minimatch": "^3.1.2",
