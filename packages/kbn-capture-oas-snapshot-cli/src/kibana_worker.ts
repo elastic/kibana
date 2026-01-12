@@ -61,7 +61,6 @@ export type Result = string;
   set(settings, 'migrations.skip', true);
   set(settings, 'dataStreams.migrations.skip', true);
   set(settings, 'elasticsearch.skipStartupConnectionCheck', true);
-  set(settings, 'xpack.fleet.enableExperimental', ["enableAgentMigrations","enableAgentPrivilegeLevelChange"]);
 
   if (serverless) {
     // Satisfy spaces config for serverless:
