@@ -52,7 +52,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   return (
     <DashboardRenderer
-      getCreationOptions={() => getCreationOptions(dashboardProps, notifications, dataView)}
+      getCreationOptions={() => getCreationOptions(dashboardProps, notifications)}
       onApiAvailable={setDashboard}
     />
   );
@@ -60,10 +60,10 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
 async function getCreationOptions(
   dashboardProps: MetricsDashboardProps,
-  notifications: NotificationsStart,
-  dataView: DataView
+  notifications: NotificationsStart
 ): Promise<DashboardCreationOptions> {
   try {
+    const { dataView } = dashboardProps;
     const controlGroupState = {};
 
     await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
@@ -73,7 +73,7 @@ async function getCreationOptions(
       width: 'medium',
       grow: true,
     });
-    const panels = await convertSavedDashboardToPanels(dashboardProps, dataView);
+    const panels = await convertSavedDashboardToPanels(dashboardProps);
 
     if (!panels) {
       throw new Error('Failed parsing dashboard panels.');

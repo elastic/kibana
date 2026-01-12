@@ -12,10 +12,12 @@ import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
 import { ValidationError } from './health_diagnostic_circuit_breakers.types';
 import { artifactService } from '../artifact';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import {
   createMockLogger,
   createMockTaskManager,
   createMockAnalytics,
+  createMockTelemetryConfigProvider,
   createMockQueryExecutor,
   createMockDocument,
   createMockArtifactData,
@@ -34,6 +36,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
   let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
+  let mockTelemetryConfigProvider: jest.Mocked<TelemetryConfigProvider>;
   let mockQueryExecutor: jest.Mocked<CircuitBreakingQueryExecutorImpl>;
 
   const mockDocument = createMockDocument();
@@ -43,6 +46,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
     mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
     mockTaskManager = createMockTaskManager();
     mockAnalytics = createMockAnalytics();
+    mockTelemetryConfigProvider = createMockTelemetryConfigProvider();
     mockQueryExecutor = createMockQueryExecutor();
 
     MockedCircuitBreakingQueryExecutorImpl.mockImplementation(() => mockQueryExecutor);
@@ -60,6 +64,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
       taskManager: mockTaskManager,
       esClient: mockEsClient,
       analytics: mockAnalytics,
+      telemetryConfigProvider: mockTelemetryConfigProvider,
     });
   };
 
@@ -145,8 +150,8 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
 
         expect(result).toEqual([]);
-        expect(mockLogger.warn).toHaveBeenCalledWith(
-          'CircuitBreakingQueryExecutor service is not started',
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          'Skipping health diagnostic task because telemetry is disabled',
           expect.anything()
         );
       });
@@ -302,6 +307,59 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
             traceId: expect.any(String),
           })
         );
+      });
+    });
+
+    describe('telemetry opt-out behavior', () => {
+      beforeEach(async () => {
+        await startService();
+      });
+
+      test('should skip queries and return empty array when telemetry is opted out', async () => {
+        mockTelemetryConfigProvider.getIsOptedIn.mockReturnValue(false);
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toEqual([]);
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          'Skipping health diagnostic task because telemetry is disabled',
+          expect.anything()
+        );
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+        expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      test('should skip queries when telemetry config provider returns undefined', async () => {
+        mockTelemetryConfigProvider.getIsOptedIn.mockReturnValue(undefined);
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toEqual([]);
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          'Skipping health diagnostic task because telemetry is disabled',
+          expect.anything()
+        );
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+        expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      test('should run queries when telemetry is opted in', async () => {
+        mockTelemetryConfigProvider.getIsOptedIn.mockReturnValue(true);
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          name: 'test-query',
+          passed: true,
+          numDocs: 1,
+        });
+        expect(mockQueryExecutor.search).toHaveBeenCalledTimes(1);
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledTimes(2);
       });
     });
   });

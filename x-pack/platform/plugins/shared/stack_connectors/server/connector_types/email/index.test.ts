@@ -620,6 +620,73 @@ describe('params validation', () => {
       )
     ).not.toThrowError();
   });
+
+  test('throws for too long "to" address ', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const longEmailAddress = 'a'.repeat(513 - '@example.com'.length) + '@example.com';
+
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: [longEmailAddress],
+          cc: ['cc@example.com'],
+          bcc: ['bcc@example.com'],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [to.0]: value has length [513] but it must have a maximum length of [512]."`
+    );
+  });
+  test('throws for too long "cc" address ', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const longEmailAddress = 'a'.repeat(513 - '@example.com'.length) + '@example.com';
+
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['to@example.com'],
+          cc: [longEmailAddress],
+          bcc: ['bcc@example.com'],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [cc.0]: value has length [513] but it must have a maximum length of [512]."`
+    );
+  });
+  test('throws for too long "bcc" address ', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const longEmailAddress = 'a'.repeat(513 - '@example.com'.length) + '@example.com';
+
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['to@example.com'],
+          cc: ['cc@example.com'],
+          bcc: [longEmailAddress],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [bcc.0]: value has length [513] but it must have a maximum length of [512]."`
+    );
+  });
 });
 
 describe('execute()', () => {

@@ -255,6 +255,7 @@ dependsOn:
   - '@kbn/ai-assistant-default-llm-setting'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/react-query'
+  - '@kbn/core-elasticsearch-server-utils'
 tags:
   - plugin
   - prod

@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/spaces-utils'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -77,6 +78,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

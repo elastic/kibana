@@ -11,18 +11,32 @@ type IndicatorLike = Record<'fields', Record<string, unknown>> | null | undefine
  * Unpacks field value from raw indicator fields. Will return null if fields are missing entirely
  * or there is no record for given `fieldId`
  */
-export const unwrapValue = <T = string>(indicator: IndicatorLike, fieldId: string): T | null => {
+export const unwrapValue = (
+  indicator: IndicatorLike,
+  fieldId: string
+): string | string[] | null => {
   if (!indicator) {
     return null;
   }
 
-  const fieldValues = indicator.fields?.[fieldId];
+  const raw = indicator.fields?.[fieldId];
 
-  if (!Array.isArray(fieldValues)) {
-    return null;
+  // Handle string directly
+  if (typeof raw === 'string') {
+    return raw;
   }
 
-  const firstValue = fieldValues[0];
+  // Handle arrays by collecting only strings
+  if (Array.isArray(raw)) {
+    const strings = raw.filter((v): v is string => typeof v === 'string');
 
-  return typeof firstValue === 'object' ? null : (firstValue as T);
+    if (strings.length === 0) return null;
+    if (strings.length === 1) return strings[0];
+
+    // Multiple string values -> return array so callers can OR them
+    return strings;
+  }
+
+  // Any other type -> unsupported
+  return null;
 };
