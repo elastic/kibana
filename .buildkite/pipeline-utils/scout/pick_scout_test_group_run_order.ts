@@ -59,7 +59,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
         return config.serverRunFlags.map((flag) => ({
           label: `Scout: [ ${module.group} / ${module.name} ${flag} ] ${module.type}`,
           key: `${module.name}-${flag.replace(/^--/, '').replace(/=/g, '-')}`,
-          agents: expandAgentQueue('n2-16-spot'),
+          agents: expandAgentQueue('n2-4-spot'),
           group: module.group,
         }));
       });
