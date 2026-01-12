@@ -9,7 +9,6 @@
 
 import { BehaviorSubject, skip, Subject } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
@@ -22,31 +21,33 @@ import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { DashboardPanel } from '../../server';
 import { getSampleDashboardState } from '../mocks';
-import { serializeLayout } from './layout_manager/serialize_layout';
-import { waitFor } from '@testing-library/dom';
 
 jest.mock('../services/dashboard_backup_service', () => ({}));
 
 const forcePublishOnReset$ = new Subject<void>();
 
-const layoutUnsavedChanges$ = new BehaviorSubject<{
-  panels?: DashboardState['panels'];
+const panelUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
+const pinnedPanelUnsavedChanges$ = new BehaviorSubject<{
   controlGroupInput?: DashboardState['controlGroupInput'];
 }>({});
+
 const layoutManagerMock = {
   api: {
     children$: new BehaviorSubject<DashboardChildren>({}),
   },
   internalApi: {
-    startComparing$: () => layoutUnsavedChanges$,
+    startComparing: () => ({
+      hasPanelUnsavedChanges$: panelUnsavedChanges$,
+      hasPinnedPanelUnsavedChanges$: pinnedPanelUnsavedChanges$,
+    }),
     serializeLayout: () => {
-      const panels = layoutUnsavedChanges$.getValue()?.panels;
-      const controlGroupInput = layoutUnsavedChanges$.getValue()?.controlGroupInput;
+      const panels = panelUnsavedChanges$.getValue()?.panels ?? [];
+      const controlGroupInput = pinnedPanelUnsavedChanges$.getValue()?.controlGroupInput ?? {};
       return {
-        ...(panels && { panels }),
-        ...(controlGroupInput && { controlGroupInput }),
+        panels,
+        controlGroupInput,
         // create one reference per panel
-        references: (panels ?? [])
+        references: panels
           .filter((panel) => !isDashboardSection(panel))
           .map((panel, index) => ({
             name: 'savedObjectRef',
@@ -87,7 +88,8 @@ describe('unsavedChangesManager', () => {
     jest.clearAllMocks();
     setBackupStateMock.mockReset();
 
-    layoutUnsavedChanges$.next({});
+    panelUnsavedChanges$.next({});
+    pinnedPanelUnsavedChanges$.next({});
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../services/dashboard_backup_service').getDashboardBackupService = () => ({
@@ -154,7 +156,7 @@ describe('unsavedChangesManager', () => {
           done();
         });
 
-        layoutUnsavedChanges$.next({
+        panelUnsavedChanges$.next({
           panels: [
             {
               type: 'testType',
@@ -163,129 +165,6 @@ describe('unsavedChangesManager', () => {
               },
             } as unknown as DashboardPanel,
           ],
-        });
-      });
-
-      describe('should backup control and panel children changes independently', () => {
-        let child1Api: any;
-        let child2Api: any;
-        let apiMockWithChildren: ReturnType<typeof initializeLayoutManager>;
-        let unsavedChangesManager: ReturnType<typeof initializeUnsavedChangesManager>;
-        let backupState: any;
-
-        beforeEach(async () => {
-          child1Api = {
-            uuid: 'child1',
-            hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
-            resetUnsavedChanges: () => undefined,
-          };
-          child2Api = {
-            uuid: 'child2',
-            hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
-            resetUnsavedChanges: () => undefined,
-          };
-          const children$ = new BehaviorSubject<DashboardChildren>({
-            child1: child1Api as unknown as DefaultEmbeddableApi,
-            child2: child2Api as unknown as DefaultEmbeddableApi,
-          });
-          apiMockWithChildren = {
-            api: {
-              children$,
-            },
-            internalApi: {
-              startComparing$: () => layoutUnsavedChanges$,
-              serializeLayout: (subset: string[]) =>
-                serializeLayout(
-                  {
-                    panels: {
-                      child1: { type: 'lens', grid: { x: 0, y: 0, w: 12, h: 12 } },
-                    },
-                    sections: {},
-                    controls: {
-                      child2: { type: 'optionsListControl', order: 0 },
-                    },
-                  },
-                  {
-                    child1: { rawState: { title: 'child1' } },
-                    child2: { rawState: { title: 'child2' } },
-                  },
-                  subset
-                ),
-            },
-          } as unknown as ReturnType<typeof initializeLayoutManager>;
-
-          unsavedChangesManager = initializeUnsavedChangesManager({
-            viewMode$,
-            storeUnsavedChanges: true,
-            lastSavedState: DEFAULT_DASHBOARD_STATE,
-            layoutManager: apiMockWithChildren,
-            savedObjectId$,
-            settingsManager: settingsManagerMock,
-            unifiedSearchManager: unifiedSearchManagerMock,
-            projectRoutingManager: projectRoutingManagerMock,
-            forcePublishOnReset$,
-          });
-
-          setBackupStateMock.mockImplementation((id, result) => {
-            backupState = result;
-          });
-          await waitFor(() => {
-            expect(unsavedChangesManager.api.hasUnsavedChanges$.getValue()).toBe(false);
-          });
-        });
-
-        test('backs up panel state', async () => {
-          child1Api.hasUnsavedChanges$.next(true);
-          await waitFor(() => {
-            expect(unsavedChangesManager.api.hasUnsavedChanges$.getValue()).toBe(true);
-          });
-
-          expect(backupState).toMatchInlineSnapshot(`
-            Object {
-              "panels": Array [
-                Object {
-                  "config": Object {
-                    "title": "child1",
-                  },
-                  "grid": Object {
-                    "h": 12,
-                    "w": 12,
-                    "x": 0,
-                    "y": 0,
-                  },
-                  "type": "lens",
-                  "uid": "child1",
-                },
-              ],
-              "references": Array [],
-              "viewMode": "edit",
-            }
-          `);
-        });
-
-        test('backs up control state', async () => {
-          child2Api.hasUnsavedChanges$.next(true);
-          await waitFor(() => {
-            expect(unsavedChangesManager.api.hasUnsavedChanges$.getValue()).toBe(true);
-          });
-
-          expect(backupState).toMatchInlineSnapshot(`
-            Object {
-              "controlGroupInput": Object {
-                "controls": Array [
-                  Object {
-                    "config": Object {
-                      "title": "child2",
-                    },
-                    "type": "optionsListControl",
-                    "uid": "child2",
-                  },
-                ],
-              },
-              "references": Array [],
-              "viewMode": "edit",
-            }
-          `);
         });
       });
     });
