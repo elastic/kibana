@@ -7,9 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '../../../types';
+import { esqlCommandRegistry } from '../../../..';
+import type { ESQLCommand, ESQLAstForkCommand } from '../../../types';
 import type { ESQLCommandSummary } from '../types';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
-  return { newColumns: new Set(['_fork']) };
+  const forkCommand = command as ESQLAstForkCommand;
+  const branches = forkCommand.args.map((parens) => parens.child);
+
+  const allNewColumns = new Set<string>(['_fork']); // FORK always adds _fork column
+  const allRenamedColumnsPairs = new Set<[string, string]>();
+  const allMetadataColumns = new Set<string>();
+
+  for (const branch of branches) {
+    for (const branchCommand of branch.commands) {
+      const commandDef = esqlCommandRegistry.getCommandByName(branchCommand.name);
+
+      if (commandDef?.methods.summary) {
+        const branchSummary = commandDef.methods.summary(branchCommand, query);
+
+        if (branchSummary.newColumns) {
+          branchSummary.newColumns.forEach((col) => allNewColumns.add(col));
+        }
+
+        if (branchSummary.renamedColumnsPairs) {
+          branchSummary.renamedColumnsPairs.forEach((pair) => allRenamedColumnsPairs.add(pair));
+        }
+
+        if (branchSummary.metadataColumns) {
+          branchSummary.metadataColumns.forEach((col) => allMetadataColumns.add(col));
+        }
+      }
+    }
+  }
+
+  return {
+    newColumns: allNewColumns,
+    renamedColumnsPairs: allRenamedColumnsPairs,
+    metadataColumns: allMetadataColumns,
+  };
 };

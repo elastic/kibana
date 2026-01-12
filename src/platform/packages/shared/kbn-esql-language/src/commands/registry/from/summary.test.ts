@@ -12,7 +12,11 @@ import { summary } from './summary';
 describe('FROM > summary', () => {
   it('returns an empty list if METADATA is not present', () => {
     const result = summary(synth.cmd`FROM index`, '');
-    expect(result).toEqual({ newColumns: new Set([]), metadataColumns: new Set([]) });
+    expect(result).toEqual({
+      newColumns: new Set([]),
+      metadataColumns: new Set([]),
+      renamedColumnsPairs: new Set([]),
+    });
   });
 
   it('returns the metadata columns if METADATA is present', () => {
@@ -20,6 +24,28 @@ describe('FROM > summary', () => {
     expect(result).toEqual({
       newColumns: new Set([]),
       metadataColumns: new Set(['_index', '_id']),
+      renamedColumnsPairs: new Set([]),
+    });
+  });
+
+  it('collects columns from simple subquery', () => {
+    const result = summary(synth.cmd`FROM index1, (FROM index2 | EVAL computed = price * 2)`, '');
+    expect(result).toEqual({
+      newColumns: new Set(['computed']),
+      metadataColumns: new Set([]),
+      renamedColumnsPairs: new Set([]),
+    });
+  });
+
+  it('collects columns from multiple subqueries', () => {
+    const result = summary(
+      synth.cmd`FROM index1, (FROM index2 | EVAL a = 1), (FROM index3 | EVAL b = 2)`,
+      ''
+    );
+    expect(result).toEqual({
+      newColumns: new Set(['a', 'b']),
+      metadataColumns: new Set([]),
+      renamedColumnsPairs: new Set([]),
     });
   });
 });

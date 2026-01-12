@@ -9,7 +9,7 @@
 
 import { esqlCommandRegistry, Parser, type ESQLCommandSummary } from '@kbn/esql-language';
 
-export function getAllUserDefinedColumnNames(query: string): ESQLCommandSummary {
+export function getQuerySummary(query: string): ESQLCommandSummary {
   const { root } = Parser.parseQuery(query);
 
   const allNewColumns = new Set<string>();
