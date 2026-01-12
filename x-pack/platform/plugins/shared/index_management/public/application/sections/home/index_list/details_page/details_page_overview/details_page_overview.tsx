@@ -46,6 +46,7 @@ import { useMappingsState } from '../../../../../components/mappings_editor/mapp
 import { hasElserOnMlNodeSemanticTextField } from '../../../../../components/mappings_editor/lib/utils';
 import { useMappingsStateListener } from '../../../../../components/mappings_editor/use_state_listener';
 import { parseMappings } from '../../../../../shared/parse_mappings';
+import { useUserPrivileges } from '../../../../../services/api';
 
 interface Props {
   indexDetails: Index;
@@ -79,10 +80,8 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
-  // Setting undefined here because we don't have user privileges data in index management
-  // If the user doesn't have update mappings privileges we let the api handle the error
-  // TODO: Add route and api to get user privileges data in index management plugin
-  const hasUpdateMappingsPrivileges = undefined;
+  const { data } = useUserPrivileges(indexDetails.name);
+  const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,
