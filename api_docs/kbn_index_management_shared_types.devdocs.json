@@ -2218,20 +2218,6 @@
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/index-management-shared-types",
-            "id": "def-common.IndexMappingProps.hasUpdateMappingsPrivilege",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hasUpdateMappingsPrivilege",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
