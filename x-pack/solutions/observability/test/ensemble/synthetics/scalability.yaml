@@ -1,0 +1,49 @@
+name: Synthetics Scalability Test
+description: Minimal test
+
+params:
+  - name: github_token
+    description: GitHub authentication token
+    type: exec
+    command: gh
+    args:
+      - auth
+      - token
+
+  - name: github_username
+    description: GitHub Username
+    type: exec
+    command: gh
+    args:
+      - api
+      - user
+      - -q
+      - ".login"
+
+  - name: github_email
+    description: GitHub email
+    type: exec
+    command: git
+    args:
+      - config
+      - user.email
+
+  - name: gcp_app_credentials
+    description: GCP application default credentials JSON
+    type: automation
+    automation: gcp_auth
+
+steps:
+  - name: Create OBLT CCS Cluster
+    id: create_ccs_cluster
+    type: providers.oblt_cli.create_ccs_cluster
+    with:
+      gcp_app_credentials: ".secrets/credentials.json"
+      remote_cluster: 'edge-oblt'
+      github_token: '{{ param.github_token }}'
+      github_username: '{{ param.github_username }}'
+      github_email: '{{ param.github_email }}'
+    resources:
+      - type: file
+        content: "{{ param.gcp_app_credentials }}"
+        filename: ".secrets/credentials.json"
