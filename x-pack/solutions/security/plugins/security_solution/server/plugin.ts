@@ -252,9 +252,9 @@ export class Plugin implements ISecuritySolutionPlugin {
           AI_AGENTS_FEATURE_FLAG_DEFAULT
         );
 
-        if (!isAiAgentsEnabled) {
-          return;
-        }
+        // if (!isAiAgentsEnabled) {
+        //   return;
+        // }
 
         registerTools(agentBuilder, core, logger).catch((error) => {
           this.logger.error(`Error registering security tools: ${error}`);
