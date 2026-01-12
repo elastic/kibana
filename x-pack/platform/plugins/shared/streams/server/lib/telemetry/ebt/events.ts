@@ -8,12 +8,12 @@
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
   STREAMS_STATE_ERROR_EVENT,
-  STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
+  STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
-  streamsFeatureIdentificationIdentifiedSchema,
+  streamsSystemIdentificationIdentifiedSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -26,13 +26,13 @@ const streamsStateErrorEventType = {
   schema: streamsStateErrorSchema,
 };
 
-const streamsFeatureIdentificationIdentifiedEventType = {
-  eventType: STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
-  schema: streamsFeatureIdentificationIdentifiedSchema,
+const streamsSystemIdentificationIdentifiedEventType = {
+  eventType: STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
+  schema: streamsSystemIdentificationIdentifiedSchema,
 };
 
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
-  streamsFeatureIdentificationIdentifiedEventType,
+  streamsSystemIdentificationIdentifiedEventType,
 };
