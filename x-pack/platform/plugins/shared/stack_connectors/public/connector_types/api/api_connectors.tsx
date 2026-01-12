@@ -31,12 +31,12 @@ const ApiActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPro
   return (
     <>
       <UseField
-        path="config.basePath"
+        path="config.url"
         config={{
-          label: i18n.BASE_PATH_LABEL,
+          label: i18n.BASE_URL_LABEL,
           validations: [
             {
-              validator: urlField(i18n.BASE_PATH_INVALID),
+              validator: urlField(i18n.BASE_URL_INVALID),
             },
           ],
         }}
@@ -44,9 +44,9 @@ const ApiActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPro
         componentProps={{
           euiFieldProps: {
             readOnly,
-            'data-test-subj': 'apiBasePathText',
+            'data-test-subj': 'apiUrlText',
             fullWidth: true,
-            placeholder: 'https://api.example.com',
+            placeholder: 'https://example.com/api/v1',
           },
         }}
       />

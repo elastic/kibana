@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { validate as validateUuid } from 'uuid';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -18,21 +15,23 @@ import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/appl
 export class ConnectorExecutor {
   constructor(private actionsClient: ActionsClient) {}
 
-  public async execute(
-    connectorType: string,
-    connectorName: string,
-    inputs: Record<string, any>,
-    spaceId: string,
-    abortController: AbortController
-  ): Promise<ActionTypeExecutorResult<unknown>> {
+  public async execute(params: {
+    connectorType: string;
+    connectorNameOrId: string;
+    input: Record<string, unknown>;
+    abortController: AbortController;
+    isSystemAction?: boolean;
+  }): Promise<ActionTypeExecutorResult<unknown>> {
+    const { connectorType, connectorNameOrId, input, abortController, isSystemAction } = params;
     if (!connectorType) {
       throw new Error('Connector type is required');
     }
 
-    const runConnectorPromise = this.runConnector(connectorName, inputs, spaceId);
+    const runConnectorPromise = this.runConnector(connectorNameOrId, input, isSystemAction);
+
     const abortPromise = new Promise<void>((resolve, reject) => {
       abortController.signal.addEventListener('abort', () =>
-        reject(new Error(`"${connectorName}" with type "${connectorType}" was aborted`))
+        reject(new Error(`"${connectorNameOrId}" with type "${connectorType}" was aborted`))
       );
     });
 
@@ -46,24 +45,24 @@ export class ConnectorExecutor {
   }
 
   private async runConnector(
-    connectorName: string,
-    connectorParams: Record<string, any>,
-    spaceId: string
+    connectorNameOrId: string,
+    connectorParams: Record<string, unknown>,
+    isSystemAction?: boolean
   ): Promise<ActionTypeExecutorResult<unknown>> {
-    const connectorId = await this.resolveConnectorId(connectorName, spaceId);
+    let actionId = connectorNameOrId;
+    if (!isSystemAction) {
+      actionId = await this.resolveConnectorId(connectorNameOrId);
+    }
 
-    return (this.actionsClient as ActionsClient).execute({
-      actionId: connectorId,
-      params: connectorParams,
-    });
+    return this.actionsClient.execute({ actionId, params: connectorParams });
   }
 
-  private async resolveConnectorId(connectorName: string, spaceId: string): Promise<string> {
+  private async resolveConnectorId(connectorName: string): Promise<string> {
     if (validateUuid(connectorName)) {
       return connectorName;
     }
 
-    const allConnectors = await (this.actionsClient as ActionsClient).getAll();
+    const allConnectors = await this.actionsClient.getAll();
 
     const connector = allConnectors.find(
       (c: ConnectorWithExtraFindData) => c.name === connectorName

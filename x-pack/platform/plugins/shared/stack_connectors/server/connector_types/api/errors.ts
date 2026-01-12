@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import type { ApiConnectorTypeExecutorResult } from './types';
 
 export function errorResultInvalid(
   actionId: string,
   serviceMessage: string
-): ConnectorTypeExecutorResult<void> {
+): ApiConnectorTypeExecutorResult {
   const errMessage = i18n.translate('xpack.stackConnectors.api.invalidResponseErrorMessage', {
     defaultMessage: 'error calling api, invalid response',
   });
@@ -28,7 +28,7 @@ export function errorResultRequestFailed(
   actionId: string,
   serviceMessage: string,
   errorSource?: TaskErrorSource
-): ConnectorTypeExecutorResult<unknown> {
+): ApiConnectorTypeExecutorResult {
   const errMessage = i18n.translate('xpack.stackConnectors.api.requestFailedErrorMessage', {
     defaultMessage: 'error calling api, request failed',
   });
@@ -41,7 +41,7 @@ export function errorResultRequestFailed(
   };
 }
 
-export function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResult<void> {
+export function errorResultUnexpectedError(actionId: string): ApiConnectorTypeExecutorResult {
   const errMessage = i18n.translate('xpack.stackConnectors.api.unreachableErrorMessage', {
     defaultMessage: 'error calling api, unexpected error',
   });
@@ -54,7 +54,7 @@ export function errorResultUnexpectedError(actionId: string): ConnectorTypeExecu
 
 export function errorResultUnexpectedNullResponse(
   actionId: string
-): ConnectorTypeExecutorResult<void> {
+): ApiConnectorTypeExecutorResult {
   const message = i18n.translate('xpack.stackConnectors.api.unexpectedNullResponseErrorMessage', {
     defaultMessage: 'unexpected null response from api',
   });
@@ -68,7 +68,7 @@ export function errorResultUnexpectedNullResponse(
 export function retryResult(
   actionId: string,
   serviceMessage: string
-): ConnectorTypeExecutorResult<void> {
+): ApiConnectorTypeExecutorResult {
   const errMessage = i18n.translate(
     'xpack.stackConnectors.api.invalidResponseRetryLaterErrorMessage',
     {
@@ -88,7 +88,7 @@ export function retryResultSeconds(
   actionId: string,
   serviceMessage: string,
   retryAfter: number
-): ConnectorTypeExecutorResult<void> {
+): ApiConnectorTypeExecutorResult {
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();

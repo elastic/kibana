@@ -7,41 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { z } from '@kbn/zod';
-import { AuthConfiguration, WebhookMethods } from '../../common/auth';
+import { AuthConfiguration } from '../../common/auth';
 
 export const HeadersSchema = z.record(z.string(), z.string());
 
-const configSchemaProps = {
-  basePath: z.string(),
-  headers: HeadersSchema.nullable().default(null),
-  hasAuth: AuthConfiguration.hasAuth,
-  authType: AuthConfiguration.authType,
-  certType: AuthConfiguration.certType,
-  ca: AuthConfiguration.ca,
-  verificationMode: AuthConfiguration.verificationMode,
-  accessTokenUrl: AuthConfiguration.accessTokenUrl,
-  clientId: AuthConfiguration.clientId,
-  scope: AuthConfiguration.scope,
-  additionalFields: AuthConfiguration.additionalFields,
-};
-
-export const ConfigSchema = z.object(configSchemaProps).strict();
+export const ConfigSchema = z
+  .object({
+    url: z.string().url(),
+    headers: HeadersSchema.nullable().default(null),
+    hasAuth: AuthConfiguration.hasAuth,
+    authType: AuthConfiguration.authType,
+    certType: AuthConfiguration.certType,
+    ca: AuthConfiguration.ca,
+    verificationMode: AuthConfiguration.verificationMode,
+    accessTokenUrl: AuthConfiguration.accessTokenUrl,
+    clientId: AuthConfiguration.clientId,
+    scope: AuthConfiguration.scope,
+    additionalFields: AuthConfiguration.additionalFields,
+  })
+  .strict();
 
 export const ParamsSchema = z
   .object({
+    url: z.string().url().optional(),
     path: z.string().optional(),
-    method: z
-      .enum([
-        WebhookMethods.GET,
-        WebhookMethods.POST,
-        WebhookMethods.PUT,
-        WebhookMethods.PATCH,
-        WebhookMethods.DELETE,
-      ])
-      .default(WebhookMethods.GET),
+    method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).default('GET'),
     body: z.string().optional(),
     query: z.record(z.string(), z.string()).optional(),
     headers: z.record(z.string(), z.string()).optional(),
     timeout: z.number().positive().optional(),
+    fetcher: z
+      .object({
+        skip_ssl_verification: z.boolean().optional(),
+        follow_redirects: z.boolean().optional(),
+        max_redirects: z.number().optional(),
+        keep_alive: z.boolean().optional(),
+      })
+      .optional(),
   })
   .strict();

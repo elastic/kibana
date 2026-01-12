@@ -124,7 +124,7 @@ export function validateConnectorTypeConfig(
   validatorServices: ValidatorServices
 ) {
   const { configurationUtilities } = validatorServices;
-  const configuredBasePath = configObject.basePath;
+  const configuredBasePath = configObject.url;
 
   validateUrl(configuredBasePath);
   ensureUriAllowed(configuredBasePath, configurationUtilities);

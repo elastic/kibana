@@ -9,6 +9,8 @@
 import { i18n } from '@kbn/i18n';
 
 export const CONNECTOR_ID = '.api';
+export const CONNECTOR_ID_SYSTEM = '.api-system';
+
 export const CONNECTOR_NAME = i18n.translate('connectors.api.title', {
   defaultMessage: 'API',
 });

@@ -414,6 +414,22 @@ describe('request', () => {
     expect(axiosMock.mock.calls[1][1]!.timeout).toBe(360001);
   });
 
+  test('it uses keepAlive when provided', async () => {
+    await request({
+      axios,
+      url: '/test',
+      data: { id: '123' },
+      logger,
+      configurationUtilities,
+      keepAlive: true,
+    });
+    expect(axiosMock).toHaveBeenCalledWith('/test', {
+      method: 'get',
+      data: { id: '123' },
+      httpsAgent: expect.objectContaining({ options: { keepAlive: true } }),
+    });
+  });
+
   test('throw an error if you use baseUrl in your axios instance', async () => {
     await expect(async () => {
       await request({

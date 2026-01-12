@@ -16,12 +16,26 @@ import { z } from '@kbn/zod/v4';
 
 // API connector parameter schema
 export const ApiParamsSchema = z.object({
-  path: z.string().optional(),
-  method: z.enum(['get', 'post', 'put', 'patch', 'delete']).default('get'),
+  url: z
+    .url()
+    .optional()
+    .describe(
+      'The base URL to send the request to. If `connector-id` is provided the configured URL will be used and this value will be ignored.'
+    ),
+  path: z.string().optional().describe('The path appended to the base URL.'),
+  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).default('GET'),
   body: z.string().optional(),
   query: z.record(z.string(), z.string()).optional(),
   headers: z.record(z.string(), z.string()).optional(),
   timeout: z.number().positive().optional(),
+  fetcher: z
+    .object({
+      skip_ssl_verification: z.boolean().optional(),
+      follow_redirects: z.boolean().optional(),
+      max_redirects: z.number().optional(),
+      keep_alive: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 // API connector response schema

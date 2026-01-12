@@ -34,6 +34,7 @@ export const request = async <T = unknown>({
   sslOverrides,
   timeout,
   connectorUsageCollector,
+  keepAlive,
   ...config
 }: {
   axios: AxiosInstance;
@@ -46,6 +47,7 @@ export const request = async <T = unknown>({
   timeout?: number;
   sslOverrides?: SSLSettings;
   connectorUsageCollector?: ConnectorUsageCollector;
+  keepAlive?: boolean;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
@@ -58,6 +60,11 @@ export const request = async <T = unknown>({
     url,
     sslOverrides
   );
+
+  if (keepAlive && httpsAgent) {
+    httpsAgent.options.keepAlive = keepAlive;
+  }
+
   const { maxContentLength, timeout: settingsTimeout } =
     configurationUtilities.getResponseSettings();
 

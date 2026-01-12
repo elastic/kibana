@@ -10,6 +10,8 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -78,17 +80,32 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           step['connector-id']
         );
 
-      if (!connectorIdRendered) {
-        throw new Error(`Connector ID is required`);
-      }
+      let output: ActionTypeExecutorResult<unknown>;
+      if (connectorIdRendered) {
+        // Use regular connector with saved object
+        output = await this.connectorExecutor.execute({
+          connectorType: stepType,
+          connectorNameOrId: connectorIdRendered,
+          input: renderedInputs,
+          abortController: this.stepExecutionRuntime.abortController,
+        });
+      } else {
+        const systemConnectorActionTypeId = SystemConnectorsMap.get(`.${stepType}`);
+        if (systemConnectorActionTypeId) {
+          // Use system connector when connector-id is missing and connector type is in SystemConnectorsMap
+          const systemConnectorId = `system-connector-${systemConnectorActionTypeId}`;
 
-      const output = await this.connectorExecutor.execute(
-        stepType,
-        connectorIdRendered,
-        renderedInputs,
-        step.spaceId,
-        this.stepExecutionRuntime.abortController
-      );
+          output = await this.connectorExecutor.execute({
+            connectorType: stepType,
+            connectorNameOrId: systemConnectorId,
+            input: renderedInputs,
+            abortController: this.stepExecutionRuntime.abortController,
+            isSystemAction: true,
+          });
+        } else {
+          throw new Error(`Connector ID is required for connector type ${stepType}`);
+        }
+      }
 
       const { data, status, message, serviceMessage } = output;
 

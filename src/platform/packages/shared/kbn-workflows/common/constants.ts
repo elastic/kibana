@@ -23,3 +23,9 @@ export const WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID = 'workflows:ui:executionGr
  * Feature flag ID for enabling / disabling the workflow execution stats bar UI
  */
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
+
+/**
+ * Map of connector types to their system connector equivalents.
+ * Connectors in this map can be executed without a connector-id by using their system connector.
+ */
+export const SystemConnectorsMap = new Map<string, string>([['.api', '.api-system']]);

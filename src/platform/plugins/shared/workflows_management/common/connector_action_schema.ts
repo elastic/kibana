@@ -116,8 +116,6 @@ import {
   TinesWebhooksParamsSchema,
   TorqParamsSchema,
   TorqResponseSchema,
-  WebhookParamsSchema,
-  WebhookResponseSchema,
 } from './stack_connectors_schema';
 
 /**
@@ -138,7 +136,6 @@ export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSc
 export const ConnectorInputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackParamsSchema],
   ['.email', EmailParamsSchema],
-  ['.webhook', WebhookParamsSchema],
   ['.api', ApiParamsSchema],
   ['.teams', TeamsParamsSchema],
   ['.bedrock', BedrockParamsSchema],
@@ -298,7 +295,6 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
 export const ConnectorOutputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackResponseSchema],
   ['.email', EmailResponseSchema],
-  ['.webhook', WebhookResponseSchema],
   ['.api', ApiResponseSchema],
   ['.teams', TeamsResponseSchema],
   ['.bedrock', BedrockResponseSchema],

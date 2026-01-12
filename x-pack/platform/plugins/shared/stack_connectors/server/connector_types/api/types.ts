@@ -9,6 +9,7 @@ import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
 } from '@kbn/actions-plugin/server/types';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -26,3 +27,12 @@ export type ApiConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeSecretsType,
   ActionParamsType
 >;
+
+export interface HttpConnectorResponse {
+  status: number;
+  statusText: string;
+  data: unknown;
+  headers: Record<string, string>;
+}
+
+export type ApiConnectorTypeExecutorResult = ActionTypeExecutorResult<HttpConnectorResponse>;

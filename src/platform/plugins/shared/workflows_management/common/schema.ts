@@ -12,6 +12,7 @@ import {
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
+  SystemConnectorsMap,
 } from '@kbn/workflows';
 import type { BaseConnectorContract } from '@kbn/workflows/types/v1';
 import { z } from '@kbn/zod/v4';
@@ -130,6 +131,10 @@ function convertDynamicConnectorsToContractsInternal(
           : z.string();
 
       const connectorTypeName = connectorType.actionTypeId.replace(/^\./, '');
+
+      // If the connector has a system connector associated, it can be executed without a connector-id
+      const connectorIdRequired = !SystemConnectorsMap.has(connectorType.actionTypeId);
+
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
         connectorType.subActions.forEach((subAction) => {
@@ -144,7 +149,7 @@ function convertDynamicConnectorsToContractsInternal(
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
-            connectorIdRequired: true,
+            connectorIdRequired,
             connectorId: connectorIdSchema,
             outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,
@@ -162,7 +167,7 @@ function convertDynamicConnectorsToContractsInternal(
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
-          connectorIdRequired: true,
+          connectorIdRequired,
           connectorId: connectorIdSchema,
           outputSchema,
           description: `${connectorType.displayName} connector`,

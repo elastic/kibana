@@ -135,9 +135,10 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
             })}
             fullWidth
             error={errors.path as string}
-            isInvalid={errors.path !== undefined && errors.path.length > 0}
+            isInvalid={Boolean(errors.path?.length)}
           >
             <EuiFieldText
+              isInvalid={Boolean(errors.path?.length)}
               fullWidth
               value={path || ''}
               onChange={(e) => {
@@ -155,9 +156,10 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
             })}
             fullWidth
             error={errors.method as string}
-            isInvalid={errors.method !== undefined && errors.method.length > 0}
+            isInvalid={Boolean(errors.method?.length)}
           >
             <EuiSelect
+              isInvalid={Boolean(errors.method?.length)}
               fullWidth
               options={HTTP_METHODS}
               value={method}
@@ -180,12 +182,9 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
         label={i18n.translate('xpack.stackConnectors.components.api.bodyFieldLabel', {
           defaultMessage: 'Body',
         })}
-        ariaLabel={i18n.translate(
-          'xpack.stackConnectors.components.api.bodyCodeEditorAriaLabel',
-          {
-            defaultMessage: 'Body code editor',
-          }
-        )}
+        ariaLabel={i18n.translate('xpack.stackConnectors.components.api.bodyCodeEditorAriaLabel', {
+          defaultMessage: 'Body code editor',
+        })}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
           editAction('body', json || undefined, index);
@@ -361,9 +360,10 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
         })}
         fullWidth
         error={errors.timeout as string}
-        isInvalid={errors.timeout !== undefined && errors.timeout.length > 0}
+        isInvalid={Boolean(errors.timeout?.length)}
       >
         <EuiFieldNumber
+          isInvalid={Boolean(errors.timeout?.length)}
           fullWidth
           value={timeout || ''}
           onChange={(e) => {
