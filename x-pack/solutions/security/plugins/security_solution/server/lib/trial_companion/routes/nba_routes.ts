@@ -23,10 +23,6 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { TrialCompanionUserNBAServiceImpl } from '../services/trial_companion_user_nba_service';
 import type { TrialCompanionRoutesDeps } from '../types';
 
-// think about dependency injection of saved objects (internal) client. Currently, we get it from context.core.savedObjects
-// if we need internal client - add user milestone service in x-pack/solutions/security/plugins/security_solution/server/request_context_factory.ts
-// and get it from request context
-
 interface NBAContext {
   nbaService: TrialCompanionUserNBAService;
   username: string;
