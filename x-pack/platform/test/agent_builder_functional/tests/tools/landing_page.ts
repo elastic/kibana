@@ -12,7 +12,6 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
   const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
-  const retry = getService('retry');
 
   describe('tools landing page', function () {
     it('should render', async () => {
@@ -42,13 +41,9 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
       await agentBuilder.bulkDeleteTools(ids);
 
       await testSubjects.existOrFail('agentBuilderToolsTable');
-
-      await retry.try(async () => {
-        for (const id of ids) {
-          const isInTable = await agentBuilder.isToolInTable(id);
-          expect(isInTable).to.be(false);
-        }
-      });
+      for (const id of ids) {
+        expect(await agentBuilder.isToolInTable(id)).to.be(false);
+      }
     });
   });
 }
