@@ -23,6 +23,7 @@ type StorageMappingPropertyType = AllMappingPropertyType &
     | 'float'
     | 'double'
     | 'long'
+    | 'binary'
     | 'object'
   );
 
@@ -72,6 +73,7 @@ const types = {
   date: createFactory('date', { format: 'strict_date_optional_time' }),
   byte: createFactory('byte'),
   float: createFactory('float'),
+  binary: createFactory('binary'),
   object: createFactory('object'),
 } satisfies {
   [TKey in StorageMappingPropertyType]: MappingPropertyFactory<TKey, any>;
@@ -91,6 +93,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
   long: number;
   byte: number;
   float: number;
+  binary: string;
   object: TProperty extends { properties: Record<string, StorageMappingProperty> }
     ? {
         [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;

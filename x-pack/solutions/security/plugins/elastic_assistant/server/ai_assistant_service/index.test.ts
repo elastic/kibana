@@ -175,8 +175,6 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-component-template-anonymization-fields',
         '.kibana-elastic-ai-assistant-component-template-defend-insights',
         '.kibana-elastic-ai-assistant-component-template-alert-summary',
-        '.kibana-elastic-ai-assistant-component-template-checkpoints',
-        '.kibana-elastic-ai-assistant-component-template-checkpoint-writes',
       ];
       clusterClient.cluster.putComponentTemplate.mock.calls.forEach((call, i) => {
         expect(call[0].name).toEqual(expectedTemplates[i]);
@@ -692,8 +690,6 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-component-template-anonymization-fields',
         '.kibana-elastic-ai-assistant-component-template-defend-insights',
         '.kibana-elastic-ai-assistant-component-template-alert-summary',
-        '.kibana-elastic-ai-assistant-component-template-checkpoints',
-        '.kibana-elastic-ai-assistant-component-template-checkpoint-writes',
       ];
 
       clusterClient.cluster.putComponentTemplate.mock.calls.forEach((call, i) => {
@@ -732,8 +728,6 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-index-template-anonymization-fields',
         '.kibana-elastic-ai-assistant-index-template-defend-insights',
         '.kibana-elastic-ai-assistant-index-template-alert-summary',
-        '.kibana-elastic-ai-assistant-index-template-checkpoints',
-        '.kibana-elastic-ai-assistant-index-template-checkpoint-writes',
       ];
       clusterClient.indices.putIndexTemplate.mock.calls.forEach((call, i) => {
         expect(call[0].name).toEqual(expectedTemplates[i]);
