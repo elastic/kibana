@@ -103,8 +103,9 @@ export class AgentService {
     const traceOptions = {
       tracers: [
         ...getLangSmithTracer({
-          apiKey: 'key',
-          projectName: 'Bharat_Create_Integration_test',
+          // TODO: Get apiKey from config
+          apiKey: 'apiKey',
+          projectName: 'projectName',
           logger: this.logger,
         }),
       ],

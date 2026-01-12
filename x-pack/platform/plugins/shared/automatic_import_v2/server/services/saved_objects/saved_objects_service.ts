@@ -103,8 +103,6 @@ export class AutomaticImportSavedObjectService {
     }
 
     try {
-      this.logger.info(`***********insertIntegration: Creating integration: ${integrationId}`);
-
       const initialIntegrationData: IntegrationAttributes = {
         integration_id: integrationId,
         data_stream_count: 0,
@@ -361,7 +359,7 @@ export class AutomaticImportSavedObjectService {
 
       await this.savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId, options);
 
-      this.logger.info(
+      this.logger.debug(
         `Successfully deleted integration ${integrationId} and ${dataStreamsDeleted} associated data streams`
       );
 
@@ -415,8 +413,6 @@ export class AutomaticImportSavedObjectService {
       throw new Error('Data stream ID is required');
     }
     try {
-      this.logger.info(`***********insertDataStream: Creating data stream: ${dataStreamId}`);
-
       const initialDataStreamData: DataStreamAttributes = {
         integration_id: integrationId,
         data_stream_id: dataStreamId,
@@ -437,8 +433,6 @@ export class AutomaticImportSavedObjectService {
       };
 
       const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
-      this.logger.info(`***********insertDataStream: compositeId: ${compositeId}`);
-
       return await this.savedObjectsClient.create<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
         initialDataStreamData,
@@ -469,7 +463,6 @@ export class AutomaticImportSavedObjectService {
     try {
       this.logger.debug(`Getting data stream: ${dataStreamId}`);
       const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
-      this.logger.info(`***********getDataStream: compositeId: ${compositeId}`);
       return await this.savedObjectsClient.get<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
         compositeId
@@ -610,9 +603,11 @@ export class AutomaticImportSavedObjectService {
         },
       };
 
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
       await this.savedObjectsClient.update(
         DATA_STREAM_SAVED_OBJECT_TYPE,
-        dataStreamId,
+        compositeId,
         updatedDataStreamData
       );
     } catch (error) {
