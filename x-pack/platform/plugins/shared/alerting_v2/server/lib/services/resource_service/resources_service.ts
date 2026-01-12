@@ -62,7 +62,8 @@ export class ResourcesService {
     const keysToStart = resourceKeys ?? Array.from(this.resources.keys());
     for (const key of keysToStart) {
       this.startupResourceKeys.add(key);
-      void this.startResource(key);
+
+      void this.startResource(key).catch(() => {});
     }
   }
 

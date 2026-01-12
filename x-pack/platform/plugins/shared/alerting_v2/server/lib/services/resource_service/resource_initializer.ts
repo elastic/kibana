@@ -47,7 +47,7 @@ export class ResourceInitializer {
       },
       _meta: {
         managed: true,
-        description: `${this.resourceDefinition.dataStreamName} written-fields schema (alerting_v2 / ES|QL)`,
+        description: `${this.resourceDefinition.dataStreamName} schema component template`,
       },
     };
 
@@ -66,14 +66,12 @@ export class ResourceInitializer {
       },
       _meta: {
         managed: true,
-        description: `${this.resourceDefinition.dataStreamName} index template (alerting_v2 / ES|QL)`,
+        description: `${this.resourceDefinition.dataStreamName} index template`,
       },
     };
 
-    await Promise.all([
-      this.esClient.cluster.putComponentTemplate(componentTemplate),
-      this.esClient.indices.putIndexTemplate(indexTemplate),
-    ]);
+    await this.esClient.cluster.putComponentTemplate(componentTemplate);
+    await this.esClient.indices.putIndexTemplate(indexTemplate);
 
     try {
       await this.esClient.indices.createDataStream({
