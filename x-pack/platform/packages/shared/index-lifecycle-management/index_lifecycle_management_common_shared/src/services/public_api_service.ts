@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
-export type * from './src/policies';
-export type * from './src/locator';
-export type * from './src/types';
-export type * from './src/services';
+import type { PolicyFromES } from '../policies';
+
+export interface PublicApiServiceSetup {
+  /**
+   * Fetches all ILM policies available in Index Lifecycle Management.
+   */
+  getPolicies(options?: { signal?: AbortSignal }): Promise<PolicyFromES[]>;
+}
