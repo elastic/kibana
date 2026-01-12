@@ -6,10 +6,7 @@
  */
 
 export { getDocumentTypeFilterForServiceDestinationStatistics } from './spans/get_is_using_service_destination_metrics';
-export {
-  getBackwardCompatibleDocumentTypeFilter,
-  isDurationSummaryNotSupportedFilter,
-} from './transactions';
+export { getBackwardCompatibleDocumentTypeFilter } from './transactions';
 export {
   APMEventClient,
   type APMEventESSearchRequest,
