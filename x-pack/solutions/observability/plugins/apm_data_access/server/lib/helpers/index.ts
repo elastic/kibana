@@ -11,6 +11,7 @@ export {
   getHasTransactionsEvents,
   getBackwardCompatibleDocumentTypeFilter,
   isSummaryFieldSupportedByDocType,
+  isDurationSummaryNotSupportedFilter,
 } from './transactions';
 export { getRollupIntervalForTimeRange } from './get_rollup_interval_for_time_range';
 export {
