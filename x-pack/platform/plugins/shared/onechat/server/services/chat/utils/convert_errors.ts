@@ -9,17 +9,24 @@ import type { OperatorFunction } from 'rxjs';
 import { catchError, throwError } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { createInternalError, isOnechatError } from '@kbn/onechat-common';
+import type { ModelProvider } from '@kbn/inference-common';
 import { getCurrentTraceId } from '../../../tracing';
-import type { TrackingService } from '../../../telemetry';
+import type { AnalyticsService, TrackingService } from '../../../telemetry';
 
 export function convertErrors<T>({
-  logger,
-  trackingService,
+  agentId,
+  analyticsService,
   conversationId,
+  logger,
+  modelProvider,
+  trackingService,
 }: {
-  logger: Logger;
-  trackingService?: TrackingService;
+  agentId: string;
+  analyticsService?: AnalyticsService;
   conversationId?: string;
+  logger: Logger;
+  modelProvider: ModelProvider;
+  trackingService?: TrackingService;
 }): OperatorFunction<T, T> {
   return ($source) => {
     return $source.pipe(
@@ -33,6 +40,13 @@ export function convertErrors<T>({
             // continue
           }
         }
+
+        analyticsService?.reportRoundError({
+          agentId,
+          conversationId,
+          error: err,
+          modelProvider,
+        });
 
         return throwError(() => {
           const traceId = getCurrentTraceId();

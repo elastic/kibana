@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { McpConnector } from './mcp';
+import { McpConnector, listToolsCache } from './mcp';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -85,6 +85,9 @@ describe('McpConnector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Clear the listTools cache before each test
+    listToolsCache.clear();
 
     services = actionsMock.createServices();
     connectorUsageCollector = new ConnectorUsageCollector({
@@ -604,6 +607,203 @@ describe('McpConnector', () => {
       await getPrivateMethods(connector).handleConnectionError(error, 'test-operation');
 
       expect(mockMcpClient.disconnect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listTools caching', () => {
+    it('should return cached results on subsequent calls', async () => {
+      const mockToolsResult: ListToolsResponse = {
+        tools: [
+          {
+            name: 'tool1',
+            description: 'Test tool',
+            inputSchema: {},
+          },
+        ],
+      };
+
+      mockMcpClient.isConnected
+        .mockReturnValueOnce(false) // First call: before connect
+        .mockReturnValueOnce(true); // First call: after connect for safeDisconnect
+      mockMcpClient.connect.mockResolvedValue({ connected: true, capabilities: {} });
+      mockMcpClient.listTools.mockResolvedValue(mockToolsResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      // First call - should fetch from server and cache
+      const result1 = await connector.listTools({}, connectorUsageCollector);
+      expect(result1).toEqual(mockToolsResult);
+      expect(mockMcpClient.listTools).toHaveBeenCalledTimes(1);
+
+      // Second call - should return cached result without calling server
+      const result2 = await connector.listTools({}, connectorUsageCollector);
+      expect(result2).toEqual(mockToolsResult);
+      expect(mockMcpClient.listTools).toHaveBeenCalledTimes(1); // Still only 1 call
+    });
+
+    it('should bypass cache when forceRefresh is true', async () => {
+      const mockToolsResult: ListToolsResponse = {
+        tools: [
+          {
+            name: 'tool1',
+            description: 'Test tool',
+            inputSchema: {},
+          },
+        ],
+      };
+
+      const updatedToolsResult: ListToolsResponse = {
+        tools: [
+          {
+            name: 'tool1',
+            description: 'Updated description',
+            inputSchema: {},
+          },
+          {
+            name: 'tool2',
+            description: 'New tool',
+            inputSchema: {},
+          },
+        ],
+      };
+
+      mockMcpClient.isConnected
+        .mockReturnValueOnce(false) // First call: before connect
+        .mockReturnValueOnce(true) // First call: for safeDisconnect
+        .mockReturnValueOnce(false) // Second call: before connect
+        .mockReturnValueOnce(true); // Second call: for safeDisconnect
+      mockMcpClient.connect.mockResolvedValue({ connected: true, capabilities: {} });
+      mockMcpClient.listTools
+        .mockResolvedValueOnce(mockToolsResult)
+        .mockResolvedValueOnce(updatedToolsResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      // First call - should fetch from server and cache
+      const result1 = await connector.listTools({}, connectorUsageCollector);
+      expect(result1).toEqual(mockToolsResult);
+
+      // Second call with forceRefresh - should bypass cache and fetch fresh data
+      const result2 = await connector.listTools({ forceRefresh: true }, connectorUsageCollector);
+      expect(result2).toEqual(updatedToolsResult);
+      expect(mockMcpClient.listTools).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not cache results on error', async () => {
+      const toolsError = new Error('Failed to list tools');
+      const mockToolsResult: ListToolsResponse = {
+        tools: [{ name: 'tool1', description: 'Test', inputSchema: {} }],
+      };
+
+      mockMcpClient.isConnected
+        .mockReturnValueOnce(false) // First call: before connect
+        .mockReturnValueOnce(true) // First call: for safeDisconnect
+        .mockReturnValueOnce(false) // Second call: before connect
+        .mockReturnValueOnce(true); // Second call: for safeDisconnect
+      mockMcpClient.connect.mockResolvedValue({ connected: true, capabilities: {} });
+      mockMcpClient.listTools
+        .mockRejectedValueOnce(toolsError)
+        .mockResolvedValueOnce(mockToolsResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      // First call - should fail and not cache
+      await expect(connector.listTools({}, connectorUsageCollector)).rejects.toThrow(
+        'Failed to list tools'
+      );
+
+      // Second call - should fetch from server (not from cache)
+      const result = await connector.listTools({}, connectorUsageCollector);
+      expect(result).toEqual(mockToolsResult);
+      expect(mockMcpClient.listTools).toHaveBeenCalledTimes(2);
+    });
+
+    it('should isolate cache by connector id', async () => {
+      const mockToolsResult1: ListToolsResponse = {
+        tools: [{ name: 'tool1', description: 'Connector 1 tool', inputSchema: {} }],
+      };
+      const mockToolsResult2: ListToolsResponse = {
+        tools: [{ name: 'tool2', description: 'Connector 2 tool', inputSchema: {} }],
+      };
+
+      // Create a second connector with different id
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { McpClient } = require('@kbn/mcp-client');
+      const mockMcpClient2 = {
+        connect: jest.fn().mockResolvedValue({ connected: true, capabilities: {} }),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+        isConnected: jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true),
+        listTools: jest.fn().mockResolvedValue(mockToolsResult2),
+        callTool: jest.fn(),
+      };
+      McpClient.mockImplementationOnce(() => mockMcpClient2);
+
+      const connector2 = new McpConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: 'test-connector-2', type: CONNECTOR_ID },
+        config: defaultConfig,
+        secrets: defaultSecrets,
+        logger,
+        services,
+      });
+
+      mockMcpClient.isConnected.mockReturnValueOnce(false).mockReturnValueOnce(true);
+      mockMcpClient.connect.mockResolvedValue({ connected: true, capabilities: {} });
+      mockMcpClient.listTools.mockResolvedValue(mockToolsResult1);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      // Call listTools on first connector
+      const result1 = await connector.listTools({}, connectorUsageCollector);
+      expect(result1).toEqual(mockToolsResult1);
+
+      // Call listTools on second connector - should not use first connector's cache
+      const result2 = await connector2.listTools({}, connectorUsageCollector);
+      expect(result2).toEqual(mockToolsResult2);
+
+      // Verify both clients were called
+      expect(mockMcpClient.listTools).toHaveBeenCalledTimes(1);
+      expect(mockMcpClient2.listTools).toHaveBeenCalledTimes(1);
+    });
+
+    it('should share cache across multiple instances of the same connector', async () => {
+      const mockToolsResult: ListToolsResponse = {
+        tools: [{ name: 'tool1', description: 'Test tool', inputSchema: {} }],
+      };
+
+      // Create a second connector instance with the SAME id
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { McpClient } = require('@kbn/mcp-client');
+      const mockMcpClient2 = {
+        connect: jest.fn(),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+        isConnected: jest.fn(),
+        listTools: jest.fn(),
+        callTool: jest.fn(),
+      };
+      McpClient.mockImplementationOnce(() => mockMcpClient2);
+
+      const connectorInstance2 = new McpConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: 'test-connector-1', type: CONNECTOR_ID }, // Same id as first connector
+        config: defaultConfig,
+        secrets: defaultSecrets,
+        logger,
+        services,
+      });
+
+      mockMcpClient.isConnected.mockReturnValueOnce(false).mockReturnValueOnce(true);
+      mockMcpClient.connect.mockResolvedValue({ connected: true, capabilities: {} });
+      mockMcpClient.listTools.mockResolvedValue(mockToolsResult);
+      mockMcpClient.disconnect.mockResolvedValue(undefined);
+
+      // First instance fetches and caches
+      const result1 = await connector.listTools({}, connectorUsageCollector);
+      expect(result1).toEqual(mockToolsResult);
+      expect(mockMcpClient.listTools).toHaveBeenCalledTimes(1);
+
+      // Second instance with same id should use cache
+      const result2 = await connectorInstance2.listTools({}, connectorUsageCollector);
+      expect(result2).toEqual(mockToolsResult);
+
+      // The second client should NOT have been called - cache was used
+      expect(mockMcpClient2.listTools).not.toHaveBeenCalled();
     });
   });
 });

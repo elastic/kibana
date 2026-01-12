@@ -33,7 +33,7 @@ export interface GetAnomalyDetectionJobsToolResult {
   type: ToolResultType.other;
   data: {
     jobs: Awaited<ReturnType<typeof getToolHandler>>;
-    totalReturned: number;
+    total: number;
     message?: string;
   };
 }
@@ -72,8 +72,12 @@ export function createGetAnomalyDetectionJobsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getAnomalyDetectionJobsSchema> = {
     id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Retrieves Machine Learning anomaly detection jobs and their top anomaly records for a given time range. Use this to identify unusual patterns or outliers in observability data.',
+    description: `Retrieves Machine Learning anomaly detection jobs and their top anomaly records.
+
+When to use:
+- Investigating anomalies in logs, metrics, or traces
+- Finding outliers that might indicate problems
+- Answering "is anything behaving abnormally?"`,
     schema: getAnomalyDetectionJobsSchema,
     tags: ['observability', 'machine_learning', 'anomaly_detection'],
     availability: {
@@ -83,16 +87,17 @@ export function createGetAnomalyDetectionJobsTool({
       },
     },
     handler: async (
-      {
-        jobIds,
-        limit: jobsLimit = DEFAULT_JOBS_LIMIT,
-        start: rangeStart = DEFAULT_TIME_RANGE.start,
-        end: rangeEnd = DEFAULT_TIME_RANGE.end,
-      },
+      toolParams,
       { esClient, request }
     ): Promise<{
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
+      const {
+        jobIds,
+        limit: jobsLimit = DEFAULT_JOBS_LIMIT,
+        start: rangeStart = DEFAULT_TIME_RANGE.start,
+        end: rangeEnd = DEFAULT_TIME_RANGE.end,
+      } = toolParams;
       const scopedEsClient = esClient.asCurrentUser;
       const mlClient = scopedEsClient.ml;
 
@@ -109,28 +114,13 @@ export function createGetAnomalyDetectionJobsTool({
           rangeEnd,
         });
 
-        if (!mlJobs.length) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  jobs: [],
-                  totalReturned: 0,
-                  message: 'No anomaly detection jobs found for the provided filters.',
-                },
-              },
-            ],
-          };
-        }
-
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
                 jobs: mlJobs,
-                totalReturned: mlJobs.length,
+                total: mlJobs.length,
               },
             },
           ],

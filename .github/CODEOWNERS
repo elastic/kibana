@@ -602,7 +602,7 @@ src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui @elastic/kibana-core
 src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
-src/platform/packages/shared/kbn-synthtrace @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-synthtrace @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team @elastic/obs-ai-team
 src/platform/packages/shared/kbn-synthtrace-client @elastic/obs-presentation-team @elastic/obs-onboarding-team @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-team
 src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
@@ -2741,6 +2741,12 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
 /x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
 /src/platform/packages/shared/kbn-connector-schemas/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
+
+# MCP
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/mcp @elastic/workchat-eng
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/mcp @elastic/workchat-eng
+/x-pack/platform/plugins/shared/stack_connectors/common/mcp @elastic/workchat-eng
+/src/platform/packages/shared/kbn-connector-schemas/mcp @elastic/workchat-eng
 
 # Inference API
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team

@@ -54,7 +54,11 @@ export const createIndexSyncService = (
       namespace: deps.namespace,
     });
     // get all monitoring index source saved objects of type 'index_sync'
-    const indexSources = await monitoringIndexSourceClient.findSourcesByType('index');
+    const { sources: indexSources } = await monitoringIndexSourceClient.list({
+      type: 'index',
+      per_page: 10000,
+    });
+
     if (indexSources.length === 0) {
       dataClient.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
