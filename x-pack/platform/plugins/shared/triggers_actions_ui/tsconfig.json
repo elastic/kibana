@@ -92,7 +92,9 @@
     "@kbn/react-query",
     "@kbn/router-utils",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/actions-types"
+    "@kbn/actions-types",
+    "@kbn/connector-specs",
+    "@kbn/response-ops-form-generator"
   ],
   "exclude": ["target/**/*"]
 }

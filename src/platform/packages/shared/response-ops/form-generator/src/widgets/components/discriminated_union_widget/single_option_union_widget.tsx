@@ -9,7 +9,6 @@
 
 import type React from 'react';
 import type { z } from '@kbn/zod/v4';
-import { addMeta, getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import { type DiscriminatedUnionWidgetProps } from './discriminated_union_widget';
 import { getFieldsFromSchema, renderField } from '../../../field_builder';
 
@@ -30,21 +29,20 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
   fieldConfig,
   fieldProps,
   formConfig,
+  meta,
 }) => {
+  const { getMeta, addMeta } = meta;
   const optionSchema = options[0];
 
   if (!optionSchema) {
     throw new Error(`SingleOptionUnionWidget requires an option in schema at path: ${rootPath}`);
   }
 
-  // Hide the discriminator field since its value is implied by the selected option
-  // E.g., if the option is { type: z.literal('basic'), token: z.string() }, then the 'type' field should be hidden
   addMeta(optionSchema.shape[discriminatorKey] as z.ZodType, {
     hidden: true,
     disabled: true,
   });
 
-  // If the parent discriminated union is disabled, propagate that to the option schema
   const isParentDisabled = formConfig.disabled || getMeta(schema).disabled;
   if (isParentDisabled && getMeta(optionSchema).disabled !== false) {
     addMeta(optionSchema, { disabled: true });
@@ -54,7 +52,8 @@ export const SingleOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = 
     schema: optionSchema,
     rootPath,
     formConfig,
+    meta,
   });
 
-  return fields.map((field) => renderField({ field }));
+  return fields.map((field) => renderField({ field, meta }));
 };

@@ -8,3 +8,4 @@
  */
 
 export { generateFormFields } from './src/form';
+export type { MetaFunctions, GetMetaFn, SetMetaFn, AddMetaFn } from './src/meta_types';

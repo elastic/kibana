@@ -14,6 +14,9 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectWidget } from './select_widget';
+import { getMeta, addMeta } from '../../schema_connector_metadata';
+
+const meta = { getMeta, addMeta };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -33,6 +36,7 @@ describe('SelectWidget', () => {
     render(
       <TestFormWrapper>
         <SelectWidget
+          meta={meta}
           formConfig={{}}
           path="country"
           schema={z.enum(['option1', 'option2', 'option3'])}
@@ -59,6 +63,7 @@ describe('SelectWidget', () => {
     render(
       <TestFormWrapper>
         <SelectWidget
+          meta={meta}
           formConfig={{}}
           path="country"
           schema={z.enum(['US', 'UK', 'CA'])}
@@ -90,6 +95,7 @@ describe('SelectWidget', () => {
     render(
       <TestFormWrapper>
         <SelectWidget
+          meta={meta}
           formConfig={{}}
           path="role"
           schema={z.enum(['admin', 'user', 'guest'])}
@@ -153,6 +159,7 @@ describe('SelectWidget', () => {
     render(
       <TestFormWrapper>
         <SelectWidget
+          meta={meta}
           formConfig={{}}
           path="choice"
           schema={z.enum(['option1', 'option2', 'option3'])}
@@ -183,6 +190,7 @@ describe('SelectWidget', () => {
     render(
       <TestFormWrapper>
         <SelectWidget
+          meta={meta}
           formConfig={{}}
           path="choice"
           schema={z.enum(['option1', 'option2', 'option3'])}

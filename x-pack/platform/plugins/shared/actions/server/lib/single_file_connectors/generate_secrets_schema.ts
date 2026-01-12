@@ -6,8 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-
-import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
+import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs';
 import type { ActionTypeSecrets, ValidatorType } from '../../types';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
