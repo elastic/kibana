@@ -6,15 +6,14 @@
  */
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import {
   TaskStatus,
   getStreamTypeFromDefinition,
-  type GeneratedSignificantEventQuery,
   type SignificantEventsQueriesGenerationResult,
   type System,
 } from '@kbn/streams-schema';
+import pLimit from 'p-limit';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -70,17 +69,13 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 const systemsToProcess: Array<System | undefined> =
                   systems && systems.length > 0 ? systems : [undefined];
 
-                // Process systems in batches to avoid overwhelming the LLM provider
+                // Process systems with concurrency limit to avoid overwhelming the LLM provider
                 const CONCURRENCY_LIMIT = 3;
-                const resultsArray: Array<{
-                  queries: GeneratedSignificantEventQuery[];
-                  tokensUsed: ChatCompletionTokenCount;
-                }> = [];
+                const limiter = pLimit(CONCURRENCY_LIMIT);
 
-                for (let i = 0; i < systemsToProcess.length; i += CONCURRENCY_LIMIT) {
-                  const batch = systemsToProcess.slice(i, i + CONCURRENCY_LIMIT);
-                  const batchResults = await Promise.all(
-                    batch.map((system) =>
+                const resultsArray = await Promise.all(
+                  systemsToProcess.map((system) =>
+                    limiter(() =>
                       generateSignificantEventDefinitions(
                         {
                           definition: stream,
@@ -99,9 +94,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                         }
                       )
                     )
-                  );
-                  resultsArray.push(...batchResults);
-                }
+                  )
+                );
 
                 // Combine results from all parallel generations in a single pass
                 const combinedResults =
