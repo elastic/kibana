@@ -9,26 +9,12 @@ import { schema } from '@kbn/config-schema';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
 import {
-  AGENT_BUILDER_ENABLED_SETTING_ID,
   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
-    [AGENT_BUILDER_ENABLED_SETTING_ID]: {
-      description: i18n.translate('xpack.onechat.uiSettings.feature.description', {
-        defaultMessage: 'Enables Elastic Agent Builder.',
-      }),
-      name: i18n.translate('xpack.onechat.uiSettings.feature.name', {
-        defaultMessage: 'Elastic Agent Builder',
-      }),
-      schema: schema.boolean(),
-      value: true,
-      technicalPreview: true,
-      requiresPageReload: true,
-      readonly: false,
-    },
     [AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID]: {
       description: i18n.translate('xpack.onechat.uiSettings.createVisualizations.description', {
         defaultMessage: 'Enables the Dashboard Agent and related tools for Elastic Agent Builder.',
