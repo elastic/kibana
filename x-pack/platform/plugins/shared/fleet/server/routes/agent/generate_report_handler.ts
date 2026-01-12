@@ -14,16 +14,17 @@ import {
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
+import type { SavedReport } from '@kbn/reporting-plugin/server/lib/store';
 
-import { getSortConfig, removeSOAttributes } from '../../../common';
+import { AGENT_API_ROUTES, getSortConfig, removeSOAttributes } from '../../../common';
 import type { FleetRequestHandler, PostGenerateAgentsReportRequestSchema } from '../../types';
 import { appContextService } from '../../services/app_context';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 import { FleetError } from '../../errors';
 
 export const generateReportHandler: FleetRequestHandler<
-  undefined,
-  undefined,
+  Record<string, string>,
+  null,
   TypeOf<typeof PostGenerateAgentsReportRequestSchema.body>
 > = async (context, request, response) => {
   const { agentIds, fields, timezone, sort } = request.body;
@@ -36,23 +37,45 @@ export const generateReportHandler: FleetRequestHandler<
     throw new FleetError('Report generation is not ready');
   }
 
-  const jobParams = getJobParams(agentIds, fields, runtimeFields, timezone, sort);
+  const jobConfig = () => {
+    return {
+      jobParams: getJobParams(agentIds, fields, runtimeFields, timezone, sort),
+      exportTypeId: 'csv_searchsource',
+    };
+  };
 
-  try {
-    const internalReportingService = reporting.getInternalGenerateReportService();
+  const handleResponse = async (report: SavedReport | null, err?: Error) => {
+    if (err) {
+      throw err;
+    }
 
-    const report = await internalReportingService.enqueueJob('csv_searchsource', jobParams);
-
+    if (!report) {
+      throw new FleetError('Report generation encountered an unknown error');
+    }
     // Return the download URL
-    const { basePath } = (reporting as any).getServerInfo();
+    const basePath = appContextService.getHttpSetup().basePath.serverBasePath;
     const publicDownloadPath = basePath + PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX;
 
     return response.ok({
       body: {
         url: `${publicDownloadPath}/${report._id}`,
-        job: report.toApiJSON(),
       },
     });
+  };
+
+  try {
+    const handler = reporting.getGenerateSystemReportHandler(
+      AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
+      jobConfig,
+      handleResponse
+    );
+
+    const reportingContext = {
+      ...context,
+      reporting: Promise.resolve(reporting),
+    };
+
+    return await handler(reportingContext, request, response);
   } catch (error) {
     logger.error(`Failed to generate report: ${error.message}`);
     throw new FleetError(`Failed to generate report: ${error.message}`);

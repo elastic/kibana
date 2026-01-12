@@ -39,14 +39,22 @@ import type {
   RawNotification,
   RawScheduledReport,
 } from './saved_objects/scheduled_report/schemas/latest';
-import { type InternalReportingService } from './services/internal_generate_report_service';
+import type {
+  CreateJobConfigFunc,
+  HandleResponseFunc,
+  getGenerateSystemReportRequestHandler,
+} from './routes/common/request_handler/generate_system_report_request_handler';
 
 /**
  * Plugin Setup Contract
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
-  getInternalGenerateReportService: () => InternalReportingService;
+  getGenerateSystemReportHandler: (
+    path: string,
+    jobConfigFunc: CreateJobConfigFunc,
+    handleResponseFunc: HandleResponseFunc
+  ) => ReturnType<typeof getGenerateSystemReportRequestHandler>;
 }
 
 /**

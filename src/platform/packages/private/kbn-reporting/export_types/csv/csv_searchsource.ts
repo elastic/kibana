@@ -71,6 +71,7 @@ export class CsvSearchSourceExportType extends ExportType<
     request,
     cancellationToken,
     stream,
+    useInternalESClient,
   }: RunTaskOpts<TaskPayloadCSV>) => {
     const logger = this.logger.get('execute-job');
 
