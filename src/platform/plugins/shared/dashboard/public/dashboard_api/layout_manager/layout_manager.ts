@@ -619,7 +619,7 @@ export function initializeLayoutManager(
       getPanelSection: (uuid: string) => {
         return layout$.getValue().panels[uuid]?.grid?.sectionId;
       },
-      getPanelSection$: (uuid: string) => {
+      panelSection: (uuid: string) => {
         return layout$.pipe(
           // pinned panels and panels in global section are treated identically; i.e. their section is `undefined`
           map((layout) => layout.panels[uuid]?.grid?.sectionId),

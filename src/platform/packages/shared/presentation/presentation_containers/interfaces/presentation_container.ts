@@ -76,13 +76,13 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
 
 export interface HasSections extends CanAddNewSection {
   getPanelSection: (uuid: string) => string | undefined;
-  getPanelSection$: (uuid: string) => Observable<string | undefined>;
+  panelSection$: (uuid: string) => Observable<string | undefined>;
 }
 
 export const apiHasSections = (api: unknown): api is HasSections => {
   return (
     typeof (api as HasSections)?.getPanelSection === 'function' &&
-    typeof (api as HasSections)?.getPanelSection$ === 'function'
+    typeof (api as HasSections)?.panelSection$ === 'function'
   );
 };
 
