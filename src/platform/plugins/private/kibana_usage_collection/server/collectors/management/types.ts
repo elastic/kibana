@@ -187,4 +187,5 @@ export interface UsageStats {
   'observability:streamsEnableGroupStreams': boolean;
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
+  'securitySolution:entityStoreEnableV2': boolean;
 }
