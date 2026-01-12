@@ -30,9 +30,7 @@ export const useDeleteActiveSource = (onSuccess?: () => void) => {
             defaultMessage: 'Data source deleted successfully',
           }),
         });
-        if (onSuccess) {
-          onSuccess();
-        }
+        onSuccess?.();
       },
       onError: (error: { body: KibanaServerError }) => {
         toasts?.addError(new Error(error.body?.message || 'Unknown error'), {

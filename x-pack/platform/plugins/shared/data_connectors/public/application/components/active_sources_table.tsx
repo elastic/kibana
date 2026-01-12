@@ -62,7 +62,7 @@ const ActionsCell: React.FC<{
   disabled?: boolean;
 }> = ({ source, onReconnect, onEdit, onDelete, disabled = false }) => {
   const { euiTheme } = useEuiTheme();
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
     <EuiButtonIcon

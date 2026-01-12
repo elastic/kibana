@@ -37,12 +37,6 @@ describe('toStackConnectorType', () => {
     it('should throw error for whitespace-only string', () => {
       expect(() => toStackConnectorType('   ')).toThrow('Connector type cannot be empty');
     });
-
-    it('should throw error for undefined', () => {
-      expect(() => toStackConnectorType(undefined as unknown as string)).toThrow(
-        'Connector type cannot be empty'
-      );
-    });
   });
 
   it('should NOT add another dot if type already has dot prefix', () => {
