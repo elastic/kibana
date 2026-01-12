@@ -161,14 +161,22 @@ export function convertDatatableColumnsToAPI(
   // Used for the sorting columnId mapping during transformation to API format
   const columnIdMapping: ColumnIdMapping = {};
 
+  // Create a lookup map from columnId to visualization column state
+  const columnStateMap = new Map(columns.map((col) => [col.columnId, col]));
+
   if (isFormBasedLayer(layer)) {
     const metrics: DatatableStateNoESQL['metrics'] = [];
     const rows: NonNullable<DatatableStateNoESQL['rows']> = [];
     const splitMetricsBy: NonNullable<DatatableStateNoESQL['split_metrics_by']> = [];
 
-    for (const column of columns) {
-      const { columnId } = column;
-      const apiOperation = columnId ? operationFromColumn(columnId, layer) : undefined;
+    // Use columnOrder from the layer to preserve the correct row ordering/ aggregation nesting
+    const orderedColumnIds = layer.columnOrder;
+
+    for (const columnId of orderedColumnIds) {
+      const column = columnStateMap.get(columnId);
+      if (!column) continue; // Skip columns not in visualization state
+
+      const apiOperation = operationFromColumn(columnId, layer);
       if (!apiOperation) throw new Error('Column not found');
 
       if (isMetricColumnNoESQL(column, layer.columns[columnId])) {
