@@ -38,6 +38,7 @@ export function initSpacesNavControl(
 
   core.chrome.navControls.registerLeft({
     order: 1000,
+    id: 'spaces-nav-control',
     mount(targetDomElement: HTMLElement) {
       if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
         return () => null;

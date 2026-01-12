@@ -12,7 +12,11 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /** @public */
 export interface ChromeNavControl {
+  /** Optional order value to control the order in which nav controls are displayed. Lower numbers are displayed first. */
   order?: number;
+  /** Required unique identifier. */
+  id: string;
+  /** Mount function to mount the nav control. */
   mount: MountPoint;
 }
 
@@ -31,6 +35,7 @@ export interface ChromeHelpMenuLink {
  * Register a left-side nav control rendered with React.
  * ```jsx
  * chrome.navControls.registerLeft({
+ *   id: 'my-react-control',
  *   mount(targetDomElement) {
  *     ReactDOM.mount(<MyControl />, targetDomElement);
  *     return () => ReactDOM.unmountComponentAtNode(targetDomElement);

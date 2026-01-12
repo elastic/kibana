@@ -31,9 +31,9 @@ export function HeaderNavControls({ navControls$, append = null }: Props) {
   // to change while Kibana is running.
   return (
     <>
-      {navControls.map((navControl: ChromeNavControl, index: number) => (
-        <EuiHeaderSectionItem key={index}>
-          <HeaderExtension extension={navControl.mount} />
+      {navControls.map((navControl: ChromeNavControl) => (
+        <EuiHeaderSectionItem key={navControl.id}>
+          <HeaderExtension extension={navControl.mount} id={navControl.id} />
         </EuiHeaderSectionItem>
       ))}
       {append}

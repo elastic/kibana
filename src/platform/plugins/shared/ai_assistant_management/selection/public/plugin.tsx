@@ -226,6 +226,7 @@ export class AIAssistantManagementPlugin
       (isObservabilityAIAssistantEnabled || isSecurityAIAssistantEnabled || isAiAgentsEnabled)
     ) {
       coreStart.chrome.navControls.registerRight({
+        id: 'aiAssistantNavControl',
         mount: (element) => {
           ReactDOM.render(
             coreStart.rendering.addContext(

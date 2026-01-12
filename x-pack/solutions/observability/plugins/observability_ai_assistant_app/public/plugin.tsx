@@ -130,6 +130,7 @@ export class ObservabilityAIAssistantAppPlugin
 
     if (isEnabled) {
       coreStart.chrome.navControls.registerRight({
+        id: 'observabilityAiAssistantNavControl',
         mount: (element) => {
           ReactDOM.render(
             <NavControlInitiator

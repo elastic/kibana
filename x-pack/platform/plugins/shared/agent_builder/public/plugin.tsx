@@ -199,6 +199,7 @@ export class AgentBuilderPlugin
 
     if (hasAgentBuilder) {
       core.chrome.navControls.registerRight({
+        id: 'agentBuilderNavControl',
         mount: (element) => {
           ReactDOM.render(
             <AgentBuilderNavControlInitiator

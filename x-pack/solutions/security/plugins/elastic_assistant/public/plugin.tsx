@@ -78,6 +78,7 @@ export class ElasticAssistantPublicPlugin
     };
 
     coreStart.chrome.navControls.registerRight({
+      id: 'elasticAssistantNavControl',
       order: 1001,
       mount: (target) => {
         const startService = startServices();
