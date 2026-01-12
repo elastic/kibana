@@ -26,6 +26,7 @@ import {
   EuiBadge,
   EuiIcon,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -37,6 +38,8 @@ import {
   EuiCode,
   EuiAccordion,
   EuiCallOut,
+  EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
@@ -47,6 +50,11 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useKibana } from '../../common/lib/kibana';
+import { PlatformIcon } from '../../management/components/endpoint_responder/components/header_info/platforms';
+import { PrivilegesContent } from './privileges_content';
+import { usePrivileges } from '../hooks/use_privileges';
+import type { FindingType } from '../../../common/endpoint_assets';
+import { SecurityFindingsDetailFlyout } from '../components/security_findings_detail_flyout';
 
 const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.endpointAssets.pageTitle',
@@ -77,10 +85,9 @@ const TAB_PRIVILEGES = i18n.translate(
   { defaultMessage: 'Privileges' }
 );
 
-const TAB_DRIFT = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.endpointAssets.tabDrift',
-  { defaultMessage: 'Drift' }
-);
+const TAB_DRIFT = i18n.translate('xpack.securitySolution.entityAnalytics.endpointAssets.tabDrift', {
+  defaultMessage: 'Drift',
+});
 
 // Constants
 const ENTITY_STORE_INDEX = 'entities-generic-latest';
@@ -131,22 +138,31 @@ type AssetDetailDocument = Record<string, any>;
 type TabId = 'inventory' | 'posture' | 'privileges' | 'drift';
 
 // Helper functions
-const getPlatformIcon = (platform: string): React.ReactNode => {
-  switch (platform?.toLowerCase()) {
+const normalizePlatform = (platform: string): 'windows' | 'macos' | 'linux' | null => {
+  const p = platform?.toLowerCase();
+  switch (p) {
     case 'windows':
-      return <EuiIcon type="logoWindows" size="m" />;
+      return 'windows';
     case 'darwin':
     case 'macos':
-      return <EuiIcon type="logoApple" size="m" />;
+      return 'macos';
     case 'linux':
     case 'ubuntu':
     case 'rhel':
     case 'centos':
     case 'debian':
-      return <EuiIcon type="logoLinux" size="m" />;
+      return 'linux';
     default:
-      return <EuiIcon type="compute" size="m" />;
+      return null;
   }
+};
+
+const getPlatformIcon = (platform: string): React.ReactNode => {
+  const normalizedPlatform = normalizePlatform(platform);
+  if (normalizedPlatform) {
+    return <PlatformIcon platform={normalizedPlatform} size="m" />;
+  }
+  return <EuiIcon type="desktop" size="m" />;
 };
 
 const getPlatformLabel = (platform: string): string => {
@@ -396,6 +412,684 @@ const useAssetDetails = (entityId: string | null) => {
   };
 };
 
+// Types for Security Posture
+type PostureStatus = 'PASS' | 'FAIL' | 'UNKNOWN';
+type RiskLevel = 'critical' | 'high' | 'medium' | 'low';
+
+interface PostureCheck {
+  name: string;
+  status: PostureStatus;
+  points: number; // Points deducted if failed
+}
+
+interface SecurityFinding {
+  type: string;
+  count: number;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  latestDetection?: string;
+  latestVtLink?: string;
+}
+
+interface AssetPostureIssue {
+  entityId: string;
+  entityName: string;
+  platform: string;
+  issues: string[];
+  securityFindings: SecurityFinding[];
+}
+
+interface AssetMissingData {
+  entityId: string;
+  entityName: string;
+  platform: string;
+  missingChecks: string[];
+  suggestedQueries: Array<{ name: string; description: string }>;
+}
+
+interface AssetWithScore {
+  entityId: string;
+  entityName: string;
+  platform: string;
+  score: number;
+  riskLevel: RiskLevel;
+  checks: {
+    diskEncryption: PostureStatus;
+    firewall: PostureStatus;
+    secureBoot: PostureStatus;
+    shellHistory: PostureStatus;
+    adminCount: PostureStatus;
+  };
+  adminCount: number;
+  failedChecks: string[];
+}
+
+interface RiskDistribution {
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}
+
+interface SecurityPostureSummary {
+  passed: number;
+  failed: number;
+  unknown: number;
+  totalChecks: number;
+  failedChecks: Array<{
+    check: string;
+    failedCount: number;
+    severity: string;
+    affectedAssets: string[];
+  }>;
+  securityFindings: Array<{
+    type: string;
+    assetsAffected: number;
+    affectedAssetNames: string[];
+    latestDetection: string;
+    severity: string;
+    latestVtLink?: string;
+  }>;
+  assetsWithIssues: AssetPostureIssue[];
+  assetsWithMissingData: AssetMissingData[];
+  assetsWithScores: AssetWithScore[];
+  riskDistribution: RiskDistribution;
+}
+
+// Extract value from transform top_metrics format
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const extractPostureValue = (obj: any): string | null => {
+  if (!obj?.value) return null;
+  const keys = Object.keys(obj.value);
+  if (keys.length === 0) return null;
+  const firstKey = keys[0];
+  const value = obj.value[firstKey];
+  return value !== null && value !== undefined ? String(value) : null;
+};
+
+// Interpret disk encryption
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getDiskEncryptionStatus = (raw: any): PostureStatus => {
+  const value = extractPostureValue(raw);
+  if (value === null || value === '' || value === 'null') return 'UNKNOWN';
+  return value === '1' ? 'PASS' : 'FAIL';
+};
+
+// Interpret firewall - checks both firewall_enabled and global_state
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getFirewallStatus = (raw: any): PostureStatus => {
+  if (!raw?.value) return 'UNKNOWN';
+  const valueObj = raw.value;
+  const keys = Object.keys(valueObj);
+  if (keys.length === 0) return 'UNKNOWN';
+
+  // Check for global_state first (macOS ALF)
+  const globalState = valueObj['osquery.global_state'];
+  if (
+    globalState !== null &&
+    globalState !== undefined &&
+    globalState !== '' &&
+    globalState !== 'null'
+  ) {
+    return globalState === '1' || globalState === '2' ? 'PASS' : 'FAIL'; // 1=on, 2=block all
+  }
+
+  // Check for firewall_enabled (Windows)
+  const firewallEnabled = valueObj['osquery.firewall_enabled'];
+  if (
+    firewallEnabled !== null &&
+    firewallEnabled !== undefined &&
+    firewallEnabled !== '' &&
+    firewallEnabled !== 'null'
+  ) {
+    return firewallEnabled === '1' ? 'PASS' : 'FAIL';
+  }
+
+  return 'UNKNOWN';
+};
+
+// Extract value from security findings (no .value wrapper, direct object)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const extractSecurityValue = (obj: any): string | null => {
+  if (!obj) return null;
+  if (typeof obj === 'string') return obj;
+  const keys = Object.keys(obj);
+  if (keys.length === 0) return null;
+  const firstKey = keys[0];
+  const value = obj[firstKey];
+  if (value === null || value === undefined || value === '' || value === 'null') return null;
+  return String(value);
+};
+
+// Check if security findings exist
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const hasSecurityFindings = (security: any): boolean => {
+  return (
+    (security?.suspicious_tasks?.doc_count || 0) > 0 ||
+    (security?.suspicious_services?.doc_count || 0) > 0 ||
+    (security?.unsigned_processes?.doc_count || 0) > 0
+  );
+};
+
+// Interpret secure boot status
+// secure_boot from osquery: 1 = enabled, 0 = disabled
+// SIP from macOS: enabled = 1 means SIP is on
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getSecureBootStatus = (raw: any): PostureStatus => {
+  const value = extractPostureValue(raw);
+  if (value === null || value === '' || value === 'null') return 'UNKNOWN';
+  // Handle both string and numeric values
+  return value === '1' || value === 'true' || value === 1 || value === true ? 'PASS' : 'FAIL';
+};
+
+// Get admin count from privileges
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getAdminCount = (privileges: any): number => {
+  return privileges?.admin_count?.count || 0;
+};
+
+// Check if admin count is excessive (>2 is considered a risk)
+const getAdminCountStatus = (adminCount: number): PostureStatus => {
+  if (adminCount === 0) return 'UNKNOWN'; // No data collected
+  return adminCount <= 2 ? 'PASS' : 'FAIL';
+};
+
+/**
+ * Calculate posture score based on RFC scoring rules:
+ * Base Score: 100
+ * Deductions:
+ * - Disk encryption disabled:     -25 points
+ * - Firewall disabled:            -20 points
+ * - Secure boot disabled:         -15 points
+ * - Local admin count > 2:        -10 points
+ * - Suspicious shell config:      -10 points
+ */
+const calculatePostureScore = (checks: {
+  diskEncryption: PostureStatus;
+  firewall: PostureStatus;
+  secureBoot: PostureStatus;
+  shellHistory: PostureStatus;
+  adminCount: PostureStatus;
+}): number => {
+  let score = 100;
+
+  // Only deduct points for FAIL status, not UNKNOWN
+  if (checks.diskEncryption === 'FAIL') score -= 25;
+  if (checks.firewall === 'FAIL') score -= 20;
+  if (checks.secureBoot === 'FAIL') score -= 15;
+  if (checks.adminCount === 'FAIL') score -= 10;
+  if (checks.shellHistory === 'FAIL') score -= 10;
+
+  return Math.max(0, score);
+};
+
+/**
+ * Determine risk level from posture score:
+ * - 90-100: LOW
+ * - 70-89:  MEDIUM
+ * - 50-69:  HIGH
+ * - 0-49:   CRITICAL
+ */
+const getRiskLevel = (score: number): RiskLevel => {
+  if (score >= 90) return 'low';
+  if (score >= 70) return 'medium';
+  if (score >= 50) return 'high';
+  return 'critical';
+};
+
+const getRiskLevelColor = (level: RiskLevel): string => {
+  switch (level) {
+    case 'critical':
+      return 'danger';
+    case 'high':
+      return 'warning';
+    case 'medium':
+      return 'default';
+    case 'low':
+      return 'success';
+  }
+};
+
+// Hook to fetch security posture data
+const useSecurityPosture = () => {
+  const { services } = useKibana();
+
+  const fetchPosture = useCallback(async (): Promise<SecurityPostureSummary> => {
+    const { data } = services;
+    if (!data?.search) {
+      throw new Error('Search service not available');
+    }
+
+    type PostureSearchRequest = IKibanaSearchRequest<estypes.SearchRequest>;
+    type PostureSearchResponse = IKibanaSearchResponse<
+      estypes.SearchResponse<AssetDetailDocument, never>
+    >;
+
+    const searchRequest: estypes.SearchRequest = {
+      index: TRANSFORM_OUTPUT_INDEX,
+      size: 500,
+    };
+
+    const response = await lastValueFrom(
+      data.search.search<PostureSearchRequest, PostureSearchResponse>({
+        params: searchRequest as PostureSearchRequest['params'],
+      })
+    );
+
+    const hits = response.rawResponse.hits.hits;
+
+    let passed = 0;
+    let failed = 0;
+    let unknown = 0;
+
+    const failedChecksMap: Record<
+      string,
+      { count: number; assets: Set<string>; assetNames: string[] }
+    > = {
+      'Disk Encryption Disabled': { count: 0, assets: new Set(), assetNames: [] },
+      'Firewall Disabled': { count: 0, assets: new Set(), assetNames: [] },
+      'Secure Boot Disabled': { count: 0, assets: new Set(), assetNames: [] },
+      'Excessive Local Admins': { count: 0, assets: new Set(), assetNames: [] },
+      'Suspicious Shell Config': { count: 0, assets: new Set(), assetNames: [] },
+    };
+
+    const securityFindingsMap: Record<
+      string,
+      {
+        count: number;
+        assets: Set<string>;
+        assetNames: string[];
+        latestDetection: string;
+        latestVtLink?: string;
+      }
+    > = {};
+    const assetsWithIssues: AssetPostureIssue[] = [];
+    const assetsWithMissingData: AssetMissingData[] = [];
+    const assetsWithScores: AssetWithScore[] = [];
+    const riskDistribution: RiskDistribution = { critical: 0, high: 0, medium: 0, low: 0 };
+
+    // Query suggestions by platform and check type
+    const getQuerySuggestions = (
+      checkType: string,
+      plat: string
+    ): { name: string; description: string } => {
+      const platformLower = plat.toLowerCase();
+      if (checkType === 'Disk Encryption') {
+        if (platformLower === 'windows') {
+          return { name: 'bitlocker_info', description: 'Query BitLocker encryption status' };
+        }
+        return {
+          name: 'disk_encryption / mounts',
+          description: 'Query LUKS/dm-crypt encryption status',
+        };
+      }
+      if (checkType === 'Firewall') {
+        if (platformLower === 'windows') {
+          return {
+            name: 'windows_security_center',
+            description: 'Query Windows Firewall status via Security Center',
+          };
+        }
+        return { name: 'iptables', description: 'Query iptables/firewalld rules' };
+      }
+      if (checkType === 'Shell History') {
+        if (platformLower === 'windows') {
+          return { name: 'powershell_events', description: 'Query PowerShell command history' };
+        }
+        return { name: 'shell_history', description: 'Query bash/zsh command history' };
+      }
+      return { name: 'unknown', description: 'Unknown query type' };
+    };
+
+    for (const hit of hits) {
+      const doc = hit._source;
+      if (!doc) continue;
+
+      const entityId = getNestedValue(doc, 'entity.id');
+      const entityName = getNestedValue(doc, 'entity.name');
+      const platform = getNestedValue(doc, 'host.os.platform');
+      const issues: string[] = [];
+      const securityFindings: SecurityFinding[] = [];
+      const missingChecks: string[] = [];
+      const suggestedQueries: Array<{ name: string; description: string }> = [];
+
+      // Get all posture check statuses
+      const diskEncryption = getDiskEncryptionStatus(doc.endpoint?.posture?.disk_encryption_raw);
+      const firewall = getFirewallStatus(doc.endpoint?.posture?.firewall_enabled_raw);
+      const secureBoot = getSecureBootStatus(doc.endpoint?.posture?.secure_boot_raw);
+      const adminCount = getAdminCount(doc.endpoint?.privileges);
+      const adminCountStatus = getAdminCountStatus(adminCount);
+      // Shell data doesn't have .value wrapper like posture fields - use extractSecurityValue
+      const suspiciousShell = extractSecurityValue(doc.endpoint?.shell?.suspicious);
+      const shellHistoryStatus: PostureStatus =
+        suspiciousShell === 'yes' ? 'FAIL' : suspiciousShell === 'no' ? 'PASS' : 'UNKNOWN';
+
+      // Track failed checks for this asset
+      const assetFailedChecks: string[] = [];
+
+      // Disk Encryption Check
+      if (diskEncryption === 'PASS') passed++;
+      if (diskEncryption === 'FAIL') {
+        failed++;
+        failedChecksMap['Disk Encryption Disabled'].count++;
+        if (!failedChecksMap['Disk Encryption Disabled'].assets.has(entityId)) {
+          failedChecksMap['Disk Encryption Disabled'].assets.add(entityId);
+          failedChecksMap['Disk Encryption Disabled'].assetNames.push(entityName);
+        }
+        issues.push('Disk Encryption Disabled');
+        assetFailedChecks.push('Disk Encryption');
+      }
+      if (diskEncryption === 'UNKNOWN') {
+        unknown++;
+        missingChecks.push('Disk Encryption');
+        suggestedQueries.push(getQuerySuggestions('Disk Encryption', platform));
+      }
+
+      // Firewall Check
+      if (firewall === 'PASS') passed++;
+      if (firewall === 'FAIL') {
+        failed++;
+        failedChecksMap['Firewall Disabled'].count++;
+        if (!failedChecksMap['Firewall Disabled'].assets.has(entityId)) {
+          failedChecksMap['Firewall Disabled'].assets.add(entityId);
+          failedChecksMap['Firewall Disabled'].assetNames.push(entityName);
+        }
+        issues.push('Firewall Disabled');
+        assetFailedChecks.push('Firewall');
+      }
+      if (firewall === 'UNKNOWN') {
+        unknown++;
+        missingChecks.push('Firewall');
+        suggestedQueries.push(getQuerySuggestions('Firewall', platform));
+      }
+
+      // Secure Boot Check
+      if (secureBoot === 'PASS') passed++;
+      if (secureBoot === 'FAIL') {
+        failed++;
+        failedChecksMap['Secure Boot Disabled'].count++;
+        if (!failedChecksMap['Secure Boot Disabled'].assets.has(entityId)) {
+          failedChecksMap['Secure Boot Disabled'].assets.add(entityId);
+          failedChecksMap['Secure Boot Disabled'].assetNames.push(entityName);
+        }
+        issues.push('Secure Boot Disabled');
+        assetFailedChecks.push('Secure Boot');
+      }
+      if (secureBoot === 'UNKNOWN') {
+        unknown++;
+        missingChecks.push('Secure Boot');
+        suggestedQueries.push({ name: 'secureboot', description: 'Query Secure Boot status' });
+      }
+
+      // Admin Count Check
+      if (adminCountStatus === 'PASS') passed++;
+      if (adminCountStatus === 'FAIL') {
+        failed++;
+        failedChecksMap['Excessive Local Admins'].count++;
+        if (!failedChecksMap['Excessive Local Admins'].assets.has(entityId)) {
+          failedChecksMap['Excessive Local Admins'].assets.add(entityId);
+          failedChecksMap['Excessive Local Admins'].assetNames.push(entityName);
+        }
+        issues.push(`${adminCount} Local Admins (>2)`);
+        assetFailedChecks.push('Admin Count');
+      }
+      if (adminCountStatus === 'UNKNOWN') {
+        unknown++;
+        missingChecks.push('Admin Count');
+        suggestedQueries.push({
+          name: 'user_groups',
+          description: 'Query local admin group membership',
+        });
+      }
+
+      // Shell History Check
+      if (shellHistoryStatus === 'PASS') passed++;
+      if (shellHistoryStatus === 'FAIL') {
+        failed++;
+        failedChecksMap['Suspicious Shell Config'].count++;
+        if (!failedChecksMap['Suspicious Shell Config'].assets.has(entityId)) {
+          failedChecksMap['Suspicious Shell Config'].assets.add(entityId);
+          failedChecksMap['Suspicious Shell Config'].assetNames.push(entityName);
+        }
+        issues.push('Suspicious Shell Config');
+        assetFailedChecks.push('Shell History');
+      }
+      if (shellHistoryStatus === 'UNKNOWN') {
+        unknown++;
+        missingChecks.push('Shell History');
+        suggestedQueries.push(getQuerySuggestions('Shell History', platform));
+      }
+
+      // Calculate posture score for this asset
+      const checks = {
+        diskEncryption,
+        firewall,
+        secureBoot,
+        shellHistory: shellHistoryStatus,
+        adminCount: adminCountStatus,
+      };
+      const score = calculatePostureScore(checks);
+      const riskLevel = getRiskLevel(score);
+
+      // Track risk distribution
+      riskDistribution[riskLevel]++;
+
+      // Add to assets with scores
+      assetsWithScores.push({
+        entityId,
+        entityName,
+        platform,
+        score,
+        riskLevel,
+        checks,
+        adminCount,
+        failedChecks: assetFailedChecks,
+      });
+
+      const suspiciousTasks = doc.endpoint?.security?.suspicious_tasks?.doc_count || 0;
+      if (suspiciousTasks > 0) {
+        const detectionMethod = extractSecurityValue(
+          doc.endpoint?.security?.suspicious_tasks?.latest_detection_method
+        );
+        const detectionReason = extractSecurityValue(
+          doc.endpoint?.security?.suspicious_tasks?.latest_detection_reason
+        );
+        const vtLink = extractSecurityValue(
+          doc.endpoint?.security?.suspicious_tasks?.latest_vt_link
+        );
+
+        // Build detection description
+        const detectionDesc = detectionReason
+          ? detectionMethod
+            ? `${detectionMethod}: ${detectionReason}`
+            : detectionReason
+          : detectionMethod || 'Suspicious activity detected';
+
+        securityFindings.push({
+          type: 'Suspicious Tasks (LOTL)',
+          count: suspiciousTasks,
+          severity: 'critical',
+          latestDetection: detectionDesc,
+          latestVtLink: vtLink || undefined,
+        });
+        issues.push(`${suspiciousTasks} suspicious tasks (LOTL)`);
+
+        if (!securityFindingsMap['Suspicious Tasks (LOTL)']) {
+          securityFindingsMap['Suspicious Tasks (LOTL)'] = {
+            count: suspiciousTasks,
+            assets: new Set([entityId]),
+            assetNames: [entityName],
+            latestDetection: detectionReason || detectionMethod || 'Suspicious activity detected',
+            latestVtLink: vtLink || undefined,
+          };
+        } else {
+          securityFindingsMap['Suspicious Tasks (LOTL)'].count += suspiciousTasks;
+          if (!securityFindingsMap['Suspicious Tasks (LOTL)'].assets.has(entityId)) {
+            securityFindingsMap['Suspicious Tasks (LOTL)'].assets.add(entityId);
+            securityFindingsMap['Suspicious Tasks (LOTL)'].assetNames.push(entityName);
+          }
+        }
+      }
+
+      const unsignedProcesses = doc.endpoint?.security?.unsigned_processes?.doc_count || 0;
+      if (unsignedProcesses > 0) {
+        const processName = extractSecurityValue(
+          doc.endpoint?.security?.unsigned_processes?.latest_name
+        );
+        const processResult = extractSecurityValue(
+          doc.endpoint?.security?.unsigned_processes?.latest_result
+        );
+        const vtLink = extractSecurityValue(
+          doc.endpoint?.security?.unsigned_processes?.latest_vt_link
+        );
+
+        const unsignedDesc = processName
+          ? `${processName} (${processResult || 'untrusted'})`
+          : processResult || 'Untrusted processes detected';
+
+        securityFindings.push({
+          type: 'Unsigned Processes',
+          count: unsignedProcesses,
+          severity: 'high',
+          latestDetection: unsignedDesc,
+          latestVtLink: vtLink || undefined,
+        });
+        issues.push(`${unsignedProcesses} unsigned processes`);
+
+        if (!securityFindingsMap['Unsigned Processes']) {
+          securityFindingsMap['Unsigned Processes'] = {
+            count: unsignedProcesses,
+            assets: new Set([entityId]),
+            assetNames: [entityName],
+            latestDetection: unsignedDesc,
+            latestVtLink: vtLink || undefined,
+          };
+        } else {
+          securityFindingsMap['Unsigned Processes'].count += unsignedProcesses;
+          if (!securityFindingsMap['Unsigned Processes'].assets.has(entityId)) {
+            securityFindingsMap['Unsigned Processes'].assets.add(entityId);
+            securityFindingsMap['Unsigned Processes'].assetNames.push(entityName);
+          }
+        }
+      }
+
+      const suspiciousServices = doc.endpoint?.security?.suspicious_services?.doc_count || 0;
+      if (suspiciousServices > 0) {
+        const serviceName = extractSecurityValue(
+          doc.endpoint?.security?.suspicious_services?.latest_name
+        );
+        const signatureStatus = extractSecurityValue(
+          doc.endpoint?.security?.suspicious_services?.latest_signature_status
+        );
+        const vtLink = extractSecurityValue(
+          doc.endpoint?.security?.suspicious_services?.latest_vt_link
+        );
+
+        const serviceDesc = signatureStatus
+          ? serviceName
+            ? `${serviceName} (${signatureStatus})`
+            : `Signature: ${signatureStatus}`
+          : serviceName || 'Services with signature issues';
+
+        securityFindings.push({
+          type: 'Suspicious Services',
+          count: suspiciousServices,
+          severity: 'medium',
+          latestDetection: serviceDesc,
+          latestVtLink: vtLink || undefined,
+        });
+        issues.push(`${suspiciousServices} suspicious services`);
+
+        if (!securityFindingsMap['Suspicious Services']) {
+          securityFindingsMap['Suspicious Services'] = {
+            count: suspiciousServices,
+            assets: new Set([entityId]),
+            assetNames: [entityName],
+            latestDetection: serviceDesc,
+            latestVtLink: vtLink || undefined,
+          };
+        } else {
+          securityFindingsMap['Suspicious Services'].count += suspiciousServices;
+          if (!securityFindingsMap['Suspicious Services'].assets.has(entityId)) {
+            securityFindingsMap['Suspicious Services'].assets.add(entityId);
+            securityFindingsMap['Suspicious Services'].assetNames.push(entityName);
+          }
+        }
+      }
+
+      if (issues.length > 0) {
+        assetsWithIssues.push({
+          entityId,
+          entityName,
+          platform,
+          issues,
+          securityFindings,
+        });
+      }
+
+      // Track assets with missing data
+      if (missingChecks.length > 0) {
+        assetsWithMissingData.push({
+          entityId,
+          entityName,
+          platform,
+          missingChecks,
+          suggestedQueries,
+        });
+      }
+    }
+
+    const failedChecks = Object.entries(failedChecksMap)
+      .filter(([_, data]) => data.count > 0)
+      .map(([check, data]) => ({
+        check,
+        failedCount: data.count,
+        severity:
+          check === 'Disk Encryption Disabled'
+            ? 'critical'
+            : check === 'Firewall Disabled'
+            ? 'high'
+            : 'medium',
+        affectedAssets: data.assetNames,
+      }));
+
+    const securityFindings = Object.entries(securityFindingsMap).map(([type, data]) => ({
+      type,
+      assetsAffected: data.assets.size,
+      affectedAssetNames: data.assetNames,
+      latestDetection: data.latestDetection,
+      severity: type.includes('Tasks') ? 'critical' : type.includes('Unsigned') ? 'high' : 'medium',
+      latestVtLink: data.latestVtLink,
+    }));
+
+    const totalChecks = passed + failed + unknown;
+
+    return {
+      passed,
+      failed,
+      unknown,
+      totalChecks,
+      failedChecks,
+      securityFindings,
+      assetsWithIssues,
+      assetsWithMissingData,
+      assetsWithScores: assetsWithScores.sort((a, b) => a.score - b.score), // Sort by score ascending (worst first)
+      riskDistribution,
+    };
+  }, [services]);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['security-posture'],
+    queryFn: fetchPosture,
+    staleTime: 30000,
+  });
+
+  return {
+    summary: data ?? null,
+    loading: isLoading,
+    error: error as Error | null,
+  };
+};
+
 /**
  * Extract a nested value from transform output using dot notation path
  */
@@ -446,9 +1140,10 @@ const AssetDetailsFlyout: React.FC<{
       platform: getNestedValue(details, 'host.os.platform'),
       osName: getNestedValue(details, 'host.os.name'),
       osVersion: getNestedValue(details, 'host.os.version'),
-      hostname: getNestedValue(details, 'host.hostname') !== '-'
-        ? getNestedValue(details, 'host.hostname')
-        : getNestedValue(details, 'host.name'),
+      hostname:
+        getNestedValue(details, 'host.hostname') !== '-'
+          ? getNestedValue(details, 'host.hostname')
+          : getNestedValue(details, 'host.name'),
       agentName: getNestedValue(details, 'agent.name'),
     };
   }, [details, asset]);
@@ -579,14 +1274,20 @@ const AssetDetailsFlyout: React.FC<{
                     title: 'Platform',
                     description: (
                       <EuiFlexGroup alignItems="center" gutterSize="s">
-                        <EuiFlexItem grow={false}>{getPlatformIcon(summaryData.platform)}</EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          {getPlatformIcon(summaryData.platform)}
+                        </EuiFlexItem>
                         <EuiFlexItem>{getPlatformLabel(summaryData.platform)}</EuiFlexItem>
                       </EuiFlexGroup>
                     ),
                   },
                   {
                     title: 'OS',
-                    description: `${summaryData.osName}${summaryData.osVersion && summaryData.osVersion !== '-' ? ` ${summaryData.osVersion}` : ''}`,
+                    description: `${summaryData.osName}${
+                      summaryData.osVersion && summaryData.osVersion !== '-'
+                        ? ` ${summaryData.osVersion}`
+                        : ''
+                    }`,
                   },
                   {
                     title: 'Hostname',
@@ -676,6 +1377,781 @@ const AssetDetailsFlyout: React.FC<{
     </EuiFlyout>
   );
 };
+
+// Security Posture Content Component
+const SecurityPostureContent: React.FC = React.memo(() => {
+  const { summary, loading, error } = useSecurityPosture();
+  const [findingsFlyoutConfig, setFindingsFlyoutConfig] = useState<{
+    hostId: string;
+    hostName: string;
+    findingType: FindingType;
+    summaryCount: number;
+  } | null>(null);
+
+  // Handler for opening security findings detail flyout
+  const handleViewAllFindings = useCallback(
+    (asset: AssetPostureIssue, finding: SecurityFinding) => {
+      setFindingsFlyoutConfig({
+        hostId: asset.entityId,
+        hostName: asset.entityName,
+        findingType: finding.type as FindingType,
+        summaryCount: finding.count,
+      });
+    },
+    []
+  );
+
+  if (loading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (error) {
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        color="danger"
+        title={<h2>Error Loading Security Posture Data</h2>}
+        body={<p>{error.message}</p>}
+      />
+    );
+  }
+
+  if (!summary) {
+    return (
+      <EuiEmptyPrompt
+        iconType="securityApp"
+        title={<h2>No Security Posture Data Available</h2>}
+        body={
+          <p>Security posture data will appear once osquery data is collected and processed.</p>
+        }
+      />
+    );
+  }
+
+  const failedChecksColumns: Array<
+    EuiBasicTableColumn<{
+      check: string;
+      failedCount: number;
+      severity: string;
+      affectedAssets: string[];
+    }>
+  > = [
+    {
+      field: 'check',
+      name: 'Check',
+      render: (check: string) => <strong>{check}</strong>,
+    },
+    {
+      field: 'failedCount',
+      name: 'Failed Count',
+      align: 'right',
+      render: (count: number, item: { affectedAssets: string[] }) => (
+        <EuiToolTip
+          position="top"
+          content={
+            <div>
+              <strong>Affected Hosts:</strong>
+              <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px' }}>
+                {item.affectedAssets.map((name, idx) => (
+                  <li key={idx}>{name}</li>
+                ))}
+              </ul>
+            </div>
+          }
+        >
+          <EuiBadge color="danger" style={{ cursor: 'pointer' }}>
+            {count}
+          </EuiBadge>
+        </EuiToolTip>
+      ),
+    },
+    {
+      field: 'severity',
+      name: 'Severity',
+      render: (severity: string) => (
+        <EuiBadge
+          color={severity === 'critical' ? 'danger' : severity === 'high' ? 'warning' : 'default'}
+        >
+          {severity.charAt(0).toUpperCase() + severity.slice(1)}
+        </EuiBadge>
+      ),
+    },
+  ];
+
+  const securityFindingsColumns: Array<
+    EuiBasicTableColumn<{
+      type: string;
+      assetsAffected: number;
+      affectedAssetNames: string[];
+      latestDetection: string;
+      severity: string;
+      latestVtLink?: string;
+    }>
+  > = [
+    {
+      field: 'type',
+      name: 'Finding Type',
+      render: (type: string) => <strong>{type}</strong>,
+    },
+    {
+      field: 'assetsAffected',
+      name: 'Assets Affected',
+      align: 'right',
+      render: (count: number, item: { affectedAssetNames: string[] }) => (
+        <EuiToolTip
+          position="top"
+          content={
+            <div>
+              <strong>Affected Hosts:</strong>
+              <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px' }}>
+                {item.affectedAssetNames.map((name, idx) => (
+                  <li key={idx}>{name}</li>
+                ))}
+              </ul>
+            </div>
+          }
+        >
+          <EuiBadge color="warning" style={{ cursor: 'pointer' }}>
+            {count}
+          </EuiBadge>
+        </EuiToolTip>
+      ),
+    },
+    {
+      field: 'latestDetection',
+      name: 'Latest Detection',
+      render: (detection: string, item: { latestVtLink?: string }) => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>{detection}</EuiFlexItem>
+          {item.latestVtLink && (
+            <EuiFlexItem grow={false}>
+              <EuiLink href={item.latestVtLink} target="_blank" external>
+                VirusTotal
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      field: 'severity',
+      name: 'Severity',
+      render: (severity: string) => (
+        <EuiBadge
+          color={severity === 'critical' ? 'danger' : severity === 'high' ? 'warning' : 'default'}
+        >
+          {severity.charAt(0).toUpperCase() + severity.slice(1)}
+        </EuiBadge>
+      ),
+    },
+  ];
+
+  const assetsWithIssuesColumns: Array<EuiBasicTableColumn<AssetPostureIssue>> = [
+    {
+      field: 'entityName',
+      name: 'Asset',
+      render: (name: string, asset: AssetPostureIssue) => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>{getPlatformIcon(asset.platform)}</EuiFlexItem>
+          <EuiFlexItem>
+            <strong>{name}</strong>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      field: 'platform',
+      name: 'Platform',
+      render: (platform: string) => getPlatformLabel(platform),
+    },
+    {
+      field: 'issues',
+      name: 'Issues',
+      render: (issues: string[]) => (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          {issues.map((issue, idx) => (
+            <EuiFlexItem grow={false} key={idx}>
+              <EuiBadge color="danger">{issue}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      field: 'securityFindings',
+      name: 'Security Findings',
+      render: (findings: SecurityFinding[]) => {
+        if (!findings || findings.length === 0) {
+          return (
+            <EuiText size="s" color="subdued">
+              None
+            </EuiText>
+          );
+        }
+        return (
+          <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
+            {findings.map((finding, idx) => (
+              <EuiFlexItem key={idx}>
+                <EuiBadge color={finding.severity === 'critical' ? 'danger' : 'warning'}>
+                  {finding.type}: {finding.count}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
+      },
+    },
+    {
+      name: 'Actions',
+      width: '100px',
+      render: (asset: AssetPostureIssue) => {
+        const firstFinding = asset.securityFindings?.[0];
+        if (!firstFinding) {
+          return null;
+        }
+        return (
+          <button
+            type="button"
+            style={{
+              background: 'none',
+              border: '1px solid #0077CC',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              cursor: 'pointer',
+              color: '#0077CC',
+              fontSize: '12px',
+            }}
+            data-test-subj="view-all-findings-button"
+            onClick={() => handleViewAllFindings(asset, firstFinding)}
+          >
+            View All
+          </button>
+        );
+      },
+    },
+  ];
+
+  const totalAssets = summary.assetsWithScores.length;
+  const checksPerAsset = 5; // Disk Encryption, Firewall, Secure Boot, Admin Count, Shell History
+
+  // Asset scores table columns
+  const assetScoresColumns: Array<EuiBasicTableColumn<AssetWithScore>> = [
+    {
+      field: 'entityName',
+      name: 'Asset',
+      sortable: true,
+      render: (name: string, asset: AssetWithScore) => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>{getPlatformIcon(asset.platform)}</EuiFlexItem>
+          <EuiFlexItem>
+            <strong>{name}</strong>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      field: 'score',
+      name: 'Score',
+      sortable: true,
+      width: '80px',
+      align: 'center',
+      render: (score: number, asset: AssetWithScore) => (
+        <EuiToolTip
+          position="top"
+          content={
+            <div>
+              <strong>Posture Score: {score}/100</strong>
+              <br />
+              <small>
+                {asset.failedChecks.length === 0
+                  ? 'All checks passed'
+                  : `Failed: ${asset.failedChecks.join(', ')}`}
+              </small>
+            </div>
+          }
+        >
+          <EuiBadge
+            color={getRiskLevelColor(asset.riskLevel)}
+            style={{ cursor: 'pointer', minWidth: '45px' }}
+          >
+            {score}
+          </EuiBadge>
+        </EuiToolTip>
+      ),
+    },
+    {
+      field: 'riskLevel',
+      name: 'Risk',
+      sortable: true,
+      width: '100px',
+      render: (level: RiskLevel) => (
+        <EuiBadge color={getRiskLevelColor(level)}>
+          {level.charAt(0).toUpperCase() + level.slice(1)}
+        </EuiBadge>
+      ),
+    },
+    {
+      field: 'checks',
+      name: 'Checks',
+      render: (_: unknown, asset: AssetWithScore) => (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content="Disk Encryption">
+              <EuiHealth
+                color={
+                  asset.checks.diskEncryption === 'PASS'
+                    ? 'success'
+                    : asset.checks.diskEncryption === 'FAIL'
+                    ? 'danger'
+                    : 'subdued'
+                }
+              >
+                Enc
+              </EuiHealth>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content="Firewall">
+              <EuiHealth
+                color={
+                  asset.checks.firewall === 'PASS'
+                    ? 'success'
+                    : asset.checks.firewall === 'FAIL'
+                    ? 'danger'
+                    : 'subdued'
+                }
+              >
+                FW
+              </EuiHealth>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content="Secure Boot">
+              <EuiHealth
+                color={
+                  asset.checks.secureBoot === 'PASS'
+                    ? 'success'
+                    : asset.checks.secureBoot === 'FAIL'
+                    ? 'danger'
+                    : 'subdued'
+                }
+              >
+                SB
+              </EuiHealth>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={`Admin Count: ${asset.adminCount}`}>
+              <EuiHealth
+                color={
+                  asset.checks.adminCount === 'PASS'
+                    ? 'success'
+                    : asset.checks.adminCount === 'FAIL'
+                    ? 'danger'
+                    : 'subdued'
+                }
+              >
+                Adm
+              </EuiHealth>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content="Shell History">
+              <EuiHealth
+                color={
+                  asset.checks.shellHistory === 'PASS'
+                    ? 'success'
+                    : asset.checks.shellHistory === 'FAIL'
+                    ? 'danger'
+                    : 'subdued'
+                }
+              >
+                Sh
+              </EuiHealth>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
+  ];
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="l">
+      {/* Section A: Risk Level Distribution */}
+      <EuiFlexItem>
+        <EuiPanel hasBorder paddingSize="l">
+          <EuiTitle size="s">
+            <h3>Risk Level Distribution</h3>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>
+              Asset risk levels based on posture scores. Score = 100 minus deductions for failed
+              checks.
+            </p>
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem>
+              <EuiPanel hasBorder color="danger" paddingSize="m">
+                <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
+                  <EuiFlexItem>
+                    <strong style={{ fontSize: '28px', color: '#BD271E' }}>
+                      {summary.riskDistribution.critical}
+                    </strong>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s" textAlign="center">
+                      <strong>Critical</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued" textAlign="center">
+                      Score 0-49
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasBorder color="warning" paddingSize="m">
+                <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
+                  <EuiFlexItem>
+                    <strong style={{ fontSize: '28px', color: '#F5A700' }}>
+                      {summary.riskDistribution.high}
+                    </strong>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s" textAlign="center">
+                      <strong>High</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued" textAlign="center">
+                      Score 50-69
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasBorder paddingSize="m">
+                <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
+                  <EuiFlexItem>
+                    <strong style={{ fontSize: '28px', color: '#69707D' }}>
+                      {summary.riskDistribution.medium}
+                    </strong>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s" textAlign="center">
+                      <strong>Medium</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued" textAlign="center">
+                      Score 70-89
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasBorder color="success" paddingSize="m">
+                <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
+                  <EuiFlexItem>
+                    <strong style={{ fontSize: '28px', color: '#017D73' }}>
+                      {summary.riskDistribution.low}
+                    </strong>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s" textAlign="center">
+                      <strong>Low</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued" textAlign="center">
+                      Score 90-100
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+      {/* Section B: Posture Checks Summary */}
+      <EuiFlexItem>
+        <EuiPanel hasBorder paddingSize="l">
+          <EuiTitle size="s">
+            <h3>Posture Checks Summary</h3>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>
+              Evaluating <strong>{checksPerAsset} security checks</strong> across{' '}
+              <strong>
+                {totalAssets} endpoint{totalAssets !== 1 ? 's' : ''}
+              </strong>
+              : Disk Encryption, Firewall, Secure Boot, Admin Count, and Shell History. Total of{' '}
+              <strong>{summary.totalChecks} individual checks</strong>.
+            </p>
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem>
+              <EuiPanel hasBorder color="success" paddingSize="m">
+                <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiHealth color="success">
+                      <strong style={{ fontSize: '24px', color: '#017D73' }}>
+                        {summary.passed.toLocaleString()}
+                      </strong>
+                    </EuiHealth>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s" textAlign="center">
+                      <strong>Checks Passed</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued" textAlign="center">
+                      Security control enabled and configured correctly
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasBorder color="danger" paddingSize="m">
+                <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiHealth color="danger">
+                      <strong style={{ fontSize: '24px', color: '#BD271E' }}>
+                        {summary.failed.toLocaleString()}
+                      </strong>
+                    </EuiHealth>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s" textAlign="center">
+                      <strong>Checks Failed</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued" textAlign="center">
+                      Security control disabled or misconfigured
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasBorder paddingSize="m">
+                <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiHealth color="subdued">
+                      <strong style={{ fontSize: '24px', color: '#69707D' }}>
+                        {summary.unknown.toLocaleString()}
+                      </strong>
+                    </EuiHealth>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s" textAlign="center">
+                      <strong>Checks Unknown</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued" textAlign="center">
+                      No data collected from osquery
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+      {/* Section C: Failed Checks Breakdown */}
+      {summary.failedChecks.length > 0 && (
+        <EuiFlexItem>
+          <EuiPanel hasBorder>
+            <EuiTitle size="s">
+              <h3>Failed Checks Breakdown</h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiBasicTable
+              items={summary.failedChecks}
+              columns={failedChecksColumns}
+              tableLayout="auto"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      )}
+      {/* Section D: Asset Posture Scores */}
+      {summary.assetsWithScores.length > 0 && (
+        <EuiFlexItem>
+          <EuiPanel hasBorder>
+            <EuiTitle size="s">
+              <h3>Asset Posture Scores</h3>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              <p>Individual posture scores for each endpoint. Lower scores indicate higher risk.</p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiBasicTable
+              items={summary.assetsWithScores}
+              columns={assetScoresColumns}
+              tableLayout="auto"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      )}
+      {/* Section E: Security Findings */}
+      {summary.securityFindings.length > 0 && (
+        <EuiFlexItem>
+          <EuiPanel hasBorder>
+            <EuiTitle size="s">
+              <h3>Security Findings</h3>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              <p>Active security threats and anomalies detected across your endpoint fleet.</p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiBasicTable
+              items={summary.securityFindings}
+              columns={securityFindingsColumns}
+              tableLayout="auto"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      )}
+      {/* Section D: Assets Requiring Attention */}
+      {summary.assetsWithIssues.length > 0 && (
+        <EuiFlexItem>
+          <EuiPanel hasBorder>
+            <EuiTitle size="s">
+              <h3>Assets Requiring Attention</h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiBasicTable
+              items={summary.assetsWithIssues}
+              columns={assetsWithIssuesColumns}
+              tableLayout="auto"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      )}
+      {/* Section E: Assets with Missing Data */}
+      {summary.assetsWithMissingData.length > 0 && (
+        <EuiFlexItem>
+          <EuiPanel hasBorder color="warning">
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="questionInCircle" color="warning" size="l" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h3>Assets with Missing Data ({summary.assetsWithMissingData.length})</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p>
+                These assets are missing posture data. Add the suggested osquery queries to collect
+                this information.
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiBasicTable
+              items={summary.assetsWithMissingData}
+              columns={[
+                {
+                  field: 'entityName',
+                  name: 'Asset',
+                  render: (name: string, asset: AssetMissingData) => (
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>{getPlatformIcon(asset.platform)}</EuiFlexItem>
+                      <EuiFlexItem>
+                        <strong>{name}</strong>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ),
+                },
+                {
+                  field: 'platform',
+                  name: 'Platform',
+                  width: '100px',
+                  render: (platform: string) => getPlatformLabel(platform),
+                },
+                {
+                  field: 'missingChecks',
+                  name: 'Missing Checks',
+                  render: (checks: string[]) => (
+                    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                      {checks.map((check, idx) => (
+                        <EuiFlexItem grow={false} key={idx}>
+                          <EuiBadge color="warning">{check}</EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  ),
+                },
+                {
+                  field: 'suggestedQueries',
+                  name: 'Suggested Osquery Tables',
+                  render: (queries: Array<{ name: string; description: string }>) => (
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      {queries.map((query, idx) => (
+                        <EuiFlexItem key={idx}>
+                          <EuiToolTip content={query.description} position="top">
+                            <EuiCode>{query.name}</EuiCode>
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  ),
+                },
+              ]}
+              tableLayout="auto"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      )}
+      {/* Empty state when all checks pass */}
+      {summary.failedChecks.length === 0 &&
+        summary.securityFindings.length === 0 &&
+        summary.assetsWithIssues.length === 0 && (
+          <EuiFlexItem>
+            <EuiPanel hasBorder>
+              <EuiEmptyPrompt
+                iconType="checkInCircleFilled"
+                iconColor="success"
+                title={<h2>All Security Checks Passed</h2>}
+                body={<p>All endpoints are in good security posture with no issues detected.</p>}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
+      {findingsFlyoutConfig && (
+        <SecurityFindingsDetailFlyout
+          hostId={findingsFlyoutConfig.hostId}
+          hostName={findingsFlyoutConfig.hostName}
+          findingType={findingsFlyoutConfig.findingType}
+          summaryCount={findingsFlyoutConfig.summaryCount}
+          onClose={() => setFindingsFlyoutConfig(null)}
+        />
+      )}
+    </EuiFlexGroup>
+  );
+});
+
+SecurityPostureContent.displayName = 'SecurityPostureContent';
 
 // Table Component
 const EndpointAssetsInventoryTable: React.FC<{
@@ -850,6 +2326,7 @@ const EndpointAssetsPageComponent: React.FC = () => {
   const { sourcererDataView: dataView, loading: sourcererLoading } = useSourcererDataView();
 
   const { assets, loading, error, refresh, summary } = useEndpointAssetsFromEntityStore();
+  const { summary: privilegesSummary } = usePrivileges();
 
   const handleAssetClick = useCallback((asset: EndpointAssetRecord) => {
     setSelectedAsset(asset);
@@ -874,24 +2351,12 @@ const EndpointAssetsPageComponent: React.FC = () => {
     {
       id: 'posture',
       name: TAB_POSTURE,
-      content: (
-        <EuiEmptyPrompt
-          iconType="securityApp"
-          title={<h2>Security Posture Dashboard - Coming Soon</h2>}
-          body={<p>View disk encryption status, firewall configuration, secure boot, and more.</p>}
-        />
-      ),
+      content: <SecurityPostureContent />,
     },
     {
       id: 'privileges',
       name: TAB_PRIVILEGES,
-      content: (
-        <EuiEmptyPrompt
-          iconType="user"
-          title={<h2>Privilege Analysis - Coming Soon</h2>}
-          body={<p>Identify endpoints with elevated privileges and local admin accounts.</p>}
-        />
-      ),
+      content: <PrivilegesContent />,
     },
     {
       id: 'drift',
@@ -966,10 +2431,10 @@ const EndpointAssetsPageComponent: React.FC = () => {
 
                 <EuiFlexItem grow={false}>
                   <EuiStat
-                    title="--"
+                    title={privilegesSummary?.assetsWithElevatedRisk?.toLocaleString() ?? '--'}
                     description="Elevated Privileges"
                     titleSize="l"
-                    titleColor="warning"
+                    titleColor={privilegesSummary?.assetsWithElevatedRisk ? 'warning' : 'default'}
                   />
                 </EuiFlexItem>
 

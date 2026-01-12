@@ -345,6 +345,72 @@ export interface TransformStatusResponse {
 }
 
 // =============================================================================
+// Privileges Tab UI Types
+// =============================================================================
+
+/** Risk level for privilege analysis */
+export type PrivilegeRiskLevel = 'low' | 'medium' | 'high';
+
+/**
+ * Single asset with privilege information for UI display
+ */
+export interface PrivilegeAsset {
+  /** Entity ID from transform */
+  entityId: string;
+  /** Display name of the asset */
+  entityName: string;
+  /** Platform: windows, macos, linux */
+  platform: string;
+  /** Number of local admin accounts */
+  adminCount: number;
+  /** List of admin usernames */
+  adminUsers: string[];
+  /** Risk level based on admin count */
+  riskLevel: PrivilegeRiskLevel;
+  /** Whether admin count exceeds threshold (>2) */
+  hasElevatedRisk: boolean;
+}
+
+/**
+ * Admin user aggregated across the fleet
+ */
+export interface TopAdminUser {
+  /** Username */
+  username: string;
+  /** Number of assets where this user is admin */
+  assetCount: number;
+  /** User type classification */
+  userType: 'built-in' | 'service' | 'user' | 'suspicious';
+}
+
+/**
+ * Complete privileges summary for the Privileges tab
+ */
+export interface PrivilegesSummary {
+  /** Total admin accounts across all assets */
+  totalAdminAccounts: number;
+  /** Number of assets with elevated risk (>2 admins) */
+  assetsWithElevatedRisk: number;
+  /** Average admin count per asset */
+  averageAdminCount: number;
+  /** Number of unique admin usernames across fleet */
+  uniqueAdminUsers: number;
+  /** Distribution by risk level */
+  riskDistribution: {
+    /** 0-2 admins */
+    low: number;
+    /** 3-4 admins */
+    medium: number;
+    /** 5+ admins */
+    high: number;
+  };
+  /** Per-asset privilege data */
+  assets: PrivilegeAsset[];
+  /** Top admin users across fleet */
+  topAdminUsers: TopAdminUser[];
+}
+
+// =============================================================================
 // Posture Check Types
 // =============================================================================
 

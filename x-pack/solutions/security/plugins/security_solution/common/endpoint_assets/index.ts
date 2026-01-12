@@ -7,3 +7,5 @@
 
 export * from './constants';
 export * from './types';
+export * from './posture_queries';
+export * from './security_finding_types';
