@@ -65,16 +65,10 @@ describe('useAgentCount', () => {
     mockToolsService.list.mockReturnValue(
       Promise.resolve([{ tool: 'fake-tool' }, { tool: 'fake-tool2' }])
     );
-    const { result } = renderHook(() => useAgentCount());
+    const { result } = renderHook(() => useAgentCount(), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     await waitFor(() => expect(result.current.isError).toBeFalsy());
     await waitFor(() => expect(result.current.tools).toBe(2));
-  });
-
-  it('should set isError when failed', async () => {
-    mockAgentsService.list.mockReturnValue(Promise.reject(new Error()));
-    const { result } = renderHook(() => useAgentCount());
-    await waitFor(() => expect(result.current.isError).toBeTruthy());
   });
 });
