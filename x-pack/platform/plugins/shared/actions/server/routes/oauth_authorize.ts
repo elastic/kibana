@@ -20,6 +20,11 @@ import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 const paramsSchema = schema.object({
   connectorId: schema.string(),
 });
+
+const bodySchema = schema.object({
+  returnUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+});
+
 /**
  * Initiates OAuth2 Authorization Code flow
  * Returns authorization URL for user to visit
@@ -37,6 +42,7 @@ export const oauthAuthorizeRoute = (
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       validate: {
         params: paramsSchema,
+        body: bodySchema,
       },
       options: {
         access: 'internal',
@@ -91,8 +97,28 @@ export const oauthAuthorizeRoute = (
           });
           const oauthConfig = await oauthService.getOAuthConfig(connectorId);
           const redirectUri = oauthService.getRedirectUri(oauthConfig);
-          // Build return URL for post-OAuth redirect
-          const kibanaReturnUrl = `${kibanaUrl}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`;
+
+          // Validate and build return URL for post-OAuth redirect
+          const requestedReturnUrl = req.body?.returnUrl;
+          let kibanaReturnUrl: string;
+
+          if (requestedReturnUrl) {
+            // Security: Validate that returnUrl is same-origin to prevent open redirect attacks
+            const returnUrlObj = new URL(requestedReturnUrl);
+            const kibanaUrlObj = new URL(kibanaUrl);
+
+            if (returnUrlObj.origin !== kibanaUrlObj.origin) {
+              return res.badRequest({
+                body: {
+                  message: `returnUrl must be same origin as Kibana. Expected: ${kibanaUrlObj.origin}, Got: ${returnUrlObj.origin}`,
+                },
+              });
+            }
+            kibanaReturnUrl = requestedReturnUrl;
+          } else {
+            // Default to connectors management page
+            kibanaReturnUrl = `${kibanaUrl}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`;
+          }
 
           // Create OAuth state with PKCE
           const oauthStateClient = new OAuthStateClient({
