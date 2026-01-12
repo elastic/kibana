@@ -48,10 +48,19 @@ export async function getToolHandler({
   // Filters for standard logs with message field
   const messageFilters = [...baseFilters, { exists: { field: 'message' } }];
 
-  // Filters for OTel exception logs (no message field, but has exception.message)
-  const exceptionFilters = [
+  // Filters for OTel span exceptions. No body.text(~message) field, use exception.message
+  const spanExceptionFilters = [
     ...baseFilters,
+    // Span exception/error events per OTel (should be "exception", but some use "error")
+    {
+      bool: {
+        should: [{ term: { event_name: 'exception' } }, { term: { event_name: 'error' } }],
+        minimum_should_match: 1,
+      },
+    },
+    // defensive: span exception events should have exception.message
     { exists: { field: 'exception.message' } },
+    // defensive: so we dont process same doc. span exception events should not have body.text(~message)
     { bool: { must_not: { exists: { field: 'message' } } } },
   ];
 
@@ -89,7 +98,7 @@ export async function getToolHandler({
     getFilteredLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: exceptionFilters },
+      boolQuery: { filter: spanExceptionFilters },
       logger,
       categoryCount: 10,
       terms,
