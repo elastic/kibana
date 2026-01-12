@@ -48,7 +48,6 @@ export const convertTool = ({
       },
       getSchema: () => tool.schema,
       getHandler: () => tool.handler,
-      summarizeToolReturn: tool.summarizeToolReturn,
     };
   }
   if (!isBuiltinDefinition(definition)) {

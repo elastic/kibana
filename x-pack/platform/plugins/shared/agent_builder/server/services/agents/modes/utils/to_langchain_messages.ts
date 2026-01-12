@@ -14,7 +14,7 @@ import {
   createUserMessage,
   sanitizeToolId,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
+import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type {
   ProcessedAttachment,
   ProcessedConversation,
@@ -84,29 +84,34 @@ const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessa
   let content = message;
 
   if (attachments.length > 0) {
-    const attachmentsXml = generateXmlTree(
-      {
-        tagName: 'attachments',
-        children: attachments.map((attachment) => formatAttachment({ attachment })),
-      },
-      { escapeContent: false }
-    );
-
-    content += `\n\n${attachmentsXml}\n`;
+    content += `\n\n
+<attachments>
+${attachments.map((attachment) => formatAttachment({ attachment, indent: 2 })).join('\n')}
+</attachments>
+`;
   }
 
   return createUserMessage(content);
 };
 
-const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): XmlNode => {
-  return {
-    tagName: 'attachment',
-    attributes: {
-      type: attachment.attachment.type,
-      id: attachment.attachment.id,
+const formatAttachment = ({
+  attachment,
+  indent = 0,
+}: {
+  attachment: ProcessedAttachment;
+  indent?: number;
+}): string => {
+  return generateXmlTree(
+    {
+      tagName: 'attachment',
+      attributes: {
+        type: attachment.attachment.type,
+        id: attachment.attachment.id,
+      },
+      children: [attachment.representation.value],
     },
-    children: [attachment.representation.value],
-  };
+    { initialIndentLevel: indent, escapeContent: false }
+  );
 };
 
 const formatAssistantResponse = ({ response }: { response: AssistantResponse }): AIMessage => {

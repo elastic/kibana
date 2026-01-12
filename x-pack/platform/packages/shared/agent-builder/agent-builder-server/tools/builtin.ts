@@ -8,7 +8,7 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
+import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
@@ -90,21 +90,6 @@ export interface BuiltInToolSpecificConfig {
 }
 
 /**
- * Function to summarize a tool return for conversation history.
- * Used to reduce context size by replacing large tool results with compact summaries.
- *
- * This function receives all results from a single tool call, allowing it to
- * aggregate and summarize multiple results together (e.g., converting 10 search
- * results into a single summary like "search returned 10 docs, ids are: ...").
- *
- * @param toolReturn - All results from a single tool call
- * @returns The summarized results, or undefined if no summarization should be applied
- */
-export type ToolReturnSummarizerFn = (
-  toolReturn: ToolCallWithResult
-) => ToolCallWithResult['results'] | undefined;
-
-/**
  * Built-in tool, as registered as static tool.
  */
 export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
@@ -122,18 +107,6 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<RunInput>>;
-  /**
-   * Optional dynamic availability configuration.
-   * Refer to {@link ToolAvailabilityConfig}
-   */
-  availability?: ToolAvailabilityConfig;
-  /**
-   * Optional function to summarize a tool return for conversation history.
-   * When provided, this function will be called when processing conversation history
-   * to replace large tool results with compact summaries.
-   * This helps prevent context bloat in long conversations.
-   */
-  summarizeToolReturn?: ToolReturnSummarizerFn;
 }
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> &

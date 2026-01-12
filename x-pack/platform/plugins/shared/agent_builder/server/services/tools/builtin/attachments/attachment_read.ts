@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -34,7 +33,7 @@ export const createAttachmentReadTool = ({
     'Read the content of a conversation attachment by ID. Use this to retrieve data you previously stored or to check the current state of an attachment.',
   schema: attachmentReadSchema,
   tags: ['attachment'],
-  handler: async ({ attachment_id: attachmentId, version }) => {
+  handler: async ({ attachment_id: attachmentId, version }, _context) => {
     const attachment = attachmentManager.get(attachmentId);
 
     if (!attachment) {
@@ -42,7 +41,7 @@ export const createAttachmentReadTool = ({
         results: [
           createErrorResult({
             message: `Attachment with ID '${attachmentId}' not found`,
-            metadata: { attachment_id: attachmentId },
+            metadata: { attachmentId },
           }),
         ],
       };
@@ -57,7 +56,7 @@ export const createAttachmentReadTool = ({
         results: [
           createErrorResult({
             message: `Version ${version} not found for attachment '${attachmentId}'`,
-            metadata: { attachment_id: attachmentId, version },
+            metadata: { attachmentId, version },
           }),
         ],
       };
@@ -69,32 +68,11 @@ export const createAttachmentReadTool = ({
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            attachment_id: attachmentId,
             type: attachment.type,
-            version: versionData.version,
             data: versionData.data,
           },
         },
       ],
     };
-  },
-  summarizeToolReturn: (toolReturn) => {
-    if (toolReturn.results.length === 0) return undefined;
-    const result = toolReturn.results[0];
-    if (!isOtherResult(result)) return undefined;
-    const data = result.data as Record<string, unknown>;
-
-    const attachmentId = data.attachment_id || 'unknown';
-    return [
-      {
-        ...result,
-        data: {
-          summary: `Read ${data.type || 'attachment'} "${attachmentId}" v${data.version ?? '?'}`,
-          attachment_id: attachmentId,
-          type: data.type,
-          version: data.version,
-        },
-      },
-    ];
   },
 });

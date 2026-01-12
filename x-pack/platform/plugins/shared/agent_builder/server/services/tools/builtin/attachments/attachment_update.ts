@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -31,7 +30,7 @@ export const createAttachmentUpdateTool = ({
     'Update the content of an existing attachment. This creates a new version if the content changed. Use this to modify data you previously stored.',
   schema: attachmentUpdateSchema,
   tags: ['attachment'],
-  handler: async ({ attachment_id: attachmentId, data, description }) => {
+  handler: async ({ attachment_id: attachmentId, data, description }, _context) => {
     const existing = attachmentManager.get(attachmentId);
 
     if (!existing) {
@@ -39,7 +38,7 @@ export const createAttachmentUpdateTool = ({
         results: [
           createErrorResult({
             message: `Attachment with ID '${attachmentId}' not found`,
-            metadata: { attachment_id: attachmentId },
+            metadata: { attachmentId },
           }),
         ],
       };
@@ -50,13 +49,12 @@ export const createAttachmentUpdateTool = ({
         results: [
           createErrorResult({
             message: `Cannot update deleted attachment '${attachmentId}'. Restore it first.`,
-            metadata: { attachment_id: attachmentId },
+            metadata: { attachmentId },
           }),
         ],
       };
     }
 
-    // Capture version before update (attachmentManager mutates the object in place)
     const previousVersion = existing.current_version;
 
     const updated = attachmentManager.update(attachmentId, { data, description });
@@ -66,7 +64,7 @@ export const createAttachmentUpdateTool = ({
         results: [
           createErrorResult({
             message: `Failed to update attachment '${attachmentId}'`,
-            metadata: { attachment_id: attachmentId },
+            metadata: { attachmentId },
           }),
         ],
       };
@@ -78,39 +76,12 @@ export const createAttachmentUpdateTool = ({
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            attachment_id: attachmentId,
             type: updated.type,
-            previous_version: previousVersion,
             version: updated.current_version,
             version_created: updated.current_version !== previousVersion,
           },
         },
       ],
     };
-  },
-  summarizeToolReturn: (toolReturn) => {
-    if (toolReturn.results.length === 0) return undefined;
-    const result = toolReturn.results[0];
-    if (!isOtherResult(result)) return undefined;
-    const data = result.data as Record<string, unknown>;
-
-    const versionCreated = data.version_created as boolean | undefined;
-    const summary = versionCreated
-      ? `Updated attachment "${data.attachment_id}" from v${data.previous_version} to v${data.version}`
-      : `Updated attachment "${data.attachment_id}" metadata (no content change)`;
-
-    return [
-      {
-        ...result,
-        data: {
-          summary,
-          attachment_id: data.attachment_id,
-          type: data.type,
-          previous_version: data.previous_version,
-          version: data.version,
-          version_created: data.version_created,
-        },
-      },
-    ];
   },
 });

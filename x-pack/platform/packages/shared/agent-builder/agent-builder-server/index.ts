@@ -50,7 +50,6 @@ export type {
   ToolAvailabilityConfig,
   InternalToolAvailabilityHandler,
   InternalToolDefinition,
-  ToolReturnSummarizerFn,
 } from './tools';
 export { getToolResultId, createErrorResult, isToolResultId } from './tools';
 export type {
