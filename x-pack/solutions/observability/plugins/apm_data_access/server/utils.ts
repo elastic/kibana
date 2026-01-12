@@ -9,6 +9,8 @@ export {
   getDurationFieldForTransactions,
   getHasTransactionsEvents,
   getBackwardCompatibleDocumentTypeFilter,
+  isSummaryFieldSupportedByDocType,
+  isDurationSummaryNotSupportedFilter,
   getRollupIntervalForTimeRange,
   callAsyncWithDebug,
   cancelEsRequestOnAbort,
