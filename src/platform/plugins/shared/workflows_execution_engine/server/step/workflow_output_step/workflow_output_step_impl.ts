@@ -111,6 +111,27 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     return result;
   }
 
+  /**
+   * Completes all ancestor steps in the scope stack with the specified status.
+   * This is necessary when workflow.output terminates the workflow while inside
+   * nested scopes (e.g., foreach loops, if branches, etc.).
+   *
+   * Without this, parent scope steps would remain in "in progress" status even
+   * though the workflow has terminated.
+   *
+   * @param executionStatus - The status to set for ancestor steps (COMPLETED, CANCELLED, or FAILED)
+   */
+  private completeAncestorSteps(executionStatus: ExecutionStatus): void {
+    const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
+
+    // Delegate to the runtime manager to complete ancestor steps
+    this.workflowExecutionRuntime.completeAncestorSteps(
+      this.stepExecutionRuntime.scopeStack,
+      executionStatus,
+      workflowExecution.id
+    );
+  }
+
   async run(): Promise<void> {
     this.stepExecutionRuntime.startStep();
     await this.stepExecutionRuntime.flushEventLogs();
@@ -229,6 +250,11 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
         },
         tags: ['workflow-output', 'termination'],
       });
+
+      // Complete all ancestor steps in the scope stack (e.g., foreach, if, etc.)
+      // This ensures parent scopes are properly marked as completed/cancelled/failed
+      // when workflow.output terminates the workflow mid-execution
+      this.completeAncestorSteps(executionStatus);
 
       // Update the workflow execution status to terminate the workflow
       // This will cause the execution loop to stop

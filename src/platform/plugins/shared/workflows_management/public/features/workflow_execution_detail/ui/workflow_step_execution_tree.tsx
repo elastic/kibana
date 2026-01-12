@@ -513,6 +513,13 @@ export const WorkflowStepExecutionTree = ({
     if (triggerPseudoStep && execution.context) {
       const triggerExecution = buildTriggerStepExecutionFromContext(execution);
       if (triggerExecution) {
+        // Remove the old pseudo-step entries to avoid duplicates
+        const oldStepExecutionId = triggerPseudoStep.stepExecutionId;
+        if (oldStepExecutionId) {
+          stepExecutionMap.delete(oldStepExecutionId);
+          enhancedStepExecutionMap.delete(oldStepExecutionId);
+        }
+
         stepExecutionMap.set(triggerExecution.id, triggerExecution);
         enhancedStepExecutionMap.set(triggerExecution.id, triggerExecution);
         triggerPseudoStep.stepExecutionId = triggerExecution.id;
@@ -530,9 +537,23 @@ export const WorkflowStepExecutionTree = ({
     const overviewItem = items.find(
       (item) => enhancedStepExecutionMap.get(item.id)?.stepType === '__overview'
     );
-    const regularItems = items.filter(
-      (item) => enhancedStepExecutionMap.get(item.id)?.stepType !== '__overview'
-    );
+
+    // Filter out duplicate trigger pseudo-steps - keep only one trigger-type item
+    const seenTriggerStep = new Set<string>();
+    const regularItems = items.filter((item) => {
+      const stepType = enhancedStepExecutionMap.get(item.id)?.stepType;
+      if (stepType === '__overview') {
+        return false;
+      }
+      // If this is a trigger pseudo-step, ensure we only include one
+      if (stepType?.startsWith('trigger_')) {
+        if (seenTriggerStep.has('trigger')) {
+          return false; // Skip duplicate trigger
+        }
+        seenTriggerStep.add('trigger');
+      }
+      return true;
+    });
 
     return (
       <>

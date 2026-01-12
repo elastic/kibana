@@ -858,4 +858,201 @@ steps:
       );
     });
   });
+
+  describe('workflow.output interruption inside foreach loop', () => {
+    it('should interrupt workflow on second iteration of loop', async () => {
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: `
+outputs:
+  - name: iteration
+    type: number
+    required: true
+  - name: item
+    type: string
+    required: true
+  - name: message
+    type: string
+    required: true
+
+steps:
+  - name: loopStep
+    type: foreach
+    foreach: '{{inputs.items}}'
+    steps:
+      - name: log_iteration
+        type: log
+        with:
+          message: 'Processing item {{foreach.item}} at index {{foreach.index}}'
+
+      - name: check_and_output
+        type: if
+        condition: '{{foreach.index}} == 1'
+        steps:
+          - name: emit_output
+            type: workflow.output
+            with:
+              iteration: '{{foreach.index}}'
+              item: '{{foreach.item}}'
+              message: 'Interrupted at second iteration'
+`,
+        inputs: {
+          items: ['item1', 'item2', 'item3', 'item4'],
+        },
+      });
+
+      const workflowExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+
+      // Workflow should complete successfully
+      expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+      // Verify outputs were set correctly
+      expect(workflowExecution?.context?.outputs).toEqual({
+        iteration: 1,
+        item: 'item2',
+        message: 'Interrupted at second iteration',
+      });
+    });
+
+    it('should have step executions for only first two loop iterations', async () => {
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: `
+outputs:
+  - name: iteration
+    type: number
+  - name: item
+    type: string
+
+steps:
+  - name: loopStep
+    type: foreach
+    foreach: '{{inputs.items}}'
+    steps:
+      - name: log_iteration
+        type: log
+        with:
+          message: 'Processing item {{foreach.item}}'
+
+      - name: check_and_output
+        type: if
+        condition: '{{foreach.index}} == 1'
+        steps:
+          - name: emit_output
+            type: workflow.output
+            with:
+              iteration: '{{foreach.index}}'
+              item: '{{foreach.item}}'
+`,
+        inputs: {
+          items: ['item1', 'item2', 'item3', 'item4'],
+        },
+      });
+
+      // Get all log_iteration step executions
+      const logSteps = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).filter((se) => se.stepId === 'log_iteration');
+
+      // Should have exactly 2 log steps (iterations 0 and 1)
+      expect(logSteps.length).toBe(2);
+
+      // Verify first log step is for iteration 0
+      expect(logSteps[0].scopeStack?.[0]?.nestedScopes?.[0]?.scopeId).toBe('0');
+
+      // Verify second log step is for iteration 1
+      expect(logSteps[1].scopeStack?.[0]?.nestedScopes?.[0]?.scopeId).toBe('1');
+    });
+
+    it('should execute workflow.output step with correct scope', async () => {
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: `
+outputs:
+  - name: result
+    type: string
+
+steps:
+  - name: loopStep
+    type: foreach
+    foreach: '{{inputs.items}}'
+    steps:
+      - name: check_and_output
+        type: if
+        condition: '{{foreach.index}} == 1'
+        steps:
+          - name: emit_output
+            type: workflow.output
+            with:
+              result: 'Loop item {{foreach.item}}'
+`,
+        inputs: {
+          items: ['item1', 'item2', 'item3'],
+        },
+      });
+
+      // Find the workflow.output step execution
+      const outputStep = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).find((se) => se.stepType === 'workflow.output');
+
+      expect(outputStep).toBeDefined();
+      expect(outputStep?.status).toBe(ExecutionStatus.COMPLETED);
+
+      // Verify it's in the correct scope (foreach iteration 1, if branch)
+      expect(outputStep?.scopeStack?.[0]?.stepId).toBe('loopStep');
+      expect(outputStep?.scopeStack?.[0]?.nestedScopes?.[0]?.scopeId).toBe('1');
+      expect(outputStep?.scopeStack?.[1]?.stepId).toBe('check_and_output');
+    });
+
+    it('should not execute iterations after workflow.output', async () => {
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: `
+outputs:
+  - name: value
+    type: number
+
+steps:
+  - name: loopStep
+    type: foreach
+    foreach: '{{inputs.items}}'
+    steps:
+      - name: log_iteration
+        type: log
+        with:
+          message: 'Item {{foreach.index}}'
+
+      - name: check_and_output
+        type: if
+        condition: '{{foreach.index}} == 1'
+        steps:
+          - name: emit_output
+            type: workflow.output
+            with:
+              value: '{{foreach.index}}'
+`,
+        inputs: {
+          items: ['a', 'b', 'c', 'd'],
+        },
+      });
+
+      const logSteps = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).filter((se) => se.stepId === 'log_iteration');
+
+      // Should not have log steps for iterations 2 and 3
+      const iter2Steps = logSteps.filter(
+        (se) => se.scopeStack?.[0]?.nestedScopes?.[0]?.scopeId === '2'
+      );
+      const iter3Steps = logSteps.filter(
+        (se) => se.scopeStack?.[0]?.nestedScopes?.[0]?.scopeId === '3'
+      );
+
+      expect(iter2Steps.length).toBe(0);
+      expect(iter3Steps.length).toBe(0);
+
+      // Should only have 2 total log executions
+      expect(logSteps.length).toBe(2);
+    });
+  });
 });
