@@ -19,6 +19,8 @@ export {
   routingDefinitionListSchema,
 } from './src/models/ingest/routing';
 
+export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
+export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root';
 export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
@@ -137,15 +139,13 @@ export { emptyAssets } from './src/helpers/empty_assets';
 
 export {
   type Feature,
-  type SystemFeature,
-  type FeatureWithFilter,
   type FeatureType,
   isFeature,
   featureSchema,
   featureTypeSchema,
-  featureWithFilterSchema,
-  isFeatureWithFilter,
 } from './src/feature';
+
+export { type System, systemSchema, isSystem } from './src/system';
 
 export {
   type BaseSimulationError,
