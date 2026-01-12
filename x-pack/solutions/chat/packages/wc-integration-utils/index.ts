@@ -12,4 +12,3 @@ export {
   createFilterClauses,
   hitToContent,
 } from './src/tools';
-

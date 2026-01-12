@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-
-import { test as base, apiTest as apiBase, mergeTests } from '@kbn/scout';
+import { test as base, apiTest as apiBase } from '@kbn/scout';
 import type { ApiServicesFixture } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
