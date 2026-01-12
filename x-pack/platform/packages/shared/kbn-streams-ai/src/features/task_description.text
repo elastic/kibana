@@ -1,0 +1,71 @@
+Task: Create a system prompt for an LLM to extract "features" from log data.
+
+## What are Features?
+Features are stable facts about real system entities (environment, deployment, agent, runtime, etc.) that are explicitly supported by log evidence. They follow the BaseFeature schema with properties: type, name, description, value (object), confidence (0-100), evidence (array), tags (array), and meta (object).
+
+## Feature Types
+- **infrastructure**: Cloud providers, container orchestration (Kubernetes, Docker), operating systems, networking, hardware
+- **technology**: Programming languages, web servers, databases, libraries, frameworks (e.g., nginx, postgresql, log4j, React)
+- **dependency**: Relationships between systems (service-to-service calls, database connections, API integrations)
+
+## Consolidation Strategy
+- **Consolidate** when properties belong to the same entity and appear together in logs
+  - Example: `{name: "cloud_deployment", value: {provider: "aws", region: "eu-west-1"}}` if both appear together
+- **Separate** distinct technologies even if related
+  - Example: Separate features for nginx, postgresql, redis (not one combined feature)
+
+## Naming Conventions
+- Use **generic names** with specific values in the value object
+  - Good: `{name: "programming_language", value: {language: "java", version: "11"}}`
+  - Bad: `{name: "java_runtime", value: {version: "11"}}`
+- Use snake_case for feature names
+- Keep names descriptive but concise
+
+## Inference Rules
+- Allow **one-level inference** from strong patterns with lower confidence
+  - Example: "NullPointerException" in logs → infer `programming_language: java` with confidence 40-60
+  - Must tag inferred features with "inferred" tag
+- Accept features with confidence ≥ 30 if evidence supports them
+- Extract version numbers when available (important for CVE/vulnerability analysis)
+- **Version formatting**: Record only semantic version numbers, strip codenames and extra labels
+  - Example: `attributes.host.os.version: 20.04.6 LTS (Focal Fossa)` → record as `version: "20.04.6"`
+  - Remove codenames, release names, edition labels (LTS, Enterprise, etc.) from version values
+
+## Confidence Scoring
+- 90-100: Explicit, unambiguous evidence
+- 70-89: Strong patterns with multiple corroborating signals
+- 50-69: Clear indicators with some ambiguity
+- 30-49: Weak inference from patterns (tag as "inferred")
+
+## Evidence Requirements
+- Provide specific examples from logs (direct quotes or field:value pairs)
+- Multiple pieces of evidence strengthen confidence
+- Evidence must support the feature claim
+
+## Purpose & Downstream Use
+These features will be used as input for another LLM workflow that generates:
+- Queries for significant events
+- Error pattern detection
+- CVE and vulnerability queries
+This is why extracting libraries/frameworks (like log4j) and their versions is important—the downstream system needs to know what technologies are present to generate relevant security and error queries.
+
+## Input Context
+The LLM receives:
+- dataset_analysis: Field mappings, statistics, patterns from the logs
+- sample_documents: 10 actual log examples
+
+## Output Format
+Return features following the BaseFeature schema structure using the finalize_features tool.
+
+## Examples to Include
+1. Infrastructure feature with clean semantic version (e.g., OS version stripped of codenames)
+2. Infrastructure feature with consolidation (cloud provider + region)
+3. Technology feature with version (e.g., log4j with version number)
+4. Inferred feature with lower confidence (e.g., Java inferred from exceptions)
+5. Dependency feature (e.g., service connecting to database)
+
+## Style Requirements
+- Keep prompt concise (400-600 words)
+- Use clear, directive language (imperatives: "Extract", "Consolidate", "Tag")
+- Provide concrete examples over abstract descriptions
+- Emphasize practical application for query generation

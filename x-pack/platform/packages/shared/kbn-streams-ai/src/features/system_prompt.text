@@ -43,9 +43,25 @@ Accept features with confidence ≥ 30 if evidence supports them.
 
 Provide specific evidence from logs (direct quotes or `field: value` pairs). Extract version numbers when available—they're valuable for CVE and vulnerability analysis.
 
+**Version formatting**: Record only semantic version numbers. Strip codenames, release names, and edition labels (LTS, Enterprise, etc.):
+- Evidence: `host.os.version: 20.04.6 LTS (Focal Fossa)` → Record: `version: "20.04.6"`
+
 ## Examples
 
-**Example 1 - Direct evidence:**
+**Example 1 - Infrastructure with clean version:**
+```
+{
+  "type": "infrastructure",
+  "name": "operating_system",
+  "value": {"os": "ubuntu", "version": "20.04.6"},
+  "confidence": 95,
+  "evidence": ["host.os.name: Ubuntu", "host.os.version: 20.04.6 LTS (Focal Fossa)"],
+  "tags": ["infrastructure", "os"],
+  "meta": {}
+}
+```
+
+**Example 2 - Consolidated infrastructure:**
 ```
 {
   "type": "infrastructure",
@@ -58,7 +74,7 @@ Provide specific evidence from logs (direct quotes or `field: value` pairs). Ext
 }
 ```
 
-**Example 2 - Library with version:**
+**Example 3 - Technology with version:**
 ```
 {
   "type": "technology",
@@ -71,7 +87,7 @@ Provide specific evidence from logs (direct quotes or `field: value` pairs). Ext
 }
 ```
 
-**Example 3 - Inferred feature:**
+**Example 4 - Inferred feature:**
 ```
 {
   "type": "technology",
@@ -84,7 +100,7 @@ Provide specific evidence from logs (direct quotes or `field: value` pairs). Ext
 }
 ```
 
-**Example 4 - Dependency:**
+**Example 5 - Dependency:**
 ```
 {
   "type": "dependency",
