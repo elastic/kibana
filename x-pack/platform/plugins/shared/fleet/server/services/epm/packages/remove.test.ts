@@ -116,14 +116,16 @@ describe('removeInstallation', () => {
 describe('deleteESAsset', () => {
   it('should not delete @custom components template', async () => {
     const esClient = elasticsearchServiceMock.createInternalClient();
-    await deleteESAssets(
-      [
-        {
-          id: 'logs@custom',
-          type: ElasticsearchAssetType.componentTemplate,
-        },
-      ],
-      esClient
+    await Promise.all(
+      deleteESAssets(
+        [
+          {
+            id: 'logs@custom',
+            type: ElasticsearchAssetType.componentTemplate,
+          },
+        ],
+        esClient
+      )
     );
 
     expect(esClient.cluster.deleteComponentTemplate).not.toBeCalled();
@@ -131,14 +133,16 @@ describe('deleteESAsset', () => {
 
   it('should delete @package components template', async () => {
     const esClient = elasticsearchServiceMock.createInternalClient();
-    await deleteESAssets(
-      [
-        {
-          id: 'logs-nginx.access@package',
-          type: ElasticsearchAssetType.componentTemplate,
-        },
-      ],
-      esClient
+    await Promise.all(
+      deleteESAssets(
+        [
+          {
+            id: 'logs-nginx.access@package',
+            type: ElasticsearchAssetType.componentTemplate,
+          },
+        ],
+        esClient
+      )
     );
 
     expect(esClient.cluster.deleteComponentTemplate).toBeCalledWith(
