@@ -38,7 +38,7 @@ export const oauthAuthorizeRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_oauth_authorize`,
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_start_oauth_flow`,
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       validate: {
         params: paramsSchema,

@@ -25,7 +25,7 @@ export function useOAuthAuthorize() {
         const { authorizationUrl } = await http!.post<OAuthAuthorizeResponse>(
           `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(
             connectorId
-          )}/_oauth_authorize`,
+          )}/_start_oauth_flow`,
           {
             body: JSON.stringify({}),
           }

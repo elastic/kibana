@@ -43,9 +43,9 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  *
  * ## How it works:
  * 1. User clicks the "Authorize" button in the connector UI
- * 2. oauth_authorize route generates PKCE parameters and redirects the user to the provider's authorization page
- * 3. User authorizes the app on the provider's site
- * 4. Provider redirects back to the oauth_callback route with the authorization code
+ * 2. _start_oauth_flow route generates PKCE parameters and returns the provider's authorization URL
+ * 3. UI opens the authorization URL where user authorizes the app
+ * 4. Provider redirects back to the _oauth_callback route with the authorization code
  * 5. Callback route exchanges code for access/refresh tokens and stores them
  * 6. Tokens are auto-refreshed when expired during connector execution
  *
@@ -79,7 +79,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * ```
  *
  * Users will fill in their client ID, client secret, and can customize URLs/scopes if needed.
- * The oauth_authorize and oauth_callback routes are generic and work with any provider.
+ * The _start_oauth_flow and _oauth_callback routes are generic and work with any provider.
  */
 export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
   id: 'oauth_authorization_code',
