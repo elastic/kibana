@@ -11,7 +11,8 @@ fi
 source .buildkite/scripts/common/util.sh
 
 # Moon takes a long while to warm up before starting to execute anything.
-# If we want to use for setup/sync actions, we have to change this
+# We disable Moon actions here to avoid that overhead; if we want to use Moon for
+# setup/sync actions in the future, we will need to remove or conditionally set this variable.
 export MOON_NO_ACTIONS=true
 
 # Set up general-purpose tokens and credentials

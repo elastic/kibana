@@ -18,8 +18,8 @@ if is_pr && ! is_auto_commit_disabled; then
   desc="node scripts/eslint_all_files --fix"
   node scripts/eslint_all_files --fix
 else
-  desc="node scripts/eslint_all_files --fix --update-cache"
-  node scripts/eslint_all_files --fix --update-cache
+  desc="node scripts/eslint_all_files --update-cache"
+  node scripts/eslint_all_files --update-cache
 fi
 
 eslint_exit=$?
