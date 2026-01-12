@@ -12,7 +12,7 @@ import { BehaviorSubject, firstValueFrom, merge } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -26,12 +26,10 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -43,6 +41,7 @@ import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
+import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -259,14 +258,6 @@ export const getSearchEmbeddableFactory = ({
             };
           }, []);
 
-          const viewMode = useMemo(() => {
-            if (!savedSearch.searchSource) return;
-            return getValidViewMode({
-              viewMode: savedSearch.viewMode,
-              isEsqlMode: isEsqlMode(savedSearch),
-            });
-          }, [savedSearch]);
-
           const dataView = useMemo(() => {
             const hasDataView = (dataViews ?? []).length > 0;
             if (!hasDataView) {
@@ -313,12 +304,8 @@ export const getSearchEmbeddableFactory = ({
           );
 
           const renderAsFieldStatsTable = useMemo(
-            () =>
-              Boolean(discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS)) &&
-              viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
-              Boolean(dataView) &&
-              Array.isArray(savedSearch.columns),
-            [savedSearch, dataView, viewMode]
+            () => isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings),
+            [savedSearch, dataView]
           );
 
           return (

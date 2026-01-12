@@ -235,7 +235,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 target="_blank"
                 iconSide="right"
                 iconType="popout"
-                onClick={(e) => {
+                onClick={() => {
                   // Track telemetry for opening service
                   if (serviceKey) {
                     telemetryService.trackLinkClicked({
@@ -311,7 +311,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   };
 
   return (
-    <EuiPanel hasBorder paddingSize="m" color={isCardDisabled ? 'subdued' : 'plain'}>
+    <EuiPanel hasBorder paddingSize="l" color={isCardDisabled ? 'subdued' : 'plain'}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -333,7 +333,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           )}
 
           <EuiSpacer size="s" />
-          <EuiText size="s">
+          <EuiText size="s" color="subdued">
             {description}{' '}
             {learnMoreUrl && (
               <EuiLink

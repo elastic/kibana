@@ -37,8 +37,8 @@ import { getConnectorType as getXSOARConnectorType } from './xsoar';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { getMcpConnectorType } from './mcp';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 
@@ -78,10 +78,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
-
-  if (experimentalFeatures.agentBuilderExternalMcpOn) {
-    actions.registerSubActionConnectorType(getMcpConnectorType());
-  }
+  actions.registerSubActionConnectorType(getMcpConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());

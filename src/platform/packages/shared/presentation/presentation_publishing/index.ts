@@ -35,6 +35,8 @@ export type { FetchContext } from './interfaces/fetch/fetch_context';
 export {
   type PublishesPauseFetch,
   apiPublishesPauseFetch,
+  type PublishesEditablePauseFetch,
+  apiPublishesEditablePauseFetch,
 } from './interfaces/fetch/publishes_pause_fetch';
 export {
   initializeTimeRangeManager,
@@ -42,6 +44,14 @@ export {
   type SerializedTimeRange,
 } from './interfaces/fetch/time_range_manager';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
+export {
+  apiAppliesFilters,
+  type AppliesFilters,
+  apiAppliesTimeslice,
+  type AppliesTimeslice,
+  apiHasUseGlobalFiltersSetting,
+  type HasUseGlobalFiltersSetting,
+} from './interfaces/fetch/applies_filters';
 export {
   apiPublishesFilters,
   apiPublishesPartialUnifiedSearch,
@@ -59,6 +69,9 @@ export {
 export {
   apiPublishesProjectRouting,
   type PublishesProjectRouting,
+  apiPublishesProjectRoutingOverrides,
+  type ProjectRoutingOverrides,
+  type PublishesProjectRoutingOverrides,
 } from './interfaces/fetch/publishes_project_routing';
 export {
   apiHasAppContext,

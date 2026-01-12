@@ -1752,6 +1752,74 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.ADD_PANEL_LEGACY_GROUP",
+        "type": "Object",
+        "tags": [],
+        "label": "ADD_PANEL_LEGACY_GROUP",
+        "description": [],
+        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_LEGACY_GROUP.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_LEGACY_GROUP.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_LEGACY_GROUP.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_LEGACY_GROUP.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.ADD_PANEL_OTHER_GROUP",
         "type": "Object",
         "tags": [],
@@ -2315,7 +2383,7 @@
             "\nRegister legacyURLTransform for an embeddable type.\nLegacyURLTransform is used to convert StoredEmbeddableState from URL into EmbeddableState."
           ],
           "signature": [
-            "(type: string, getTransformOut: () => Promise<((storedState: object, references?: ",
+            "(type: string, getTransformOut: () => Promise<((storedState: object, panelReferences?: ",
             {
               "pluginId": "@kbn/content-management-utils",
               "scope": "server",
@@ -2323,7 +2391,15 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[] | undefined) => object) | undefined>) => void"
+            "[] | undefined, containerReferences?: ",
+            {
+              "pluginId": "@kbn/content-management-utils",
+              "scope": "server",
+              "docId": "kibKbnContentManagementUtilsPluginApi",
+              "section": "def-server.Reference",
+              "text": "Reference"
+            },
+            "[] | undefined, id?: string | undefined) => object) | undefined>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
@@ -2352,7 +2428,7 @@
               "label": "getTransformOut",
               "description": [],
               "signature": [
-                "() => Promise<((storedState: object, references?: ",
+                "() => Promise<((storedState: object, panelReferences?: ",
                 {
                   "pluginId": "@kbn/content-management-utils",
                   "scope": "server",
@@ -2360,7 +2436,15 @@
                   "section": "def-server.Reference",
                   "text": "Reference"
                 },
-                "[] | undefined) => object) | undefined>"
+                "[] | undefined, containerReferences?: ",
+                {
+                  "pluginId": "@kbn/content-management-utils",
+                  "scope": "server",
+                  "docId": "kibKbnContentManagementUtilsPluginApi",
+                  "section": "def-server.Reference",
+                  "text": "Reference"
+                },
+                "[] | undefined, id?: string | undefined) => object) | undefined>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
               "deprecated": false,
@@ -2623,7 +2707,7 @@
           "label": "getLegacyURLTransform",
           "description": [],
           "signature": [
-            "(type: string) => Promise<((storedState: object, references?: ",
+            "(type: string) => Promise<((storedState: object, panelReferences?: ",
             {
               "pluginId": "@kbn/content-management-utils",
               "scope": "server",
@@ -2631,7 +2715,15 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[] | undefined) => object) | undefined>"
+            "[] | undefined, containerReferences?: ",
+            {
+              "pluginId": "@kbn/content-management-utils",
+              "scope": "server",
+              "docId": "kibKbnContentManagementUtilsPluginApi",
+              "section": "def-server.Reference",
+              "text": "Reference"
+            },
+            "[] | undefined, id?: string | undefined) => object) | undefined>"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
@@ -3380,7 +3472,7 @@
         "label": "EmbeddableTransforms",
         "description": [],
         "signature": [
-          "{ transformOutInjectsReferences?: boolean | undefined; transformOut?: ((storedState: StoredEmbeddableState, references?: ",
+          "{ transformOut?: ((storedState: StoredEmbeddableState, panelReferences?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -3388,7 +3480,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[] | undefined) => EmbeddableState) | undefined; transformIn?: ((state: EmbeddableState) => { state: StoredEmbeddableState; references?: ",
+          "[] | undefined, containerReferences?: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined, id?: string | undefined) => EmbeddableState) | undefined; transformIn?: ((state: EmbeddableState) => { state: StoredEmbeddableState; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

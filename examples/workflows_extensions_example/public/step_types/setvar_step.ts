@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { icon as pencilIcon } from '@elastic/eui/es/components/icon/assets/pencil';
 import { i18n } from '@kbn/i18n';
 import { SetVarStepTypeId, setVarStepCommonDefinition } from '../../common/step_types/setvat_step';
 
 export const setVarStepDefinition: PublicStepDefinition = {
   ...setVarStepCommonDefinition,
-  icon: pencilIcon,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({ default: icon }))
+  ),
   label: i18n.translate('workflowsExtensionsExample.setVarStep.label', {
     defaultMessage: 'Set Variable',
   }),

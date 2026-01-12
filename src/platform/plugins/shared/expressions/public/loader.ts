@@ -8,11 +8,11 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { delay, filter, map, shareReplay } from 'rxjs';
+import { BehaviorSubject, delay, filter, map, shareReplay, Subject } from 'rxjs';
 import { defaults } from 'lodash';
 import type { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import type { Adapters } from '@kbn/inspector-plugin/public';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { IExpressionLoaderParams } from './types';
 import type { ExpressionAstExpression } from '../common';
 import type { ExecutionContract } from '../common/execution/execution_contract';
@@ -97,12 +97,12 @@ export class ExpressionLoader {
     this.dataSubject.complete();
     this.loadingSubject.complete();
     this.renderHandler.destroy();
-    this.cancel();
+    this.cancel(AbortReason.CLEANUP);
     this.subscription?.unsubscribe();
   }
 
-  cancel() {
-    this.execution?.cancel();
+  cancel(reason?: AbortReason) {
+    this.execution?.cancel(reason);
   }
 
   getExpression(): string | undefined {
@@ -138,7 +138,7 @@ export class ExpressionLoader {
   ) => {
     this.subscription?.unsubscribe();
     if (this.execution && this.execution.isPending) {
-      this.execution.cancel();
+      this.execution.cancel(AbortReason.REPLACED);
     }
     this.setParams(params);
     this.execution = getExpressionsService().execute(expression, params.context, {

@@ -127,3 +127,10 @@ export const parseIntervalAsMillisecond = memoize((interval: Interval): number =
 });
 
 const isNumeric = (numAsStr: string) => /^\d+$/.test(numAsStr);
+
+export const timePeriodBeforeDate = (date: Date, timePeriod: string): Date => {
+  const result = new Date(date.valueOf());
+  const milisecFromTime = parseIntervalAsMillisecond(timePeriod);
+  result.setMilliseconds(result.getMilliseconds() - milisecFromTime);
+  return result;
+};

@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
@@ -16,7 +15,6 @@ import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
-import { isSearchSourceReference } from '../out/transform_references_out';
 
 export const transformDashboardIn = (
   dashboardState: DashboardState
@@ -40,30 +38,15 @@ export const transformDashboardIn = (
       query,
       references: incomingReferences,
       tags,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       time_range,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       refresh_interval,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       project_routing,
       ...rest
     } = dashboardState;
 
-    // TODO remove when references are removed from API
-    const hasTagReference = (incomingReferences ?? []).some(
-      ({ type }) => type === tagSavedObjectTypeName
-    );
-    if (hasTagReference) {
-      throw new Error(`Tag references are not supported. Pass tags in with 'data.tags'`);
+    if (incomingReferences && incomingReferences.length) {
+      throw new Error(`References are not supported.`);
     }
-    // TODO remove when references are removed from API
-    const hasSearchSourceReference = (incomingReferences ?? []).some(isSearchSourceReference);
-    if (hasSearchSourceReference) {
-      throw new Error(
-        `Search source references are not supported. Pass filters in with injected references'`
-      );
-    }
-
     const tagReferences = transformTagsIn(tags);
 
     const {
@@ -83,11 +66,16 @@ export const transformDashboardIn = (
       query
     );
 
+    const { controlsJSON, references: controlGroupReferences } =
+      transformControlGroupIn(controlGroupInput);
+
     const attributes = {
       description: '',
       ...rest,
-      ...(controlGroupInput && {
-        controlGroupInput: transformControlGroupIn(controlGroupInput),
+      ...(controlsJSON && {
+        controlGroupInput: {
+          panelsJSON: controlsJSON,
+        },
       }),
       optionsJSON: transformOptionsIn(options),
       panelsJSON,
@@ -103,8 +91,8 @@ export const transformDashboardIn = (
       attributes,
       references: [
         ...tagReferences,
-        ...(incomingReferences ?? []),
         ...panelReferences,
+        ...controlGroupReferences,
         ...searchSourceReferences,
       ],
       error: null,

@@ -15,12 +15,14 @@ import { ExperimentalFeaturesService } from '../../../../services';
 import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useLicense } from '../../../../../../hooks/use_license';
+import { useStartServices } from '../../../../../../hooks/use_core';
 
 import { AgentBulkActions } from './bulk_actions';
 
 jest.mock('../../../../../../services/experimental_features');
 jest.mock('../../../../../../hooks/use_license');
 jest.mock('../../../../../../hooks/use_authz');
+jest.mock('../../../../../../hooks/use_core');
 jest.mock('../../components/agent_reassign_policy_modal');
 jest.mock('../hooks/export_csv', () => ({
   useExportCSV: jest.fn().mockReturnValue({
@@ -30,6 +32,7 @@ jest.mock('../hooks/export_csv', () => ({
 
 const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+const mockUseStartServices = useStartServices as jest.Mock;
 
 const defaultProps = {
   nAgentsInTable: 10,
@@ -64,6 +67,27 @@ async function navigateToSubmenu(
 }
 
 describe('AgentBulkActions', () => {
+  const mockStartServices = (isServerlessEnabled?: boolean) => {
+    mockUseStartServices.mockReturnValue({
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+        },
+      },
+      docLinks: {
+        links: {
+          fleet: {},
+          logstash: {},
+          kibana: {},
+          observability: {},
+        },
+      },
+      cloud: {
+        isServerlessEnabled,
+      },
+    });
+  };
+
   beforeAll(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
       enableAgentPrivilegeLevelChange: true,
@@ -75,6 +99,7 @@ describe('AgentBulkActions', () => {
       },
       integrations: {},
     } as any);
+    mockStartServices(true);
   });
 
   beforeEach(() => {
@@ -207,6 +232,59 @@ describe('AgentBulkActions', () => {
 
       expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeEnabled();
     });
+    it('should show export to CSV action if not in serverless mode', async () => {
+      mockStartServices(false);
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgents: true,
+          readAgents: true,
+        },
+        integrations: {},
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      await navigateToSubmenu(results, 'Maintenance and diagnostics');
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
+    });
+
+    it('should disable export to CSV action in serverless mode', async () => {
+      mockStartServices(true);
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgents: true,
+          readAgents: true,
+        },
+        integrations: {},
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      await navigateToSubmenu(results, 'Maintenance and diagnostics');
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).not.toBeInTheDocument();
+    });
   });
 
   describe('When in query selection mode', () => {
@@ -325,6 +403,60 @@ describe('AgentBulkActions', () => {
       await navigateToSubmenu(results, 'Security and removal');
 
       expect(results.queryByText(/Remove root privilege/)).not.toBeInTheDocument();
+    });
+
+    it('should show export to CSV action if not in serverless mode', async () => {
+      mockStartServices(false);
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgents: true,
+          readAgents: true,
+        },
+        integrations: {},
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      await navigateToSubmenu(results, 'Maintenance and diagnostics');
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).toBeInTheDocument();
+    });
+
+    it('should hide export to CSV action if in serverless mode', async () => {
+      mockStartServices(true);
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgents: true,
+          readAgents: true,
+        },
+        integrations: {},
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      await navigateToSubmenu(results, 'Maintenance and diagnostics');
+
+      const exportToCSVButton = results.queryByTestId('bulkAgentExportBtn');
+      expect(exportToCSVButton).not.toBeInTheDocument();
     });
   });
 

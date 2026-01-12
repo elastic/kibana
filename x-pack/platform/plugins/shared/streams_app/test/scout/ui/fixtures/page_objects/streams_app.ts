@@ -9,11 +9,11 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import {
-  expect,
+  EuiCodeBlockWrapper,
+  EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
-  EuiComboBoxWrapper,
-  EuiCodeBlockWrapper,
+  expect,
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
@@ -66,7 +66,6 @@ export class StreamsApp {
 
   async goto() {
     await this.page.gotoApp('streams');
-    await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
   }
 
   async gotoStreamMainPage() {
@@ -103,6 +102,10 @@ export class StreamsApp {
 
   async gotoAdvancedTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'advanced');
+  }
+
+  async gotoAttachmentsTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'attachments');
   }
 
   async clickStreamNameLink(streamName: string) {
@@ -616,6 +619,11 @@ export class StreamsApp {
     await this.page.getByRole('button', { name: 'Delete processor' }).click();
   }
 
+  async waitForModifiedFieldsDetection() {
+    const badge = this.page.getByTestId('streamsAppModifiedFieldsBadge');
+    await expect(badge).toBeVisible({ timeout: 30_000 });
+  }
+
   async saveStepsListChanges() {
     await this.page.getByRole('button', { name: 'Save changes' }).click();
   }
@@ -680,7 +688,9 @@ export class StreamsApp {
   }
 
   async confirmChangesInReviewModal() {
-    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
+    const submitButton = this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton');
+    await expect(submitButton).toBeEnabled({ timeout: 30_000 });
+    await submitButton.click();
   }
 
   /**
@@ -873,12 +883,177 @@ export class StreamsApp {
   }
 
   /**
+   * Pipeline Suggestions utility methods
+   */
+  getSuggestPipelineButton() {
+    return this.page.getByTestId('streamsAppGenerateSuggestionButton');
+  }
+
+  async clickSuggestPipelineButton() {
+    const button = this.getSuggestPipelineButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getSuggestPipelinePanel() {
+    return this.page.getByTestId('streamsAppSuggestPipelinePanel');
+  }
+
+  getPipelineSuggestionCallout() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionCallout');
+  }
+
+  getPipelineSuggestionAcceptButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionAcceptButton');
+  }
+
+  async acceptPipelineSuggestion() {
+    const button = this.getPipelineSuggestionAcceptButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getPipelineSuggestionRejectButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionRejectButton');
+  }
+
+  async rejectPipelineSuggestion() {
+    const button = this.getPipelineSuggestionRejectButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getRegeneratePipelineSuggestionButton() {
+    return this.page
+      .getByTestId('streamsAppGenerateSuggestionButton')
+      .filter({ hasText: 'Regenerate' });
+  }
+
+  async regeneratePipelineSuggestion() {
+    const regenerateButton = this.getRegeneratePipelineSuggestionButton();
+    await expect(regenerateButton).toBeVisible();
+    await regenerateButton.click();
+  }
+
+  /**
    * Share utility methods
    */
 
   async closeFlyout() {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
     await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
+  }
+
+  // Attachments utility methods
+  async expectAttachmentsEmptyPromptVisible() {
+    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible();
+  }
+
+  async clickAddAttachmentsButton() {
+    await this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton').click();
+  }
+
+  async expectAddAttachmentFlyoutVisible() {
+    await expect(
+      this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable')
+    ).toBeVisible();
+  }
+
+  async expectAttachmentInFlyout(attachmentTitle: string) {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    await expect(flyoutTable.getByText(attachmentTitle)).toBeVisible();
+  }
+
+  async closeAddAttachmentFlyout() {
+    await this.page.getByTestId('streamsAppAddAttachmentFlyoutCancelButton').click();
+  }
+
+  async selectAllAttachmentsInFlyout() {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    // Click the header checkbox to select all
+    await flyoutTable.locator('thead input[type="checkbox"]').click();
+  }
+
+  async clickAddToStreamButton() {
+    await this.page.getByTestId('streamsAppAddAttachmentFlyoutAddAttachmentsButton').click();
+  }
+
+  async expectAttachmentsTableVisible() {
+    await expect(this.page.getByTestId('streamsAppStreamDetailAttachmentsTable')).toBeVisible();
+  }
+
+  async expectAttachmentInTable(attachmentTitle: string) {
+    const table = this.page.getByTestId('streamsAppStreamDetailAttachmentsTable');
+    await expect(table.getByText(attachmentTitle)).toBeVisible();
+  }
+
+  async expectAttachmentsCount(count: number) {
+    // Use exact match to avoid matching toast notifications like "3 attachments were added to..."
+    await expect(this.page.getByText(`${count} Attachments`, { exact: true })).toBeVisible();
+  }
+
+  async selectAllAttachmentsInTable() {
+    const table = this.page.getByTestId('streamsAppStreamDetailAttachmentsTable');
+    // Click the header checkbox to select all
+    await table.locator('thead input[type="checkbox"]').click();
+  }
+
+  async clickSelectedAttachmentsLink() {
+    await this.page.getByTestId('streamsAppStreamDetailSelectedAttachmentsLink').click();
+  }
+
+  async clickRemoveAttachmentsInPopover() {
+    await this.page.getByText('Remove attachments').click();
+  }
+
+  async confirmRemoveAttachments() {
+    await this.page.getByTestId('streamsAppConfirmAttachmentModalConfirmButton').click();
+  }
+
+  async clickAttachmentDetailsButton(attachmentTitle: string) {
+    const table = this.page.getByTestId('streamsAppStreamDetailAttachmentsTable');
+    // Find the row containing the attachment title, then click the expand button within that row
+    const row = table.locator('tr').filter({ hasText: attachmentTitle });
+    await row.getByTestId('streamsAppAttachmentDetailsButton').click();
+  }
+
+  async expectAttachmentDetailsFlyoutVisible() {
+    await expect(
+      this.page.getByTestId('streamsAppAttachmentDetailsFlyoutGoToButton')
+    ).toBeVisible();
+  }
+
+  async expectAttachmentDetailsFlyoutTitle(title: string) {
+    // The title is in an h2 element within the flyout header
+    const flyoutTitle = this.page.locator('.euiFlyoutHeader h2');
+    await expect(flyoutTitle).toHaveText(title);
+  }
+
+  async expectAttachmentDetailsFlyoutDescription(description: string) {
+    // The description is shown in the first InfoPanel - scope to the flyout
+    const flyout = this.page.locator('.euiFlyout');
+    const descriptionText = flyout.getByText(description);
+    await expect(descriptionText).toBeVisible();
+  }
+
+  async expectAttachmentDetailsFlyoutType(typeLabel: string) {
+    // The type badge is inside the flyout - scope to the flyout to avoid matching table badges
+    const flyout = this.page.locator('.euiFlyout');
+    const typeBadge = flyout.getByText(typeLabel, { exact: true });
+    await expect(typeBadge).toBeVisible();
+  }
+
+  async expectAttachmentDetailsFlyoutHasStream(streamName: string) {
+    const streamLink = this.page.getByTestId('streamsAppAttachmentDetailsFlyoutStreamLink');
+    await expect(streamLink).toHaveText(streamName);
+  }
+
+  async closeAttachmentDetailsFlyout() {
+    await this.page.getByTestId('euiFlyoutCloseButton').click();
+  }
+
+  async clickUnlinkInDetailsFlyout() {
+    await this.page.getByTestId('streamsAppAttachmentDetailsFlyoutUnlinkButton').click();
   }
 
   async clickProcessorPreviewTab(label: string) {

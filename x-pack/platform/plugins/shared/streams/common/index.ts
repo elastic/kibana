@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { Asset, AssetType } from './assets';
+export type { Query } from './queries';
 export type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
@@ -20,6 +20,7 @@ export {
   ATTACHMENT_SUGGESTIONS_LIMIT,
 } from './constants';
 
+export type { StreamDocsStat } from './doc_counts';
 export {
   excludeFrozenQuery,
   kqlQuery,

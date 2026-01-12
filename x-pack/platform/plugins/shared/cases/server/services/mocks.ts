@@ -61,10 +61,13 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     patchCase: jest.fn(),
     patchCases: jest.fn(),
     findCasesGroupedByID: jest.fn(),
+    searchCasesGroupedByID: jest.fn(),
     getCaseStatusStats: jest.fn(),
     executeAggregations: jest.fn(),
     bulkDeleteCaseEntities: jest.fn(),
     getCategories: jest.fn(),
+    getCaseIdsByAttachmentSearch: jest.fn(),
+    searchCases: jest.fn(),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error

@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Interpolation, Theme } from '@emotion/react';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
@@ -38,7 +38,7 @@ import {
   usePlaceholder,
   useFitToContent,
   ReBroadcastMouseDownEvents,
-  RepositionSuggestionWidget,
+  EditorWidgetsCustomizations,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -569,6 +569,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       editorWillUnmount?.();
 
+      // Clear the stored editor reference before it gets disposed, to avoid downstream
+      // effects/hooks attempting to call into a disposed editor instance.
+      setEditor(null);
+
       const model = editor.getModel();
       model?.dispose();
     },
@@ -602,11 +606,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <div
-      css={[styles.container, classNameCss]}
+      css={styles.container}
       onKeyDown={onKeyDown}
       data-test-subj={dataTestSubj ?? 'kibanaCodeEditor'}
       className="kibanaCodeEditor"
     >
+      <Global styles={classNameCss} />
       {accessibilityOverlayEnabled && renderPrompt()}
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
@@ -628,7 +633,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <ReBroadcastMouseDownEvents>
-          <RepositionSuggestionWidget
+          <EditorWidgetsCustomizations
             editor={_editor}
             enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
           >
@@ -673,7 +678,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 links,
               }}
             />
-          </RepositionSuggestionWidget>
+          </EditorWidgetsCustomizations>
         </ReBroadcastMouseDownEvents>
       </FullScreenDisplay>
     </div>

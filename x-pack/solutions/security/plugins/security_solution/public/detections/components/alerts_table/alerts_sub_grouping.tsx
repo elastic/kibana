@@ -12,7 +12,11 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation, NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DynamicGroupingProps, ParsedGroupingAggregation } from '@kbn/grouping/src';
+import type {
+  DynamicGroupingProps,
+  GroupChildComponentRenderer,
+  ParsedGroupingAggregation,
+} from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -67,7 +71,7 @@ interface OwnProps {
   pageIndex: number;
   pageSize: number;
   parentGroupingFilter?: string;
-  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
+  renderChildComponent: GroupChildComponentRenderer<AlertsGroupingAggregation>;
   runtimeMappings: RunTimeMappings;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
@@ -75,6 +79,9 @@ interface OwnProps {
   signalIndexName: string | undefined;
   tableId: TableIdLiteral;
   to: string;
+
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
 
   /**
    * If you're not using this property, multi-value fields will be transformed into a string
@@ -129,6 +136,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   signalIndexName,
   tableId,
   to,
+  additionalToolbarControls = [],
   multiValueFieldsToFlatten,
   pageScope = PageScope.alerts,
   onAggregationsChange,
@@ -332,7 +340,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         activePage: pageIndex,
         data: aggs,
         groupingLevel,
-        additionalToolbarControls: [inspect],
+        additionalToolbarControls: [...additionalToolbarControls, inspect],
         isLoading: loading || isLoadingGroups,
         itemsPerPage: pageSize,
         onChangeGroupsItemsPerPage,
@@ -358,6 +366,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       pageSize,
       renderChildComponent,
       selectedGroup,
+      additionalToolbarControls,
     ]
   );
 };

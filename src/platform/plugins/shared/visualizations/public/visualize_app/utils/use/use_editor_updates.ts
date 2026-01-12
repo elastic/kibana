@@ -19,6 +19,7 @@ import type {
   IEditorController,
 } from '../../types';
 import { convertFromSerializedVis } from '../../../utils/saved_visualize_utils';
+import type { ProjectRoutingManager } from './use_project_routing';
 
 export const useEditorUpdates = (
   services: VisualizeServices,
@@ -26,7 +27,8 @@ export const useEditorUpdates = (
   setHasUnsavedChanges: (value: boolean) => void,
   appState: VisualizeAppStateContainer | null,
   visInstance: VisualizeEditorVisInstance | undefined,
-  visEditorController: IEditorController | undefined
+  visEditorController: IEditorController | undefined,
+  projectRoutingManager?: ProjectRoutingManager
 ) => {
   const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
   const [currentAppState, setCurrentAppState] = useState<VisualizeAppState>();
@@ -63,6 +65,7 @@ export const useEditorUpdates = (
             filters: filterManager.getFilters(),
             query: queryString.getQuery() as Query,
             searchSessionId: services.data.search.session.getSessionId(),
+            projectRouting: projectRoutingManager?.getProjectRouting(),
           });
         }
       };
@@ -113,6 +116,17 @@ export const useEditorUpdates = (
           }
         });
 
+      // Subscribe to CPS project routing changes for Vega
+      const cpsSubscription = projectRoutingManager
+        ?.getProjectRouting$()
+        .subscribe((projectRouting) => {
+          if (vis.data.searchSource) {
+            vis.data.searchSource.setField('projectRouting', projectRouting);
+          }
+          embeddableHandler.updateInput({ projectRouting });
+          embeddableHandler.reload();
+        });
+
       const unsubscribeStateUpdates = appState.subscribe((state) => {
         setCurrentAppState(state);
         if (savedVis && savedVis.id && !services.history.location.pathname.includes(savedVis.id)) {
@@ -160,6 +174,14 @@ export const useEditorUpdates = (
       const updateOnEmbeddableRendered = () => setIsEmbeddableRendered(true);
       eventEmitter.on('embeddableRendered', updateOnEmbeddableRendered);
 
+      // Set initial projectRouting if available
+      if (projectRoutingManager) {
+        const initialProjectRouting = projectRoutingManager.getProjectRouting();
+        if (initialProjectRouting && vis.data.searchSource) {
+          vis.data.searchSource.setField('projectRouting', initialProjectRouting);
+        }
+      }
+
       reloadVisualization();
 
       return () => {
@@ -169,9 +191,18 @@ export const useEditorUpdates = (
         vis.uiState.off('change', updateOnChange);
         unsubscribeStateUpdates();
         sessionSubscription.unsubscribe();
+        cpsSubscription?.unsubscribe();
       };
     }
-  }, [appState, eventEmitter, visInstance, services, setHasUnsavedChanges, visEditorController]);
+  }, [
+    appState,
+    eventEmitter,
+    visInstance,
+    services,
+    setHasUnsavedChanges,
+    visEditorController,
+    projectRoutingManager,
+  ]);
 
   return { isEmbeddableRendered, currentAppState };
 };

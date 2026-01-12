@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
+import chroma from 'chroma-js';
 import { useEffect } from 'react';
 import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
 
@@ -36,6 +37,10 @@ export function useWorkflowsMonacoTheme() {
         'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
         'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
         'editorHoverWidget.border': euiTheme.colors.borderBaseSubdued,
+        // Subtle highlight for hover - 0.15 alpha means 15% opacity
+        'editor.hoverHighlightBackground': chroma(
+          transparentize(euiTheme.colors.primary, 0.15)
+        ).hex(),
         'editorLineNumber.foreground': euiTheme.colors.textPrimary,
         'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
         'editorIndentGuide.background1': euiTheme.colors.backgroundLightText,

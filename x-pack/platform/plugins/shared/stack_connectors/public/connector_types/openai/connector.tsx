@@ -278,7 +278,15 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                         // a row and add a new one, the stale values will appear
                         readDefaultValueOnForm={!item.isNew}
                         componentProps={{
-                          euiFieldProps: { readOnly, ['data-test-subj']: 'openAIHeadersKeyInput' },
+                          euiFieldProps: {
+                            readOnly,
+                            ['data-test-subj']: 'openAIHeadersKeyInput',
+                            inputRef: (input: HTMLInputElement | null) => {
+                              if (!readOnly && item.isNew && input) {
+                                input.focus();
+                              }
+                            },
+                          },
                         }}
                       />
                     </EuiFlexItem>

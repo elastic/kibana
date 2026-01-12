@@ -7,7 +7,9 @@
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { castArray } from 'lodash';
-import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { existsQuery } from '@kbn/observability-utils-common/es/queries/exists_query';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
+import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
 import type { estypes } from '@elastic/elasticsearch';
 import type { MetricsAPIResponse, MetricsAPIRequest } from '../../../common';
 import type {

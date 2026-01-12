@@ -8,20 +8,17 @@
  */
 
 import { BehaviorSubject, take } from 'rxjs';
-import { getMockedControlGroupApi } from '../controls/mocks/control_mocks';
 import { ClearControlAction } from './clear_control_action';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 const dashboardApi = {
   viewMode$: new BehaviorSubject<ViewMode>('view'),
-};
-const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
   removePanel: jest.fn(),
   replacePanel: jest.fn(),
   addNewPanel: jest.fn(),
   children$: new BehaviorSubject({}),
-});
+};
 
 const clearControlAction = new ClearControlAction();
 const hasSelections$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -29,7 +26,7 @@ const hasSelections$ = new BehaviorSubject<boolean | undefined>(undefined);
 const controlApi = {
   type: 'test',
   uuid: '1',
-  parentApi: controlGroupApi,
+  parentApi: dashboardApi,
   hasSelections$,
   clearSelections: jest.fn(),
 };
@@ -62,7 +59,7 @@ describe('ClearControlAction', () => {
     });
 
     test('should be compatible if there is a selection', async () => {
-      const hasSelections = { ...controlApi, hasSelections$: true };
+      const hasSelections = { ...controlApi, hasSelections$: new BehaviorSubject(true) };
 
       expect(await clearControlAction.isCompatible({ embeddable: hasSelections })).toBe(true);
     });

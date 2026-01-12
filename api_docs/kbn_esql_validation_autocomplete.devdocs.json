@@ -147,6 +147,84 @@
       },
       {
         "parentPluginId": "@kbn/esql-validation-autocomplete",
+        "id": "def-common.getSignatureHelp",
+        "type": "Function",
+        "tags": [],
+        "label": "getSignatureHelp",
+        "description": [],
+        "signature": [
+          "(fullText: string, offset: number, callbacks: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLCallbacks",
+            "text": "ESQLCallbacks"
+          },
+          " | undefined) => Promise<SignatureHelpItem | undefined>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/signature_help/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.getSignatureHelp.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fullText",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/signature_help/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.getSignatureHelp.$2",
+            "type": "number",
+            "tags": [],
+            "label": "offset",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/signature_help/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.getSignatureHelp.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "callbacks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLCallbacks",
+                "text": "ESQLCallbacks"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/signature_help/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-validation-autocomplete",
         "id": "def-common.getSourcesHelper",
         "type": "Function",
         "tags": [],

@@ -10,6 +10,8 @@
 import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { ESQLControlState } from '@kbn/esql-types';
 import useLatest from 'react-use/lib/useLatest';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
@@ -95,9 +97,11 @@ export const SingleTabView = ({
     async ({
       dataViewSpec,
       defaultUrlState,
+      esqlControls,
     }: {
       dataViewSpec?: DataViewSpec | undefined;
       defaultUrlState?: DiscoverAppState;
+      esqlControls?: ControlPanelsState<ESQLControlState>;
     } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,
@@ -120,6 +124,7 @@ export const SingleTabView = ({
             stateContainer,
             customizationService,
             dataViewSpec,
+            esqlControls,
             defaultUrlState,
           },
         })
@@ -135,6 +140,7 @@ export const SingleTabView = ({
 
       initializeTab.current({
         dataViewSpec: historyLocationState?.dataViewSpec,
+        esqlControls: historyLocationState?.esqlControls,
         defaultUrlState: historyLocationState?.defaultState,
       });
     }

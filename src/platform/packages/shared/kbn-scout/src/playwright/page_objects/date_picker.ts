@@ -56,7 +56,7 @@ export class DatePicker {
     await inputFrom.clear();
     await inputFrom.fill(to);
     await this.page.testSubj.click('parseAbsoluteDateFormat');
-    await this.page.testSubj.click('superDatePickerendDatePopoverButton');
+    await this.page.keyboard.press('Escape');
     // and later change start date
     await this.page.testSubj.click('superDatePickerstartDatePopoverButton');
     await this.page.testSubj.click('superDatePickerAbsoluteTab');

@@ -24,13 +24,28 @@ export const ConnectorIconsMap: Map<
 > = new Map([
   [
     '.virustotal',
-    lazy(() => import(/* webpackChunkName: "connectorIconVirustotal" */ './icons/virustotal')),
+    lazy(() => import(/* webpackChunkName: "connectorIconVirustotal" */ './specs/virustotal/icon')),
   ],
   [
     '.alienvault-otx',
     lazy(
-      () => import(/* webpackChunkName: "connectorIconAlienvaultOtx" */ './icons/alienvault_otx')
+      () =>
+        import(/* webpackChunkName: "connectorIconAlienvaultOtx" */ './specs/alienvault_otx/icon')
     ),
   ],
-  ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './icons/notion'))],
+  ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
+  [
+    '.brave-search',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')
+    ),
+  ],
+  [
+    '.github',
+    lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
+  ],
+  [
+    '.jina',
+    lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina')),
+  ],
 ]);

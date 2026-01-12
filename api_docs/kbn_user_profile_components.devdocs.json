@@ -72,6 +72,45 @@
       },
       {
         "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.isValidUserProfileAvatarColor",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidUserProfileAvatarColor",
+        "description": [
+          "\nValidates if the provided color string is a valid hex color."
+        ],
+        "signature": [
+          "(color: string | undefined) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.isValidUserProfileAvatarColor.$1",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [
+              "- The color to validate."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "True if the color is a valid hex color, false otherwise."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
         "id": "def-common.UserAvatar",
         "type": "Function",
         "tags": [],
@@ -1036,7 +1075,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"data-test-subj\" | \"errorMessage\" | \"height\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"height\" | \"data-test-subj\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
@@ -1348,11 +1387,11 @@
               "EuiSelectableLIOption",
               "<{}>> & ",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
               "DisambiguateSet",
               "<",
               "EuiSelectableLIOption",

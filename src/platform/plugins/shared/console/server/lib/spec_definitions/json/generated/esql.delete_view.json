@@ -1,0 +1,21 @@
+{
+  "esql.delete_view": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_query/view/{name}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/product-doc-base-plugin'
   - '@kbn/ai-assistant-connector-selector-action'
+  - '@kbn/ai-agent-confirmation-modal'
 tags:
   - shared-browser
   - package

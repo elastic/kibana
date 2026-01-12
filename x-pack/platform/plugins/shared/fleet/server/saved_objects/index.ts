@@ -34,7 +34,7 @@ import {
   SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
-import { SettingsSchemaV5, SettingsSchemaV6 } from '../types';
+import { SettingsSchemaV5, SettingsSchemaV6, SettingsSchemaV7 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
@@ -180,6 +180,7 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          integration_knowledge_enabled: { type: 'boolean' },
           ssl_secret_storage_requirements_met: { type: 'boolean' },
         },
       },
@@ -255,6 +256,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: SettingsSchemaV6.extends({}, { unknowns: 'ignore' }),
             create: SettingsSchemaV6,
+          },
+        },
+        7: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                integration_knowledge_enabled: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV7,
           },
         },
       },
@@ -1478,6 +1493,37 @@ export const getSavedObjectTypes = (
               accountType: schema.maybe(schema.string()),
               vars: schema.any(),
               packagePolicyCount: schema.number(),
+              created_at: schema.string(),
+              updated_at: schema.string(),
+            }),
+          },
+        },
+        3: {
+          changes: [
+            {
+              type: 'data_removal',
+              removedAttributePaths: ['packagePolicyCount'],
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                namespace: schema.maybe(schema.string()),
+                cloudProvider: schema.string(),
+                accountType: schema.maybe(schema.string()),
+                vars: schema.any(),
+                created_at: schema.string(),
+                updated_at: schema.string(),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
+              cloudProvider: schema.string(),
+              accountType: schema.maybe(schema.string()),
+              vars: schema.any(),
               created_at: schema.string(),
               updated_at: schema.string(),
             }),

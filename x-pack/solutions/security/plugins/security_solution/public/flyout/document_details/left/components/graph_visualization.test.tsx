@@ -234,7 +234,7 @@ describe('GraphVisualization', () => {
       );
     });
 
-    it('calls open entity preview callback for entity - without entity data', async () => {
+    it('should not call open entity preview callback for entity - without entity data', async () => {
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
@@ -263,18 +263,7 @@ describe('GraphVisualization', () => {
       } satisfies NodeViewModel);
 
       // Assert
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'generic-entity-panel',
-          params: {
-            entityId: 'entity-id',
-            scopeId: 'test-scope',
-            isPreviewMode: true,
-            banner: expect.objectContaining({ title: 'Preview entity details' }),
-            isEngineMetadataExist: false,
-          },
-        })
-      );
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
     });
 
     it('calls open entity preview callback for entity - with entity data', async () => {
@@ -305,6 +294,8 @@ describe('GraphVisualization', () => {
               name: 'Admin',
               type: 'Identity',
               sub_type: 'Test User',
+              availableInEntityStore: true,
+              ecsParentField: 'entity',
             },
           },
         ],
@@ -350,6 +341,103 @@ describe('GraphVisualization', () => {
       // Assert
       expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
       expect(mockToasts.addDanger).toHaveBeenCalled();
+    });
+
+    it('calls open grouped entities preview for multiple entities', async () => {
+      const { getByTestId } = render(<GraphVisualization />);
+      expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
+
+      // Wait for lazy-loaded GraphInvestigation to appear
+      await waitFor(() => {
+        expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
+      });
+
+      expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty('onOpenEventPreview');
+      const onOpenEventPreview =
+        jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
+
+      // Act - Grouped entities node with multiple entity documents
+      onOpenEventPreview?.({
+        id: 'grouped-entity-node',
+        shape: 'rectangle',
+        color: 'primary',
+        icon: 'user',
+        count: 3,
+        documentsData: [
+          {
+            id: 'entity-1',
+            type: 'entity',
+            entity: {
+              name: 'User 1',
+              type: 'Identity',
+              sub_type: 'IAM User',
+              ecsParentField: 'user',
+              availableInEntityStore: true,
+            },
+          },
+          {
+            id: 'entity-2',
+            type: 'entity',
+            entity: {
+              name: 'User 2',
+              type: 'Identity',
+              sub_type: 'IAM User',
+              ecsParentField: 'user',
+              availableInEntityStore: true,
+            },
+          },
+          {
+            id: 'entity-3',
+            type: 'entity',
+            entity: {
+              ecsParentField: 'user',
+              availableInEntityStore: false,
+            },
+          },
+        ],
+      } satisfies NodeViewModel);
+
+      // Assert - should open grouped entities preview panel
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'graphGroupedNodePreviewPanel',
+          params: {
+            id: 'grouped-entity-node',
+            scopeId: 'test-scope',
+            isPreviewMode: true,
+            banner: expect.objectContaining({ backgroundColor: 'warning', textColor: 'warning' }),
+            docMode: 'grouped-entities',
+            entityItems: [
+              {
+                itemType: 'entity',
+                id: 'entity-1',
+                type: 'Identity',
+                subType: 'IAM User',
+                icon: 'user',
+                availableInEntityStore: true,
+              },
+              {
+                itemType: 'entity',
+                id: 'entity-2',
+                type: 'Identity',
+                subType: 'IAM User',
+                icon: 'user',
+                availableInEntityStore: true,
+              },
+              {
+                itemType: 'entity',
+                id: 'entity-3',
+                type: undefined,
+                subType: undefined,
+                icon: 'user',
+                availableInEntityStore: false,
+              },
+            ],
+          },
+        })
+      );
+      expect(mockToasts.addDanger).not.toHaveBeenCalled();
     });
 
     it('calls open grouped events preview for multiple events', async () => {

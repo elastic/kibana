@@ -61,25 +61,6 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
             titleSize="xs"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            hasBorder
-            layout="horizontal"
-            title={i18n.translate('xpack.cloudConnect.serviceCards.synthetic.title', {
-              defaultMessage: 'Synthetics',
-            })}
-            description={i18n.translate('xpack.cloudConnect.serviceCards.synthetic.description', {
-              defaultMessage:
-                'Proactive, automated monitoring for apps and APIs—catch issues early, get deep diagnostics, and integrate easily.',
-            })}
-            titleSize="xs"
-            betaBadgeProps={{
-              label: i18n.translate('xpack.cloudConnect.serviceCards.synthetic.comingSoon', {
-                defaultMessage: 'COMING SOON',
-              }),
-            }}
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
   );

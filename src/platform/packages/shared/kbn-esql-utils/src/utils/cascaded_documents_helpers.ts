@@ -25,18 +25,18 @@ import {
   type ESQLColumn,
   isBinaryExpression,
   Walker,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 import type {
   StatsCommandSummary,
   StatsFieldSummary,
-} from '@kbn/esql-ast/src/mutate/commands/stats';
+} from '@kbn/esql-language/src/ast/mutate/commands/stats';
 import type {
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLPostfixUnaryExpression,
   ESQLLiteral,
-} from '@kbn/esql-ast/src/types';
+} from '@kbn/esql-language/src/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { extractCategorizeTokens } from './extract_categorize_tokens';

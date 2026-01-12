@@ -37,6 +37,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "customIntegrations",
       "embeddableEnhanced",
       "home",

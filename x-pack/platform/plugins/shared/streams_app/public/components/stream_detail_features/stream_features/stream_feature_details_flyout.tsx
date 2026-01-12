@@ -20,8 +20,9 @@ import {
   EuiMarkdownEditor,
   EuiSpacer,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
+import { type Streams, type System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
@@ -35,19 +36,19 @@ export const StreamFeatureDetailsFlyout = ({
   closeFlyout,
   refreshFeatures,
 }: {
-  feature: Feature;
+  feature: System;
   definition: Streams.all.Definition;
   closeFlyout: () => void;
   refreshFeatures: () => void;
 }) => {
-  const [updatedFeature, setUpdatedFeature] = React.useState<Feature>(cloneDeep(feature));
-  const { upsertFeature } = useStreamFeaturesApi(definition);
+  const [updatedFeature, setUpdatedFeature] = React.useState<System>(cloneDeep(feature));
+  const { upsertSystem } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
     setIsUpdating(true);
-    upsertFeature(updatedFeature).finally(() => {
+    upsertSystem(updatedFeature).finally(() => {
       setIsUpdating(false);
       refreshFeatures();
       closeFlyout();
@@ -70,16 +71,16 @@ export const StreamFeatureDetailsFlyout = ({
         </EuiTitle>
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
-
       <EuiFlyoutBody>
         <div>
-          <EuiTitle size="xs">
+          <EuiTitle size="xxs">
             <h3>
               {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.description', {
                 defaultMessage: 'Description',
               })}
             </h3>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiMarkdownEditor
             aria-label={i18n.translate(
               'xpack.streams.streamDetailView.featureDetailExpanded.markdownEditorAriaLabel',
@@ -89,14 +90,15 @@ export const StreamFeatureDetailsFlyout = ({
             )}
             value={updatedFeature.description}
             onChange={(value) => setUpdatedFeature({ ...updatedFeature, description: value })}
-            height={400}
+            height={320}
             readOnly={false}
             initialViewMode="viewing"
+            autoExpandPreview={false}
           />
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule />
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
-              <EuiTitle size="xs">
+              <EuiTitle size="xxs">
                 <h3>
                   {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
                     defaultMessage: 'Filter',
@@ -119,22 +121,16 @@ export const StreamFeatureDetailsFlyout = ({
                 }
               />
             </EuiFlexGroup>
-            {isFeatureWithFilter(updatedFeature) && (
-              <EditableConditionPanel
-                condition={updatedFeature.filter}
-                isEditingCondition={isEditingCondition}
-                setCondition={(condition) =>
-                  setUpdatedFeature({ ...updatedFeature, filter: condition })
-                }
-              />
-            )}
+            <EditableConditionPanel
+              condition={updatedFeature.filter}
+              isEditingCondition={isEditingCondition}
+              setCondition={(condition) =>
+                setUpdatedFeature({ ...updatedFeature, filter: condition })
+              }
+            />
           </EuiFlexGroup>
-
-          <EuiSpacer size="m" />
-
-          {isFeatureWithFilter(feature) && (
-            <FeatureEventsData feature={updatedFeature} definition={definition} />
-          )}
+          <EuiHorizontalRule />
+          <FeatureEventsData feature={updatedFeature} definition={definition} />
         </div>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

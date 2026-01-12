@@ -81,6 +81,7 @@ import { findAutoFillSchedulerLogsRoute } from './gaps/apis/gap_auto_fill_schedu
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 import type { AlertingPluginsStart } from '../plugin';
 import { getInternalRuleTemplateRoute } from './rule_templates/apis/get/get_rule_template_route';
+import { findInternalRuleTemplatesRoute } from './rule_templates/apis/find/find_rule_template_route';
 import { bulkMuteAlertsRoute } from './rule/apis/bulk_mute_alerts/bulk_mute_alerts_route';
 import { bulkUnmuteAlertsRoute } from './rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route';
 
@@ -112,6 +113,7 @@ export function defineRoutes(opts: RouteOptions) {
   createRuleRoute(opts);
   getRuleRoute(router, licenseState);
   getInternalRuleTemplateRoute(router, licenseState);
+  findInternalRuleTemplatesRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);
   resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);

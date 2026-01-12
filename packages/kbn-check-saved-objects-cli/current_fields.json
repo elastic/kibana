@@ -22,6 +22,7 @@
     "actions.actionRef",
     "actions.actionTypeId",
     "actions.group",
+    "actions.params",
     "alertTypeId",
     "artifacts",
     "artifacts.investigation_guide",
@@ -94,6 +95,10 @@
     "tags"
   ],
   "api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt"
+  ],
+  "api_key_to_invalidate": [
     "apiKeyId",
     "createdAt"
   ],
@@ -315,6 +320,17 @@
     "timeTo",
     "title",
     "version"
+  ],
+  "data_connector": [
+    "config",
+    "createdAt",
+    "features",
+    "kscIds",
+    "name",
+    "toolIds",
+    "type",
+    "updatedAt",
+    "workflowIds"
   ],
   "data_stream-config": [
     "created_by",
@@ -812,6 +828,7 @@
     "fleet_server_hosts",
     "has_seen_add_data_notice",
     "ilm_migration_status",
+    "integration_knowledge_enabled",
     "output_secret_storage_requirements_met",
     "prerelease_integrations_enabled",
     "secret_storage_requirements_met",
@@ -978,7 +995,8 @@
     "installation_status",
     "last_installation_date",
     "product_name",
-    "product_version"
+    "product_version",
+    "resource_type"
   ],
   "query": [
     "description",
@@ -1189,12 +1207,17 @@
     "version"
   ],
   "slo-settings": [],
+  "slo_template": [
+    "name",
+    "tags"
+  ],
   "space": [
     "disabledFeatures",
     "name",
     "solution"
   ],
   "spaces-usage-stats": [],
+  "stream-prompts": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",

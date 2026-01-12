@@ -193,17 +193,17 @@ export const streamRoutingMachine = setup({
           })),
         },
         'suggestion.preview': {
-          target: '#idle',
           actions: [
-            sendTo('routingSamplesMachine', ({ event }) => ({
+            sendTo('routingSamplesMachine', ({ event, context }) => ({
               type: 'routingSamples.setSelectedPreview',
               preview: event.toggle
                 ? { type: 'suggestion', name: event.name, index: event.index }
                 : undefined,
-            })),
-            sendTo('routingSamplesMachine', ({ event }) => ({
-              type: 'routingSamples.updateCondition',
-              condition: event.toggle ? event.condition : undefined,
+              condition: event.toggle
+                ? event.condition
+                : context.currentRuleId
+                ? selectCurrentRule(context)?.where
+                : undefined,
             })),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
@@ -224,11 +224,6 @@ export const streamRoutingMachine = setup({
             enqueue.sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: { type: 'suggestion', name: event.suggestion.name, index: event.index },
-            });
-
-            // Update condition for preview
-            enqueue.sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
               condition: event.suggestion.condition,
             });
           }),
@@ -269,9 +264,6 @@ export const streamRoutingMachine = setup({
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: { type: 'createStream' },
-            }),
-            sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
               condition: { always: {} },
             }),
           ],
@@ -280,10 +272,6 @@ export const streamRoutingMachine = setup({
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: undefined,
-            }),
-            sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
-              condition: undefined,
             }),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
@@ -378,6 +366,10 @@ export const streamRoutingMachine = setup({
                     sendTo('routingSamplesMachine', {
                       type: 'routingSamples.setDocumentMatchFilter',
                       filter: 'matched',
+                    }),
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.updateCondition',
+                      condition: undefined,
                     }),
                   ],
                 },
@@ -602,10 +594,6 @@ export const streamRoutingMachine = setup({
                       type: 'routingSamples.setSelectedPreview',
                       preview: undefined,
                     }),
-                    sendTo('routingSamplesMachine', {
-                      type: 'routingSamples.updateCondition',
-                      condition: undefined,
-                    }),
                   ],
                 },
                 'suggestion.saveSuggestion': {
@@ -616,10 +604,6 @@ export const streamRoutingMachine = setup({
                     sendTo('routingSamplesMachine', {
                       type: 'routingSamples.setSelectedPreview',
                       preview: undefined,
-                    }),
-                    sendTo('routingSamplesMachine', {
-                      type: 'routingSamples.updateCondition',
-                      condition: undefined,
                     }),
                   ],
                 },
@@ -653,6 +637,7 @@ export const createStreamRoutingMachineImplementations = ({
       createRoutingSamplesMachineImplementations({
         data,
         timeState$,
+        telemetryClient,
       })
     ),
   },

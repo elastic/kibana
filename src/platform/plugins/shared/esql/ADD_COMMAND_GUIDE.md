@@ -20,9 +20,9 @@ We use a custom AST as a helper to support the rest of the capabilities listed i
 
 - [ ] Make sure that the new command is in the local Kibana grammar definition. The ANTLR lexer and parser files are updated every Monday from the source definition of the language at Elasticsearch (via a manually merged, automatically generated [PR](https://github.com/elastic/kibana/pull/213006)).
 - [ ] Create a factory for generating the new node. The new node should satisfy the `ESQLCommand<Name>` interface. If the syntax of your command cannot be decomposed only in parameters, you can hold extra information by extending the `ESQLCommand` interface. I.E., check the Rerank command.
-- [ ] ANTLR creates a data structure called a _concrete syntax tree_. From that tree, we create our _abstract syntax tree_ which is used everywhere else in our code. You need to add support for your new command to our AST by adding a `from<commandname>Command` method to the `CstToAstConverter` class (found in `kbn-esql-ast/src/parser/cst_to_ast_converter.ts`). You then call that new method in `CstToAstConverter.fromProcessingCommand` (for most commands). There are many examples.
+- [ ] ANTLR creates a data structure called a _concrete syntax tree_. From that tree, we create our _abstract syntax tree_ which is used everywhere else in our code. You need to add support for your new command to our AST by adding a `from<commandname>Command` method to the `CstToAstConverter` class (found in `kbn-esql-language/src/parser/cst_to_ast_converter.ts`). You then call that new method in `CstToAstConverter.fromProcessingCommand` (for most commands). There are many examples.
 - [ ] Create unit tests checking that the correct AST nodes are generated when parsing your command. In many cases, it also makes sense to verify behavior of incomplete command syntax since the parser will encounter this while a user is editing a query.
-- [ ] Add a dedicated [visitor callback](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/src/visitor/README.md) for the new command.
+- [ ] Add a dedicated [visitor callback](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-language/src/visitor/README.md) for the new command.
 - [ ] Verify that the `Walker` API can visit the new node.
 - [ ] Verify that the `Synth` API can construct the new node.
 
@@ -32,7 +32,7 @@ We use a custom AST as a helper to support the rest of the capabilities listed i
 
 ## Verify prettifying behavior
 
-[Pretty-printing](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/src/pretty_print/README.md) is the process of converting an ES|QL AST into a human-readable string. This is useful for debugging or for displaying the AST to the user.
+[Pretty-printing](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-language/src/pretty_print/README.md) is the process of converting an ES|QL AST into a human-readable string. This is useful for debugging or for displaying the AST to the user.
 
 Depending on the command you are adding, it may be required or not to do an adjustment.
 
@@ -46,11 +46,11 @@ Depending on the command you are adding, it may be required or not to do an adju
 
 ## Create the command definition
 
-We need to register the new command in the `kbn-esql-ast` [package](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/README.md) in order to activate the autocomplete and validation features.
+We need to register the new command in the `kbn-esql-language` [package](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-language/README.md) in order to activate the autocomplete and validation features.
 
-All commands are registered in our commands registry. Read [the doc](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/src/commands_registry/README.md) for context.
+All commands are registered in our commands registry. Read [the doc](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-language/src/commands/registry/README.md) for context.
 
-- [ ] First, create a new folder with the same name as the command under `kbn-esql-ast/src/commands_registry/commands`. This will house all command logic that gets sent to the registry.
+- [ ] First, create a new folder with the same name as the command under `kbn-esql-language/src/commands/registry/commands`. This will house all command logic that gets sent to the registry.
 - [ ] Create an `index.ts` file within the folder. This is where you create your command definition (`ICommand`).
 
   If the command is not ready to be advertised, use `hidden: true`.
@@ -59,9 +59,9 @@ All commands are registered in our commands registry. Read [the doc](https://git
 
   If the command is ready for GA, don’t use either of the above properties.
 
-- [ ] Import your new command definition in `commands_registry/index.ts`.
+- [ ] Import your new command definition in `commands/registry/index.ts`.
 
-If you get stuck, check the many examples in `commands_registry/commands`.
+If you get stuck, check the many examples in `commands/registry/commands`.
 
 ### Example ⭐
 
@@ -77,7 +77,7 @@ export const dissectCommand = {
   name: 'dissect',
   methods: dissectCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-ast.esql.definitions.dissectDoc', {
+    description: i18n.translate('kbn-esql-language.esql.definitions.dissectDoc', {
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
@@ -132,7 +132,7 @@ There is a validation function called `validateCommandArguments` that performs s
   - [ ] Optionally, add command-specific validation, but only _sparingly_. Our validation is, by design, incomplete. Really consider whether the UX value of each check is worth the complexity it introduces. If a command requires a field of a certain type as an argument, that is an appropriate check.
 - [ ] Add a suite of validation tests within the command's directory. Check the many examples for help.
 
-**NOTE**: all new validation messages should be registered in the `getMessageAndTypeFromId` function. It is also often a good idea to create a convenience method for a new message on our simplified API, `errors`. See `kbn-esql-ast/src/definitions/utils/errors.ts`.
+**NOTE**: all new validation messages should be registered in the `getMessageAndTypeFromId` function. It is also often a good idea to create a convenience method for a new message on our simplified API, `errors`. See `kbn-esql-language/src/definitions/utils/errors.ts`.
 
 ### Example ⭐
 
@@ -165,7 +165,7 @@ export const validate = (
 
 Define what are the keywords you want to be suggested when the cursor is positioned at the new command.
 
-You can read how suggestions work [here](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/README.md#autocomplete-1).
+You can read how suggestions work [here](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-language/README.md#autocomplete-1).
 
 - [ ] Add the suggestions to be shown when **positioned at** the new command.
 
@@ -221,7 +221,7 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
   1. resume typing where you left off to generate suggestions again
   1. then accept a suggestion
 
-  If the editor is inserting the text incorrectly, you need to calculate and attach a custom [`rangeToReplace`](https://github.com/elastic/kibana/blob/f09bce1108cdd55ba69e11e8b14c947bf052dd91/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts#L64-L75) that covers the entire prefix. Once you have verified the behavior manually, you can add an automated test to check the computed range ([example](https://github.com/elastic/kibana/blob/3962e0fb2a7b833a21b33012b2425fa847e48bcb/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/__tests__/autocomplete.command.sort.test.ts#L240)). (We may be able to find [a more automatic way](https://github.com/elastic/kibana/issues/209905) to ensure correct behavior in the future, but for now, it's manual.)
+  If the editor is inserting the text incorrectly, you need to calculate and attach a custom [`rangeToReplace`](https://github.com/elastic/kibana/blob/f09bce1108cdd55ba69e11e8b14c947bf052dd91/src/platform/packages/shared/kbn-esql-language/src/autocomplete/types.ts#L64-L75) that covers the entire prefix. Once you have verified the behavior manually, you can add an automated test to check the computed range ([example](https://github.com/elastic/kibana/blob/3962e0fb2a7b833a21b33012b2425fa847e48bcb/src/platform/packages/shared/kbn-esql-language/src/autocomplete/__tests__/autocomplete.command.sort.test.ts#L240)). (We may be able to find [a more automatic way](https://github.com/elastic/kibana/issues/209905) to ensure correct behavior in the future, but for now, it's manual.)
 
 ### A note on regular expressions (regex) in autocomplete
 

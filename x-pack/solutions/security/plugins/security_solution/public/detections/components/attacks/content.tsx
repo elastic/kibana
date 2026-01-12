@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,8 +19,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { isEqual } from 'lodash';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
-import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import type { Filter } from '@kbn/es-query';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { useKibana } from '../../../common/lib/kibana';
+import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
@@ -33,6 +37,9 @@ import { SchedulesFlyout } from './schedule_flyout';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ConnectorFilter } from '../../../attack_discovery/pages/results/history/search_and_filter/connector_filter';
+
+import type { Status } from '../../../../common/api/detection_engine';
+import { FiltersSection } from './filters/filters_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
@@ -91,6 +98,22 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     },
     [assignees]
   );
+  const [statusFilter, setStatusFilter] = useState<Status[]>([]);
+  const [pageFilters, setPageFilters] = useState<Filter[]>();
+  const [pageFilterHandler, setPageFilterHandler] = useState<FilterGroupHandler | undefined>();
+
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+  const isTableLoading = useShallowEqualSelector(
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
+  );
+
+  useEffect(() => {
+    if (!pageFilterHandler) return;
+    // if the table is reloaded because of action by the user
+    // (e.g. closed and alert)
+    // We want reload the values in the Attacks Page filters
+    if (!isTableLoading) pageFilterHandler.reload();
+  }, [isTableLoading, pageFilterHandler]);
 
   return (
     <StyledFullHeightContainer data-test-subj={CONTENT_TEST_ID} ref={containerElement}>
@@ -124,9 +147,22 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           </HeaderPage>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
+          <FiltersSection
+            dataView={dataView}
+            pageFilters={pageFilters}
+            setStatusFilter={setStatusFilter}
+            setPageFilters={setPageFilters}
+            setPageFilterHandler={setPageFilterHandler}
+          />
+          <EuiSpacer size="l" />
         </Display>
 
-        <TableSection dataView={dataView} />
+        <TableSection
+          dataView={dataView}
+          statusFilter={statusFilter}
+          pageFilters={pageFilters}
+          assignees={assignees}
+        />
 
         {showFlyout && <SchedulesFlyout onClose={onClose} />}
       </SecuritySolutionPageWrapper>
