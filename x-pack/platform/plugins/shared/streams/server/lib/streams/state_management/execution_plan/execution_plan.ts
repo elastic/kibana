@@ -6,6 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
+import { getSegments } from '@kbn/streams-schema';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
@@ -361,7 +362,7 @@ export class ExecutionPlan {
   private async upsertIngestPipelines(actions: UpsertIngestPipelineAction[]) {
     const actionWithStreamsDepth = actions.map((action) => ({
       ...action,
-      depth: action.stream.match(/\./g)?.length ?? 0,
+      depth: getSegments(action.stream).length - 1,
     }));
 
     const actionsByDepth = groupBy(actionWithStreamsDepth, 'depth');
