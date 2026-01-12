@@ -40,7 +40,7 @@ export function registerStop(router: EntityStorePluginRouter) {
         const { taskManagerStart, logger } = entityStoreCtx;
         const { entityTypes } = req.body;
 
-        logger.info('Stop API invoked');
+        logger.debug('Stop API invoked');
 
         const stoppedTasks = await stopExtractEntityTasks({
           taskManager: taskManagerStart,
