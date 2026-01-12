@@ -276,19 +276,15 @@ const generateSignificantEventsRoute = createServerRoute({
 });
 
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/significant_events/_status 2023-10-31',
+  endpoint: 'GET /internal/streams/{name}/significant_events/_status',
   params: z.object({
     path: z.object({ name: z.string().describe('The name of the stream') }),
   }),
   options: {
-    access: 'public',
+    access: 'internal',
     summary: 'Check the status of significant events query generation',
     description:
-      'Significant events query generation happens as a background task, this endpoint allows the user to check the status of this task. This endpoint combines with POST /api/streams/{name}/significant_events/_task which manages the task lifecycle.',
-    availability: {
-      since: '9.4.0',
-      stability: 'experimental',
-    },
+      'Significant events query generation happens as a background task, this endpoint allows the user to check the status of this task.',
   },
   security: {
     authz: {
@@ -337,7 +333,7 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
 });
 
 const significantEventsQueriesGenerationTaskRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/significant_events/_task 2023-10-31',
+  endpoint: 'POST /internal/streams/{name}/significant_events/_task',
   params: z.object({
     path: z.object({ name: z.string().describe('The name of the stream') }),
     body: z.discriminatedUnion('action', [
@@ -368,14 +364,10 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     ]),
   }),
   options: {
-    access: 'public',
+    access: 'internal',
     summary: 'Manage significant events query generation task',
     description:
-      'Generate significant events queries based on the stream data, this happens as a background task and this endpoint manages the task lifecycle.',
-    availability: {
-      since: '9.4.0',
-      stability: 'experimental',
-    },
+      'Manage the lifecycle of the background task that generates significant events queries based on the stream data.',
   },
   security: {
     authz: {

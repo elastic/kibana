@@ -97,7 +97,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     },
     getGenerationTask: async () => {
       return streamsRepositoryClient.fetch(
-        'GET /api/streams/{name}/significant_events/_status 2023-10-31',
+        'GET /internal/streams/{name}/significant_events/_status',
         {
           signal,
           params: {
@@ -113,7 +113,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     ) => {
       const { from, to } = getLast24HoursTimeRange();
       return streamsRepositoryClient.fetch(
-        'POST /api/streams/{name}/significant_events/_task 2023-10-31',
+        'POST /internal/streams/{name}/significant_events/_task',
         {
           signal,
           params: {
@@ -132,7 +132,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     },
     cancelGenerationTask: async () => {
       return streamsRepositoryClient.fetch(
-        'POST /api/streams/{name}/significant_events/_task 2023-10-31',
+        'POST /internal/streams/{name}/significant_events/_task',
         {
           signal,
           params: {
@@ -146,7 +146,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     },
     acknowledgeGenerationTask: async () => {
       return streamsRepositoryClient.fetch(
-        'POST /api/streams/{name}/significant_events/_task 2023-10-31',
+        'POST /internal/streams/{name}/significant_events/_task',
         {
           signal,
           params: {

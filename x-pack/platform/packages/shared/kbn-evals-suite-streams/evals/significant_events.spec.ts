@@ -22,7 +22,7 @@ async function pollUntilComplete(
   maxAttempts: number = MAX_POLL_ATTEMPTS
 ): Promise<TaskStatusResponse> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const status = (await fetch('/api/streams/logs/significant_events/_status', {
+    const status = (await fetch('/internal/streams/logs/significant_events/_status', {
       method: 'GET',
     })) as TaskStatusResponse;
 
@@ -64,7 +64,7 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
           const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
           // Schedule the generation task
-          await fetch('/api/streams/logs/significant_events/_task', {
+          await fetch('/internal/streams/logs/significant_events/_task', {
             method: 'POST',
             body: JSON.stringify({
               action: 'schedule',
