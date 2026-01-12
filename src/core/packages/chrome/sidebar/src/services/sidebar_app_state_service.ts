@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 
+const isDev = process.env.NODE_ENV !== 'production';
 /**
  * API for managing sidebar app params
  */
@@ -49,6 +50,9 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
     const currentParams = this.getParams<T>(appId);
     const newParams = { ...currentParams, ...params };
 
+    if (isDev) {
+      this.validateParams(appId, newParams);
+    }
     this.getOrCreateParams<T>(appId).next(newParams as T);
     this.saveToStorage(appId, newParams as T);
   }
@@ -60,6 +64,10 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
   initializeParams<T>(appId: string, initialParams?: Partial<T>): void {
     const defaultParams = this.createDefaultParams<T>(appId);
     const mergedParams = initialParams ? { ...defaultParams, ...initialParams } : defaultParams;
+
+    if (isDev) {
+      this.validateParams(appId, mergedParams);
+    }
 
     if (this.appParams.has(appId)) {
       this.appParams.get(appId)!.next(mergedParams);
@@ -138,4 +146,3 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
     }
   }
 }
-
