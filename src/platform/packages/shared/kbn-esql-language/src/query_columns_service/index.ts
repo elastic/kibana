@@ -15,7 +15,6 @@ import {
   type ESQLPolicy,
 } from '../commands/registry/types';
 import { getCurrentQueryAvailableColumns, getFieldsFromES, getUnmappedFields } from './helpers';
-import { getUnmappedFieldsTreatment } from '../commands/definitions/utils/settings';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -74,7 +73,10 @@ export class QueryColumns {
     private readonly query: ESQLAstQueryExpression,
     private readonly originalQueryText: string,
     private readonly resourceRetriever?: ESQLCallbacks,
-    private readonly options?: { invalidateColumnsCache?: boolean }
+    private readonly options?: {
+      invalidateColumnsCache?: boolean;
+      unmappedFieldsTreatment?: UnmappedFieldsTreatment;
+    }
   ) {}
 
   /**
@@ -212,17 +214,13 @@ export class QueryColumns {
       this.originalQueryText
     );
 
-    if (query.header) {
-      // Unmapped fields are fields that are used in the query but not present in the indexes mapping.
-      // We can't be sure if they are typos or actual fields that the index hasn't mapped.
-      const unmmapedFieldsTreatment = getUnmappedFieldsTreatment(query.header);
-      if (
-        unmmapedFieldsTreatment === UnmappedFieldsTreatment.NULLIFY ||
-        unmmapedFieldsTreatment === UnmappedFieldsTreatment.LOAD
-      ) {
-        const unmappedFields = getUnmappedFields(query.commands, availableFields);
-        availableFields.push(...unmappedFields);
-      }
+    const unmappedFieldsTreatment = this.options?.unmappedFieldsTreatment;
+    if (
+      unmappedFieldsTreatment === UnmappedFieldsTreatment.NULLIFY ||
+      unmappedFieldsTreatment === UnmappedFieldsTreatment.LOAD
+    ) {
+      const unmappedFields = getUnmappedFields(query.commands, availableFields);
+      availableFields.push(...unmappedFields);
     }
 
     return availableFields;
