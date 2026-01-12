@@ -18,6 +18,7 @@ import { timeRangeSchemaOptional, indexDescription } from '../../utils/tool_sche
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { getFilteredLogCategories } from './handler';
 import { getToolHandler } from './handler';
+import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '../get_correlated_logs/tool';
 
 export interface GetLogCategoriesToolResult {
   type: ToolResultType.other;
@@ -37,11 +38,17 @@ export const OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID = 'observability.get_log_c
 const getLogsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   index: z.string().describe(indexDescription).optional(),
-  terms: z
-    .record(z.string(), z.string())
+  kqlFilter: z
+    .string()
     .optional()
     .describe(
-      'Optional field filters to narrow down results. Each key-value pair filters logs where the field exactly matches the value. Example: { "service.name": "payment", "host.name": "web-server-01" }. Multiple filters are combined with AND logic.'
+      'A KQL query to filter logs. Examples: service.name:"payment", host.name:"web-server-01", service.name:"payment" AND log.level:error'
+    ),
+  fields: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Additional fields to return for each log sample. "message" and "@timestamp" are always included. Example: ["service.name", "host.name"]'
     ),
 });
 
@@ -69,9 +76,15 @@ When to use:
 How it works:
 Groups similar log messages together using pattern recognition, returning representative categories with counts.
 
+After using this tool:
+- For high-count error categories, use \`${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID}\` to trace the sequence of events leading to those errors
+- Compare error patterns across services - the origin service often has different error types than affected downstream services (e.g., "constraint violation" vs "connection timeout")
+- Patterns like "timeout", "exhausted", "capacity", "limit reached" are often SYMPTOMS - look for what's causing the resource pressure
+- If you see resource lifecycle logs (acquire/release, open/close), check if counts match - mismatches can indicate leaks
+
 Do NOT use for:
-- Understanding the sequence of events for a specific error (use get_correlated_logs)
-- Investigating a specific incident in detail (use get_correlated_logs)
+- Understanding the sequence of events for a specific error (use ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID})
+- Investigating a specific incident in detail (use ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID})
 - Analyzing changes in log volume over time (use run_log_rate_analysis)`,
     schema: getLogsSchema,
     tags: ['observability', 'logs'],
@@ -86,7 +99,8 @@ Do NOT use for:
         index,
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
-        terms,
+        kqlFilter,
+        fields = [],
       } = toolParams;
 
       try {
@@ -97,7 +111,8 @@ Do NOT use for:
           index,
           start,
           end,
-          terms,
+          kqlFilter,
+          fields,
         });
 
         return {
