@@ -75,15 +75,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Wait for all interceptors to be called (backend processing complete)
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      // Wait for the successful response to appear
-      await retry.try(async () => {
-        await testSubjects.find('agentBuilderRoundResponse');
-      });
-
       // Assert the successful response is visible
-      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-      const responseText = await responseElement.getVisibleText();
-      expect(responseText).to.contain(MOCKED_RESPONSE);
+      await retry.try(async () => {
+        const responseElements = await testSubjects.findAll('agentBuilderRoundResponse');
+        const lastResponse = responseElements[responseElements.length - 1];
+        const responseText = await lastResponse.getVisibleText();
+        expect(responseText).to.contain(MOCKED_RESPONSE);
+      });
 
       // Assert the error is no longer visible
       const isErrorStillVisible = await agentBuilder.isErrorVisible();
