@@ -16,7 +16,7 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../../types';
-import { getFilteredLogCategories } from '../../../tools/get_log_categories/get_log_categories';
+import { getFilteredLogCategories } from '../../../tools/get_log_categories/handler';
 import { getLogsIndices } from '../../../utils/get_logs_indices';
 import { getApmIndices } from '../../../utils/get_apm_indices';
 import { parseDatemath } from '../../../utils/time';
@@ -161,7 +161,7 @@ export async function fetchApmErrorContext({
           },
           logger,
           categoryCount: 10,
-          terms: { 'trace.id': traceId },
+          fields: ['trace.id'],
         });
 
         return logCategories?.categories;

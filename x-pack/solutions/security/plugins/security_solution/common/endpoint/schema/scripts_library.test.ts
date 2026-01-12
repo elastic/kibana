@@ -9,7 +9,9 @@
 import { Readable } from 'stream';
 import type { CreateScriptRequestBody } from '../../api/endpoint/scripts_library';
 import {
-  PatchUpdateRequestSchema,
+  GetOneScriptRequestSchema,
+  DownloadScriptRequestSchema,
+  PatchUpdateScriptRequestSchema,
   CreateScriptRequestSchema,
 } from '../../api/endpoint/scripts_library';
 import type { HapiReadableStream } from '../../../server/types';
@@ -153,6 +155,29 @@ describe('Scripts library schemas', () => {
       expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
     });
 
+    it('should accept `tags` array with valid values', () => {
+      reqBody.tags = ['dataCollection', 'threatHunting'];
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+    });
+
+    it('should error if `tags` is not an array', () => {
+      // @ts-expect-error
+      reqBody.tags = 'invalid';
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+    });
+
+    it('should error if `tags` contains invalid values', () => {
+      reqBody.tags = ['invalid'];
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+    });
+
+    it('should error if `tags` contains duplicates', () => {
+      reqBody.tags = ['dataCollection', 'dataCollection'];
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+        '[tags]: Duplicate values are not allowed'
+      );
+    });
+
     // ------------------------------------
     // Field: `description`
     // Field: `instructions`
@@ -260,7 +285,7 @@ describe('Scripts library schemas', () => {
 
     it('should accept full payload', () => {
       expect(
-        PatchUpdateRequestSchema.body.validate({
+        PatchUpdateScriptRequestSchema.body.validate({
           name: 'foo',
           platform: ['linux'],
           requiresInput: true,
@@ -279,6 +304,7 @@ describe('Scripts library schemas', () => {
       ----------             -------------
       ${'name'}             | ${{ name: 'foo' }}
       ${'platform'}         | ${{ platform: ['windows'] }}
+      ${'tags'}             | ${{ tags: ['dataCollection'] }}
       ${'file'}             | ${{ file: createFileStream() }}
       ${'requiresInput'}    | ${{ requiresInput: true }}
       ${'description'}      | ${{ description: 'some description' }}
@@ -286,19 +312,31 @@ describe('Scripts library schemas', () => {
       ${'example'}          | ${{ example: 'some example' }}
       ${'pathToExecutable'} | ${{ pathToExecutable: '/some/path' }}
     `('should accept partial updates with only `$title`', ({ bodyPayload }) => {
-      expect(PatchUpdateRequestSchema.body.validate(bodyPayload)).toBeTruthy();
+      expect(PatchUpdateScriptRequestSchema.body.validate(bodyPayload)).toBeTruthy();
     });
 
     it('should error if no updates are provided', () => {
-      expect(() => PatchUpdateRequestSchema.body.validate({})).toThrow(
+      expect(() => PatchUpdateScriptRequestSchema.body.validate({})).toThrow(
         'At least one field must be defined for update'
       );
     });
 
     it('should error if only `version` is provided', () => {
-      expect(() => PatchUpdateRequestSchema.body.validate({ version: 'fdfd' })).toThrow(
+      expect(() => PatchUpdateScriptRequestSchema.body.validate({ version: 'fdfd' })).toThrow(
         'At least one field must be defined for update'
       );
+    });
+  });
+
+  describe('Download API', () => {
+    it('should accept a script_id URL param', () => {
+      expect(DownloadScriptRequestSchema.params.validate({ script_id: 'foo' })).toBeTruthy();
+    });
+  });
+
+  describe('Get one API', () => {
+    it('should accept a script_id URL param', () => {
+      expect(GetOneScriptRequestSchema.params.validate({ script_id: 'foo' })).toBeTruthy();
     });
   });
 });

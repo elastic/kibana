@@ -6507,10 +6507,15 @@ describe('#authorizeChangeAccessControl', () => {
     );
     checkAuthorizationSpy.mockResolvedValue({
       status: 'fully_authorized',
-      typeMap: new Map().set('dashboard', {
-        manage_access_control: { isGloballyAuthorized: true, authorizedSpaces: [] },
-        ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-      }),
+      typeMap: new Map()
+        .set('dashboard', {
+          manage_access_control: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('visualization', {
+          update: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
     });
 
     await securityExtension.authorizeChangeAccessControl(
@@ -6522,12 +6527,12 @@ describe('#authorizeChangeAccessControl', () => {
     );
 
     expect(checkAuthorizationSpy).toHaveBeenCalledWith({
-      types: new Set(['dashboard']),
+      types: new Set(['visualization']), // owners need to have update privs
       spaces: new Set([namespace]),
-      actions: new Set([]),
+      actions: new Set(['update']),
       options: {
         allowGlobalResource: true,
-        typesRequiringAccessControl: new Set(['dashboard']),
+        typesRequiringAccessControl: new Set(['dashboard']), // will need to manage access control for dashboards
       },
     });
   });
@@ -6562,25 +6567,35 @@ describe('#authorizeChangeAccessControl', () => {
       expect.objectContaining({
         action: AuditAction.UPDATE_OBJECTS_OWNER,
         error: expect.any(Error),
-        unauthorizedTypes: ['dashboard'],
+        unauthorizedTypes: ['dashboard', 'visualization'],
         unauthorizedSpaces: [namespace],
       })
     );
   });
 
-  test('allows operation when user is not admin but owner', async () => {
+  test('calls checkAuthorization with expected options when objects are owned by current user', async () => {
     const currentUser = {
       username: 'fake_owner',
       profile_uid: 'fake_owner_id',
     };
-    const { securityExtension, checkPrivileges } = setup();
+    const { securityExtension } = setup();
     getCurrentUser.mockReturnValue(currentUser);
-    setupSimpleCheckPrivsMockResolve(
-      checkPrivileges,
-      'dashboard',
-      MANAGE_ACCESS_CONTROL_ACTION,
-      false
-    );
+
+    const typeMap = new Map()
+      .set('dashboard', {
+        update: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      })
+      .set('visualization', {
+        update: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      });
+
+    checkAuthorizationSpy.mockResolvedValue({
+      status: 'fully_authorized',
+      typeMap,
+    });
+
     const result = await securityExtension.authorizeChangeAccessControl(
       {
         namespace,
@@ -6590,7 +6605,17 @@ describe('#authorizeChangeAccessControl', () => {
     );
     expect(result).toEqual({
       status: 'fully_authorized',
-      typeMap: new Map(),
+      typeMap,
+    });
+
+    expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+      types: new Set(['dashboard', 'visualization']), // owners need to have update privs
+      spaces: new Set([namespace]),
+      actions: new Set(['update']),
+      options: {
+        allowGlobalResource: true,
+        typesRequiringAccessControl: new Set(),
+      },
     });
   });
 
@@ -6649,7 +6674,7 @@ describe('#authorizeChangeAccessControl', () => {
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         })
         .set('visualization', {
-          manage_access_control: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          update: { isGloballyAuthorized: true, authorizedSpaces: [] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
     });
@@ -6694,7 +6719,7 @@ describe('#authorizeChangeAccessControl', () => {
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         })
         .set('visualization', {
-          manage_access_control: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          update: { isGloballyAuthorized: true, authorizedSpaces: [] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
     });
@@ -6815,15 +6840,24 @@ describe('#authorizeChangeAccessControl', () => {
       false
     );
     // User is authorized in 'y' space but not in current space 'x'
+    const typeMap = new Map();
+    typeMap.set('dashboard', {
+      manage_access_control: {
+        isGloballyAuthorized: false,
+        authorizedSpaces: ['y'],
+      },
+      ['login:']: { isGloballyAuthorized: false, authorizedSpaces: ['y'] },
+    });
+    typeMap.set('visualization', {
+      update: {
+        isGloballyAuthorized: false,
+        authorizedSpaces: ['y'],
+      },
+      ['login:']: { isGloballyAuthorized: false, authorizedSpaces: ['y'] },
+    });
     checkAuthorizationSpy.mockResolvedValue({
       status: 'partially_authorized',
-      typeMap: new Map().set('dashboard', {
-        manage_access_control: {
-          isGloballyAuthorized: false,
-          authorizedSpaces: ['y'],
-        },
-        ['login:']: { isGloballyAuthorized: false, authorizedSpaces: ['y'] },
-      }),
+      typeMap,
     });
 
     await expect(
@@ -6840,7 +6874,7 @@ describe('#authorizeChangeAccessControl', () => {
       expect.objectContaining({
         action: AuditAction.UPDATE_OBJECTS_OWNER,
         error: expect.any(Error),
-        unauthorizedTypes: ['dashboard'],
+        unauthorizedTypes: ['dashboard', 'visualization'],
         unauthorizedSpaces: [namespace],
       })
     );

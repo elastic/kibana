@@ -31,9 +31,7 @@ describe('ES capabilities for traditional ES', () => {
   });
 
   afterEach(async () => {
-    if (esServer) {
-      await esServer.stop();
-    }
+    await esServer?.stop();
   });
 
   it('returns the correct capabilities', async () => {

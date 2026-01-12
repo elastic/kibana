@@ -91,3 +91,85 @@ describe('Group stats', () => {
     expect(queryByTestId('take-action-button')).not.toBeInTheDocument();
   });
 });
+
+describe('Additional action buttons', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders additional action buttons when provided', () => {
+    const additionalButtons = [
+      <button key="button1" data-test-subj="additional-button-1">
+        Button 1
+      </button>,
+      <button key="button2" data-test-subj="additional-button-2">
+        Button 2
+      </button>,
+    ];
+    const { getByTestId } = render(
+      <GroupStats {...testProps} additionalActionButtons={additionalButtons} />
+    );
+    expect(getByTestId('additional-button-1')).toBeInTheDocument();
+    expect(getByTestId('additional-button-2')).toBeInTheDocument();
+  });
+
+  it('renders additional buttons in correct order', () => {
+    const additionalButtons = [
+      <button key="button1" data-test-subj="additional-button-1">
+        Button 1
+      </button>,
+    ];
+    const { getByTestId } = render(
+      <GroupStats {...testProps} additionalActionButtons={additionalButtons} />
+    );
+
+    const groupStats = getByTestId('group-stats');
+    const children = Array.from(groupStats.children);
+
+    // Find indices of key elements
+    const statsIndex = children.findIndex((child) =>
+      child.querySelector('[data-test-subj="metric-Alerts:"]')
+    );
+    const additionalButtonIndex = children.findIndex((child) =>
+      child.querySelector('[data-test-subj="additional-button-1"]')
+    );
+    const takeActionIndex = children.findIndex((child) =>
+      child.querySelector('[data-test-subj="take-action-button"]')
+    );
+
+    // Verify order: stats < additional buttons < take actions
+    expect(statsIndex).toBeGreaterThanOrEqual(0);
+    expect(additionalButtonIndex).toBeGreaterThan(statsIndex);
+    expect(takeActionIndex).toBeGreaterThan(additionalButtonIndex);
+  });
+
+  it('renders separators correctly between stats, additional buttons, and take actions', () => {
+    const additionalButtons = [
+      <button key="button1" data-test-subj="additional-button-1">
+        Button 1
+      </button>,
+    ];
+    const { container } = render(
+      <GroupStats {...testProps} additionalActionButtons={additionalButtons} />
+    );
+
+    // Find all separators (elements with role="separator")
+    const separators = container.querySelectorAll('[role="separator"]');
+
+    // With 4 stats + 1 additional button + 1 take action = 6 items, we should have 5 separators
+    expect(separators.length).toBe(5);
+  });
+
+  it('handles empty array', () => {
+    const { container } = render(<GroupStats {...testProps} additionalActionButtons={[]} />);
+
+    // Check that there are no elements with data-test-subj prefix 'additional-action-button-'
+    const additionalButtonElements = container.querySelectorAll(
+      '[data-test-subj^="additional-action-button-"]'
+    );
+    expect(additionalButtonElements.length).toBe(0);
+
+    // Verify existing functionality still works
+    expect(container.querySelector('[data-test-subj="take-action-button"]')).toBeInTheDocument();
+  });
+});

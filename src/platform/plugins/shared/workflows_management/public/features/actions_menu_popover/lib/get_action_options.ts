@@ -117,6 +117,29 @@ export function getActionOptions(
     }),
     options: [],
   };
+  const dataTransformationGroup: ActionOptionData = {
+    iconType: 'pencil',
+    iconColor: euiTheme.colors.vis.euiColorVis0,
+    id: 'data',
+    label: i18n.translate('workflows.actionsMenu.dataTransformation', {
+      defaultMessage: 'Data transformation',
+    }),
+    description: i18n.translate('workflows.actionsMenu.dataTransformationDescription', {
+      defaultMessage: 'Manipulate and convert your data',
+    }),
+    options: [
+      {
+        id: 'data.set',
+        label: i18n.translate('workflows.actionsMenu.dataSet', {
+          defaultMessage: 'Set Variables',
+        }),
+        description: i18n.translate('workflows.actionsMenu.dataSetDescription', {
+          defaultMessage: 'Define or compute variables to use in your workflow',
+        }),
+        iconType: 'tableOfContents',
+      },
+    ],
+  };
   const flowControlGroup: ActionOptionData = {
     iconType: 'branch',
     iconColor: euiTheme.colors.vis.euiColorVis0,
@@ -180,6 +203,7 @@ export function getActionOptions(
     external: externalGroup,
     ai: aiGroup,
     kibana: kibanaGroup,
+    data: dataTransformationGroup,
   };
 
   const baseTypeInstancesCount: Record<string, number> = {};
@@ -254,6 +278,7 @@ export function getActionOptions(
     elasticSearchGroup,
     kibanaGroup,
     aiGroup,
+    dataTransformationGroup,
     externalGroup,
     httpRequest,
     flowControlGroup,

@@ -85,7 +85,7 @@ export function ErrorGroupDetails() {
   const apmRouter = useApmRouter();
   const history = useHistory();
   const { onPageReady } = usePerformanceContext();
-  const { observabilityAIAssistant, onechat } = useApmPluginContext();
+  const { observabilityAIAssistant, agentBuilder } = useApmPluginContext();
 
   const {
     path: { groupId },
@@ -201,11 +201,11 @@ export function ErrorGroupDetails() {
 
   // Configure agent builder global flyout with the error attachment
   useEffect(() => {
-    if (!onechat || !errorId) {
+    if (!agentBuilder || !errorId) {
       return;
     }
 
-    onechat.setConversationFlyoutActiveConfig({
+    agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
       attachments: [
         {
@@ -222,9 +222,9 @@ export function ErrorGroupDetails() {
     });
 
     return () => {
-      onechat.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig();
     };
-  }, [onechat, errorId, serviceName, environment, start, end]);
+  }, [agentBuilder, errorId, serviceName, environment, start, end]);
 
   return (
     <>

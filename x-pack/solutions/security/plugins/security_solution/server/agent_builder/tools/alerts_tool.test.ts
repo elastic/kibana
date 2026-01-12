@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/onechat-common';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
-import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
+import { ToolResultType } from '@kbn/agent-builder-common';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import {
   createToolHandlerContext,
@@ -16,7 +16,7 @@ import {
 } from '../__mocks__/test_helpers';
 import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
 
-jest.mock('@kbn/onechat-genai-utils/tools', () => ({
+jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
   runSearchTool: jest.fn(),
 }));
 
@@ -29,6 +29,7 @@ describe('alertsTool', () => {
   };
   const mockEvents = {
     reportProgress: jest.fn(),
+    sendUiEvent: jest.fn(),
   };
   const tool = alertsTool(mockCore, mockLogger);
 
