@@ -7,9 +7,10 @@
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 
-/** Extracts the primary (non-unmapped) field type from field_caps response */
+const EXCLUDED_FIELD_TYPES = ['unmapped', 'object', 'nested'];
+
 export function getFieldType(
   fieldTypes: Record<string, FieldCapsFieldCapability>
 ): string | undefined {
-  return Object.keys(fieldTypes).find((type) => type !== 'unmapped');
+  return Object.keys(fieldTypes).find((type) => !EXCLUDED_FIELD_TYPES.includes(type));
 }

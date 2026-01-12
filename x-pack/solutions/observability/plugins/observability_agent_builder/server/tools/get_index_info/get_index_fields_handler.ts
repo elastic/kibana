@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import { compact, groupBy, mapValues, uniq } from 'lodash';
@@ -20,13 +19,10 @@ export interface IndexFieldsResult {
 }
 
 /** Threshold above which LLM filtering is applied */
-const LLM_FILTER_THRESHOLD = 100;
+const MIN_FIELDS_FOR_INTENT_FILTERING = 100;
 
-/** Minimum number of documents to sample for field discovery */
-const MIN_SAMPLE_SIZE = 1000;
-
-/** Maximum docs to return from top_hits within sampler */
-const MAX_TOP_HITS = 1000;
+/** Number of documents to sample for field discovery */
+const SAMPLE_SIZE = 1000;
 
 /**
  * Extracts all field paths from a nested object.
@@ -43,22 +39,8 @@ function extractFieldPaths(obj: Record<string, unknown>, prefix = ''): string[] 
 }
 
 /**
- * Extracts unique field paths from an array of document sources.
- */
-function extractFieldsFromDocs(docs: Array<{ _source?: unknown }>): string[] {
-  const fieldPaths = docs
-    .map((hit) => hit._source)
-    .filter(
-      (source): source is Record<string, unknown> => source != null && typeof source === 'object'
-    )
-    .flatMap((source) => extractFieldPaths(source));
-
-  return uniq(fieldPaths);
-}
-
-/**
- * Samples documents using random_sampler aggregation to get a diverse sample.
- * Calculates probability to ensure at least MIN_SAMPLE_SIZE documents.
+ * Fetches documents and extracts unique field names.
+ * Uses a simple search to get up to SAMPLE_SIZE documents.
  */
 async function getFieldNamesWithData(
   esClient: IScopedClusterClient,
@@ -68,87 +50,37 @@ async function getFieldNamesWithData(
   kqlFilter: string | undefined,
   logger: Logger
 ): Promise<string[]> {
-  const query: QueryDslQueryContainer = {
-    bool: {
-      filter: [
-        ...timeRangeFilter('@timestamp', {
-          start: parseDatemath(start),
-          end: parseDatemath(end, { roundUp: true }),
-        }),
-        ...toKqlFilter(kqlFilter),
-      ],
-    },
-  };
-
-  // Step 1: Get total document count within time range
-  const countResponse = await esClient.asCurrentUser.count({
-    index,
-    query,
-    ignore_unavailable: true,
-    allow_no_indices: true,
-  });
-
-  const totalDocs = countResponse.count;
-
-  if (totalDocs === 0) {
-    return [];
-  }
-
-  // Step 2: Determine sampling strategy
-  // random_sampler probability must be between 0.0-0.5 or exactly 1.0
-  const probability = MIN_SAMPLE_SIZE / totalDocs;
-
-  if (probability >= 0.5) {
-    // Need >= 50% of docs: fetch directly without sampling
-    const fetchSize = Math.min(totalDocs, MIN_SAMPLE_SIZE * 2);
-    const response = await esClient.asCurrentUser.search({
-      index,
-      query,
-      size: fetchSize,
-      _source: true,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    });
-
-    return extractFieldsFromDocs(response.hits.hits);
-  }
-
-  // Large index: use random_sampler for diverse sampling (probability < 0.5)
-  logger.debug(
-    `Sampling ${index}: ${totalDocs} total docs, using probability ${probability.toFixed(4)}`
-  );
-
   const response = await esClient.asCurrentUser.search({
     index,
-    query,
-    size: 0,
-    ignore_unavailable: true,
-    allow_no_indices: true,
-    aggs: {
-      sample: {
-        random_sampler: {
-          probability,
-        },
-        aggs: {
-          docs: {
-            top_hits: {
-              size: MAX_TOP_HITS,
-              _source: true,
-            },
-          },
-        },
+    size: SAMPLE_SIZE,
+    query: {
+      bool: {
+        filter: [
+          ...timeRangeFilter('@timestamp', {
+            start: parseDatemath(start),
+            end: parseDatemath(end, { roundUp: true }),
+          }),
+          ...toKqlFilter(kqlFilter),
+        ],
       },
     },
+    _source: true,
+    ignore_unavailable: true,
+    allow_no_indices: true,
   });
 
-  const sampleAgg = response.aggregations?.sample as {
-    docs?: { hits?: { hits?: Array<{ _source?: Record<string, unknown> }> } };
-  };
-  const sampledDocs = sampleAgg?.docs?.hits?.hits ?? [];
+  const docs = response.hits.hits;
+  logger.debug(`Sampled ${docs.length} documents from ${index}`);
 
-  logger.debug(`Sampled ${sampledDocs.length} documents from ${index}`);
+  // Extract field paths from documents
+  const fieldPaths = docs
+    .map((hit) => hit._source)
+    .filter(
+      (source): source is Record<string, unknown> => source != null && typeof source === 'object'
+    )
+    .flatMap((source) => extractFieldPaths(source));
 
-  return extractFieldsFromDocs(sampledDocs);
+  return uniq(fieldPaths);
 }
 
 /**
@@ -180,13 +112,13 @@ async function getFieldsWithTypes(
 
 /**
  * Returns fields from a specific index pattern that have actual data, grouped by type.
- * Uses random sampling to discover populated fields (O(1) regardless of mapping field count).
+ * Samples up to 1000 documents to discover populated fields.
  * When userIntentDescription is provided and field count exceeds threshold, uses LLM to filter.
  */
-export async function getIndexFieldsHandler({
+export async function listFieldsHandler({
   esClient,
   index,
-  userIntentDescription,
+  intent,
   start,
   end,
   kqlFilter,
@@ -195,7 +127,7 @@ export async function getIndexFieldsHandler({
 }: {
   esClient: IScopedClusterClient;
   index: string;
-  userIntentDescription?: string;
+  intent?: string;
   start: string;
   end: string;
   kqlFilter?: string;
@@ -224,10 +156,10 @@ export async function getIndexFieldsHandler({
     let fieldsWithTypes = await getFieldsWithTypes(esClient, index, fieldNamesWithData);
 
     // Step 3: Apply LLM filtering if needed
-    if (fieldsWithTypes.length > LLM_FILTER_THRESHOLD && userIntentDescription) {
+    if (fieldsWithTypes.length > MIN_FIELDS_FOR_INTENT_FILTERING && intent) {
       const { inferenceClient } = await modelProvider.getDefaultModel();
       fieldsWithTypes = await selectRelevantFields({
-        userIntentDescription,
+        intent,
         candidateFields: fieldsWithTypes,
         inferenceClient,
         logger,
@@ -240,7 +172,10 @@ export async function getIndexFieldsHandler({
 
     return { fieldsByType };
   } catch (error) {
-    logger.debug(`Error getting index fields: ${error.message}`);
-    return { fieldsByType: {} };
+    logger.error(`Error getting index fields for "${index}": ${error.message}`);
+    return {
+      fieldsByType: {},
+      message: `Failed to discover fields: ${error.message}`,
+    };
   }
 }

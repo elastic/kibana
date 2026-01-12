@@ -19,16 +19,16 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { getIndexOverviewHandler } from './get_index_overview_handler';
-import { getIndexFieldsHandler } from './get_index_fields_handler';
+import { getIndexPatternsHandler } from './get_index_overview_handler';
+import { listFieldsHandler } from './get_index_fields_handler';
 import { getFieldValuesHandler } from './get_field_values_handler';
 
 export const OBSERVABILITY_GET_INDEX_INFO_TOOL_ID = 'observability.get_index_info';
 
 const getIndexInfoSchema = z.object({
-  operation: z.enum(['get-overview', 'list-fields', 'get-field-values']).describe(
+  operation: z.enum(['get-index-patterns', 'list-fields', 'get-field-values']).describe(
     dedent(`Operation to perform:
-        - "get-overview": Get observability index patterns (logs, metrics, traces) and common fields
+        - "get-index-patterns": Get observability index patterns and discovered data streams 
         - "list-fields": List names of populated fields in an index (requires: index)
         - "get-field-values": Get values for specific fields (requires: index, fields)`)
   ),
@@ -42,7 +42,7 @@ const getIndexInfoSchema = z.object({
     .union([z.string(), z.array(z.string()).max(10)])
     .optional()
     .describe(
-      'Field name(s) to get values for (e.g., "host.name"). Required for "get-field-values".'
+      'Field name(s) or wildcard patterns to get values for (e.g., "host.name", "attributes.app.*"). Required for "get-field-values".'
     ),
   ...timeRangeSchemaOptional({ start: 'now-24h', end: 'now' }),
   kqlFilter: z
@@ -72,8 +72,18 @@ export function createGetIndexInfoTool({
   const toolDefinition: BuiltinToolDefinition<typeof getIndexInfoSchema> = {
     id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Discovers observability index patterns, fields, and field values. Call before using tools that need field names (e.g., groupBy, kqlFilter).',
+    description: dedent(`
+      Discovers observability index patterns, fields, and field values in the user's Elasticsearch cluster.
+
+      **When to use:**
+      - Before calling tools with "kqlFilter" param to discover valid fields and values 
+      - To discover custom fields available beyond standard ECS or OTel fields
+      - To understand which fields has data in the index
+      - To understand the sample values and ranges for fields
+
+      **When NOT to use:**
+      - When you already know the field names and values you need
+    `),
     schema: getIndexInfoSchema,
     tags: ['observability', 'index', 'fields'],
     availability: {
@@ -87,8 +97,8 @@ export function createGetIndexInfoTool({
         let result;
 
         switch (params.operation) {
-          case 'get-overview':
-            result = await getIndexOverviewHandler({ core, plugins, logger, esClient });
+          case 'get-index-patterns':
+            result = await getIndexPatternsHandler({ core, plugins, esClient, logger });
             break;
 
           case 'list-fields':
@@ -102,10 +112,10 @@ export function createGetIndexInfoTool({
                 ],
               };
             }
-            result = await getIndexFieldsHandler({
+            result = await listFieldsHandler({
               esClient,
               index: params.index,
-              userIntentDescription: params.intent,
+              intent: params.intent,
               start: params.start,
               end: params.end,
               kqlFilter: params.kqlFilter,
@@ -131,6 +141,9 @@ export function createGetIndexInfoTool({
               esClient,
               index: params.index,
               fields: castArray(params.fields),
+              start: params.start,
+              end: params.end,
+              kqlFilter: params.kqlFilter,
             });
             break;
         }

@@ -89,12 +89,12 @@ function getFieldObjects(
  * Uses an LLM to filter a large list of fields down to those relevant to the user's intent.
  */
 export async function selectRelevantFields({
-  userIntentDescription,
+  intent,
   candidateFields,
   inferenceClient,
   logger,
 }: {
-  userIntentDescription: string;
+  intent: string;
   candidateFields: FieldWithType[];
   inferenceClient: BoundInferenceClient;
   logger: Logger;
@@ -108,11 +108,7 @@ export async function selectRelevantFields({
 
   for (const fieldsChunk of chunks) {
     try {
-      const selectedFieldNames = await selectFieldsFromChunk(
-        inferenceClient,
-        userIntentDescription,
-        fieldsChunk
-      );
+      const selectedFieldNames = await selectFieldsFromChunk(inferenceClient, intent, fieldsChunk);
       const fields = getFieldObjects(selectedFieldNames, fieldsChunk);
       relevantFields.push(...fields);
     } catch (e) {
