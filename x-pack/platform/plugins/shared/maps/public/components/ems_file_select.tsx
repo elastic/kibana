@@ -106,18 +106,15 @@ export class EMSFileSelect extends Component<Props, State> {
 
   render() {
     return (
-      <div className="lnsIndexPatternDimensionEditor--padded">
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.source.emsFileSelect.selectLabel', {
-            defaultMessage: 'EMS boundaries',
-          })}
-          helpText={this.state.emsFileOptions.length === 0 ? getEmsUnavailableMessage() : null}
-          display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
-          fullWidth
-        >
-          {this._renderSelect()}
-        </EuiFormRow>
-      </div>
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.source.emsFileSelect.selectLabel', {
+          defaultMessage: 'EMS boundaries',
+        })}
+        helpText={this.state.emsFileOptions.length === 0 ? getEmsUnavailableMessage() : null}
+        display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+      >
+        {this._renderSelect()}
+      </EuiFormRow>
     );
   }
 }
