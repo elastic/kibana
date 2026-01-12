@@ -9,10 +9,13 @@
 
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SearchSessionSavedObjectAttributes } from '../../../common';
-import { SearchSessionStatus } from '../../../common';
-import { SearchStatus } from './types';
-import type { SearchSessionsConfigSchema } from '../../config';
+import type {
+  SearchSessionRequestInfo,
+  SearchSessionRequestStatus,
+  SearchSessionSavedObjectAttributes,
+} from '../../../../common';
+import { SearchSessionStatus } from '../../../../common';
+import { SearchStatus } from '../types';
 import { getSearchStatus } from './get_search_status';
 
 // A session should is considered "new" for the first 30 seconds after creation. We need some arbitrary value here
@@ -20,17 +23,23 @@ import { getSearchStatus } from './get_search_status';
 // Some examples of possible issues: the browser is closed or in another tab the search requests are canceled.
 const NEW_SESSION_THRESHOLD_SECONDS = 30;
 
+export type SearchStatusWithInfo = SearchSessionRequestStatus & SearchSessionRequestInfo;
+
 export async function getSessionStatus(
   deps: { esClient: ElasticsearchClient },
   session: SearchSessionSavedObjectAttributes,
-  config: SearchSessionsConfigSchema
-): Promise<{ status: SearchSessionStatus; errors?: string[] }> {
+  // When true it will try to use the cached status if present, otherwise it will fall back to checking the actual status from ES.
+  opts: { preferCachedStatus: boolean }
+): Promise<{
+  status: SearchSessionStatus;
+  errors?: string[];
+  searchStatuses?: SearchStatusWithInfo[];
+}> {
   if (session.isCanceled === true) {
     return { status: SearchSessionStatus.CANCELLED };
   }
 
   const now = moment();
-
   if (moment(session.expires).isBefore(now)) {
     return { status: SearchSessionStatus.EXPIRED };
   }
@@ -43,11 +52,20 @@ export async function getSessionStatus(
     return { status: SearchSessionStatus.ERROR };
   }
 
+  if (opts.preferCachedStatus && !!session.status) {
+    return {
+      status: session.status,
+      errors: Object.values(session.idMapping)
+        .filter((s) => s.status === SearchStatus.ERROR && !!s.error)
+        .map((s) => s.error) as string[],
+    };
+  }
+
   const searchStatuses = await Promise.all(
     searches.map(async (s) => {
       const status = await getSearchStatus({
         asyncId: s.id,
-        session: s,
+        search: s,
         esClient: deps.esClient,
       });
       return {
@@ -57,16 +75,20 @@ export async function getSessionStatus(
     })
   );
 
-  if (searchStatuses.some((item) => item.status === SearchStatus.ERROR)) {
-    const erroredSearches = searchStatuses.filter((s) => s.status === SearchStatus.ERROR);
+  const erroredSearches = searchStatuses.filter((s) => s.status === SearchStatus.ERROR);
+  const hasErrors = erroredSearches.length > 0;
+  if (hasErrors) {
     const errors = erroredSearches.map((s) => s.error).filter((error) => !!error) as string[];
-    return { status: SearchSessionStatus.ERROR, errors };
-  } else if (
-    searchStatuses.length > 0 &&
-    searchStatuses.every((item) => item.status === SearchStatus.COMPLETE)
-  ) {
-    return { status: SearchSessionStatus.COMPLETE };
-  } else {
-    return { status: SearchSessionStatus.IN_PROGRESS };
+    return { status: SearchSessionStatus.ERROR, errors, searchStatuses };
   }
+
+  const hasSearches = searchStatuses.length > 0;
+  const areAllSearchesComplete = searchStatuses.every(
+    (item) => item.status === SearchStatus.COMPLETE
+  );
+  if (hasSearches && areAllSearchesComplete) {
+    return { status: SearchSessionStatus.COMPLETE, searchStatuses };
+  }
+
+  return { status: SearchSessionStatus.IN_PROGRESS, searchStatuses };
 }

@@ -1,0 +1,92 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ElasticsearchClient,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { SearchSessionStatus } from '../../../../common';
+import { SEARCH_SESSION_TYPE, type SearchSessionSavedObjectAttributes } from '../../../../common';
+import type { SearchStatusWithInfo } from './get_session_status';
+import { getSessionStatus } from './get_session_status';
+
+export async function updateSessionStatus(
+  deps: { esClient: ElasticsearchClient; savedObjectsClient: SavedObjectsClientContract },
+  session: SavedObject<SearchSessionSavedObjectAttributes>
+): Promise<{
+  status: SearchSessionStatus;
+  errors?: string[];
+  searchStatuses?: SearchStatusWithInfo[];
+}> {
+  const sessionStatus = await getSessionStatus(deps, session.attributes, {
+    preferCachedStatus: false,
+  });
+  const updatedIdMapping = getUpdatedIdMappings(
+    session.attributes,
+    sessionStatus.searchStatuses || []
+  );
+
+  const needsUpdate = !!updatedIdMapping || session.attributes.status !== sessionStatus.status;
+  if (!needsUpdate) return sessionStatus;
+
+  const updatedSession: SavedObject<SearchSessionSavedObjectAttributes> = {
+    ...session,
+    attributes: {
+      ...session.attributes,
+      status: sessionStatus.status,
+      idMapping: updatedIdMapping || session.attributes.idMapping,
+    },
+  };
+  await deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
+    SEARCH_SESSION_TYPE,
+    session.id,
+    updatedSession.attributes
+  );
+
+  return {
+    status: sessionStatus.status,
+    errors: sessionStatus.searchStatuses
+      ?.filter((s) => s.status === 'error' && !!s.error)
+      .map((s) => s.error) as string[],
+    searchStatuses: sessionStatus.searchStatuses,
+  };
+}
+
+function getUpdatedIdMappings(
+  session: SearchSessionSavedObjectAttributes,
+  searchStatuses: SearchStatusWithInfo[]
+) {
+  let hasUpdated = false;
+  const idMapping = { ...session.idMapping };
+
+  for (const searchStatus of searchStatuses) {
+    const requestHash = getRequestHashBySearchId(session, searchStatus.id);
+    if (!requestHash) continue;
+
+    const search = idMapping[requestHash];
+    if (!search || search.status === searchStatus.status) continue;
+    idMapping[requestHash] = {
+      ...search,
+      status: searchStatus.status,
+      completionTime: searchStatus.completionTime,
+    };
+    hasUpdated = true;
+  }
+
+  return hasUpdated ? idMapping : null;
+}
+
+function getRequestHashBySearchId(session: SearchSessionSavedObjectAttributes, searchId: string) {
+  for (const [requestHash, info] of Object.entries(session.idMapping)) {
+    if (info.id === searchId) return requestHash;
+  }
+
+  return null;
+}

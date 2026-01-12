@@ -33,7 +33,8 @@ import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE } from '../../../commo
 import type { ISearchSessionService } from '../..';
 import { NoSearchIdInSessionError } from '../..';
 import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
-import { getSessionStatus } from './get_session_status';
+import { getSessionStatus } from './status/get_session_status';
+import { updateSessionStatus } from './status/update_session_status';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -194,7 +195,7 @@ export class SearchSessionService implements ISearchSessionService {
             esClient: asCurrentUserElasticsearchClient,
           },
           so.attributes,
-          this.sessionConfig
+          { preferCachedStatus: true }
         );
 
         return sessionStatus;
@@ -377,10 +378,29 @@ export class SearchSessionService implements ISearchSessionService {
         esClient: deps.asCurrentUserElasticsearchClient,
       },
       session.attributes,
-      this.sessionConfig
+      { preferCachedStatus: true }
     );
 
     return { status: sessionStatus.status, errors: sessionStatus.errors };
+  }
+
+  public async updateStatus(
+    deps: SearchSessionStatusDependencies,
+    user: AuthenticatedUser | null,
+    sessionId: string
+  ): Promise<SearchSessionStatusResponse> {
+    this.logger.debug(`SearchSessionService: updateStatus | ${sessionId}`);
+    const session = await this.get(deps, user, sessionId);
+
+    const updatedSessionStatus = await updateSessionStatus(
+      {
+        esClient: deps.asCurrentUserElasticsearchClient,
+        savedObjectsClient: deps.savedObjectsClient,
+      },
+      session
+    );
+
+    return updatedSessionStatus;
   }
 
   /**
@@ -446,6 +466,7 @@ export class SearchSessionService implements ISearchSessionService {
         cancel: this.cancel.bind(this, deps, user),
         delete: this.delete.bind(this, deps, user),
         status: this.status.bind(this, deps, user),
+        updateStatus: this.updateStatus.bind(this, deps, user),
         getConfig: () => this.config.search.sessions,
       };
     };

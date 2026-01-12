@@ -9,19 +9,20 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SearchSessionRequestInfo, SearchSessionRequestStatus } from '../../../common';
-import { SearchStatus } from './types';
+import moment from 'moment';
+import type { SearchSessionRequestInfo, SearchSessionRequestStatus } from '../../../../common';
+import { SearchStatus } from '../types';
 
 function requestByStrategy({
-  session,
+  search,
   asyncId,
   esClient,
 }: {
-  session: SearchSessionRequestInfo;
+  search: SearchSessionRequestInfo;
   asyncId: string;
   esClient: ElasticsearchClient;
 }) {
-  if (session.strategy === 'esql_async') {
+  if (search.strategy === 'esql_async') {
     return esClient.esql.asyncQueryGet({ id: asyncId }, { meta: true });
   }
 
@@ -34,43 +35,65 @@ function requestByStrategy({
 }
 
 export async function getSearchStatus({
-  session,
+  search,
   asyncId,
   esClient,
 }: {
-  session: SearchSessionRequestInfo;
+  search: SearchSessionRequestInfo;
   asyncId: string;
   esClient: ElasticsearchClient;
 }): Promise<SearchSessionRequestStatus> {
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
   try {
+    if (search.status === SearchStatus.COMPLETE) {
+      return {
+        status: SearchStatus.COMPLETE,
+        startTime: search.startTime,
+        completionTime: search.completionTime,
+      };
+    }
+
     const apiResponse = await requestByStrategy({
-      session,
+      search,
       asyncId,
       esClient,
     });
 
     const response = apiResponse.body;
+    const startTime =
+      'start_time_in_millis' in response
+        ? moment(response.start_time_in_millis).toISOString()
+        : undefined;
+    const completionTime =
+      'completion_time_in_millis' in response && response.completion_time_in_millis
+        ? moment(response.completion_time_in_millis).toISOString()
+        : undefined;
+
     if ('completion_status' in response && response.completion_status! >= 400) {
       return {
         status: SearchStatus.ERROR,
+        startTime,
+        completionTime,
         error: i18n.translate('data.search.statusError', {
           defaultMessage: `Search {searchId} completed with a {errorCode} status`,
           values: { searchId: asyncId, errorCode: response.completion_status },
         }),
       };
-    } else if (!response.is_running) {
+    }
+
+    if (!response.is_running) {
       return {
         status: SearchStatus.COMPLETE,
-        error: undefined,
-      };
-    } else {
-      return {
-        status: SearchStatus.IN_PROGRESS,
-        error: undefined,
+        startTime,
+        completionTime,
       };
     }
+
+    return {
+      status: SearchStatus.IN_PROGRESS,
+      startTime,
+    };
   } catch (e) {
     return {
       status: SearchStatus.ERROR,

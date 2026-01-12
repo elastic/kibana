@@ -66,6 +66,19 @@ export interface SearchSessionSavedObjectAttributes {
    * `true` if session was cancelled
    */
   isCanceled?: boolean;
+
+  /**
+   * Search status - used to avoid extra calls to ES when tracking search IDs
+   */
+  status?: SearchSessionStatus;
+  /**
+   * Start time of the search request in ISO format
+   */
+  startTime?: string;
+  /**
+   * Completion time of the search request in ISO format
+   */
+  completionTime?: string;
 }
 
 export interface SearchSessionRequestInfo {
@@ -77,10 +90,31 @@ export interface SearchSessionRequestInfo {
    * Search strategy used to submit the search request
    */
   strategy: string;
+  /**
+   * Search status - used to avoid extra calls to ES when tracking search IDs
+   */
+  status?: SearchStatus;
+  /**
+   * Start time of the search request in ISO format
+   */
+  startTime?: string;
+  /**
+   * Completion time of the search request in ISO format
+   */
+  completionTime?: string;
+  /**
+   * An optional error. Set if status is set to error.
+   */
+  error?: string;
 }
 
 export interface SearchSessionRequestStatus {
   status: SearchStatus;
+  startTime?: string;
+  /**
+   * Optional completion time. May be undefined if the search is still in progress
+   */
+  completionTime?: string;
   /**
    * An optional error. Set if status is set to error.
    */

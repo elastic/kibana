@@ -175,6 +175,48 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
 
   router.versioned
     .post({
+      path: `${pathPrefix}/{id}/status`,
+      access,
+      security: {
+        authz: { requiredPrivileges },
+      },
+    })
+    .addVersion(
+      {
+        version,
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
+          },
+          response: {
+            200: {
+              body: searchSessionStatusSchema,
+            },
+          },
+        },
+      },
+      async (context, request, res) => {
+        const { id } = request.params;
+        try {
+          const searchContext = await context.search;
+          const response: SearchSessionStatusRestResponse =
+            await searchContext!.updateSessionStatus(id);
+
+          return res.ok({
+            body: response,
+          });
+        } catch (e) {
+          const err = e.output?.payload || e;
+          logger.error(err);
+          return reportServerError(res, err);
+        }
+      }
+    );
+
+  router.versioned
+    .post({
       path: `${pathPrefix}/_find`,
       access,
       security: {
