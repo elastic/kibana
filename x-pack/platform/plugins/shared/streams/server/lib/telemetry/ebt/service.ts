@@ -6,7 +6,11 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { streamsEndpointLatencyEventType, streamsStateErrorEventType } from './events';
+import {
+  streamsEndpointLatencyEventType,
+  streamsStateErrorEventType,
+  streamsSystemIdentificationIdentifiedEventType,
+} from './events';
 import { EbtTelemetryClient } from './client';
 
 export class EbtTelemetryService {
@@ -18,6 +22,7 @@ export class EbtTelemetryService {
     this.analytics = analytics;
     this.analytics.registerEventType(streamsEndpointLatencyEventType);
     this.analytics.registerEventType(streamsStateErrorEventType);
+    this.analytics.registerEventType(streamsSystemIdentificationIdentifiedEventType);
   }
 
   public getClient() {

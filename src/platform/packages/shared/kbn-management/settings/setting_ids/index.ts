@@ -60,10 +60,8 @@ export const LABS_DASHBOARDS_ENABLE_UI_ID = 'labs:dashboard:enable_ui';
 export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimations';
 
 // Agent builder settings
-export const AGENT_BUILDER_ENABLED_SETTING_ID = 'agentBuilder:enabled';
 export const AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID = 'agentBuilder:dashboardTools';
 export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
-export const AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID = 'agentBuilder:externalMcp';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
