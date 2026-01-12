@@ -202,7 +202,7 @@ export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(static
  * Combine static connectors with dynamic Elasticsearch and Kibana connectors
  * Internal implementation - use exported getAllConnectors() instead
  */
-function getAllConnectorsInternal(): ConnectorContractUnion[] {
+export function getAllConnectorsInternal(): ConnectorContractUnion[] {
   // Return cached connectors if available
   const cached = stepSchemas.getAllConnectorsCache();
   if (cached !== null) {
@@ -341,31 +341,6 @@ export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeIn
 export function getAllConnectors(): ConnectorContractUnion[] {
   return getAllConnectorsInternal();
 }
-
-export const getOutputSchemaForStepType = (stepType: string): z.ZodSchema => {
-  const allConnectors = getAllConnectorsInternal();
-  const connector = allConnectors.find((c) => c.type === stepType);
-  if (connector) {
-    if (!connector.outputSchema) {
-      // throw new Error(`Output schema not found for step type ${stepType}`);
-      return z.unknown();
-    }
-    return connector.outputSchema;
-  }
-
-  // Handle internal actions with pattern matching
-  // TODO: add output schema support for elasticsearch.request and kibana.request connectors
-  if (stepType.startsWith('elasticsearch.')) {
-    return z.unknown();
-  }
-
-  if (stepType.startsWith('kibana.')) {
-    return z.unknown();
-  }
-
-  // Fallback to any if not found
-  return z.unknown();
-};
 
 export function getAllConnectorsWithDynamic(
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>

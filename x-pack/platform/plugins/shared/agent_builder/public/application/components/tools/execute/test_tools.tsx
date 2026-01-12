@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFieldNumber,
   EuiFieldText,
@@ -15,7 +14,6 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
@@ -37,7 +35,6 @@ import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
 import { useTool } from '../../../hooks/tools/use_tools';
-import { ToolFormMode } from '../form/tool_form';
 import { labels } from '../../../utils/i18n';
 
 const flyoutStyles = css`
@@ -69,9 +66,11 @@ const i18nMessages = {
       defaultMessage: 'Enter {label}',
       values: { label },
     }),
-  title: i18n.translate('xpack.agentBuilder.tools.testFlyout.title', {
-    defaultMessage: 'Test Tool',
-  }),
+  title: (toolName: string) =>
+    i18n.translate('xpack.agentBuilder.tools.testFlyout.title', {
+      defaultMessage: 'Test tool: {toolName}',
+      values: { toolName },
+    }),
   inputsTitle: i18n.translate('xpack.agentBuilder.tools.testTool.inputsTitle', {
     defaultMessage: 'Inputs',
   }),
@@ -141,93 +140,37 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
   });
 };
 
-/**
- * Transforms form data to convert array string inputs to arrays
- * The form UI only has text inputs, so array fields come through as strings (JSON or comma-separated)
- */
-const transformFormDataToSchemaTypes = (
+export const parseFormData = (
   formData: Record<string, any>,
-  tool?: ToolDefinitionWithSchema
+  parameters: Array<{ name: string; type: string }>
 ): Record<string, any> => {
-  if (!tool?.schema?.properties) return formData;
+  const parsedFormData: Record<string, any> = {};
 
-  const transformed: Record<string, any> = {};
-
-  // Iterate over all schema properties to handle missing keys and apply defaults
-  for (const [key, paramSchema] of Object.entries(tool.schema.properties)) {
-    const value = formData[key];
-
-    // Check if value is missing/empty and schema has a default - apply default
-    const hasDefault = 'default' in paramSchema && paramSchema.default !== undefined;
-    const isEmpty = value == null || value === '' || !(key in formData);
-
-    if (isEmpty && hasDefault) {
-      transformed[key] = paramSchema.default;
+  for (const [key, value] of Object.entries(formData)) {
+    // Skip empty string values
+    if (typeof value === 'string' && value.trim() === '') {
       continue;
     }
 
-    // If value is missing and no default, skip (will be handled by Zod schema validation)
-    if (!(key in formData) && !hasDefault) {
-      continue;
-    }
-
-    let schemaType: string | string[] | undefined;
-    if (paramSchema && 'type' in paramSchema) {
-      schemaType = paramSchema.type as string | string[] | undefined;
-    }
-
-    // Only transform arrays and objects - numbers and booleans are handled by form components
-    if (schemaType === 'array' || (Array.isArray(schemaType) && schemaType.includes('array'))) {
-      if (value == null || value === '') {
-        // Null, undefined, or empty string for array becomes empty array
-        transformed[key] = [];
-      } else if (Array.isArray(value)) {
-        transformed[key] = value;
-      } else if (typeof value === 'string') {
-        // Try to parse as JSON array first
-        try {
-          const parsed = JSON.parse(value);
-          transformed[key] = Array.isArray(parsed) ? parsed : [parsed];
-        } catch {
-          // If not valid JSON, split by comma or wrap single value
-          const trimmed = value.trim();
-          if (trimmed.includes(',')) {
-            transformed[key] = trimmed
-              .split(',')
-              .map((v) => v.trim())
-              .filter((v) => v.length > 0);
-          } else {
-            transformed[key] = [trimmed];
-          }
-        }
-      } else {
-        transformed[key] = value;
-      }
-    } else if (
-      schemaType === 'object' ||
-      (Array.isArray(schemaType) && schemaType.includes('object'))
+    const param = parameters.find((p) => p.name === key);
+    if (
+      param &&
+      (param.type === 'object' || param.type === 'array') &&
+      typeof value === 'string' &&
+      value.trim() !== ''
     ) {
-      // Handle object types - parse JSON strings
-      if (typeof value === 'string' && value.trim() !== '') {
-        try {
-          transformed[key] = JSON.parse(value);
-        } catch {
-          // If not valid JSON, keep as string (will fail validation, but that's expected)
-          transformed[key] = value;
-        }
-      } else if (value === '' || value == null) {
-        // Empty string or null for object should be undefined (optional) or empty object
-        transformed[key] = undefined;
-      } else {
-        transformed[key] = value;
+      try {
+        parsedFormData[key] = JSON.parse(value);
+      } catch {
+        // If parsing fails, use the original string value
+        parsedFormData[key] = value;
       }
     } else {
-      // Pass through other types as-is (form components handle numbers/booleans)
-      transformed[key] = value;
+      parsedFormData[key] = value;
     }
   }
 
-  return transformed;
+  return parsedFormData;
 };
 
 const renderFormField = ({
@@ -292,7 +235,7 @@ const renderFormField = ({
             <EuiFieldText
               {...field}
               inputRef={ref}
-              value={(value as string) ?? ''}
+              value={value as string}
               placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
             />
@@ -305,10 +248,9 @@ const renderFormField = ({
 export interface ToolTestFlyoutProps {
   toolId: string;
   onClose: () => void;
-  formMode?: ToolFormMode;
 }
 
-export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose, formMode }) => {
+export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose }) => {
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
   const { docLinksService } = useAgentBuilderServices();
   const [response, setResponse] = useState<string>('{}');
@@ -318,7 +260,6 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
 
   const form = useForm<Record<string, any>>({
     mode: 'onChange',
-    defaultValues: {},
   });
 
   const {
@@ -343,12 +284,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
   });
 
   const onSubmit = async (formData: Record<string, any>) => {
-    // Transform form data to match schema types (strings -> arrays, numbers, booleans)
-    const transformedParams = transformFormDataToSchemaTypes(formData, tool);
+    const parameters = getParameters(tool);
+    const parsedFormData = parseFormData(formData, parameters);
 
     await executeTool({
       toolId: tool!.id,
-      toolParams: transformedParams,
+      toolParams: parsedFormData,
     });
   };
 
@@ -360,7 +301,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="flyoutTitle">{i18nMessages.title}</h2>
+              <h2 id="flyoutTitle">{i18nMessages.title(tool.id)}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -394,7 +335,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                 <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
                   <EuiFlexGroup direction="column" gutterSize="none">
                     {getParameters(tool).map((parameter) => {
-                      const { name, label, description, optional } = parameter;
+                      const { name, label, description, type, optional } = parameter;
                       return (
                         <EuiFormRow
                           key={name}
@@ -406,7 +347,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                               </EuiText>
                             )
                           }
-                          helpText={description}
+                          helpText={
+                            <>
+                              <code>{type}</code>
+                              {description && ` - ${description}`}
+                            </>
+                          }
                           isInvalid={!!errors[name]}
                           error={errors[name]?.message as string}
                           fullWidth
@@ -456,17 +402,6 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
           </FormProvider>
         )}
       </EuiFlyoutBody>
-      {formMode === ToolFormMode.Edit && (
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            aria-label={labels.tools.testTool.backToEditToolButton}
-            iconType="sortLeft"
-            onClick={onClose}
-          >
-            {labels.tools.testTool.backToEditToolButton}
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      )}
     </EuiFlyout>
   );
 };

@@ -56,15 +56,19 @@ export function isValidJsonSchema(schema: unknown): schema is JSONSchema7 {
     // eslint-disable-next-line no-console
     const originalConsoleError = console.error;
     // eslint-disable-next-line no-console
-    console.error = () => {
-      // Suppress Ajv compilation errors
-    };
+    const originalConsoleWarn = console.warn;
+    // eslint-disable-next-line no-console
+    console.error = () => {};
+    // eslint-disable-next-line no-console
+    console.warn = () => {};
     try {
       ajv.compile(schemaObj);
       return true;
     } finally {
       // eslint-disable-next-line no-console
       console.error = originalConsoleError;
+      // eslint-disable-next-line no-console
+      console.warn = originalConsoleWarn;
     }
   } catch (error) {
     // If compilation fails, it's not a valid schema
