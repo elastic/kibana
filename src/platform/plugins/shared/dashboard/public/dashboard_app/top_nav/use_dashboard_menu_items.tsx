@@ -225,7 +225,8 @@ export const useDashboardMenuItems = ({
         isResetting ||
         !hasUnsavedChanges ||
         hasOverlays ||
-        (viewMode === 'edit' && (isSaveInProgress || !lastSavedId)),
+        (viewMode === 'edit' && (isSaveInProgress || !lastSavedId)) ||
+        !lastSavedId, // Disable when on a new dashboard
       isLoading: isResetting,
       run: () => resetChanges(),
     };
@@ -256,7 +257,7 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
       } as AppMenuItemType,
 
-      viewModeInteractiveSave: {
+      duplicate: {
         order: 2,
         disableButton: disableTopNav,
         id: 'interactive-save',
@@ -355,13 +356,13 @@ export const useDashboardMenuItems = ({
         color: 'text',
       } as AppMenuPrimaryActionItem,
 
-      quickSave: {
+      save: {
         label: topNavStrings.quickSave.label,
-        id: 'quick-save',
+        id: 'save',
         iconType: 'save',
-        testId: 'dashboardQuickSaveMenuItem',
-        disableButton: isQuickSaveButtonDisabled,
-        run: () => quickSaveDashboard(),
+        testId: lastSavedId ? 'dashboardQuickSaveMenuItem' : 'dashboardInteractiveSaveMenuItem',
+        disableButton: lastSavedId ? isQuickSaveButtonDisabled : disableTopNav, // Only check disableTopNav for new dashboards
+        run: () => (lastSavedId ? quickSaveDashboard() : dashboardInteractiveSave()),
         popoverWidth: 150,
         splitButtonProps: {
           items: [
@@ -371,13 +372,12 @@ export const useDashboardMenuItems = ({
               iconType: 'save',
               order: 1,
               testId: 'dashboardInteractiveSaveMenuItem',
-              disableButton: isSaveInProgress,
+              disableButton: isSaveInProgress || !lastSavedId, // Disable when on a new dashboard
               run: () => dashboardInteractiveSave(),
             },
             resetChangesMenuItem,
           ],
           isMainButtonLoading: isSaveInProgress,
-          isMainButtonDisabled: !hasUnsavedChanges,
           secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
           secondaryButtonIcon: 'arrowDown',
           secondaryButtonFill: true,
@@ -385,17 +385,6 @@ export const useDashboardMenuItems = ({
           notifcationIndicatorTooltipContent: topNavStrings.unsavedChangesTooltip,
           showNotificationIndicator: hasUnsavedChanges,
         },
-      } as AppMenuPrimaryActionItem,
-
-      editModeInteractiveSave: {
-        order: 2,
-        disableButton: disableTopNav,
-        id: 'interactive-save',
-        testId: 'dashboardInteractiveSaveMenuItem',
-        iconType: 'save',
-        run: dashboardInteractiveSave,
-        label: topNavStrings.quickSave.label,
-        color: 'text',
       } as AppMenuPrimaryActionItem,
 
       // Labs item
@@ -446,7 +435,7 @@ export const useDashboardMenuItems = ({
     const items: AppMenuItemType[] = [menuItems.fullScreen];
 
     if (showWriteControls) {
-      items.push(menuItems.viewModeInteractiveSave);
+      items.push(menuItems.duplicate);
     }
 
     // Only show the export button if the current user meets the requirements for at least one registered export integration
@@ -481,7 +470,7 @@ export const useDashboardMenuItems = ({
     return viewModeConfig;
   }, [
     menuItems.fullScreen,
-    menuItems.viewModeInteractiveSave,
+    menuItems.duplicate,
     menuItems.export,
     menuItems.share,
     menuItems.edit,
@@ -519,7 +508,7 @@ export const useDashboardMenuItems = ({
     const editModeConfig: AppMenuConfig = {
       items,
       secondaryActionItem: menuItems.add,
-      primaryActionItem: lastSavedId ? menuItems.quickSave : menuItems.editModeInteractiveSave,
+      primaryActionItem: menuItems.save,
     };
 
     return editModeConfig;
@@ -530,11 +519,9 @@ export const useDashboardMenuItems = ({
     menuItems.settings,
     menuItems.backgroundSearch,
     menuItems.add,
-    menuItems.quickSave,
-    menuItems.editModeInteractiveSave,
+    menuItems.save,
     menuItems.labs,
     hasExportIntegration,
-    lastSavedId,
     isLabsEnabled,
   ]);
 
