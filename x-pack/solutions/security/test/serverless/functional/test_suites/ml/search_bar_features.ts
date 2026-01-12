@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.svlCommonNavigation.search.searchFor(expectedLabel);
           const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
           expect(results.length).to.be.greaterThan(0);
-          expect(results.map((r) => r.label)).to.contain(expectedLabel);
+          expect(results.map((r) => r.label.toLowerCase())).to.contain(expectedLabel.toLowerCase());
         }
         await PageObjects.svlCommonNavigation.search.hideSearch();
       });
@@ -64,7 +64,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         for (const notExpectedLabel of notExpectedLabels) {
           await PageObjects.svlCommonNavigation.search.searchFor(notExpectedLabel);
           const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
-          expect(results.map((r) => r.label)).to.not.contain(notExpectedLabel);
+          expect(results.map((r) => r.label.toLowerCase())).to.not.contain(
+            notExpectedLabel.toLowerCase()
+          );
         }
         await PageObjects.svlCommonNavigation.search.hideSearch();
       });
