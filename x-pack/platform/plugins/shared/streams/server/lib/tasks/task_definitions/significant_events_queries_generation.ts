@@ -8,7 +8,11 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { GeneratedSignificantEventQuery, System } from '@kbn/streams-schema';
+import type {
+  GeneratedSignificantEventQuery,
+  SignificantEventsQueriesGenerationResult,
+  System,
+} from '@kbn/streams-schema';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
@@ -23,11 +27,6 @@ export interface SignificantEventsQueriesGenerationTaskParams {
   end: number;
   systems?: System[];
   sampleDocsSize?: number;
-}
-
-export interface SignificantEventsQueriesGenerationResult {
-  queries: GeneratedSignificantEventQuery[];
-  tokensUsed: ChatCompletionTokenCount;
 }
 
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
@@ -65,8 +64,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
 
-                // If no systems are passed, generate for all data (single call with no feature)
-                // If systems are passed, generate for each feature with concurrency limit
+                // If no systems are passed, generate for all data
+                // If systems are passed, generate for each system with concurrency limit
                 const systemsToProcess: Array<System | undefined> =
                   systems && systems.length > 0 ? systems : [undefined];
 

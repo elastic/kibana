@@ -204,15 +204,7 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
     >(getSignificantEventsQueriesGenerationTaskId(name));
 
     if (task.status === 'in_progress') {
-      if (isStale(task.created_at)) {
-        return {
-          status: 'stale',
-        };
-      }
-
-      return {
-        status: 'in_progress',
-      };
+      return isStale(task.created_at) ? { status: 'stale' } : { status: task.status };
     } else if (task.status === 'failed') {
       return {
         status: 'failed',

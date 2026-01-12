@@ -132,7 +132,11 @@ export function AddSignificantEventFlyout({
     // - Transitioning from in_progress to completed
     const isFirstLoad = prevStatus === undefined;
     const isTransitionFromInProgress = prevStatus === 'in_progress';
-    if (task?.status === 'completed' && (isFirstLoad || isTransitionFromInProgress)) {
+    if (
+      task?.status === 'completed' &&
+      (isFirstLoad || isTransitionFromInProgress) &&
+      !isGenerating
+    ) {
       setGeneratedQueries(
         task.queries
           .filter((nextQuery) => {
@@ -152,7 +156,7 @@ export function AddSignificantEventFlyout({
           }))
       );
     }
-  }, [task]);
+  }, [isGenerating, task]);
 
   const stopGeneration = useCallback(() => {
     if (task?.status === 'in_progress') {
