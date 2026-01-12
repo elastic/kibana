@@ -19,6 +19,7 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
@@ -72,6 +73,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private experimentalFeatures: ExperimentalFeatures;
   private contract: PluginContract;
   private services: PluginServices;
+  private logger: Logger;
 
   private appUpdater$ = new Subject<AppUpdater>();
   private storage = new Storage(localStorage);
@@ -87,12 +89,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.config.enableExperimental || []
     ).features;
     this.contract = new PluginContract(this.experimentalFeatures);
+    this.logger = initializerContext.logger.get(); // Initializes logger with name plugins.securitySolution
 
     this.services = new PluginServices(
       this.config,
       this.experimentalFeatures,
       this.contract,
-      initializerContext.env.packageInfo
+      initializerContext.env.packageInfo,
+      this.logger
     );
   }
 
