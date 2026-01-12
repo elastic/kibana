@@ -8,7 +8,6 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
-  getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
   calculateThroughputWithRange,
 } from '@kbn/apm-data-access-plugin/server/utils';
@@ -26,6 +25,7 @@ import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
   isRootTransaction,
 } from '../../lib/helpers/transactions';
