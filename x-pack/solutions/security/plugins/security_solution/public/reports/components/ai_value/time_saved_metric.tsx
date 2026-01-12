@@ -18,6 +18,7 @@ import {
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 interface Props {
   from: string;
@@ -36,6 +37,8 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
   } = useEuiTheme();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const signalIndexName = useSignalIndexWithDefault();
+  const aiValueExportContext = useAIValueExportContext();
+  const isExportMode = aiValueExportContext?.isExportMode === true;
 
   const getLensAttributes = useCallback<GetLensAttributes>(
     (args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert, signalIndexName }),
@@ -50,7 +53,10 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
           height: 100% !important;
         }
         .echMetricText__icon .euiIcon {
-          fill: ${colors.vis.euiColorVis2};
+          ${isExportMode ? 'display: none;' : `fill: ${colors.vis.euiColorVis2};`}
+        }
+        .echMetricText__valueBlock {
+          grid-row-start: 3 !important;
         }
         .echMetricText {
           padding: 8px 16px 60px;

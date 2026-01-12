@@ -14,8 +14,8 @@ import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
 import { useLatencyChart } from '../../hooks/use_latency_chart';
-import { useDataSourcesContext } from '../../hooks/use_data_sources';
-import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
+import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { getEsqlQuery } from './get_esql_query';
 import type { ContentFrameworkSectionProps } from '../../../../content_framework/section/section';
 

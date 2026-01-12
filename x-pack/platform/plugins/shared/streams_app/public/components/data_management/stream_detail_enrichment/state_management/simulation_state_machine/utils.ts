@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type {
+  StreamlangProcessorDefinitionWithUIAttributes,
+  StreamlangStepWithUIAttributes,
+} from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
 import type { FieldDefinition, FlattenRecord } from '@kbn/streams-schema';
-import { uniq } from 'lodash';
-import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import type { FieldDefinitionType } from '@kbn/streams-schema/src/fields';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
-import type { PreviewDocsFilterOption } from './simulation_documents_search';
-import type { DetectedField, Simulation, SimulationContext } from './types';
+import { uniq } from 'lodash';
 import type {
   MappedSchemaField,
   SchemaField,
@@ -19,6 +21,9 @@ import type {
 } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
+import { collectDescendantStepIds } from '../utils';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { DetectedField, Simulation, SimulationContext } from './types';
 
 export function getSourceField(
   processor: StreamlangProcessorDefinitionWithUIAttributes
@@ -47,6 +52,65 @@ export function getSourceField(
 
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
+}
+
+/**
+ * Recursively collects all descendant processor IDs
+ * for a given condition step ID.
+ */
+export function collectDescendantProcessorIdsForCondition(
+  steps: StreamlangStepWithUIAttributes[],
+  conditionId: string
+) {
+  const descendantStepIds = collectDescendantStepIds(steps, conditionId);
+
+  if (descendantStepIds.size === 0) {
+    return [];
+  }
+
+  return steps
+    .filter((step) => descendantStepIds.has(step.customIdentifier))
+    .filter((step) => isActionBlock(step))
+    .map((step) => step.customIdentifier);
+}
+
+/**
+ * Collects the documents affected by the processors
+ * directly included in the currently selected condition.
+ */
+export function collectActiveDocumentsForSelectedCondition(
+  documents: Simulation['documents'] | undefined,
+  steps: StreamlangStepWithUIAttributes[],
+  selectedConditionId: string | undefined
+): Simulation['documents'] {
+  if (!documents) {
+    return [];
+  }
+
+  if (!selectedConditionId) {
+    return documents;
+  }
+
+  const processorIds = collectDescendantProcessorIdsForCondition(steps, selectedConditionId);
+
+  return collectDocumentsAffectedByProcessors(documents, processorIds);
+}
+
+/**
+ * Filters documents based on the processors
+ * that affected them during simulation.
+ */
+export function collectDocumentsAffectedByProcessors(
+  documents: Simulation['documents'] | undefined,
+  processorIds: string[]
+): Simulation['documents'] {
+  if (!documents || processorIds.length === 0) {
+    return [];
+  }
+
+  return documents.filter((doc) => {
+    return doc.processed_by?.some((processorId) => processorIds.includes(processorId)) ?? false;
+  });
 }
 
 export function getAllFieldsInOrder(
@@ -100,6 +164,8 @@ export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) 
       return (doc: SimulationDocReport) => doc.status === 'skipped';
     case 'outcome_filter_failed':
       return (doc: SimulationDocReport) => doc.status === 'failed';
+    case 'outcome_filter_dropped':
+      return (doc: SimulationDocReport) => doc.status === 'dropped';
     case 'outcome_filter_all':
     default:
       return (_doc: SimulationDocReport) => true;

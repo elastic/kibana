@@ -209,5 +209,74 @@
         "enabled": true
       }
     }
+  },
+  {
+    "job": {
+      "job_id": "ad-test4",
+      "custom_settings": {},
+      "description": "",
+      "analysis_config": {
+        "bucket_span": "15m",
+        "detectors": [
+          {
+            "detector_description": "mean(responsetime) partitionfield=airline",
+            "function": "mean",
+            "field_name": "responsetime",
+            "partition_field_name": "airline",
+            "detector_index": 0,
+            "custom_rules": [
+              {
+                "actions": ["skip_result"],
+                "scope": {
+                  "airline": {
+                    "filter_id": "missing-filter-id",
+                    "filter_type": "include"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "influencers": [
+          "airline"
+        ]
+      },
+      "analysis_limits": {
+        "model_memory_limit": "11mb",
+        "categorization_examples_limit": 4
+      },
+      "data_description": {
+        "time_field": "@timestamp",
+        "time_format": "epoch_ms"
+      },
+      "model_plot_config": {
+        "enabled": false,
+        "annotations_enabled": false
+      },
+      "model_snapshot_retention_days": 10,
+      "daily_model_snapshot_retention_after_days": 1,
+      "results_index_name": "shared",
+      "allow_lazy_open": false
+    },
+    "datafeed": {
+      "datafeed_id": "datafeed-ad-test4",
+      "job_id": "ad-test4",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "match_all": {}
+            }
+          ]
+        }
+      },
+      "indices": [
+        "ft_farequote"
+      ],
+      "scroll_size": 1000,
+      "delayed_data_check_config": {
+        "enabled": true
+      }
+    }
   }
 ]

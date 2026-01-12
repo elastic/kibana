@@ -10,11 +10,11 @@ This plan will cover the UI part (not API) for Observability's implementation of
 ## Data generation
 
 > [!WARNING]
-> This guide will not cover how to run Kibana and ES locally. It assumes both instances are running before starting the data ingestion 
+> This guide will not cover how to run Kibana and ES locally. It assumes both instances are running before starting the data ingestion
 
 > [!TIP]
-> The following commands use [synthtrace](https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/README.md) to generate some data that will be used to test the rules.
-Synthtrace has many scenarios, any of them could work as long as it has data that makes sense with the rules that need to be tested. 
+> The following commands use [synthtrace](https://github.com/elastic/kibana/blob/main/packages/kbn-synthtrace/README.md) to generate some data that will be used to test the rules.
+Synthtrace has many scenarios, any of them could work as long as it has data that makes sense with the rules that need to be tested.
 
 For this test will use `logs_traces_hosts` scenario.
 

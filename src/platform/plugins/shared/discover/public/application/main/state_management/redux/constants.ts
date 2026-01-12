@@ -8,9 +8,10 @@
  */
 
 import type { TabItem } from '@kbn/unified-tabs';
-import { type TabState } from './types';
+import { TabInitializationStatus, type TabState } from './types';
 
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
+  initializationState: { initializationStatus: TabInitializationStatus.NotStarted },
   globalState: {},
   appState: {},
   previousAppState: {},

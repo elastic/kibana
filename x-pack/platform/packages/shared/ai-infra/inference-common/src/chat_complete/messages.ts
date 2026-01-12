@@ -57,6 +57,10 @@ export type AssistantMessage<TToolCalls extends ToolCall[] | undefined = ToolCal
      * Can be null if the LLM called a tool.
      */
     content: string | null;
+    /**
+     * Optional refusal reason returned by the model when content is filtered.
+     */
+    refusal?: string | null;
     // make sure `toolCalls` inherits the optionality from `TToolCalls`
   } & (TToolCalls extends ToolCall[]
       ? {

@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
 import { useEffect } from 'react';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getStepIconBase64 } from '../../../shared/ui/step_icons/get_step_icon_base64';
+import {
+  getStepIconBase64,
+  type GetStepIconBase64Params,
+} from '../../../shared/ui/step_icons/get_step_icon_base64';
+import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
 
-export interface ConnectorTypeInfoMinimal {
-  actionTypeId: string;
+export interface ConnectorTypeInfoMinimal extends GetStepIconBase64Params {
   displayName: string;
-  icon?: IconType;
 }
 
 export const predefinedStepTypes = [
@@ -53,6 +54,10 @@ export const predefinedStepTypes = [
     displayName: 'Wait',
   },
   {
+    actionTypeId: 'data.set',
+    displayName: 'Set Variables',
+  },
+  {
     actionTypeId: 'http',
     displayName: 'HTTP',
   },
@@ -71,7 +76,9 @@ export const predefinedStepTypes = [
 ];
 
 export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefined) {
-  const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
+  const { triggersActionsUi, workflowsExtensions } = useKibana().services;
+  const { actionTypeRegistry } = triggersActionsUi;
+
   useEffect(() => {
     if (!connectorsData?.connectorTypes) {
       return;
@@ -85,14 +92,23 @@ export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefin
       };
     });
 
+    const registeredTypes = workflowsExtensions.getAllStepDefinitions().map((step) => ({
+      actionTypeId: step.id,
+      displayName: step.label,
+      fromRegistry: true,
+      icon: step.icon,
+    }));
+
+    const allTypes = [...predefinedStepTypes, ...connectorTypes, ...registeredTypes];
+
     // Run async functions
     (async () => {
       await Promise.all([
-        injectDynamicConnectorIcons([...predefinedStepTypes, ...connectorTypes]),
-        injectDynamicShadowIcons([...predefinedStepTypes, ...connectorTypes]),
+        injectDynamicConnectorIcons(allTypes),
+        injectDynamicShadowIcons(allTypes),
       ]);
     })();
-  }, [connectorsData?.connectorTypes, actionTypeRegistry]);
+  }, [connectorsData?.connectorTypes, actionTypeRegistry, workflowsExtensions]);
 }
 
 /**
@@ -118,41 +134,49 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
 
     const displayName = connector.displayName;
 
-    try {
-      // Generate CSS rule for this connector
-      const iconBase64 = await getStepIconBase64(connector);
+    // Generate CSS rule for this connector
+    const iconBase64 = await getStepIconBase64(connector);
 
-      // Only inject CSS if we successfully generated an icon
-      if (iconBase64) {
-        let selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon:before,
-          .monaco-list .monaco-list-row[aria-label$=", ${connectorType}"] .suggest-icon:before,
-          .monaco-list .monaco-list-row[aria-label*=", ${connectorType},"] .suggest-icon:before,
-          .monaco-list .monaco-list-row[aria-label="${connectorType}"] .suggest-icon:before,
-          .monaco-list .monaco-list-row[aria-label*="${displayName}"] .suggest-icon:before`;
-        if (connectorType === 'elasticsearch') {
-          selector = '.codicon-symbol-struct:before';
-        } else if (connectorType === 'kibana') {
-          selector = '.codicon-symbol-module:before';
-        } else if (connectorType === 'console') {
-          selector = '.codicon-symbol-variable:before';
-        }
-        cssToInject += `
-          /* Target by aria-label content */
-          ${selector} {
-            background-image: url("${iconBase64}") !important;
-            background-size: 12px 12px !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
-            content: " " !important;
-            width: 16px !important;
-            height: 16px !important;
-            display: block !important;
-          }
-        `;
-      }
-    } catch (error) {
-      // Silently skip if icon generation fails
+    let selector = '';
+    if (connectorType === 'elasticsearch') {
+      // Target the codicon class for elasticsearch connectors AND any suggestion with "elasticsearch." in aria-label
+      selector = `.codicon-symbol-struct:before,
+        .monaco-list .monaco-list-row[aria-label^="elasticsearch."] .suggest-icon:before`;
+    } else if (connectorType === 'kibana') {
+      // Target the codicon class for kibana connectors AND any suggestion with "kibana." in aria-label
+      selector = `.codicon-symbol-module:before,
+        .monaco-list .monaco-list-row[aria-label^="kibana."] .suggest-icon:before`;
+    } else if (connectorType === 'console') {
+      selector = '.codicon-symbol-variable:before';
+    } else {
+      selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType}"] .suggest-icon:before,
+      .monaco-list .monaco-list-row[aria-label^="${displayName}"] .suggest-icon:before`;
     }
+
+    let cssProperties = '';
+    if (MonochromeIcons.has(connector.actionTypeId)) {
+      cssProperties = `
+        mask-image: url("${iconBase64}");
+        mask-size: contain;
+        background-color: currentColor;
+      `;
+    } else {
+      cssProperties = `background-image: url("${iconBase64}") !important;`;
+    }
+
+    cssToInject += `
+      /* Target by aria-label content */
+      ${selector} {
+        ${cssProperties}
+        background-size: 12px 12px !important;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        content: " " !important;
+        width: 16px !important;
+        height: 16px !important;
+        display: block !important;
+      }
+    `;
   }
 
   // Inject the CSS
@@ -181,45 +205,52 @@ async function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal
   let cssToInject = '';
 
   for (const connector of connectorTypes) {
-    const connectorType = connector.actionTypeId;
-    try {
-      // Generate CSS rule for this connector shadow icon
-      const iconBase64 = await getStepIconBase64(connector);
+    // Generate CSS rule for this connector
+    const iconBase64 = await getStepIconBase64(connector);
 
-      // Only inject CSS if we successfully generated an icon
-      if (iconBase64) {
-        // Get the class name for this connector
-        let className = connectorType;
-        if (connectorType.startsWith('elasticsearch.')) {
-          className = 'elasticsearch';
-        } else if (connectorType.startsWith('kibana.')) {
-          className = 'kibana';
-        } else {
-          // Handle connectors with dot notation properly
-          if (connectorType.startsWith('.')) {
-            // For connectors like ".jira", remove the leading dot
-            className = connectorType.substring(1);
-          } else if (connectorType.includes('.')) {
-            // For connectors like "thehive.createAlert", use base name
-            className = connectorType.split('.')[0];
-          } else {
-            // For simple connectors like "slack", use as-is
-            className = connectorType;
-          }
-        }
+    // Only inject CSS if we successfully generated an icon
+    const connectorType = connector.actionTypeId.startsWith('.')
+      ? connector.actionTypeId.slice(1)
+      : connector.actionTypeId;
 
-        cssToInject += `
-          .type-inline-highlight.type-${className}::after {
-            background-image: url("${iconBase64}");
-            background-size: contain;
-            background-repeat: no-repeat;
-          }
-        `;
+    // Get the class name for this connector
+    let className = connectorType;
+    if (connectorType.startsWith('elasticsearch.')) {
+      className = 'elasticsearch';
+    } else if (connectorType.startsWith('kibana.')) {
+      className = 'kibana';
+    } else {
+      // Handle connectors with dot notation properly
+      if (connectorType.startsWith('.')) {
+        // For connectors like ".jira", remove the leading dot
+        className = connectorType.substring(1);
+      } else if (connectorType.includes('.')) {
+        // For connectors like "thehive.createAlert", use base name
+        className = connectorType.split('.')[0];
+      } else {
+        // For simple connectors like "slack", use as-is
+        className = connectorType;
       }
-    } catch (error) {
-      // console.log('error getting connector icon base64', error);
-      // Silently skip if icon generation fails
     }
+
+    let cssProperties = '';
+    if (MonochromeIcons.has(connector.actionTypeId)) {
+      cssProperties = `
+        mask-image: url("${iconBase64}");
+        mask-size: contain;
+        background-color: currentColor;
+      `;
+    } else {
+      cssProperties = `background-image: url("${iconBase64}");`;
+    }
+
+    cssToInject += `
+      .type-inline-highlight.type-${className}::after {
+        ${cssProperties}
+        background-size: contain;
+        background-repeat: no-repeat;
+      }
+    `;
   }
 
   // Inject the CSS

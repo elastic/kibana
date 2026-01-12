@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'apiKeys',
     'searchGettingStarted',
+    'solutionNavigation',
   ]);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -29,72 +30,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlCommonPage.loginAsViewer();
       });
 
-      describe('Getting Started page', function () {
+      describe('Displays page with limited functionality', function () {
         beforeEach(async () => {
           await pageObjects.common.navigateToApp('searchGettingStarted');
         });
-
-        it('load search getting started', async () => {
-          await pageObjects.searchGettingStarted.expectSearchGettingStartedIsLoaded();
-        });
-        it('should have embedded dev console', async () => {
-          await testHasEmbeddedConsole(pageObjects);
-        });
-      });
-
-      describe('Getting Started page interactions', function () {
-        beforeEach(async () => {
-          await pageObjects.common.navigateToApp('searchGettingStarted');
+        it('No access to manage API keys', async () => {
+          const bodyText = await pageObjects.common.getBodyText();
+          expect(bodyText).to.contain("You don't have access to manage API keys");
         });
 
-        describe('Add data button', function () {
-          it('navigates to the sample data page when option is selected', async () => {
-            await pageObjects.searchGettingStarted.selectAddDataOption(
-              'gettingStartedSampleDataMenuItem'
-            );
-            await retry.tryWithRetries(
-              'wait for URL to change',
-              async () => {
-                expect(await browser.getCurrentUrl()).to.contain('/tutorial_directory/sampleData');
-              },
-              { initialDelay: 200, retryCount: 5, retryDelay: 500 }
-            );
-          });
-        });
-
-        describe('Elasticsearch endpoint and API Keys', function () {
-          it('renders endpoint field and copy button', async () => {
-            await testSubjects.existOrFail('endpointValueField');
-            await testSubjects.existOrFail('copyEndpointButton');
-            const endpointValue = await testSubjects.getVisibleText('endpointValueField');
-            expect(endpointValue).to.contain('https://');
-            await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
-          });
-        });
-
-        describe('View connection details', function () {
-          it('renders the view connection details button', async () => {
-            await testSubjects.existOrFail('viewConnectionDetailsLink');
-          });
-          it('opens the connection flyout when the button is clicked', async () => {
+        describe('Connection details flyout', function () {
+          it('should not show API Keys tab when user lacks permission', async () => {
             await testSubjects.click('viewConnectionDetailsLink');
             await testSubjects.existOrFail('connectionDetailsModalTitle');
-          });
-        });
-
-        describe('Connect to your application', function () {
-          it('renders the JavaScript code example when selected in Language Selector', async () => {
-            await pageObjects.searchGettingStarted.selectCodingLanguage('javascript');
-            await pageObjects.searchGettingStarted.expectCodeSampleContainsValue(
-              'import { Client } from'
-            );
-          });
-        });
-
-        describe('Footer content', function () {
-          it('renders Python Notebooks callout and navigates correctly', async () => {
-            const href = await testSubjects.getAttribute('gettingStartedOpenNotebooks-btn', 'href');
-            expect(href).to.contain('search-labs/tutorials/examples');
+            // Wait for endpoints tab to exist (flyout is loaded)
+            await testSubjects.existOrFail('connectionDetailsTabBtn-endpoints');
+            // API Keys tab should NOT exist for viewer - wait for permission check to complete
+            await retry.try(async () => {
+              await testSubjects.missingOrFail('connectionDetailsTabBtn-apiKeys');
+            });
           });
         });
       });
@@ -108,6 +62,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('Getting Started page interactions', function () {
         beforeEach(async () => {
           await pageObjects.common.navigateToApp('searchGettingStarted');
+        });
+
+        it('load search getting started', async () => {
+          await pageObjects.searchGettingStarted.expectSearchGettingStartedIsLoaded();
+        });
+
+        it('should have embedded dev console', async () => {
+          await testHasEmbeddedConsole(pageObjects);
         });
 
         describe('Add data button', function () {
@@ -157,6 +119,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
+        describe('Elasticsearch endpoint', function () {
+          it('shows checkmark icon feedback when copy button is clicked', async () => {
+            await testSubjects.existOrFail('copyEndpointButton');
+            await testSubjects.click('copyEndpointButton');
+            // After clicking, the button should show copied state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton-copied');
+            });
+            // After 1 second, it should revert back to normal state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton');
+              await testSubjects.missingOrFail('copyEndpointButton-copied');
+            });
+          });
+        });
+
         describe('View connection details', function () {
           it('renders the view connection details button', async () => {
             await testSubjects.existOrFail('viewConnectionDetailsLink');
@@ -164,6 +142,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('opens the connection flyout when the button is clicked', async () => {
             await testSubjects.click('viewConnectionDetailsLink');
             await testSubjects.existOrFail('connectionDetailsModalTitle');
+          });
+          it('should show API Keys tab when user has permission', async () => {
+            await testSubjects.click('viewConnectionDetailsLink');
+            await testSubjects.existOrFail('connectionDetailsModalTitle');
+            // Both tabs should exist for developer
+            await testSubjects.existOrFail('connectionDetailsTabBtn-endpoints');
+            await testSubjects.existOrFail('connectionDetailsTabBtn-apiKeys');
           });
         });
 
@@ -220,9 +205,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const href = await testSubjects.getAttribute('gettingStartedSearchLabs-btn', 'href');
             expect(href).to.contain('search-labs');
           });
-          it('renders Python Notebooks callout and navigates correctly', async () => {
-            const href = await testSubjects.getAttribute('gettingStartedOpenNotebooks-btn', 'href');
-            expect(href).to.contain('search-labs/tutorials/examples');
+          it('renders Elastic Training callout and navigates correctly', async () => {
+            const href = await testSubjects.getAttribute(
+              'gettingStartedElasticTraining-btn',
+              'href'
+            );
+            expect(href).to.contain('elastic.co/training');
           });
           it('renders Elasticsearch Documentation callout and navigates correctly', async () => {
             const href = await testSubjects.getAttribute(

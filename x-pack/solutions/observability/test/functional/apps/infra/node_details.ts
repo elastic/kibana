@@ -8,7 +8,7 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -292,7 +292,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const ACTIVE_ALERTS = 2;
           const RECOVERED_ALERTS = 2;
           const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-          const COLUMNS = 11;
+          const COLUMNS = 12;
           before(async () => {
             await esArchiver.load(
               'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'

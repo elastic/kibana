@@ -12,9 +12,10 @@ export { registerRoutes } from './register_routes';
 export type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './create';
 export type { DashboardReadResponseBody } from './read';
 export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './search';
-export type { DashboardUpdateResponseBody } from './update';
+export type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './update';
 export type {
   DashboardState,
+  DashboardControlsState,
   DashboardPanel,
   DashboardSection,
   DashboardFilter,
@@ -22,3 +23,8 @@ export type {
   DashboardQuery,
   GridData,
 } from './types';
+
+export { create } from './create/create';
+export { read } from './read/read';
+export { update } from './update/update';
+export { deleteDashboard } from './delete/delete';

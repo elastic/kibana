@@ -10,7 +10,7 @@
 import type YAML from 'yaml';
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import { isDynamicValue, isVariableValue } from '../../../../common/lib/regex';
+import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../../../../common/lib/regex';
 import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
 
 export function filterMonacoYamlMarkers(
@@ -30,10 +30,12 @@ export function filterMonacoYamlMarkers(
         if (
           scalarNode &&
           isScalar(scalarNode) &&
-          (isDynamicValue(scalarNode.value) || isVariableValue(scalarNode.value))
+          (isDynamicValue(scalarNode.value) ||
+            isVariableValue(scalarNode.value) ||
+            isLiquidTagValue(scalarNode.value))
         ) {
-          // Filter out markers with dynamic or variable values (e.g. ${{ }} or {{ }})
-          // as we cannot reliably validate them statically
+          // Filter out markers with dynamic values, variable values, or Liquid tags
+          // (e.g. ${{ }}, {{ }}, {% ... %}, {%- ... -%}) as we cannot reliably validate them statically
           return false;
         }
       } catch (error) {

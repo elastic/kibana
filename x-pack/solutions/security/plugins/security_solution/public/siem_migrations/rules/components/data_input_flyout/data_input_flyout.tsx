@@ -19,94 +19,122 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
+import { PanelText } from '../../../../common/components/panel_text';
 import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import { RulesDataInput } from './steps/rules/rules_data_input';
-import { DataInputStep } from './steps/constants';
-import { MacrosDataInput } from './steps/macros/macros_data_input';
-import { LookupsDataInput } from './steps/lookups/lookups_data_input';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
-import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
+import { type RuleMigrationSettings, type RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
-
-interface MissingResourcesIndexed {
-  macros: string[];
-  lookups: string[];
-}
+import { useMigrationSourceStep } from '../migration_source_step/use_migration_source_step';
+import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
+import type {
+  HandleMissingResourcesIndexed,
+  MigrationStepProps,
+  Step,
+} from '../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
+import { STEP_COMPONENTS } from './configs';
+import { QradarDataInputStep } from './types';
+import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
   migrationStats?: RuleMigrationStats;
+  migrationSource?: MigrationSource;
 }
 
 const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';
 
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
-  ({ onClose, migrationStats: initialMigrationSats }) => {
+  ({ onClose, migrationStats: initialMigrationStats }) => {
     const modalTitleId = useGeneratedHtmlId({
       prefix: RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
     });
 
+    const {
+      migrationSource,
+      setMigrationSource,
+      migrationSourceDisabled,
+      setMigrationSourceDisabled,
+      migrationSourceOptions,
+    } = useMigrationSourceStep(initialMigrationStats?.vendor ?? MigrationSource.SPLUNK);
+
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
-      initialMigrationSats
+      initialMigrationStats
     );
-    const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
-      MissingResourcesIndexed | undefined
-    >();
+
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
-    const [dataInputStep, setDataInputStep] = useState<DataInputStep>(DataInputStep.Rules);
+    const [dataInputStep, setDataInputStep] = useState<number>(SplunkDataInputStep.Upload);
 
-    const onMigrationCreated = useCallback((createdMigrationStats: RuleMigrationStats) => {
-      setMigrationStats(createdMigrationStats);
-    }, []);
+    const setMissingResourcesStep: HandleMissingResourcesIndexed = useCallback(
+      ({ migrationSource: vendor, newMissingResourcesIndexed }) => {
+        if (vendor === MigrationSource.QRADAR) {
+          if (newMissingResourcesIndexed?.lookups.length) {
+            setDataInputStep(QradarDataInputStep.ReferenceSet);
+            return;
+          }
 
-    const onMissingResourcesFetched = useCallback(
-      (missingResources: SiemMigrationResourceBase[]) => {
-        const newMissingResourcesIndexed = missingResources.reduce<MissingResourcesIndexed>(
-          (acc, { type, name }) => {
-            if (type === 'macro') {
-              acc.macros.push(name);
-            } else if (type === 'lookup') {
-              acc.lookups.push(name);
+          // when all reference sets are created, move to the next step
+          setDataInputStep((currentStep) => {
+            if (!migrationStats?.id) {
+              return QradarDataInputStep.Rules;
             }
-            return acc;
-          },
-          { macros: [], lookups: [] }
-        );
-        setMissingResourcesIndexed(newMissingResourcesIndexed);
-        if (newMissingResourcesIndexed.macros.length) {
-          setDataInputStep(DataInputStep.Macros);
+            // If we are not on the Reference Set step, move to the End step
+            if (currentStep !== QradarDataInputStep.ReferenceSet) {
+              return QradarDataInputStep.End;
+            }
+            return QradarDataInputStep.Enhancements;
+          });
+        }
+
+        if (newMissingResourcesIndexed?.macros.length) {
+          setDataInputStep(SplunkDataInputStep.Macros);
           return;
         }
-        if (newMissingResourcesIndexed.lookups.length) {
-          setDataInputStep(DataInputStep.Lookups);
+
+        if (newMissingResourcesIndexed?.lookups.length) {
+          setDataInputStep(SplunkDataInputStep.Lookups);
           return;
         }
-        setDataInputStep(DataInputStep.End);
+
+        if (migrationStats?.id) {
+          setDataInputStep(SplunkDataInputStep.End);
+        }
       },
-      []
+      [migrationStats?.id]
     );
 
-    const onAllLookupsCreated = useCallback(() => {
-      setDataInputStep(DataInputStep.End);
-    }, []);
+    const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
+      handleMissingResourcesIndexed: setMissingResourcesStep,
+      migrationSource,
+    });
+
+    const onMigrationCreated = useCallback(
+      (createdMigrationStats: RuleMigrationStats) => {
+        setMigrationStats(createdMigrationStats);
+        setMigrationSourceDisabled(true);
+      },
+      [setMigrationStats, setMigrationSourceDisabled]
+    );
 
     const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
     const onStartMigrationWithSettings = useCallback(
       (settings: RuleMigrationSettings) => {
-        if (migrationStats?.id) {
-          startMigration(
-            migrationStats.id,
-            isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
-            settings
-          );
+        if (!migrationStats?.id) {
+          return;
         }
+
+        startMigration(
+          migrationStats,
+          isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
+          settings
+        );
       },
-      [isRetry, migrationStats?.id, startMigration]
+      [isRetry, migrationStats, startMigration]
     );
     const { modal: startMigrationModal, showModal: showStartMigrationModal } =
       useStartRulesMigrationModal({
@@ -118,7 +146,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       if (migrationStats?.id) {
         showStartMigrationModal();
       }
-    }, [migrationStats?.id, showStartMigrationModal]);
+    }, [migrationStats, showStartMigrationModal]);
 
     return (
       <>
@@ -136,7 +164,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
               <h2 id={modalTitleId} aria-label={RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE}>
                 <FormattedMessage
                   id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.title"
-                  defaultMessage="Upload Splunk SIEM rules"
+                  defaultMessage="Upload SIEM rules"
                 />
               </h2>
             </EuiTitle>
@@ -144,28 +172,32 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
           <EuiFlyoutBody>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
-                <RulesDataInput
-                  dataInputStep={dataInputStep}
-                  migrationStats={migrationStats}
-                  onMigrationCreated={onMigrationCreated}
-                  onMissingResourcesFetched={onMissingResourcesFetched}
+                <MigrationSourceDropdown
+                  migrationSource={migrationSource}
+                  setMigrationSource={setMigrationSource}
+                  disabled={!!migrationStats?.id || migrationSourceDisabled}
+                  migrationSourceOptions={migrationSourceOptions}
                 />
               </EuiFlexItem>
+              <>
+                {STEP_COMPONENTS[migrationSource].map((step: Step<MigrationStepProps>) => (
+                  <EuiFlexItem key={step.id}>
+                    <step.Component
+                      dataInputStep={dataInputStep}
+                      migrationSource={migrationSource}
+                      migrationStats={migrationStats}
+                      missingResourcesIndexed={missingResourcesIndexed}
+                      onMigrationCreated={onMigrationCreated}
+                      onMissingResourcesFetched={onMissingResourcesFetched}
+                      setDataInputStep={setDataInputStep}
+                    />
+                  </EuiFlexItem>
+                ))}
+              </>
               <EuiFlexItem>
-                <MacrosDataInput
-                  dataInputStep={dataInputStep}
-                  missingMacros={missingResourcesIndexed?.macros}
-                  migrationStats={migrationStats}
-                  onMissingResourcesFetched={onMissingResourcesFetched}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <LookupsDataInput
-                  dataInputStep={dataInputStep}
-                  missingLookups={missingResourcesIndexed?.lookups}
-                  migrationStats={migrationStats}
-                  onAllLookupsCreated={onAllLookupsCreated}
-                />
+                <PanelText size="xs" subdued cursive>
+                  <p>{getCopyrightNoticeByVendor(migrationSource)}</p>
+                </PanelText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>

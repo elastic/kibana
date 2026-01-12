@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ServiceParams, SSLSettings } from '@kbn/actions-plugin/server';
+import type { SSLSettings } from '@kbn/actions-utils';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
@@ -321,6 +322,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         connectorUsageCollector
       );
 
+      // @ts-expect-error upgrade typescript v5.9.3
       return stream ? pipeStreamingResponse(response) : response.data;
     } catch (error) {
       // special error handling for PKI errors

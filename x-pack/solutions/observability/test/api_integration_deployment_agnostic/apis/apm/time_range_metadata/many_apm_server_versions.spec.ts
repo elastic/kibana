@@ -5,9 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ApmSynthtracePipelineSchema, apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema, apm, timerange } from '@kbn/synthtrace-client';
 import moment from 'moment';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_DURATION_SUMMARY,

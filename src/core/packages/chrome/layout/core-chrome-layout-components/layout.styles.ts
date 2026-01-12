@@ -25,7 +25,7 @@ const cssProp = css`
 
   grid-template-areas:
     'banner banner banner'
-    'navigation header sidebar'
+    'header header header'
     'navigation application sidebar'
     'footer footer footer';
 `;

@@ -8,42 +8,54 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import ReactDOM from 'react-dom';
 
 import {
-  type EuiContextMenuPanelDescriptor,
   EuiContextMenu,
   EuiWrappingPopover,
+  type EuiContextMenuPanelDescriptor,
   EuiThemeProvider,
 } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { DefaultControlApi } from '@kbn/controls-plugin/public';
-import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { apiHasType, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { openLazyFlyout } from '@kbn/presentation-util';
+import { coreServices } from '../../../services/kibana_services';
+import {
+  executeCreateTimeSliderControlPanelAction,
+  isTimeSliderControlCreationCompatible,
+} from '../../../dashboard_actions/execute_create_time_slider_control_panel_action';
+import { executeCreateControlPanelAction } from '../../../dashboard_actions/execute_create_control_panel_action';
+import { executeCreateESQLControlPanelAction } from '../../../dashboard_actions/execute_create_esql_control_panel_action';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
-import { uiActionsService } from '../../../services/kibana_services';
-import {
-  getAddControlButtonTitle,
-  getControlButtonTitle,
-  getAddESQLControlButtonTitle,
-  getAddTimeSliderControlButtonTitle,
-  getCreateVisualizationButtonTitle,
-  getEditControlGroupButtonTitle,
-} from '../../_dashboard_app_strings';
+import { getCreateVisualizationButtonTitle } from '../../_dashboard_app_strings';
 
 interface AddMenuProps {
   dashboardApi: DashboardApi;
   anchorElement: HTMLElement;
-  coreServices: CoreStart;
 }
+
+const getControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
+    defaultMessage: 'Controls',
+  });
+
+const getAddControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addControlButtonLabel', {
+    defaultMessage: 'Control',
+  });
+
+const getAddESQLControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addESQLControlButtonLabel', {
+    defaultMessage: 'Variable control',
+  });
+
+const getAddTimeSliderControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addTimeSliderControlButtonLabel', {
+    defaultMessage: 'Time slider control',
+  });
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -57,29 +69,12 @@ function cleanup() {
   isOpen = false;
 }
 
-export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) => {
-  const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
-  const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
+export const AddMenu = ({ dashboardApi, anchorElement }: AddMenuProps) => {
+  const [canCreateTimeSlider, setCanCreateTimeSlider] = useState(false);
 
   useEffect(() => {
-    if (!controlGroupApi) {
-      return;
-    }
-
-    const subscription = controlGroupApi.children$.subscribe((children) => {
-      const nextHasTimeSliderControl = Object.values(children).some((controlApi) => {
-        return apiHasType(controlApi) && controlApi.type === TIME_SLIDER_CONTROL;
-      });
-      setHasTimeSliderControl(nextHasTimeSliderControl);
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [controlGroupApi]);
-
-  const onSave = () => {
-    dashboardApi.scrollToTop();
-  };
+    isTimeSliderControlCreationCompatible(dashboardApi).then(setCanCreateTimeSlider);
+  }, [dashboardApi]);
 
   const closePopover = useCallback(() => {
     cleanup();
@@ -106,7 +101,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
         triggerId: 'dashboardAddTopNavButton',
       },
     });
-  }, [coreServices, dashboardApi]);
+  }, [dashboardApi]);
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -134,6 +129,14 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           },
         },
         {
+          name: i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
+            defaultMessage: 'Controls',
+          }),
+          icon: 'controlsHorizontal',
+          'data-test-subj': 'dashboard-controls-menu-button',
+          panel: 1,
+        },
+        {
           name: i18n.translate('dashboard.solutionToolbar.addSectionButtonLabel', {
             defaultMessage: 'Collapsible section',
           }),
@@ -143,12 +146,6 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
             dashboardApi.addNewSection();
             closePopover();
           },
-        },
-        {
-          name: getControlButtonTitle(),
-          icon: 'controlsHorizontal',
-          'data-test-subj': 'dashboard-controls-menu-button',
-          panel: 1,
         },
         {
           name: i18n.translate(
@@ -174,48 +171,18 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
         {
           name: getAddControlButtonTitle(),
           icon: 'empty',
-          disabled: !controlGroupApi,
           'data-test-subj': 'controls-create-button',
-          onClick: () => {
-            controlGroupApi?.openAddDataControlFlyout({ onSave });
+          onClick: async () => {
+            await executeCreateControlPanelAction(dashboardApi);
             closePopover();
           },
         },
         {
           name: getAddESQLControlButtonTitle(),
           icon: 'empty',
-          disabled: !controlGroupApi,
           'data-test-subj': 'esql-control-create-button',
           onClick: async () => {
-            try {
-              const variablesInParent = apiPublishesESQLVariables(dashboardApi)
-                ? dashboardApi.esqlVariables$.value
-                : [];
-
-              await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-                queryString: '',
-                variableType: ESQLVariableType.VALUES,
-                controlType: EsqlControlType.VALUES_FROM_QUERY,
-                esqlVariables: variablesInParent,
-                parentApi: dashboardApi,
-                onSaveControl: (controlState: DefaultControlApi) => {
-                  controlGroupApi?.addNewPanel({
-                    panelType: 'esqlControl',
-                    serializedState: {
-                      rawState: {
-                        ...controlState,
-                      },
-                    },
-                  });
-                  dashboardApi.scrollToTop();
-                  closePopover();
-                },
-                onCancelControl: closePopover,
-              });
-            } catch (e) {
-              // eslint-disable-next-line no-console
-              console.error('Error getting ESQL control trigger', e);
-            }
+            await executeCreateESQLControlPanelAction(dashboardApi);
             closePopover();
           },
         },
@@ -223,35 +190,16 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           name: getAddTimeSliderControlButtonTitle(),
           icon: 'empty',
           'data-test-subj': 'controls-create-timeslider-button',
-          disabled: !controlGroupApi || hasTimeSliderControl,
+          disabled: !canCreateTimeSlider,
           onClick: async () => {
-            controlGroupApi?.addNewPanel({
-              panelType: TIME_SLIDER_CONTROL,
-              serializedState: {
-                rawState: {
-                  grow: true,
-                  width: 'large',
-                  id: uuidv4(),
-                },
-              },
-            });
-            dashboardApi.scrollToTop();
+            await executeCreateTimeSliderControlPanelAction(dashboardApi);
             closePopover();
           },
-        },
-        {
-          isSeparator: true,
-          key: 'sep',
-        },
-        {
-          name: getEditControlGroupButtonTitle(),
-          icon: 'empty',
-          'data-test-subj': 'controls-settings-button',
-          disabled: !controlGroupApi,
-          onClick: async () => {
-            controlGroupApi?.onEdit();
-            closePopover();
-          },
+          toolTipContent: canCreateTimeSlider
+            ? undefined
+            : i18n.translate('dashboard.timeSlider.disabledTooltip', {
+                defaultMessage: 'Only one time slider control can be added per dashboard.',
+              }),
         },
       ],
     },
@@ -273,7 +221,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
   );
 };
 
-export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMenuProps) {
+export function showAddMenu({ dashboardApi, anchorElement }: AddMenuProps) {
   if (isOpen) {
     cleanup();
     return;
@@ -286,11 +234,7 @@ export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMe
   ReactDOM.render(
     <KibanaContextProvider services={coreServices}>
       <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
-        <AddMenu
-          dashboardApi={dashboardApi}
-          anchorElement={anchorElement}
-          coreServices={coreServices}
-        />
+        <AddMenu dashboardApi={dashboardApi} anchorElement={anchorElement} />
       </EuiThemeProvider>
     </KibanaContextProvider>,
     container

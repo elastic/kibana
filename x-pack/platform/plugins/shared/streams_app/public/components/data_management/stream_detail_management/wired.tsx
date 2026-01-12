@@ -16,7 +16,7 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
-import { WiredAdvancedView } from './wired_advanced_view';
+import { WiredAdvancedView } from './advanced_view/wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { WiredStreamBadge } from '../../stream_badges';
@@ -140,7 +140,9 @@ export function WiredStreamDetailManagement({
       }),
     },
     dataQuality: {
-      content: <StreamDetailDataQuality definition={definition} />,
+      content: (
+        <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
+      ),
       label: (
         <EuiToolTip
           content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
@@ -155,7 +157,7 @@ export function WiredStreamDetailManagement({
         </EuiToolTip>
       ),
     },
-    ...(attachments?.enabled
+    ...(attachments.enabled
       ? {
           attachments: {
             content: <StreamDetailAttachments definition={definition} />,

@@ -69,7 +69,11 @@
     "@kbn/core-ui-settings-common",
     "@kbn/licensing-types",
     "@kbn/react-query",
-    "@kbn/core-user-profile-browser-mocks"
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/alerting-types",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/zod",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

@@ -20,5 +20,7 @@
     "@kbn/zod",
     "@kbn/logging",
     "@kbn/licensing-types",
+    "@kbn/actions-utils",
+    "@kbn/i18n",
   ]
 }

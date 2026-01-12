@@ -15,7 +15,6 @@
       "dataViewEditor",
       "embeddable",
       "fieldFormats",
-      "controls",
       "inspector",
       "navigation",
       "savedObjectsFinder",
@@ -40,6 +39,7 @@
       "noDataPage",
       "observabilityAIAssistant",
       "lens",
+      "security",
       "cps"
     ],
     "requiredBundles": [

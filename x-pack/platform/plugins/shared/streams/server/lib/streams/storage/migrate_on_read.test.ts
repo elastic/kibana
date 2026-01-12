@@ -15,6 +15,7 @@ jest.mock('@kbn/streamlang', () => ({
 jest.mock('./migrate_to_streamlang_on_read', () => ({
   migrateRoutingIfConditionToStreamlang: jest.fn((definition) => definition),
   migrateOldProcessingArrayToStreamlang: jest.fn((definition) => definition),
+  migrateWhereBlocksToCondition: jest.fn((steps) => ({ steps, migrated: false })),
 }));
 
 jest.mock('@kbn/streams-schema', () => ({
@@ -36,15 +37,49 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
   return {
     name: 'test-stream',
     description: 'Test stream',
+    updated_at: new Date().toISOString(),
     ingest: {
       lifecycle: { dsl: {} },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       wired: {
         fields: {},
         routing: [],
         ...overrides,
       },
+      failure_store: { inherit: {} },
+    },
+  };
+}
+
+function createCompleteClassicStreamDefinition(overrides: any = {}) {
+  return {
+    name: 'test-classic-stream',
+    description: 'Test classic stream',
+    updated_at: new Date().toISOString(),
+    ingest: {
+      lifecycle: { dsl: {} },
+      processing: { steps: [], updated_at: new Date().toISOString() },
+      settings: {},
+      classic: {
+        fieldOverrides: [],
+        ...overrides,
+      },
+      failure_store: { inherit: {} },
+    },
+  };
+}
+
+function createCompleteGroupStreamDefinition(overrides: any = {}) {
+  return {
+    name: 'test-group-stream',
+    description: 'Test group stream',
+    updated_at: new Date().toISOString(),
+    group: {
+      members: [],
+      tags: [],
+      metadata: {},
+      ...overrides,
     },
   };
 }
@@ -169,16 +204,7 @@ describe('migrateOnRead', () => {
     });
 
     it('should handle definition without wired ingest', () => {
-      const definition = {
-        name: 'test-stream',
-        description: 'Test stream',
-        ingest: {
-          lifecycle: { dsl: {} },
-          settings: {},
-          processing: { steps: [] },
-          classic: { someConfig: 'value' },
-        },
-      };
+      const definition = createCompleteClassicStreamDefinition({ someConfig: 'value' });
 
       const result = migrateOnRead(definition);
       expect(result).toEqual(definition);
@@ -197,6 +223,7 @@ describe('migrateOnRead', () => {
             fields: {},
             routing: [createRoutingRule()],
           },
+          failure_store: { inherit: {} },
         },
       };
 
@@ -217,11 +244,56 @@ describe('migrateOnRead', () => {
             fields: {},
             routing: [createRoutingRule()],
           },
+          failure_store: { inherit: {} },
         },
       };
 
       const result = migrateOnRead(definition);
       expect((result as any).ingest.settings).toEqual({});
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add failure_store inherit if missing for non root stream', () => {
+      const definition = {
+        name: 'test-stream.child',
+        description: 'Test stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [] },
+          settings: {},
+          wired: {
+            fields: {},
+            routing: [],
+          },
+        },
+      };
+
+      const result = migrateOnRead(definition);
+
+      expect((result as any).ingest.failure_store).toEqual({ inherit: {} });
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add failure_store lifecycle if missing for root stream', () => {
+      const definition = {
+        name: 'test-stream',
+        description: 'Test stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [] },
+          settings: {},
+          wired: {
+            fields: {},
+            routing: [],
+          },
+        },
+      };
+
+      const result = migrateOnRead(definition);
+
+      expect((result as any).ingest.failure_store).toEqual({
+        lifecycle: { enabled: { data_retention: '30d' } },
+      });
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
   });
@@ -235,6 +307,7 @@ describe('migrateOnRead', () => {
           lifecycle: { dsl: {} },
           processing: { steps: [] },
           unwired: { someConfig: 'value' },
+          failure_store: { inherit: {} },
         },
       };
 
@@ -278,6 +351,124 @@ describe('migrateOnRead', () => {
 
       expect((result as any).group.tags).toEqual([]);
       expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+  });
+
+  describe('updated_at migration', () => {
+    describe('Should add updated_at if missing', () => {
+      it('for wired stream', () => {
+        const definition = createCompleteWiredStreamDefinition() as Partial<
+          ReturnType<typeof createCompleteWiredStreamDefinition>
+        >;
+        delete definition.updated_at;
+
+        const result = migrateOnRead(definition);
+        expect(result.updated_at).toEqual(new Date(0).toISOString());
+        expect(mockStreamsAsserts).toHaveBeenCalled();
+      });
+
+      it('for classic stream', () => {
+        const definition = createCompleteClassicStreamDefinition() as Partial<
+          ReturnType<typeof createCompleteClassicStreamDefinition>
+        >;
+        delete definition.updated_at;
+
+        const result = migrateOnRead(definition);
+        expect(result.updated_at).toEqual(new Date(0).toISOString());
+        expect(mockStreamsAsserts).toHaveBeenCalled();
+      });
+
+      it('for group stream', () => {
+        const definition = createCompleteGroupStreamDefinition() as Partial<
+          ReturnType<typeof createCompleteGroupStreamDefinition>
+        >;
+        delete definition.updated_at;
+
+        const result = migrateOnRead(definition);
+        expect(result.updated_at).toEqual(new Date(0).toISOString());
+        expect(mockStreamsAsserts).toHaveBeenCalled();
+      });
+    });
+
+    describe('Should not touch updated_at if present', () => {
+      it('for wired stream', () => {
+        const definition = createCompleteWiredStreamDefinition();
+        const existingUpdatedAt = definition.updated_at;
+
+        const result = migrateOnRead(definition);
+        expect(result.updated_at).toEqual(existingUpdatedAt);
+        expect(mockStreamsAsserts).not.toHaveBeenCalled();
+      });
+
+      it('for classic stream', () => {
+        const definition = createCompleteClassicStreamDefinition();
+        const existingUpdatedAt = definition.updated_at;
+
+        const result = migrateOnRead(definition);
+        expect(result.updated_at).toEqual(existingUpdatedAt);
+        expect(mockStreamsAsserts).not.toHaveBeenCalled();
+      });
+
+      it('for group stream', () => {
+        const definition = createCompleteGroupStreamDefinition();
+        const existingUpdatedAt = definition.updated_at;
+
+        const result = migrateOnRead(definition);
+        expect(result.updated_at).toEqual(existingUpdatedAt);
+        expect(mockStreamsAsserts).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('ingest.processing.updated_at migration', () => {
+    describe('Should add updated_at if missing', () => {
+      it('for wired stream', () => {
+        const definition = createCompleteWiredStreamDefinition() as any;
+        delete definition.ingest?.processing?.updated_at;
+
+        const result = migrateOnRead(definition) as Streams.WiredStream.Definition;
+        expect(result.ingest.processing.updated_at).toEqual(new Date(0).toISOString());
+        expect(mockStreamsAsserts).toHaveBeenCalled();
+      });
+
+      it('for classic stream', () => {
+        const definition = createCompleteClassicStreamDefinition() as any;
+        delete definition.ingest?.processing?.updated_at;
+
+        const result = migrateOnRead(definition) as Streams.ClassicStream.Definition;
+        expect(result.ingest.processing.updated_at).toEqual(new Date(0).toISOString());
+        expect(mockStreamsAsserts).toHaveBeenCalled();
+      });
+    });
+
+    describe('Should not touch updated_at if present', () => {
+      it('for wired stream', () => {
+        const definition = createCompleteWiredStreamDefinition();
+        const existingUpdatedAt = definition.ingest.processing.updated_at;
+
+        const result = migrateOnRead(definition) as Streams.WiredStream.Definition;
+        expect(result.ingest.processing.updated_at).toEqual(existingUpdatedAt);
+        expect(mockStreamsAsserts).not.toHaveBeenCalled();
+      });
+
+      it('for classic stream', () => {
+        const definition = createCompleteClassicStreamDefinition();
+        const existingUpdatedAt = definition.ingest.processing.updated_at;
+
+        const result = migrateOnRead(definition) as Streams.ClassicStream.Definition;
+        expect(result.ingest.processing.updated_at).toEqual(existingUpdatedAt);
+        expect(mockStreamsAsserts).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Should not modify non-ingest streams', () => {
+      it('for group stream', () => {
+        const definition = createCompleteGroupStreamDefinition();
+
+        const result = migrateOnRead(definition);
+        expect((result as any).ingest).toBeUndefined();
+        expect(mockStreamsAsserts).not.toHaveBeenCalled();
+      });
     });
   });
 });

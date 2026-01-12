@@ -391,7 +391,9 @@
               " | ",
               "SavedObjectsImportMissingReferencesError",
               " | ",
-              "SavedObjectsImportUnknownError"
+              "SavedObjectsImportUnknownError",
+              " | ",
+              "SavedObjectsImportUnexpectedAccessControlMetadataError"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
             "deprecated": false,
@@ -799,6 +801,36 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportUnexpectedAccessControlMetadataError",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportUnexpectedAccessControlMetadataError",
+        "description": [
+          "\nRepresents a failure to import due to missing access control mode metadata.\nThis metadata is required only for objects that support access control when\nan Admin chooses to apply access control on import.\n\nRepresents a failure to import due to missing access control owner metadata.\nThis metadata is required only for objects that support access control when\nan Admin chooses to apply access control on import.\n\nRepresents a failure to import due to unexpected access control metadata.\nThis metadata is required only for objects that support access control."
+        ],
+        "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportUnexpectedAccessControlMetadataError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"unexpected_access_control_metadata\""
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
             "deprecated": false,
@@ -1228,6 +1260,18 @@
             "path": "src/core/packages/ui-settings/server-internal/src/saved_objects/transforms.test.ts"
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectAccessControl",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectAccessControl",
+        "description": [],
+        "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1671,8 +1715,44 @@
             "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/gauge.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
+          },
+          {
+            "plugin": "@kbn/lens-embeddable-utils",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/region_map.ts"
           },
           {
             "plugin": "maps",
@@ -1689,66 +1769,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
           },
           {
             "plugin": "canvas",
@@ -1874,7 +1894,7 @@
           "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
         ],
         "signature": [
-          "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+          "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
         "deprecated": false,

@@ -38,7 +38,9 @@ describe('FailureStoreHoverLink', () => {
     it('renders the button with "N/A" text by default', () => {
       renderWithI18n(<FailureStoreHoverLink dataStreamStat={mockDataStreamStat} />);
 
-      const button = screen.getByTestId('datasetQualitySetFailureStoreLink');
+      const button = screen.getByTestId(
+        `datasetQualitySetFailureStoreLink-${mockDataStreamStat.rawName}`
+      );
       expect(button).toBeInTheDocument();
       expect(button).toHaveTextContent('N/A');
     });
@@ -46,7 +48,9 @@ describe('FailureStoreHoverLink', () => {
     it('shows tooltip with correct message', async () => {
       renderWithI18n(<FailureStoreHoverLink dataStreamStat={mockDataStreamStat} />);
 
-      const button = screen.getByTestId('datasetQualitySetFailureStoreLink');
+      const button = screen.getByTestId(
+        `datasetQualitySetFailureStoreLink-${mockDataStreamStat.rawName}`
+      );
       fireEvent.mouseEnter(button);
 
       await waitFor(() => {
@@ -57,7 +61,9 @@ describe('FailureStoreHoverLink', () => {
     it('changes text to "Set failure store" on hover', () => {
       renderWithI18n(<FailureStoreHoverLink dataStreamStat={mockDataStreamStat} />);
 
-      const button = screen.getByTestId('datasetQualitySetFailureStoreLink');
+      const button = screen.getByTestId(
+        `datasetQualitySetFailureStoreLink-${mockDataStreamStat.rawName}`
+      );
       expect(button).toHaveTextContent('N/A');
 
       fireEvent.mouseEnter(button);
@@ -70,7 +76,9 @@ describe('FailureStoreHoverLink', () => {
     it('opens modal when button is clicked', () => {
       renderWithI18n(<FailureStoreHoverLink dataStreamStat={mockDataStreamStat} />);
 
-      const button = screen.getByTestId('datasetQualitySetFailureStoreLink');
+      const button = screen.getByTestId(
+        `datasetQualitySetFailureStoreLink-${mockDataStreamStat.rawName}`
+      );
       fireEvent.click(button);
 
       expect(screen.getByTestId('editFailureStoreModal')).toBeInTheDocument();
@@ -84,7 +92,9 @@ describe('FailureStoreHoverLink', () => {
 
       renderWithI18n(<FailureStoreHoverLink dataStreamStat={disabledFsDataStream} />);
 
-      const button = screen.getByTestId('datasetQualitySetFailureStoreLink');
+      const button = screen.getByTestId(
+        `datasetQualitySetFailureStoreLink-${disabledFsDataStream.rawName}`
+      );
       fireEvent.click(button);
 
       expect(screen.getByTestId('editFailureStoreModal')).toBeInTheDocument();
@@ -93,7 +103,9 @@ describe('FailureStoreHoverLink', () => {
     it('calls updateFailureStore with custom retention period when provided', async () => {
       renderWithI18n(<FailureStoreHoverLink dataStreamStat={mockDataStreamStat} />);
 
-      fireEvent.click(screen.getByTestId('datasetQualitySetFailureStoreLink'));
+      fireEvent.click(
+        screen.getByTestId(`datasetQualitySetFailureStoreLink-${mockDataStreamStat.rawName}`)
+      );
       fireEvent.click(screen.getByTestId('enableFailureStoreToggle'));
       fireEvent.click(screen.getByTestId('failureStoreModalSaveButton'));
 

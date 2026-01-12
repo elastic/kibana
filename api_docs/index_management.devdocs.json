@@ -406,20 +406,6 @@
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-public.IndexMappingProps.hasUpdateMappingsPrivilege",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hasUpdateMappingsPrivilege",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -433,11 +419,13 @@
         "type": "string",
         "tags": [],
         "label": "INDEX_MANAGEMENT_LOCATOR_ID",
-        "description": [],
+        "description": [
+          "\nLocator ID used to navigate to the Index Management application.\n\nKept in `@kbn/index-management-shared-types` so other plugins can reference it\nwithout depending on `@kbn/index-management-plugin`."
+        ],
         "signature": [
           "\"INDEX_MANAGEMENT_LOCATOR_ID\""
         ],
-        "path": "x-pack/platform/plugins/shared/index_management/public/locator.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -457,7 +445,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " & ({ page: \"index_list\"; filter?: string | undefined; includeHiddenIndices?: boolean | undefined; } | { page: \"data_stream_index_list\"; dataStreamName: string; } | { page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"index_template_edit\"; indexTemplate: string; } | { page: \"index_template_clone\"; indexTemplate: string; } | { page: \"component_template\"; componentTemplate: string; } | { page: \"component_template_list\"; filter?: string | undefined; } | { page: \"edit_component_template\"; componentTemplate: string; } | { page: \"clone_component_template\"; componentTemplate: string; } | { page: \"create_component_template\"; componentTemplate: string; })"
+          " & ({ page: \"index_list\"; filter?: string | undefined; includeHiddenIndices?: boolean | undefined; } | { page: \"data_stream_index_list\"; dataStreamName: string; } | { page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"index_template_edit\"; indexTemplate: string; } | { page: \"index_template_clone\"; indexTemplate: string; } | { page: \"create_template\"; } | { page: \"component_template\"; componentTemplate: string; } | { page: \"component_template_list\"; filter?: string | undefined; } | { page: \"edit_component_template\"; componentTemplate: string; } | { page: \"clone_component_template\"; componentTemplate: string; } | { page: \"create_component_template\"; componentTemplate: string; })"
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
@@ -599,6 +587,26 @@
       "deprecated": false,
       "trackAdoption": false,
       "children": [
+        {
+          "parentPluginId": "indexManagement",
+          "id": "def-public.IndexManagementPluginStart.apiService",
+          "type": "Object",
+          "tags": [],
+          "label": "apiService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "@kbn/index-management-shared-types",
+              "scope": "common",
+              "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+              "section": "def-common.PublicApiServiceSetup",
+              "text": "PublicApiServiceSetup"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
         {
           "parentPluginId": "indexManagement",
           "id": "def-public.IndexManagementPluginStart.extensionsService",
@@ -1383,7 +1391,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; readonly enableFailureStoreRetentionDisabling: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/index_management/server/config.ts",
         "deprecated": false,
@@ -2303,7 +2311,7 @@
             "label": "failureStoreRetention",
             "description": [],
             "signature": [
-              "{ customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; } | undefined"
+              "{ customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; retentionDisabled?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -2534,6 +2542,22 @@
             "description": [],
             "signature": [
               "{ delete_index: boolean; manage_data_stream_lifecycle: boolean; read_failure_store: boolean; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.EnhancedDataStreamFromEs.failure_store",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "failure_store",
+            "description": [],
+            "signature": [
+              "(",
+              "IndicesFailureStore",
+              " & { lifecycle?: { enabled?: boolean | undefined; data_retention?: string | undefined; } | undefined; }) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -4017,7 +4041,7 @@
         "label": "TemplateType",
         "description": [],
         "signature": [
-          "\"system\" | \"default\" | \"managed\" | \"cloudManaged\""
+          "\"default\" | \"system\" | \"managed\" | \"cloudManaged\""
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,

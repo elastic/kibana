@@ -39,11 +39,30 @@ class SecurityTelemetry {
   private readonly logoutCounter: Counter<Attributes>;
   private readonly privilegeRegistrationDuration: Histogram<Attributes>;
 
+  // Adds more boundaries in 50-500ms range where most operations typically fall
+  private readonly DEFAULT_BUCKET_BOUNDARIES = [
+    50, 75, 100, 150, 200, 250, 300, 400, 500, 650, 800, 1000, 1500, 2000, 3000, 5000, 7500, 10000,
+    20000,
+  ];
+
+  // Provides detailed buckets in the 1.5s-4s range where most operations occur
+  private readonly PRIVILEGE_REGISTRATION_BUCKET_BOUNDARIES = [
+    0, 200, 350, 500, 650, 800, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 10000, 20000,
+  ];
+
+  // Provides detailed buckets in the under 1.5s range where most operations occur
+  private readonly LOGIN_DURATION_BUCKET_BOUNDARIES = [
+    0, 50, 100, 220, 280, 340, 400, 500, 650, 800, 1000, 1500, 2000, 3000, 5000, 7500, 10000, 20000,
+  ];
+
   constructor() {
     this.loginDuration = this.meter.createHistogram('auth.login.duration', {
       description: 'Duration of login attempts',
       unit: 'ms',
       valueType: ValueType.DOUBLE,
+      advice: {
+        explicitBucketBoundaries: this.LOGIN_DURATION_BUCKET_BOUNDARIES,
+      },
     });
 
     this.userProfileActivationDuration = this.meter.createHistogram(
@@ -52,6 +71,9 @@ class SecurityTelemetry {
         description: 'Duration of user profile activation attempts',
         unit: 'ms',
         valueType: ValueType.DOUBLE,
+        advice: {
+          explicitBucketBoundaries: this.DEFAULT_BUCKET_BOUNDARIES,
+        },
       }
     );
 
@@ -59,6 +81,9 @@ class SecurityTelemetry {
       description: 'Duration of session creation attempts',
       unit: 'ms',
       valueType: ValueType.DOUBLE,
+      advice: {
+        explicitBucketBoundaries: this.DEFAULT_BUCKET_BOUNDARIES,
+      },
     });
 
     this.logoutCounter = this.meter.createCounter('auth.logout.attempts', {
@@ -73,6 +98,9 @@ class SecurityTelemetry {
         description: 'Duration of privilege registration',
         unit: 'ms',
         valueType: ValueType.DOUBLE,
+        advice: {
+          explicitBucketBoundaries: this.PRIVILEGE_REGISTRATION_BUCKET_BOUNDARIES,
+        },
       }
     );
   }

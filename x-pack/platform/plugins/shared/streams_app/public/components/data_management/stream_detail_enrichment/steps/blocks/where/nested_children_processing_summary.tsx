@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import type { StepsProcessingSummaryMap } from '../../../state_management/use_steps_processing_summary';
+import type { StepsProcessingSummaryMap } from '../../../hooks/use_steps_processing_summary';
 import { getNestedMessage } from './utils';
 
 export const NestedChildrenProcessingSummary = ({

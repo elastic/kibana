@@ -16,6 +16,7 @@ import type { PublicLocations } from '../../common/runtime_types';
 import { LocationStatus } from '../../common/runtime_types';
 import type { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsServerSetup } from '../types';
+import { getSanitizedError } from './utils/sanitize_error';
 
 const licenseMock: LicenseGetResponse = {
   license: {
@@ -35,6 +36,9 @@ const licenseMock: LicenseGetResponse = {
 };
 
 jest.mock('axios', () => jest.fn());
+jest.mock('./utils/sanitize_error', () => ({
+  getSanitizedError: jest.fn().mockImplementation(() => 'sanitized error'),
+}));
 jest.mock('@kbn/server-http-tools', () => ({
   ...jest.requireActual('@kbn/server-http-tools'),
   SslConfig: jest.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
@@ -142,6 +146,78 @@ describe('checkAccountAccessStatus', () => {
 
     expect(result).toEqual({ allowed: true, signupUrl: 'http://localhost:666/example' });
   });
+
+  it('logs a sanitized error if the request fails', async () => {
+    const logger = loggerMock.create();
+    const apiClient = new ServiceAPIClient(
+      logger,
+      { tls: { certificate: 'crt', key: 'k' }, manifestUrl: 'http://localhost' } as ServiceConfig,
+      { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
+    );
+    apiClient.locations = [
+      {
+        id: 'test-location',
+        url: 'http://localhost',
+        label: 'Test location',
+        isServiceManaged: true,
+      },
+    ];
+    const error = new Error('Request failed', { someConfig: 'someValue' } as any);
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(error);
+
+    await apiClient.checkAccountAccessStatus();
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error getting isAllowed status, Error: Request failed',
+      {
+        error: 'sanitized error',
+      }
+    );
+    expect(getSanitizedError).toHaveBeenCalledWith(error);
+  });
+});
+
+describe('syncMonitors', () => {
+  beforeEach(() => {
+    (axios as jest.MockedFunction<typeof axios>).mockReset();
+  });
+
+  it('logs a sanitized error if callAPI fails', async () => {
+    const logger = loggerMock.create();
+    const apiClient = new ServiceAPIClient(
+      logger,
+      { tls: { certificate: 'crt', key: 'k' }, manifestUrl: 'http://localhost' } as ServiceConfig,
+      { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
+    );
+    apiClient.locations = [
+      {
+        id: 'us_central',
+        url: 'http://localhost',
+        label: 'Test location',
+        isServiceManaged: true,
+      },
+    ];
+    const error = new Error('Request failed', { someConfig: 'someValue' } as any);
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(error);
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    jest.spyOn(apiClient, 'callAPI').mockRejectedValueOnce(error);
+
+    await apiClient.syncMonitors({
+      monitors: testMonitors,
+      output,
+      license: licenseMock.license,
+    });
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error syncing Synthetics monitors, Error: Request failed',
+      {
+        error: 'sanitized error',
+      }
+    );
+    expect(getSanitizedError).toHaveBeenCalledWith(error);
+  });
 });
 
 describe('callAPI', () => {
@@ -232,7 +308,11 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { rejectUnauthorized: true, path: null, noDelay: true },
+        options: expect.objectContaining({
+          rejectUnauthorized: true,
+          path: null,
+          noDelay: true,
+        }),
       }),
       method: 'POST',
       url: 'https://service.dev/monitors',
@@ -252,7 +332,11 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { rejectUnauthorized: true, path: null, noDelay: true },
+        options: expect.objectContaining({
+          rejectUnauthorized: true,
+          path: null,
+          noDelay: true,
+        }),
       }),
       method: 'POST',
       url: 'https://qa.service.elstc.co/monitors',
@@ -272,7 +356,11 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { rejectUnauthorized: true, path: null, noDelay: true },
+        options: expect.objectContaining({
+          rejectUnauthorized: true,
+          path: null,
+          noDelay: true,
+        }),
       }),
       method: 'POST',
       url: 'https://qa.service.stg.co/monitors',
@@ -345,13 +433,13 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: {
+        options: expect.objectContaining({
           rejectUnauthorized: true,
           path: null,
           noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
-        },
+        }),
       }),
       method: 'POST',
       url: 'https://service.dev/monitors',
@@ -399,13 +487,13 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: {
+        options: expect.objectContaining({
           rejectUnauthorized: true,
           path: null,
           noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
-        },
+        }),
       }),
       method: 'POST',
       url: 'https://service.dev/run',
@@ -459,13 +547,13 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: {
+        options: expect.objectContaining({
           rejectUnauthorized: true,
           path: null,
           noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
-        },
+        }),
       }),
       method: 'PUT',
       url: 'https://service.dev/monitors/sync',

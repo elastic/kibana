@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type {
   ConnectorStep,
   EsWorkflowExecution,
@@ -18,15 +18,12 @@ import type {
 } from '@kbn/workflows';
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
 import type { WorkflowTemplatingEngine } from '../../templating_engine';
-import type { ContextDependencies } from '../types';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
-const cloudSetupMock = cloudMock.createSetup();
-const dependencies: ContextDependencies = {
-  cloudSetup: cloudSetupMock,
-};
+const dependencies = mockContextDependencies();
 
 jest.mock('../../utils', () => ({
   buildStepExecutionId: jest.fn().mockImplementation((executionId, stepId, path) => {
@@ -55,6 +52,7 @@ describe('WorkflowContextManager', () => {
     type: 'atomic',
     stepId: 'fake_id',
     stepType: 'fake_type',
+    configuration: {},
   };
   const fakeStackFrames: StackFrame[] = [];
 
@@ -84,6 +82,10 @@ describe('WorkflowContextManager', () => {
       delete: jest.fn(),
     } as any;
 
+    workflowExecutionState.getLatestStepExecution = jest
+      .fn()
+      .mockReturnValue({} as EsWorkflowStepExecution);
+
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,
@@ -92,6 +94,8 @@ describe('WorkflowContextManager', () => {
       workflowExecutionState,
       esClient,
       dependencies,
+      fakeRequest: {} as KibanaRequest,
+      coreStart: {} as CoreStart,
     });
 
     return {
@@ -271,6 +275,7 @@ describe('WorkflowContextManager', () => {
 
       const context = testContainer.underTest.getContext();
       expect(context.inputs).toEqual({
+        name: '', // Default value from workflow definition is applied
         remainingKey: 'some string',
         overridenKey: false,
         newKey: 123,

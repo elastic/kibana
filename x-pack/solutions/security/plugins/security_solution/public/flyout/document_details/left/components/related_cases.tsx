@@ -111,7 +111,7 @@ export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
         items={data}
         columns={columns}
         pagination={true}
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesNoDataDescription"
             defaultMessage="No related cases."

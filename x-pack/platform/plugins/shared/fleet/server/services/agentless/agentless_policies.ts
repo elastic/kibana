@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
-import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
+import type { AgentlessPolicy, CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 
 import { AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT } from '../../../common/constants';
 
@@ -28,7 +28,7 @@ import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
-import { appContextService } from '../app_context';
+import { appContextService, cloudConnectorService } from '..';
 
 import type { PackageInfo } from '../../types';
 import {
@@ -36,6 +36,7 @@ import {
   getAgentlessGlobalDataTags,
 } from '../../../common/services/agentless_policy_helper';
 import { agentlessAgentService } from '../agents/agentless_agent';
+import { createAndIntegrateCloudConnector } from '../cloud_connectors';
 
 export interface AgentlessPoliciesService {
   createAgentlessPolicy: (
@@ -52,7 +53,7 @@ export interface AgentlessPoliciesService {
   ) => Promise<void>;
 }
 
-const getAgentlessPolicy = (packageInfo?: PackageInfo) => {
+const getAgentlessPolicy = (packageInfo?: PackageInfo): AgentlessPolicy | undefined => {
   if (
     !packageInfo?.policy_templates &&
     !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
@@ -104,6 +105,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     const spaceId = this.soClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
 
     let createdAgentPolicyId: string | undefined;
+    let createdCloudConnectorId: string | undefined;
+    let cloudConnectorWasCreated = false;
 
     try {
       const pkg = data.package;
@@ -118,6 +121,33 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       const { outputId, fleetServerId } = agentlessAgentService.getDefaultSettings();
 
       const agentPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(data.name);
+
+      // Get base agentless config from package info
+      const baseAgentlessConfig = getAgentlessPolicy(pkgInfo);
+
+      // Build agentless config with cloud connectors if provided
+      let agentlessConfig = baseAgentlessConfig;
+      if (data.cloud_connector?.enabled) {
+        const inputsArray = data.inputs ? Object.entries(data.inputs) : [];
+        const input = inputsArray.find(([, pinput]) => pinput.enabled !== false);
+        const targetCsp = input?.[0].match(/aws|azure|gcp/)?.[0] as
+          | 'aws'
+          | 'azure'
+          | 'gcp'
+          | undefined;
+
+        this.logger.debug(
+          `Configuring cloud connectors for cloud provider: ${targetCsp} from cloud_connector object`
+        );
+        agentlessConfig = {
+          ...baseAgentlessConfig,
+          cloud_connectors: {
+            target_csp: targetCsp,
+            enabled: true,
+          },
+        };
+      }
+
       const agentPolicy = await agentPolicyService.create(
         this.soClient,
         this.esClient,
@@ -129,7 +159,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           namespace: data.namespace || 'default',
           monitoring_enabled: [],
           keep_monitoring_alive: true,
-          agentless: getAgentlessPolicy(pkgInfo),
+          agentless: agentlessConfig,
           global_data_tags: getAgentlessGlobalDataTags(pkgInfo),
           fleet_server_host_id: fleetServerId,
           data_output_id: outputId,
@@ -141,13 +171,40 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       createdAgentPolicyId = agentPolicy.id;
 
       const newPolicy = {
-        ...omit(data, 'id', 'package'),
+        ...omit(data, 'id', 'package', 'cloud_connector'),
         namespace: data.namespace || 'default',
         policy_ids: [agentPolicy.id],
         supports_agentless: true,
+        // Extract cloud connector fields from cloud_connector object
+        ...(data.cloud_connector &&
+          data.cloud_connector.enabled && {
+            supports_cloud_connector: true,
+            ...(data.cloud_connector.cloud_connector_id && {
+              cloud_connector_id: data.cloud_connector.cloud_connector_id,
+            }),
+          }),
       };
 
-      const newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
+      let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
+
+      // Integrate cloud connector if enabled for this agentless policy
+      const {
+        packagePolicy: updatedPackagePolicy,
+        cloudConnectorId,
+        wasCreated,
+      } = await createAndIntegrateCloudConnector({
+        packagePolicy: newPackagePolicy,
+        agentPolicy,
+        policyName: data.name,
+        soClient: this.soClient,
+        esClient: this.esClient,
+        logger: this.logger,
+        cloudConnectorName: data.cloud_connector?.name,
+      });
+
+      newPackagePolicy = updatedPackagePolicy;
+      createdCloudConnectorId = cloudConnectorId;
+      cloudConnectorWasCreated = wasCreated;
 
       // Create package policy
       this.logger.debug(`Creating agentless package policy ${packagePolicyId}`);
@@ -174,6 +231,24 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
       return packagePolicy;
     } catch (err) {
+      // Handle cloud connector rollback
+      if (createdCloudConnectorId) {
+        if (cloudConnectorWasCreated) {
+          // If we created a new cloud connector, delete it to avoid orphaned connectors
+          this.logger.debug(
+            `Rolling back: deleting created cloud connector ${createdCloudConnectorId}`
+          );
+          await cloudConnectorService
+            .delete(this.soClient, this.esClient, createdCloudConnectorId, true)
+            .catch((e: Error) => {
+              this.logger.error(
+                `Failed to delete cloud connector ${createdCloudConnectorId}: ${e.message}`,
+                { error: e }
+              );
+            });
+        }
+      }
+
       // If policy was created and error happens later during package policy creation or agentless API call, delete the created policy to avoid orphaned policies
       if (createdAgentPolicyId) {
         await agentPolicyService
@@ -209,7 +284,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       throw new Error(`Policy ${policyId} is not an agentless policy`);
     }
 
-    // Delete agent policy
+    // Delete agent policy (this will also delete associated package policies)
     await agentPolicyService.delete(this.soClient, this.esClient, policyId, {
       force: options?.force,
       user,

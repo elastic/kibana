@@ -10,35 +10,38 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
+import type {
+  FetchContext,
+  PublishesDataViews,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import type { ControlFetchContext } from '../../../control_group/control_fetch';
-import type { ControlGroupApi } from '../../../control_group/types';
+import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 
 export function minMax$({
   controlFetch$,
-  controlGroupApi,
   dataViews$,
   fieldName$,
+  useGlobalFilters$,
   setIsLoading,
 }: {
-  controlFetch$: Observable<ControlFetchContext>;
-  controlGroupApi: ControlGroupApi;
+  controlFetch$: Observable<FetchContext>;
   dataViews$: PublishesDataViews['dataViews$'];
   fieldName$: PublishingSubject<string>;
+  useGlobalFilters$: PublishingSubject<boolean | undefined>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([controlFetch$, dataViews$, fieldName$]).pipe(
+  return combineLatest([controlFetch$, dataViews$, fieldName$, useGlobalFilters$]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([controlFetchContext, dataViews, fieldName]) => {
+    switchMap(async ([controlFetchContext, dataViews, fieldName, useGlobalFilters]) => {
       const dataView = dataViews?.[0];
       const dataViewField = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
       if (!dataView || !dataViewField) {
@@ -54,6 +57,8 @@ export function minMax$({
           dataView,
           field: dataViewField,
           ...controlFetchContext,
+          timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
+          filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
         });
       } catch (error) {
         return { error, max: undefined, min: undefined };

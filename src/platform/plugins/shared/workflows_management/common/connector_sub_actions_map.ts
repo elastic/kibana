@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 // Import SUB_ACTION enums from all stack connectors
 import {
   CONNECTOR_ID as BEDROCK_CONNECTOR_ID,
@@ -29,6 +28,10 @@ import {
   SUB_ACTION as JiraServiceManagementSubActions,
 } from '@kbn/connector-schemas/jira-service-management/constants';
 import {
+  CONNECTOR_ID as MCP_CONNECTOR_ID,
+  SUB_ACTION as MCP_SUB_ACTION,
+} from '@kbn/connector-schemas/mcp/constants';
+import {
   CONNECTOR_ID as OPENAI_CONNECTOR_ID,
   SUB_ACTION as OPENAI_SUB_ACTION,
 } from '@kbn/connector-schemas/openai/constants';
@@ -48,6 +51,8 @@ import {
   CONNECTOR_ID as XSOAR_CONNECTOR_ID,
   SUB_ACTION as XSOAR_SUB_ACTION,
 } from '@kbn/connector-schemas/xsoar/constants';
+
+import { connectorsSpecs } from '@kbn/connector-specs';
 
 // Helper function to format sub-action names for display
 function formatSubActionName(action: string): string {
@@ -119,6 +124,7 @@ function createSubActionsMapping() {
     { id: D3_SECURITY_CONNECTOR_ID, actions: D3SECURITY_SUB_ACTION },
     { id: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID, actions: JiraServiceManagementSubActions },
     { id: OpsgenieConnectorTypeId, actions: OpsgenieSubActions },
+    { id: MCP_CONNECTOR_ID, actions: MCP_SUB_ACTION },
     // Legacy connectors (using older ActionType pattern)
     { id: '.jira', actions: JIRA_SUB_ACTIONS },
     { id: '.servicenow-itsm', actions: SERVICENOW_ITSM_SUB_ACTIONS },
@@ -130,6 +136,13 @@ function createSubActionsMapping() {
 
   connectorSubActions.forEach(({ id, actions }) => {
     mapping[id] = Object.values(actions).map((action) => ({
+      name: action,
+      displayName: formatSubActionName(action),
+    }));
+  });
+
+  Object.values(connectorsSpecs).forEach((connectorSpec) => {
+    mapping[connectorSpec.metadata.id] = Object.keys(connectorSpec.actions).map((action) => ({
       name: action,
       displayName: formatSubActionName(action),
     }));

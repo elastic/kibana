@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { ensureFleetGlobalEsAssets } from '../../../../setup/ensure_fleet_global_es_assets';
 import { appContextService } from '../../../..';
 
 import {
+  DATA_STREAM_TYPES_DEPRECATED_ILMS,
   getILMMigrationStatus,
   getILMPolicies,
   getILMPolicy,
@@ -17,6 +19,25 @@ import {
 import { withPackageSpan } from '../../utils';
 
 export async function stepInstallPrecheck() {
+  await Promise.all([checkILMMigrationStatus(), ensureFleetGlobalAssets()]);
+}
+
+async function ensureFleetGlobalAssets() {
+  await withPackageSpan('Ensure Fleet Global Assets', () =>
+    ensureFleetGlobalEsAssets(
+      {
+        logger: appContextService.getLogger(),
+        esClient: appContextService.getInternalUserESClient(),
+        soClient: appContextService.getInternalUserSOClient(),
+      },
+      {
+        reinstallPackages: false,
+      }
+    )
+  );
+}
+
+async function checkILMMigrationStatus() {
   const isILMPoliciesDisabled =
     appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   if (isILMPoliciesDisabled) {
@@ -27,10 +48,9 @@ export async function stepInstallPrecheck() {
     const ilmMigrationStatusMap = await getILMMigrationStatus();
     const updatedILMMigrationStatusMap = new Map(ilmMigrationStatusMap);
 
-    const dataStreamTypes = ['logs', 'metrics', 'synthetics'];
-    const ilmPolicies = await getILMPolicies(dataStreamTypes);
+    const ilmPolicies = await getILMPolicies(DATA_STREAM_TYPES_DEPRECATED_ILMS);
 
-    for (const dataStreamType of dataStreamTypes) {
+    for (const dataStreamType of DATA_STREAM_TYPES_DEPRECATED_ILMS) {
       const ilmPolicy = getILMPolicy(dataStreamType, ilmMigrationStatusMap, ilmPolicies);
 
       if (ilmPolicy === `${dataStreamType}@lifecycle`) {

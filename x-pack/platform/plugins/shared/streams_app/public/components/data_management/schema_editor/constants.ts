@@ -52,6 +52,12 @@ export const FIELD_TYPE_MAP = {
     }),
     readonly: false,
   },
+  geo_point: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableGeoPointType', {
+      defaultMessage: 'Geo point',
+    }),
+    readonly: false,
+  },
   system: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableSystemType', {
       defaultMessage: 'System managed',

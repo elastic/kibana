@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
@@ -29,6 +30,7 @@ jest.mock('../utils', () => ({
 describe('WorkflowTaskManager', () => {
   let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
   let workflowTaskManager: WorkflowTaskManager;
+  let fakeRequest: jest.Mocked<KibanaRequest>;
 
   const createMockWorkflowExecution = (
     overrides?: Partial<EsWorkflowExecution>
@@ -64,6 +66,7 @@ describe('WorkflowTaskManager', () => {
       fetch: jest.fn(),
       runSoon: jest.fn(),
     } as any;
+    fakeRequest = jest.mocked({} as KibanaRequest);
 
     workflowTaskManager = new WorkflowTaskManager(mockTaskManager);
   });
@@ -83,21 +86,28 @@ describe('WorkflowTaskManager', () => {
       const result = await workflowTaskManager.scheduleResumeTask({
         workflowExecution,
         resumeAt,
+        fakeRequest,
       });
 
       expect(result).toEqual({ taskId: mockTaskId });
       expect(generateExecutionTaskScope).toHaveBeenCalledWith(workflowExecution);
       expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.schedule).toHaveBeenCalledWith({
-        taskType: 'workflow:resume',
-        params: {
-          workflowRunId: 'test-execution-id',
-          spaceId: 'default',
-        } as ResumeWorkflowExecutionParams,
-        state: {},
-        runAt: resumeAt,
-        scope: ['workflow', 'workflow:test-workflow-id', 'workflow:execution:test-execution-id'],
-      });
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        {
+          id: 'mocked-uuid',
+          taskType: 'workflow:resume',
+          params: {
+            workflowRunId: 'test-execution-id',
+            spaceId: 'default',
+          } as ResumeWorkflowExecutionParams,
+          state: {},
+          runAt: resumeAt,
+          scope: ['workflow', 'workflow:test-workflow-id', 'workflow:execution:test-execution-id'],
+        },
+        {
+          request: fakeRequest,
+        }
+      );
     });
 
     it('should include stepId in scope when present', async () => {
@@ -111,13 +121,15 @@ describe('WorkflowTaskManager', () => {
       await workflowTaskManager.scheduleResumeTask({
         workflowExecution,
         resumeAt,
+        fakeRequest,
       });
 
       expect(generateExecutionTaskScope).toHaveBeenCalledWith(workflowExecution);
       expect(mockTaskManager.schedule).toHaveBeenCalledWith(
         expect.objectContaining({
           scope: ['workflow', 'workflow:test-workflow-id', 'workflow:execution:test-execution-id'],
-        })
+        }),
+        expect.anything()
       );
     });
 
@@ -132,6 +144,7 @@ describe('WorkflowTaskManager', () => {
       await workflowTaskManager.scheduleResumeTask({
         workflowExecution,
         resumeAt,
+        fakeRequest,
       });
 
       expect(mockTaskManager.schedule).toHaveBeenCalledWith(
@@ -139,7 +152,8 @@ describe('WorkflowTaskManager', () => {
           params: expect.objectContaining({
             spaceId: 'custom-space',
           }),
-        })
+        }),
+        expect.anything()
       );
     });
 
@@ -154,6 +168,7 @@ describe('WorkflowTaskManager', () => {
         workflowTaskManager.scheduleResumeTask({
           workflowExecution,
           resumeAt,
+          fakeRequest,
         })
       ).rejects.toThrow('Task scheduling failed');
     });

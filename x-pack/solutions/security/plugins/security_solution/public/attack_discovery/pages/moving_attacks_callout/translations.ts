@@ -13,3 +13,10 @@ export const VIEW_ATTACKS_BUTTON = i18n.translate(
     defaultMessage: 'View Attacks',
   }
 );
+
+export const HIDE_BUTTON = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.movingAttacksCallout.hideButton',
+  {
+    defaultMessage: 'Hide',
+  }
+);

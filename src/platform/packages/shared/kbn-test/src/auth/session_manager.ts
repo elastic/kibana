@@ -9,6 +9,8 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
+import type { ServerlessProjectType } from '@kbn/es';
+import { createHash } from 'crypto';
 import { KbnClient } from '../kbn_client';
 import { isValidHostname, readCloudUsersFromFile } from './helper';
 import type { Session } from './saml_auth';
@@ -29,7 +31,14 @@ export interface SamlSessionManagerOptions {
   supportedRoles?: SupportedRoles;
   cloudHostName?: string;
   cloudUsersFilePath: string;
+  serverless?: SamlSessionManagerServerlessOptions;
   log: ToolingLog;
+}
+
+export interface SamlSessionManagerServerlessOptions {
+  uiam: boolean;
+  projectType: ServerlessProjectType;
+  organizationId: string;
 }
 
 export interface SupportedRoles {
@@ -55,6 +64,7 @@ export class SamlSessionManager {
   private readonly supportedRoles?: SupportedRoles;
   private readonly cloudHostName?: string;
   private readonly cloudUsersFilePath: string;
+  private readonly serverless?: SamlSessionManagerServerlessOptions;
 
   constructor(options: SamlSessionManagerOptions) {
     this.log = options.log;
@@ -80,6 +90,7 @@ export class SamlSessionManager {
     this.sessionCache = new Map<Role, Session>();
     this.roleToUserMap = new Map<Role, User>();
     this.supportedRoles = options.supportedRoles;
+    this.serverless = options.serverless;
     this.validateCloudSetting();
   }
 
@@ -158,13 +169,11 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
   };
 
   private createSessionForRole = async (role: string): Promise<Session> => {
-    let session: Session;
-
     if (this.isCloud) {
       this.log.debug(`Creating new cloud SAML session for role '${role}'`);
       const kbnVersion = await this.kbnClient.version.get();
       const { email, password } = this.getCloudUserByRole(role);
-      session = await createCloudSAMLSession({
+      return await createCloudSAMLSession({
         hostname: this.cloudHostName!,
         email,
         password,
@@ -172,32 +181,41 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
         kbnVersion,
         log: this.log,
       });
-    } else {
-      this.log.debug(`Creating new local SAML session for role '${role}'`);
-      session = await createLocalSAMLSession({
-        username: `elastic_${role}`,
-        email: `elastic_${role}@elastic.co`,
-        fullname: `test ${role}`,
-        role,
-        kbnHost: this.kbnHost,
-        log: this.log,
-      });
     }
 
-    return session;
+    // UIAM service requires numeric usernames, so we hash the role name (first 4 bytes) to generate a unique username.
+    const username = this.serverless?.uiam
+      ? createHash('sha256').update(`elastic_${role}`).digest().readUInt32BE(0).toString()
+      : `elastic_${role}`;
+    this.log.debug(`Creating new local SAML session for a user '${username}' with role '${role}'`);
+    return await createLocalSAMLSession({
+      username,
+      email: `elastic_${role}@elastic.co`,
+      fullname: `test ${role}`,
+      role,
+      kbnHost: this.kbnHost,
+      serverless: this.serverless
+        ? {
+            organizationId: this.serverless.organizationId,
+            projectType: this.serverless.projectType,
+            uiamEnabled: this.serverless.uiam,
+          }
+        : undefined,
+      log: this.log,
+    });
   };
 
-  private validateRole = (role: string): void => {
+  validateRole = (role: string): void => {
     if (this.supportedRoles && !this.supportedRoles.roles.includes(role)) {
-      throw new Error(`Role '${role}' not found in ${
-        this.supportedRoles.sourcePath
-      }. Available predefined roles: ${this.supportedRoles.roles.join(', ')}
+      const errorMessage = [
+        `Role '${role}' not found in ${
+          this.supportedRoles.sourcePath
+        }. Available predefined roles: ${this.supportedRoles.roles.join(', ')}.`,
+        `Is '${role}' a custom test role? → Use 'loginWithCustomRole()' for functional tests or 'getApiKeyForCustomRole()' for API tests to log in with custom Kibana and Elasticsearch privileges.`,
+        `Is '${role}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${this.supportedRoles.sourcePath} to enable it for testing.`,
+      ].join('\n\n');
 
-      Is '${role}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
-
-      Is '${role}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
-        this.supportedRoles.sourcePath
-      } to enable it for testing.`);
+      throw new Error(errorMessage);
     }
   };
 

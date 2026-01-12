@@ -35,17 +35,17 @@ export default function ({ getService }: FtrProviderContext) {
         return;
       }
 
-      const response1 = await supertest.get('/emit_log_with_trace_id');
+      // Explicitly unset traceparent so that APM agent provides a new trace.id for the request
+      const response1 = await supertest.get('/emit_log_with_trace_id').set('traceparent', '');
+      expect(response1.body.traceId).to.be.a('string');
       expect(response1.status).to.be(200);
 
-      expect(response1.body.traceId).to.be.a('string');
-
-      const response2 = await supertest.get('/emit_log_with_trace_id');
-
+      // Explicitly unset traceparent so that APM agent provides a new trace.id for the request
+      const response2 = await supertest.get('/emit_log_with_trace_id').set('traceparent', '');
+      expect(response2.body.traceId).to.be.a('string');
       expect(response2.status).to.be(200);
-      expect(response1.body.traceId).to.be.a('string');
 
-      expect(response2.body.traceId).not.to.be(response1.body.traceId);
+      expect(response1.body.traceId).not.to.be(response2.body.traceId);
 
       const logs = await readLogFile();
 
@@ -78,7 +78,6 @@ export default function ({ getService }: FtrProviderContext) {
               // esClient.ping() request
               record.message?.includes('HEAD /')
           ),
-
         logs,
       });
     });

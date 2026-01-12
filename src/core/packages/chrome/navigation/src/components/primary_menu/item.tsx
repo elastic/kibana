@@ -31,6 +31,8 @@ export interface PrimaryMenuItemProps extends Omit<MenuItem, 'href'> {
   isHighlighted: boolean;
   isHorizontal?: boolean;
   onClick?: () => void;
+  'aria-posinset'?: number;
+  'aria-setsize'?: number;
 }
 
 export const PrimaryMenuItem = forwardRef<

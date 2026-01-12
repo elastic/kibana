@@ -1,0 +1,41 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/workflows-management-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/agent-builder-genai-utils",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/agent-builder-common",
+    "@kbn/zod",
+    "@kbn/management-settings-ids",
+    "@kbn/agent-builder-plugin",
+    "@kbn/core-lifecycle-server",
+    "@kbn/esql-language",
+    "@kbn/inference-common",
+    "@kbn/llm-tasks-plugin",
+    "@kbn/i18n",
+    "@kbn/agent-builder-browser",
+    "@kbn/cases-plugin",
+    "@kbn/core-http-server",
+    "@kbn/spaces-plugin",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
+  ]
+}

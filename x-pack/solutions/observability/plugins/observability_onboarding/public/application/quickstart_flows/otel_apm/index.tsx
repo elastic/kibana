@@ -13,7 +13,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCallOut,
   EuiLink,
   EuiMarkdownFormat,
   EuiPanel,
@@ -32,6 +31,7 @@ import type { ObservabilityOnboardingAppServices } from '../../..';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { GetStartedPanel } from '../shared/get_started_panel';
+import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 import { useOtelApmFlow } from './use_otel_apm_flow';
 import { EmptyPrompt } from '../shared/empty_prompt';
 
@@ -42,10 +42,7 @@ export function OtelApmQuickstartFlow() {
     }),
   });
   const {
-    services: {
-      share,
-      context: { isServerless },
-    },
+    services: { share },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useOtelApmFlow();
   const { onPageReady } = usePerformanceContext();
@@ -68,45 +65,7 @@ export function OtelApmQuickstartFlow() {
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
-      {!isServerless && (
-        <EuiCallOut
-          announceOnMount
-          title={i18n.translate(
-            'xpack.observability_onboarding.otelApmQuickstartFlow.euiCallOut.calloutTitleLabel',
-            {
-              defaultMessage: 'Managed OTLP Endpoint is in Tech Preview for Elastic Cloud Hosted',
-            }
-          )}
-          iconType="info"
-          color="warning"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.observability_onboarding.otelApmQuickstartFlow.p.descriptionTextGoesHereLabel"
-              defaultMessage="Managed OTLP Endpoint should not be used in production yet for Elastic Cloud Hosted deployments. For more details, refer to the {motlpDocumentation}."
-              values={{
-                motlpDocumentation: (
-                  <EuiLink
-                    data-test-subj="apmCreateOpenTelemetryAgentInstructionsMOTLPDocsLink"
-                    target="_blank"
-                    href="https://www.elastic.co/docs/reference/opentelemetry/motlp"
-                  >
-                    {i18n.translate(
-                      'xpack.observability_onboarding.otelApmQuickstartFlow.motlpDocumentationLinkLabel',
-                      {
-                        defaultMessage: 'Managed OTLP Endpoint documentation',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiCallOut>
-      )}
-
-      <EuiSpacer size="l" />
-
+      <ManagedOtlpCallout />
       <EuiSteps
         steps={[
           {

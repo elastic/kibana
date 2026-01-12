@@ -25,7 +25,9 @@ import moment from 'moment';
 import { routeWithNamespace, waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-type PrivmonUser = ListPrivMonUsersResponse[number];
+type PrivmonUser = ListPrivMonUsersResponse[number] & {
+  '@timestamp'?: string;
+};
 // Default within last month so included in first run range of now-1M
 const DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP = new Date(
   Date.now() - 3.5 * 7 * 24 * 60 * 60 * 1000
@@ -42,7 +44,6 @@ const OKTA_USER_IDS = {
 interface TimestampSource {
   '@timestamp'?: string;
 }
-
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
@@ -319,7 +320,7 @@ export const PrivMonUtils = (
 
   async function getLastProcessedMarker(indexPattern: string) {
     const res = await api.listEntitySources({ query: {} });
-    const integration = res.body.find(
+    const integration = res.body.sources.find(
       (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
     );
     return integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
@@ -370,7 +371,7 @@ export const PrivMonUtils = (
       query: {},
     });
 
-    const sources = res.body as ListEntitySourcesResponse;
+    const { sources } = res.body as ListEntitySourcesResponse;
     const source = sources.find((s) => s.integrationName === integrationName);
     if (!source) {
       throw new Error(`No monitoring source found for integration ${integrationName}`);

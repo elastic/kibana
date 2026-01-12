@@ -76,7 +76,7 @@ describe('RenderCellValue', () => {
             <CellValue
               {...defaultProps}
               {...props}
-              sourcererScope={PageScope.alerts}
+              pageScope={PageScope.alerts}
               tableType={TableId.test}
             />
           </AlertTableCellContextProvider>
@@ -90,11 +90,7 @@ describe('RenderCellValue', () => {
       render(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <CellValue
-              {...defaultProps}
-              sourcererScope={PageScope.alerts}
-              tableType={TableId.test}
-            />
+            <CellValue {...defaultProps} pageScope={PageScope.alerts} tableType={TableId.test} />
           </DragDropContextWrapper>
         </TestProviders>
       );

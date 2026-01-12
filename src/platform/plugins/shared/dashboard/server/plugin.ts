@@ -29,6 +29,8 @@ import type {
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { registerAccessControl } from '@kbn/content-management-access-control-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   initializeDashboardTelemetryTask,
@@ -43,7 +45,7 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerRoutes } from './api';
+import { registerRoutes, create, read, update, deleteDashboard } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
@@ -61,6 +63,7 @@ export interface StartDeps {
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
   share?: SharePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
@@ -124,6 +127,15 @@ export class DashboardPlugin
 
     registerRoutes(core.http);
 
+    void registerAccessControl({
+      http: core.http,
+      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
+      getStartServices: () =>
+        core.getStartServices().then(([_, { security }]) => ({
+          security,
+        })),
+    });
+
     return {};
   }
 
@@ -173,6 +185,12 @@ export class DashboardPlugin
         };
       },
       scanDashboards,
+      client: {
+        create,
+        read,
+        update,
+        delete: deleteDashboard,
+      },
     };
   }
 

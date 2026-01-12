@@ -14,20 +14,23 @@ import {
   FEATURE_DESCRIPTION,
   FEATURE_FILTER,
   FEATURE_NAME,
+  FEATURE_TYPE,
 } from './fields';
 
 export interface StoredFeature {
+  [FEATURE_TYPE]: 'system';
   [FEATURE_UUID]: string;
   [FEATURE_NAME]: string;
   [FEATURE_DESCRIPTION]: string;
-  [FEATURE_FILTER]: Condition;
   [STREAM_NAME]: string;
+  [FEATURE_FILTER]?: Condition;
 }
 
 export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
+  [FEATURE_TYPE]: z.literal('system'),
   [FEATURE_UUID]: z.string(),
   [FEATURE_NAME]: z.string(),
   [FEATURE_DESCRIPTION]: z.string(),
-  [FEATURE_FILTER]: conditionSchema,
   [STREAM_NAME]: z.string(),
+  [FEATURE_FILTER]: z.optional(conditionSchema),
 });

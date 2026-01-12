@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import type SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -43,6 +43,7 @@ import {
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { emailSchema } from '@kbn/connector-schemas/email/schemas/latest';
 import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
@@ -53,6 +54,7 @@ export type EmailConnectorType = ConnectorType<
   ActionParamsType,
   unknown
 >;
+
 export type EmailConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -98,6 +100,13 @@ function validateConfig(
   });
   if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
+  }
+
+  const { oauthTokenUrl } = config;
+  if (oauthTokenUrl && !configurationUtilities.isUriAllowed(oauthTokenUrl)) {
+    throw new Error(
+      `[oauthTokenUrl]: host name value for '${oauthTokenUrl}' is not in the allowedHosts configuration`
+    );
   }
 
   // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
@@ -166,7 +175,6 @@ function validateConfig(
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
-
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
@@ -175,6 +183,14 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
 
   if (addrs === 0) {
     throw new Error('no [to], [cc], or [bcc] entries');
+  }
+
+  try {
+    emailSchema.parse(to);
+    emailSchema.parse(cc);
+    emailSchema.parse(bcc);
+  } catch (error) {
+    throw new Error(`Invalid email addresses: ${error}`);
   }
 
   const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));

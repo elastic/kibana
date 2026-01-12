@@ -21,6 +21,7 @@ import { FetchStatus } from '../../../types';
 import React from 'react';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { internalStateActions } from '../../state_management/redux';
 
 describe('useFetchMoreRecords', () => {
   const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
@@ -130,7 +131,11 @@ describe('useFetchMoreRecords', () => {
       loadedRecordsCount: 3,
       totalRecordsCount: 5,
     });
-    stateContainer.appState.update({ query: { esql: 'from *' } });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: 'from *' } },
+      })
+    );
     const {
       result: { current },
     } = renderHook((props) => useFetchMoreRecords(props), {

@@ -13,6 +13,7 @@ import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { isSupportedConnector } from '@kbn/inference-common';
 import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 import type { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
@@ -49,7 +50,11 @@ export const useLoadConnectors = ({
       const connectors = await loadConnectors({ http });
 
       const allAiConnectors = connectors.flatMap((connector) => {
-        if (!connector.isMissingSecrets && actionTypes.includes(connector.actionTypeId)) {
+        if (
+          !connector.isMissingSecrets &&
+          actionTypes.includes(connector.actionTypeId) &&
+          isSupportedConnector(connector)
+        ) {
           const aiConnector: AIConnector = {
             ...connector,
             apiProvider:

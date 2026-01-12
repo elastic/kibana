@@ -178,8 +178,8 @@ export interface IngestPipelineWrapper {
 }
 
 export interface IngestPipeline {
-  description: string;
-  processors: any[];
+  description?: string;
+  processors?: any[];
   isManaged?: boolean;
   name?: string;
 }
@@ -219,4 +219,34 @@ export interface CreateDocsResponse<T extends ImportDoc> {
 export interface ImportFactoryOptions {
   excludeLinesPattern?: string;
   multilineStartPattern?: string;
+}
+
+export interface TestGrokPatternResponse {
+  matches: Array<{
+    matched: boolean;
+    fields: Record<string, Array<{ match: string; offset: number; length: number }>>;
+  }>;
+}
+
+type LinkType = 'file' | 'index';
+
+export interface GetAdditionalLinksParams {
+  dataViewId: string;
+  dataViewTitle?: string;
+  globalState?: any;
+}
+
+export type GetAdditionalLinks = Array<
+  (params: GetAdditionalLinksParams) => Promise<ResultLink[] | undefined>
+>;
+
+export interface ResultLink {
+  id: string;
+  type: LinkType;
+  title: string;
+  icon: string;
+  description: string;
+  getUrl(params?: any): Promise<string>;
+  canDisplay(params?: any): Promise<boolean>;
+  'data-test-subj'?: string;
 }

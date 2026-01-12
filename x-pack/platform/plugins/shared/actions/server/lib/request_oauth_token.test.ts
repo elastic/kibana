@@ -57,6 +57,7 @@ describe('requestOAuthToken', () => {
       Array [
         "https://test",
         Object {
+          "beforeRedirect": [Function],
           "data": "client_id=123456&client_secret=secrert123&grant_type=test&some_additional_param=test",
           "headers": Object {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -73,6 +74,7 @@ describe('requestOAuthToken', () => {
               "list": Array [],
               "map": Object {},
             },
+            "agentKeepAliveTimeoutBuffer": 1000,
             "defaultPort": 443,
             "freeSockets": Object {},
             "keepAlive": false,
@@ -82,8 +84,10 @@ describe('requestOAuthToken', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "defaultPort": 443,
               "noDelay": true,
               "path": null,
+              "protocol": "https:",
               "rejectUnauthorized": true,
             },
             "protocol": "https:",

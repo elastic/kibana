@@ -15,15 +15,17 @@
  *
  * Key principles:
  * - Single schema (config + secrets together)
+ * - Standard auth types
  * - Secrets marked with meta.sensitive
  * - Standard auth schemas (reusable)
  * - Zod for validation and UI derivation
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
+import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { AxiosInstance } from 'axios';
+import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -73,35 +75,31 @@ export interface ConnectorMetadata {
 // Phase 1 supports only: Header, Basic, Bearer
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
-/**
- * Header-based authentication (generic)
- * Use for: API keys, custom headers (X-API-Key, etc.)
- */
-export const HeaderAuthSchema = z.object({
-  method: z.literal('headers'),
-  headers: z.record(z.string(), z.string()).describe('Custom Headers'),
-});
+// Auth schemas defined in ./auth_types
+export interface GetTokenOpts {
+  tokenUrl: string;
+  scope?: string;
+  clientId: string;
+  clientSecret: string;
+  additionalFields?: Record<string, unknown>;
+}
 
-/**
- * HTTP Basic Authentication
- * Use for: Username + Password auth (Jira, etc.)
- */
-export const BasicAuthSchema = z.object({
-  method: z.literal('basic'),
-  credentials: z.object({
-    username: z.string().describe('Username'),
-    password: z.string().meta({ sensitive: true }).describe('Password'),
-  }),
-});
+export interface AuthContext {
+  getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
+  getToken: (opts: GetTokenOpts) => Promise<string | null>;
+  logger: Logger;
+  proxySettings?: ProxySettings;
+  sslSettings: SSLSettings;
+}
 
-/**
- * Bearer Token Authentication
- * Use for: OAuth tokens, API tokens sent as "Authorization: Bearer <token>"
- */
-export const BearerAuthSchema = z.object({
-  method: z.literal('bearer'),
-  token: z.string().meta({ sensitive: true }).describe('Bearer Token'),
-});
+export interface AuthTypeSpec<T extends Record<string, unknown>> {
+  id: string;
+  schema: z.ZodObject<Record<string, z.ZodType>>;
+  normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
+  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+}
+
+export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
 
 // ============================================================================
 // PHASE 2 AUTH TYPES (Not supported yet - see connector_rfc.ts)
@@ -189,11 +187,11 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 }
 
 export interface ActionContext {
-  auth: { method: string; headers: Record<string, string>; [key: string]: unknown };
-  log: Logger;
   client: AxiosInstance;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
+  log: Logger;
+  secrets?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -233,12 +231,25 @@ export interface ConnectorTest {
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
+export interface AuthTypeDef {
+  type: string;
+  defaults: Record<string, unknown>;
+  overrides?: {
+    meta?: Record<string, Record<string, unknown>>;
+    // can override other Zod fields here in the future if needed
+  };
+}
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
+  auth?: {
+    types: Array<string | AuthTypeDef>;
+    headers?: Record<string, AxiosHeaderValue>;
+  };
+
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })
-  schema: z.ZodSchema;
+  schema?: z.ZodObject;
 
   validateUrls?: {
     fields?: string[];

@@ -296,7 +296,7 @@ async function buildDashboardUrlFromSettings(
 
   const location = await share.url.locators.get(DASHBOARD_APP_LOCATOR)?.getLocation({
     dashboardId,
-    timeRange: {
+    time_range: {
       from,
       to,
       mode: 'absolute',

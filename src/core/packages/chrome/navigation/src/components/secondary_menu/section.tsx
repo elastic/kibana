@@ -21,15 +21,35 @@ export const SecondaryMenuSectionComponent = ({
   children,
   label,
 }: SecondaryMenuSectionProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme, highContrastMode } = euiThemeContext;
 
   const sectionId = label ? label.replace(/\s+/g, '-').toLowerCase() : undefined;
 
-  const wrapperStyles = css`
+  const secondaryMenuWrapperStyles = css`
     padding: ${euiTheme.size.m};
+    position: relative;
 
     &:not(:last-child) {
-      border-bottom: 1px ${euiTheme.colors.borderBaseSubdued} solid;
+      ${highContrastMode
+        ? `
+        border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
+        margin-left: ${euiTheme.size.m};
+        margin-right: ${euiTheme.size.m};
+        padding-left: 0;
+        padding-right: 0;
+      `
+        : `
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: ${euiTheme.size.m};
+          right: ${euiTheme.size.m};
+          height: ${euiTheme.border.width.thin};
+          background-color: ${euiTheme.colors.borderBaseSubdued};
+        }
+      `}
     }
   `;
 
@@ -52,13 +72,15 @@ export const SecondaryMenuSectionComponent = ({
   `;
 
   return (
-    <nav css={wrapperStyles} aria-labelledby={sectionId || undefined}>
+    <div css={secondaryMenuWrapperStyles} role="group" aria-labelledby={sectionId || undefined}>
       {label && (
         <EuiText id={sectionId} css={labelStyles} component="span">
           {label}
         </EuiText>
       )}
-      <ul css={listStyles}>{children}</ul>
-    </nav>
+      <ul css={listStyles} role="none">
+        {children}
+      </ul>
+    </div>
   );
 };

@@ -2,7 +2,7 @@
 
 OpenTelemetry tracing bootstrap for Kibana Node processes.
 
-`initTracing()` wires up the global `NodeTracerProvider`, sampling, context propagation and registers inference-tracing exporters (Phoenix / Langfuse) when configured in `kibana.yml`. OpenTelemetry tracing is disabled by default and should not be enabled in conjuction with Elastic APM.
+`initTracing()` wires up the global `NodeTracerProvider`, sampling, context propagation and registers inference-tracing exporters (Phoenix / Langfuse / OTLP) when configured in `kibana.yml`. OpenTelemetry tracing is disabled by default and should not be enabled in conjuction with Elastic APM.
 
 ---
 
@@ -28,12 +28,30 @@ telemetry.tracing.exporters:
       public_key: '${LANGFUSE_PUBLIC_KEY}'
       secret_key: '${LANGFUSE_SECRET_KEY}'
       scheduled_delay: 2000
+
+  # OTLP HTTP exporter (for APM Server, OpenTelemetry Collector, etc.)
+  - http:
+      url: 'http://localhost:4318/v1/traces' # OTLP HTTP receiver endpoint
+      headers:
+        Authorization: 'Bearer ${SECRET_TOKEN}' # optional
+      scheduled_delay: 2000
+
+  # OTLP gRPC exporter
+  - grpc:
+      url: 'http://localhost:4317' # OTLP gRPC receiver endpoint
+      headers:
+        Authorization: 'Bearer ${SECRET_TOKEN}' # optional
+      scheduled_delay: 2000
 ```
 
 The YAML follows the schema exported from `@kbn/inference-tracing-config`:
 
 - `InferenceTracingPhoenixExportConfig`
 - `InferenceTracingLangfuseExportConfig`
+
+And from `@kbn/tracing-config`:
+
+- `OTLPExportConfig` (used for both `grpc` and `http` keys)
 
 See those types for a full list of allowed fields.
 
@@ -49,6 +67,6 @@ See those types for a full list of allowed fields.
    - creates a `NodeTracerProvider` with resource attributes derived from the Elastic APM config,
    - for each entry under `telemetry.tracing.exporters` instantiates the corresponding span processor from `@kbn/inference-tracing` and registers it.
 
-After this, any code using the helpers from `@kbn/inference-tracing` (`withActiveInferenceSpan`, `withChatCompleteSpan`, …) will produce spans that are forwarded to Phoenix / Langfuse.
+After this, any code using the helpers from `@kbn/inference-tracing` (`withActiveInferenceSpan`, `withChatCompleteSpan`, …) will produce spans that are forwarded to Phoenix / Langfuse / OTLP backends.
 
 No additional application code is needed—configuration alone enables exporting.

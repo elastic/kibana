@@ -37,6 +37,7 @@ export default function searchSolutionNavigation({
     it('renders expected navigation items', async () => {
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
+        { id: 'GettingStarted', label: 'Getting started' },
         { id: 'Build', label: 'Build' },
         { id: 'Indices', label: 'Index Management' },
         { id: 'Playground', label: 'Playground' },

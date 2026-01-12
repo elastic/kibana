@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import type {
   ActionDetails,
@@ -26,13 +26,9 @@ export interface ExecuteActionHostResponseProps {
   agentId?: string;
   canAccessFileDownloadLink: boolean;
   'data-test-subj'?: string;
-  textSize?: 'xs' | 's';
-  hideFile?: boolean;
-  hideContext?: boolean;
-  showPasscode?: boolean;
+  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
 }
 
-// Note: also used for RunScript command
 export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
   ({
     action,
@@ -40,9 +36,6 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
     canAccessFileDownloadLink,
     textSize = 's',
     'data-test-subj': dataTestSubj,
-    hideFile,
-    hideContext,
-    showPasscode,
   }) => {
     const outputContent = useMemo(
       () =>
@@ -54,27 +47,27 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
 
     return (
       <>
-        {!hideFile && (
-          <EuiFlexItem>
-            <ResponseActionFileDownloadLink
-              action={action}
-              agentId={agentId}
-              buttonTitle={EXECUTE_FILE_LINK_TITLE}
-              canAccessFileDownloadLink={canAccessFileDownloadLink}
-              data-test-subj={`${dataTestSubj}-getExecuteLink`}
-              textSize={textSize}
-              showPasscode={showPasscode}
-            />
-            <EuiSpacer size="xxl" />
-          </EuiFlexItem>
-        )}
-        {outputContent && (
-          <ExecuteActionHostResponseOutput
-            outputContent={outputContent}
-            data-test-subj={`${dataTestSubj}-executeResponseOutput`}
+        <EuiFlexItem>
+          <ResponseActionFileDownloadLink
+            action={action}
+            agentId={agentId}
+            buttonTitle={EXECUTE_FILE_LINK_TITLE}
+            canAccessFileDownloadLink={canAccessFileDownloadLink}
+            data-test-subj={`${dataTestSubj}-getExecuteLink`}
             textSize={textSize}
-            hideContext={hideContext}
+            showPasscode={true}
           />
+        </EuiFlexItem>
+
+        {outputContent && (
+          <>
+            <EuiSpacer size="l" />
+            <ExecuteActionHostResponseOutput
+              outputContent={outputContent}
+              data-test-subj={`${dataTestSubj}-executeResponseOutput`}
+              textSize={textSize}
+            />
+          </>
         )}
       </>
     );

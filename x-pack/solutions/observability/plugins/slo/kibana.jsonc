@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/slo-plugin",
-  "owner": ["@elastic/obs-ux-management-team"],
+  "owner": ["@elastic/actionable-obs-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -30,6 +30,7 @@
       "presentationUtil",
       "ruleRegistry",
       "share",
+      "sloShared",
       "taskManager",
       "triggersActionsUi",
       "uiActions",
@@ -49,7 +50,6 @@
       "spaces"
     ],
     "requiredBundles": [
-      "controls",
       "embeddable",
       "ingestPipelines",
       "kibanaReact",

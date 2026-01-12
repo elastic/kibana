@@ -35,11 +35,12 @@
     "@kbn/file-upload-plugin",
     "@kbn/react-kibana-context-common",
     "@kbn/restorable-state",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/es-types",
-    "@kbn/file-upload-common",
     "@kbn/esql-utils",
     "@kbn/test-jest-helpers",
     "@kbn/esql-types",
+    "@kbn/field-types",
+    "@kbn/field-utils",
   ]
 }

@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type {
   APIReturnType,
   APIClientRequestParamsOf,

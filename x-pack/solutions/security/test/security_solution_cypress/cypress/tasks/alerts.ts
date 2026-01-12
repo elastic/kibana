@@ -26,6 +26,7 @@ import {
   ALERT_TAGGING_CONTEXT_MENU_ITEM,
   ALERT_TAGGING_UPDATE_BUTTON,
   ALERTS_HISTOGRAM_LEGEND,
+  ALERTS_TABLE_ROW_LOADER,
   CELL_ADD_TO_TIMELINE_BUTTON,
   CELL_FILTER_IN_BUTTON,
   CELL_FILTER_OUT_BUTTON,
@@ -49,6 +50,7 @@ import {
   SELECT_COUNTS_TABLE,
   SELECT_HISTOGRAM,
   SELECT_TREEMAP,
+  SELECTED_ALERT_TAG,
   SELECTED_ALERTS,
   SEND_ALERT_TO_TIMELINE_BTN,
   SESSION_VIEWER_BUTTON,
@@ -558,6 +560,17 @@ export const clickAlertTag = (tag: string) => {
 
 export const updateAlertTags = () => {
   cy.get(ALERT_TAGGING_UPDATE_BUTTON).click();
+};
+
+export const addAlertTagToNAlerts = (alertCount: number, tag = 'Duplicate') => {
+  selectNumberOfAlerts(alertCount);
+  openAlertTaggingBulkActionMenu();
+  clickAlertTag(tag);
+  updateAlertTags();
+  cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+  selectNumberOfAlerts(alertCount);
+  openAlertTaggingBulkActionMenu();
+  cy.get(SELECTED_ALERT_TAG).contains(tag);
 };
 
 export const showHoverActionsEventRenderedView = (fieldSelector: string) => {

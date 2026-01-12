@@ -14,7 +14,7 @@ import type { NodesFactory } from '../step/nodes_factory';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import type { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export interface WorkflowExecutionLoopParams {
@@ -22,7 +22,7 @@ export interface WorkflowExecutionLoopParams {
   workflowRuntime: WorkflowExecutionRuntimeManager;
   stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
   workflowExecutionState: WorkflowExecutionState;
-  workflowLogger: WorkflowEventLogger;
+  workflowLogger: IWorkflowEventLogger;
   workflowExecutionRepository: WorkflowExecutionRepository;
   nodesFactory: NodesFactory;
   esClient: ElasticsearchClient;

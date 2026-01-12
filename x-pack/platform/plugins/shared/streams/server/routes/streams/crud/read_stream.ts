@@ -10,37 +10,41 @@ import {
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
   getInheritedSettings,
+  findInheritedFailureStore,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
+import type {
+  DataStreamWithFailureStore,
+  WiredIngestStreamEffectiveFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
-import type { AssetClient } from '../../../lib/streams/assets/asset_client';
+import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
+  getFailureStore,
   getDataStreamSettings,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
-import type { QueryLink } from '../../../../common/assets';
-import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 export async function readStream({
   name,
-  assetClient,
+  queryClient,
   attachmentClient,
   streamsClient,
   scopedClusterClient,
 }: {
   name: string;
-  assetClient: AssetClient;
+  queryClient: QueryClient;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
 }): Promise<Streams.all.GetResponse> {
-  const [streamDefinition, { [name]: assets }, attachments] = await Promise.all([
+  const [streamDefinition, { [name]: queryLinks }, attachments] = await Promise.all([
     streamsClient.getStream(name),
-    assetClient.getAssetLinks([name], ['query']),
+    queryClient.getStreamToQueryLinksMap([name]),
     attachmentClient.getAttachments(name),
   ]);
 
@@ -56,20 +60,7 @@ export async function readStream({
     { dashboards: [] as string[], rules: [] as string[] }
   );
 
-  const assetsByType = assets.reduce(
-    (acc, asset) => {
-      const assetType = asset[ASSET_TYPE];
-      if (assetType === 'query') {
-        acc.queries.push(asset);
-      }
-      return acc;
-    },
-    {
-      queries: [] as QueryLink[],
-    }
-  );
-
-  const queries = assetsByType.queries.map((query) => {
+  const queries = queryLinks.map((query) => {
     return query.query;
   });
 
@@ -122,6 +113,9 @@ export async function readStream({
       dashboards,
       rules,
       queries,
+      effective_failure_store: getFailureStore({
+        dataStream: dataStream as DataStreamWithFailureStore,
+      }),
     } satisfies Streams.ClassicStream.GetResponse;
   }
 
@@ -129,6 +123,15 @@ export async function readStream({
     streamDefinition,
     getInheritedFieldsFromAncestors(ancestors)
   );
+
+  const inheritedFailureStore = findInheritedFailureStore(streamDefinition, ancestors);
+
+  const effectiveFailureStore: WiredIngestStreamEffectiveFailureStore = dataStream
+    ? {
+        ...getFailureStore({ dataStream: dataStream as DataStreamWithFailureStore }),
+        from: inheritedFailureStore.from,
+      }
+    : inheritedFailureStore;
 
   const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
@@ -139,7 +142,7 @@ export async function readStream({
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
+    effective_failure_store: effectiveFailureStore,
   };
-
   return body;
 }

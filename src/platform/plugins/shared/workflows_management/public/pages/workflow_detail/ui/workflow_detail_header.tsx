@@ -38,6 +38,7 @@ import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_
 import {
   selectHasChanges,
   selectIsExecutionsTab,
+  selectIsSavingYaml,
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -115,7 +116,8 @@ export const WorkflowDetailHeader = React.memo(
       [workflow]
     );
 
-    const [saveYaml, { isLoading: isSaving }] = useSaveYaml();
+    const saveYaml = useSaveYaml();
+    const isSaving = useSelector(selectIsSavingYaml);
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
     }, [saveYaml]);

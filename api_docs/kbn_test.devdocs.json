@@ -660,7 +660,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(name: string) => { name: string; url: string; enabled: boolean; portInContainer: number; port: number; image: string; waitForLogLine?: string | RegExp | undefined; waitForLogLineTimeoutMs?: number | undefined; waitFor?: ((server: ",
+              "(name: string) => { name: string; url: string; enabled: boolean; portInContainer: number; port: number; image: string; preferCached?: boolean | undefined; waitForLogLine?: string | RegExp | undefined; waitForLogLineTimeoutMs?: number | undefined; waitFor?: ((server: ",
               {
                 "pluginId": "@kbn/test",
                 "scope": "common",
@@ -1989,6 +1989,38 @@
           },
           {
             "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManager.validateRole",
+            "type": "Function",
+            "tags": [],
+            "label": "validateRole",
+            "description": [],
+            "signature": [
+              "(role: string) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.validateRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
             "id": "def-common.SamlSessionManager.getApiCredentialsForRole",
             "type": "Function",
             "tags": [],
@@ -2753,6 +2785,23 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.fipsIsEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "fipsIsEnabled",
+        "description": [],
+        "signature": [
+          "() => RegExpMatchArray | null | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/fips.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -4061,7 +4110,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"image\" | \"host\" | \"tag\" | \"dataPath\" | \"resources\" | \"kibanaUrl\" | \"projectType\"> | undefined"
+              ", \"image\" | \"host\" | \"tag\" | \"dataPath\" | \"resources\" | \"kibanaUrl\" | \"projectType\" | \"uiam\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
@@ -4391,6 +4440,20 @@
             "tags": [],
             "label": "image",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DockerServerSpec.preferCached",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preferCached",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/define_docker_servers_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5903,6 +5966,21 @@
             "tags": [],
             "label": "cloudUsersFilePath",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [],
+            "signature": [
+              "SamlSessionManagerServerlessOptions",
+              " | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false

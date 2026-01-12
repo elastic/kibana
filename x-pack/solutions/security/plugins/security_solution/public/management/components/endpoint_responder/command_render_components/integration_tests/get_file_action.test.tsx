@@ -195,6 +195,7 @@ describe('When using get-file action from response actions console', () => {
   });
 
   it.each([
+    'ra_get-file_error_canceled',
     'ra_get-file_error_not-found',
     'ra_get-file_error_is-directory',
     'ra_get-file_error_invalid-input',

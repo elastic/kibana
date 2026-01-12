@@ -220,7 +220,9 @@
         "parentPluginId": "navigation",
         "id": "def-public.TopNavMenu",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "TopNavMenu",
         "description": [],
         "signature": [
@@ -235,8 +237,30 @@
           "<QT>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
         ],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/__mocks__/services.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/__mocks__/services.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/__mocks__/services.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "navigation",
@@ -268,7 +292,9 @@
         "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuBadges",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "TopNavMenuBadges",
         "description": [],
         "signature": [
@@ -283,8 +309,9 @@
           "[] | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "navigation",
@@ -328,15 +355,18 @@
         "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuItems",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "TopNavMenuItems",
         "description": [],
         "signature": [
           "({ config, className, popoverBreakpoints, gutterSize, }: TopNavMenuItemsProps) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "navigation",
@@ -512,6 +542,20 @@
           },
           {
             "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.tooltipTitle",
+            "type": "string",
+            "tags": [],
+            "label": "tooltipTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
             "id": "def-public.TopNavMenuData.badge",
             "type": "CompoundType",
             "tags": [],
@@ -524,7 +568,7 @@
               "DisambiguateSet",
               "<(",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\">) | (",
               "DisambiguateSet",
               "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">), WithSpanProps> & WithSpanProps & { iconType?: ",
               "IconType",
@@ -532,7 +576,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"accent\" | \"warning\" | \"subdued\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -540,7 +584,7 @@
               "DisambiguateSet",
               "<(",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\">) | (",
               "DisambiguateSet",
               "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">), WithSpanProps> & WithSpanProps & { iconType?: ",
               "IconType",
@@ -548,7 +592,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"accent\" | \"warning\" | \"subdued\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -558,17 +602,17 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\">) | (",
               "DisambiguateSet",
               "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\"> & { iconType?: ",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\"> & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"accent\" | \"warning\" | \"subdued\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -576,17 +620,17 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\">) | (",
               "DisambiguateSet",
               "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\"> & { iconType?: ",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\"> & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"accent\" | \"warning\" | \"subdued\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -596,17 +640,17 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\">) | (",
               "DisambiguateSet",
               "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\"> & { iconType?: ",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\"> & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"accent\" | \"warning\" | \"subdued\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -616,7 +660,7 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\">) | (",
               "DisambiguateSet",
               "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
@@ -626,7 +670,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"accent\" | \"warning\" | \"subdued\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -634,7 +678,7 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\">) | (",
               "DisambiguateSet",
               "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
@@ -644,7 +688,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"accent\" | \"warning\" | \"subdued\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -654,7 +698,7 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"href\" | \"onClick\">) | (",
               "DisambiguateSet",
               "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
@@ -664,7 +708,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"accent\" | \"warning\" | \"subdued\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",

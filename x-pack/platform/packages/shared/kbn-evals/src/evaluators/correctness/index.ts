@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import type { Evaluator } from '../../types';
@@ -30,7 +30,7 @@ function shouldRunCorrectnessAnalysis() {
   const evaluatorSelection = parseSelectedEvaluators();
 
   return (
-    !evaluatorSelection ||
+    evaluatorSelection.length === 0 ||
     [
       QUALITATIVE_EVALUATOR_NAME,
       FACTUALITY_EVALUATOR_NAME,
@@ -66,6 +66,10 @@ export function createCorrectnessAnalysisEvaluator({
             agent_response: `${latestMessage}`,
             ground_truth_response: `${groundTruthResponse}`,
           },
+          // toolChoice must be specified in the API call, as `createPrompt` currently discards it from the prompt definition
+          toolChoice: {
+            function: 'analyze',
+          } as ToolChoice,
         });
 
         // Extract the correctness evaluation from the tool call

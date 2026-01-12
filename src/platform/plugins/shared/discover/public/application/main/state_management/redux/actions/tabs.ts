@@ -16,8 +16,9 @@ import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
+import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import { type TabState } from '../types';
+import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
@@ -35,7 +36,6 @@ import {
   GLOBAL_STATE_URL_KEY,
   NEW_TAB_ID,
 } from '../../../../../../common/constants';
-import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
@@ -148,7 +148,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           },
         },
         ...existingTab,
-        ...item,
+        ...omit(item, 'initializationState'),
       };
 
       if (existingTab) {
@@ -213,34 +213,41 @@ export const updateTabs: InternalStateThunkActionCreator<
     });
 
     const selectedTab = selectedItem ?? currentTab;
+    const selectedTabHasChanged = selectedTab.id !== currentTab.id;
+
+    // If changing tabs, stop syncing the current tab before updating any URL state
+    if (selectedTabHasChanged) {
+      currentTabStateContainer?.actions.stopSyncing();
+    }
 
     // Push the selected tab ID to the URL, which creates a new browser history entry.
     // This must be done before setting other URL state, which replace the history entry
     // in order to avoid creating multiple browser history entries when switching tabs.
     await tabsStorageManager.pushSelectedTabIdToUrl(selectedTab.id);
 
-    if (selectedTab.id !== currentTab.id) {
-      currentTabStateContainer?.actions.stopSyncing();
-
+    if (selectedTabHasChanged) {
       const nextTab = updatedTabs.find((tab) => tab.id === selectedTab.id);
       const nextTabRuntimeState = selectTabRuntimeState(runtimeStateManager, selectedTab.id);
       const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
 
       if (nextTab && nextTabStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
-        const appState = nextTabStateContainer.appState.get();
-        const { filters: appFilters, query } = appState;
+        const { filters: appFilters, query } = nextTab.appState;
 
-        await urlStateStorage.set<QueryState>(
-          GLOBAL_STATE_URL_KEY,
-          {
-            time: timeRange,
-            refreshInterval,
-            filters: globalFilters,
-          },
-          { replace: true }
-        );
-        await urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, appState, { replace: true });
+        await Promise.all([
+          urlStateStorage.set<QueryState>(
+            GLOBAL_STATE_URL_KEY,
+            {
+              time: timeRange,
+              refreshInterval,
+              filters: globalFilters,
+            },
+            { replace: true }
+          ),
+          urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, nextTab.appState, {
+            replace: true,
+          }),
+        ]);
 
         services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
         services.timefilter.setRefreshInterval(
@@ -274,8 +281,10 @@ export const updateTabs: InternalStateThunkActionCreator<
           nextTabStateContainer.actions.fetchData();
         }
       } else {
-        await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true });
-        await urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true });
+        await Promise.all([
+          urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true }),
+          urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true }),
+        ]);
         searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         services.data.search.session.reset();
       }
@@ -459,6 +468,24 @@ export const openInNewTab: InternalStateThunkActionCreator<
 
     return dispatch(
       updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
+    );
+  };
+
+export const openInNewTabExtPointAction: InternalStateThunkActionCreator<[OpenInNewTabParams]> = ({
+  query,
+  tabLabel,
+  timeRange,
+}) =>
+  function openInNewTabExtPointActionThunkFn(dispatch) {
+    const appState: TabState['appState'] = { query };
+    const globalState: TabState['globalState'] = { timeRange };
+
+    return dispatch(
+      openInNewTab({
+        appState,
+        globalState,
+        tabLabel,
+      })
     );
   };
 

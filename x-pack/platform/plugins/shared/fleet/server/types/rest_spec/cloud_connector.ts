@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
+
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -19,6 +21,14 @@ export const CreateCloudConnectorRequestSchema = {
       {
         meta: { description: 'The cloud provider type: aws, azure, or gcp.' },
       }
+    ),
+    accountType: schema.maybe(
+      schema.oneOf([schema.literal(SINGLE_ACCOUNT), schema.literal(ORGANIZATION_ACCOUNT)], {
+        meta: {
+          description:
+            'The account type: single-account (single account/subscription) or organization-account (organization-wide).',
+        },
+      })
     ),
     vars: schema.recordOf(
       schema.string({ minLength: 1, maxLength: 100 }),
@@ -52,6 +62,7 @@ export const CreateCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
+    accountType: schema.maybe(schema.string()),
     vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
@@ -86,11 +97,13 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       name: schema.string(),
       namespace: schema.maybe(schema.string()),
       cloudProvider: schema.string(),
+      accountType: schema.maybe(schema.string()),
       vars: CloudConnectorResponseVarsSchema,
       packagePolicyCount: schema.number(),
       created_at: schema.string(),
       updated_at: schema.string(),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 
@@ -108,6 +121,7 @@ export const GetCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
+    accountType: schema.maybe(schema.string()),
     vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
@@ -148,6 +162,14 @@ export const UpdateCloudConnectorRequestSchema = {
         meta: { description: 'The name of the cloud connector.' },
       })
     ),
+    accountType: schema.maybe(
+      schema.oneOf([schema.literal(SINGLE_ACCOUNT), schema.literal(ORGANIZATION_ACCOUNT)], {
+        meta: {
+          description:
+            'The account type: single-account (single account/subscription) or organization-account (organization-wide).',
+        },
+      })
+    ),
     vars: schema.maybe(
       schema.recordOf(
         schema.string({ minLength: 1, maxLength: 100 }),
@@ -178,9 +200,55 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
+    accountType: schema.maybe(schema.string()),
     vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
     updated_at: schema.string(),
   }),
+});
+
+export const GetCloudConnectorUsageRequestSchema = {
+  params: schema.object({
+    cloudConnectorId: schema.string({
+      meta: { description: 'The unique identifier of the cloud connector.' },
+    }),
+  }),
+  query: schema.object({
+    page: schema.maybe(
+      schema.number({
+        min: 1,
+        meta: { description: 'The page number for pagination.' },
+      })
+    ),
+    perPage: schema.maybe(
+      schema.number({
+        min: 1,
+        meta: { description: 'The number of items per page.' },
+      })
+    ),
+  }),
+};
+
+export const GetCloudConnectorUsageResponseSchema = schema.object({
+  items: schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      name: schema.string(),
+      package: schema.maybe(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version: schema.string(),
+        })
+      ),
+      policy_ids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      created_at: schema.string(),
+      updated_at: schema.string(),
+    }),
+    { maxSize: 10000 }
+  ),
+  total: schema.number(),
+  page: schema.number(),
+  perPage: schema.number(),
 });

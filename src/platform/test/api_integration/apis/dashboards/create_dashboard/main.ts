@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
+import { DASHBOARD_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
       const title = 'Hello world dashboard';
 
       const response = await supertest
-        .post(PUBLIC_API_PATH)
+        .post(DASHBOARD_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
@@ -31,8 +31,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.spaces).to.eql(['default']);
       expect(response.body.data).to.eql({
-        panels: [],
-        references: [],
         title,
       });
     });
@@ -42,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       const id = `bar-${Date.now()}-${Math.random()}`;
 
       const response = await supertest
-        .post(PUBLIC_API_PATH)
+        .post(DASHBOARD_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
@@ -57,44 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.id).to.be(id);
     });
 
-    it('creates a dashboard with references', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}`;
-
-      const response = await supertest
-        .post(PUBLIC_API_PATH)
-        .set('kbn-xsrf', 'true')
-        .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-        .set('elastic-api-version', '1')
-        .send({
-          data: {
-            title,
-            panels: [
-              {
-                type: 'visualization',
-                grid: {
-                  x: 0,
-                  y: 0,
-                  w: 24,
-                  h: 15,
-                },
-                config: {},
-                uid: 'bizz',
-              },
-            ],
-            references: [
-              {
-                name: 'bizz:panel_bizz',
-                type: 'visualization',
-                id: 'my-saved-object',
-              },
-            ],
-          },
-        });
-
-      expect(response.status).to.be(200);
-      expect(response.body.data.panels).to.be.an('array');
-    });
-
     // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
     it('can create a dashboard in a defined space', async () => {
       const title = `foo-${Date.now()}-${Math.random()}`;
@@ -102,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       const spaceId = 'space-1';
 
       const response = await supertest
-        .post(PUBLIC_API_PATH)
+        .post(DASHBOARD_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
@@ -123,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
       const id = 'be3733a0-9efe-11e7-acb3-3dab96693fab';
 
       const response = await supertest
-        .post(PUBLIC_API_PATH)
+        .post(DASHBOARD_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')

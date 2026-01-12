@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await lens.dragFieldToWorkspace('machine.os.raw', xyChartContainer);
         expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-          'Top 5 values of machine.os.raw'
+          'Top 9 values of machine.os.raw'
         );
         expect(await lens.getChartTypeFromChartSwitcher()).to.eql('Bar');
       });
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'lnsDatatable_rows > lns-dimensionTrigger'
         );
         expect(await lens.getDimensionTriggerText('lnsDatatable_rows')).to.eql(
-          'Top 3 values of clientip'
+          'Top 9 values of clientip'
         );
 
         await lens.dragFieldToDimensionTrigger('bytes', 'lnsDatatable_rows > lns-empty-dimension');
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'lnsDatatable_rows > lns-empty-dimension'
         );
         expect(await lens.getDimensionTriggerText('lnsDatatable_rows', 2)).to.eql(
-          'Top 3 values of @message.raw'
+          'Top 9 values of @message.raw'
         );
       });
 
@@ -61,8 +61,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.reorderDimensions('lnsDatatable_rows', 3, 1);
         await lens.waitForVisualization();
         expect(await lens.getDimensionTriggersTexts('lnsDatatable_rows')).to.eql([
-          'Top 3 values of @message.raw',
-          'Top 3 values of clientip',
+          'Top 9 values of @message.raw',
+          'Top 9 values of clientip',
           'bytes',
         ]);
       });
@@ -70,10 +70,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should move the column to compatible dimension group', async () => {
         await lens.switchToVisualization('bar');
         expect(await lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
-          'Top 3 values of @message.raw',
+          'Top 9 values of @message.raw',
         ]);
         expect(await lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')).to.eql([
-          'Top 3 values of clientip',
+          'Top 9 values of clientip',
         ]);
 
         await lens.dragDimensionToDimension({
@@ -83,13 +83,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([]);
         expect(await lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')).to.eql([
-          'Top 3 values of @message.raw',
+          'Top 9 values of @message.raw',
         ]);
       });
 
       it('should move the column to non-compatible dimension group', async () => {
         expect(await lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')).to.eql([
-          'Top 3 values of @message.raw',
+          'Top 9 values of @message.raw',
         ]);
 
         await lens.dragDimensionToDimension({
@@ -128,12 +128,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Count of @message.raw [1]',
         ]);
         expect(await lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
-          'Top 5 values of @message.raw',
+          'Top 9 values of @message.raw',
         ]);
       });
 
       it('Should duplicate and swap elements when dragging over secondary drop targets', async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
         await lens.switchToVisualization('bar');
         await lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
 
@@ -160,12 +161,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Count of @timestamp'
         );
         expect(await lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-          'Top 3 values of @message.raw'
+          'Top 9 values of @message.raw'
         );
       });
 
       it('should combine breakdown dimension with the horizontal one', async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
         await lens.dragFieldToWorkspace('clientip', xyChartContainer);
         await lens.dragFieldToWorkspace('@message.raw', xyChartContainer);
 
@@ -182,6 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should combine field to existing horizontal dimension', async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
         await lens.dragFieldToWorkspace('clientip', xyChartContainer);
 
         await lens.dragFieldToExtraDropType(
@@ -197,6 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should combine two multi terms dimensions', async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
         await lens.dragFieldToWorkspace('clientip', xyChartContainer);
 
         await lens.dragFieldToExtraDropType(
@@ -246,14 +250,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
         await lens.dragFieldWithKeyboard('@message.raw', 1, true);
         expect(await lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')).to.eql([
-          'Top 3 values of @message.raw',
+          'Top 9 values of @message.raw',
         ]);
         await lens.assertFocusedField('@message.raw');
       });
       it('should drop a field to an existing dimension replacing the old one', async () => {
         await lens.dragFieldWithKeyboard('clientip', 1, true);
         expect(await lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')).to.eql([
-          'Top 3 values of clientip',
+          'Top 9 values of clientip',
         ]);
 
         await lens.assertFocusedField('clientip');
@@ -314,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.dragFieldToWorkspace('clientip', xyChartContainer);
         await lens.waitForVisualization(xyChartContainer);
         expect(await lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')).to.eql([
-          'Top 3 values of clientip',
+          'Top 9 values of clientip',
         ]);
         await lens.openDimensionEditor('lnsXY_splitDimensionPanel > lns-dimensionTrigger');
         expect(await lens.isTopLevelAggregation()).to.be(true);
@@ -332,7 +336,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('dropping between layers', () => {
+    // not supported for layers as tabs
+    describe.skip('dropping between layers', () => {
       it('should move the column', async () => {
         await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsXYvis');

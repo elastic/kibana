@@ -211,7 +211,7 @@ Array [
     data-test-subj="inspectorTable"
   >
     <table
-      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -229,6 +229,7 @@ Array [
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -495,7 +496,7 @@ Array [
     data-test-subj="inspectorTable"
   >
     <table
-      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -513,6 +514,7 @@ Array [
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"

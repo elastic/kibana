@@ -363,6 +363,10 @@ describe('SearchBarComponent', () => {
             timerange: mockGlobalState.inputs.timeline.timerange,
             linkTo: mockGlobalState.inputs.timeline.linkTo,
           },
+          valueReport: {
+            timerange: mockGlobalState.inputs.valueReport.timerange,
+            linkTo: mockGlobalState.inputs.valueReport.linkTo,
+          },
         },
       ]);
     });

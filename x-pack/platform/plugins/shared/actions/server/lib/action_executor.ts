@@ -40,6 +40,7 @@ import type {
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   ActionTypeSecrets,
+  ConnectorTokenClientContract,
   GetServicesFunction,
   GetUnsecuredServicesFunction,
   InMemoryConnector,
@@ -89,10 +90,12 @@ export interface ExecuteOptions<Source = unknown> {
   request: KibanaRequest;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
+  connectorTokenClient?: ConnectorTokenClientContract;
 }
 
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
   currentUser?: AuthenticatedUser | null;
+  connectorTokenClient?: ConnectorTokenClientContract;
   checkCanExecuteFn?: (connectorTypeId: string) => Promise<void>;
   executeLabel: string;
   namespace: { namespace?: string };
@@ -139,6 +142,7 @@ export class ActionExecutor {
   public async execute({
     actionExecutionId,
     actionId,
+    connectorTokenClient,
     consumer,
     executionId,
     request,
@@ -164,6 +168,7 @@ export class ActionExecutor {
     return await this.executeHelper({
       actionExecutionId,
       actionId,
+      connectorTokenClient,
       consumer,
       currentUser,
       checkCanExecuteFn: async (connectorTypeId: string) => {
@@ -369,6 +374,7 @@ export class ActionExecutor {
   private async executeHelper({
     actionExecutionId,
     actionId,
+    connectorTokenClient,
     consumer,
     currentUser,
     checkCanExecuteFn,
@@ -437,6 +443,18 @@ export class ActionExecutor {
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
+
+        if (!actionType.executor) {
+          throw new Error(
+            `Connector type "${actionTypeId}" does not have an execute function and cannot be executed.`
+          );
+        }
+
+        if (!actionType.validate.params) {
+          throw new Error(
+            `Connector type "${actionTypeId}" does not have a params validator and cannot be executed.`
+          );
+        }
 
         let validatedParams: Record<string, unknown>;
         let validatedConfig;
@@ -529,11 +547,13 @@ export class ActionExecutor {
             config: validatedConfig,
             secrets: validatedSecrets,
             taskInfo,
+            globalAuthHeaders: actionType.globalAuthHeaders,
             configurationUtilities,
             logger,
             source,
             ...(actionType.isSystemActionType ? { request } : {}),
             connectorUsageCollector,
+            connectorTokenClient,
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -714,6 +734,7 @@ function validateAction(
   let validatedSecrets: Record<string, unknown>;
 
   try {
+    // Params validator is guaranteed to exist at this point (validated in execute method)
     validatedParams = validateParams(actionType, params, validatorServices);
   } catch (err) {
     throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {

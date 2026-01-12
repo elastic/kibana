@@ -6,13 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { type LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { type LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import { log, timerange } from '@kbn/synthtrace-client';
 import { type DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { type SupertestWithRoleScopeType } from '../../services';
+import { type RoleCredentials, type SupertestWithRoleScopeType } from '../../services';
+import { customRoles } from './custom_roles';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const customRoleScopedSupertest = getService('customRoleScopedSupertest');
+  const saml = getService('samlAuth');
   const synthtrace = getService('synthtrace');
 
   let synthtraceLogsEsClient: LogsSynthtraceEsClient;
@@ -42,6 +45,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.status).to.be(404);
       expect(response.body.message).to.contain('onboarding session not found');
+    });
+
+    describe('when user lacks required privileges', () => {
+      let noAccessClient: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await saml.setCustomRole(customRoles.noAccessUserRole);
+        noAccessClient = await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
+      });
+
+      after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await saml.deleteCustomRole();
+      });
+
+      it('fails with a 404 error', async () => {
+        const response = await noAccessClient.get(
+          `/internal/observability_onboarding/flow/${onboardingId}/progress`
+        );
+
+        expect(response.status).to.be(404);
+        expect(response.body.message).to.contain('onboarding session not found');
+      });
     });
 
     describe('when ea-status is complete', () => {

@@ -9,7 +9,7 @@
 
 import type { Document, YAMLMap } from 'yaml';
 import { isPair, isScalar, visit } from 'yaml';
-import { getPathFromAncestors } from './get_path_from_ancestors';
+import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 
 export function getStepNode(document: Document, stepName: string): YAMLMap | null {
   let stepNode: YAMLMap | null = null;

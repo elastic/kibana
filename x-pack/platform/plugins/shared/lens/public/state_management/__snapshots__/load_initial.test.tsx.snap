@@ -91,6 +91,7 @@ Object {
       "type": "lens",
       "visualizationType": "testVis",
     },
+    "projectRouting": undefined,
     "query": Object {
       "language": "lucene",
       "query": "",
@@ -106,6 +107,7 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
+      "selectedLayerId": null,
       "state": "testVis initial state",
     },
   },

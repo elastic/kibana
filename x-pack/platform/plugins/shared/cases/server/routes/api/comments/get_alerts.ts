@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { AttachmentType } from '../../../../common';
 import type { alertApiV1 } from '../../../../common/types/api';
 
 import { CASE_DETAILS_ALERTS_URL } from '../../../../common/constants';
@@ -35,9 +36,11 @@ export const getAllAlertsAttachedToCaseRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const res: alertApiV1.AlertResponse = await casesClient.attachments.getAllAlertsAttachToCase({
-        caseId,
-      });
+      const res: alertApiV1.DocumentResponse =
+        await casesClient.attachments.getAllDocumentsAttachedToCase({
+          caseId,
+          attachmentTypes: [AttachmentType.alert],
+        });
 
       return response.ok({
         body: res,

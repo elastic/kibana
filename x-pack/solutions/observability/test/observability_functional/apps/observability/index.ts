@@ -17,8 +17,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./pages/alerts/rule_stats'));
     loadTestFile(require.resolve('./pages/alerts/state_synchronization'));
     loadTestFile(require.resolve('./pages/alerts/table_configuration'));
-    loadTestFile(require.resolve('./pages/alerts/custom_threshold_preview_chart'));
     loadTestFile(require.resolve('./pages/alerts/custom_threshold'));
+    loadTestFile(require.resolve('./pages/alerts/mute_unmute'));
     loadTestFile(require.resolve('./pages/cases/case_details'));
     loadTestFile(require.resolve('./pages/overview/alert_table'));
     loadTestFile(require.resolve('./exploratory_view'));

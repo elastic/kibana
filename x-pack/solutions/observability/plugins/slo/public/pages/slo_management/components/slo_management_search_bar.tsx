@@ -46,9 +46,9 @@ export function SloManagementSearchBar({ onRefresh }: Props) {
       showFilterBar={false}
       query={{ query: state.search, language: 'text' }}
       onQuerySubmit={({ query: value }) => {
-        onStateChange({ ...state, search: value?.query ? (value?.query as string) : '' });
+        onStateChange({ search: String(value?.query ?? '') });
+        onRefresh();
       }}
-      onRefresh={onRefresh}
       renderQueryInputAppend={() => (
         <>
           <EuiComboBox
@@ -60,10 +60,7 @@ export function SloManagementSearchBar({ onRefresh }: Props) {
             selectedOptions={selectedOptions}
             onChange={(newOptions) => {
               setSelectedOptions(newOptions);
-              onStateChange({
-                ...state,
-                tags: newOptions.map((option) => String(option.value)),
-              });
+              onStateChange({ tags: newOptions.map((option) => String(option.value)) });
             }}
             isClearable={true}
             data-test-subj="filter-slos-by-tag"

@@ -9,6 +9,13 @@
 
 import type { LicenseType } from '@kbn/licensing-types';
 
+export enum ACTION_TYPE_SOURCES {
+  spec = 'spec',
+  yml = 'yml',
+  stack = 'stack',
+}
+export type ActionTypeSource = keyof typeof ACTION_TYPE_SOURCES;
+
 export enum SUB_FEATURE {
   endpointSecurity,
 }
@@ -23,6 +30,8 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
+  source?: ActionTypeSource;
   subFeature?: SubFeature;
   isDeprecated: boolean;
+  allowMultipleSystemActions?: boolean;
 }

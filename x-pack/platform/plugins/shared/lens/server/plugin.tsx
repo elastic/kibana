@@ -43,7 +43,7 @@ import {
 import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
 import { fetchLensFeatureFlags } from '../common';
-import { getLensTransforms } from '../common/transforms';
+import { getLensServerTransforms } from './transforms';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -118,15 +118,6 @@ export class LensServerPlugin
     );
     const builder = new LensConfigBuilder();
 
-    plugins.embeddable.registerTransforms(
-      LENS_EMBEDDABLE_TYPE,
-      getLensTransforms({
-        builder,
-        transformEnhancementsIn: plugins.embeddable.transformEnhancementsIn,
-        transformEnhancementsOut: plugins.embeddable.transformEnhancementsOut,
-      })
-    );
-
     registerLensAPIRoutes({
       http: core.http,
       contentManagement: plugins.contentManagement,
@@ -139,6 +130,12 @@ export class LensServerPlugin
       .then(async ([{ featureFlags }]) => {
         const flags = await fetchLensFeatureFlags(featureFlags);
         builder.setEnabled(flags.apiFormat);
+
+        // Need to wait for feature flags to be set before registering transforms
+        plugins.embeddable.registerTransforms(
+          LENS_EMBEDDABLE_TYPE,
+          getLensServerTransforms(builder, plugins.embeddable)
+        );
       })
       .catch((error) => {
         this.logger.error(error);

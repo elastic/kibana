@@ -38,8 +38,6 @@ export async function handleExecutionDelay(
   params.workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.WAITING,
   });
-  await params.workflowExecutionState.flush();
-
   if (diff < SHORT_DURATION_THRESHOLD) {
     const timeout = diff > 0 ? diff : 0;
 
@@ -57,6 +55,10 @@ export async function handleExecutionDelay(
       status: ExecutionStatus.RUNNING,
     });
   } else {
-    await params.workflowTaskManager.scheduleResumeTask({ workflowExecution, resumeAt });
+    await params.workflowTaskManager.scheduleResumeTask({
+      workflowExecution,
+      resumeAt,
+      fakeRequest: params.fakeRequest,
+    });
   }
 }

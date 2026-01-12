@@ -7,9 +7,8 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import type { MatcherFunction } from '@testing-library/react';
+import { within } from '@testing-library/react';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiButton } from '@elastic/eui';
@@ -20,30 +19,10 @@ import { EuiButton } from '@elastic/eui';
 export const removeExternalLinkText = (str: string | null) =>
   str?.replace(/\(external[^)]*\)/g, '');
 
-export async function waitForComponentToPaint<P = {}>(wrapper: ReactWrapper<P>, amount = 0) {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, amount));
-    wrapper.update();
-  });
-}
-
 export const waitForComponentToUpdate = async () =>
   act(async () => {
     return Promise.resolve();
   });
-
-type Query = (f: MatcherFunction) => HTMLElement;
-
-export const createQueryWithMarkup =
-  (query: Query) =>
-  (text: string): HTMLElement =>
-    query((content: string, node: Parameters<MatcherFunction>[1]) => {
-      const hasText = (el: Parameters<MatcherFunction>[1]) => el?.textContent === text;
-      const childrenDontHaveText = Array.from(node?.children ?? []).every(
-        (child) => !hasText(child as HTMLElement)
-      );
-      return hasText(node) && childrenDontHaveText;
-    });
 
 export interface FormTestComponentProps {
   formDefaultValue?: Record<string, unknown>;
@@ -70,3 +49,20 @@ export const FormTestComponent: FC<PropsWithChildren<FormTestComponentProps>> = 
     </Form>
   );
 };
+
+export function tableMatchesExpectedContent({
+  expectedContent,
+  tableRows,
+}: {
+  expectedContent: string[][];
+  tableRows: HTMLElement[];
+}) {
+  expect(tableRows).toHaveLength(expectedContent.length);
+
+  tableRows.forEach((row, index) => {
+    const expected = expectedContent[index];
+    expected.forEach((content) => {
+      expect(within(row).getByText(content));
+    });
+  });
+}

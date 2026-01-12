@@ -67,6 +67,26 @@ Object {
                 },
                 "type": "object",
               },
+              "modifiers": Object {
+                "properties": Object {
+                  "contribution": Object {
+                    "type": "float",
+                  },
+                  "metadata": Object {
+                    "type": "flattened",
+                  },
+                  "modifier_value": Object {
+                    "type": "float",
+                  },
+                  "subtype": Object {
+                    "type": "keyword",
+                  },
+                  "type": Object {
+                    "type": "keyword",
+                  },
+                },
+                "type": "object",
+              },
               "notes": Object {
                 "type": "keyword",
               },
@@ -126,6 +146,26 @@ Object {
                 },
                 "type": "object",
               },
+              "modifiers": Object {
+                "properties": Object {
+                  "contribution": Object {
+                    "type": "float",
+                  },
+                  "metadata": Object {
+                    "type": "flattened",
+                  },
+                  "modifier_value": Object {
+                    "type": "float",
+                  },
+                  "subtype": Object {
+                    "type": "keyword",
+                  },
+                  "type": Object {
+                    "type": "keyword",
+                  },
+                },
+                "type": "object",
+              },
               "notes": Object {
                 "type": "keyword",
               },
@@ -181,6 +221,26 @@ Object {
                   },
                   "timestamp": Object {
                     "type": "date",
+                  },
+                },
+                "type": "object",
+              },
+              "modifiers": Object {
+                "properties": Object {
+                  "contribution": Object {
+                    "type": "float",
+                  },
+                  "metadata": Object {
+                    "type": "flattened",
+                  },
+                  "modifier_value": Object {
+                    "type": "float",
+                  },
+                  "subtype": Object {
+                    "type": "keyword",
+                  },
+                  "type": Object {
+                    "type": "keyword",
                   },
                 },
                 "type": "object",

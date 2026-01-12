@@ -8,13 +8,15 @@
  */
 
 import { CPSManager } from './cps_manager';
-import type { HttpSetup } from '@kbn/core/public';
+import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { BehaviorSubject } from 'rxjs';
 
 describe('CPSManager', () => {
   let mockHttp: jest.Mocked<HttpSetup>;
   const mockLogger = loggingSystemMock.createLogger();
+  let mockApplication: ApplicationStart;
   let cpsManager: CPSManager;
 
   const mockOriginProject: CPSProject = {
@@ -58,7 +60,16 @@ describe('CPSManager', () => {
       get: jest.fn().mockResolvedValue(mockResponse),
     } as unknown as jest.Mocked<HttpSetup>;
 
-    cpsManager = new CPSManager({ http: mockHttp, logger: mockLogger });
+    mockApplication = {
+      currentAppId$: new BehaviorSubject<string | undefined>('discover'),
+      currentLocation$: new BehaviorSubject<string>('#/'),
+    } as unknown as ApplicationStart;
+
+    cpsManager = new CPSManager({
+      http: mockHttp,
+      logger: mockLogger,
+      application: mockApplication,
+    });
   });
 
   afterEach(() => {

@@ -92,6 +92,62 @@ describe('GeminiConnector', () => {
     logger,
     services: actionsMock.createServices(),
   });
+
+  describe('getAccessToken', () => {
+    it('should throw an error if the credentials type is not service_account', async () => {
+      const invalidConnector = new GeminiConnector({
+        connector: { id: '1', type: '.gemini' },
+        configurationUtilities: actionsConfigMock.create(),
+        config: {
+          apiUrl: 'https://api.gemini.com',
+          defaultModel: DEFAULT_MODEL,
+          gcpRegion: 'us-central1',
+          gcpProjectID: 'my-project-12345',
+        },
+        secrets: {
+          credentialsJson: JSON.stringify({
+            type: 'external_account',
+            audience:
+              '//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/provider',
+            subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
+            token_url: 'https://sts.googleapis.com/v1/token',
+            credential_source: {
+              file: '/etc/passwd',
+            },
+          }),
+        },
+        logger,
+        services: actionsMock.createServices(),
+      });
+      // @ts-expect-error accessing private method for testing
+      await expect(invalidConnector.getAccessToken()).rejects.toThrow(
+        'Invalid credential type. Only "service_account" credentials are supported. Type was "external_account".'
+      );
+    });
+
+    it('should throw an error if the credentials JSON is invalid', async () => {
+      const invalidConnector = new GeminiConnector({
+        connector: { id: '1', type: '.gemini' },
+        configurationUtilities: actionsConfigMock.create(),
+        config: {
+          apiUrl: 'https://api.gemini.com',
+          defaultModel: DEFAULT_MODEL,
+          gcpRegion: 'us-central1',
+          gcpProjectID: 'my-project-12345',
+        },
+        secrets: {
+          credentialsJson: '{ invalid json }',
+        },
+        logger,
+        services: actionsMock.createServices(),
+      });
+      // @ts-expect-error accessing private method for testing
+      await expect(invalidConnector.getAccessToken()).rejects.toThrow(
+        'Invalid JSON format for credentials.'
+      );
+    });
+  });
+
   const maxOutputTokens = 65535; // Example from Gemini 2.5 Pro
   let connectorUsageCollector: ConnectorUsageCollector;
 
@@ -136,7 +192,7 @@ describe('GeminiConnector', () => {
               Authorization: 'Bearer mock_access_token',
               'Content-Type': 'application/json',
             },
-            timeout: 60000,
+            timeout: 200000,
             responseSchema: RunApiResponseSchema,
             signal: undefined,
           },
@@ -218,7 +274,7 @@ describe('GeminiConnector', () => {
               'Content-Type': 'application/json',
             },
             signal: undefined,
-            timeout: 60000,
+            timeout: 200000,
           },
           connectorUsageCollector
         );
@@ -252,7 +308,7 @@ describe('GeminiConnector', () => {
               'Content-Type': 'application/json',
             },
             signal: undefined,
-            timeout: 60000,
+            timeout: 200000,
           },
           connectorUsageCollector
         );
@@ -260,7 +316,7 @@ describe('GeminiConnector', () => {
 
       it('signal and timeout is properly passed to runApi', async () => {
         const signal = jest.fn();
-        const timeout = 60000;
+        const timeout = 200000;
         await connector.invokeAI({ ...aiAssistantBody, timeout, signal }, connectorUsageCollector);
         expect(mockRequest).toHaveBeenCalledWith(
           {
@@ -286,7 +342,7 @@ describe('GeminiConnector', () => {
               'Content-Type': 'application/json',
             },
             signal,
-            timeout: 60000,
+            timeout: 200000,
           },
           connectorUsageCollector
         );
@@ -294,7 +350,7 @@ describe('GeminiConnector', () => {
 
       it('maxOutputTokens is passed to runApi when provided', async () => {
         const signal = jest.fn();
-        const timeout = 60000;
+        const timeout = 200000;
         await connector.invokeAI(
           { ...withMaxOutputTokens, timeout, signal },
           connectorUsageCollector
@@ -324,7 +380,7 @@ describe('GeminiConnector', () => {
               'Content-Type': 'application/json',
             },
             signal,
-            timeout: 60000,
+            timeout: 200000,
           },
           connectorUsageCollector
         );
@@ -392,7 +448,7 @@ describe('GeminiConnector', () => {
               'Content-Type': 'application/json',
             },
             signal: undefined,
-            timeout: 60000,
+            timeout: 200000,
           },
           connectorUsageCollector
         );
@@ -433,7 +489,7 @@ describe('GeminiConnector', () => {
               'Content-Type': 'application/json',
             },
             signal: undefined,
-            timeout: 60000,
+            timeout: 200000,
           },
           connectorUsageCollector
         );
@@ -441,7 +497,7 @@ describe('GeminiConnector', () => {
 
       it('signal and timeout is properly passed to streamApi', async () => {
         const signal = jest.fn();
-        const timeout = 60000;
+        const timeout = 200000;
         await connector.invokeStream(
           { ...aiAssistantBody, timeout, signal },
           connectorUsageCollector
@@ -477,7 +533,7 @@ describe('GeminiConnector', () => {
               'Content-Type': 'application/json',
             },
             signal,
-            timeout: 60000,
+            timeout: 200000,
           },
           connectorUsageCollector
         );
@@ -485,7 +541,7 @@ describe('GeminiConnector', () => {
 
       it('maxOutputTokens is passed to streamApi when provided', async () => {
         const signal = jest.fn();
-        const timeout = 60000;
+        const timeout = 200000;
         await connector.invokeStream(
           { ...withMaxOutputTokens, timeout, signal },
           connectorUsageCollector
@@ -522,7 +578,7 @@ describe('GeminiConnector', () => {
               'Content-Type': 'application/json',
             },
             signal,
-            timeout: 60000,
+            timeout: 200000,
           },
           connectorUsageCollector
         );

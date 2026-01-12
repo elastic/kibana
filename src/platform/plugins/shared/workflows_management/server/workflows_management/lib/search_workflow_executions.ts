@@ -40,7 +40,7 @@ export const searchWorkflowExecutions = async ({
   page = 1,
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
-    logger.info(`Searching workflow executions in index ${workflowExecutionIndex}`);
+    logger.debug(`Searching workflow executions in index ${workflowExecutionIndex}`);
     const response = await esClient.search<EsWorkflowExecution>({
       index: workflowExecutionIndex,
       query,
@@ -83,6 +83,7 @@ function transformToWorkflowExecutionListModel(
         id: hit._id!,
         stepId: workflowExecution.stepId,
         status: workflowExecution.status,
+        error: workflowExecution.error || null,
         isTestRun: workflowExecution.isTestRun ?? false,
         startedAt: workflowExecution.startedAt,
         finishedAt: workflowExecution.finishedAt,

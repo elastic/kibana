@@ -154,7 +154,11 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
         {enableProjectLevelRetentionChecks && (
           <EuiFlexItem grow={false}>
-            <EuiLink href={cloud?.deploymentUrl} target="_blank">
+            <EuiLink
+              href={cloud?.deploymentUrl}
+              target="_blank"
+              data-test-subj="projectLevelRetentionLink"
+            >
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.projectlevelRetention.linkText"
                 defaultMessage="Project data retention"

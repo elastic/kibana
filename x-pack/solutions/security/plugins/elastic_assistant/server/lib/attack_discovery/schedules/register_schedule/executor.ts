@@ -11,7 +11,9 @@ import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
 import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
+import { isInvalidAnonymizationError } from '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization';
 import {
   reportAttackDiscoveryGenerationFailure,
   reportAttackDiscoveryGenerationSuccess,
@@ -22,6 +24,7 @@ import { getResourceName } from '../../../../ai_assistant_service';
 import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
+import { filterHallucinatedAlerts } from '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts';
 import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 import {
@@ -30,6 +33,7 @@ import {
 } from '../../persistence/transforms/transform_to_alert_documents';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
+import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
 
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
@@ -66,7 +70,7 @@ export const attackDiscoveryScheduleExecutor = async ({
   });
   const anonymizationFields = transformESSearchToAnonymizationFields(result.data);
 
-  const { query, filters, combinedFilter, ...restParams } = params;
+  const { alertsIndexPattern, query, filters, combinedFilter, ...restParams } = params;
 
   const startTime = moment(); // start timing the generation
   const scheduleInfo = {
@@ -80,6 +84,7 @@ export const attackDiscoveryScheduleExecutor = async ({
       actionsClient,
       config: {
         ...restParams,
+        alertsIndexPattern,
         filter: combinedFilter,
         anonymizationFields,
         subAction: 'invokeAI',
@@ -121,11 +126,21 @@ export const attackDiscoveryScheduleExecutor = async ({
       withReplacements: false, // Never apply replacements to the results. It's still possible for clients who read the generated discoveries to specify true when retrieving them.
     };
 
+    // Filter out attack discoveries with hallucinated alert IDs.
+    // Some LLMs will hallucinate alert IDs that don't exist in the alerts index.
+    // We query Elasticsearch to verify all alert IDs exist before persisting discoveries.
+    const validDiscoveries = await filterHallucinatedAlerts({
+      attackDiscoveries: attackDiscoveries ?? [],
+      alertsIndexPattern,
+      esClient,
+      logger,
+    });
+
     // Deduplicate attackDiscoveries before creating alerts
     const indexPattern = getScheduledIndexPattern(spaceId);
     const dedupedDiscoveries = await deduplicateAttackDiscoveries({
       esClient,
-      attackDiscoveries: attackDiscoveries ?? [],
+      attackDiscoveries: validDiscoveries,
       connectorId: params.apiConfig.connectorId,
       indexPattern,
       logger,
@@ -136,6 +151,13 @@ export const attackDiscoveryScheduleExecutor = async ({
       replacements,
       spaceId,
     });
+
+    /**
+     * Map that uses alert id as key and an array
+     * of attack ids as value.
+     * Used to update alerts in one query
+     */
+    const alertIdToAttackIds: Record<string, string[]> = {};
 
     await Promise.all(
       dedupedDiscoveries.map(async (attackDiscovery) => {
@@ -150,6 +172,11 @@ export const attackDiscoveryScheduleExecutor = async ({
           id: alertInstanceId,
           actionGroup: 'default',
         });
+
+        for (const alertId of attackDiscovery.alertIds) {
+          alertIdToAttackIds[alertId] = alertIdToAttackIds[alertId] ?? [];
+          alertIdToAttackIds[alertId].push(alertDocId);
+        }
 
         const baseAlertDocument = transformToBaseAlertDocument({
           alertDocId,
@@ -186,6 +213,12 @@ export const attackDiscoveryScheduleExecutor = async ({
         });
       })
     );
+
+    await updateAlertsWithAttackIds({
+      alertIdToAttackIdsMap: alertIdToAttackIds,
+      esClient,
+      spaceId,
+    });
   } catch (error) {
     logger.error(error);
     const transformedError = transformError(error);
@@ -195,6 +228,10 @@ export const attackDiscoveryScheduleExecutor = async ({
       scheduleInfo,
       telemetry,
     });
+
+    if (isInvalidAnonymizationError(error)) {
+      throw createTaskRunError(error, TaskErrorSource.USER);
+    }
     throw error;
   }
 

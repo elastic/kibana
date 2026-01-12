@@ -31,6 +31,7 @@ exports[`ExplorerChartLabelBadge renders the chart label in one line 1`] = `
   <span>
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
     >
       <span
         data-euiicon-type="question"
@@ -52,6 +53,7 @@ exports[`ExplorerChartLabelBadge renders the chart label in two lines 1`] = `
   <span>
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
     >
       <span
         data-euiicon-type="question"

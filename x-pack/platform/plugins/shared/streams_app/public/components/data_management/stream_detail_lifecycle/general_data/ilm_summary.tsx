@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { capitalize, first } from 'lodash';
+import { capitalize } from 'lodash';
 import React, { useMemo } from 'react';
 import type { IlmPolicyDeletePhase, IlmPolicyPhase, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
@@ -20,11 +20,11 @@ import {
 } from '@elastic/eui';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { orderIlmPhases, parseDurationInSeconds } from '../helpers/helpers';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { getTimeSizeAndUnitLabel } from '../helpers/format_size_units';
 import { formatBytes } from '../helpers/format_bytes';
+import { getILMRatios } from '../helpers/helpers';
 
 export function IlmSummary({
   definition,
@@ -55,24 +55,7 @@ export function IlmSummary({
   );
 
   const phasesWithGrow = useMemo(() => {
-    if (!value) return undefined;
-
-    const orderedPhases = orderIlmPhases(value.phases).reverse();
-    const totalDuration = parseDurationInSeconds(first(orderedPhases)!.min_age);
-
-    return orderedPhases.map((phase, index, phases) => {
-      const prevPhase = phases[index - 1];
-      if (!prevPhase) {
-        return { ...phase, grow: phase.name === 'delete' ? false : 2 };
-      }
-
-      const phaseDuration =
-        parseDurationInSeconds(prevPhase!.min_age) - parseDurationInSeconds(phase!.min_age);
-      return {
-        ...phase,
-        grow: Math.max(2, Math.round((phaseDuration / totalDuration) * 10)),
-      };
-    });
+    return getILMRatios(value);
   }, [value]);
 
   return (

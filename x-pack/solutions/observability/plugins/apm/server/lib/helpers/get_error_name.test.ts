@@ -4,31 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { APMError } from '../../../typings/es_schemas/ui/apm_error';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { getErrorName } from './get_error_name';
 
 describe('getErrorName', () => {
   it('returns log message', () => {
-    expect(
-      getErrorName({
-        error: {
-          log: { message: 'bar' },
-          exception: [{ message: 'foo' }],
-        },
-      } as APMError)
-    ).toEqual('bar');
+    const event = accessKnownApmEventFields({ 'error.log.message': ['bar'] });
+    const exception = { message: 'foo' };
+
+    expect(getErrorName(event, exception)).toEqual('bar');
   });
   it('returns exception message', () => {
-    expect(
-      getErrorName({
-        error: {
-          exception: [{ message: 'foo' }],
-        },
-      } as APMError)
-    ).toEqual('foo');
+    const event = accessKnownApmEventFields({} as Partial<FlattenedApmEvent>);
+    const exception = { message: 'foo' };
+
+    expect(getErrorName(event, exception)).toEqual('foo');
   });
   it('returns default message', () => {
-    expect(getErrorName({} as APMError)).toEqual(NOT_AVAILABLE_LABEL);
+    const event = accessKnownApmEventFields({} as Partial<FlattenedApmEvent>);
+    expect(getErrorName(event, {})).toEqual(NOT_AVAILABLE_LABEL);
   });
 });

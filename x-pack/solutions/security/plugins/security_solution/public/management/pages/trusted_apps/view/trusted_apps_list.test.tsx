@@ -17,6 +17,8 @@ import { SEARCHABLE_FIELDS } from '../constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { ExceptionsListItemGenerator } from '../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
@@ -42,6 +44,8 @@ describe('When on the trusted applications page', () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
+    // enable process descendants feature flag
+    mockedContext.setExperimentalFlag({ filterProcessDescendantsForTrustedAppsEnabled: true });
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<TrustedAppsList />));
 
@@ -85,6 +89,64 @@ describe('When on the trusted applications page', () => {
         }),
       })
     );
+  });
+
+  describe('process descendants', () => {
+    let renderWithData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+
+    beforeEach(() => {
+      renderWithData = async () => {
+        const generator = new ExceptionsListItemGenerator();
+
+        apiMocks.responseProvider.exceptionsFind.mockReturnValue({
+          data: [
+            generator.generateTrustedApp(),
+            generator.generateTrustedApp({ tags: [TRUSTED_PROCESS_DESCENDANTS_TAG] }),
+            generator.generateTrustedApp({ tags: [TRUSTED_PROCESS_DESCENDANTS_TAG] }),
+          ],
+          total: 3,
+          per_page: 3,
+          page: 1,
+        });
+
+        render();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('trustedAppsListPage-list')).toBeTruthy();
+        });
+
+        return renderResult;
+      };
+    });
+
+    it('should indicate to user if trusted app has process descendants', async () => {
+      await renderWithData();
+
+      expect(renderResult.getAllByTestId('trustedAppsListPage-card')).toHaveLength(3);
+      expect(
+        renderResult.getAllByTestId(
+          'trustedAppsListPage-card-decorator-processDescendantsIndication'
+        )
+      ).toHaveLength(2);
+    });
+
+    it('should display additional `event.category is process` entry in tooltip', async () => {
+      const prefix = 'trustedAppsListPage-card-decorator-processDescendantsIndicationTooltip';
+
+      await renderWithData();
+
+      expect(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)).toHaveLength(2);
+      expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();
+
+      userEvent.hover(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)[0]);
+
+      await waitFor(async () => {
+        expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).toBeInTheDocument();
+        expect(renderResult.queryByTestId(`${prefix}-tooltipText`)?.textContent).toContain(
+          'event.category is process'
+        );
+      });
+    });
   });
 
   describe('RBAC Trusted Applications', () => {

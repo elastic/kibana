@@ -18,7 +18,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId } from '../utils';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
  * Guards against duplicate node entries in stack frames by removing the current node if it exists on top.
@@ -84,8 +84,8 @@ export class StepExecutionRuntimeFactory {
       workflowExecutionGraph: WorkflowGraph;
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
-      fakeRequest?: KibanaRequest;
-      coreStart?: CoreStart;
+      fakeRequest: KibanaRequest;
+      coreStart: CoreStart;
       dependencies: ContextDependencies;
     }
   ) {}

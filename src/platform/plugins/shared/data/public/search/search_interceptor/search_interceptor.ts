@@ -10,18 +10,23 @@
 import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, EMPTY, from, fromEvent, of, throwError } from 'rxjs';
 import {
+  BehaviorSubject,
   catchError,
+  EMPTY,
   filter,
   finalize,
+  from,
+  fromEvent,
   map,
+  of,
   shareReplay,
   skip,
   switchMap,
   take,
   takeUntil,
   tap,
+  throwError,
 } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
@@ -51,13 +56,16 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import type {
-  SanitizedConnectionRequestParams,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
   ISearchOptionsSerializable,
+  SanitizedConnectionRequestParams,
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
-import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
-import { defaultFreeze } from '@kbn/kibana-utils-plugin/common';
+import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
+import type { ICPSManager } from '@kbn/cps-utils';
+import { getProjectRouting } from './project_routing';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -97,6 +105,7 @@ export interface SearchInterceptorDeps {
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
   searchConfig: SearchConfigSchema;
+  getCPSManager?: () => ICPSManager | undefined;
 }
 
 const MAX_CACHE_ITEMS = 50;
@@ -175,10 +184,11 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
-    const { sessionId } = options;
+    const { sessionId, projectRouting } = options;
     const hashOptions = {
       ...request.params,
       sessionId,
+      projectRouting,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
@@ -275,6 +285,9 @@ export class SearchInterceptor {
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
     }
+    if (combined.projectRouting !== undefined) {
+      serializableOptions.projectRouting = combined.projectRouting;
+    }
 
     return serializableOptions;
   }
@@ -297,10 +310,12 @@ export class SearchInterceptor {
         { isSearchStored: false },
         () => {},
       ];
+      const projectRouting = getProjectRouting(options.projectRouting, this.deps.getCPSManager?.());
       return this.runSearch(
         { id, ...request },
         {
           ...options,
+          projectRouting,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
           isSearchStored,
@@ -318,7 +333,7 @@ export class SearchInterceptor {
 
     const searchTracker = this.deps.session.isCurrentSession(sessionId)
       ? this.deps.session.trackSearch({
-          abort: () => searchAbortController.abort(),
+          abort: (reason?: AbortReason) => searchAbortController.abort(reason),
           poll: async (abortSignal) => {
             if (id) {
               await search({ abortSignal });
@@ -356,8 +371,14 @@ export class SearchInterceptor {
     );
 
     const cancel = async () => {
-      // If the request times out, we handle cancellation after we make the last call to retrieve the results
-      if (!id || isSavedToBackground || searchAbortController.isTimeout()) return;
+      // If the request times out/is canceled, we handle cancellation after we make the last call to retrieve the results
+      if (
+        !id ||
+        isSavedToBackground ||
+        searchAbortController.isTimeout() ||
+        searchAbortController.isCanceled()
+      )
+        return;
       try {
         await sendCancelRequest();
       } catch (e) {
@@ -399,23 +420,31 @@ export class SearchInterceptor {
           : response;
       }),
       catchError((e: Error) => {
-        // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
-        if (searchAbortController.isTimeout()) {
-          this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
-            [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
-            [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
-          });
+        // If we aborted (search:timeout advanced setting) or the user canceled and there was a partial response, return it instead of just erroring out
+        if (searchAbortController.isTimeout() || searchAbortController.isCanceled()) {
+          if (searchAbortController.isTimeout()) {
+            this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
+              [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
+              [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
+            });
+          }
           return from(
-            this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
+            this.runSearch(
+              { id, ...request },
+              { ...options, abortSignal: new AbortController().signal, retrieveResults: true }
+            )
           ).pipe(
             map((response) =>
               options.strategy === ENHANCED_ES_SEARCH_STRATEGY
                 ? toPartialResponseAfterTimeout(response)
                 : response
             ),
-            tap(async () => {
+            tap(async (response) => {
+              id = id ?? response.id;
               await sendCancelRequest();
-              this.handleSearchError(e, request?.params?.body ?? {}, options, true);
+              if (searchAbortController.isTimeout()) {
+                this.handleSearchError(e, request?.params?.body ?? {}, options, true);
+              }
             })
           );
         } else {
@@ -445,29 +474,20 @@ export class SearchInterceptor {
    * @throws `AbortError` | `ErrorLike`
    */
   private runSearch(
-    request: IKibanaSearchRequest,
+    { params, ...request }: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
-    const requestHash = request.params
-      ? createRequestHashForBackgroundSearches(request.params)
-      : undefined;
-
-    if (request.id) {
-      // just polling an existing search, no need to send the body, just the hash
-
-      const { params, ...requestWithoutParams } = request;
-      if (params) {
-        const { body, ...paramsWithoutBody } = params;
-        request = {
-          ...requestWithoutParams,
-          params: paramsWithoutBody,
-        };
-      }
-    }
+    const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
+
+    // FIXME: the dropNullColumns param shouldn't be needed during polling
+    // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
+    // at that point, exclude all params when request.id is defined (polling phase)
+    const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
+
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
         `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
@@ -476,7 +496,7 @@ export class SearchInterceptor {
           signal: abortSignal,
           context: this.deps.executionContext.withGlobalContext(executionContext),
           body: JSON.stringify({
-            ...request,
+            ...{ ...request, params: paramsToUse },
             ...searchOptions,
             requestHash,
             stream:
@@ -615,9 +635,11 @@ export class SearchInterceptor {
         // Abort the replay if the abortSignal is aborted.
         // The underlaying search will not abort unless searchAbortController fires.
         const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
-          map(() => {
-            throw new AbortError();
-          })
+          switchMap((e) =>
+            (e.target as AbortSignal)?.reason === AbortReason.CANCELED
+              ? EMPTY
+              : throwError(new AbortError())
+          )
         );
 
         return response$.pipe(

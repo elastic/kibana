@@ -51,6 +51,7 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   DEFAULT_ALERTS_ILM_POLICY,
@@ -88,14 +89,8 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
     rulesSettings: { enabled: true },
-    maintenanceWindow: { enabled: true },
     disabledRuleTypes: true,
     enabledRuleTypes: true,
   },
-  deprecations: ({ renameFromRoot, deprecate }) => [
-    deprecate('maxEphemeralActionsPerAlert', '9.0.0', {
-      level: 'warning',
-      message: `The setting "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and currently ignored by the system. Please remove this setting.`,
-    }),
-  ],
+  deprecations: autocompleteConfigDeprecationProvider,
 };

@@ -631,7 +631,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     title: 'Endpoint exceptions',
     pagePrefix: 'endpointExceptionsListPage',
     tabId: 'endpointExceptions',
-    nextTabId: 'eventFilters', // todo: update when Policy details tabs are implemented
+    nextTabId: 'protectionUpdates',
     artifactName: 'Endpoint exception name',
     firstSiemVersion: 'siemV4',
     privilegePrefix: 'endpoint_exceptions_',

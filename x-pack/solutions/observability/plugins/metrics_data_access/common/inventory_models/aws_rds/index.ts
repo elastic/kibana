@@ -30,4 +30,5 @@ export const awsRDS = createInventoryModel('awsRDS', {
     id: 'aws.rds.db_instance.arn',
     name: 'aws.rds.db_instance.identifier',
   },
+  nodeFilter: () => [{ term: { 'event.module': 'aws' } }],
 });

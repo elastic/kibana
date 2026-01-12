@@ -395,6 +395,18 @@
                   }
                 }
               }
+            },
+            "tokens_used": {
+              "type": "long",
+              "_meta": {
+                "description": "Total tokens used across all conversations (input + output)"
+              }
+            },
+            "average_tokens_per_conversation": {
+              "type": "float",
+              "_meta": {
+                "description": "Average tokens per conversation"
+              }
             }
           }
         },
@@ -434,6 +446,271 @@
               "type": "long",
               "_meta": {
                 "description": "Mean query-to-result time in milliseconds"
+              }
+            }
+          }
+        },
+        "time_to_first_token": {
+          "properties": {
+            "p50": {
+              "type": "long",
+              "_meta": {
+                "description": "50th percentile time-to-first-token in milliseconds"
+              }
+            },
+            "p75": {
+              "type": "long",
+              "_meta": {
+                "description": "75th percentile time-to-first-token in milliseconds"
+              }
+            },
+            "p90": {
+              "type": "long",
+              "_meta": {
+                "description": "90th percentile time-to-first-token in milliseconds"
+              }
+            },
+            "p95": {
+              "type": "long",
+              "_meta": {
+                "description": "95th percentile time-to-first-token in milliseconds"
+              }
+            },
+            "p99": {
+              "type": "long",
+              "_meta": {
+                "description": "99th percentile time-to-first-token in milliseconds"
+              }
+            },
+            "mean": {
+              "type": "long",
+              "_meta": {
+                "description": "Mean time-to-first-token in milliseconds"
+              }
+            },
+            "total_samples": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of TTFT samples"
+              }
+            }
+          }
+        },
+        "time_to_last_token": {
+          "properties": {
+            "p50": {
+              "type": "long",
+              "_meta": {
+                "description": "50th percentile time-to-last-token in milliseconds"
+              }
+            },
+            "p75": {
+              "type": "long",
+              "_meta": {
+                "description": "75th percentile time-to-last-token in milliseconds"
+              }
+            },
+            "p90": {
+              "type": "long",
+              "_meta": {
+                "description": "90th percentile time-to-last-token in milliseconds"
+              }
+            },
+            "p95": {
+              "type": "long",
+              "_meta": {
+                "description": "95th percentile time-to-last-token in milliseconds"
+              }
+            },
+            "p99": {
+              "type": "long",
+              "_meta": {
+                "description": "99th percentile time-to-last-token in milliseconds"
+              }
+            },
+            "mean": {
+              "type": "long",
+              "_meta": {
+                "description": "Mean time-to-last-token in milliseconds"
+              }
+            },
+            "total_samples": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of TTLT samples"
+              }
+            }
+          }
+        },
+        "latency_by_model": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "model": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Model identifier (e.g., gpt-4o, claude-3-sonnet)"
+                }
+              },
+              "ttft_p50": {
+                "type": "long",
+                "_meta": {
+                  "description": "50th percentile TTFT for this model"
+                }
+              },
+              "ttft_p95": {
+                "type": "long",
+                "_meta": {
+                  "description": "95th percentile TTFT for this model"
+                }
+              },
+              "ttlt_p50": {
+                "type": "long",
+                "_meta": {
+                  "description": "50th percentile TTLT for this model"
+                }
+              },
+              "ttlt_p95": {
+                "type": "long",
+                "_meta": {
+                  "description": "95th percentile TTLT for this model"
+                }
+              },
+              "sample_count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of samples for this model"
+                }
+              }
+            }
+          }
+        },
+        "latency_by_agent_type": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "agent_id": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Agent ID"
+                }
+              },
+              "ttft_p50": {
+                "type": "long",
+                "_meta": {
+                  "description": "50th percentile TTFT for this agent"
+                }
+              },
+              "ttft_p95": {
+                "type": "long",
+                "_meta": {
+                  "description": "95th percentile TTFT for this agent"
+                }
+              },
+              "ttlt_p50": {
+                "type": "long",
+                "_meta": {
+                  "description": "50th percentile TTLT for this agent"
+                }
+              },
+              "ttlt_p95": {
+                "type": "long",
+                "_meta": {
+                  "description": "95th percentile TTLT for this agent"
+                }
+              },
+              "sample_count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of samples for this agent"
+                }
+              }
+            }
+          }
+        },
+        "tokens_by_model": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "model": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Model identifier for token usage grouping"
+                }
+              },
+              "total_tokens": {
+                "type": "long",
+                "_meta": {
+                  "description": "Total tokens (input + output) consumed by this model"
+                }
+              },
+              "avg_tokens_per_round": {
+                "type": "float",
+                "_meta": {
+                  "description": "Average tokens per conversation round for this model"
+                }
+              },
+              "sample_count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of rounds sampled for this model"
+                }
+              }
+            }
+          }
+        },
+        "query_to_result_time_by_model": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "model": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Model identifier for QTRT grouping"
+                }
+              },
+              "p50": {
+                "type": "long"
+              },
+              "p75": {
+                "type": "long"
+              },
+              "p90": {
+                "type": "long"
+              },
+              "p95": {
+                "type": "long"
+              },
+              "p99": {
+                "type": "long"
+              },
+              "mean": {
+                "type": "long"
+              },
+              "total_samples": {
+                "type": "long"
+              },
+              "sample_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "tool_calls_by_model": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "model": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Model identifier for tool-call grouping"
+                }
+              },
+              "count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Tool calls counted for this model"
+                }
               }
             }
           }
@@ -6406,90 +6683,160 @@
             "dashboard": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "lens": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "visualization": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "map": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "search": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "osquery-pack": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "osquery-pack-asset": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "osquery-saved-query": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "alerting_rule_template": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
+                }
+              }
+            },
+            "slo_template": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
+                },
+                "taggedObjects": {
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             }
@@ -7013,6 +7360,12 @@
               "type": "long",
               "_meta": {
                 "description": "The number of inference connectors created using the Contextual AI provider."
+              }
+            },
+            "groq": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Groq provider."
               }
             }
           }

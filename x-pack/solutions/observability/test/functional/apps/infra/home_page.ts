@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
-import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   INVENTORY_PATH,
@@ -115,7 +115,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with metrics present', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/233920
+    describe.skip('with metrics present', () => {
       before(async () => {
         await synthEsClient.index([
           generateHostData({

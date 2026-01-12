@@ -24,6 +24,7 @@ import { css } from '@emotion/css';
 import React from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
+import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import { NestedView } from '../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
 import { NewRoutingStreamEntry } from './new_routing_stream_entry';
@@ -39,18 +40,16 @@ import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_c
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
+import { NoDataEmptyPrompt } from './empty_prompt';
+import { SuggestPartitionPanel } from './partition_suggestions/suggest_partition_panel';
+import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
-    return i18n.translate('xpack.streams.streamDetailRouting.rules.maxNestingLevel', {
-      defaultMessage:
-        'You have reached the maximum nesting level for streams. Try to flatten your hierarchy.',
-    });
+    return maxNestingLevelText;
   }
   if (!canManageRoutingRules) {
-    return i18n.translate('xpack.streams.streamDetailRouting.rules.onlySimulate', {
-      defaultMessage: "You don't have sufficient privileges to create new streams, only simulate.",
-    });
+    return cannotManageRoutingRulesText;
   }
 }
 
@@ -78,6 +77,15 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
+  const scrollToSuggestions = useScrollToActive(!!suggestions);
+  const isEditingOrReorderingStreams =
+    routingSnapshot.matches({ ready: 'editingRule' }) ||
+    routingSnapshot.matches({ ready: 'reorderingRules' });
+
+  // This isRefreshing tracks async gap between operation completion and server data arrival
+  const { isRefreshing } = routingSnapshot.context;
+
+  const hasData = routing.length > 0 || (aiFeatures?.enabled && suggestions);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -97,7 +105,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
 
   const renderCreateButton = () => {
     return (
-      <EuiFlexItem grow={false} alignItems="flex-start">
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup
           justifyContent="center"
           alignItems="center"
@@ -109,20 +117,16 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           `}
           wrap
         >
-          {aiFeatures && aiFeatures.enabled && (
+          {aiFeatures?.enabled && !isLoadingSuggestions && !suggestions && (
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 size="s"
                 onClick={getSuggestionsForStream}
                 isLoading={isLoadingSuggestions}
+                isDisabled={isEditingOrReorderingStreams}
                 aiFeatures={aiFeatures}
               >
-                {i18n.translate(
-                  'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
-                  {
-                    defaultMessage: 'Suggest partitions with AI',
-                  }
-                )}
+                {suggestPartitionsWithAIText}
               </GenerateSuggestionButton>
             </EuiFlexItem>
           )}
@@ -137,9 +141,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                 onClick={createNewRule}
                 disabled={!canCreateRoutingRules || maxNestingLevel}
               >
-                {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-                  defaultMessage: 'Create partition manually',
-                })}
+                {createPartitionManuallyText}
               </CreateButtonComponent>
             </EuiToolTip>
           </EuiFlexItem>
@@ -158,92 +160,158 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     >
       <CurrentStreamEntry definition={definition} />
 
-      {/* Scrollable routing rules container */}
-      <EuiFlexItem
-        grow={false}
-        className={css`
-          display: flex;
-          flex-direction: column;
-          overflow-y: auto;
-          max-height: calc(100% - 80px);
-        `}
-      >
-        <EuiDragDropContext onDragEnd={handlerItemDrag}>
-          <EuiDroppable droppableId="routing_children_reordering" spacing="none">
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              {routing.map((routingRule, pos) => (
-                <EuiFlexItem key={routingRule.id} grow={false}>
-                  <EuiDraggable
-                    index={pos}
-                    isDragDisabled={!canReorderRoutingRules}
-                    draggableId={routingRule.id}
-                    hasInteractiveChildren={true}
-                    customDragHandle={true}
-                    spacing="none"
-                  >
-                    {(provided, snapshot) => (
-                      <NestedView
-                        last={pos === routing.length - 1}
-                        first={pos === 0}
-                        isBeingDragged={snapshot.isDragging}
-                      >
-                        {routingRule.isNew ? (
-                          <NewRoutingStreamEntry />
-                        ) : currentRuleId === routingRule.id ? (
-                          <EditRoutingStreamEntry onChange={changeRule} routingRule={routingRule} />
-                        ) : (
-                          <IdleRoutingStreamEntry
-                            availableStreams={availableStreams}
-                            draggableProvided={provided}
-                            isEditingEnabled={routingSnapshot.can({
-                              type: 'routingRule.edit',
-                              id: routingRule.id,
-                            })}
-                            onEditClick={editRule}
-                            routingRule={routingRule}
-                            canReorder={canReorderRoutingRules}
-                          />
-                        )}
-                      </NestedView>
-                    )}
-                  </EuiDraggable>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiDroppable>
-        </EuiDragDropContext>
+      {!hasData && !isLoadingSuggestions && !isRefreshing ? (
+        <NoDataEmptyPrompt createNewRule={createNewRule}>
+          {aiFeatures?.enabled && (
+            <SuggestPartitionPanel>
+              <GenerateSuggestionButton
+                size="s"
+                onClick={getSuggestionsForStream}
+                isLoading={isLoadingSuggestions}
+                isDisabled={isEditingOrReorderingStreams}
+                aiFeatures={aiFeatures}
+              >
+                {suggestPartitionsCardButtonText}
+              </GenerateSuggestionButton>
+            </SuggestPartitionPanel>
+          )}
+        </NoDataEmptyPrompt>
+      ) : (
+        <>
+          {/* Scrollable routing rules container */}
+          <EuiFlexItem
+            grow={false}
+            className={css`
+              display: flex;
+              flex-direction: column;
+              overflow-y: auto;
+              max-height: calc(100% - 80px);
+            `}
+          >
+            {routing.length > 0 && (
+              <EuiDragDropContext onDragEnd={handlerItemDrag}>
+                <EuiDroppable droppableId="routing_children_reordering" spacing="none">
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    {routing.map((routingRule, pos) => (
+                      <EuiFlexItem key={routingRule.id} grow={false}>
+                        <EuiDraggable
+                          index={pos}
+                          isDragDisabled={!canReorderRoutingRules}
+                          draggableId={routingRule.id}
+                          hasInteractiveChildren={true}
+                          customDragHandle={true}
+                          spacing="none"
+                        >
+                          {(provided, snapshot) => (
+                            <NestedView
+                              last={pos === routing.length - 1}
+                              first={pos === 0}
+                              isBeingDragged={snapshot.isDragging}
+                            >
+                              {routingRule.isNew ? (
+                                <NewRoutingStreamEntry />
+                              ) : currentRuleId === routingRule.id ? (
+                                <EditRoutingStreamEntry
+                                  onChange={changeRule}
+                                  routingRule={routingRule}
+                                />
+                              ) : (
+                                <IdleRoutingStreamEntry
+                                  availableStreams={availableStreams}
+                                  draggableProvided={provided}
+                                  isEditingEnabled={routingSnapshot.can({
+                                    type: 'routingRule.edit',
+                                    id: routingRule.id,
+                                  })}
+                                  onEditClick={editRule}
+                                  routingRule={routingRule}
+                                  canReorder={canReorderRoutingRules}
+                                />
+                              )}
+                            </NestedView>
+                          )}
+                        </EuiDraggable>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiDroppable>
+              </EuiDragDropContext>
+            )}
 
-        {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
-          <>
-            <EuiSpacer size="m" />
-            {suggestions ? (
-              isEmpty(suggestions) ? (
-                <NoSuggestionsCallout
-                  aiFeatures={aiFeatures}
-                  isLoadingSuggestions={isLoadingSuggestions}
-                  onDismiss={resetForm}
-                  onRegenerate={getSuggestionsForStream}
-                />
-              ) : (
-                <ReviewSuggestionsForm
-                  acceptSuggestion={acceptSuggestion}
-                  aiFeatures={aiFeatures}
-                  definition={definition}
-                  isLoadingSuggestions={isLoadingSuggestions}
-                  onRegenerate={getSuggestionsForStream}
-                  previewSuggestion={previewSuggestion}
-                  rejectSuggestion={rejectSuggestion}
-                  resetForm={resetForm}
-                  suggestions={suggestions}
-                  updateSuggestion={updateSuggestion}
-                />
-              )
-            ) : null}
-          </>
-        )}
-      </EuiFlexItem>
+            {aiFeatures?.enabled && shouldDisplayCreateButton && (
+              <div ref={scrollToSuggestions}>
+                <EuiSpacer size="m" />
+                {isLoadingSuggestions && (
+                  <SuggestionLoadingPrompt
+                    onCancel={() => {
+                      resetForm();
+                    }}
+                  />
+                )}
+                {!isLoadingSuggestions && suggestions ? (
+                  isEmpty(suggestions) ? (
+                    <NoSuggestionsCallout
+                      aiFeatures={aiFeatures}
+                      isLoadingSuggestions={isLoadingSuggestions}
+                      onDismiss={resetForm}
+                      onRegenerate={getSuggestionsForStream}
+                      isDisabled={isEditingOrReorderingStreams}
+                    />
+                  ) : (
+                    <ReviewSuggestionsForm
+                      acceptSuggestion={acceptSuggestion}
+                      aiFeatures={aiFeatures}
+                      definition={definition}
+                      isLoadingSuggestions={isLoadingSuggestions}
+                      onRegenerate={getSuggestionsForStream}
+                      previewSuggestion={previewSuggestion}
+                      rejectSuggestion={rejectSuggestion}
+                      resetForm={resetForm}
+                      suggestions={suggestions}
+                      updateSuggestion={updateSuggestion}
+                    />
+                  )
+                ) : null}
+              </div>
+            )}
+          </EuiFlexItem>
 
-      {shouldDisplayCreateButton && !suggestions && renderCreateButton()}
+          {shouldDisplayCreateButton && renderCreateButton()}
+        </>
+      )}
     </EuiFlexGroup>
   );
 }
+
+const maxNestingLevelText = i18n.translate(
+  'xpack.streams.streamDetailRouting.rules.maxNestingLevel',
+  {
+    defaultMessage:
+      'You have reached the maximum nesting level for streams. Try to flatten your hierarchy.',
+  }
+);
+
+const cannotManageRoutingRulesText = i18n.translate(
+  'xpack.streams.streamDetailRouting.rules.onlySimulate',
+  {
+    defaultMessage: "You don't have sufficient privileges to create new streams, only simulate.",
+  }
+);
+
+const suggestPartitionsWithAIText = i18n.translate(
+  'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
+  {
+    defaultMessage: 'Suggest partitions with AI',
+  }
+);
+
+const createPartitionManuallyText = i18n.translate('xpack.streams.streamDetailRouting.addRule', {
+  defaultMessage: 'Create partition manually',
+});
+
+const suggestPartitionsCardButtonText = i18n.translate(
+  'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.cardButton',
+  {
+    defaultMessage: 'Suggest partitions',
+  }
+);

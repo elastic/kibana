@@ -16,6 +16,7 @@ import {
   DOCUMENT_COUNT_I18N,
   LAST_VALUE_I18N,
   MAX_I18N,
+  MEDIAN_I18N,
   MIN_I18N,
   PERCENTILE_95_I18N,
   PERCENTILE_99_I18N,
@@ -52,6 +53,8 @@ export const getLabel = (criterion: Evaluation) => {
         return SUM_I18N(criterion.metrics[0].field!);
       case Aggregators.LAST_VALUE:
         return LAST_VALUE_I18N(criterion.metrics[0].field!);
+      case Aggregators.MED:
+        return MEDIAN_I18N(criterion.metrics[0].field!);
     }
   }
   return criterion.label || CUSTOM_EQUATION_I18N;
