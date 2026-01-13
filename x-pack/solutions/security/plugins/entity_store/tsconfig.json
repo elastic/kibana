@@ -23,5 +23,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-server",
+    "@kbn/config-schema",
+    "@kbn/logging-mocks",
   ]
 }

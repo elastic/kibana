@@ -14,6 +14,7 @@ import type {
   EntityStoreStartPlugins,
 } from './types';
 import { ResourcesService } from './domain/resources_service';
+import { FeatureFlags } from './infra/feature_flags';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   core: CoreSetup<EntityStoreStartPlugins, void>;
@@ -39,5 +40,6 @@ export async function createRequestHandlerContext({
     logger,
     resourcesService: new ResourcesService(logger),
     taskManagerStart: await getTaskManagerStart(core),
+    featureFlags: new FeatureFlags(core.uiSettings.client),
   };
 }

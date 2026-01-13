@@ -24,7 +24,6 @@ export function SignificantEventsColumn({ streamName }: SignificantEventsColumnP
   const { euiTheme } = useEuiTheme();
   const significantEventsFetchState = useFetchSignificantEvents({
     name: streamName,
-    query: '',
   });
 
   if (significantEventsFetchState.isLoading) {
