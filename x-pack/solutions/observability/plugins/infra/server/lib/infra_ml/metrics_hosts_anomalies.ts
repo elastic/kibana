@@ -231,7 +231,6 @@ async function fetchMetricsHostsAnomalies(
 
   const anomalies = hits.map((result) => {
     const {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       job_id,
       record_score: anomalyScore,
       typical,
