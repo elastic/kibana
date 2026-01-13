@@ -50,6 +50,6 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'workflows.rerank',
-    handlerHash: '804838fe3386152310597062c6ee6bcf02720d73d8d9955822a2215e9d0c9c94',
+    handlerHash: 'b5c039744706eaf011c97e9e22ceeb96bc51fbde1b3b589136fe39807b42e11e',
   },
 ];
