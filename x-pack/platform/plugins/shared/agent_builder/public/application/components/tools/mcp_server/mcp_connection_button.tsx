@@ -71,6 +71,7 @@ export const McpConnectionButton = () => {
             key="bulkImportMcpTools"
             icon="plus"
             href={createAgentBuilderUrl(appPaths.tools.bulkImportMcp)}
+            data-test-subj="agentBuilderBulkImportMcpMenuItem"
           >
             {i18n.translate('xpack.agentBuilder.tools.bulkImportMcpToolsButton', {
               defaultMessage: 'Bulk import MCP tools',

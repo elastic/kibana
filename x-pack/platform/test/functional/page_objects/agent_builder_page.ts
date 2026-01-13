@@ -398,6 +398,7 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async clickBulkImportMcpMenuItem() {
+    await this.testSubjects.existOrFail('agentBuilderBulkImportMcpMenuItem');
     await this.testSubjects.click('agentBuilderBulkImportMcpMenuItem');
   }
 
