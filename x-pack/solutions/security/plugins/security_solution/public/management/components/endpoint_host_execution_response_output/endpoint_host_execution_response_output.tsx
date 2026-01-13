@@ -19,7 +19,10 @@ import { i18n } from '@kbn/i18n';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import type { ResponseActionExecuteOutputContent } from '../../../../common/endpoint/types';
+import type {
+  ResponseActionEndpointRunScriptOutputContent,
+  ResponseActionExecuteOutputContent,
+} from '../../../../common/endpoint/types';
 import { getEmptyValue } from '../../../common/components/empty_value';
 
 const emptyValue = getEmptyValue();
@@ -176,13 +179,17 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
 ExecutionActionOutputAccordion.displayName = 'ExecutionActionOutputAccordion';
 
 export interface ExecuteActionHostResponseOutputProps {
-  outputContent: ResponseActionExecuteOutputContent;
+  outputContent: ResponseActionExecuteOutputContent | ResponseActionEndpointRunScriptOutputContent;
   'data-test-subj'?: string;
   textSize?: 's' | 'xs';
 }
 
-// Note: also used for RunScript command
-export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
+/**
+ * Displays output from Elastic Defend Endpoint host execution actions (like `runscript` and `execute`) where
+ * the response will include some output that may be truncated along with a file that includes all of the
+ * output from the execution.
+ */
+export const EndpointHostExecutionResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
   ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
     const contextContent = useMemo(
       () => (
@@ -256,4 +263,4 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
     );
   }
 );
-ExecuteActionHostResponseOutput.displayName = 'ExecuteActionHostResponseOutput';
+EndpointHostExecutionResponseOutput.displayName = 'EndpointHostExecutionResponseOutput';
