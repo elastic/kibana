@@ -124,12 +124,6 @@ export interface InternalChromeStart extends ChromeStart {
   getGlobalFooter$(): Observable<ReactNode>;
 
   /**
-   * Used only by the rendering service to wrap the rendering tree in the Chrome context providers
-   * @internal
-   */
-  wrapInChromeProvider(component: ReactNode): ReactNode;
-
-  /**
    * Used only by the serverless plugin to customize project-style chrome.
    * @internal
    */

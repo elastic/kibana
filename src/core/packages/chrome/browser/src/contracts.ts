@@ -284,4 +284,9 @@ export interface ChromeStart {
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<SolutionId | null>;
+
+  /**
+   * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
+   */
+  wrapInChromeProvider(component: ReactNode): ReactNode;
 }
