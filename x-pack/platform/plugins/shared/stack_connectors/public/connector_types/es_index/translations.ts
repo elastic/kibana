@@ -48,3 +48,10 @@ export const INDEX_LABEL = i18n.translate(
     defaultMessage: 'Index',
   }
 );
+
+export const INDEX_NAME_PLACEHOLDER = i18n.translate(
+  'xpack.stackConnectors.components.index.indexNamePlaceholder',
+  {
+    defaultMessage: 'Enter a specific index name',
+  }
+);
