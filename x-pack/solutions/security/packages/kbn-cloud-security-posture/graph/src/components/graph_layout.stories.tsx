@@ -9,6 +9,7 @@ import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
 import type { StoryObj, Meta } from '@storybook/react';
 import type { Writable } from '@kbn/utility-types';
+import type { NodeColor } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
   EdgeViewModel,
@@ -16,6 +17,7 @@ import type {
   NodeViewModel,
   EntityNodeViewModel,
   GroupNodeViewModel,
+  RelationshipNodeViewModel,
 } from '.';
 import { Graph } from '.';
 
@@ -53,7 +55,8 @@ type Story = StoryObj<typeof Graph>;
 type EnhancedNodeViewModel =
   | EntityNodeViewModel
   | GroupNodeViewModel
-  | (LabelNodeViewModel & { source: string; target: string });
+  | (LabelNodeViewModel & { source: string; target: string })
+  | (RelationshipNodeViewModel & { source: string; target: string });
 
 const extractEdges = (
   graphData: EnhancedNodeViewModel[]
@@ -1067,6 +1070,158 @@ export const SingleAndGroupNodes: Story = {
         uniqueAlertsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
+      },
+    ]),
+  },
+};
+
+// Helper type for enhanced nodes that includes both label and relationship nodes with source/target
+type EnhancedNodeWithRelationships =
+  | EntityNodeViewModel
+  | GroupNodeViewModel
+  | (LabelNodeViewModel & { source: string; target: string })
+  | (RelationshipNodeViewModel & { source: string; target: string });
+
+// Helper function to extract edges from nodes with both label and relationship support
+const extractEdgesWithRelationships = (
+  graphData: EnhancedNodeWithRelationships[]
+): { nodes: NodeViewModel[]; edges: EdgeViewModel[] } => {
+  const nodesMetadata: { [key: string]: { edgesIn: number; edgesOut: number } } = {};
+  const nodes: { [key: string]: NodeViewModel } = {};
+  const edges: EdgeViewModel[] = [];
+
+  // First pass: register all entity nodes
+  graphData.forEach((node) => {
+    if (node.shape !== 'label' && node.shape !== 'relationship') {
+      nodes[node.id] = node;
+      nodesMetadata[node.id] = { edgesIn: 0, edgesOut: 0 };
+    }
+  });
+
+  // Second pass: process label and relationship nodes
+  graphData.forEach((node) => {
+    if (node.shape === 'label' || node.shape === 'relationship') {
+      const connectorNode = { ...node, id: `${node.id}-connector(${node.label})` };
+      const { source, target } = node;
+
+      nodes[connectorNode.id] = connectorNode;
+
+      if (nodesMetadata[source]) {
+        nodesMetadata[source].edgesOut += 1;
+      }
+      if (nodesMetadata[target]) {
+        nodesMetadata[target].edgesIn += 1;
+      }
+
+      // Create edges: source -> connector -> target
+      edges.push({
+        id: `edge-${source}-to-${connectorNode.id}`,
+        source,
+        sourceShape: nodes[source]?.shape,
+        target: connectorNode.id,
+        targetShape: connectorNode.shape,
+        color: connectorNode.color as NodeColor,
+      });
+
+      edges.push({
+        id: `edge-${connectorNode.id}-to-${target}`,
+        source: connectorNode.id,
+        sourceShape: connectorNode.shape,
+        target,
+        targetShape: nodes[target]?.shape,
+        color: connectorNode.color as NodeColor,
+      });
+    }
+  });
+
+  return { nodes: Object.values(nodes), edges };
+};
+
+/**
+ * Story: Events and Relationships Combined
+ * Demonstrates a realistic AWS/cloud scenario with both:
+ * - Event connections (label nodes): Actions performed by a user (ConsoleLogin, AssumeRole)
+ * - Relationship connections (relationship nodes): Static ownership/access relationships
+ *
+ * Scenario: A user logs into a host, assumes a role, and has ownership/access relationships to multiple hosts
+ */
+export const EventsAndEntityRelationships: Story = {
+  args: {
+    ...extractEdgesWithRelationships([
+      // Entity nodes
+      {
+        id: 'user-john',
+        label: 'john.doe@company.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'host-prod-1',
+        label: 'prod-ec2-instance-01',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'compute',
+      },
+      {
+        id: 'host-prod-2',
+        label: 'prod-ec2-instance-02',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'compute',
+      },
+      {
+        id: 'iam-role',
+        label: 'AdminRole',
+        color: 'primary',
+        shape: 'hexagon',
+        icon: 'key',
+      },
+
+      // Event edges (activity-based) - Actions performed by the user
+      {
+        id: 'evt-console-login',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'ConsoleLogin',
+        color: 'primary',
+        shape: 'label',
+        uniqueEventsCount: 3,
+      },
+      {
+        id: 'evt-assume-role',
+        source: 'user-john',
+        target: 'iam-role',
+        label: 'AssumeRole',
+        color: 'primary',
+        shape: 'label',
+        uniqueEventsCount: 1,
+      },
+
+      // Relationship edges (static/configuration-based) - Ownership and access permissions
+      {
+        id: 'rel-user-owns-host1',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Owns',
+        color: 'primary',
+        shape: 'relationship',
+      },
+      {
+        id: 'rel-user-owns-host2',
+        source: 'user-john',
+        target: 'host-prod-2',
+        label: 'Owns',
+        color: 'primary',
+        shape: 'relationship',
+      },
+      {
+        id: 'rel-user-access-host1',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Has Access',
+        color: 'primary',
+        shape: 'relationship',
       },
     ]),
   },

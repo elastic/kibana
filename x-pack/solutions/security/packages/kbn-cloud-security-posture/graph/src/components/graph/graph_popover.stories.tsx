@@ -72,6 +72,8 @@ const useExpandButtonPopover = () => {
     closePopover();
   }, [closePopover]);
 
+  const isLabelNode = selectedNode.current?.data?.shape === 'label';
+
   // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <GraphPopover
@@ -82,23 +84,50 @@ const useExpandButtonPopover = () => {
       closePopover={closePopoverHandler}
     >
       <EuiListGroup color="primary" gutterSize="none" bordered={false} flush={true}>
-        <ExpandPopoverListItem
-          iconType="visTagCloud"
-          label="Explore related entities"
-          onClick={() => {}}
-        />
-        <ExpandPopoverListItem
-          iconType="users"
-          label="Show actions by this entity"
-          onClick={() => {}}
-        />
-        <ExpandPopoverListItem
-          iconType="storage"
-          label="Show actions on this entity"
-          onClick={() => {}}
-        />
-        <EuiHorizontalRule margin="xs" />
-        <ExpandPopoverListItem iconType="expand" label="View entity details" onClick={() => {}} />
+        {isLabelNode ? (
+          <>
+            <ExpandPopoverListItem
+              iconType="visTagCloud"
+              label="Show related entities"
+              onClick={() => {}}
+            />
+            <EuiHorizontalRule margin="xs" />
+            <ExpandPopoverListItem
+              iconType="expand"
+              label="Show entity details"
+              onClick={() => {}}
+            />
+          </>
+        ) : (
+          <>
+            <ExpandPopoverListItem
+              iconType="graphApp"
+              label="Show entity relationships"
+              onClick={() => {}}
+            />
+            <ExpandPopoverListItem
+              iconType="indexRuntime"
+              label="Show this entity's actions"
+              onClick={() => {}}
+            />
+            <ExpandPopoverListItem
+              iconType="indexFlush"
+              label="Show actions done to this entity"
+              onClick={() => {}}
+            />
+            <ExpandPopoverListItem
+              iconType="logstashQueue"
+              label="Show related events"
+              onClick={() => {}}
+            />
+            <EuiHorizontalRule margin="xs" />
+            <ExpandPopoverListItem
+              iconType="expand"
+              label="Show entity details"
+              onClick={() => {}}
+            />
+          </>
+        )}
       </EuiListGroup>
     </GraphPopover>
   ));

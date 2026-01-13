@@ -41,6 +41,7 @@ export const GRAPH_CONTROLS_FIT_VIEW_ID = `${GRAPH_INVESTIGATION_TEST_ID}FitView
 export const GRAPH_ID = `${GRAPH_INVESTIGATION_TEST_ID}Graph` as const;
 export const GRAPH_ENTITY_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EntityNode` as const;
 export const GRAPH_LABEL_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}LabelNode` as const;
+export const GRAPH_RELATIONSHIP_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNode` as const;
 export const GRAPH_STACK_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackNode` as const;
 export const GRAPH_EDGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}Edge` as const;
 

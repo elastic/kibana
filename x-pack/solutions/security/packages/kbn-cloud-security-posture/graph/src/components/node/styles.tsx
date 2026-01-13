@@ -174,13 +174,24 @@ export const NodeContainer = styled.div`
   width: ${NODE_WIDTH}px;
 `;
 
+export type LabelNodeType = 'label' | 'relationship';
+
 /**
  * Gets the background, border and text colors for the label based on document analysis
  */
 export const getLabelColors = (
   color: LabelNodeViewModel['color'],
-  euiTheme: EuiThemeComputed
+  euiTheme: EuiThemeComputed,
+  nodeType: LabelNodeType = 'label'
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
+  if (nodeType === 'relationship') {
+    return {
+      backgroundColor: euiTheme.colors.darkShade,
+      borderColor: euiTheme.colors.lightShade,
+      textColor: euiTheme.colors.lightestShade,
+    };
+  }
+
   if (color === 'danger') {
     return {
       backgroundColor: euiTheme.colors.danger,
