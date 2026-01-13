@@ -9,17 +9,13 @@
 
 import React from 'react';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import { Sidebar as SidebarComponent, useSidebar } from '@kbn/core-chrome-sidebar';
+import { Sidebar as SidebarComponent } from '@kbn/core-chrome-sidebar';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SidebarProps {}
 
 // eslint-disable-next-line import/no-default-export
 export default function Sidebar(props: SidebarProps) {
-  const { isOpen } = useSidebar();
-
-  if (!isOpen) return null;
-
   return (
     <KibanaSectionErrorBoundary sectionName={'Sidebar'}>
       <SidebarComponent />

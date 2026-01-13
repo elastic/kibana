@@ -26,10 +26,8 @@ export function SidebarAppRenderer({ appId, loadComponent }: SidebarAppRendererP
     [loadComponent]
   );
 
-  // Subscribe to params changes
   const params = useObservable(appStateService.getParams$(appId), appStateService.getParams(appId));
 
-  // Create setParams callback bound to this app
   const setParams = useCallback(
     (newParams: Record<string, unknown>) => appStateService.setParams(appId, newParams),
     [appStateService, appId]

@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dynamic } from '@kbn/shared-ux-utility';
+import React, { lazy, Suspense } from 'react';
+import type { ComponentType } from 'react';
+import type { SidebarProps } from './sidebar';
 
-export const Sidebar = dynamic(() => import('./sidebar'));
+const SidebarLazy = lazy(() => import('./sidebar'));
+
+export const Sidebar: ComponentType<SidebarProps> = (props) => (
+  <Suspense fallback={null}>
+    <SidebarLazy {...props} />
+  </Suspense>
+);
