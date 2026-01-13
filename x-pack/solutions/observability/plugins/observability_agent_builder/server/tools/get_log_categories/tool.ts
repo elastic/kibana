@@ -47,12 +47,6 @@ const getLogsSchema = z.object({
     .describe(
       'Additional fields to return for each log sample. "@timestamp" and the message field are always included. Example: ["service.name", "host.name"]'
     ),
-  messageField: z
-    .string()
-    .optional()
-    .describe(
-      'The field containing the log message. Use "message" for ECS logs or "body.text" for OpenTelemetry logs. Defaults to "message".'
-    ),
 });
 
 export function createGetLogCategoriesTool({
@@ -101,7 +95,6 @@ Do NOT use for:
         end = DEFAULT_TIME_RANGE.end,
         kqlFilter,
         fields = [],
-        messageField = 'message',
       } = toolParams;
 
       try {
@@ -114,7 +107,6 @@ Do NOT use for:
           end,
           kqlFilter,
           fields,
-          messageField,
         });
 
         return {
