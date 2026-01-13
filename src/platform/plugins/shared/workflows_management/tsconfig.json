@@ -75,7 +75,8 @@
     "@kbn/ai-assistant-icon",
     "@kbn/licensing-plugin",
     "@kbn/securitysolution-rules",
-    "@kbn/alerts-as-data-utils"
+    "@kbn/alerts-as-data-utils",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": ["target/**/*"]
 }

@@ -47,7 +47,7 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_processing] streamType: ${streamType}`,
         },
         customMetrics: {
           key1: 'linked_dashboards_count',
