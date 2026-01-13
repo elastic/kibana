@@ -33,6 +33,8 @@ export interface BarrelFileEntry {
   packageName?: string;
   /** For node_modules barrels: absolute path to package root */
   packageRoot?: string;
+  /** Names of exports defined locally in this barrel file (not re-exports) */
+  localExports?: string[];
 }
 
 /**

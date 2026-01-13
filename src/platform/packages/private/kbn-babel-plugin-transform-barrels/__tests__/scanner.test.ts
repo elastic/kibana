@@ -633,15 +633,19 @@ export function LocalFunc() { return 'func'; }`
       await Fsp.rm(tempDir, { recursive: true, force: true });
     });
 
-    it('does not include barrel in index when all exports are local', async () => {
-      // When a barrel only has local exports, transforming any import from it
-      // would produce the same import path, causing infinite recursion.
-      // Such barrels should not be in the index at all.
+    it('includes barrel in index with localExports when all exports are local', async () => {
+      // When a barrel only has local exports, import transforms can't be applied
+      // (would produce same import path), but we still need to track them
+      // for export * transformations to emit explicit exports.
       const barrelIndex = await buildBarrelIndex(tempDir);
       const mainBarrelPath = Path.join(tempDir, 'index.ts');
 
-      // Barrel should NOT be in the index since it has no transformable exports
-      expect(barrelIndex[mainBarrelPath]).toBeUndefined();
+      // Barrel SHOULD be in the index with localExports populated
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      expect(barrelIndex[mainBarrelPath].exports).toEqual({});
+      expect(barrelIndex[mainBarrelPath].localExports).toEqual(
+        expect.arrayContaining(['LocalOnly', 'LocalFunc'])
+      );
     });
   });
 

@@ -17,6 +17,7 @@ interface TestExportInfo extends ExportInfo {
 
 interface TestBarrelFileEntry extends Omit<BarrelFileEntry, 'exports'> {
   exports: Record<string, TestExportInfo>;
+  localExports?: string[];
 }
 
 interface TestBarrelIndex {
@@ -955,6 +956,121 @@ describe('barrel transform plugin', () => {
         // Local definition should remain
         expect(result?.code).toMatch(/export const versionSchema/);
       });
+    });
+  });
+
+  describe('export * with local exports', () => {
+    const MIXED_BARREL_PATH = '/test/src/mixed/index.ts';
+
+    const mixedBarrelIndex: TestBarrelIndex = {
+      [MIXED_BARREL_PATH]: {
+        exports: {
+          // Re-export from submodule
+          Foo: {
+            path: '/test/src/mixed/foo.ts',
+            type: 'named',
+            localName: 'Foo',
+            importedName: 'Foo',
+            expectedPath: './mixed/foo',
+          },
+        },
+        // Local exports defined in the barrel itself
+        localExports: ['BAR', 'BAZ'],
+      },
+    };
+
+    it('transforms export * to include both re-exports and local exports', () => {
+      const result = transform({
+        code: `export * from './mixed';`,
+        barrelIndex: mixedBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // Re-export should be transformed to direct path
+      expect(result?.code).toContain('./mixed/foo');
+      expect(result?.code).toContain('Foo');
+
+      // Local exports should point to original barrel
+      expect(result?.code).toMatch(/export\s*{\s*BAR,\s*BAZ\s*}\s*from\s*['"]\.\/mixed['"]/);
+
+      // Original export * should be gone
+      expect(result?.code).not.toContain('export *');
+    });
+
+    it('respects local shadowing for barrel local exports', () => {
+      const result = transform({
+        code: `
+          export * from './mixed';
+          export const BAR = 'shadowed';
+        `,
+        barrelIndex: mixedBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // BAR is shadowed locally, so only BAZ should be re-exported from barrel
+      expect(result?.code).toMatch(/export\s*{\s*BAZ\s*}\s*from\s*['"]\.\/mixed['"]/);
+      expect(result?.code).not.toMatch(/export\s*{[^}]*BAR[^}]*}\s*from\s*['"]\.\/mixed['"]/);
+      // Local definition should remain
+      expect(result?.code).toMatch(/export const BAR/);
+    });
+
+    it('handles barrel with only local exports (no re-exports)', () => {
+      const localOnlyBarrel: TestBarrelIndex = {
+        [MIXED_BARREL_PATH]: {
+          exports: {}, // No re-exports
+          localExports: ['A', 'B'],
+        },
+      };
+
+      const result = transform({
+        code: `export * from './mixed';`,
+        barrelIndex: localOnlyBarrel,
+        filename: '/test/src/file.ts',
+      });
+
+      // Should emit explicit exports for local items
+      expect(result?.code).toMatch(/export\s*{\s*A,\s*B\s*}\s*from\s*['"]\.\/mixed['"]/);
+      expect(result?.code).not.toContain('export *');
+    });
+
+    it('does not emit local exports that are shadowed by default', () => {
+      const barrelWithDefaultLocal: TestBarrelIndex = {
+        [MIXED_BARREL_PATH]: {
+          exports: {},
+          localExports: ['default', 'A'],
+        },
+      };
+
+      const result = transform({
+        code: `export * from './mixed';`,
+        barrelIndex: barrelWithDefaultLocal,
+        filename: '/test/src/file.ts',
+      });
+
+      // 'default' should be skipped (export * doesn't re-export default)
+      expect(result?.code).not.toMatch(/default/);
+      // 'A' should be exported
+      expect(result?.code).toMatch(/export\s*{\s*A\s*}\s*from\s*['"]\.\/mixed['"]/);
+    });
+
+    it('removes export * entirely when all re-exports AND local exports are shadowed', () => {
+      const result = transform({
+        code: `
+          export * from './mixed';
+          export const Foo = 'shadowed';
+          export const BAR = 'shadowed';
+          export const BAZ = 'shadowed';
+        `,
+        barrelIndex: mixedBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // No re-export should remain since all exports are shadowed
+      expect(result?.code).not.toMatch(/from\s*['"]\.\/mixed['"]/);
+      // Local definitions should remain
+      expect(result?.code).toMatch(/export const Foo/);
+      expect(result?.code).toMatch(/export const BAR/);
+      expect(result?.code).toMatch(/export const BAZ/);
     });
   });
 

@@ -228,12 +228,21 @@ async function buildBarrelIndex(repoRoot) {
               index[barrelPath] = entry;
             }
           } else {
-            // No exports field - filter out local exports that point to barrel file itself
+            // Separate local exports (defined in barrel itself) from re-exports
+            const localExportNames = Object.entries(exports)
+              .filter((entry) => entry[1].path === barrelPath)
+              .map((entry) => entry[0]);
+
             const filteredExports = Object.fromEntries(
               Object.entries(exports).filter((entry) => entry[1].path !== barrelPath)
             );
-            if (Object.keys(filteredExports).length > 0) {
+
+            // Include barrel if it has re-exports OR local exports
+            if (Object.keys(filteredExports).length > 0 || localExportNames.length > 0) {
               entry.exports = filteredExports;
+              if (localExportNames.length > 0) {
+                entry.localExports = localExportNames;
+              }
               index[barrelPath] = entry;
             }
           }
@@ -257,15 +266,22 @@ async function buildBarrelIndex(repoRoot) {
         const content = await readFile(barrelPath, 'utf-8');
         const exports = parseBarrelExports(content, barrelPath);
 
-        // Filter out exports that point to the barrel file itself
-        // These can't be transformed as they would produce the same import path
-        // causing infinite recursion when Babel re-visits the new nodes
+        // Separate local exports from re-exports
+        const localExportNames = Object.entries(exports)
+          .filter((entry) => entry[1].path === barrelPath)
+          .map((entry) => entry[0]);
+
         const filteredExports = Object.fromEntries(
           Object.entries(exports).filter((entry) => entry[1].path !== barrelPath)
         );
 
-        if (Object.keys(filteredExports).length > 0) {
-          index[barrelPath] = { exports: filteredExports };
+        if (Object.keys(filteredExports).length > 0 || localExportNames.length > 0) {
+          /** @type {import('./types').BarrelFileEntry} */
+          const entry = { exports: filteredExports };
+          if (localExportNames.length > 0) {
+            entry.localExports = localExportNames;
+          }
+          index[barrelPath] = entry;
         }
       } catch (err) {
         console.warn(`[barrel-transform] Error parsing barrel file ${barrelPath}: ${err.message}`);

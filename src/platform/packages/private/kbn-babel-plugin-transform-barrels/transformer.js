@@ -514,7 +514,25 @@ function transformExportAllDeclaration(nodePath, state, t, barrelIndex) {
     });
   }
 
-  if (newExports.size === 0) {
+  const { localExports: barrelLocalExports } = barrelEntry;
+
+  // Collect local exports that aren't shadowed by local definitions in this file
+  /** @type {ExportSpecifierInfo[]} */
+  const localExportSpecifiers = [];
+  if (barrelLocalExports) {
+    for (const name of barrelLocalExports) {
+      // Skip 'default' (export * doesn't re-export default)
+      // Skip exports shadowed by local definitions
+      if (name !== 'default' && !localExports.has(name)) {
+        localExportSpecifiers.push({
+          localName: name,
+          exportedName: name,
+        });
+      }
+    }
+  }
+
+  if (newExports.size === 0 && localExportSpecifiers.length === 0) {
     // All exports are shadowed by local definitions - remove the export * entirely
     nodePath.remove();
     return;
@@ -523,6 +541,13 @@ function transformExportAllDeclaration(nodePath, state, t, barrelIndex) {
   /** @type {import('@babel/types').ExportNamedDeclaration[]} */
   const newNodes = [];
 
+  // First, add explicit exports for local items (pointing to original barrel)
+  // This must come first for circular dependency safety
+  if (localExportSpecifiers.length > 0) {
+    newNodes.push(createExportNamedDeclaration(t, localExportSpecifiers, exportSource));
+  }
+
+  // Then add transformed exports for re-exports (pointing to direct paths)
   for (const [targetPath, { specifiers, publicSubpath }] of newExports) {
     const outputPath = toImportPath(
       targetPath,
