@@ -125,6 +125,8 @@ export class OAuthAuthorizationService {
     const secrets = rawAction.attributes.secrets;
 
     // Extract OAuth config - for connector specs, check secrets first, then config
+    // For connector specs, OAuth config is always in secrets (encrypted)
+    // Fallback to config for backwards compatibility with legacy connectors
     const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
     const clientId = secrets.clientId || config?.clientId;
     const scope = secrets.scope || config?.scope;
