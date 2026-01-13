@@ -33,7 +33,7 @@ import {
 import { useQueries, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
-import { DOCUMENTATION_ITEMS_CONFIG } from './documentation_items';
+import { DOCUMENTATION_ITEMS_CONFIG, type NormalizedDocStatus } from './documentation_items';
 import * as i18n from './translations';
 
 interface DocumentationSectionProps {
@@ -62,7 +62,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         queryFn: async () => doc.getNormalizedStatus({ productDocBase, inferenceId }),
         keepPreviousData: false,
         refetchOnWindowFocus: false,
-        refetchInterval: (queryData?: { status: DocumentationStatus }) => {
+        refetchInterval: (queryData?: NormalizedDocStatus) => {
           // Match useProductDocStatus behavior: poll when install/uninstall is in progress.
           const status = queryData?.status;
 
