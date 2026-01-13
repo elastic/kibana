@@ -19,7 +19,7 @@ import {
   type ExecuteActionHostResponseProps,
 } from './execute_action_host_response';
 import { getEmptyValue } from '@kbn/cases-plugin/public/components/empty_value';
-import { EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE } from './execute_action_host_response_output';
+import { EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE } from '../endpoint_host_execution_response_output/execute_action_host_response_output';
 
 describe('When using the `ExecuteActionHostResponse` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

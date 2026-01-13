@@ -16,7 +16,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import { EXECUTE_FILE_LINK_TITLE } from '../endpoint_response_actions_list/translations';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
-import { ExecuteActionHostResponseOutput } from './execute_action_host_response_output';
+import { ExecuteActionHostResponseOutput } from '../endpoint_host_execution_response_output';
 
 export interface ExecuteActionHostResponseProps {
   action: MaybeImmutable<
