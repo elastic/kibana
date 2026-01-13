@@ -34,7 +34,10 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-security-common",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/es-errors",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"
