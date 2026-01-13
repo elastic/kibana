@@ -13,13 +13,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
+  EuiPanel,
   EuiSpacer,
   EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldNameWithIcon } from '@kbn/react-field';
 import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
-import { FieldNameWithIcon } from '@kbn/react-field';
 import { useEnrichmentFieldSuggestions } from '../../../../../../../hooks/use_field_suggestions';
 import { SortableList } from '../../../../sortable_list';
 import type { ConcatFormState } from '../../../../types';
@@ -38,39 +40,38 @@ const DraggableConcatFieldInput = ({ id, index }: DraggableConcatInputProps) => 
   }));
 
   return (
-    <EuiDraggable draggableId={id} index={index}>
-      <Controller
-        control={control}
-        name={`from.${index}.value`}
-        rules={{
-          required: {
-            value: true,
-            message: i18n.translate('xpack.streams.draggableConcatFieldInput.fieldRequiredError', {
-              defaultMessage: 'Field is required.',
-            }),
-          },
-        }}
-        render={({ field, fieldState }) => (
-          <EuiFormRow
-            aria-label={i18n.translate('xpack.streams.draggableConcatFieldInput.fieldLabel', {
+    <Controller
+      control={control}
+      name={`from.${index}.value`}
+      rules={{
+        required: {
+          value: true,
+          message: i18n.translate('xpack.streams.draggableConcatFieldInput.fieldRequiredError', {
+            defaultMessage: 'Field is required.',
+          }),
+        },
+      }}
+      render={({ field, fieldState }) => (
+        <EuiFormRow
+          aria-label={i18n.translate('xpack.streams.draggableConcatFieldInput.fieldLabel', {
+            defaultMessage: 'Field',
+          })}
+          isInvalid={fieldState.invalid}
+          error={fieldState.error?.message}
+        >
+          <EuiSuperSelect
+            options={options}
+            valueOfSelected={field.value}
+            onChange={field.onChange}
+            prepend={i18n.translate('xpack.streams.draggableConcatFieldInput.fieldLabel', {
               defaultMessage: 'Field',
             })}
             isInvalid={fieldState.invalid}
-            error={fieldState.error?.message}
-          >
-            <EuiSuperSelect
-              options={options}
-              valueOfSelected={field.value}
-              onChange={field.onChange}
-              prepend={i18n.translate('xpack.streams.draggableConcatFieldInput.fieldLabel', {
-                defaultMessage: 'Field',
-              })}
-              isInvalid={fieldState.invalid}
-            />
-          </EuiFormRow>
-        )}
-      />
-    </EuiDraggable>
+            fullWidth
+          />
+        </EuiFormRow>
+      )}
+    />
   );
 };
 
@@ -78,39 +79,79 @@ const DraggableConcatTextInput = ({ id, index }: DraggableConcatInputProps) => {
   const { control } = useFormContext();
 
   return (
-    <EuiDraggable draggableId={id} index={index}>
-      <Controller
-        control={control}
-        name={`from.${index}.value`}
-        rules={{
-          minLength: {
-            value: 1,
-            message: i18n.translate('xpack.streams.draggableConcatTextInput.textRequiredError', {
+    <Controller
+      control={control}
+      name={`from.${index}.value`}
+      rules={{
+        minLength: {
+          value: 1,
+          message: i18n.translate('xpack.streams.draggableConcatTextInput.textRequiredError', {
+            defaultMessage: 'Text cannot be empty.',
+          }),
+        },
+        validate: (value) => {
+          if (value === '') {
+            return i18n.translate('xpack.streams.draggableConcatTextInput.textRequiredError', {
               defaultMessage: 'Text cannot be empty.',
-            }),
-          },
-          validate: (value) => {
-            if (value === '') {
-              return i18n.translate('xpack.streams.draggableConcatTextInput.textRequiredError', {
-                defaultMessage: 'Text cannot be empty.',
-              });
-            }
-            return true;
-          },
-        }}
-        render={({ field, fieldState }) => (
-          <EuiFormRow isInvalid={fieldState.invalid} error={fieldState.error?.message}>
-            <EuiFieldText
-              value={field.value}
-              onChange={field.onChange}
-              isInvalid={fieldState.invalid}
-              prepend={i18n.translate('xpack.streams.draggableConcatTextInput.textLabel', {
-                defaultMessage: 'Text',
+            });
+          }
+          return true;
+        },
+      }}
+      render={({ field, fieldState }) => (
+        <EuiFormRow isInvalid={fieldState.invalid} error={fieldState.error?.message}>
+          <EuiFieldText
+            value={field.value}
+            onChange={field.onChange}
+            isInvalid={fieldState.invalid}
+            prepend={i18n.translate('xpack.streams.draggableConcatTextInput.textLabel', {
+              defaultMessage: 'Text',
+            })}
+            fullWidth
+          />
+        </EuiFormRow>
+      )}
+    />
+  );
+};
+
+interface FromBuilderItemProps {
+  type: ConcatFormState['from'][number]['type'];
+  id: string;
+  index: number;
+}
+
+const FromBuilderItem = ({ type, id, index }: FromBuilderItemProps) => {
+  return (
+    <EuiDraggable
+      draggableId={id}
+      index={index}
+      customDragHandle={true}
+      hasInteractiveChildren={true}
+    >
+      {(provided) => (
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              color="transparent"
+              paddingSize="s"
+              {...provided.dragHandleProps}
+              aria-label={i18n.translate('xpack.streams.fromBuilderItem.dragHandleLabel', {
+                defaultMessage: 'Drag Handle',
               })}
-            />
-          </EuiFormRow>
-        )}
-      />
+            >
+              <EuiIcon type="grab" />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {type === 'field' ? (
+              <DraggableConcatFieldInput id={id} index={index} />
+            ) : (
+              <DraggableConcatTextInput id={id} index={index} />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiDraggable>
   );
 };
@@ -146,11 +187,7 @@ export const ConcatFromBuilder = () => {
           <EuiFlexGroup direction="column" gutterSize="s">
             {fields.map((field, index) => (
               <EuiFlexItem key={field.id}>
-                {field.type === 'field' ? (
-                  <DraggableConcatFieldInput id={field.id} index={index} />
-                ) : (
-                  <DraggableConcatTextInput id={field.id} index={index} />
-                )}
+                <FromBuilderItem type={field.type} id={field.id} index={index} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
