@@ -10,6 +10,7 @@ import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import type {
+  AxesSettingsConfig,
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
@@ -127,6 +128,49 @@ export function checkScaleOperation(
       operation && (!dataType || operation.dataType === dataType) && operation.scale === scaleType
     );
   };
+}
+
+/**
+ * Checks if an operation is a date histogram (date type with interval scale).
+ */
+export function isDateHistogramOperation(operation: OperationMetadata | null | undefined): boolean {
+  return Boolean(operation?.dataType === 'date' && operation?.scale === 'interval');
+}
+
+/**
+ * Returns recommended X-axis title visibility settings based on the operation type.
+ *
+ * - Date histogram: recommends "None" (redundant info - timestamp per bucket shown in chart)
+ * - Non-date histogram: recommends "Auto" (axis label is useful)
+ * - Respects user's manual choice (e.g., if user set Auto on date histogram, keeps it)
+ *
+ * @returns Updated settings if a change is recommended, undefined otherwise
+ */
+export function getRecommendedXAxisTitleVisibility(
+  currentSettings: AxesSettingsConfig | undefined,
+  operation: OperationMetadata | null | undefined
+): AxesSettingsConfig | undefined {
+  const isDateHistogram = isDateHistogramOperation(operation);
+  const currentXAxisTitleSetting = currentSettings?.x;
+
+  // Only change if switching between expected defaults:
+  // - Date histogram with Auto (true) or undefined → set to None (false)
+  // - Non-date histogram with None (false) → set to Auto (true)
+  const shouldSetToNone =
+    isDateHistogram &&
+    (currentXAxisTitleSetting === true || currentXAxisTitleSetting === undefined);
+  const shouldSetToAuto = !isDateHistogram && currentXAxisTitleSetting === false;
+
+  if (shouldSetToNone || shouldSetToAuto) {
+    return {
+      ...currentSettings,
+      x: !shouldSetToNone,
+      yLeft: currentSettings?.yLeft ?? true,
+      yRight: currentSettings?.yRight ?? true,
+    };
+  }
+
+  return undefined;
 }
 
 export const isDataLayer = (layer: XYLayerConfig): layer is XYDataLayerConfig =>

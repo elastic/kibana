@@ -21,7 +21,7 @@ import { getColorMappingDefaults } from '../../utils';
 import type { XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
-import { getDataLayers, isDataLayer } from './visualization_helpers';
+import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
 const columnSortOrder = {
   document: 0,
@@ -533,8 +533,7 @@ function buildSuggestion({
       : undefined,
   };
 
-  const hasDateHistogramDomain =
-    xValue?.operation.dataType === 'date' && xValue.operation.scale === 'interval';
+  const hasDateHistogramDomain = isDateHistogramOperation(xValue?.operation);
 
   // Maintain consistent order for any layers that were saved
   const keptLayers: XYLayerConfig[] = currentState
@@ -575,7 +574,8 @@ function buildSuggestion({
     yLeftScale: currentState?.yLeftScale,
     yRightScale: currentState?.yRightScale,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
-      x: true,
+      // Default X axis title to "None" for date histogram to reduce redundant information
+      x: !hasDateHistogramDomain,
       yLeft: true,
       yRight: true,
     },

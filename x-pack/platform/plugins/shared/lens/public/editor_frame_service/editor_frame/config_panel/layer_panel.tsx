@@ -40,6 +40,7 @@ import {
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
   selectDatasourceStates,
+  getUpdatedFrameWithDatasourceState,
 } from '../../../state_management';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
@@ -259,6 +260,26 @@ export function LayerPanel(props: LayerPanelProps) {
           props.onRemoveDimension({ layerId, columnId: openColumnId });
         }
       } else if (isDimensionComplete) {
+        // newState could be a function or an object, resolve it to get the actual state
+        const resolvedNewState =
+          layerDatasource && layerDatasourceState
+            ? typeof newState === 'function'
+              ? newState(layerDatasourceState)
+              : newState
+            : undefined;
+
+        // Create an updated frame with the new datasource state so that
+        // setDimension has access to the updated operation info for the new column
+        const updatedFrame =
+          resolvedNewState && layerDatasource
+            ? getUpdatedFrameWithDatasourceState(
+                framePublicAPI,
+                layerDatasource,
+                resolvedNewState,
+                layerId
+              )
+            : framePublicAPI;
+
         updateAll(
           datasourceId,
           newState,
@@ -267,7 +288,7 @@ export function LayerPanel(props: LayerPanelProps) {
             groupId: openColumnGroup.groupId,
             columnId: openColumnId,
             prevState: visualizationState,
-            frame: framePublicAPI,
+            frame: updatedFrame,
           })
         );
       } else {
@@ -286,6 +307,8 @@ export function LayerPanel(props: LayerPanelProps) {
       activeVisualization,
       datasourceId,
       layerId,
+      layerDatasource,
+      layerDatasourceState,
       updateAll,
       updateDatasourceAsync,
       visualizationState,

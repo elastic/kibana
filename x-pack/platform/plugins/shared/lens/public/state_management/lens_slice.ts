@@ -36,6 +36,7 @@ import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from
 import { generateId } from '../id_generator';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
+import { getUpdatedFrameWithDatasourceState } from './utils';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import type { LensSerializedState, LayerType, Suggestion, Visualization } from '..';
 
@@ -1051,11 +1052,23 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           state.datasourceStates[layerDatasourceId].state = newDatasourceState;
         }
 
+        // Create an updated frame with the new datasource state so that
+        // setDimension (called by onDrop) has access to the updated operation info
+        const updatedFramePublicAPI =
+          newDatasourceState && layerDatasource
+            ? getUpdatedFrameWithDatasourceState(
+                framePublicAPI,
+                layerDatasource,
+                newDatasourceState,
+                target.layerId
+              )
+            : framePublicAPI;
+
         activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
         const newVisualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
           {
             prevState: state.visualization.state,
-            frame: framePublicAPI,
+            frame: updatedFramePublicAPI,
             target,
             source,
             dropType,
