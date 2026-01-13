@@ -86,14 +86,6 @@ export const SidebarPanel: FC<SidebarPanelProps> = ({ children, title, onClose }
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
                 <EuiButtonIcon
-                  iconType={'fullScreen'}
-                  onClick={() => {}}
-                  aria-label="Full screen"
-                  color="text"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonIcon
                   iconType="cross"
                   onClick={onClose}
                   aria-label="Close Sidebar"
