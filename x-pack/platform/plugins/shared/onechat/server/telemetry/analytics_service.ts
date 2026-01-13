@@ -14,7 +14,7 @@ import {
   ConversationRoundStepType,
   type ToolSelection,
   type ToolType,
-} from '@kbn/agent-builder-common';
+} from '@kbn/onechat-common';
 import type { ModelProvider } from '@kbn/inference-common';
 import { normalizeErrorType, sanitizeForCounterName } from './error_utils';
 import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from './utils';
