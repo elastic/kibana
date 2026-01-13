@@ -15,11 +15,18 @@ import { z } from '@kbn/zod/v4';
 export const RerankStepTypeId = 'workflows.rerank';
 
 /**
+ * Default values for rerank step parameters
+ */
+export const RERANK_DEFAULT_RANK_WINDOW_SIZE = 100;
+export const RERANK_DEFAULT_MAX_INPUT_FIELD_LENGTH = 1000;
+export const RERANK_DEFAULT_MAX_INPUT_TOTAL_LENGTH = 2000;
+
+/**
  * Input schema for the rerank step
  * Validates parameters for calling the Elasticsearch rerank inference endpoint
  */
 const RerankInputSchema = z.object({
-  rerank_query: z.string().describe('Query text to rerank documents against'),
+  rerank_text: z.string().describe('Text to rerank documents against'),
   data: z.array(z.any()).describe('Array of documents to rerank'),
   fields: z
     .array(z.array(z.string()))
@@ -35,9 +42,21 @@ const RerankInputSchema = z.object({
     ),
   rank_window_size: z
     .number()
-    .optional()
+    .default(RERANK_DEFAULT_RANK_WINDOW_SIZE)
     .describe(
-      'Number of documents from the start of the input array to send for reranking. Limits inference API costs by only reranking the top N documents. Remaining documents are appended to output in original order.'
+      `Number of documents from the start of the input array to send for reranking. Limits inference API costs by only reranking the top N documents. Remaining documents are appended to output in their input order. Defaults to ${RERANK_DEFAULT_RANK_WINDOW_SIZE}.`
+    ),
+  max_input_field_length: z
+    .number()
+    .default(RERANK_DEFAULT_MAX_INPUT_FIELD_LENGTH)
+    .describe(
+      `Maximum character length per individual field when extracting fields from documents. Prevents any single field from dominating the text sent to rerank. Defaults to ${RERANK_DEFAULT_MAX_INPUT_FIELD_LENGTH} characters.`
+    ),
+  max_input_total_length: z
+    .number()
+    .default(RERANK_DEFAULT_MAX_INPUT_TOTAL_LENGTH)
+    .describe(
+      `Maximum character length for the total text sent per document to the rerank endpoint. Applied after field extraction and concatenation. Prevents exceeding model token limits. Defaults to ${RERANK_DEFAULT_MAX_INPUT_TOTAL_LENGTH} characters.`
     ),
 });
 

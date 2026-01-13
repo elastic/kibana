@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { RerankStepTypeId, rerankStepCommonDefinition } from './rerank_step';
+export {
+  RerankStepTypeId,
+  rerankStepCommonDefinition,
+  RERANK_DEFAULT_RANK_WINDOW_SIZE,
+  RERANK_DEFAULT_MAX_INPUT_FIELD_LENGTH,
+  RERANK_DEFAULT_MAX_INPUT_TOTAL_LENGTH,
+} from './rerank_step';
 export type { RerankInput, RerankOutput } from './rerank_step';

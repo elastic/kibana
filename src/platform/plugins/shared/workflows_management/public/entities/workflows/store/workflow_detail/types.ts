@@ -16,6 +16,16 @@ import type { LoadingStates } from './utils/loading_states';
 import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
 
+export interface InferenceEndpointsResponse {
+  endpoints: Array<{
+    id: string;
+    name: string;
+    service: string;
+    task_type: string;
+  }>;
+  total: number;
+}
+
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
@@ -37,6 +47,8 @@ export interface WorkflowDetailState {
   isTestModalOpen: boolean;
   /** The connectors data */
   connectors?: ConnectorsResponse;
+  /** The inference endpoints data */
+  inferenceEndpoints?: InferenceEndpointsResponse;
   /** The schema for the workflow, depends on the connectors available */
   schema: WorkflowZodSchemaType;
   /** Loading states for async operations */
