@@ -181,6 +181,7 @@ ExecutionActionOutputAccordion.displayName = 'ExecutionActionOutputAccordion';
 export interface ExecuteActionHostResponseOutputProps {
   outputContent: ResponseActionExecuteOutputContent | ResponseActionEndpointRunScriptOutputContent;
   'data-test-subj'?: string;
+  /** Default is `xs` (normally used in the Action History log) */
   textSize?: 's' | 'xs';
 }
 

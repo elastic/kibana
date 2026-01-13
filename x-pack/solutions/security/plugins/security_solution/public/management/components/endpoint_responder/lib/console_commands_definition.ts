@@ -491,9 +491,7 @@ export const getEndpointConsoleCommands = ({
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 9,
       helpDisabled: !isActionSupportedByAgentType(agentType, 'runscript', 'manual'),
-      helpHidden:
-        !getRbacControl({ commandName: 'runscript', privileges: endpointPrivileges }) ||
-        (agentType === 'endpoint' && !doesEndpointSupportCommand('runscript')),
+      helpHidden: !getRbacControl({ commandName: 'runscript', privileges: endpointPrivileges }),
     },
   ];
 
