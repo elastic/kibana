@@ -23,20 +23,20 @@ Extract features in three categories:
 ## Consolidation Rules
 
 **Consolidate** when properties belong to the same entity and appear together in logs:
-- ✅ A single cloud deployment feature with provider in `value` and regions/zones in `meta`
-- ✅ A single container orchestration feature for Kubernetes with stable platform/version in `value`
+- Good: A single cloud deployment feature with provider in `value` and regions/zones in `meta`
+- Good: A single container orchestration feature for Kubernetes with stable platform/version in `value`
 
 **Separate** distinct technologies even if related:
-- ✅ Separate features for `web_server` (nginx), `database` (postgresql), `cache` (redis)
-- ❌ Do not combine multiple distinct technologies into one feature
+- Good: Separate features for `web_server` (nginx), `database` (postgresql), `cache` (redis)
+- Bad: Do not combine multiple distinct technologies into one feature
 
 Also: **do not emit multiple features with the same (`type`, `name`, `value`) tuple**. Merge evidence/tags/meta instead.
 
 ## Naming Conventions
 
 Use **generic names** with specific values in the `value` object:
-- ✅ `{ "name": "programming_language", "value": { "language": "java", "version": "11" } }`
-- ❌ `{ "name": "java_runtime", "value": { "version": "11" } }`
+- Good: `{ "name": "programming_language", "value": { "language": "java", "version": "11" } }`
+- Bad: `{ "name": "java_runtime", "value": { "version": "11" } }`
 
 Rules:
 - Use `snake_case` for `name`
@@ -51,8 +51,8 @@ The `value` field MUST contain **stable, low-cardinality properties** that enabl
 - Use `meta` for: regions/availability zones, hostnames, instance IDs, pod/container names, IPs, URLs/paths, request/trace IDs, endpoint lists, build hashes/edition labels
 
 Example (cloud deployment):
-- ✅ `value: { "provider": "aws" }` (stable)
-- ✅ `meta: { "regions": ["eu-west-1"], "availability_zones": ["eu-west-1a"] }` (variable/high-cardinality)
+- Good: `value: { "provider": "aws" }` (stable)
+- Good: `meta: { "regions": ["eu-west-1"], "availability_zones": ["eu-west-1a"] }` (variable/high-cardinality)
 
 **Conflict & cardinality rules**:
 - If multiple values are observed for the same property, prefer the most frequently supported value in `value` and record alternates in `meta.observed_*` with evidence.
