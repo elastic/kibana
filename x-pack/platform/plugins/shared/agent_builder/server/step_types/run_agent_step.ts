@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  isConversationCreatedEvent,
+  isConversationUpdatedEvent,
+  isRoundCompleteEvent,
+} from '@kbn/agent-builder-common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { firstValueFrom, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 
@@ -19,8 +25,12 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
     ...runAgentStepCommonDefinition,
     handler: async (context) => {
       try {
-        const { message, schema } = context.input;
-        const { 'agent-id': agentId, 'connector-id': connectorId } = context.config;
+        const { schema, message, conversation_id: conversationId } = context.input;
+
+        const config = context.config as Record<string, unknown>;
+        const agentId = config['agent-id'];
+        const connectorId = config['connector-id'];
+        const createConversation = Boolean(config['create-conversation']);
 
         context.logger.debug('ai.agent step started');
         const request = context.contextManager.getFakeRequest();
@@ -32,35 +42,64 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           agentId: agentId || agentBuilderDefaultAgentId,
         });
 
-        const runner = serviceManager.internalStart?.runnerFactory?.getRunner();
-        if (!runner) {
-          throw new Error('agent runner is not available');
+        const effectiveAgentId = (agentId as string | undefined) || agentBuilderDefaultAgentId;
+        const effectiveConnectorId = connectorId as string | undefined;
+
+        const storeConversation = createConversation || Boolean(conversationId);
+
+        const chatService = serviceManager.internalStart?.chat;
+        if (!chatService) {
+          throw new Error('chat service is not available');
         }
 
-        const { result } = await runner.runAgent({
-          agentId: agentId || agentBuilderDefaultAgentId,
-          defaultConnectorId: connectorId,
+        const chatEvents$ = chatService.converse({
+          agentId: effectiveAgentId,
+          connectorId: effectiveConnectorId,
+          conversationId,
+          autoCreateConversationWithId: createConversation,
+          storeConversation,
           request,
           abortSignal: context.abortSignal,
-          agentParams: {
-            structuredOutput: !!schema,
-            outputSchema: schema,
-            nextInput: {
-              message,
-            },
+          structuredOutput: !!schema,
+          outputSchema: schema,
+          nextInput: {
+            message,
           },
         });
 
-        context.logger.debug('ai.agent step completed successfully');
+        const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+        const roundEvent = events.find(isRoundCompleteEvent);
+        if (!roundEvent) {
+          throw new Error('No round_complete event received from chat service');
+        }
 
+        const round = roundEvent.data.round;
         const outputMessage = schema
-          ? JSON.stringify(result.round.response.structured_output)
-          : result.round.response.message;
+          ? JSON.stringify(round.response.structured_output)
+          : round.response.message;
+
+        if (storeConversation) {
+          const conversationEvent = events.find(
+            (e) => isConversationCreatedEvent(e) || isConversationUpdatedEvent(e)
+          );
+          if (!conversationEvent) {
+            throw new Error('No conversation_created / conversation_updated event received');
+          }
+          const convId = conversationEvent.data.conversation_id;
+
+          return {
+            output: {
+              message: outputMessage,
+              structured_output: round.response.structured_output,
+              conversation_id: convId,
+            },
+          };
+        }
 
         return {
           output: {
             message: outputMessage,
-            structured_output: result.round.response.structured_output,
+            structured_output: round.response.structured_output,
           },
         };
       } catch (error) {
