@@ -7,15 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 interface OverviewFooterItemProps {
   title: string;
@@ -31,15 +23,6 @@ export const OverviewFooterItem: FC<OverviewFooterItemProps> = ({
   callToAction,
 }) => (
   <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        color="primary"
-        href={docLink}
-        aria-label={i18n.translate('xpack.ml.overviewFooterItem.documentationLink', {
-          defaultMessage: 'Documentation link',
-        })}
-      />
-    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiTitle size="xs">
         <h3>{title}</h3>

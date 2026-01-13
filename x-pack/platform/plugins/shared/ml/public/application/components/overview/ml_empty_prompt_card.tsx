@@ -37,5 +37,6 @@ export const MLEmptyPromptCard = ({
     body={body}
     actions={actions}
     data-test-subj={dataTestSubj}
+    paddingSize="m"
   />
 );
