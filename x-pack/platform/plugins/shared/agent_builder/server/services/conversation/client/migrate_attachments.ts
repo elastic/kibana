@@ -81,11 +81,7 @@ export const migrateRoundAttachments = (rounds: ConversationRound[]): VersionedA
       }
 
       // Create versioned attachment from legacy attachment
-      const versionedAttachment = convertLegacyToVersioned(
-        attachment,
-        contentHash,
-        roundTimestamp
-      );
+      const versionedAttachment = convertLegacyToVersioned(attachment, contentHash, roundTimestamp);
 
       seenAttachments.set(dedupeKey, {
         attachment: versionedAttachment,

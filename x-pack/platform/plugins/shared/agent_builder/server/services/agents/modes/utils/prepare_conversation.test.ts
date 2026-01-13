@@ -13,7 +13,7 @@ import {
   ToolResultType,
   ToolType,
 } from '@kbn/agent-builder-common';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type {
   AttachmentBoundedTool,
@@ -300,7 +300,9 @@ describe('prepareConversation', () => {
       // stripped from previous rounds
       expect(result.previousRounds[0].input.attachments).toHaveLength(0);
       // promoted to conversation attachments
-      expect(result.attachmentStateManager.getAll().map((a) => a.id)).toContain('prev-attachment-id');
+      expect(result.attachmentStateManager.getAll().map((a) => a.id)).toContain(
+        'prev-attachment-id'
+      );
     });
 
     it('should process multiple previous rounds', async () => {

@@ -38,9 +38,7 @@ const createMockRound = (
   },
 });
 
-const createMockAttachment = (
-  overrides: Partial<Attachment> = {}
-): Attachment => ({
+const createMockAttachment = (overrides: Partial<Attachment> = {}): Attachment => ({
   id: `attachment-${Math.random().toString(36).substr(2, 9)}`,
   type: AttachmentType.text,
   data: { content: 'test content' },
@@ -133,14 +131,8 @@ describe('migrate_attachments', () => {
     it('preserves earliest timestamp for deduplicated attachments', () => {
       const data = { content: 'same content' };
       const rounds = [
-        createMockRound(
-          [createMockAttachment({ id: 'att-2', data })],
-          '2024-06-15T00:00:00.000Z'
-        ),
-        createMockRound(
-          [createMockAttachment({ id: 'att-1', data })],
-          '2024-01-01T00:00:00.000Z'
-        ),
+        createMockRound([createMockAttachment({ id: 'att-2', data })], '2024-06-15T00:00:00.000Z'),
+        createMockRound([createMockAttachment({ id: 'att-1', data })], '2024-01-01T00:00:00.000Z'),
       ];
 
       const result = migrateRoundAttachments(rounds);
@@ -153,7 +145,11 @@ describe('migrate_attachments', () => {
     it('handles different attachment types separately', () => {
       const rounds = [
         createMockRound([
-          createMockAttachment({ id: 'att-1', type: AttachmentType.text, data: { content: 'content' } }),
+          createMockAttachment({
+            id: 'att-1',
+            type: AttachmentType.text,
+            data: { content: 'content' },
+          }),
           createMockAttachment({ id: 'att-2', type: 'json', data: { key: 'value' } }),
         ]),
       ];
@@ -166,7 +162,10 @@ describe('migrate_attachments', () => {
     });
 
     it('generates UUID when attachment has no ID', () => {
-      const attachment = { type: AttachmentType.text, data: { content: 'no id' } } as unknown as Attachment;
+      const attachment = {
+        type: AttachmentType.text,
+        data: { content: 'no id' },
+      } as unknown as Attachment;
       const rounds = [createMockRound([attachment])];
 
       const result = migrateRoundAttachments(rounds);
@@ -256,9 +255,7 @@ describe('migrate_attachments', () => {
       const refs = createAttachmentRefs(rounds, versionedAttachments);
 
       expect(refs.size).toBe(1);
-      expect(refs.get(0)).toEqual([
-        { attachment_id: 'legacy-1', version: 1 },
-      ]);
+      expect(refs.get(0)).toEqual([{ attachment_id: 'legacy-1', version: 1 }]);
     });
 
     it('handles attachments not found in versioned list', () => {
@@ -277,10 +274,7 @@ describe('migrate_attachments', () => {
       const attachment1 = createMockAttachment({ id: 'att-1', data: data1 });
       const attachment2 = createMockAttachment({ id: 'att-2', data: data2 });
 
-      const rounds = [
-        createMockRound([attachment1]),
-        createMockRound([attachment2]),
-      ];
+      const rounds = [createMockRound([attachment1]), createMockRound([attachment2])];
 
       const versionedAttachments = migrateRoundAttachments(rounds);
       const refs = createAttachmentRefs(rounds, versionedAttachments);
@@ -295,10 +289,7 @@ describe('migrate_attachments', () => {
       const attachment1 = createMockAttachment({ id: 'att-1', data });
       const attachment2 = createMockAttachment({ id: 'att-2', data });
 
-      const rounds = [
-        createMockRound([attachment1]),
-        createMockRound([attachment2]),
-      ];
+      const rounds = [createMockRound([attachment1]), createMockRound([attachment2])];
 
       const versionedAttachments = migrateRoundAttachments(rounds);
       const refs = createAttachmentRefs(rounds, versionedAttachments);
@@ -322,10 +313,7 @@ describe('migrate_attachments', () => {
       const attachment2 = createMockAttachment({ id: 'att-2', data });
       const attachment3 = createMockAttachment({ id: 'att-3', data: { content: 'different' } });
 
-      const rounds = [
-        createMockRound([attachment1, attachment2]),
-        createMockRound([attachment3]),
-      ];
+      const rounds = [createMockRound([attachment1, attachment2]), createMockRound([attachment3])];
 
       const result = getAllLegacyAttachments(rounds);
 
