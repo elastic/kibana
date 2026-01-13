@@ -193,10 +193,14 @@ function loadSchemaFromFile(filePath: string): SchemaWithMeta[] | null {
     const module = require(filePath);
 
     // Try different export patterns to find the schema
+    // Plugins use various naming conventions: configSchema, ConfigSchema, config.schema, etc.
     let schema = null;
 
     if (module.configSchema?.getSchema) {
       schema = module.configSchema;
+    } else if (module.ConfigSchema?.getSchema) {
+      // Some plugins export as ConfigSchema (uppercase)
+      schema = module.ConfigSchema;
     } else if (module.config?.schema?.getSchema) {
       schema = module.config.schema;
     } else if (module.config?.getSchema) {
@@ -205,6 +209,9 @@ function loadSchemaFromFile(filePath: string): SchemaWithMeta[] | null {
       schema = module.default.schema;
     } else if (module.default?.getSchema) {
       schema = module.default;
+    } else if (module.schema?.getSchema) {
+      // Direct schema export
+      schema = module.schema;
     }
 
     if (schema) {
@@ -286,26 +293,33 @@ run(
     log.info('Scanning Kibana codebase for configuration options...');
 
     // Find all plugin manifests
-    const manifestPaths = await globby(
-      [
-        'src/platform/plugins/**/kibana.jsonc',
-        'x-pack/platform/plugins/**/kibana.jsonc',
-        'x-pack/solutions/**/kibana.jsonc',
-        'src/plugins/**/kibana.jsonc',
-        'x-pack/plugins/**/kibana.jsonc',
+    const manifestPaths = await globby(['**/kibana.jsonc'], {
+      cwd: REPO_ROOT,
+      absolute: true,
+      ignore: [
+        '**/node_modules/**',
+        '**/examples/**',
+        '**/packages/**',
+        '**/build/**',
+        // Exclude test directories and test helper plugins
+        'src/core/test/**',
+        'src/core/test-helpers/**',
+        'src/platform/test/**',
+        'x-pack/platform/test/**',
+        'x-pack/solutions/*/test/**',
+        'x-pack/performance/**',
+        'test/**',
       ],
-      {
-        cwd: REPO_ROOT,
-        absolute: true,
-        ignore: ['**/node_modules/**'],
-      }
-    );
+    });
 
     log.info(`Found ${manifestPaths.length} plugin manifests`);
 
     const allConfigs: ConfigEntry[] = [];
     let loadedCount = 0;
     let failedCount = 0;
+    let primaryCount = 0; // Found via server/index.ts config.schema
+    let fallback1Count = 0; // Found via common config file locations
+    let fallback2Count = 0; // Found via dynamic search
 
     // Process each plugin manifest
     for (const manifestPath of manifestPaths) {
@@ -318,59 +332,108 @@ run(
       const rawConfigPath = manifest.plugin?.configPath || manifest.configPath;
       const configPath = configPathToString(rawConfigPath, pluginId);
 
-      // Find the config file
+      // Find and load the config schema
+      // Strategy: Use the GUARANTEED approach first (load entry point and check config.schema)
+      // then fall back to heuristics if needed
       const pluginDir = Path.dirname(manifestPath);
-      const possibleConfigFiles = [
-        Path.join(pluginDir, 'server', 'config.ts'),
-        Path.join(pluginDir, 'common', 'config.ts'),
-        Path.join(pluginDir, 'server', 'index.ts'),
-        Path.join(pluginDir, 'server', 'config_schema.ts'),
-        Path.join(pluginDir, 'common', 'config_schema.ts'),
-      ];
+      const serverIndexPath = Path.join(pluginDir, 'server', 'index.ts');
 
+      let schemaStructure: SchemaWithMeta[] | null = null;
       let configFile: string | null = null;
-      for (const possible of possibleConfigFiles) {
-        if (Fs.existsSync(possible)) {
-          configFile = possible;
-          break;
+      let discoveryMethod: 'primary' | 'fallback1' | 'fallback2' | 'none' = 'none';
+
+      // PRIMARY: Load server/index.ts and check for config.schema
+      // This is how Kibana itself discovers plugin configs via PluginConfigDescriptor
+      if (Fs.existsSync(serverIndexPath)) {
+        configFile = serverIndexPath;
+        schemaStructure = loadSchemaFromFile(serverIndexPath);
+        if (schemaStructure) {
+          discoveryMethod = 'primary';
         }
       }
 
-      if (configFile) {
-        if (verbose) {
-          log.debug(`Processing ${pluginId} (${configPath}) from ${configFile}`);
+      // FALLBACK 1: If entry point didn't have config.schema, try common config file locations
+      if (!schemaStructure) {
+        const fallbackConfigFiles = [
+          Path.join(pluginDir, 'server', 'config.ts'),
+          Path.join(pluginDir, 'server', 'config_schema.ts'),
+          Path.join(pluginDir, 'common', 'config.ts'),
+          Path.join(pluginDir, 'common', 'config_schema.ts'),
+        ];
+
+        for (const possible of fallbackConfigFiles) {
+          if (Fs.existsSync(possible)) {
+            configFile = possible;
+            schemaStructure = loadSchemaFromFile(possible);
+            if (schemaStructure) {
+              discoveryMethod = 'fallback1';
+              break;
+            }
+          }
         }
+      }
 
-        const schemaStructure = loadSchemaFromFile(configFile);
+      // FALLBACK 2: Search for any file with config in the name that imports @kbn/config-schema
+      if (!schemaStructure) {
+        const searchPatterns = [
+          Path.join(pluginDir, 'server', '**/config*.ts'),
+          Path.join(pluginDir, 'common', '**/config*.ts'),
+          Path.join(pluginDir, 'public', 'config.ts'),
+        ];
 
-        if (schemaStructure && schemaStructure.length > 0) {
-          loadedCount++;
+        for (const pattern of searchPatterns) {
+          const matches = await globby(pattern, {
+            ignore: ['**/*.test.ts', '**/*.mock.ts', '**/mocks/**'],
+          });
 
-          for (const entry of schemaStructure) {
-            const fullPath =
-              entry.path.length > 0 ? `${configPath}.${entry.path.join('.')}` : configPath;
-
-            allConfigs.push({
-              path: fullPath,
-              type: entry.type,
-              ...(entry.description && { description: entry.description }),
-              ...(entry.deprecated && { deprecated: entry.deprecated }),
-            });
+          for (const match of matches) {
+            try {
+              const content = Fs.readFileSync(match, 'utf8');
+              if (content.includes("from '@kbn/config-schema'")) {
+                configFile = match;
+                schemaStructure = loadSchemaFromFile(match);
+                if (schemaStructure) {
+                  discoveryMethod = 'fallback2';
+                  break;
+                }
+              }
+            } catch {
+              // Skip files we can't read
+            }
           }
-        } else {
-          failedCount++;
-          if (verbose) {
-            log.debug(`  Could not load schema from ${configFile}`);
-          }
+          if (schemaStructure) break;
+        }
+      }
 
-          // Add default enabled option as fallback
+      if (verbose && configFile) {
+        log.debug(`Processing ${pluginId} (${configPath}) from ${configFile} [${discoveryMethod}]`);
+      }
+
+      if (schemaStructure && schemaStructure.length > 0) {
+        loadedCount++;
+        if (discoveryMethod === 'primary') primaryCount++;
+        else if (discoveryMethod === 'fallback1') fallback1Count++;
+        else if (discoveryMethod === 'fallback2') fallback2Count++;
+
+        for (const entry of schemaStructure) {
+          const fullPath =
+            entry.path.length > 0 ? `${configPath}.${entry.path.join('.')}` : configPath;
+
           allConfigs.push({
-            path: `${configPath}.enabled`,
-            type: 'boolean (default: true)',
+            path: fullPath,
+            type: entry.type,
+            ...(entry.description && { description: entry.description }),
+            ...(entry.deprecated && { deprecated: entry.deprecated }),
           });
         }
       } else {
-        // No config file found, add default enabled option
+        // No schema found - use fallback
+        failedCount++;
+        if (verbose && configFile) {
+          log.debug(`  Could not load schema from ${configFile}`);
+        }
+
+        // Add default enabled option as fallback
         allConfigs.push({
           path: `${configPath}.enabled`,
           type: 'boolean (default: true)',
@@ -478,9 +541,14 @@ ${yamlOutput}`;
     }
 
     log.info(`Found ${uniqueConfigs.length} configuration options`);
-    log.info(`Successfully loaded schemas from ${loadedCount} plugins`);
+    log.info(`Successfully loaded schemas from ${loadedCount} plugins:`);
+    log.info(`  - Primary (server/index.ts config.schema): ${primaryCount}`);
+    log.info(`  - Fallback 1 (config.ts/config_schema.ts): ${fallback1Count}`);
+    log.info(`  - Fallback 2 (dynamic search): ${fallback2Count}`);
     if (failedCount > 0) {
-      log.warning(`Could not load schemas from ${failedCount} plugins (using fallback)`);
+      log.warning(
+        `Could not load schemas from ${failedCount} plugins (using default enabled option)`
+      );
     }
   },
   {
