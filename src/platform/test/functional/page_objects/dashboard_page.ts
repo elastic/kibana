@@ -427,7 +427,7 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
-  public async ensureHasUnsavedChangesNotification(retry = false) {
+  public async ensureHasUnsavedChangesNotification({ retry = false } = {}) {
     this.log.debug('Expect unsaved changes notification indicator to be present');
     if (retry) {
       await this.retry.try(async () => {
@@ -439,7 +439,7 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
-  public async ensureMissingUnsavedChangesNotification(retry = false) {
+  public async ensureMissingUnsavedChangesNotification({ retry = false } = {}) {
     this.log.debug('Expect there to be no unsaved changes notification indicator');
     if (retry) {
       await this.retry.try(async () => {
