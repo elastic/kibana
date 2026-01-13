@@ -17,12 +17,12 @@ import type {
   InternalChromeStart,
 } from '@kbn/core-chrome-browser-internal';
 import { lazyObject } from '@kbn/lazy-object';
+import { sidebarServiceMock } from '@kbn/core-chrome-sidebar/mocks';
 
-const createSetupContractMock = (): InternalChromeSetup => {
-  return {
-    // TODO: add sidebar mock methods as needed
-    sidebar: {} as any,
-  };
+const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
+  return lazyObject({
+    sidebar: lazyObject(sidebarServiceMock.createSetupContract()),
+  });
 };
 
 const createStartContractMock = () => {
@@ -36,8 +36,7 @@ const createStartContractMock = () => {
     getProjectSideNavComponentForGridLayout: jest.fn(),
     getSidebarComponent: jest.fn(),
     wrapInChromeProvider: jest.fn(),
-    // TODO: mock sidebar methods as needed
-    sidebar: {} as any,
+    sidebar: lazyObject(sidebarServiceMock.createStartContract()),
     navLinks: lazyObject({
       getNavLinks$: jest.fn(),
       has: jest.fn(),

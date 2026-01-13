@@ -90,9 +90,10 @@ export class GridLayout implements LayoutService {
 
     const footer$ = chrome.getGlobalFooter$();
 
-    const sidebarWidth$ = combineLatest([chrome.sidebar.width$, chrome.sidebar.isOpen$]).pipe(
-      map(([width, isOpen]) => (isOpen ? width : 0))
-    );
+    const sidebarWidth$ = combineLatest([
+      chrome.sidebar.getWidth$(),
+      chrome.sidebar.isOpen$(),
+    ]).pipe(map(([width, isOpen]) => (isOpen ? width : 0)));
 
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265

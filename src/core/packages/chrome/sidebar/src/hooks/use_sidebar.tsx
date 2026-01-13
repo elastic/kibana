@@ -30,8 +30,8 @@ export function useSidebar(): UseSidebarApi {
   const sidebarService = useSidebarService();
   const sidebar = sidebarService.state;
 
-  const isOpen = useObservable(sidebar.isOpen$, sidebar.isOpen());
-  const currentAppId = useObservable(sidebar.currentAppId$, sidebar.getCurrentAppId());
+  const isOpen = useObservable(sidebar.isOpen$(), sidebar.isOpen());
+  const currentAppId = useObservable(sidebar.getCurrentAppId$(), sidebar.getCurrentAppId());
 
   const open = useCallback(
     <TParams = {},>(appId: string, params?: Partial<TParams>) => sidebar.open(appId, params),
@@ -63,7 +63,7 @@ export function useSidebar(): UseSidebarApi {
  */
 export function useSidebarWidth(): number {
   const sidebar = useSidebarService().state;
-  return useObservable(sidebar.width$, sidebar.getWidth());
+  return useObservable(sidebar.getWidth$(), sidebar.getWidth());
 }
 
 /**

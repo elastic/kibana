@@ -1291,6 +1291,7 @@
     "d3-scale": "3.3.0",
     "d3-selection": "3.0.0",
     "d3-transition": "3.0.1",
+    "decko": "^1.2.0",
     "dedent": "0.7.0",
     "deep-freeze-strict": "1.1.1",
     "deepmerge": "4.3.1",

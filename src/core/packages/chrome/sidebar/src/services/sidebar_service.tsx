@@ -26,7 +26,7 @@ export interface SidebarServiceStart extends SidebarStateServiceApi {
   /** Set the availability status of a sidebar app */
   setAvailable: SidebarRegistryServiceApi['setAvailable'];
   /** Observable of apps that are currently available */
-  availableApps$: SidebarRegistryServiceApi['availableApps$'];
+  getAvailableApps$: SidebarRegistryServiceApi['getAvailableApps$'];
 }
 
 /**
@@ -59,11 +59,21 @@ export class SidebarService {
     // initialize state service on start to make sure all apps are registered
     (this.state as SidebarStateService).start();
     return {
-      ...this.registry,
-      ...this.state,
+      // SidebarStateServiceApi
+      isOpen$: this.state.isOpen$.bind(this.state),
+      isOpen: this.state.isOpen.bind(this.state),
+      open: this.state.open.bind(this.state),
+      close: this.state.close.bind(this.state),
+      getWidth$: this.state.getWidth$.bind(this.state),
+      getWidth: this.state.getWidth.bind(this.state),
+      setWidth: this.state.setWidth.bind(this.state),
+      getCurrentAppId$: this.state.getCurrentAppId$.bind(this.state),
+      getCurrentAppId: this.state.getCurrentAppId.bind(this.state),
+      // SidebarAppStateServiceApi
       setParams: this.appState.setParams.bind(this.appState),
+      // SidebarRegistryServiceApi
       setAvailable: this.registry.setAvailable.bind(this.registry),
-      availableApps$: this.registry.availableApps$,
+      getAvailableApps$: this.registry.getAvailableApps$.bind(this.registry),
     };
   }
 

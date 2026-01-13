@@ -10,20 +10,21 @@
 // eslint-disable-next-line max-classes-per-file
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, filter, map, take } from 'rxjs';
+import { memoize } from 'decko';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 import type { SidebarAppStateService } from './sidebar_app_state_service';
 
 export interface SidebarStateServiceApi {
-  isOpen$: Observable<boolean>;
+  isOpen$: () => Observable<boolean>;
   isOpen: () => boolean;
   open: <TParams = {}>(appId: string, params?: Partial<TParams>) => void;
   close: () => void;
 
-  width$: Observable<number>;
+  getWidth$: () => Observable<number>;
   getWidth: () => number;
   setWidth: (width: number) => void;
 
-  currentAppId$: Observable<string | null>;
+  getCurrentAppId$: () => Observable<string | null>;
   getCurrentAppId: () => string | null;
 }
 
@@ -36,18 +37,29 @@ function getMaxWidth(): number {
 }
 
 export class SidebarStateService implements SidebarStateServiceApi {
-  private readonly _currentAppId$ = new BehaviorSubject<string | null>(null);
-  private readonly _width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
+  private readonly currentAppId$ = new BehaviorSubject<string | null>(null);
+  private readonly width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
   private pendingRestoreSubscription?: Subscription;
-
-  public readonly currentAppId$ = this._currentAppId$.asObservable();
-  public readonly isOpen$ = this._currentAppId$.pipe(map((appId) => appId !== null));
-  public readonly width$ = this._width$.asObservable();
 
   constructor(
     private readonly registry: SidebarRegistryServiceApi,
     private readonly appStateService: SidebarAppStateService
   ) {}
+
+  @memoize
+  isOpen$(): Observable<boolean> {
+    return this.currentAppId$.pipe(map((appId) => appId !== null));
+  }
+
+  @memoize
+  getWidth$(): Observable<number> {
+    return this.width$.asObservable();
+  }
+
+  @memoize
+  getCurrentAppId$(): Observable<string | null> {
+    return this.currentAppId$.asObservable();
+  }
 
   start() {
     const currentAppId = StorageHelper.get<string>('currentAppId') ?? null;
@@ -92,7 +104,7 @@ export class SidebarStateService implements SidebarStateServiceApi {
       )
       .subscribe(() => {
         // Only restore if no other app has been opened in the meantime
-        if (this._currentAppId$.getValue() === null) {
+        if (this.currentAppId$.getValue() === null) {
           this.open(appId);
         }
       });
@@ -116,33 +128,33 @@ export class SidebarStateService implements SidebarStateServiceApi {
       this.appStateService.initializeParams(appId, params);
     }
 
-    this._currentAppId$.next(appId);
+    this.currentAppId$.next(appId);
     StorageHelper.set('currentAppId', appId);
   }
 
   close(): void {
-    this._currentAppId$.next(null);
+    this.currentAppId$.next(null);
     StorageHelper.set('currentAppId', null);
   }
 
   isOpen(): boolean {
-    return this._currentAppId$.getValue() !== null;
+    return this.currentAppId$.getValue() !== null;
   }
 
   setWidth(width: number): void {
     const maxWidth = getMaxWidth();
     width = Math.max(MIN_WIDTH, Math.min(maxWidth, width));
 
-    this._width$.next(width);
+    this.width$.next(width);
     StorageHelper.set('width', width);
   }
 
   getWidth(): number {
-    return this._width$.getValue();
+    return this.width$.getValue();
   }
 
   getCurrentAppId(): string | null {
-    return this._currentAppId$.getValue();
+    return this.currentAppId$.getValue();
   }
 }
 
