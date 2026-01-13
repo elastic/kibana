@@ -17,10 +17,17 @@ import {
   EuiPanel,
   euiScrollBarStyles,
   EuiTitle,
-  useEuiShadow,
-  useEuiTheme,
+  euiShadow,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { PanelResizeHandle } from './panel_resize_handle';
+
+const sidebarWrapperStyles = css`
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+`;
 
 const panelContainerStyles = ({ euiTheme }: UseEuiTheme) =>
   css`
@@ -29,6 +36,7 @@ const panelContainerStyles = ({ euiTheme }: UseEuiTheme) =>
     flex-grow: 1;
     margin-right: ${euiTheme.size.s};
     margin-bottom: ${euiTheme.size.s};
+    min-width: 0; // Allow panel to shrink
   `;
 
 const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
@@ -38,9 +46,10 @@ const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   align-items: center;
 `;
 
-const scrollableContentStyles = (theme: UseEuiTheme, shadow: string) => {
+const scrollableContentStyles = (theme: UseEuiTheme) => {
   const { euiTheme } = theme;
   const scrolling = euiScrollBarStyles(theme);
+  const shadow = euiShadow(theme, 's');
 
   return css`
     ${scrolling};
@@ -50,52 +59,54 @@ const scrollableContentStyles = (theme: UseEuiTheme, shadow: string) => {
   `;
 };
 
-export const SidebarPanel: FC<{ children: ReactNode; title: string; onClose: () => void }> = ({
-  children,
-  title,
-  onClose,
-}) => {
-  const theme = useEuiTheme();
-  const shadow = useEuiShadow('s');
+export interface SidebarPanelProps {
+  children: ReactNode;
+  title: string;
+  onClose: () => void;
+}
 
+export const SidebarPanel: FC<SidebarPanelProps> = ({ children, title, onClose }) => {
   return (
-    <EuiPanel
-      paddingSize="none"
-      color="transparent"
-      css={panelContainerStyles(theme)}
-      hasBorder={false}
-      hasShadow={false}
-    >
-      <EuiFlexGroup css={headerStyles(theme)}>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem>
-              <EuiButtonIcon
-                iconType={'fullScreen'}
-                onClick={() => {}}
-                aria-label="Full screen"
-                color="text"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonIcon
-                iconType="cross"
-                onClick={onClose}
-                aria-label="Close Sidebar"
-                color="text"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiPanel css={scrollableContentStyles(theme, shadow)} borderRadius="m">
-        {children}
+    <div css={sidebarWrapperStyles}>
+      <PanelResizeHandle />
+      <EuiPanel
+        paddingSize="none"
+        color="transparent"
+        css={panelContainerStyles}
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiFlexGroup css={headerStyles}>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>{title}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem>
+                <EuiButtonIcon
+                  iconType={'fullScreen'}
+                  onClick={() => {}}
+                  aria-label="Full screen"
+                  color="text"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonIcon
+                  iconType="cross"
+                  onClick={onClose}
+                  aria-label="Close Sidebar"
+                  color="text"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiPanel css={scrollableContentStyles} borderRadius="m">
+          {children}
+        </EuiPanel>
       </EuiPanel>
-    </EuiPanel>
+    </div>
   );
 };

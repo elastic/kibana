@@ -29,6 +29,7 @@ export interface SidebarStateServiceApi {
 
 const DEFAULT_WIDTH = 400;
 const MIN_WIDTH = 200;
+const MAX_WIDTH = 800;
 
 export class SidebarStateService implements SidebarStateServiceApi {
   private readonly _currentAppId$ = new BehaviorSubject<string | null>(null);
@@ -117,7 +118,7 @@ export class SidebarStateService implements SidebarStateServiceApi {
   }
 
   setWidth(width: number): void {
-    width = Math.max(MIN_WIDTH, width);
+    width = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, width));
 
     this._width$.next(width);
     StorageHelper.set('width', width);
