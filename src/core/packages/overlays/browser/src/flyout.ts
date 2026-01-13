@@ -17,8 +17,8 @@ import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
  */
 export interface OverlayFlyoutStart {
   /**
-   * Opens a flyout panel with the given mount point inside. You can use
-   * `close()` on the returned FlyoutRef to close the flyout.
+   * Opens a flyout panel with the given mount point inside. Calling `open` for multiple flyouts replaces the current flyout.
+   * You can use `close()` on the returned FlyoutRef to close the flyout.
    *
    * @param mount {@link MountPoint} - Mounts the children inside a flyout panel
    * @param options {@link OverlayFlyoutOpenOptions} - options for the flyout

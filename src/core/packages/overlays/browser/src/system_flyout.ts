@@ -26,8 +26,8 @@ export type OverlaySystemFlyoutOpenOptions = Omit<OverlayFlyoutOpenOptions, 'ses
  */
 export interface OverlaySystemFlyoutStart {
   /**
-   * Opens a flyout panel with given content inside. You can use
-   * `close()` on the returned FlyoutRef to close the flyout.
+   * Opens a flyout panel with given React element inside. Calling `open` for multiple flyouts allows history navigation.
+   * You can use `close()` on the returned FlyoutRef to close the flyout.
    *
    * @param content React.ReactElement - Renders the content inside a flyout panel
    * @param options {@link EuiFlyoutProps} - options for the flyout
