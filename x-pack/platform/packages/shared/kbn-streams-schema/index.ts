@@ -142,8 +142,6 @@ export {
   type Feature,
   type BaseFeature,
   type FeatureStatus,
-  type FeatureType,
-  featureTypes,
   isFeature,
   featureSchema,
   baseFeatureSchema,

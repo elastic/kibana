@@ -7,9 +7,6 @@
 
 import { z } from '@kbn/zod';
 
-export const featureTypes = ['infrastructure', 'technology'] as const;
-export type FeatureType = (typeof featureTypes)[number];
-
 const featureStatus = ['active', 'stale', 'expired'] as const;
 export type FeatureStatus = (typeof featureStatus)[number];
 
