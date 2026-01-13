@@ -24,11 +24,12 @@ import type {
   DataConnectorsServerSetupDependencies,
   DataConnectorsServerStartDependencies,
 } from '../types';
-import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
+import { convertSOtoAPIResponse, createDataSourceRequestSchema } from './schema';
 
 // Constants
 const DEFAULT_PAGE_SIZE = 100;
 const MAX_PAGE_SIZE = 1000;
+const APP_BASE_PATH = '/app/data_sources';
 
 function createErrorResponse(
   response: KibanaResponseFactory,
@@ -52,14 +53,14 @@ export interface RouteDependencies {
 }
 
 /**
- * Registers all data connector routes
+ * Registers all data sources routes
  */
 export function registerRoutes(dependencies: RouteDependencies) {
   const { router, logger, getStartServices, workflowManagement } = dependencies;
-  // List all data connectors
+  // List all data sources
   router.get(
     {
-      path: '/api/data_connectors',
+      path: APP_BASE_PATH,
       validate: false,
       security: {
         authz: {
@@ -79,27 +80,27 @@ export function registerRoutes(dependencies: RouteDependencies) {
             perPage: DEFAULT_PAGE_SIZE,
           });
 
-        const connectors = findResult.saved_objects.map((savedObject) => {
+        const dataSources = findResult.saved_objects.map((savedObject) => {
           return convertSOtoAPIResponse(savedObject);
         });
 
         return response.ok({
           body: {
-            connectors,
+            dataSources,
             total: findResult.total,
           },
         });
       } catch (error) {
-        logger.error(`Failed to list all data connectors: ${(error as Error).message}`);
-        return createErrorResponse(response, 'Failed to list connectors', error as Error);
+        logger.error(`Failed to list all data sources: ${(error as Error).message}`);
+        return createErrorResponse(response, 'Failed to list data sources', error as Error);
       }
     }
   );
 
-  // Get one data connector by ID
+  // Get one data source by ID
   router.get(
     {
-      path: '/api/data_connectors/{id}',
+      path: `${APP_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
@@ -122,18 +123,18 @@ export function registerRoutes(dependencies: RouteDependencies) {
           body: convertSOtoAPIResponse(savedObject),
         });
       } catch (error) {
-        logger.error(`Error fetching data connector: ${(error as Error).message}`);
-        return createErrorResponse(response, 'Failed to fetch data connector', error as Error);
+        logger.error(`Error fetching data source: ${(error as Error).message}`);
+        return createErrorResponse(response, 'Failed to fetch data source', error as Error);
       }
     }
   );
 
-  // Create data connector
+  // Create data source
   router.post(
     {
-      path: '/api/data_connectors',
+      path: APP_BASE_PATH,
       validate: {
-        body: createDataConnectorRequestSchema,
+        body: createDataSourceRequestSchema,
       },
       security: {
         authz: {
@@ -162,7 +163,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           });
         }
 
-        const dataConnectorId = await createDataSourceAndRelatedResources({
+        const dataSourceId = await createDataSourceAndRelatedResources({
           name,
           type,
           token,
@@ -177,21 +178,21 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
         return response.ok({
           body: {
-            message: 'Data connector created successfully!',
-            dataConnectorId,
+            message: 'Data source created successfully!',
+            dataSourceId,
           },
         });
       } catch (error) {
-        logger.error(`Error creating data connector: ${(error as Error).message}`);
-        return createErrorResponse(response, 'Failed to create data connector', error as Error);
+        logger.error(`Error creating data source: ${(error as Error).message}`);
+        return createErrorResponse(response, 'Failed to create data source', error as Error);
       }
     }
   );
 
-  // Delete all data connectors
+  // Delete all data sources
   router.delete(
     {
-      path: '/api/data_connectors',
+      path: APP_BASE_PATH,
       validate: false,
       security: {
         authz: {
@@ -225,7 +226,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           });
         }
 
-        // Delete all related resources and saved objects for each connector
+        // Delete all related resources and saved objects for each data source
         const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const toolRegistry = await agentBuilder.tools.getRegistry({ request });
@@ -267,10 +268,10 @@ export function registerRoutes(dependencies: RouteDependencies) {
     }
   );
 
-  // Delete data connector by ID
+  // Delete data source by ID
   router.delete(
     {
-      path: '/api/data_connectors/{id}',
+      path: `${APP_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
@@ -289,7 +290,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           request.params.id
         );
 
-        // Delete the connector and all related resources
+        // Delete the data source and all related resources
         const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const toolRegistry = await agentBuilder.tools.getRegistry({ request });
@@ -308,8 +309,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
           body: result,
         });
       } catch (error) {
-        logger.error(`Failed to delete connector: ${(error as Error).message}`);
-        return createErrorResponse(response, 'Failed to delete connector', error as Error);
+        logger.error(`Failed to delete data source: ${(error as Error).message}`);
+        return createErrorResponse(response, 'Failed to delete data source', error as Error);
       }
     }
   );

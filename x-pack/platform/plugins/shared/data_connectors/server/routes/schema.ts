@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { DataSourceAttributes } from '../saved_objects';
 
-export interface DataConnectorAPIResponse {
+export interface DataSourceAPIResponse {
   id: string;
   name: string;
   type: string;
@@ -22,7 +22,7 @@ export interface DataConnectorAPIResponse {
 
 export function convertSOtoAPIResponse(
   savedObject: SavedObject<DataSourceAttributes>
-): DataConnectorAPIResponse {
+): DataSourceAPIResponse {
   return {
     id: savedObject.id,
     name: savedObject.attributes.name,
@@ -35,7 +35,7 @@ export function convertSOtoAPIResponse(
   };
 }
 
-export const createDataConnectorRequestSchema = schema.object({
+export const createDataSourceRequestSchema = schema.object({
   type: schema.string({ minLength: 1 }),
   name: schema.string({ minLength: 1 }),
   token: schema.string({ minLength: 1 }), // in the future, this can be either token or username&password
