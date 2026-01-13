@@ -10,40 +10,60 @@
  *
  * The ranking system prioritizes fields in the following order:
  * 1. user.entity.id
- * 2. user.email
- * 3. user.name @ host (when host identity available)
- * 4. user.id @ host (when host identity available)
- * 5. user.id (when no host identity)
- * 6. user.name (when no host identity)
+ * 2. user.name @ host.entity.id
+ * 3. user.name @ host.id
+ * 4. user.name @ host.name
+ * 5. user.id
+ * 6. user.email
+ * 7. user.name @ user.domain
+ * 8. user.name
  *
- * Host identity ranking: host.id > host.name > host.hostname > host.mac > host.ip
+ * Rules:
+ * - Ignores empty or invalid values (e.g., "-", "unknown", "N/A")
+ * - When composing fields (e.g., user.name @ host.id), ensures both sides are non-empty and valid
  *
  * @returns {string} A Painless script that computes the user entity ID
  */
 export const generateUserEntityIdScript = (): string => {
   const script = `
-    // Determine best host identity (per new ranking) — NO host.entity.id
-    String h = null;
-    if (doc.containsKey('host.id') && !doc['host.id'].empty) { h = doc['host.id'].value; }
-    else if (doc.containsKey('host.name') && !doc['host.name'].empty) { h = doc['host.name'].value; }
-    else if (doc.containsKey('host.hostname') && !doc['host.hostname'].empty) { h = doc['host.hostname'].value; }
-    else if (doc.containsKey('host.mac') && !doc['host.mac'].empty) { h = doc['host.mac'].value; }
-    else if (doc.containsKey('host.ip') && !doc['host.ip'].empty) { h = doc['host.ip'].value; }
-
-    // Global top priority: user.entity.id, then user.email
-    if (doc.containsKey('user.entity.id') && !doc['user.entity.id'].empty) { emit(doc['user.entity.id'].value); return; }
-    if (doc.containsKey('user.email') && !doc['user.email'].empty) { emit(doc['user.email'].value); return; }
-
-    // When a host identity field is available
-    if (h != null) {
-      // Prefer user.name @ host..., then user.id @ host...
-      if (doc.containsKey('user.name') && !doc['user.name'].empty) { emit(doc['user.name'].value + '@' + h); return; }
-      if (doc.containsKey('user.id') && !doc['user.id'].empty) { emit(doc['user.id'].value + '@' + h); return; }
+    // Helper: check if field exists and has a valid (non-empty, non-placeholder) value
+    boolean isValid(def doc, String field) {
+      if (!doc.containsKey(field) || doc[field].empty) return false;
+      String v = doc[field].value.toString().toLowerCase();
+      return v != '' && v != '-' && v != 'unknown' && v != 'n/a';
     }
 
-    // No host identity available (or neither user.name/id present with host): fall back to user.id, then user.name
-    if (doc.containsKey('user.id') && !doc['user.id'].empty) { emit(doc['user.id'].value); return; }
-    if (doc.containsKey('user.name') && !doc['user.name'].empty) { emit(doc['user.name'].value); return; }
+    // 1. user.entity.id (highest priority)
+    if (isValid(doc, 'user.entity.id')) { emit(doc['user.entity.id'].value); return; }
+
+    // 2. user.name @ host.entity.id
+    if (isValid(doc, 'user.name') && isValid(doc, 'host.entity.id')) {
+      emit(doc['user.name'].value + '@' + doc['host.entity.id'].value); return;
+    }
+
+    // 3. user.name @ host.id
+    if (isValid(doc, 'user.name') && isValid(doc, 'host.id')) {
+      emit(doc['user.name'].value + '@' + doc['host.id'].value); return;
+    }
+
+    // 4. user.name @ host.name
+    if (isValid(doc, 'user.name') && isValid(doc, 'host.name')) {
+      emit(doc['user.name'].value + '@' + doc['host.name'].value); return;
+    }
+
+    // 5. user.id
+    if (isValid(doc, 'user.id')) { emit(doc['user.id'].value); return; }
+
+    // 6. user.email
+    if (isValid(doc, 'user.email')) { emit(doc['user.email'].value); return; }
+
+    // 7. user.name @ user.domain
+    if (isValid(doc, 'user.name') && isValid(doc, 'user.domain')) {
+      emit(doc['user.name'].value + '@' + doc['user.domain'].value); return;
+    }
+
+    // 8. user.name (lowest priority)
+    if (isValid(doc, 'user.name')) { emit(doc['user.name'].value); return; }
 
     emit('');
   `;

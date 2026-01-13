@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { collectValues as collect, newestValue } from './field_utils';
+import { collectValues as collect } from './field_utils';
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 
@@ -33,12 +33,12 @@ export const hostEntityEngineDescription: EntityDescription = {
     },
   ],
   fields: [
-    // Store single keyword values for display and querying (must come first to avoid array conversion)
-    newestValue({ source: 'host.name' }),
-    newestValue({ source: 'host.id' }),
-    newestValue({ source: 'host.hostname' }),
-    newestValue({ source: 'host.mac' }),
-    newestValue({
+    // Collect multiple values for host identity fields (can have multiple values across events)
+    collect({ source: 'host.name' }),
+    collect({ source: 'host.id' }),
+    collect({ source: 'host.hostname' }),
+    collect({ source: 'host.mac' }),
+    collect({
       source: 'host.ip',
       mapping: {
         type: 'ip',

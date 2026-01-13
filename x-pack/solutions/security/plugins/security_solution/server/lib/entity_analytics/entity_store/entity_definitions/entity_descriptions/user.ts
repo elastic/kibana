@@ -40,10 +40,11 @@ export const userEntityEngineDescription: EntityDescription = {
     },
   ],
   fields: [
-    // Store single keyword values for display and querying (must come first to avoid array conversion)
-    newestValue({ source: 'user.name' }),
-    newestValue({ source: 'user.id' }),
-    newestValue({ source: 'user.email' }),
+    // Collect multiple values for user identity fields (can have multiple values across events)
+    collect({ source: 'user.name' }),
+    collect({ source: 'user.id' }),
+    collect({ source: 'user.email' }),
+    // Host fields remain as newestValue (context fields for the user)
     newestValue({ source: 'host.name' }),
     newestValue({ source: 'host.id' }),
     newestValue({ source: 'host.hostname' }),

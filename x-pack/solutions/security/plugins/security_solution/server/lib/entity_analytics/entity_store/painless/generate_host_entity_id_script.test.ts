@@ -14,71 +14,74 @@ describe('generateHostEntityIdScript', () => {
     expect(typeof script).toBe('string');
   });
 
-  it('should include all ranking checks in the correct order', () => {
+  it('should include all ranking fields', () => {
     const script = generateHostEntityIdScript();
 
     // Check that all fields are present in the script
     expect(script).toContain('host.entity.id');
     expect(script).toContain('host.id');
-    expect(script).toContain('host.mac');
     expect(script).toContain('host.name');
     expect(script).toContain('host.hostname');
-    expect(script).toContain('host.ip');
+    expect(script).toContain('host.domain');
   });
 
   it('should prioritize host.entity.id first', () => {
     const script = generateHostEntityIdScript();
-    const entityIdIndex = script.indexOf('host.entity.id');
-    const hostIdIndex = script.indexOf("doc['host.id']");
+    const entityIdEmit = script.indexOf("emit(doc['host.entity.id'].value)");
+    const hostIdEmit = script.indexOf("emit(doc['host.id'].value)");
 
-    expect(entityIdIndex).toBeLessThan(hostIdIndex);
+    expect(entityIdEmit).toBeLessThan(hostIdEmit);
   });
 
-  it('should use label (host.name or host.hostname) for combinations', () => {
+  it('should prioritize host.id second', () => {
     const script = generateHostEntityIdScript();
+    const hostIdEmit = script.indexOf("emit(doc['host.id'].value); return;");
+    const hostNameDomainCombo = script.indexOf("doc['host.domain'].value); return;");
 
-    expect(script).toContain('String label');
-    expect(script).toContain("label = doc['host.name'].value");
-    expect(script).toContain("label = doc['host.hostname'].value");
+    expect(hostIdEmit).toBeLessThan(hostNameDomainCombo);
   });
 
-  it('should combine label with host.id using pipe separator', () => {
+  it('should prioritize host.name . host.domain third', () => {
     const script = generateHostEntityIdScript();
+    // Find the first occurrence of host.name combined with host.domain
+    const hostNameDomainCombo = script.indexOf(
+      "doc['host.name'].value + '.' + doc['host.domain'].value"
+    );
+    const hostHostnameDomainCombo = script.indexOf(
+      "doc['host.hostname'].value + '.' + doc['host.domain'].value"
+    );
 
-    expect(script).toContain("label + '|' + doc['host.id'].value");
+    expect(hostNameDomainCombo).toBeLessThan(hostHostnameDomainCombo);
   });
 
-  it('should combine label with host.mac using pipe separator', () => {
+  it('should prioritize host.hostname fifth, before host.name alone', () => {
     const script = generateHostEntityIdScript();
+    const hostnameEmit = script.indexOf("emit(doc['host.hostname'].value); return;");
+    const hostNameEmit = script.lastIndexOf("emit(doc['host.name'].value); return;");
 
-    expect(script).toContain("label + '|' + doc['host.mac'].value");
+    expect(hostnameEmit).toBeLessThan(hostNameEmit);
   });
 
-  it('should combine host.name and host.ip with pipe separator', () => {
+  it('should combine host.name with host.domain using dot separator', () => {
     const script = generateHostEntityIdScript();
 
-    expect(script).toContain("doc['host.name'].value + '|' + doc['host.ip'].value");
+    expect(script).toContain("doc['host.name'].value + '.' + doc['host.domain'].value");
   });
 
-  it('should combine host.hostname and host.ip with pipe separator', () => {
+  it('should combine host.hostname with host.domain using dot separator', () => {
     const script = generateHostEntityIdScript();
 
-    expect(script).toContain("doc['host.hostname'].value + '|' + doc['host.ip'].value");
+    expect(script).toContain("doc['host.hostname'].value + '.' + doc['host.domain'].value");
   });
 
-  it('should include fallback fields in correct order', () => {
+  it('should emit host.name as lowest priority fallback', () => {
     const script = generateHostEntityIdScript();
 
-    const hostIdIndex = script.indexOf("emit(doc['host.id'].value); return;");
-    const hostMacIndex = script.indexOf("emit(doc['host.mac'].value); return;");
-    const hostNameIndex = script.indexOf("emit(doc['host.name'].value); return;");
-    const hostnameIndex = script.indexOf("emit(doc['host.hostname'].value); return;");
-    const ipIndex = script.indexOf("emit(doc['host.ip'].value); return;");
+    // host.name alone should be the last emit before empty string
+    const hostNameAloneEmit = script.lastIndexOf("emit(doc['host.name'].value); return;");
+    const emptyFallback = script.indexOf("emit('')");
 
-    expect(hostIdIndex).toBeLessThan(hostMacIndex);
-    expect(hostMacIndex).toBeLessThan(hostNameIndex);
-    expect(hostNameIndex).toBeLessThan(hostnameIndex);
-    expect(hostnameIndex).toBeLessThan(ipIndex);
+    expect(hostNameAloneEmit).toBeLessThan(emptyFallback);
   });
 
   it('should emit empty string as final fallback', () => {
@@ -87,18 +90,45 @@ describe('generateHostEntityIdScript', () => {
     expect(script).toContain("emit('')");
   });
 
-  it('should use emit() instead of return for runtime fields', () => {
+  it('should use emit() and return for runtime fields', () => {
     const script = generateHostEntityIdScript();
 
     expect(script).toContain('emit(');
     expect(script).toContain('return;');
   });
 
-  it('should use proper field existence checks', () => {
+  it('should include isValid helper function for field validation', () => {
     const script = generateHostEntityIdScript();
 
-    // The script should contain field existence checks
-    expect(script).toContain('doc.containsKey');
-    expect(script).toContain('.empty');
+    expect(script).toContain('boolean isValid(def doc, String field)');
+    expect(script).toContain('doc.containsKey(field)');
+    expect(script).toContain('doc[field].empty');
+  });
+
+  it('should filter invalid values in isValid helper', () => {
+    const script = generateHostEntityIdScript();
+
+    // Check that invalid value filtering is present
+    expect(script).toContain("v != ''");
+    expect(script).toContain("v != '-'");
+    expect(script).toContain("v != 'unknown'");
+    expect(script).toContain("v != 'n/a'");
+  });
+
+  it('should convert values to lowercase for invalid value comparison', () => {
+    const script = generateHostEntityIdScript();
+
+    expect(script).toContain('.toLowerCase()');
+  });
+
+  it('should use isValid helper for all field checks', () => {
+    const script = generateHostEntityIdScript();
+
+    // All field checks should use isValid
+    expect(script).toContain("isValid(doc, 'host.entity.id')");
+    expect(script).toContain("isValid(doc, 'host.id')");
+    expect(script).toContain("isValid(doc, 'host.name')");
+    expect(script).toContain("isValid(doc, 'host.hostname')");
+    expect(script).toContain("isValid(doc, 'host.domain')");
   });
 });

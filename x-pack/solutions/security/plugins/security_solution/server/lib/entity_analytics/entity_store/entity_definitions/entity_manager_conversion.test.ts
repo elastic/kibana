@@ -66,10 +66,9 @@ describe('convertToEntityManagerDefinition', () => {
       expect(script).toBeDefined();
       expect(script).toContain('host.entity.id');
       expect(script).toContain('host.id');
-      expect(script).toContain('host.mac');
       expect(script).toContain('host.name');
       expect(script).toContain('host.hostname');
-      expect(script).toContain('host.ip');
+      expect(script).toContain('host.domain');
     });
   });
 
@@ -103,10 +102,10 @@ describe('convertToEntityManagerDefinition', () => {
 
       const script = result.runtimeMappings?._computed_entity_id.script?.source;
       expect(script).toBeDefined();
+      expect(script).toContain('host.entity.id');
       expect(script).toContain('host.id');
       expect(script).toContain('host.name');
-      expect(script).toContain('host.hostname');
-      expect(script).toContain('host.ip');
+      expect(script).toContain('user.domain');
     });
   });
 

@@ -10,36 +10,48 @@
  *
  * The ranking system prioritizes fields in the following order:
  * 1. host.entity.id
- * 2. (host.name|host.hostname) | host.id
- * 3. (host.name|host.hostname) | host.mac
- * 4. host.name | host.ip
- * 5. host.hostname | host.ip
- * 6. host.id
- * 7. host.mac
- * 8. host.name
- * 9. host.hostname
- * 10. host.ip
+ * 2. host.id
+ * 3. host.name . host.domain
+ * 4. host.hostname . host.domain
+ * 5. host.hostname
+ * 6. host.name
+ *
+ * Rules:
+ * - Ignores empty or invalid values (e.g., "-", "unknown", "N/A")
+ * - When composing fields (e.g., host.name . host.domain), ensures both sides are non-empty and valid
  *
  * @returns {string} A Painless script that computes the host entity ID
  */
 export const generateHostEntityIdScript = (): string => {
   const script = `
-    String label = null;
-    if (doc.containsKey('host.name') && !doc['host.name'].empty) { label = doc['host.name'].value; }
-    else if (doc.containsKey('host.hostname') && !doc['host.hostname'].empty) { label = doc['host.hostname'].value; }
+    // Helper: check if field exists and has a valid (non-empty, non-placeholder) value
+    boolean isValid(def doc, String field) {
+      if (!doc.containsKey(field) || doc[field].empty) return false;
+      String v = doc[field].value.toString().toLowerCase();
+      return v != '' && v != '-' && v != 'unknown' && v != 'n/a';
+    }
 
-    if (doc.containsKey('host.entity.id') && !doc['host.entity.id'].empty) { emit(doc['host.entity.id'].value); return; }
+    // 1. host.entity.id (highest priority)
+    if (isValid(doc, 'host.entity.id')) { emit(doc['host.entity.id'].value); return; }
 
-    if (doc.containsKey('host.id') && !doc['host.id'].empty && label != null) { emit(label + '|' + doc['host.id'].value); return; }
-    if (doc.containsKey('host.mac') && !doc['host.mac'].empty && label != null) { emit(label + '|' + doc['host.mac'].value); return; }
-    if (doc.containsKey('host.name') && !doc['host.name'].empty && doc.containsKey('host.ip') && !doc['host.ip'].empty) { emit(doc['host.name'].value + '|' + doc['host.ip'].value); return; }
-    if (doc.containsKey('host.hostname') && !doc['host.hostname'].empty && doc.containsKey('host.ip') && !doc['host.ip'].empty) { emit(doc['host.hostname'].value + '|' + doc['host.ip'].value); return; }
+    // 2. host.id
+    if (isValid(doc, 'host.id')) { emit(doc['host.id'].value); return; }
 
-    if (doc.containsKey('host.id') && !doc['host.id'].empty) { emit(doc['host.id'].value); return; }
-    if (doc.containsKey('host.mac') && !doc['host.mac'].empty) { emit(doc['host.mac'].value); return; }
-    if (doc.containsKey('host.name') && !doc['host.name'].empty) { emit(doc['host.name'].value); return; }
-    if (doc.containsKey('host.hostname') && !doc['host.hostname'].empty) { emit(doc['host.hostname'].value); return; }
-    if (doc.containsKey('host.ip') && !doc['host.ip'].empty) { emit(doc['host.ip'].value); return; }
+    // 3. host.name . host.domain
+    if (isValid(doc, 'host.name') && isValid(doc, 'host.domain')) {
+      emit(doc['host.name'].value + '.' + doc['host.domain'].value); return;
+    }
+
+    // 4. host.hostname . host.domain
+    if (isValid(doc, 'host.hostname') && isValid(doc, 'host.domain')) {
+      emit(doc['host.hostname'].value + '.' + doc['host.domain'].value); return;
+    }
+
+    // 5. host.hostname
+    if (isValid(doc, 'host.hostname')) { emit(doc['host.hostname'].value); return; }
+
+    // 6. host.name (lowest priority)
+    if (isValid(doc, 'host.name')) { emit(doc['host.name'].value); return; }
 
     emit('');
   `;
