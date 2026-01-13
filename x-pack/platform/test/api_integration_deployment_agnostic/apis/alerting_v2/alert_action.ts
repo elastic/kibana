@@ -8,9 +8,12 @@
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
+import { createAlertEvent, createAlertTransition } from './fixtures';
 
 const ALERT_ACTION_API_PATH = '/internal/alerting/v2/alerts';
-const ALERTS_DATA_STREAM = '.alerts-events';
+const ALERTS_EVENTS_INDEX = '.alerts-events';
+const ALERTS_TRANSITIONS_INDEX = '.alerts-transitions';
+const ALERTS_ACTIONS_INDEX = '.alerts-actions';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
@@ -19,78 +22,121 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Alert Action API', function () {
     let roleAuthc: RoleCredentials;
+    let alertEvent: ReturnType<typeof createAlertEvent>;
+    let alertTransition: ReturnType<typeof createAlertTransition>;
 
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
-      await esClient.index({
-        index: ALERTS_DATA_STREAM,
-        document: {
-          '@timestamp': new Date().toISOString(),
-          scheduled_timestamp: new Date().toISOString(),
-          rule: {
-            id: 'test-rule-id',
-            tags: ['rule-tag-1', 'rule-tag-2'],
-          },
-          grouping: {
-            key: 'host.name',
-            value: 'test-host',
-          },
-          data: { custom_field: 'custom_value' },
-          parent_rule_id: 'test-parent-rule-id',
-          status: 'active',
-          alert_id: 'test-alert-id',
-          alert_series_id: 'test-alert-series-id',
-          source: 'test-source',
-          tags: ['alert-tag-1', 'alert-tag-2'],
-        },
-        refresh: 'wait_for',
-      });
+      alertEvent = createAlertEvent();
+      alertTransition = createAlertTransition();
+
+      await Promise.all([
+        esClient.index({
+          index: ALERTS_EVENTS_INDEX,
+          document: alertEvent,
+          refresh: 'wait_for',
+        }),
+        esClient.index({
+          index: ALERTS_TRANSITIONS_INDEX,
+          document: alertTransition,
+          refresh: 'wait_for',
+        }),
+      ]);
     });
 
     after(async () => {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await Promise.all([
+        esClient.deleteByQuery({
+          index: ALERTS_EVENTS_INDEX,
+          query: { match_all: {} },
+          refresh: true,
+          wait_for_completion: true,
+        }),
+        esClient.deleteByQuery({
+          index: ALERTS_TRANSITIONS_INDEX,
+          query: { match_all: {} },
+          refresh: true,
+          wait_for_completion: true,
+        }),
+        esClient.deleteByQuery({
+          index: ALERTS_ACTIONS_INDEX,
+          query: { match_all: {} },
+          refresh: true,
+          wait_for_completion: true,
+        }),
+      ]);
+    });
+
+    afterEach(async () => {
+      // Clean up actions after each test
       await esClient.deleteByQuery({
-        index: ALERTS_DATA_STREAM,
-        query: {
-          match_all: {},
-        },
+        index: ALERTS_ACTIONS_INDEX,
+        query: { match_all: {} },
         refresh: true,
         wait_for_completion: true,
       });
     });
 
-    it('should return 200 for ack action', async () => {
+    async function getLatestAction() {
+      const result = await esClient.search({
+        index: ALERTS_ACTIONS_INDEX,
+        query: { match_all: {} },
+        sort: [{ '@timestamp': 'desc' }],
+        size: 1,
+      });
+      return result.hits.hits[0]?._source as Record<string, unknown> | undefined;
+    }
+
+    it('should return 204 for ack action and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'ack' });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('ack');
+      expect(action!.episode_id).to.be(alertTransition.episode_id);
+      expect(action!.rule_id).to.be(alertEvent['rule.id']);
+      expect(action!.last_series_event_timestamp).to.be(alertEvent['@timestamp']);
     });
 
-    it('should return 200 for unack action', async () => {
+    it('should return 204 for unack action and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'unack' });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('unack');
+      expect(action!.episode_id).to.be(alertTransition.episode_id);
     });
 
-    it('should return 200 for tag action with tags', async () => {
+    it('should return 204 for tag action with tags and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'tag', tags: ['tag1', 'tag2'] });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('tag');
+      expect(action!.tags).to.eql(['tag1', 'tag2']);
     });
 
     it('should return 400 for tag action without tags', async () => {
@@ -103,48 +149,66 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.be(400);
     });
 
-    it('should return 200 for untag action with tags', async () => {
+    it('should return 204 for untag action with tags and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'untag', tags: ['tag1'] });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('untag');
+      expect(action!.tags).to.eql(['tag1']);
     });
 
-    it('should return 200 for snooze action', async () => {
+    it('should return 204 for snooze action and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'snooze' });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('snooze');
     });
 
-    it('should return 200 for unsnooze action', async () => {
+    it('should return 204 for unsnooze action and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'unsnooze' });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('unsnooze');
     });
 
-    it('should return 200 for set_severity action with sev_level', async () => {
+    it('should return 204 for set_severity action with sev_level and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'set_severity', sev_level: 1 });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('set_severity');
+      expect(action!.sev_level).to.be(1);
     });
 
     it('should return 400 for set_severity action without sev_level', async () => {
@@ -157,26 +221,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.be(400);
     });
 
-    it('should return 200 for clear_severity action', async () => {
+    it('should return 204 for clear_severity action and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'clear_severity' });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('clear_severity');
     });
 
-    it('should return 200 for activate action with reason', async () => {
+    it('should return 204 for activate action with reason and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'activate', reason: 'test reason' });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('activate');
+      expect(action!.reason).to.be('test reason');
     });
 
     it('should return 400 for activate action without reason', async () => {
@@ -189,15 +262,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.be(400);
     });
 
-    it('should return 200 for deactivate action with reason', async () => {
+    it('should return 204 for deactivate action with reason and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'deactivate', reason: 'test reason' });
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'not implemented yet');
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('deactivate');
+      expect(action!.reason).to.be('test reason');
     });
 
     it('should return 400 for deactivate action without reason', async () => {

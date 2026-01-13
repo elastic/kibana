@@ -50,11 +50,7 @@ export class AlertActionRoute {
         action: this.request.body,
       });
 
-      return this.response.ok({
-        body: {
-          message: 'not implemented yet',
-        },
-      });
+      return this.response.noContent();
     } catch (e) {
       const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
       return this.response.customError({
