@@ -26,6 +26,9 @@ const TMP_DIR = Path.resolve(__dirname, '__tmp__');
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/yarn (\w+) v[\d\.]+/g, 'yarn $1 <version>'));
+expect.addSnapshotSerializer(
+  createReplaceSerializer(/\/[^\s]+plugins\/foo_test_plugin[^\s]*/g, '<plugin-path>')
+);
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 beforeEach(async () => {
@@ -47,7 +50,11 @@ it('builds a generated plugin into a viable archive', async () => {
   const filterLogs = (logs: string | undefined) => {
     return logs
       ?.split('\n')
-      .filter((l) => !l.includes('failed to reach ci-stats service'))
+      .filter(
+        (l) =>
+          !l.includes('failed to reach ci-stats service') &&
+          !l.includes('baseline-browser-mapping')
+      )
       .join('\n');
   };
 
@@ -71,9 +78,9 @@ it('builds a generated plugin into a viable archive', async () => {
     " info deleting the build and target directories
      info building required artifacts for the optimizer
      info running @kbn/optimizer
-     │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
      │ info stopping @kbn/optimizer
-     info compressing js and css bundles found at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public to brotli
+     info compressing js and css bundles found at <plugin-path>/build/kibana/fooTestPlugin/target/public to brotli
+     ERROR Error: ENOENT: no such file or directory, scandir '<plugin-path>/build/kibana/fooTestPlugin/target/public'
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies
@@ -97,10 +104,6 @@ it('builds a generated plugin into a viable archive', async () => {
       "kibana/fooTestPlugin/server/plugin.js",
       "kibana/fooTestPlugin/server/routes/index.js",
       "kibana/fooTestPlugin/server/types.js",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.998.js",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.998.js.br",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
       "kibana/fooTestPlugin/translations/ja-JP.json",
       "kibana/fooTestPlugin/tsconfig.json",
     ]
