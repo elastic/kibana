@@ -314,22 +314,18 @@ export function LensEditConfigurationFlyout({
       : [];
   }, [activeVisualization, visualization.state]);
 
-  const isSingleLayerVisualization = layerIds.length === 1;
-
   const isDevMode = useIsDevMode();
 
   const showConvertToEsqlButton = useMemo(() => {
-    return isDevMode && !textBasedMode && isSingleLayerVisualization;
-  }, [isDevMode, textBasedMode, isSingleLayerVisualization]);
+    return isDevMode && !textBasedMode;
+  }, [isDevMode, textBasedMode]);
 
-  const { isConvertToEsqlButtonDisabled, convertibleLayers } = useEsqlConversion(
-    datasourceId,
-    datasourceStates,
-    isSingleLayerVisualization,
-    layerIds,
-    textBasedMode,
-    { framePublicAPI, coreStart, startDependencies }
-  );
+  const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip, convertibleLayers } =
+    useEsqlConversion(
+      showConvertToEsqlButton,
+      { datasourceId, datasourceStates, layerIds, visualization, activeVisualization },
+      { framePublicAPI, coreStart, startDependencies }
+    );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -346,24 +342,7 @@ export function LensEditConfigurationFlyout({
       <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
       {showConvertToEsqlButton ? (
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={
-              isConvertToEsqlButtonDisabled ? (
-                <p>
-                  {i18n.translate('xpack.lens.config.cannotConvertToEsqlDescription', {
-                    defaultMessage: 'This visualization cannot be converted to ES|QL',
-                  })}
-                </p>
-              ) : (
-                <p>
-                  {i18n.translate('xpack.lens.config.convertToEsqlDescription', {
-                    defaultMessage: 'Convert visualization to ES|QL',
-                  })}
-                </p>
-              )
-            }
-          >
+          <EuiToolTip position="top" content={convertToEsqlButtonTooltip}>
             <EuiButtonIcon
               color="success"
               display="base"

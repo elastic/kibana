@@ -106,6 +106,7 @@ const createStartContractMock = () => {
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
     getAppMenu$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     setAppMenu: jest.fn(),
+    setBreadcrumbsBadges: jest.fn(),
   });
 
   return startContract;

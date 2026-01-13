@@ -3,7 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["index.ts", "common/**/*.ts", "public/**/*.ts", "public/**/*.tsx", "server/**/*.ts"],
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../../../typings/emotion.d.ts"
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -19,6 +26,10 @@
     "@kbn/connector-specs",
     "@kbn/actions-plugin",
     "@kbn/core-saved-objects-common",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/react-query",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-http-browser",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks",
