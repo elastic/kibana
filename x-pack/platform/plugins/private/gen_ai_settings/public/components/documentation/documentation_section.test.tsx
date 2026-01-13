@@ -240,7 +240,8 @@ describe('DocumentationSection', () => {
         expect(screen.getByTestId('documentation-install-elastic_documents')).toBeInTheDocument();
       });
 
-      const initialCalls = (mockProductDocBase.installation.getStatus as jest.Mock).mock.calls.length;
+      const initialCalls = (mockProductDocBase.installation.getStatus as jest.Mock).mock.calls
+        .length;
       fireEvent.click(screen.getByTestId('documentation-install-elastic_documents'));
 
       await waitFor(() => {
