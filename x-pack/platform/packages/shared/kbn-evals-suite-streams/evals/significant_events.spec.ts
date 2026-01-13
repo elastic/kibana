@@ -5,9 +5,110 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { evaluate } from '@kbn/evals';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
+import {
+  SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
+  SIGNIFICANT_EVENT_TYPE_ERROR,
+  SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
+  SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
+  SIGNIFICANT_EVENT_TYPE_SECURITY,
+} from '@kbn/streams-ai/src/significant_events/types';
 import { from, lastValueFrom, toArray } from 'rxjs';
+import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
+import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
+
+const ALLOWED_CATEGORIES = [
+  SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
+  SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
+  SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
+  SIGNIFICANT_EVENT_TYPE_ERROR,
+  SIGNIFICANT_EVENT_TYPE_SECURITY,
+];
+
+const codeBasedEvaluator = {
+  name: 'significant_events_code_evaluator',
+  kind: 'CODE' as const,
+  evaluate: async ({ output, esClient, example, metadata }: any) => {
+    // The output from the task is an array of queries, we take the first one
+    const query = Array.isArray(output) ? output[0] : output;
+
+    if (!query || !query.kql) {
+      return {
+        score: 0,
+        reasoning: 'No query generated',
+        details: {
+          syntaxValidityRate: 0,
+          executionHitRate: 0,
+        },
+      };
+    }
+
+    const { kql, category, severity_score, evidence } = query;
+    const { sample_logs } = example.input;
+
+    // 1. KQL Syntax Validation
+    let isSyntaxValid = false;
+    try {
+      fromKueryExpression(kql);
+      isSyntaxValid = true;
+    } catch (e) {
+      // KQL is invalid
+    }
+
+    // 2. Execution Verification
+    let isExecutionHit = false;
+    if (isSyntaxValid) {
+      const searchResult = await esClient.search({
+        index: metadata.test_index,
+        q: kql,
+      });
+      const hits = searchResult.hits.total.value;
+      isExecutionHit = hits > 0;
+    }
+
+    // 3. Category Compliance
+    const isCategoryCompliant = ALLOWED_CATEGORIES.includes(category);
+
+    // 4. Severity Score Compliance
+    const isSeverityCompliant = severity_score >= 0 && severity_score <= 100;
+
+    // 5. Evidence Validation
+    const evidenceValidation: {
+      allEvidenceFound: boolean;
+      missingEvidence: string[];
+    } = {
+      allEvidenceFound: true,
+      missingEvidence: [],
+    };
+    if (evidence && evidence.length > 0) {
+      const allLogs = sample_logs.join('\n');
+      const missing = evidence.filter((ev: string) => !allLogs.includes(ev));
+      if (missing.length > 0) {
+        evidenceValidation.allEvidenceFound = false;
+        evidenceValidation.missingEvidence = missing;
+      }
+    }
+
+    const syntaxValidityRate = isSyntaxValid ? 1 : 0;
+    const executionHitRate = isExecutionHit ? 1 : 0;
+
+    // The final score is a simple average of the two main metrics.
+    const score = (syntaxValidityRate + executionHitRate) / 2;
+
+    return {
+      score,
+      details: {
+        syntaxValidityRate,
+        executionHitRate,
+        isCategoryCompliant,
+        isSeverityCompliant,
+        evidenceValidation,
+      },
+    };
+  },
+};
 
 evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, () => {
   evaluate.beforeEach(async ({ apiServices }) => {
@@ -16,6 +117,83 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
 
   evaluate.afterEach(async ({ apiServices }) => {
     await apiServices.streams.disable();
+  });
+
+  SIGNIFICANT_EVENTS_DATASETS.forEach((dataset) => {
+    evaluate.describe(dataset.name, () => {
+      dataset.examples.forEach((example: SignificantEventsEvaluationExample) => {
+        evaluate(
+          example.input.stream_name,
+          async ({ phoenixClient, evaluators, connector, fetch, esClient }) => {
+            // Create a test index and ingest sample logs
+            const testIndex = `test-sig-events-${Date.now()}`;
+            await esClient.indices.create({
+              index: testIndex,
+              mappings: { properties: { message: { type: 'text' } } },
+            });
+            const bulkBody = example.input.sample_logs.flatMap((doc) => [
+              { index: { _index: testIndex } },
+              { message: doc },
+            ]);
+            await esClient.bulk({ refresh: true, body: bulkBody });
+
+            await phoenixClient.runExperiment(
+              {
+                dataset: {
+                  name: `sig_events: ${example.input.stream_name}`,
+                  description: example.input.feature_description,
+                  examples: [
+                    {
+                      input: example.input,
+                      output: example.output as unknown as Record<string, unknown>,
+                      metadata: { ...example.metadata, test_index: testIndex },
+                    },
+                  ],
+                },
+                task: async () => {
+                  const events = await lastValueFrom(
+                    from(
+                      fetch('/api/streams/logs/significant_events/_generate', {
+                        method: 'GET',
+                        asResponse: true,
+                        rawResponse: true,
+                        query: {
+                          connectorId: connector.id,
+                          index: testIndex,
+                        },
+                      })
+                    ).pipe(httpResponseIntoObservable(), toArray())
+                  );
+
+                  // The task should return the array of generated queries
+                  return events.map((e: any) => e.query);
+                },
+              },
+              [
+                codeBasedEvaluator,
+                {
+                  name: 'llm_evaluator',
+                  kind: 'LLM',
+                  evaluate: async ({ input, output, expected, metadata }) => {
+                    return evaluators
+                      .criteria(['Assert the KQL queries are generated following the user intent'])
+                      .evaluate({
+                        input,
+                        expected,
+                        output,
+                        metadata,
+                      });
+                  },
+                },
+              ]
+            );
+
+            // Cleanup the test index
+            await esClient.indices.delete({ index: testIndex });
+          }
+        );
+      });
+    });
   });
 
   evaluate('empty datastream', async ({ phoenixClient, evaluators, connector, fetch }) => {
@@ -32,8 +210,8 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
             },
           ],
         },
-        task: async ({}) => {
-          const events$ = await lastValueFrom(
+        task: async () => {
+          const events = await lastValueFrom(
             from(
               fetch('/api/streams/logs/significant_events/_generate', {
                 method: 'GET',
@@ -46,7 +224,7 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
             ).pipe(httpResponseIntoObservable(), toArray())
           );
 
-          return events$.map((e) => e.query);
+          return events.map((e: any) => e.query);
         },
       },
       [
@@ -54,7 +232,7 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
           name: 'evaluator',
           kind: 'LLM',
           evaluate: async ({ input, output, expected, metadata }) => {
-            const result = await evaluators
+            return evaluators
               .criteria(['Assert the KQL queries are generated following the user intent'])
               .evaluate({
                 input,
@@ -62,8 +240,6 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
                 output,
                 metadata,
               });
-
-            return result;
           },
         },
       ]
