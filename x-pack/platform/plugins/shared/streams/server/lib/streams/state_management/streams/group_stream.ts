@@ -261,7 +261,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
         },
       },
       {
-        type: 'unlink_features',
+        type: 'unlink_systems',
         request: {
           name: this._definition.name,
         },

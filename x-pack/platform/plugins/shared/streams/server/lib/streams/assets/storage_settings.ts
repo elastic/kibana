@@ -17,7 +17,12 @@ import {
   STREAM_NAME,
 } from './fields';
 
-export const assetStorageSettings = {
+/**
+ * Storage settings for Significant Events queries.
+ * Note: The index name ".kibana_streams_assets" is kept for backwards compatibility,
+ * but this index is only used to store query assets (Significant Events queries linked to streams).
+ */
+export const queryStorageSettings = {
   name: '.kibana_streams_assets',
   schema: {
     properties: {
@@ -33,4 +38,4 @@ export const assetStorageSettings = {
   },
 } satisfies IndexStorageSettings;
 
-export type AssetStorageSettings = typeof assetStorageSettings;
+export type QueryStorageSettings = typeof queryStorageSettings;

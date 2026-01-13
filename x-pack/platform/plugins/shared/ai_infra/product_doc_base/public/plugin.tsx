@@ -15,10 +15,7 @@ import type {
   PluginStartDependencies,
 } from './types';
 import { InstallationService } from './services/installation';
-
-interface ProductDocInstallServiceParams {
-  inferenceId: string;
-}
+import type { ProductDocInstallParams } from '../common/http_api/installation';
 
 export class ProductDocBasePlugin
   implements
@@ -46,11 +43,10 @@ export class ProductDocBasePlugin
 
     return {
       installation: {
-        getStatus: (params: ProductDocInstallServiceParams) =>
+        getStatus: (params: ProductDocInstallParams) =>
           installationService.getInstallationStatus(params),
-        install: (params: ProductDocInstallServiceParams) => installationService.install(params),
-        uninstall: (params: ProductDocInstallServiceParams) =>
-          installationService.uninstall(params),
+        install: (params: ProductDocInstallParams) => installationService.install(params),
+        uninstall: (params: ProductDocInstallParams) => installationService.uninstall(params),
       },
     };
   }

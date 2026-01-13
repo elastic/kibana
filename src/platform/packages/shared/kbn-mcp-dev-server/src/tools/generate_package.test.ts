@@ -9,6 +9,7 @@
 
 import { generateKibanaPackageTool } from './generate_package';
 import execa from 'execa';
+import { extractToolResultTextContent } from './test_utils';
 
 jest.mock('execa');
 jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo/root' }));
@@ -29,7 +30,7 @@ describe('generateKibanaPackageTool', () => {
       group: 'workplaceai',
     });
 
-    expect(result.content[0].text).toBe('package created');
+    expect(extractToolResultTextContent(result)).toBe('package created');
     expect(mockedExeca.command).toHaveBeenCalledTimes(1);
 
     const command = mockedExeca.command.mock.calls[0][0];

@@ -15,6 +15,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
   ALERT_START,
   ALERT_STATUS,
@@ -58,6 +59,7 @@ describe('buildNewAlert', () => {
       [ALERT_FLAPPING_HISTORY]: [],
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [ALERT_SEVERITY_IMPROVING]: false,
@@ -96,6 +98,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
@@ -133,6 +136,7 @@ describe('buildNewAlert', () => {
       [ALERT_FLAPPING_HISTORY]: [],
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [ALERT_SEVERITY_IMPROVING]: false,
@@ -145,11 +149,12 @@ describe('buildNewAlert', () => {
     });
   });
 
-  test('should include flapping history and maintenance window ids if set', () => {
+  test('should include flapping history and maintenance window ids and names if set', () => {
     const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
     legacyAlert.scheduleActions('default');
     legacyAlert.setFlappingHistory([true, false, false, false, true, true]);
     legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+    legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
     expect(
       buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
@@ -172,6 +177,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+      [ALERT_MAINTENANCE_WINDOW_NAMES]: ['Maintenance Window 1', 'Maintenance Window 321'],
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
@@ -217,6 +223,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
@@ -252,6 +259,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_RULE_EXECUTION_TIMESTAMP]: '2030-12-15T02:44:13.124Z',
       [ALERT_STATUS]: 'active',
@@ -303,6 +311,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
@@ -358,6 +367,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
@@ -415,6 +425,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),

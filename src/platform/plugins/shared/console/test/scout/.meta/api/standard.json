@@ -1,0 +1,22 @@
+{
+  "lastModified": "2025-12-03T19:04:09.709Z",
+  "sha1": "925c1c391d9021f32f53761bb8f49f8d0d2d3408",
+  "tests": [
+    {
+      "id": "c0a01cdf33e6b81-fab52d38008844b",
+      "title": "GET /api/console/api_server returns autocomplete definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlOblt",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/api/tests/spec_definitions.spec.ts",
+        "line": 22,
+        "column": 12
+      }
+    }
+  ]
+}

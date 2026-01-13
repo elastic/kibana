@@ -117,48 +117,6 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.LazyExpressionInput",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyExpressionInput",
-        "description": [
-          "\nA lazily-loaded ExpressionInput component."
-        ],
-        "signature": [
-          "React.LazyExoticComponent<(props: ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ExpressionInputProps",
-            "text": "ExpressionInputProps"
-          },
-          ") => React.JSX.Element>"
-        ],
-        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.LazyExpressionInput.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-public.LazyFieldPicker",
         "type": "Function",
         "tags": [],
@@ -351,58 +309,6 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.registerExpressionsLanguage",
-        "type": "Function",
-        "tags": [],
-        "label": "registerExpressionsLanguage",
-        "description": [
-          "\nRegister a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows\nthe Monaco Editor to understand the functions and their arguments.\n\nThis function is async in order to move the logic to an async chunk.\n"
-        ],
-        "signature": [
-          "(expressionFunctions: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionFunction",
-            "text": "ExpressionFunction"
-          },
-          "[]) => Promise<void>"
-        ],
-        "path": "src/platform/plugins/shared/presentation_util/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.registerExpressionsLanguage.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "expressionFunctions",
-            "description": [
-              "A set of Expression Functions to use in the ExpressionInput."
-            ],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunction",
-                "text": "ExpressionFunction"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-public.withSuspense",
         "type": "Function",
         "tags": [],
@@ -459,171 +365,68 @@
     "interfaces": [
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.ExpressionInputProps",
+        "id": "def-public.PanelResizeSettings",
         "type": "Interface",
         "tags": [],
-        "label": "ExpressionInputProps",
-        "description": [
-          "\nReact Props for the ExpressionInput component."
-        ],
-        "signature": [
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ExpressionInputProps",
-            "text": "ExpressionInputProps"
-          },
-          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"className\" | \"style\">"
-        ],
-        "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+        "label": "PanelResizeSettings",
+        "description": [],
+        "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
-            "id": "def-public.ExpressionInputProps.expressionFunctions",
-            "type": "Array",
+            "id": "def-public.PanelResizeSettings.minWidth",
+            "type": "number",
             "tags": [],
-            "label": "expressionFunctions",
-            "description": [
-              "A collection of ExpressionFunctions to use in the autocomplete"
-            ],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunction",
-                "text": "ExpressionFunction"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ExpressionInputProps.expression",
-            "type": "string",
-            "tags": [],
-            "label": "expression",
-            "description": [
-              "Value of expression"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ExpressionInputProps.onChange",
-            "type": "Function",
-            "tags": [],
-            "label": "onChange",
-            "description": [
-              "Function invoked when expression value is changed"
-            ],
-            "signature": [
-              "(value?: string | undefined) => void"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.ExpressionInputProps.onChange.$1",
-                "type": "string",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ExpressionInputProps.isCompact",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isCompact",
-            "description": [
-              "In full screen mode or not"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ExpressionInputProps.height",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "height",
-            "description": [
-              "\nThe CodeEditor requires a set height, either on itself, or set to 100% with the parent\ncontainer controlling the height.  This prop is required so consumers understand this\nlimitation and are intentional in using the component."
-            ],
-            "signature": [
-              "Property",
-              ".Height<string | number> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ExpressionInputProps.editorRef",
-            "type": "Object",
-            "tags": [],
-            "label": "editorRef",
-            "description": [
-              "\nAn optional ref in order to access the Monaco editor instance from consuming components,\n(e.g. to determine if the editor is focused, etc)."
-            ],
-            "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.ExpressionInputEditorRef",
-                "text": "ExpressionInputEditorRef"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ExpressionInputProps.onEditorDidMount",
-            "type": "Function",
-            "tags": [],
-            "label": "onEditorDidMount",
+            "label": "minWidth",
             "description": [],
             "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.OnExpressionInputEditorDidMount",
-                "text": "OnExpressionInputEditorDidMount"
-              },
-              " | undefined"
+              "number | undefined"
             ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+            "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PanelResizeSettings.maxWidth",
+            "type": "number",
+            "tags": [],
+            "label": "maxWidth",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PanelResizeSettings.minHeight",
+            "type": "number",
+            "tags": [],
+            "label": "minHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PanelResizeSettings.maxHeight",
+            "type": "number",
+            "tags": [],
+            "label": "maxHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -720,7 +523,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"presentation\" | \"canvas\" | \"dashboard\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -742,7 +545,7 @@
                 "label": "solutions",
                 "description": [],
                 "signature": [
-                  "(\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined"
+                  "(\"presentation\" | \"canvas\" | \"dashboard\")[] | undefined"
                 ],
                 "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "deprecated": false,
@@ -760,7 +563,7 @@
             "label": "setProjectStatus",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", env: \"kibana\" | \"session\" | \"browser\", status: boolean) => void"
             ],
             "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
             "deprecated": false,
@@ -789,7 +592,7 @@
                 "label": "env",
                 "description": [],
                 "signature": [
-                  "\"kibana\" | \"browser\" | \"session\""
+                  "\"kibana\" | \"session\" | \"browser\""
                 ],
                 "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "deprecated": false,
@@ -993,7 +796,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PanelPlacementStrategy",
+        "type": "Enum",
+        "tags": [],
+        "label": "PanelPlacementStrategy",
+        "description": [],
+        "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "presentationUtil",
@@ -1012,56 +828,27 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.ExpressionInputEditorRef",
+        "id": "def-public.PanelSettings",
         "type": "Type",
         "tags": [],
-        "label": "ExpressionInputEditorRef",
-        "description": [
-          "\nA type for any React Ref that can be used to store a reference to the Monaco editor within the\nExpressionInput."
-        ],
-        "signature": [
-          "React.MutableRefObject<",
-          "editor",
-          ".IStandaloneCodeEditor | null>"
-        ],
-        "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-public.OnExpressionInputEditorDidMount",
-        "type": "Type",
-        "tags": [],
-        "label": "OnExpressionInputEditorDidMount",
+        "label": "PanelSettings",
         "description": [],
         "signature": [
-          "(editor: ",
-          "editor",
-          ".IStandaloneCodeEditor | null) => void"
+          "{ placementSettings?: ",
+          "PanelPlacementSettings",
+          " | undefined; resizeSettings?: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PanelResizeSettings",
+            "text": "PanelResizeSettings"
+          },
+          " | undefined; }"
         ],
-        "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
+        "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.OnExpressionInputEditorDidMount.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "editor",
-            "description": [],
-            "signature": [
-              "editor",
-              ".IStandaloneCodeEditor | null"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ],
@@ -1170,21 +957,15 @@
         },
         {
           "parentPluginId": "presentationUtil",
-          "id": "def-public.PresentationUtilPluginStart.registerExpressionsLanguage",
+          "id": "def-public.PresentationUtilPluginStart.registerPanelPlacementSettings",
           "type": "Function",
           "tags": [],
-          "label": "registerExpressionsLanguage",
+          "label": "registerPanelPlacementSettings",
           "description": [],
           "signature": [
-            "(expressionFunctions: ",
-            {
-              "pluginId": "expressions",
-              "scope": "common",
-              "docId": "kibExpressionsPluginApi",
-              "section": "def-common.ExpressionFunction",
-              "text": "ExpressionFunction"
-            },
-            "[]) => Promise<void>"
+            "<SerializedState extends object = object>(embeddableType: string, getPanelSettings: ",
+            "PanelSettingsGetter",
+            "<SerializedState>) => void"
           ],
           "path": "src/platform/plugins/shared/presentation_util/public/types.ts",
           "deprecated": false,
@@ -1193,22 +974,113 @@
           "children": [
             {
               "parentPluginId": "presentationUtil",
-              "id": "def-public.PresentationUtilPluginStart.registerExpressionsLanguage.$1",
-              "type": "Array",
+              "id": "def-public.PresentationUtilPluginStart.registerPanelPlacementSettings.$1",
+              "type": "string",
               "tags": [],
-              "label": "expressionFunctions",
+              "label": "embeddableType",
+              "description": [],
+              "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/panel_placement_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.registerPanelPlacementSettings.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "getPanelSettings",
               "description": [],
               "signature": [
+                "(serializedState?: SerializedState | undefined) => ",
                 {
-                  "pluginId": "expressions",
+                  "pluginId": "@kbn/utility-types",
                   "scope": "common",
-                  "docId": "kibExpressionsPluginApi",
-                  "section": "def-common.ExpressionFunction",
-                  "text": "ExpressionFunction"
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-common.MaybePromise",
+                  "text": "MaybePromise"
                 },
-                "[]"
+                "<Partial<{ placementSettings: ",
+                "PanelPlacementSettings",
+                "; resizeSettings: ",
+                {
+                  "pluginId": "presentationUtil",
+                  "scope": "public",
+                  "docId": "kibPresentationUtilPluginApi",
+                  "section": "def-public.PanelResizeSettings",
+                  "text": "PanelResizeSettings"
+                },
+                "; }>>"
               ],
-              "path": "src/platform/plugins/shared/presentation_util/public/index.ts",
+              "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/panel_placement_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": [
+                {
+                  "parentPluginId": "presentationUtil",
+                  "id": "def-public.PresentationUtilPluginStart.registerPanelPlacementSettings.$2.$1",
+                  "type": "Uncategorized",
+                  "tags": [],
+                  "label": "serializedState",
+                  "description": [],
+                  "signature": [
+                    "SerializedState | undefined"
+                  ],
+                  "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.getPanelPlacementSettings",
+          "type": "Function",
+          "tags": [],
+          "label": "getPanelPlacementSettings",
+          "description": [],
+          "signature": [
+            "<SerializedState extends object = object>(embeddableType: string, serializedState?: SerializedState | undefined) => Promise<Partial<{ placementSettings: ",
+            "PanelPlacementSettings",
+            "; resizeSettings: ",
+            {
+              "pluginId": "presentationUtil",
+              "scope": "public",
+              "docId": "kibPresentationUtilPluginApi",
+              "section": "def-public.PanelResizeSettings",
+              "text": "PanelResizeSettings"
+            },
+            "; }> | undefined>"
+          ],
+          "path": "src/platform/plugins/shared/presentation_util/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.getPanelPlacementSettings.$1",
+              "type": "string",
+              "tags": [],
+              "label": "embeddableType",
+              "description": [],
+              "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/panel_placement_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.getPanelPlacementSettings.$2",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "serializedState",
+              "description": [],
+              "signature": [
+                "SerializedState | undefined"
+              ],
+              "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/panel_placement_registry.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1393,7 +1265,7 @@
             "label": "environments",
             "description": [],
             "signature": [
-              "(\"kibana\" | \"browser\" | \"session\")[]"
+              "(\"kibana\" | \"session\" | \"browser\")[]"
             ],
             "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
@@ -1418,7 +1290,7 @@
             "label": "solutions",
             "description": [],
             "signature": [
-              "(\"canvas\" | \"presentation\" | \"dashboard\")[]"
+              "(\"presentation\" | \"canvas\" | \"dashboard\")[]"
             ],
             "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
@@ -1438,7 +1310,7 @@
         "label": "EnvironmentName",
         "description": [],
         "signature": [
-          "\"kibana\" | \"browser\" | \"session\""
+          "\"kibana\" | \"session\" | \"browser\""
         ],
         "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -1453,26 +1325,9 @@
         "label": "EnvironmentStatus",
         "description": [],
         "signature": [
-          "{ kibana?: boolean | undefined; browser?: boolean | undefined; session?: boolean | undefined; }"
+          "{ kibana?: boolean | undefined; session?: boolean | undefined; browser?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-common.EXPRESSIONS_LANGUAGE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "EXPRESSIONS_LANGUAGE_ID",
-        "description": [
-          "\nThe unique identifier for the Expressions Language for use in the ExpressionInput\nand CodeEditor components."
-        ],
-        "signature": [
-          "\"kibana-expressions\""
-        ],
-        "path": "src/platform/plugins/shared/presentation_util/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1597,7 +1452,7 @@
         "label": "SolutionName",
         "description": [],
         "signature": [
-          "\"canvas\" | \"presentation\" | \"dashboard\""
+          "\"presentation\" | \"canvas\" | \"dashboard\""
         ],
         "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,

@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export enum PanelPlacementStrategy {
-  /** Place on the very top of the Dashboard, add the height of this panel to all other panels. */
-  placeAtTop = 'placeAtTop',
-  /** Look for the smallest y and x value where the default panel will fit. */
-  findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
-}
+import { PanelPlacementStrategy, type PanelSettings } from '@kbn/presentation-util-plugin/public';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../common/constants';
+
+export const DEFAULT_PANEL_PLACEMENT_SETTINGS: Required<
+  Required<PanelSettings>['placementSettings']
+> = {
+  strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
+  height: DEFAULT_PANEL_HEIGHT,
+  width: DEFAULT_PANEL_WIDTH,
+} as const;

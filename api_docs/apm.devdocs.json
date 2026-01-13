@@ -6483,7 +6483,15 @@
           "APMRouteHandlerResources",
           ", { traceItems: ",
           "TraceItem",
-          "[]; }, ",
+          "[]; errors: ",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Error",
+            "text": "Error"
+          },
+          "[]; agentMarks: Record<string, number>; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces/{traceId}\": ",
           {
@@ -9287,7 +9295,7 @@
           },
           "<\"GET /internal/apm/data_view/index_pattern\", undefined, ",
           "APMRouteHandlerResources",
-          ", { apmDataViewIndexPattern: string; }, ",
+          ", { apmDataViewIndexPattern: string; apmIndices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }, ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/data_view/static\": ",
           {

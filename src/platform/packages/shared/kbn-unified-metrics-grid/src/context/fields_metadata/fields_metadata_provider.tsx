@@ -8,8 +8,8 @@
  */
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import type { FindFieldsMetadataResponsePayload } from '@kbn/fields-metadata-plugin/common/latest';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { UnifiedMetricsGridProps } from '../../types';
+import type { MetricField } from '../../types';
 
 export interface FieldsMetadataContext {
   fieldsMetadata: FindFieldsMetadataResponsePayload['fields'] | undefined;
@@ -28,7 +28,7 @@ function FieldsMetadataProvider({
 }: {
   children: React.ReactNode;
   fields: MetricField[];
-} & Pick<ChartSectionProps, 'services'>) {
+} & Pick<UnifiedMetricsGridProps, 'services'>) {
   const [accumulatedMetadata, setAccumulatedMetadata] = useState<
     FindFieldsMetadataResponsePayload['fields']
   >({});

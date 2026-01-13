@@ -14,6 +14,7 @@ import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionTypeConfig, Services } from '../types';
+import { connectorsSpecs } from '@kbn/connector-specs';
 
 jest.mock('../action_type_registry', () => {
   const actual = jest.requireActual('../action_type_registry');
@@ -68,7 +69,10 @@ describe('Connector type config checks', () => {
   });
 
   test('ensure connector types list up to date', () => {
-    expect(connectorTypes.sort()).toEqual(actionTypeRegistry.getAllTypes().sort());
+    const connectorSpecIds = Object.values(connectorsSpecs).map(({ metadata }) => metadata.id);
+    expect([...connectorTypes, ...connectorSpecIds].sort()).toEqual(
+      actionTypeRegistry.getAllTypes().sort()
+    );
   });
 
   for (const connectorTypeId of connectorTypes) {
@@ -99,6 +103,11 @@ describe('Connector type config checks', () => {
           connectorConfig = {
             apiUrl: 'https://_face_api_.com',
           };
+        } else if (connectorTypeId === '.mcp') {
+          connectorConfig = {
+            serverUrl: 'https://_fake_mcp_.com',
+            hasAuth: false,
+          };
         }
 
         const subActions = getService({
@@ -126,7 +135,7 @@ describe('Connector type config checks', () => {
         zodToJsonSchema(secrets.schema as z.ZodType, { name: 'secrets', $refStrategy: 'none' })
       ).toMatchSnapshot();
       expect(
-        zodToJsonSchema(params.schema as z.ZodType, { name: 'params', $refStrategy: 'none' })
+        zodToJsonSchema(params!.schema as z.ZodType, { name: 'params', $refStrategy: 'none' })
       ).toMatchSnapshot();
     });
   }

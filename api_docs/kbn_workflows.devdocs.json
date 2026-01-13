@@ -1887,6 +1887,20 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.BaseConnectorContract.configSchema",
+            "type": "Any",
+            "tags": [],
+            "label": "configSchema",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.BaseConnectorContract.summary",
             "type": "CompoundType",
             "tags": [],
@@ -2583,6 +2597,20 @@
             "type": "string",
             "tags": [],
             "label": "entryTransactionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.concurrencyGroupKey",
+            "type": "string",
+            "tags": [],
+            "label": "concurrencyGroupKey",
             "description": [],
             "signature": [
               "string | undefined"
@@ -5563,6 +5591,66 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.CollisionStrategy",
+        "type": "Type",
+        "tags": [],
+        "label": "CollisionStrategy",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.CollisionStrategySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "CollisionStrategySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.ConcurrencySettings",
+        "type": "Type",
+        "tags": [],
+        "label": "ConcurrencySettings",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.ConcurrencySettingsSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ConcurrencySettingsSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.ConnectorContractUnion",
         "type": "Type",
         "tags": [],
@@ -5639,6 +5727,36 @@
           "any"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.DataSetStep",
+        "type": "Type",
+        "tags": [],
+        "label": "DataSetStep",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.DataSetStepSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "DataSetStepSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5801,7 +5919,7 @@
         "label": "ExecutionStatusUnion",
         "description": [],
         "signature": [
-          "\"running\" | \"pending\" | \"failed\" | \"timed_out\" | \"completed\" | \"skipped\" | \"waiting\" | \"waiting_for_input\" | \"cancelled\""
+          "\"running\" | \"skipped\" | \"pending\" | \"failed\" | \"timed_out\" | \"completed\" | \"cancelled\" | \"waiting\" | \"waiting_for_input\""
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -6673,7 +6791,7 @@
         "label": "WorkflowExecutionListItemDto",
         "description": [],
         "signature": [
-          "{ id: string; spaceId: string; context?: Record<string, unknown> | undefined; error: any; duration: number | null; status: ",
+          "{ id: string; spaceId: string; context?: Record<string, unknown> | undefined; error: any; status: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -6681,7 +6799,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; isTestRun: boolean; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
+          "; duration: number | null; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; isTestRun: boolean; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -7075,7 +7193,7 @@
         "label": "WorkflowStepExecutionDto",
         "description": [],
         "signature": [
-          "{ id: string; error?: any; state?: Record<string, unknown> | undefined; status: ",
+          "{ id: string; error?: any; status: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -7083,7 +7201,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; input?: ",
+          "; state?: Record<string, unknown> | undefined; input?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -7130,6 +7248,30 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.TerminalExecutionStatuses",
+        "type": "Object",
+        "tags": [],
+        "label": "TerminalExecutionStatuses",
+        "description": [],
+        "signature": [
+          "readonly ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.ExecutionStatus",
+            "text": "ExecutionStatus"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

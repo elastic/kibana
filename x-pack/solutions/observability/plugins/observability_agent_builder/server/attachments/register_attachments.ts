@@ -6,14 +6,17 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAiInsightAttachmentType } from './ai_insight';
+import { createErrorAttachmentType } from './error';
+import { createAlertAttachmentType } from './alert';
+import { createLogAttachmentType } from './log';
 import type {
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
-import type { ObservabilityAgentDataRegistry } from '../data_registry/data_registry';
+import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 
 export async function registerAttachments({
   core,
@@ -21,14 +24,22 @@ export async function registerAttachments({
   logger,
   dataRegistry,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
-  dataRegistry: ObservabilityAgentDataRegistry;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }) {
-  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [createAiInsightAttachmentType()];
+  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
+    createAiInsightAttachmentType(),
+    createErrorAttachmentType({ core, logger, dataRegistry }),
+    createAlertAttachmentType({ core, logger }),
+    createLogAttachmentType({ core, logger, dataRegistry }),
+  ];
 
   for (const attachment of attachmentTypes) {
-    plugins.onechat.attachments.registerType(attachment);
+    plugins.agentBuilder.attachments.registerType(attachment);
   }
 }

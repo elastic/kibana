@@ -6,11 +6,33 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { gapFillStatus, gapStatus } from '../../../../../../common';
 
 export const getRuleIdsWithGapsParamsSchema = schema.object({
-  start: schema.string(),
-  end: schema.string(),
-  statuses: schema.maybe(schema.arrayOf(schema.string())),
+  start: schema.maybe(schema.string()),
+  end: schema.maybe(schema.string()),
+  // Filters the underlying gap documents before aggregation. Matches the raw
+  // per-gap statuses.
+  statuses: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal(gapStatus.UNFILLED),
+        schema.literal(gapStatus.PARTIALLY_FILLED),
+        schema.literal(gapStatus.FILLED),
+      ])
+    )
+  ),
+  // Derived, per-rule status filter computed from the aggregated gap duration
+  // sums with precedence: unfilled > in_progress > filled.
+  highestPriorityGapFillStatuses: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal(gapFillStatus.UNFILLED),
+        schema.literal(gapFillStatus.IN_PROGRESS),
+        schema.literal(gapFillStatus.FILLED),
+      ])
+    )
+  ),
   hasUnfilledIntervals: schema.maybe(schema.boolean()),
   hasInProgressIntervals: schema.maybe(schema.boolean()),
   hasFilledIntervals: schema.maybe(schema.boolean()),
@@ -24,6 +46,7 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
   ),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   maxRulesToFetch: schema.maybe(schema.number()),
+  ruleIds: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const getRuleIdsWithGapsResponseSchema = schema.object({

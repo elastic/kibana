@@ -7,14 +7,16 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { ObservabilityAgentPlugin } from './plugin';
+import { ObservabilityAgentBuilderPlugin } from './plugin';
 
 export type {
-  ObservabilityAgentPluginSetup,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetup,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from './types';
 
+export type { ObservabilityAgentBuilderServerRouteRepository } from './routes/get_global_observability_agent_builder_route_repository';
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new ObservabilityAgentPlugin(initializerContext);
+  new ObservabilityAgentBuilderPlugin(initializerContext);

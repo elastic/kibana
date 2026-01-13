@@ -123,6 +123,8 @@ export const streamRoutingMachine = setup({
       editingSuggestionIndex: null,
       editedSuggestion: null,
     })),
+    setRefreshing: assign(() => ({ isRefreshing: true })),
+    clearRefreshing: assign(() => ({ isRefreshing: false })),
   },
   guards: {
     canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild']),
@@ -162,6 +164,7 @@ export const streamRoutingMachine = setup({
     suggestedRuleId: null,
     editingSuggestionIndex: null,
     editedSuggestion: null,
+    isRefreshing: false,
   }),
   initial: 'initializing',
   states: {
@@ -177,7 +180,10 @@ export const streamRoutingMachine = setup({
       on: {
         'stream.received': {
           target: '#ready',
-          actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
+          actions: [
+            { type: 'storeDefinition', params: ({ event }) => event },
+            { type: 'clearRefreshing' },
+          ],
           reenter: true,
         },
         'routingSamples.setDocumentMatchFilter': {
@@ -187,17 +193,17 @@ export const streamRoutingMachine = setup({
           })),
         },
         'suggestion.preview': {
-          target: '#idle',
           actions: [
-            sendTo('routingSamplesMachine', ({ event }) => ({
+            sendTo('routingSamplesMachine', ({ event, context }) => ({
               type: 'routingSamples.setSelectedPreview',
               preview: event.toggle
                 ? { type: 'suggestion', name: event.name, index: event.index }
                 : undefined,
-            })),
-            sendTo('routingSamplesMachine', ({ event }) => ({
-              type: 'routingSamples.updateCondition',
-              condition: event.toggle ? event.condition : undefined,
+              condition: event.toggle
+                ? event.condition
+                : context.currentRuleId
+                ? selectCurrentRule(context)?.where
+                : undefined,
             })),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
@@ -218,11 +224,6 @@ export const streamRoutingMachine = setup({
             enqueue.sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: { type: 'suggestion', name: event.suggestion.name, index: event.index },
-            });
-
-            // Update condition for preview
-            enqueue.sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
               condition: event.suggestion.condition,
             });
           }),
@@ -263,9 +264,6 @@ export const streamRoutingMachine = setup({
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: { type: 'createStream' },
-            }),
-            sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
               condition: { always: {} },
             }),
           ],
@@ -274,10 +272,6 @@ export const streamRoutingMachine = setup({
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: undefined,
-            }),
-            sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
-              condition: undefined,
             }),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
@@ -338,7 +332,7 @@ export const streamRoutingMachine = setup({
                 },
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'refreshDefinition' }],
+                  actions: [{ type: 'setRefreshing' }, { type: 'refreshDefinition' }],
                 },
                 onError: {
                   target: 'changing',
@@ -372,6 +366,10 @@ export const streamRoutingMachine = setup({
                     sendTo('routingSamplesMachine', {
                       type: 'routingSamples.setDocumentMatchFilter',
                       filter: 'matched',
+                    }),
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.updateCondition',
+                      condition: undefined,
                     }),
                   ],
                 },
@@ -407,7 +405,7 @@ export const streamRoutingMachine = setup({
                 }),
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'refreshDefinition' }],
+                  actions: [{ type: 'setRefreshing' }, { type: 'refreshDefinition' }],
                 },
                 onError: {
                   target: 'changing',
@@ -424,7 +422,11 @@ export const streamRoutingMachine = setup({
                 }),
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'notifyStreamSuccess' }, { type: 'refreshDefinition' }],
+                  actions: [
+                    { type: 'notifyStreamSuccess' },
+                    { type: 'setRefreshing' },
+                    { type: 'refreshDefinition' },
+                  ],
                 },
                 onError: {
                   target: 'changing',
@@ -469,7 +471,11 @@ export const streamRoutingMachine = setup({
                 }),
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'notifyStreamSuccess' }, { type: 'refreshDefinition' }],
+                  actions: [
+                    { type: 'notifyStreamSuccess' },
+                    { type: 'setRefreshing' },
+                    { type: 'refreshDefinition' },
+                  ],
                 },
                 onError: {
                   target: 'reordering',
@@ -516,7 +522,11 @@ export const streamRoutingMachine = setup({
                 },
                 onDone: {
                   target: '#idle',
-                  actions: [{ type: 'refreshDefinition' }, { type: 'resetSuggestedRuleId' }],
+                  actions: [
+                    { type: 'resetSuggestedRuleId' },
+                    { type: 'setRefreshing' },
+                    { type: 'refreshDefinition' },
+                  ],
                 },
                 onError: {
                   target: 'reviewing',
@@ -584,10 +594,6 @@ export const streamRoutingMachine = setup({
                       type: 'routingSamples.setSelectedPreview',
                       preview: undefined,
                     }),
-                    sendTo('routingSamplesMachine', {
-                      type: 'routingSamples.updateCondition',
-                      condition: undefined,
-                    }),
                   ],
                 },
                 'suggestion.saveSuggestion': {
@@ -598,10 +604,6 @@ export const streamRoutingMachine = setup({
                     sendTo('routingSamplesMachine', {
                       type: 'routingSamples.setSelectedPreview',
                       preview: undefined,
-                    }),
-                    sendTo('routingSamplesMachine', {
-                      type: 'routingSamples.updateCondition',
-                      condition: undefined,
                     }),
                   ],
                 },
@@ -635,6 +637,7 @@ export const createStreamRoutingMachineImplementations = ({
       createRoutingSamplesMachineImplementations({
         data,
         timeState$,
+        telemetryClient,
       })
     ),
   },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
@@ -14,7 +14,7 @@ import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { fromKueryExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
-import { GenerateSignificantEventsPrompt } from './prompt';
+import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
 
@@ -23,32 +23,38 @@ interface Query {
   title: string;
   category: SignificantEventType;
   severity_score: number;
+  evidence?: string[];
 }
 
 /**
  * Generate significant event definitions, based on:
- * - the description of the feature (or stream if feature is undefined)
+ * - the description of the system (or stream if system is undefined)
  * - dataset analysis
  * - for the given significant event types
  */
 export async function generateSignificantEvents({
   stream,
-  feature,
+  system,
   start,
   end,
   esClient,
   inferenceClient,
   signal,
+  sampleDocsSize,
+  // optional overrides for templates
+  systemPromptOverride,
   logger,
 }: {
   stream: Streams.all.Definition;
-  feature?: Feature;
+  system?: System;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  sampleDocsSize?: number;
+  systemPromptOverride?: string;
 }): Promise<{
   queries: Query[];
   tokensUsed: ChatCompletionTokenCount;
@@ -58,24 +64,30 @@ export async function generateSignificantEvents({
   logger.trace('Describing dataset for significant event generation');
   const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
     describeDataset({
+      sampleDocsSize,
       start,
       end,
       esClient,
       index: stream.name,
-      filter: feature?.filter ? conditionToQueryDsl(feature.filter) : undefined,
+      filter: system?.filter ? conditionToQueryDsl(system.filter) : undefined,
     })
   );
+
+  // create the prompt instance using provided overrides (if any)
+  const prompt = createGenerateSignificantEventsPrompt({
+    systemPromptOverride,
+  });
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
-        name: feature?.name || stream.name,
+        name: system?.name || stream.name,
         dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
-        description: feature?.description || stream.description,
+        description: system?.description || stream.description,
       },
       maxSteps: 4,
-      prompt: GenerateSignificantEventsPrompt,
+      prompt,
       inferenceClient,
       toolCallbacks: {
         add_queries: async (toolCall) => {

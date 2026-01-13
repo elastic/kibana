@@ -16,7 +16,6 @@ import * as i18n from './translations';
 import { createAttackDiscoverySchedule } from '../api';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 export const CREATE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY = ['POST', ATTACK_DISCOVERY_SCHEDULES];
 
@@ -26,7 +25,6 @@ interface CreateAttackDiscoveryScheduleParams {
 
 export const useCreateAttackDiscoverySchedule = () => {
   const { addError, addSuccess } = useAppToasts();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   const invalidateFindAttackDiscoverySchedule = useInvalidateFindAttackDiscoverySchedule();
 
@@ -34,18 +32,14 @@ export const useCreateAttackDiscoverySchedule = () => {
     CreateAttackDiscoverySchedulesResponse,
     Error,
     CreateAttackDiscoveryScheduleParams
-  >(
-    ({ scheduleToCreate }) =>
-      createAttackDiscoverySchedule({ attackDiscoveryPublicApiEnabled, body: scheduleToCreate }),
-    {
-      mutationKey: CREATE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY,
-      onSuccess: () => {
-        invalidateFindAttackDiscoverySchedule();
-        addSuccess(i18n.CREATE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS());
-      },
-      onError: (error) => {
-        addError(error, { title: i18n.CREATE_ATTACK_DISCOVERY_SCHEDULES_FAILURE() });
-      },
-    }
-  );
+  >(({ scheduleToCreate }) => createAttackDiscoverySchedule({ body: scheduleToCreate }), {
+    mutationKey: CREATE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY,
+    onSuccess: () => {
+      invalidateFindAttackDiscoverySchedule();
+      addSuccess(i18n.CREATE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS());
+    },
+    onError: (error) => {
+      addError(error, { title: i18n.CREATE_ATTACK_DISCOVERY_SCHEDULES_FAILURE() });
+    },
+  });
 };

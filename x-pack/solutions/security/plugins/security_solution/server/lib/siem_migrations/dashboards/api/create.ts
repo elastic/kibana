@@ -10,7 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { SIEM_DASHBOARD_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from '../../common/api/util/authz';
+import { authz } from './util/authz';
 import type { CreateDashboardMigrationResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { CreateDashboardMigrationRequestBody } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { withLicense } from '../../common/api/util/with_license';

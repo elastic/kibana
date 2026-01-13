@@ -2842,4 +2842,101 @@ describe('BackfillClient', () => {
       expect(result).toHaveLength(0);
     });
   });
+
+  describe('deleteBackfillsByInitiatorId()', () => {
+    test('should successfully delete backfills by initiator id and use correct filter', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            id: 'abc',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes({ overwrites: { initiator: 'init-1' } }),
+            references: [{ id: '1', name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
+            version: '1',
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true }],
+      });
+      taskManagerStart.bulkRemove.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: 'task', success: true }],
+      });
+
+      await backfillClient.deleteBackfillsByInitiatorId({
+        initiatorId: 'init-1',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        filter: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId: "init-1"`,
+      });
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE },
+      ]);
+      expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(['abc']);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('should call updateGaps when deleting by initiator with shouldUpdateGaps', async () => {
+      const attrs = getMockAdHocRunAttributes({
+        overwrites: {
+          initiator: backfillInitiator.SYSTEM,
+          start: '2023-11-16T08:00:00.000Z',
+          schedule: [
+            {
+              runAt: '2023-11-16T20:00:00.000Z',
+              interval: '12h',
+              status: adHocRunStatus.PENDING,
+            },
+          ],
+        },
+      });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            id: 'abc',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [{ id: '1', name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
+            version: '1',
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, success: true }],
+      });
+      taskManagerStart.bulkRemove.mockResolvedValueOnce({
+        statuses: [{ id: 'abc', type: 'task', success: true }],
+      });
+
+      await backfillClient.deleteBackfillsByInitiatorId({
+        initiatorId: backfillInitiator.SYSTEM,
+        unsecuredSavedObjectsClient,
+        shouldUpdateGaps: true,
+        internalSavedObjectsRepository,
+        eventLogClient,
+        eventLogger,
+        actionsClient,
+      });
+
+      expect(updateGaps).toHaveBeenCalledTimes(1);
+      expect(updateGaps).toHaveBeenCalledWith({
+        ruleId: '1',
+        start: new Date(attrs.start),
+        end: new Date(),
+        backfillSchedule: attrs.schedule,
+        savedObjectsRepository: internalSavedObjectsRepository,
+        logger,
+        eventLogClient,
+        eventLogger,
+        shouldRefetchAllBackfills: true,
+        backfillClient,
+        actionsClient,
+        initiator: backfillInitiator.SYSTEM,
+      });
+    });
+  });
 });

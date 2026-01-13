@@ -321,6 +321,22 @@ export class UnifiedTabsPageObject extends FtrService {
     return labels;
   }
 
+  public async getRecentlyClosedTabTitles() {
+    await this.openTabsBarMenu();
+    const recentlyClosedItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
+    );
+    const titles = [];
+    for (const item of recentlyClosedItems) {
+      const fullText = await item.getVisibleText();
+      // Extract just the title (first line before the timestamp)
+      const title = fullText.split('\n')[0];
+      titles.push(title);
+    }
+    await this.closeTabsBarMenu();
+    return titles;
+  }
+
   public async restoreRecentlyClosedTab(index: number) {
     const currentNumberOfTabs = await this.getNumberOfTabs();
     await this.openTabsBarMenu();

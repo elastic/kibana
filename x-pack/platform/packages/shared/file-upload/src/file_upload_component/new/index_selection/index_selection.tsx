@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { UPLOAD_TYPE, useFileUploadContext } from '../../../..';
+import { useFileUploadContext, UPLOAD_TYPE } from '../../../use_file_upload';
 import { IndexInput } from './index_input';
 
 interface Props {

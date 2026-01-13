@@ -5,36 +5,42 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { ObservabilityAgentPluginSetupDependencies } from '../types';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type {
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart,
+} from '../types';
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
-import { OBSERVABILITY_GET_ALERTS_TOOL_ID } from '../tools';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
 export async function registerObservabilityAgent({
+  core,
   plugins,
   logger,
 }: {
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
-  plugins.onechat.agents.register({
+  plugins.agentBuilder?.agents.register({
     id: OBSERVABILITY_AGENT_ID,
     name: 'Observability Agent',
     description: 'Agent specialized in logs, metrics, and traces',
     avatar_icon: 'logoObservability',
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     configuration: {
-      instructions:
-        'You are an observability specialist agent.\n' +
-        '\n' +
-        `### OUTPUT STYLE for ALERTS\n` +
-        `- When alerts results are provided (e.g., from \`${OBSERVABILITY_GET_ALERTS_TOOL_ID}\`), respond with a concise Markdown table.\n` +
-        `- Use only the \`selectedFields\` metadata to define up to 5 columns for the table. Do **NOT** pick more than 5 fields.\n` +
-        `- When choosing fields for the columns, choose fields that are most relevant to the user's request and conversation context.\n` +
-        `- Generate human-friendly column names by converting dotted paths to Title Case and stripping common prefixes like \`kibana.alert.\` or \`service.\`.\n` +
-        `- Leave cells blank when values are missing.\n` +
-        `- Always add a summary of the results in addition to the table. Mention the total number of alerts in the summary.`,
+      instructions: 'You are an observability specialist agent.\n',
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,

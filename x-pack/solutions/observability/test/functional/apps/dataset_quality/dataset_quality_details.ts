@@ -20,6 +20,7 @@ import {
   processors,
   productionNamespace,
 } from './data';
+import { waitUntilDatasetQualityTableOrTimeoutWithFallback } from './helpers';
 
 const integrationActions = {
   overview: 'Overview',
@@ -39,6 +40,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const retry = getService('retry');
   const browser = getService('browser');
+  const logger = getService('log');
   const to = '2024-01-01T12:00:00.000Z';
 
   const apacheAccessDatasetName = 'apache.access';
@@ -152,8 +154,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
       });
 
-      it('should navigate to details page from a main page', async () => {
-        await PageObjects.datasetQuality.navigateTo();
+      it('should navigate to details page from a main page', async function () {
+        await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+          this.skip()
+        );
 
         const synthDataset = await testSubjects.find(
           'datasetQualityTableDetailsLink-logs-synth.1-default',

@@ -37,7 +37,9 @@ export function savedObjectToItem(
   const { references, attributes, ...rest } = savedObject;
   return {
     ...rest,
-    attributes: transformMapAttributesOut(attributes as MapAttributes, references ?? []),
+    attributes: transformMapAttributesOut(attributes as MapAttributes, (targetName) => {
+      return references ? references.find(({ name }) => name === targetName) : undefined;
+    }),
     references: (references ?? []).filter(({ type }) => type === 'tag'),
   };
 }

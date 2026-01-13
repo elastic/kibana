@@ -68,7 +68,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('mappings');
           });
         });
-        describe('can view search index details', function () {
+        // FLAKY: https://github.com/elastic/kibana/issues/239152
+        describe.skip('can view search index details', function () {
           it('renders search index details with no documents', async () => {
             await pageObjects.searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
               0

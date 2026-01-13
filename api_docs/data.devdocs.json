@@ -2777,7 +2777,7 @@
             "signature": [
               "(core: ",
               "CoreStart",
-              ", { uiActions, fieldFormats, dataViews, inspector, screenshotMode, share }: ",
+              ", { uiActions, fieldFormats, dataViews, inspector, screenshotMode, share, cps, }: ",
               "DataStartDependencies",
               ") => ",
               {
@@ -2812,7 +2812,7 @@
                 "id": "def-public.DataPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ uiActions, fieldFormats, dataViews, inspector, screenshotMode, share }",
+                "label": "{\n      uiActions,\n      fieldFormats,\n      dataViews,\n      inspector,\n      screenshotMode,\n      share,\n      cps,\n    }",
                 "description": [],
                 "signature": [
                   "DataStartDependencies"
@@ -8263,6 +8263,23 @@
             "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SavedObject.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [
+              "\nAccess control information of the saved object.\nThis can be be used to customize access to the object in addition to RBAC, e.g.\nto set an object to read-only mode, where it is only editable by the owner of\nthe object (or an admin), even if other users are granted write access via a role."
+            ],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8744,6 +8761,20 @@
             "description": [
               "\n{@link ProjectRouting}"
             ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.timezone",
+            "type": "string",
+            "tags": [],
+            "label": "timezone",
+            "description": [],
             "signature": [
               "string | undefined"
             ],
@@ -10045,7 +10076,7 @@
             "section": "def-common.ProjectRouting",
             "text": "ProjectRouting"
           },
-          "; parent?: ",
+          "; timezone?: string | undefined; parent?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -11355,7 +11386,7 @@
               "section": "def-common.FieldFormatsRegistry",
               "text": "FieldFormatsRegistry"
             },
-            ", \"init\" | \"register\"> & { deserialize: ",
+            ", \"register\" | \"init\"> & { deserialize: ",
             {
               "pluginId": "fieldFormats",
               "scope": "common",
@@ -22626,6 +22657,23 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SavedObject.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [
+              "\nAccess control information of the saved object.\nThis can be be used to customize access to the object in addition to RBAC, e.g.\nto set an object to read-only mode, where it is only editable by the owner of\nthe object (or an admin), even if other users are granted write access via a role."
+            ],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,

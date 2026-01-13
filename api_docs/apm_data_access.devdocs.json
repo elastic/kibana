@@ -426,9 +426,9 @@
             "signature": [
               "(processorEvent: ",
               {
-                "pluginId": "observability",
+                "pluginId": "@kbn/apm-types-shared",
                 "scope": "common",
-                "docId": "kibObservabilityPluginApi",
+                "docId": "kibKbnApmTypesSharedPluginApi",
                 "section": "def-common.ProcessorEvent",
                 "text": "ProcessorEvent"
               },
@@ -447,9 +447,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "observability",
+                    "pluginId": "@kbn/apm-types-shared",
                     "scope": "common",
-                    "docId": "kibObservabilityPluginApi",
+                    "docId": "kibKbnApmTypesSharedPluginApi",
                     "section": "def-common.ProcessorEvent",
                     "text": "ProcessorEvent"
                   }
@@ -1564,7 +1564,13 @@
               "{ includeFrozen: boolean; inspectableEsQueriesMap?: WeakMap<",
               "KibanaRequest",
               "<unknown, unknown, unknown, any>, ",
-              "InspectResponse",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "common",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-common.InspectResponse",
+                "text": "InspectResponse"
+              },
               "> | undefined; excludedDataTiers?: ",
               {
                 "pluginId": "observabilityShared",
@@ -1929,9 +1935,9 @@
           "SearchRequest",
           ", \"index\"> & { apm: { includeLegacyData?: boolean | undefined; } & ({ events: ",
           {
-            "pluginId": "observability",
+            "pluginId": "@kbn/apm-types-shared",
             "scope": "common",
-            "docId": "kibObservabilityPluginApi",
+            "docId": "kibKbnApmTypesSharedPluginApi",
             "section": "def-common.ProcessorEvent",
             "text": "ProcessorEvent"
           },

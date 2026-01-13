@@ -49,7 +49,6 @@ export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
   allowMissingConnectorSecrets?: boolean;
-  isFlappingEnabled?: boolean;
 }
 
 export async function createRule<Params extends RuleParams = never>(
@@ -57,12 +56,7 @@ export async function createRule<Params extends RuleParams = never>(
   createParams: CreateRuleParams<Params>
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
-  const {
-    data: initialData,
-    options,
-    allowMissingConnectorSecrets,
-    isFlappingEnabled = false,
-  } = createParams;
+  const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
 
   const actionsClient = await context.getActionsClient();
 
@@ -181,12 +175,6 @@ export async function createRule<Params extends RuleParams = never>(
   ) {
     throw Boom.badRequest(
       `Error creating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
-    );
-  }
-
-  if (initialData.flapping !== undefined && !isFlappingEnabled) {
-    throw Boom.badRequest(
-      'Error creating rule: can not create rule with flapping if global flapping is disabled'
     );
   }
 

@@ -277,11 +277,6 @@ export class ImportResolver {
     const pkgName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
     const subPathParts = parts.slice(pkgName.startsWith('@') ? 2 : 1);
 
-    // "exports" maps only apply to sub-paths (eg. "pkg/foo")
-    if (subPathParts.length === 0) {
-      return null;
-    }
-
     // Locate the dependency's package.json
     let manifestPath: string | undefined;
     try {
@@ -307,7 +302,8 @@ export class ImportResolver {
     }
 
     // Use resolve.exports to determine the correct file for the sub-path
-    const entry = `./${subPathParts.join('/')}`;
+    const entry = subPathParts.length ? `./${subPathParts.join('/')}` : '.';
+
     const targets = resolvePackageExports(pkgJson as any, entry) as string[] | undefined;
 
     if (!targets || targets.length === 0) {

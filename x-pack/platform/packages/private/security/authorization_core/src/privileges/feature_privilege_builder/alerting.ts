@@ -32,7 +32,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'findGaps',
     'bulkEditParams',
     'getGapAutoFillScheduler',
-    'getGapAutoFillSchedulerLogs',
+    'findGapAutoFillSchedulerLogs',
   ],
   alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };

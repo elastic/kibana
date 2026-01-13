@@ -639,6 +639,39 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.OrStringRecursive",
+        "type": "Type",
+        "tags": [],
+        "label": "OrStringRecursive",
+        "description": [
+          "\nRecursively transform a type so that each value can be either its original type or a string.\nThis is useful for types that may contain template strings (like Liquid templates) that will\nbe rendered at runtime.\n"
+        ],
+        "signature": [
+          "T extends (infer U)[] ? string | ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.OrStringRecursive",
+            "text": "OrStringRecursive"
+          },
+          "<U>[] : T extends object ? { [K in keyof T]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.OrStringRecursive",
+            "text": "OrStringRecursive"
+          },
+          "<T[K]>; } : string | T"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/or_string_recursive.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-common.PublicContract",
         "type": "Type",
         "tags": [],

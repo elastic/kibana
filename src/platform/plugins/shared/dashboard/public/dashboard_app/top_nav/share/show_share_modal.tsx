@@ -11,8 +11,7 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import type { ReactElement } from 'react';
 import React, { useState } from 'react';
-
-import { EuiCheckboxGroup } from '@elastic/eui';
+import { EuiCheckbox, EuiFlexGrid, EuiFlexItem, EuiFormFieldset } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import type { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -20,9 +19,21 @@ import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import {
+  AccessModeContainer,
+  type AccessControlClient,
+} from '@kbn/content-management-access-control-public';
+
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
 import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { dataService, shareService } from '../../../services/kibana_services';
+import {
+  dataService,
+  shareService,
+  coreServices,
+  spacesService,
+} from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
@@ -36,6 +47,13 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
+  canSave: boolean;
+  accessControl?: Partial<SavedObjectAccessControl>;
+  createdBy?: string;
+  isManaged: boolean;
+  accessControlClient: AccessControlClient;
+  saveDashboard: () => Promise<void>;
+  changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -52,8 +70,26 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
+  canSave,
+  accessControl,
+  createdBy,
+  isManaged,
+  accessControlClient,
+  saveDashboard,
+  changeAccessMode,
 }: ShowShareModalProps) {
   if (!shareService) return;
+
+  const handleChangeAccessMode = async (accessMode: SavedObjectAccessControl['accessMode']) => {
+    if (!savedObjectId) return;
+
+    try {
+      await changeAccessMode(accessMode);
+      return shareModalStrings.accessModeUpdateSuccess;
+    } catch (error) {
+      return shareModalStrings.accessModeUpdateError;
+    }
+  };
 
   const EmbedUrlParamExtension = ({
     setParamValue,
@@ -70,13 +106,14 @@ export function ShowShareModal({
         label: shareModalStrings.getTopMenuCheckbox(),
       },
       {
-        id: dashboardUrlParams.showQueryInput,
-        label: shareModalStrings.getQueryCheckbox(),
-      },
-      {
         id: dashboardUrlParams.showTimeFilter,
         label: shareModalStrings.getTimeFilterCheckbox(),
       },
+      {
+        id: dashboardUrlParams.showQueryInput,
+        label: shareModalStrings.getQueryCheckbox(),
+      },
+
       {
         id: showFilterBarId,
         label: shareModalStrings.getFilterBarCheckbox(),
@@ -100,15 +137,20 @@ export function ShowShareModal({
     };
 
     return (
-      <EuiCheckboxGroup
-        options={checkboxes}
-        idToSelectedMap={urlParamsSelectedMap}
-        onChange={handleChange}
-        legend={{
-          children: shareModalStrings.getCheckboxLegend(),
-        }}
-        data-test-subj="embedUrlParamExtension"
-      />
+      <EuiFormFieldset legend={{ children: shareModalStrings.getCheckboxLegend() }}>
+        <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="embedUrlParamExtension">
+          {checkboxes.map(({ id, label }) => (
+            <EuiFlexItem key={id}>
+              <EuiCheckbox
+                id={id}
+                label={label}
+                checked={!!urlParamsSelectedMap[id]}
+                onChange={() => handleChange(id)}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiFormFieldset>
     );
   };
 
@@ -121,7 +163,6 @@ export function ShowShareModal({
     ...unsavedDashboardState,
     controlGroupInput:
       unsavedDashboardState.controlGroupInput as DashboardLocatorParams['controlGroupInput'],
-    references: unsavedDashboardState.references as DashboardLocatorParams['references'],
   };
 
   const locatorParams: DashboardLocatorParams = {
@@ -147,7 +188,9 @@ export function ShowShareModal({
     unhashUrl(baseUrl)
   );
 
-  const allowShortUrl = getDashboardCapabilities().createShortUrl;
+  const { createShortUrl, showWriteControls } = getDashboardCapabilities();
+  const allowShortUrl = createShortUrl;
+  const showAccessContainer = savedObjectId && !isManaged && showWriteControls;
 
   shareService.toggleShareContextMenu({
     isDirty,
@@ -157,9 +200,10 @@ export function ShowShareModal({
     asExport,
     objectId: savedObjectId,
     objectType: 'dashboard',
+    onSave: canSave ? saveDashboard : undefined,
     objectTypeMeta: {
       title: i18n.translate('dashboard.share.shareModal.title', {
-        defaultMessage: 'Share this dashboard',
+        defaultMessage: 'Share dashboard',
       }),
       config: {
         link: {
@@ -210,12 +254,23 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
+      accessModeContainer: showAccessContainer ? (
+        <AccessModeContainer
+          accessControl={accessControl}
+          createdBy={createdBy}
+          getActiveSpace={spacesService?.getActiveSpace}
+          getCurrentUser={coreServices.userProfile.getCurrent}
+          onChangeAccessMode={handleChangeAccessMode}
+          accessControlClient={accessControlClient}
+          contentTypeId={DASHBOARD_SAVED_OBJECT_TYPE}
+        />
+      ) : undefined,
     },
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
         DASHBOARD_APP_LOCATOR
       ) as LocatorPublic<DashboardLocatorParams>,
-      params: locatorParams,
+      params: { ...locatorParams, timeRange: locatorParams.time_range },
     },
   });
 }

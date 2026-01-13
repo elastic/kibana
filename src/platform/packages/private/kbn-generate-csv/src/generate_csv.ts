@@ -56,6 +56,7 @@ interface Dependencies {
 export class CsvGenerator {
   private csvContainsFormulas = false;
   private maxSizeReached = false;
+  private maxRowsReached = false;
   private csvRowCount = 0;
 
   constructor(
@@ -66,7 +67,9 @@ export class CsvGenerator {
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
     private logger: Logger,
-    private stream: Writable
+    private stream: Writable,
+    private isServerless: boolean = false,
+    private jobId: string
   ) {}
   /*
    * Load field formats for each field in the list
@@ -111,7 +114,7 @@ export class CsvGenerator {
         try {
           cell = formatters[tableColumn].convert(dataTableCell);
         } catch (err) {
-          this.logger.error(err);
+          this.logger.error(err, { tags: [this.jobId] });
           cell = '-';
         }
 
@@ -154,7 +157,7 @@ export class CsvGenerator {
     settings: CsvExportSettings,
     dataView: DataView
   ) {
-    this.logger.debug(`Building CSV header row`);
+    this.logger.debug(`Building CSV header row`, { tags: [this.jobId] });
     const header =
       Array.from(columns)
         .map((column) => {
@@ -186,7 +189,7 @@ export class CsvGenerator {
     formatters: Record<string, FieldFormat>,
     settings: CsvExportSettings
   ) {
-    this.logger.debug(`Building ${table.rows.length} CSV data rows`);
+    this.logger.debug(`Building ${table.rows.length} CSV data rows`, { tags: [this.jobId] });
     for (const dataTableRow of table.rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
@@ -224,7 +227,9 @@ export class CsvGenerator {
       }
 
       if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {
-        this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
+        this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`, {
+          tags: [this.jobId],
+        });
         this.maxSizeReached = true;
         if (this.cancellationToken) {
           this.cancellationToken.cancel();
@@ -263,12 +268,14 @@ export class CsvGenerator {
       ),
       createSearchSource(),
     ]);
+    searchSource.setField('timezone', settings.timezone);
 
     const { startedAt, retryAt } = this.taskInstanceFields;
     if (startedAt) {
       this.logger.debug(
         `Task started at: ${startedAt && moment(startedAt).format()}.` +
-          ` Can run until: ${retryAt && moment(retryAt).format()}`
+          ` Can run until: ${retryAt && moment(retryAt).format()}`,
+        { tags: [this.jobId] }
       );
     }
 
@@ -279,16 +286,22 @@ export class CsvGenerator {
     }
 
     if (this.job.forceNow) {
-      this.logger.debug(`Overriding time range filter using forceNow: ${this.job.forceNow}`);
+      this.logger.debug(`Overriding time range filter using forceNow: ${this.job.forceNow}`, {
+        tags: [this.jobId],
+      });
 
       const currentFilters = searchSource.getField('filter') as Filter[] | Filter | undefined;
-      this.logger.debug(() => `Current filters: ${JSON.stringify(currentFilters)}`);
+      this.logger.debug(() => `Current filters: ${JSON.stringify(currentFilters)}`, {
+        tags: [this.jobId],
+      });
       const updatedFilters = overrideTimeRange({
         currentFilters,
         forceNow: this.job.forceNow,
         logger: this.logger,
       });
-      this.logger.debug(() => `Updated filters: ${JSON.stringify(updatedFilters)}`);
+      this.logger.debug(() => `Updated filters: ${JSON.stringify(updatedFilters)}`, {
+        tags: [this.jobId],
+      });
 
       if (updatedFilters) {
         searchSource.removeField('filter'); // remove existing filters
@@ -296,11 +309,10 @@ export class CsvGenerator {
       }
     }
 
-    const { maxSizeBytes, bom, escapeFormulaValues, timezone } = settings;
+    const { maxSizeBytes, maxRows, bom, escapeFormulaValues, timezone } = settings;
     const indexPatternTitle = index.getIndexPattern();
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
-    let userError: boolean | undefined;
     let first = true;
     let currentRecord = -1;
     let totalRecords: number | undefined;
@@ -320,7 +332,7 @@ export class CsvGenerator {
         abortController,
         this.logger
       );
-      logger.debug('Using search strategy: scroll');
+      logger.debug('Using search strategy: scroll', { tags: [this.jobId] });
     } else {
       // Default strategy: point-in-time
       cursor = new SearchCursorPit(
@@ -330,14 +342,14 @@ export class CsvGenerator {
         abortController,
         this.logger
       );
-      logger.debug('Using search strategy: pit');
+      logger.debug('Using search strategy: pit', { tags: [this.jobId] });
     }
     await cursor.initialize();
 
     // apply timezone from the job to all date field formatters
     try {
       index.fields.getByType('date').forEach(({ name }) => {
-        logger.debug(`Setting timezone on ${name}`);
+        logger.debug(`Setting timezone on ${name}`, { tags: [this.jobId] });
         const format: FieldFormatConfig = {
           ...index.fieldFormatMap[name],
           id: index.fieldFormatMap[name]?.id || 'date', // allow id: date_nanos
@@ -349,7 +361,7 @@ export class CsvGenerator {
         index.setFieldFormat(name, format);
       });
     } catch (err) {
-      logger.error(err);
+      logger.error(err, { tags: [this.jobId] });
     }
 
     const columns = new Set<string>(this.job.columns ?? []);
@@ -359,18 +371,20 @@ export class CsvGenerator {
           break;
         }
 
-        searchSource.setField('size', settings.scroll.size);
+        // override the scroll size if the maxRows limit is smaller
+        const size = Math.min(settings.scroll.size, maxRows);
+        searchSource.setField('size', size);
 
         let results: estypes.SearchResponse<unknown> | undefined;
         try {
           results = await cursor.getPage(searchSource);
         } catch (err) {
-          this.logger.error(`CSV export search error: ${err}`);
+          err.message = `CSV export search error: ${err.message}`;
           throw err;
         }
 
         if (!results) {
-          logger.warn(`Search results are undefined!`);
+          logger.warn(`Search results are undefined!`, { tags: [this.jobId] });
           break;
         }
 
@@ -391,7 +405,7 @@ export class CsvGenerator {
         if (shards.failures) {
           shards.failures.forEach(({ reason }) => {
             warnings.push(`Shard failure: ${JSON.stringify(reason)}`);
-            logger.warn(JSON.stringify(reason));
+            logger.warn(JSON.stringify(reason), { tags: [this.jobId] });
           });
         }
 
@@ -399,7 +413,7 @@ export class CsvGenerator {
         try {
           table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
-          logger.error(err);
+          logger.error(err, { tags: [this.jobId] });
           warnings.push(i18nTexts.unknownError(err?.message ?? err));
         }
 
@@ -426,6 +440,20 @@ export class CsvGenerator {
 
         // update iterator
         currentRecord += table.rows.length;
+
+        // stop generating the report if the
+        // current number of rows is >= the max row limit
+        if (currentRecord >= maxRows - 1) {
+          this.logger.warn(
+            `Your requested export includes ${totalRecords} rows, which has exceeded the recommended row limit (${maxRows}).${
+              this.isServerless
+                ? ''
+                : ' This limit can be configured in kibana.yml, but increasing it may impact performance.'
+            }`
+          );
+          this.maxRowsReached = true;
+          break;
+        }
       } while (totalRecords != null && currentRecord < totalRecords - 1);
 
       // Add warnings to be logged
@@ -433,7 +461,7 @@ export class CsvGenerator {
         warnings.push(i18nTexts.escapedFormulaValuesMessage);
       }
     } catch (err) {
-      logger.error(err);
+      logger.error(err, { tags: [this.jobId] });
       if (err instanceof esErrors.ResponseError) {
         if ([401, 403].includes(err.statusCode ?? 0)) {
           reportingError = new AuthenticationExpiredError();
@@ -448,17 +476,26 @@ export class CsvGenerator {
       try {
         await cursor.closeCursor();
       } catch (err) {
-        logger.error(err);
+        logger.error(err, { tags: [this.jobId] });
         warnings.push(cursor.getUnableToCloseCursorMessage());
       }
     }
 
-    logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
+    logger.info(`Finished generating. Row count: ${this.csvRowCount}.`, { tags: [this.jobId] });
 
-    if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
+    if (this.maxRowsReached) {
+      warnings.push(
+        i18nTexts.csvMaxRowsWarning({
+          isServerless: this.isServerless,
+          maxRows,
+          expected: totalRecords ?? 0,
+        })
+      );
+    } else if (!this.maxSizeReached && !this.maxRowsReached && this.csvRowCount !== totalRecords) {
       logger.warn(
         `ES scroll returned ` +
-          `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`
+          `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`,
+        { tags: [this.jobId] }
       );
       logger.warn(`Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}`);
 
@@ -466,7 +503,6 @@ export class CsvGenerator {
         warnings.push(
           i18nTexts.csvRowCountError({ expected: totalRecords, received: this.csvRowCount })
         );
-        userError = true;
       } else {
         warnings.push(i18nTexts.csvRowCountIndeterminable({ received: this.csvRowCount }));
       }
@@ -481,12 +517,14 @@ export class CsvGenerator {
          * Kibana UI to download the export and might not otherwise see the
          * error message.
          */
-        logger.info('CSV export content was empty. Adding error messages to CSV export content.');
+        logger.info('CSV export content was empty. Adding error messages to CSV export content.', {
+          tags: [this.jobId],
+        });
         // join the string array and putting double quotes around each item
         // add a leading newline so the first message is not treated as a header
         builder.tryAppend('\n"' + warnings.join('"\n"') + '"');
       } else {
-        logger.info('CSV export content was empty. No error messages.');
+        logger.info('CSV export content was empty. No error messages.', { tags: [this.jobId] });
       }
     }
 
@@ -498,7 +536,6 @@ export class CsvGenerator {
         csv: { rows: this.csvRowCount },
       },
       warnings,
-      user_error: userError,
       error_code: reportingError?.code,
     };
   }

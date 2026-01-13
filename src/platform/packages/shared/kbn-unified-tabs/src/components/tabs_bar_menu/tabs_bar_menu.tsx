@@ -23,8 +23,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { TabItem } from '../../types';
+
+interface OptionData {
+  closedAt?: moment.Moment;
+}
+
+type RecentlyClosedTabOption = EuiSelectableOption<OptionData>;
 
 const getOpenedTabsList = (
   tabItems: TabItem[],
@@ -37,15 +45,19 @@ const getOpenedTabsList = (
   }));
 };
 
-const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] => {
+const getRecentlyClosedTabsList = (tabItems: TabItem[]): RecentlyClosedTabOption[] => {
   return tabItems.map((tab) => {
     const closedAt = 'closedAt' in tab && tab.closedAt ? moment(tab.closedAt) : undefined;
-    return {
+    const option = {
       label: tab.label,
       title: `${tab.label}${closedAt?.isValid() ? ` (${closedAt.format('LL LT')})` : ''}`,
       key: tab.id,
       'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
+      data: {
+        closedAt,
+      },
     };
+    return option;
   });
 };
 
@@ -67,6 +79,8 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     onSelectRecentlyClosed,
     onClearRecentlyClosed,
   }) => {
+    const { euiTheme } = useEuiTheme();
+
     const openedTabsList = useMemo(
       () => getOpenedTabsList(items, selectedItem),
       [items, selectedItem]
@@ -94,6 +108,22 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       },
     } as Partial<EuiSelectableOptionsListProps>;
 
+    const renderRecentlyClosedOption = useCallback((option: EuiSelectableOption<OptionData>) => {
+      const closedAt = option?.closedAt;
+      const formattedTime = closedAt?.isValid() ? closedAt.fromNow() : '';
+
+      return (
+        <>
+          {option.label}
+          {formattedTime && (
+            <EuiText size="xs" color="subdued" className="eui-displayBlock">
+              {formattedTime}
+            </EuiText>
+          )}
+        </>
+      );
+    }, []);
+
     return (
       <EuiPopover
         data-test-subj="unifiedTabs_tabsBarMenu"
@@ -103,6 +133,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         panelPaddingSize="none"
         anchorPosition="downRight"
         hasArrow={false}
+        buffer={0}
         panelProps={{
           css: popoverCss,
           ['data-test-subj']: 'unifiedTabs_tabsBarMenuPanel',
@@ -113,7 +144,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               aria-label={menuButtonLabel}
               color="text"
               data-test-subj="unifiedTabs_tabsBarMenuButton"
-              iconType="boxesVertical"
+              iconType="arrowDown"
               onClick={() => setPopover((prev) => !prev)}
             />
           </EuiToolTip>
@@ -155,7 +186,11 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               })}
               options={recentlyClosedTabsList}
               singleSelection={true}
-              listProps={selectableListProps}
+              listProps={{
+                ...selectableListProps,
+                rowHeight: parseInt(euiTheme.size.xxxl, 10),
+              }}
+              renderOption={renderRecentlyClosedOption}
               onChange={(newOptions) => {
                 const clickedTabId = newOptions.find((option) => option.checked)?.key;
                 const tabToNavigate = recentlyClosedItems.find((tab) => tab.id === clickedTabId);

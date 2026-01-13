@@ -96,6 +96,7 @@ export class AttackDiscoveryScheduleDataClient {
     ruleToUpdate: AttackDiscoveryScheduleUpdateProps & { id: string }
   ): Promise<AttackDiscoverySchedule> => {
     const { id, actions: _, ...updatePayload } = ruleToUpdate;
+
     const { actions, systemActions } = convertScheduleActionsToAlertingActions({
       actionsClient: this.options.actionsClient,
       scheduleActions: ruleToUpdate.actions,
@@ -103,10 +104,10 @@ export class AttackDiscoveryScheduleDataClient {
     const rule = await this.options.rulesClient.update<AttackDiscoveryScheduleParams>({
       id,
       data: {
+        ...updatePayload,
         actions,
         ...(systemActions.length ? { systemActions } : {}),
         tags: [],
-        ...updatePayload,
       },
     });
     const schedule = convertAlertingRuleToSchedule(rule);

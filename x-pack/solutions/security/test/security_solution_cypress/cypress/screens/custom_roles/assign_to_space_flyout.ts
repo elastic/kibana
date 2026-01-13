@@ -16,10 +16,10 @@ export const SECURITY_CATEGORY = '[data-test-subj="featureCategory_securitySolut
 export const SECURITY_FEATURE = `[data-test-subj="featureCategory_securitySolution_${SECURITY_FEATURE_ID}"]`;
 export const SECURITY_FEATURE_DESCRIPTION = '[data-test-subj="featurePrivilegeDescriptionText"]';
 export const SECURITY_SUB_FEATURE_TABLE =
-  '[data-test-subj="securitySolution_siemV4_subFeaturesTable"]';
+  '[data-test-subj="securitySolution_siemV5_subFeaturesTable"]';
 
 export const SOC_MANAGEMENT_SUB_FEATURE =
-  '[data-test-subj="securitySolution_siemV4_soc_management"]';
+  '[data-test-subj="securitySolution_siemV5_soc_management"]';
 
 export const CASES_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionCasesV3"]';

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField } from '../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
@@ -143,8 +143,8 @@ describe('Metric Flyout Overview Tab', () => {
       expect(getByText('service.name')).toBeInTheDocument();
     });
 
-    it('shows pagination for all dimensions', () => {
-      const dimensions = Array.from({ length: 30 }, (_, i) => ({
+    it('shows pagination when dimensions count is 20 or more', () => {
+      const dimensions = Array.from({ length: 20 }, (_, i) => ({
         name: `dimension.${String(i).padStart(2, '0')}`,
         type: ES_FIELD_TYPES.KEYWORD,
       }));
@@ -156,18 +156,17 @@ describe('Metric Flyout Overview Tab', () => {
       ).toBeInTheDocument();
     });
 
-    it('always shows pagination component', () => {
+    it('does not show pagination when dimensions count is less than 20', () => {
       const dimensions = [
         { name: 'dimension.01', type: ES_FIELD_TYPES.KEYWORD },
         { name: 'dimension.02', type: ES_FIELD_TYPES.KEYWORD },
       ];
       const metric = createMockMetric({ dimensions });
-      const { getByTestId } = render(<OverviewTab metric={metric} />);
+      const { queryByTestId } = render(<OverviewTab metric={metric} />);
 
-      // EuiTablePagination is always shown regardless of item count
       expect(
-        getByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
-      ).toBeInTheDocument();
+        queryByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
+      ).not.toBeInTheDocument();
     });
 
     it('sorts dimensions alphabetically', () => {

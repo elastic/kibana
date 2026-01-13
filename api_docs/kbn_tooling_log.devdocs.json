@@ -642,7 +642,7 @@
                 "label": "level",
                 "description": [],
                 "signature": [
-                  "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
+                  "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
                 "deprecated": false,
@@ -739,7 +739,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "{ name: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { error: boolean; info: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
+              "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
@@ -965,7 +965,7 @@
         "label": "parseLogLevel",
         "description": [],
         "signature": [
-          "(name: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\") => { name: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { error: boolean; info: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
+          "(name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\") => { name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
@@ -979,7 +979,7 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
+              "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
@@ -998,7 +998,7 @@
         "label": "pickLevelFromFlags",
         "description": [],
         "signature": [
-          "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined; }) => \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
+          "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined; }) => \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
@@ -1038,7 +1038,7 @@
                 "label": "default",
                 "description": [],
                 "signature": [
-                  "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
+                  "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
                 "deprecated": false,
@@ -1075,7 +1075,7 @@
               "level/type of message"
             ],
             "signature": [
-              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"write\" | \"verbose\""
+              "\"info\" | \"error\" | \"success\" | \"warning\" | \"write\" | \"debug\" | \"verbose\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
             "deprecated": false,
@@ -1235,7 +1235,7 @@
               "\nLog level, messages below this level will be ignored"
             ],
             "signature": [
-              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
+              "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
@@ -1383,7 +1383,7 @@
         "label": "LogLevel",
         "description": [],
         "signature": [
-          "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
+          "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
@@ -1398,7 +1398,7 @@
         "label": "ParsedLogLevel",
         "description": [],
         "signature": [
-          "{ name: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { error: boolean; info: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
+          "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
