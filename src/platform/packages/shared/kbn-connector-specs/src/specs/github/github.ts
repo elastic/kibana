@@ -158,23 +158,6 @@ export const GithubConnector: ConnectorSpec = {
           },
         });
 
-        // Transform response to only include essential fields
-        const transformedItems = response.data.items.map(
-          (item: {
-            name: string;
-            path: string;
-            html_url: string;
-            repository: { full_name: string };
-            score: number;
-          }) => ({
-            name: item.name,
-            path: item.path,
-            html_url: item.html_url,
-            repository: item.repository.full_name,
-            score: item.score,
-          })
-        );
-
         const searchRepoContentsResponseSchema = z.object({
           total_count: z.number(),
           items: z.array(
@@ -182,16 +165,13 @@ export const GithubConnector: ConnectorSpec = {
               name: z.string(),
               path: z.string(),
               html_url: z.string(),
-              repository: z.string(),
+              repository: z.object({ full_name: z.string() }),
               score: z.number(),
             })
           ),
         });
 
-        return searchRepoContentsResponseSchema.parse({
-          total_count: response.data.total_count,
-          items: transformedItems,
-        });
+        return searchRepoContentsResponseSchema.parse(response.data);
       },
     },
     getDocs: {
