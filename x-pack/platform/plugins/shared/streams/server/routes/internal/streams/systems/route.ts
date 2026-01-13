@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { streamObjectNameSchema, systemSchema, type System } from '@kbn/streams-schema';
+import type { System } from '@kbn/streams-schema';
+import { streamObjectNameSchema, systemSchema, TaskStatus } from '@kbn/streams-schema';
 import type {
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
@@ -14,7 +15,6 @@ import type {
 } from '@kbn/storage-adapter';
 import type { Observable } from 'rxjs';
 import { catchError, from, map } from 'rxjs';
-import { BooleanFromString } from '@kbn/zod-helpers';
 import { conflict } from '@hapi/boom';
 import { generateStreamDescription, type IdentifySystemsResult, sumTokens } from '@kbn/streams-ai';
 import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
@@ -272,25 +272,94 @@ export const bulkSystemsRoute = createServerRoute({
 
 export type SystemIdentificationTaskResult =
   | {
-      status: 'not_started' | 'in_progress' | 'stale' | 'being_canceled' | 'canceled';
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
     }
   | {
-      status: 'failed';
+      status: TaskStatus.Failed;
       error: string;
     }
   | ({
-      status: 'completed';
-    } & IdentifySystemsResult)
-  | ({
-      status: 'acknowledged';
+      status: TaskStatus.Completed | TaskStatus.Acknowledged;
     } & IdentifySystemsResult);
 
-export const identifySystemsRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/systems/_identify',
+export const systemsStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/systems/_status',
+  options: {
+    access: 'internal',
+    summary: 'Check the status of system identification',
+    description:
+      'System identification happens as a background task, this endpoints allows the user to check the status of this task. This endpoints combine with POST /internal/streams/{name}/systems/_task which manages the task lifecycle.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SystemIdentificationTaskResult> => {
+    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
+      {
+        request,
+      }
+    );
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      path: { name },
+    } = params;
+
+    const { read } = await checkAccess({ name, scopedClusterClient });
+
+    if (!read) {
+      throw new SecurityError(`Cannot read systems for stream ${name}, insufficient privileges`);
+    }
+
+    const task = await taskClient.get<SystemIdentificationTaskParams, IdentifySystemsResult>(
+      `streams_feature_identification_${name}`
+    );
+
+    if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
+      return {
+        status: TaskStatus.Stale,
+      };
+    } else if (task.status === TaskStatus.Failed) {
+      return {
+        status: TaskStatus.Failed,
+        error: task.task.error,
+      };
+    } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
+      return {
+        status: task.status,
+        ...task.task.payload,
+      };
+    }
+
+    return {
+      status: task.status,
+    };
+  },
+});
+
+export const systemsTaskRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/systems/_task',
   options: {
     access: 'internal',
     summary: 'Identify systems in a stream',
-    description: 'Identify systems in a stream with an LLM',
+    description:
+      'Identify systems in a stream with an LLM, this happens as a background task and this endpoint manages the task lifecycle.',
   },
   security: {
     authz: {
@@ -299,14 +368,25 @@ export const identifySystemsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z.string().optional(),
-      from: dateFromString,
-      to: dateFromString,
-      schedule: BooleanFromString.optional(),
-      cancel: BooleanFromString.optional(),
-      acknowledge: BooleanFromString.optional(),
-    }),
+    body: z.discriminatedUnion('action', [
+      z.object({
+        action: z.literal('schedule'),
+        from: dateFromString,
+        to: dateFromString,
+        connectorId: z
+          .string()
+          .optional()
+          .describe(
+            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+          ),
+      }),
+      z.object({
+        action: z.literal('cancel'),
+      }),
+      z.object({
+        action: z.literal('acknowledge'),
+      }),
+    ]),
   }),
   handler: async ({
     params,
@@ -325,7 +405,7 @@ export const identifySystemsRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { from: start, to: end },
+      body,
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
@@ -333,13 +413,17 @@ export const identifySystemsRoute = createServerRoute({
       throw new SecurityError(`Cannot update systems for stream ${name}, insufficient privileges`);
     }
 
-    const connectorId = await resolveConnectorId({
-      connectorId: params.query.connectorId,
-      uiSettingsClient,
-      logger,
-    });
+    const { action } = body;
 
-    if (params.query.schedule) {
+    if (action === 'schedule') {
+      const { from: start, to: end, connectorId: connectorIdParam } = body;
+
+      const connectorId = await resolveConnectorId({
+        connectorId: connectorIdParam,
+        uiSettingsClient,
+        logger,
+      });
+
       try {
         await taskClient.schedule<SystemIdentificationTaskParams>({
           task: {
@@ -357,7 +441,7 @@ export const identifySystemsRoute = createServerRoute({
         });
 
         return {
-          status: 'in_progress',
+          status: TaskStatus.InProgress,
         };
       } catch (error) {
         if (error instanceof CancellationInProgressError) {
@@ -366,61 +450,31 @@ export const identifySystemsRoute = createServerRoute({
 
         throw error;
       }
-    } else if (params.query.cancel) {
+    } else if (action === 'cancel') {
       await taskClient.cancel(`streams_feature_identification_${name}`);
 
       return {
-        status: 'being_canceled',
+        status: TaskStatus.BeingCanceled,
       };
-    } else if (params.query.acknowledge) {
-      try {
-        const task = await taskClient.acknowledge<
-          SystemIdentificationTaskParams,
-          IdentifySystemsResult
-        >(`streams_feature_identification_${name}`);
-
-        return {
-          status: 'acknowledged',
-          ...task.task.payload,
-        };
-      } catch (error) {
-        if (error instanceof AcknowledgingIncompleteError) {
-          throw conflict(error.message);
-        }
-
-        throw error;
-      }
     }
 
-    const task = await taskClient.get<SystemIdentificationTaskParams, IdentifySystemsResult>(
-      `streams_feature_identification_${name}`
-    );
-
-    if (task.status === 'in_progress') {
-      if (isStale(task.created_at)) {
-        return {
-          status: 'stale',
-        };
-      }
+    try {
+      const task = await taskClient.acknowledge<
+        SystemIdentificationTaskParams,
+        IdentifySystemsResult
+      >(`streams_feature_identification_${name}`);
 
       return {
-        status: 'in_progress',
-      };
-    } else if (task.status === 'failed') {
-      return {
-        status: 'failed',
-        error: task.task.error,
-      };
-    } else if (task.status === 'completed' || task.status === 'acknowledged') {
-      return {
-        status: task.status,
+        status: TaskStatus.Acknowledged,
         ...task.task.payload,
       };
-    }
+    } catch (error) {
+      if (error instanceof AcknowledgingIncompleteError) {
+        throw conflict(error.message);
+      }
 
-    return {
-      status: task.status,
-    };
+      throw error;
+    }
   },
 });
 
@@ -540,6 +594,7 @@ export const systemRoutes = {
   ...upsertSystemRoute,
   ...listSystemsRoute,
   ...bulkSystemsRoute,
-  ...identifySystemsRoute,
+  ...systemsStatusRoute,
+  ...systemsTaskRoute,
   ...describeStreamRoute,
 };
