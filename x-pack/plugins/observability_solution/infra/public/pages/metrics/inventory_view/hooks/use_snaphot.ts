@@ -15,10 +15,9 @@ import {
 } from '../../../../../common/http_api/snapshot_api';
 
 export interface UseSnapshotRequest
-  extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
+  extends Omit<SnapshotRequest, 'timerange' | 'filterQuery' | 'schema'> {
   filterQuery?: string | null | symbol;
   currentTime: number;
-  includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
 }
 
@@ -59,7 +58,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     dropPartialBuckets = true,
     filterQuery = '',
     groupBy = null,
-    includeTimeseries = true,
+    includeTimeseries = false,
     metrics,
     nodeType,
     overrideCompositeSize,

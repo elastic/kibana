@@ -11,6 +11,7 @@ import {
   findInventoryFields,
   findInventoryModel,
 } from '@kbn/metrics-data-access-plugin/common';
+import { isDerivativeAgg } from '@kbn/metrics-data-access-plugin/common/inventory_models';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
@@ -40,6 +41,14 @@ export const transformRequestToMetricsAPIRequest = async ({
     sourceConfiguration: source.configuration,
   });
 
+  const transformed = await transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest);
+
+  const includeTimeseries =
+    snapshotRequest.includeTimeseries ??
+    Object.values(transformed).some((metric) =>
+      Object.values(metric.aggregations).some(isDerivativeAgg)
+    );
+
   const metricsApiRequest: MetricsAPIRequest = {
     indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
     timerange: {
@@ -51,7 +60,7 @@ export const transformRequestToMetricsAPIRequest = async ({
       : compositeSize,
     alignDataToEnd: true,
     dropPartialBuckets: snapshotRequest.dropPartialBuckets ?? true,
-    includeTimeseries: snapshotRequest.includeTimeseries,
+    includeTimeseries,
   };
 
   const filters = [];

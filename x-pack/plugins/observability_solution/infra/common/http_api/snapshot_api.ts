@@ -108,9 +108,9 @@ export const SnapshotRequestRT = rt.intersection([
     groupBy: rt.union([SnapshotGroupByRT, rt.null]),
     nodeType: ItemTypeRT,
     sourceId: rt.string,
-    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
   }),
   rt.partial({
+    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(false)]),
     accountId: rt.string,
     region: rt.string,
     filterQuery: rt.union([rt.string, rt.null]),

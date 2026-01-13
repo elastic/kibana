@@ -61,6 +61,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     currentTime: requestCurrentTime.current,
     accountId: '',
     region: '',
+    includeTimeseries: true,
   });
 
   const dataNode = first(nodes);

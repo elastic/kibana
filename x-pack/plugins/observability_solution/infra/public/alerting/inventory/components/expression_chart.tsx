@@ -80,6 +80,7 @@ export const ExpressionChart: React.FC<Props> = ({
     accountId,
     region,
     timerange,
+    includeTimeseries: true,
   });
 
   const metric = {

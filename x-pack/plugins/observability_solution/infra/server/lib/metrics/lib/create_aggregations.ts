@@ -9,6 +9,7 @@ import { AggregationOptionsByType } from '@kbn/es-types';
 
 import Boom from '@hapi/boom';
 import { type MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
+import { isDerivativeAgg } from '@kbn/metrics-data-access-plugin/common/inventory_models';
 import { afterKeyObjectRT } from '../../../../common/http_api';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { calculateDateHistogramOffset } from './calculate_date_histogram_offset';
@@ -65,8 +66,12 @@ export const createCompositeAggregations = (options: MetricsAPIRequest) => {
     throw Boom.badRequest('groupBy must be informed.');
   }
 
-  if (!options.includeTimeseries && !!options.metrics.find((p) => p.id === 'logRate')) {
-    throw Boom.badRequest('logRate metric is not supported without time series');
+  const isDerivativeMetrics = Object.values(options.metrics).some((metric) =>
+    Object.values(metric.aggregations).some(isDerivativeAgg)
+  );
+
+  if (!options.includeTimeseries && isDerivativeMetrics) {
+    throw Boom.badRequest('derivative aggregations are not supported without time series');
   }
 
   const after = getAfterKey(options);
