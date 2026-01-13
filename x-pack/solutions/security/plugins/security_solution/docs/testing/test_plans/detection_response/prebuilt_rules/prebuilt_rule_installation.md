@@ -456,7 +456,7 @@ Then only the available prebuilt rules having this tag should be shown
 
 **Examples:**
 
-`<tag_with_special_chars>` = tag containing Query DSL reserved characters (+ - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /)
+`<tag_with_special_chars>` = tag containing Elasticsearch Query DSL reserved characters (+ - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /)
 More info in query DSL reserved characters: https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-query-string-query#_reserved_characters
 
 #### **Scenario: User can filter prebuilt rules by multiple tags using AND logic on the Rule Installation page**

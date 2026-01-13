@@ -64,8 +64,7 @@ export const reviewRuleInstallationHandler = async (
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
-    // eslint-disable-next-line no-inner-declarations
-    async function fetchStats(): Promise<{ tags: string[]; numRulesToInstall: number }> {
+    const fetchStats = async (): Promise<{ tags: string[]; numRulesToInstall: number }> => {
       // If there's no filter, we can reuse already fetched installable rule versions array
       const requestHasFilter = Boolean(Object.keys(filter ?? {}).length);
 
@@ -84,7 +83,7 @@ export const reviewRuleInstallationHandler = async (
         tags,
         numRulesToInstall: installableVersionsWithoutFilter.length,
       };
-    }
+    };
 
     const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
     logger.debug(
