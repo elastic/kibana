@@ -100,7 +100,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
-    conversationAttachments: conversation?.attachments,
   });
 
   const selectedTools = await selectTools({
