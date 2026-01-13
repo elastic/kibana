@@ -6874,7 +6874,7 @@ describe('#authorizeChangeAccessControl', () => {
       expect.objectContaining({
         action: AuditAction.UPDATE_OBJECTS_OWNER,
         error: expect.any(Error),
-        unauthorizedTypes: ['dashboard', 'visualization'],
+        unauthorizedTypes: ['visualization'],
         unauthorizedSpaces: [namespace],
       })
     );
@@ -6926,7 +6926,7 @@ describe('#authorizeChangeAccessControl', () => {
       expect.objectContaining({
         action: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
         error: expect.any(Error),
-        unauthorizedTypes: expect.arrayContaining(['dashboard']),
+        unauthorizedTypes: expect.arrayContaining(['visualization']),
         unauthorizedSpaces: [namespace],
       })
     );
