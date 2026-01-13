@@ -6,6 +6,8 @@
  */
 
 import { writeEsqlAlerts } from './write_alerts';
+import { LoggerService } from '../services/logger_service/logger_service';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('writeEsqlAlerts', () => {
   beforeAll(() => {
@@ -20,10 +22,11 @@ describe('writeEsqlAlerts', () => {
   it('transforms ES|QL response rows into alert documents and bulk indexes them', async () => {
     const bulk = jest.fn().mockResolvedValue({ errors: false });
     const esClient = { bulk } as any;
+    const loggerService = new LoggerService(loggingSystemMock.createLogger());
 
     const res = await writeEsqlAlerts({
       services: {
-        logger: { debug: jest.fn() } as any,
+        logger: loggerService,
         esClient,
         dataStreamName: '.alerts-events',
       },

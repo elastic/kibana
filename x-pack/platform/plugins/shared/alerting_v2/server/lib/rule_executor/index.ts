@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { initializeRuleExecutorTaskDefinition } from './task_definition';
+export { RuleExecutorTaskDefinition } from './task_definition';
 export { ALERTING_RULE_EXECUTOR_TASK_TYPE } from './task_definition';

@@ -17,6 +17,7 @@ interface ExecuteQueryParams {
   query: ESQLSearchParams['query'];
   filter?: ESQLSearchParams['filter'];
   params?: ESQLSearchParams['params'];
+  abortSignal?: AbortSignal;
 }
 
 @injectable()
@@ -26,7 +27,12 @@ export class QueryService {
     private readonly logger: LoggerService
   ) {}
 
-  async executeQuery({ query, filter, params }: ExecuteQueryParams): Promise<ESQLSearchResponse> {
+  async executeQuery({
+    query,
+    filter,
+    params,
+    abortSignal,
+  }: ExecuteQueryParams): Promise<ESQLSearchResponse> {
     try {
       this.logger.debug({
         message: () =>
@@ -49,6 +55,7 @@ export class QueryService {
             IKibanaSearchResponse<ESQLSearchResponse>
           >(request, {
             strategy: ESQL_SEARCH_STRATEGY,
+            ...(abortSignal ? { abortSignal } : {}),
           })
           .pipe(
             catchError((error) => {

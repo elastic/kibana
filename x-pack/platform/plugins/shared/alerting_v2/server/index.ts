@@ -10,6 +10,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
 import { bindOnSetup } from './setup/bind_on_setup';
+import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
 import { bindServices } from './setup/bind_services';
 
@@ -21,6 +22,7 @@ export const module = new ContainerModule((options) => {
   bindRoutes(options);
   bindServices(options);
   bindOnSetup(options);
+  bindOnStart(options);
 });
 
 export type { PluginConfig as AlertingV2Config } from './config';

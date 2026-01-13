@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { ESQL_SEARCH_STRATEGY, isRunningResponse } from '@kbn/data-plugin/common';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import { catchError, filter, lastValueFrom, map, throwError } from 'rxjs';
 import { hasStartEndParams } from '@kbn/esql-utils';
 import type { RuleSavedObjectAttributes } from '../../saved_objects/schemas/rule_saved_object_attributes';
 import { parseDurationToMs } from '../duration';
+import type { QueryService } from '../services/query_service/query_service';
+import type { LoggerService } from '../services/logger_service/logger_service';
 
 export const getEsqlQuery = (
   params: ExecuteRuleParams,
@@ -53,13 +50,13 @@ export type ExecuteRuleParams = Pick<
 
 export async function executeEsqlRule({
   logger,
-  searchClient,
+  queryService,
   abortController,
   rule,
   params,
 }: {
-  logger: Logger;
-  searchClient: IScopedSearchClient;
+  logger: LoggerService;
+  queryService: QueryService;
   abortController: AbortController;
   rule: { id: string; spaceId: string; name: string };
   params: ExecuteRuleParams;
@@ -69,33 +66,24 @@ export async function executeEsqlRule({
 
   const request = { params: getEsqlQuery(params, dateStart, dateEnd) };
 
-  logger.debug(
-    () =>
+  logger.debug({
+    message: () =>
       `executing ES|QL query for rule ${rule.id} in space ${rule.spaceId} - ${JSON.stringify(
         request
-      )}`
-  );
+      )}`,
+  });
 
-  return await lastValueFrom(
-    searchClient
-      .search<IKibanaSearchRequest<ESQLSearchParams>, IKibanaSearchResponse<ESQLSearchResponse>>(
-        request,
-        {
-          strategy: ESQL_SEARCH_STRATEGY,
-          abortSignal: abortController.signal,
-        }
-      )
-      .pipe(
-        catchError((error) => {
-          if (abortController.signal.aborted) {
-            return throwError(
-              () => new Error('Search has been aborted due to cancelled execution')
-            );
-          }
-          return throwError(() => error);
-        }),
-        filter((response) => !isRunningResponse(response)),
-        map((response) => response.rawResponse)
-      )
-  );
+  try {
+    return await queryService.executeQuery({
+      query: request.params.query,
+      filter: request.params.filter,
+      params: request.params.params,
+      abortSignal: abortController.signal,
+    });
+  } catch (error) {
+    if (abortController.signal.aborted) {
+      throw new Error('Search has been aborted due to cancelled execution');
+    }
+    throw error;
+  }
 }

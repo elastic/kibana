@@ -6,12 +6,13 @@
  */
 
 import { createHash } from 'crypto';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import stringify from 'json-stable-stringify';
 
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
+import type { LoggerService } from '../services/logger_service/logger_service';
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
@@ -52,7 +53,7 @@ function buildGrouping({
 
 export interface WriteEsqlAlertsOpts {
   services: {
-    logger: Logger;
+    logger: LoggerService;
     esClient: ElasticsearchClient;
     dataStreamName: string;
   };
@@ -138,6 +139,6 @@ export async function writeEsqlAlerts({
     );
   }
 
-  logger.debug(`Indexed ${values.length} ES|QL alerts into ${dataStreamName}`);
+  logger.debug({ message: `Indexed ${values.length} ES|QL alerts into ${dataStreamName}` });
   return { created: values.length };
 }

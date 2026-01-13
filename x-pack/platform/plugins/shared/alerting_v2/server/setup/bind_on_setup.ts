@@ -6,14 +6,12 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import type { CoreStart } from '@kbn/core/server';
 import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
 import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
-import { initializeRuleExecutorTaskDefinition } from '../lib/rule_executor';
+import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { AlertingResourcesService } from '../lib/services/alerting_resources_service';
 import type { PluginConfig } from '../config';
-import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerSavedObjects } from '../saved_objects';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
@@ -29,27 +27,11 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       logger,
     });
 
-    const taskManagerSetup = container.get(
-      PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager')
-    );
-
-    const getStartServices = container.get(CoreSetup('getStartServices')) as () => Promise<
-      [CoreStart, AlertingServerStartDependencies, unknown]
-    >;
-
-    const startServices = getStartServices();
-
     const resourcesService = container.get(AlertingResourcesService);
     resourcesService.startInitialization({
       enabled: alertingConfig.enabled,
     });
 
-    initializeRuleExecutorTaskDefinition(
-      logger,
-      taskManagerSetup,
-      startServices,
-      alertingConfig,
-      resourcesService
-    );
+    container.get(RuleExecutorTaskDefinition).register();
   });
 }
