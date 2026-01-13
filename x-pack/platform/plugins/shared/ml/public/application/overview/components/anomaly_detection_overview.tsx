@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../locator';
@@ -125,12 +125,12 @@ export const AnomalyDetectionOverviewCard: FC = () => {
         defaultMessage: 'Anomaly detection',
       })}
       body={
-        <p>
+        <EuiText size="s">
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.emptyPromptText"
             defaultMessage="Automatically spot anomalies and surface issues before they become incidents, with detection that adapts to the unique patterns in your data."
           />
-        </p>
+        </EuiText>
       }
       actions={availableActions}
       data-test-subj="mlOverviewAnomalyDetectionCard"
