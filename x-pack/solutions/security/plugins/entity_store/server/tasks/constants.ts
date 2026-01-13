@@ -7,9 +7,5 @@
 
 import { z } from '@kbn/zod';
 
-export const timeRangeSchema = z.object({
-  start: z
-    .string()
-    .describe('The start of the time range, in Elasticsearch date math, like `now-24h`.'),
-  end: z.string().describe('The end of the time range, in Elasticsearch date math, like `now`.'),
-});
+export type EntityStoreTaskType = z.infer<typeof EntityStoreTaskType>;
+export const EntityStoreTaskType = z.enum(['extractEntity']);
