@@ -26,7 +26,6 @@ import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { css, Global } from '@emotion/react';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
@@ -365,23 +364,14 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }, []);
 
           return (
-            <>
-              <Global
-                styles={css`
-                  .kbnGridPanel--resizeHandle::after {
-                    display: none !important;
-                  }
-                `}
-              />
-              <OptionsListControlContext.Provider
-                value={{
-                  componentApi,
-                  displaySettings: state.displaySettings ?? {},
-                }}
-              >
-                <OptionsListControl />
-              </OptionsListControlContext.Provider>
-            </>
+            <OptionsListControlContext.Provider
+              value={{
+                componentApi,
+                displaySettings: state.displaySettings ?? {},
+              }}
+            >
+              <OptionsListControl />
+            </OptionsListControlContext.Provider>
           );
         },
       };

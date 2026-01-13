@@ -17,7 +17,6 @@ import {
 } from '@kbn/presentation-publishing';
 import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import { css, Global } from '@emotion/react';
 
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
@@ -245,29 +244,20 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           }, []);
 
           return (
-            <>
-              <Global
-                styles={css`
-                  .kbnGridPanel--resizeHandle::after {
-                    display: none !important;
-                  }
-                `}
-              />
-              <RangeSliderControl
-                fieldName={fieldName}
-                fieldFormatter={fieldFormatter}
-                isInvalid={Boolean(value) && selectionHasNoResults}
-                isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
-                isEdit={viewMode === 'edit'}
-                max={max}
-                min={min}
-                onChange={selections.setValue}
-                step={step ?? 1}
-                value={value}
-                uuid={uuid}
-                compressed={isCompressed(api)}
-              />
-            </>
+            <RangeSliderControl
+              fieldName={fieldName}
+              fieldFormatter={fieldFormatter}
+              isInvalid={Boolean(value) && selectionHasNoResults}
+              isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
+              isEdit={viewMode === 'edit'}
+              max={max}
+              min={min}
+              onChange={selections.setValue}
+              step={step ?? 1}
+              value={value}
+              uuid={uuid}
+              compressed={isCompressed(api)}
+            />
           );
         },
       };
