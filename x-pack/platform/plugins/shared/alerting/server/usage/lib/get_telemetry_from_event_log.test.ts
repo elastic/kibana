@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -161,44 +163,37 @@ describe('event log telemetry', () => {
         countRuleExecutionsByType: {
           '__index-threshold': 78,
           document__test__: 42,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 28,
         },
         avgExecutionTimeByType: {
           '__index-threshold': 101,
           document__test__: 770,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 88,
         },
         avgEsSearchDurationByType: {
           '__index-threshold': 41,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 27,
         },
         avgTotalSearchDurationByType: {
           '__index-threshold': 44,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 31,
         },
         generatedActionsPercentilesByType: {
           p50: {
             '__index-threshold': 0,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
           p90: {
             '__index-threshold': 0,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
           p99: {
             '__index-threshold': 0,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
         },
@@ -206,19 +201,16 @@ describe('event log telemetry', () => {
           p50: {
             '__index-threshold': 1,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
           p90: {
             '__index-threshold': 1,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
           p99: {
             '__index-threshold': 1,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
         },
@@ -311,25 +303,21 @@ describe('event log telemetry', () => {
         countRuleExecutionsByType: {
           '__index-threshold': 78,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 0,
         },
         avgExecutionTimeByType: {
           '__index-threshold': 101,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 0,
         },
         avgEsSearchDurationByType: {
           '__index-threshold': 0,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 0,
         },
         avgTotalSearchDurationByType: {
           '__index-threshold': 44,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 0,
         },
         generatedActionsPercentilesByType: {
@@ -603,7 +591,6 @@ describe('event log telemetry', () => {
           decrypt: {
             '__index-threshold': 3,
             document__test__: 2,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 1,
           },
           execute: {
@@ -736,7 +723,6 @@ describe('event log telemetry', () => {
         countFailedExecutionsByReasonByType: {
           decrypt: {
             document__test__: 2,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 1,
           },
         },
@@ -1303,7 +1289,6 @@ describe('event log telemetry', () => {
         countRuleExecutionsByType: {
           '__index-threshold': 78,
           document__test__: 42,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 28,
         },
         countTotalFailedExecutions: 10,
@@ -1315,7 +1300,6 @@ describe('event log telemetry', () => {
           decrypt: {
             '__index-threshold': 3,
             document__test__: 2,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 1,
           },
           execute: {
@@ -1328,19 +1312,16 @@ describe('event log telemetry', () => {
         avgExecutionTimeByType: {
           '__index-threshold': 101,
           document__test__: 770,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 88,
         },
         avgEsSearchDurationByType: {
           '__index-threshold': 41,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 27,
         },
         avgTotalSearchDurationByType: {
           '__index-threshold': 44,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 31,
         },
         generatedActionsPercentiles: {
@@ -1357,19 +1338,16 @@ describe('event log telemetry', () => {
           p50: {
             '__index-threshold': 0,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
           p90: {
             '__index-threshold': 0,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
           p99: {
             '__index-threshold': 0,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
         },
@@ -1377,19 +1355,16 @@ describe('event log telemetry', () => {
           p50: {
             '__index-threshold': 1,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
           p90: {
             '__index-threshold': 1,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
           p99: {
             '__index-threshold': 1,
             document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
         },
@@ -1537,7 +1512,6 @@ describe('event log telemetry', () => {
         countExecutionTimeoutsByType: {
           '__index-threshold': 2,
           document__test__: 1,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 1,
         },
         hasErrors: false,
