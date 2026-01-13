@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/securitysolution-rules'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/shared-ux-utility'
+  - '@kbn/licensing-types'
 tags:
   - plugin
   - prod

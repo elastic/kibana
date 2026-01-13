@@ -386,8 +386,9 @@ describe('agent_list_page', () => {
         fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[1]);
       });
 
-      // For managed agents, "Security and removal" submenu should not exist
-      expect(renderResult.queryByText('Security and removal')).not.toBeInTheDocument();
+      // Navigate to "Security and removal" submenu
+      await navigateToSubmenu('Security and removal');
+
       expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
     });
 
