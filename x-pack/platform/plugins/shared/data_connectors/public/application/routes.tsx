@@ -15,12 +15,12 @@ export const DataConnectorsRoutes: React.FC = () => {
   return (
     <DataConnectorsLayout>
       <Routes>
-        <Route exact path="/active-sources">
-          <ActiveSourcesPage />
-        </Route>
-        {/* Default to connectors page for all other routes */}
-        <Route path="/">
+        <Route exact path="/connectors">
           <ConnectorsPage />
+        </Route>
+        {/* Default to active sources page for all other routes */}
+        <Route path="/">
+          <ActiveSourcesPage />
         </Route>
       </Routes>
     </DataConnectorsLayout>
