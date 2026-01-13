@@ -13,16 +13,20 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable, optional } from 'inversify';
 import { omit, zipObject } from 'lodash';
 import type { AlertAction } from '../../routes/schemas/alert_action_schema';
-import { LoggerService } from '../services/logger_service/logger_service';
 import { QueryService } from '../services/query_service/query_service';
 import type { StorageService } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
+import {
+  alertEventSchema,
+  alertTransitionSchema,
+  type AlertEvent,
+  type AlertTransition,
+} from './types';
 
 @injectable()
 export class AlertActionsClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
-    @inject(LoggerService) private readonly logger: LoggerService,
     @inject(QueryService) private readonly queryService: QueryService,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageService,
     @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
@@ -59,47 +63,39 @@ export class AlertActionsClient {
     });
   }
 
-  // TODO: Add DTOs for the returned records
-  private async findLastAlertEventBySeriesIdOrThrow(
-    alertSeriesId: string
-  ): Promise<Record<string, unknown>> {
+  private async findLastAlertEventBySeriesIdOrThrow(alertSeriesId: string): Promise<AlertEvent> {
     const result = await this.queryService.executeQuery({
-      query: `FROM .alerts-events | WHERE alert_series_id == "${alertSeriesId}" | SORT @timestamp DESC | LIMIT 1`,
+      query: `FROM .alerts-events | WHERE alert_series_id == "${alertSeriesId}" | SORT @timestamp DESC | KEEP @timestamp, rule.id | LIMIT 1`,
     });
+
     if (result.values.length === 0) {
       throw Boom.notFound(`Alert event with series id [${alertSeriesId}] not found`);
     }
 
-    this.logger.debug({
-      message: () =>
-        `Found alert event for series id [${alertSeriesId}]: ${JSON.stringify(result)}`,
-    });
-
-    return zipObject(
-      result.columns.map((col) => col.name),
-      result.values[0]
+    return alertEventSchema.parse(
+      zipObject(
+        result.columns.map((col) => col.name),
+        result.values[0]
+      )
     );
   }
 
-  // TODO: Add DTOs for the returned records
   private async findLastAlertTransitionBySeriesIdOrThrow(
     alertSeriesId: string
-  ): Promise<Record<string, unknown>> {
+  ): Promise<AlertTransition> {
     const result = await this.queryService.executeQuery({
-      query: `FROM .alerts-transitions | WHERE alert_series_id == "${alertSeriesId}" | SORT @timestamp DESC | LIMIT 1`,
+      query: `FROM .alerts-transitions | WHERE alert_series_id == "${alertSeriesId}" | SORT @timestamp DESC | KEEP episode_id | LIMIT 1`,
     });
+
     if (result.values.length === 0) {
       throw Boom.notFound(`Alert transition with series id [${alertSeriesId}] not found`);
     }
 
-    this.logger.debug({
-      message: () =>
-        `Found alert transition for series id [${alertSeriesId}]: ${JSON.stringify(result)}`,
-    });
-
-    return zipObject(
-      result.columns.map((col) => col.name),
-      result.values[0]
+    return alertTransitionSchema.parse(
+      zipObject(
+        result.columns.map((col) => col.name),
+        result.values[0]
+      )
     );
   }
 }
