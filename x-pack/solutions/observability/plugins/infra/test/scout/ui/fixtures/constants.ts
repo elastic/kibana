@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
-
 export const DATE_WITH_HOSTS_DATA_FROM = '2023-03-28T18:20:00.000Z';
 export const DATE_WITH_HOSTS_DATA_TO = '2023-03-28T18:21:00.000Z';
 export const DATE_WITH_HOSTS_DATA = '03/28/2023 8:20:59 PM';
@@ -91,4 +89,4 @@ export const DATE_WITH_POD_DATA = '04/01/2023 8:20:59 PM';
 export const POD_COUNT = 1;
 export const POD_NAMES = Array.from({ length: POD_COUNT }, (_, i) => `pod-${i}`);
 
-export const DATE_WITHOUT_DATA = moment().add(20, 'minutes').format('MM/DD/YYYY h:mm:ss A');
+export const DATE_WITHOUT_DATA = '04/01/2024 8:20:59 PM';
