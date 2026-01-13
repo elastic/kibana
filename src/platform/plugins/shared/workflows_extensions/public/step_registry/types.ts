@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DotKeysOf, DotObject } from '@kbn/utility-types';
 import type { StepPropertyHandler } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
@@ -72,10 +73,13 @@ export interface PublicStepDefinition<
    */
   editorHandlers?: {
     config?: {
-      [K in FlattenPaths<z.infer<Config>>]?: StepPropertyHandler<PathValue<z.infer<Config>, K>>;
+      [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<DotObject<z.infer<Config>>[K]>;
     };
     input?: {
-      [K in FlattenPaths<z.infer<Input>>]?: StepPropertyHandler<PathValue<z.infer<Input>, K>>;
+      // If Input is not an object, default to an empty object
+      [K in DotKeysOf<z.infer<Input> & {}>]?: StepPropertyHandler<
+        DotObject<z.infer<Input> & {}>[K]
+      >;
     };
     dynamicSchema?: {
       /**
@@ -132,21 +136,3 @@ export interface StepDocumentation {
    */
   examples?: string[];
 }
-
-// Utility type to flatten nested object paths with dot notation
-type FlattenPaths<T, Prefix extends string = ''> = T extends object
-  ? {
-      [K in keyof T & string]: T[K] extends object
-        ? FlattenPaths<T[K], `${Prefix}${K}.`> | `${Prefix}${K}`
-        : `${Prefix}${K}`;
-    }[keyof T & string]
-  : never;
-
-// Extract value type from a dot-path
-type PathValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
-  ? K extends keyof T
-    ? PathValue<T[K], Rest>
-    : never
-  : P extends keyof T
-  ? T[P]
-  : never;
