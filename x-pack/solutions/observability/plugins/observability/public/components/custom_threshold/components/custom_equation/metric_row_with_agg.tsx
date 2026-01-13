@@ -88,9 +88,10 @@ export function MetricRowWithAgg({
         name,
         field: (selectedOptions.length && selectedOptions[0].label) || undefined,
         aggType,
+        filter,
       });
     },
-    [name, aggType, onChange]
+    [name, aggType, filter, onChange]
   );
 
   const handleAggChange = useCallback(
@@ -99,9 +100,10 @@ export function MetricRowWithAgg({
         name,
         field: customAggType === Aggregators.COUNT ? undefined : field,
         aggType: customAggType as Aggregators,
+        filter,
       });
     },
-    [name, field, onChange]
+    [name, field, filter, onChange]
   );
 
   const handleFilterChange = useCallback(
@@ -110,13 +112,30 @@ export function MetricRowWithAgg({
         name,
         filter: filterString,
         aggType,
+        field,
       });
     },
-    [name, aggType, onChange]
+    [name, aggType, field, onChange]
   );
 
   const isAggInvalid = get(errors, ['metrics', name, 'aggType']) != null;
   const isFieldInvalid = get(errors, ['metrics', name, 'field']) != null || !field;
+
+  const expressionValue = useMemo(() => {
+    if (aggType === Aggregators.COUNT) {
+      return filter || DEFAULT_COUNT_FILTER_TITLE;
+    }
+    if (field && filter) {
+      return `${field} (${filter})`;
+    }
+    if (field) {
+      return field;
+    }
+    if (filter) {
+      return filter;
+    }
+    return '';
+  }, [aggType, field, filter]);
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
@@ -144,7 +163,7 @@ export function MetricRowWithAgg({
               <EuiExpression
                 data-test-subj={`aggregationName${name}`}
                 description={aggregationTypes[aggType].text}
-                value={aggType === Aggregators.COUNT ? filter || DEFAULT_COUNT_FILTER_TITLE : field}
+                value={expressionValue}
                 isActive={aggTypePopoverOpen}
                 display="columns"
                 onClick={() => {
@@ -198,23 +217,8 @@ export function MetricRowWithAgg({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem style={{ minWidth: 300 }}>
-                {aggType === Aggregators.COUNT ? (
-                  <EuiFormRow
-                    label={i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.filterLabel',
-                      { defaultMessage: 'KQL Filter {name}', values: { name } }
-                    )}
-                  >
-                    <RuleFlyoutKueryBar
-                      placeholder={' '}
-                      derivedIndexPattern={dataView}
-                      onChange={handleFilterChange}
-                      onSubmit={handleFilterChange}
-                      value={filter}
-                    />
-                  </EuiFormRow>
-                ) : (
+              {aggType !== Aggregators.COUNT && (
+                <EuiFlexItem style={{ minWidth: 300 }}>
                   <EuiFormRow
                     label={i18n.translate(
                       'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.fieldLabel',
@@ -231,7 +235,22 @@ export function MetricRowWithAgg({
                       data-test-subj="aggregationField"
                     />
                   </EuiFormRow>
-                )}
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem style={{ minWidth: 300 }}>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.filterLabel',
+                    { defaultMessage: 'KQL Filter {name}', values: { name } }
+                  )}
+                >
+                  <RuleFlyoutKueryBar
+                    placeholder={' '}
+                    derivedIndexPattern={dataView}
+                    onSubmit={handleFilterChange}
+                    value={filter}
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
