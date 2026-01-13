@@ -15,13 +15,30 @@ export interface SecuritySolutionServerlessSearch extends Omit<SearchSecureServi
   send: <T extends IEsSearchResponse>(options: SendOptions) => Promise<T>;
 }
 
-export interface SecuritySolutionUtilsInterface {
+interface SecuritySolutionUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
-  createSuperTest: (role?: string) => Promise<TestAgent<any>>;
+
+  // todo:
+  // - ESS: works with any user that's already created
+  // - serverless: works only with users from here: x-pack/solutions/security/test/security_solution_api_integration/config/privileges/roles.ts
   createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
+
+  createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
+
+  cleanUpCustomRole: () => Promise<void>;
+}
+
+export interface SecuritySolutionServerlessUtilsInterface extends SecuritySolutionUtilsInterface {
   createSuperTestWithCustomRole: (role: Role) => Promise<TestAgent<any>>;
   createSearch: (role?: string) => Promise<SecuritySolutionServerlessSearch>;
-  cleanUpCustomRole: () => Promise<void>;
+}
+
+export interface SecuritySolutionESSUtilsInterface extends SecuritySolutionUtilsInterface {
+  createSearch: (role?: string) => Promise<SearchService>;
+  createUser: (user: User) => Promise<any>;
+  deleteUsers: (userNames: string[]) => Promise<any>;
+  createRole: (name: string, role: Role) => Promise<any>;
+  deleteRoles: (roleNames: string[]) => Promise<any>;
 }
 
 interface FeaturesPrivileges {
@@ -56,16 +73,4 @@ export interface User {
   password: string;
   description?: string;
   roles: string[];
-}
-
-export interface SecuritySolutionESSUtilsInterface {
-  getUsername: (role?: string) => Promise<string>;
-  createSearch: (role?: string) => Promise<SearchService>;
-  createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
-  createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
-  cleanUpCustomRole: () => Promise<void>;
-  createUser: (user: User) => Promise<any>;
-  deleteUsers: (userNames: string[]) => Promise<any>;
-  createRole: (name: string, role: Role) => Promise<any>;
-  deleteRoles: (roleNames: string[]) => Promise<any>;
 }

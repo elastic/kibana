@@ -12,12 +12,12 @@ import type { RoleCredentials } from '@kbn/test-suites-xpack-platform/serverless
 import type { SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureSearchSendOptions } from './search_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecuritySolutionUtilsInterface, Role, User } from './types';
+import type { SecuritySolutionServerlessUtilsInterface, Role, User } from './types';
 import { roles } from '../privileges/roles';
 
 export function SecuritySolutionServerlessUtils({
   getService,
-}: FtrProviderContext): SecuritySolutionUtilsInterface {
+}: FtrProviderContext): SecuritySolutionServerlessUtilsInterface {
   const svlUserManager = getService('svlUserManager');
   const lifecycle = getService('lifecycle');
   const svlCommonApi = getService('svlCommonApi');
