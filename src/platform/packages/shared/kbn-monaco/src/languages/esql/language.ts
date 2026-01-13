@@ -155,9 +155,8 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
 
-        deps?.telemetry?.onSuggestionsFetchStart?.();
+        deps?.telemetry?.onSuggestionsComputeStart?.();
         const suggestions = await suggest(fullText, offset, deps);
-        deps?.telemetry?.onSuggestionsFetched?.();
 
         const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
         if (suggestionsWithCustomCommands.length) {

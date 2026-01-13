@@ -10,8 +10,7 @@
 export interface ESQLTelemetryCallbacks {
   onDecorationHoverShown?: (hoverMessage: string) => void;
   onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
-  onSuggestionsFetchStart?: () => void; // Called right before the suggestions fetch starts.
-  onSuggestionsFetched?: () => void; // Called when suggestions fetch resolves.
+  onSuggestionsComputeStart?: () => void; // Called right before the suggestions fetch starts.
   onSuggestionsReady?: () => void; // Called after suggestions data is ready for rendering.
 }
 

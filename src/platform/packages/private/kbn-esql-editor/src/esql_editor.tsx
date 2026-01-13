@@ -52,7 +52,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { ComponentProps } from 'react';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -176,6 +176,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
   // Init latency: component mount → editor ready
   const initTrackingRef = useRef({
+    complete: false,
     startTime: performance.now(),
   });
 
@@ -311,7 +312,7 @@ const ESQLEditorInternal = function ESQLEditor({
     tracking.triggerTime = performance.now();
   }, []);
 
-  const markSuggestionsFetchStart = useCallback(() => {
+  const markSuggestionsComputeStart = useCallback(() => {
     const tracking = suggestionsTrackingRef.current;
     if (tracking.startTime === 0 || tracking.fetchStartTime > 0) return;
 
@@ -321,7 +322,7 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, []);
 
-  const markSuggestionsFetched = useCallback(() => {
+  const markSuggestionsReady = useCallback(() => {
     const tracking = suggestionsTrackingRef.current;
     if (tracking.startTime === 0 || tracking.fetchEndTime > 0) return;
 
@@ -461,8 +462,7 @@ const ESQLEditorInternal = function ESQLEditor({
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
 
-  // Input latency: measure keystroke → (before paint)
-  useLayoutEffect(() => {
+  useEffect(() => {
     const result = endLatencyTracking(inputTrackingRef.current);
     if (!result) return;
 
@@ -725,13 +725,11 @@ const ESQLEditorInternal = function ESQLEditor({
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
       onSuggestionsWithCustomCommandShown: (commands) =>
         telemetryService.trackSuggestionsWithCustomCommandShown(commands),
-      onSuggestionsFetchStart: () => {
-        markSuggestionsFetchStart();
-      },
-      onSuggestionsFetched: () => {
-        markSuggestionsFetched();
+      onSuggestionsComputeStart: () => {
+        markSuggestionsComputeStart();
       },
       onSuggestionsReady: () => {
+        markSuggestionsReady();
         const result = endSuggestionsLatencyTracking(suggestionsTrackingRef.current);
 
         if (!result) {
@@ -746,7 +744,7 @@ const ESQLEditorInternal = function ESQLEditor({
         });
       },
     }),
-    [markSuggestionsFetchStart, markSuggestionsFetched, resetSuggestionsTracking, telemetryService]
+    [markSuggestionsComputeStart, markSuggestionsReady, resetSuggestionsTracking, telemetryService]
   );
 
   const onClickQueryHistory = useCallback(
@@ -1294,12 +1292,12 @@ const ESQLEditorInternal = function ESQLEditor({
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
                   editorDidMount={async (editor) => {
-                    // Track editor init time (first event always captured)
-                    if (initTrackingRef.current.startTime > 0) {
+                    // Track editor init time once per mount
+                    if (!initTrackingRef.current.complete) {
                       const initDuration = performance.now() - initTrackingRef.current.startTime;
 
                       telemetryService.trackInitLatency(initDuration, sessionIdRef.current);
-                      initTrackingRef.current.startTime = 0;
+                      initTrackingRef.current.complete = true;
                     }
 
                     editorRef.current = editor;

@@ -118,13 +118,12 @@ export const endSuggestionsLatencyTracking = (
   const fetchDuration = fetchEndTime - fetchStartTime;
   const postFetchDuration = endTime - fetchEndTime;
 
+  resetSuggestionsFields(tracking);
+
   // Guard against out-of-order timestamps (e.g. fetchEndTime recorded before fetchStartTime).
   if (keystrokeToTriggerDuration < 0 || fetchDuration < 0 || postFetchDuration < 0) {
-    resetSuggestionsFields(tracking);
     return null;
   }
-
-  resetSuggestionsFields(tracking);
 
   return {
     ...baseResult,
