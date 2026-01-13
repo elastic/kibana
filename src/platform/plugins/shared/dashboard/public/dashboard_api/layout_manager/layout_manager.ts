@@ -20,7 +20,6 @@ import {
   mergeMap,
   startWith,
   tap,
-  Subject,
   type Observable,
 } from 'rxjs';
 import { v4 } from 'uuid';
@@ -116,23 +115,14 @@ export function initializeLayoutManager(
     }
   );
 
-  /** Keep track of which children have unsaved changes and keep `currentChildState` in sync */
-  const setChildState = (uuid: string, state: object) => {
-    currentChildState[uuid] = state;
-  };
-
-  const childrenWithUnsavedChanges$: Subject<string[]> = new Subject<string[]>();
-  const childChanges$ = childrenUnsavedChanges$(children$).subscribe((childrenWithChanges) => {
-    for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
+  const childrenChanges$ = childrenUnsavedChanges$(children$);
+  const childrenChangesSubscription = childrenChanges$.subscribe((childrenChanges) => {
+    for (const { uuid, hasUnsavedChanges } of childrenChanges) {
       const childApi = children$.value[uuid];
-      if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
-      setChildState(uuid, childApi.serializeState());
+      if (hasUnsavedChanges && childApi && apiHasSerializableState(childApi)) {
+        currentChildState[uuid] = childApi.serializeState();
+      }
     }
-    childrenWithUnsavedChanges$.next(
-      childrenWithChanges
-        .filter(({ hasUnsavedChanges }) => hasUnsavedChanges)
-        .map(({ uuid }) => uuid)
-    );
   });
 
   /** Observable that publishes `true` when all children APIs are available */
@@ -505,13 +495,11 @@ export function initializeLayoutManager(
 
       startComparing: (
         lastSavedState$: BehaviorSubject<DashboardState>
-      ): {
-        hasPanelUnsavedChanges$: Observable<{ panels?: DashboardState['panels'] }>;
-        hasPinnedPanelUnsavedChanges$: Observable<{
-          controlGroupInput?: DashboardState['controlGroupInput'];
-        }>;
-      } => {
-        const updateLastSavedStatePipe = combineLatest([layout$, childrenWithUnsavedChanges$]).pipe(
+      ): Observable<{
+        controlGroupInput?: DashboardState['controlGroupInput'];
+        panels?: DashboardState['panels'];
+      }> => {
+        return combineLatest([layout$, childrenChanges$]).pipe(
           debounceTime(100),
           combineLatestWith(
             lastSavedState$.pipe(
@@ -521,50 +509,43 @@ export function initializeLayoutManager(
                 lastSavedLayout = layout;
               })
             )
-          )
+          ),
+          map(([[currentLayout, childrenChanges]]) => {
+            const hasPanelChanges =
+              childrenChanges.some(
+                (childChanges) =>
+                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.panels
+              ) || !arePanelLayoutsEqual(lastSavedLayout, currentLayout);
+            const hasPinnedPanelChanges =
+              childrenChanges.some(
+                (childChanges) =>
+                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.controls
+              ) || !arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
+
+            if (!hasPanelChanges && !hasPinnedPanelChanges) {
+              return {};
+            }
+
+            const { controlGroupInput, panels } = serializeLayout(currentLayout, currentChildState);
+            if (shouldLogStateDiff()) {
+              const { controlGroupInput: oldPinnedPanels, panels: oldPanels } = serializeLayout(
+                lastSavedLayout,
+                lastSavedChildState
+              );
+              if (hasPanelChanges) {
+                logStateDiff('dashboard panels', oldPanels, panels);
+              }
+              if (hasPinnedPanelChanges) {
+                logStateDiff('dashboard pinned panels', oldPinnedPanels, controlGroupInput);
+              }
+            }
+
+            return {
+              ...(hasPanelChanges ? { panels } : {}),
+              ...(hasPinnedPanelChanges ? { controlGroupInput } : {}),
+            };
+          })
         );
-        return {
-          hasPanelUnsavedChanges$: updateLastSavedStatePipe.pipe(
-            map(([[currentLayout, childrenWithUnsavedChanges]]) => {
-              const layoutIsEqual = arePanelLayoutsEqual(lastSavedLayout, currentLayout);
-              const childrenAreEqual = !Object.keys(
-                pick(currentLayout.panels, childrenWithUnsavedChanges)
-              ).length;
-              if (!(layoutIsEqual && childrenAreEqual)) {
-                const { panels } = serializeLayout(currentLayout, currentChildState);
-                if (shouldLogStateDiff()) {
-                  const { panels: oldPanels } = serializeLayout(
-                    lastSavedLayout,
-                    lastSavedChildState
-                  );
-                  logStateDiff('dashboard panels', oldPanels, panels);
-                }
-                return { panels };
-              }
-              return {};
-            })
-          ),
-          hasPinnedPanelUnsavedChanges$: updateLastSavedStatePipe.pipe(
-            map(([[currentLayout, childrenWithUnsavedChanges]]) => {
-              const layoutIsEqual = arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
-              const childrenAreEqual = !Object.keys(
-                pick(currentLayout.controls, childrenWithUnsavedChanges)
-              ).length;
-              if (!(layoutIsEqual && childrenAreEqual)) {
-                const { controlGroupInput } = serializeLayout(currentLayout, currentChildState);
-                if (shouldLogStateDiff()) {
-                  const { controlGroupInput: oldControlGroupInput } = serializeLayout(
-                    lastSavedLayout,
-                    lastSavedChildState
-                  );
-                  logStateDiff('dashboard pinned panels', oldControlGroupInput, controlGroupInput);
-                }
-                return { controlGroupInput };
-              }
-              return {};
-            })
-          ),
-        };
       },
 
       isSectionCollapsed,
@@ -674,7 +655,7 @@ export function initializeLayoutManager(
       },
     },
     cleanup: () => {
-      childChanges$.unsubscribe();
+      childrenChangesSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
     },
   };
