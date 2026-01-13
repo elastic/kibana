@@ -26,26 +26,17 @@ jest.mock('../services/dashboard_backup_service', () => ({}));
 
 const forcePublishOnReset$ = new Subject<void>();
 
-const panelUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
-const pinnedPanelUnsavedChanges$ = new BehaviorSubject<{
-  controlGroupInput?: DashboardState['controlGroupInput'];
-}>({});
-
+const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
 const layoutManagerMock = {
   api: {
     children$: new BehaviorSubject<DashboardChildren>({}),
   },
   internalApi: {
-    startComparing: () => ({
-      hasPanelUnsavedChanges$: panelUnsavedChanges$,
-      hasPinnedPanelUnsavedChanges$: pinnedPanelUnsavedChanges$,
-    }),
+    startComparing: () => layoutUnsavedChanges$,
     serializeLayout: () => {
-      const panels = panelUnsavedChanges$.getValue()?.panels ?? [];
-      const controlGroupInput = pinnedPanelUnsavedChanges$.getValue()?.controlGroupInput ?? {};
+      const panels = layoutUnsavedChanges$.getValue()?.panels ?? [];
       return {
         panels,
-        controlGroupInput,
         // create one reference per panel
         references: panels
           .filter((panel) => !isDashboardSection(panel))
@@ -87,8 +78,7 @@ describe('unsavedChangesManager', () => {
     jest.clearAllMocks();
     setBackupStateMock.mockReset();
 
-    panelUnsavedChanges$.next({});
-    pinnedPanelUnsavedChanges$.next({});
+    layoutUnsavedChanges$.next({});
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../services/dashboard_backup_service').getDashboardBackupService = () => ({
@@ -155,7 +145,7 @@ describe('unsavedChangesManager', () => {
           done();
         });
 
-        panelUnsavedChanges$.next({
+        layoutUnsavedChanges$.next({
           panels: [
             {
               type: 'testType',
