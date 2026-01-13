@@ -40,27 +40,36 @@ const createValueSuggestions = (
   }
 
   const { flattenArrays = false } = options ?? {};
-  const suggestions = new Set<StringOrNumberOrBoolean>();
+  // Use string keys for deduplication to handle arrays correctly
+  // (arrays with same values but different references would not deduplicate in a Set)
+  const suggestions = new Map<string, StringOrNumberOrBoolean | StringOrNumberOrBoolean[]>();
 
   previewRecords.forEach((record) => {
     const value = record[field];
-    if (value !== undefined) {
+    if (value !== undefined && value !== null) {
       if (flattenArrays && Array.isArray(value)) {
         // Flatten array values to show individual elements as suggestions
         value.forEach((item) => {
           if (item !== undefined && item !== null) {
-            suggestions.add(item as StringOrNumberOrBoolean);
+            const key = String(item);
+            if (!suggestions.has(key)) {
+              suggestions.set(key, item as StringOrNumberOrBoolean);
+            }
           }
         });
       } else {
-        suggestions.add(value as StringOrNumberOrBoolean);
+        // For arrays, use JSON.stringify as key to ensure proper deduplication
+        const key = Array.isArray(value) ? JSON.stringify(value) : String(value);
+        if (!suggestions.has(key)) {
+          suggestions.set(key, value as StringOrNumberOrBoolean | StringOrNumberOrBoolean[]);
+        }
       }
     }
   });
 
-  return Array.from(suggestions)
-    .sort()
-    .map((value) => ({ name: String(value) }));
+  return Array.from(suggestions.values())
+    .sort((a, b) => String(a).localeCompare(String(b)))
+    .map((value) => ({ name: Array.isArray(value) ? JSON.stringify(value) : String(value) }));
 };
 
 const useValueSuggestions = (
