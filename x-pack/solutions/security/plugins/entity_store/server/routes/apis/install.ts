@@ -12,6 +12,7 @@ import type { EntityStorePluginRouter } from '../../types';
 import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_type';
 import { scheduleExtractEntityTasks } from '../../tasks/extract_entity_task';
 import { wrapMiddlewares } from '../middleware';
+import { IKibanaResponse } from '@kbn/core-http-server';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
@@ -40,7 +41,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           },
         },
       },
-      wrapMiddlewares(async (ctx, req, res) => {
+      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
         const { logger, resourcesService, taskManagerStart } = entityStoreCtx;
         const { entityTypes, logExtractionFrequency } = req.body;
@@ -56,6 +57,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         });
 
         resourcesService.install(entityTypes);
+        
         return res.ok({
           body: {
             ok: true,

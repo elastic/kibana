@@ -12,6 +12,12 @@ import type { EntityStorePluginRouter } from '../../types';
 import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_type';
 import { stopExtractEntityTasks } from '../../tasks/extract_entity_task';
 import { wrapMiddlewares } from '../middleware';
+import { IKibanaResponse } from '@kbn/core-http-server';
+
+interface StopEntityStoreAPIResponse {
+  ok: boolean;
+  stoppedTasks: string[];
+}
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
@@ -36,7 +42,7 @@ export function registerStop(router: EntityStorePluginRouter) {
           },
         },
       },
-      wrapMiddlewares(async (ctx, req, res) => {
+      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse<StopEntityStoreAPIResponse>> => {
         const entityStoreCtx = await ctx.entityStore;
         const { taskManagerStart, logger } = entityStoreCtx;
         const { entityTypes } = req.body;
