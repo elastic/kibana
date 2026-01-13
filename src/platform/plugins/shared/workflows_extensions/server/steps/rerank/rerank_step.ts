@@ -23,7 +23,7 @@ interface InferenceEndpoint {
  * Prioritizes Elastic-hosted models over self-hosted Elasticsearch models.
  * Returns null if no endpoints are found or if an error occurs.
  */
-async function discoverRerankEndpoint(esClient: any): Promise<string | null> {
+async function discoverRerankEndpoint(esClient: any, logger: any): Promise<string | null> {
   try {
     const { endpoints } = await esClient.inference.get({
       inference_id: '_all',
@@ -51,6 +51,7 @@ async function discoverRerankEndpoint(esClient: any): Promise<string | null> {
     // Fallback: Return first available rerank endpoint
     return rerankEndpoints[0].inference_id;
   } catch (error) {
+    logger.debug('Failed to discover rerank endpoints', error);
     return null;
   }
 }
@@ -88,7 +89,7 @@ export const rerankStepDefinition = createServerStepDefinition({
       const esClient = context.contextManager.getScopedEsClient();
 
       context.logger.info('Rerank step started', {
-        rerankQuery: context.input.rerank_query,
+        rerankQuery: context.input.rerank_text,
         dataLength: Array.isArray(context.input.data) ? context.input.data.length : 0,
         inferenceId: context.input.inference_id,
         hasFieldExtraction: !!context.input.fields,
@@ -121,10 +122,10 @@ export const rerankStepDefinition = createServerStepDefinition({
         );
       }
 
-      let inferenceId = context.input.inference_id;
+      let inferenceId: string | null | undefined = context.input.inference_id;
       if (!inferenceId) {
         context.logger.info('No inference_id provided, discovering available rerank endpoints');
-        inferenceId = await discoverRerankEndpoint(esClient);
+        inferenceId = await discoverRerankEndpoint(esClient, context.logger);
 
         if (!inferenceId) {
           throw new Error(
@@ -141,7 +142,7 @@ export const rerankStepDefinition = createServerStepDefinition({
       const response = await esClient.inference.inference({
         inference_id: inferenceId,
         task_type: 'rerank',
-        query: context.input.rerank_query,
+        query: context.input.rerank_text,
         input: inputForRerank,
         timeout: '5m',
       });
