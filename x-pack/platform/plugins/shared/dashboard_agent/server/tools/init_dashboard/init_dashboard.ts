@@ -44,7 +44,7 @@ After calling this, use the addPanel tool to add visualizations, then finalizeDa
     schema: initDashboardSchema,
     tags: [],
     handler: async ({ title, description, markdownContent }, { events }) => {
-      events.emitCustomEvent<typeof DASHBOARD_EVENTS.SESSION_CREATED, DashboardSessionCreatedData>(
+      events.sendUiEvent<typeof DASHBOARD_EVENTS.SESSION_CREATED, DashboardSessionCreatedData>(
         DASHBOARD_EVENTS.SESSION_CREATED,
         { title, description, markdownContent }
       );

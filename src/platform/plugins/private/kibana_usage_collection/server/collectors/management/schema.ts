@@ -118,10 +118,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enablePrivilegedUserMonitoring': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:defaultAnomalyScore': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -511,10 +507,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'agentBuilder:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'agentBuilder:dashboardTools': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -744,6 +736,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Restrict to default AI connector only',
+    },
+  },
+  'securitySolution:entityStoreEnableV2': {
+    type: 'boolean',
+    _meta: {
+      description: 'Switches the Entity Store Engine to v2',
     },
   },
 };

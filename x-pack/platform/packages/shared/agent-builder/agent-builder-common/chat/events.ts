@@ -7,14 +7,14 @@
 
 import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
-import type { ConversationRound } from './conversation';
+import type { ConversationInternalState, ConversationRound } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
   browserToolCall = 'browser_tool_call',
   toolProgress = 'tool_progress',
-  toolCustom = 'tool_custom',
+  toolUi = 'tool_ui',
   toolResult = 'tool_result',
   reasoning = 'reasoning',
   messageChunk = 'message_chunk',
@@ -78,25 +78,25 @@ export const isToolProgressEvent = (
   return event.type === ChatEventType.toolProgress;
 };
 
-// Tool custom events
+// Tool UI events
 
-export interface ToolCustomEventData<TEvent = string, TData extends object = object> {
+export interface ToolUiEventData<TEvent = string, TData extends object = object> {
   tool_id: string;
   tool_call_id: string;
   custom_event: TEvent;
   data: TData;
 }
 
-export type ToolCustomEvent<
+export type ToolUiEvent<
   TEvent extends string = string,
   TData extends object = object
-> = ChatEventBase<ChatEventType.toolCustom, ToolCustomEventData<TEvent, TData>>;
+> = ChatEventBase<ChatEventType.toolUi, ToolUiEventData<TEvent, TData>>;
 
-export const isToolCustomEvent = <TEvent extends string = string, TData extends object = object>(
+export const isToolUiEvent = <TEvent extends string = string, TData extends object = object>(
   event: AgentBuilderEvent<string, any>,
   customType?: TEvent
-): event is ToolCustomEvent<TEvent, TData> => {
-  if (event.type !== ChatEventType.toolCustom) {
+): event is ToolUiEvent<TEvent, TData> => {
+  if (event.type !== ChatEventType.toolUi) {
     return false;
   }
   return customType ? event.data.custom_event === customType : true;
@@ -214,6 +214,8 @@ export interface RoundCompleteEventData {
   round: ConversationRound;
   /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
   resumed?: boolean;
+  /** if the prompt state was updated during the round, contains the up-to-date version */
+  conversation_state?: ConversationInternalState;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
@@ -284,7 +286,7 @@ export type ChatAgentEvent =
   | ToolCallEvent
   | BrowserToolCallEvent
   | ToolProgressEvent
-  | ToolCustomEvent
+  | ToolUiEvent
   | ToolResultEvent
   | PromptRequestEvent
   | ReasoningEvent

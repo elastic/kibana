@@ -88,7 +88,7 @@ IMPORTANT: Pass all the panels you added during the session. This is the final s
         );
 
         // Emit finalized event so UI can update
-        events.emitCustomEvent<typeof DASHBOARD_EVENTS.FINALIZED, DashboardFinalizedData>(
+        events.sendUiEvent<typeof DASHBOARD_EVENTS.FINALIZED, DashboardFinalizedData>(
           DASHBOARD_EVENTS.FINALIZED,
           {
             dashboardId: '', // No ID since it's unsaved

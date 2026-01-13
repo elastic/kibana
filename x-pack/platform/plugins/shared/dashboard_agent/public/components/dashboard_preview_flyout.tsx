@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { isToolCustomEvent, type ToolCustomEvent } from '@kbn/agent-builder-common/chat/events';
+import { isToolUiEvent, type ToolUiEvent } from '@kbn/agent-builder-common/chat/events';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
 import { DashboardRenderer, type DashboardApi } from '@kbn/dashboard-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
@@ -32,10 +32,7 @@ import {
 
 interface DashboardPreviewFlyoutProps {
   events$: Observable<BrowserChatEvent>;
-  initialEvent: ToolCustomEvent<
-    typeof DASHBOARD_EVENTS.SESSION_CREATED,
-    DashboardSessionCreatedData
-  >;
+  initialEvent: ToolUiEvent<typeof DASHBOARD_EVENTS.SESSION_CREATED, DashboardSessionCreatedData>;
 }
 
 /**
@@ -110,16 +107,16 @@ const DashboardPreviewFlyout: React.FC<DashboardPreviewFlyoutProps> = ({
     function subscribeToChatEvents() {
       const subscription = events$.subscribe(async (event) => {
         if (
-          isToolCustomEvent<typeof DASHBOARD_EVENTS.SESSION_CREATED, DashboardSessionCreatedData>(
+          isToolUiEvent<typeof DASHBOARD_EVENTS.SESSION_CREATED, DashboardSessionCreatedData>(
             event,
             DASHBOARD_EVENTS.SESSION_CREATED
           )
         ) {
-          setTitle(event.data.data.title);
+          setTitle(event.data.data?.title);
         }
 
         if (
-          isToolCustomEvent<typeof DASHBOARD_EVENTS.PANEL_ADDED, DashboardPanelAddedData>(
+          isToolUiEvent<typeof DASHBOARD_EVENTS.PANEL_ADDED, DashboardPanelAddedData>(
             event,
             DASHBOARD_EVENTS.PANEL_ADDED
           )
@@ -134,7 +131,7 @@ const DashboardPreviewFlyout: React.FC<DashboardPreviewFlyoutProps> = ({
           }
         }
 
-        if (isToolCustomEvent(event, DASHBOARD_EVENTS.FINALIZED)) {
+        if (isToolUiEvent(event, DASHBOARD_EVENTS.FINALIZED)) {
           setIsFinalized(true);
         }
       });
@@ -184,10 +181,7 @@ export function openDashboardPreviewFlyout({
 }: {
   core: CoreStart;
   events$: Observable<BrowserChatEvent>;
-  initialEvent: ToolCustomEvent<
-    typeof DASHBOARD_EVENTS.SESSION_CREATED,
-    DashboardSessionCreatedData
-  >;
+  initialEvent: ToolUiEvent<typeof DASHBOARD_EVENTS.SESSION_CREATED, DashboardSessionCreatedData>;
 }): { close: () => void } {
   const overlayRef = core.overlays.openFlyout(
     toMountPoint(<DashboardPreviewFlyout events$={events$} initialEvent={initialEvent} />, {

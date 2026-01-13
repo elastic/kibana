@@ -76,7 +76,7 @@ The panel will appear in the live dashboard preview immediately.`,
       const normalizedPanel = buildLensConfig(panelConfig as LensApiSchemaType);
 
       // Emit custom event - UI will call DashboardApi.addNewPanel()
-      events.emitCustomEvent<typeof DASHBOARD_EVENTS.PANEL_ADDED, DashboardPanelAddedData>(
+      events.sendUiEvent<typeof DASHBOARD_EVENTS.PANEL_ADDED, DashboardPanelAddedData>(
         DASHBOARD_EVENTS.PANEL_ADDED,
         { panel: normalizedPanel }
       );

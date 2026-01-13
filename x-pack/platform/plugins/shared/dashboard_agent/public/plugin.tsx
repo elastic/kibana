@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { isToolCustomEvent } from '@kbn/agent-builder-common/chat/events';
+import { isToolUiEvent } from '@kbn/agent-builder-common/chat/events';
 import type { Subscription } from 'rxjs';
 import { DASHBOARD_EVENTS, type DashboardSessionCreatedData } from '../common';
 import type {
@@ -41,7 +41,7 @@ export class DashboardAgentPlugin
     // Subscribe to chat events and open flyout when dashboard session starts
     this.subscription = agentBuilder.events.chat$.subscribe(async (event) => {
       if (
-        isToolCustomEvent<typeof DASHBOARD_EVENTS.SESSION_CREATED, DashboardSessionCreatedData>(
+        isToolUiEvent<typeof DASHBOARD_EVENTS.SESSION_CREATED, DashboardSessionCreatedData>(
           event,
           DASHBOARD_EVENTS.SESSION_CREATED
         )

@@ -121,8 +121,8 @@ export {
   type ChatAgentEvent,
   type ToolProgressEvent,
   type ToolProgressEventData,
-  type ToolCustomEventData,
-  type ToolCustomEvent,
+  type ToolUiEventData,
+  type ToolUiEvent,
   type ToolResultEvent,
   type ToolResultEventData,
   type ToolCallEvent,
@@ -154,3 +154,4 @@ export {
   isPromptRequestEvent,
 } from './chat';
 export * from './telemetry';
+export type { VersionedAttachment } from './attachments';

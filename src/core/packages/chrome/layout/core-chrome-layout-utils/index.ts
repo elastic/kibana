@@ -20,3 +20,9 @@ export {
   scrollBy,
   isAtBottomOfPage,
 } from './src/scroll';
+
+export {
+  type HighContrastSeparatorOptions,
+  getHighContrastBorder,
+  getHighContrastSeparator,
+} from './src/high_contrast';
