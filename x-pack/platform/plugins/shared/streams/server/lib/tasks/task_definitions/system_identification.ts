@@ -7,7 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition, TaskStatus } from '@kbn/streams-schema';
 import type { IdentifySystemsResult } from '@kbn/streams-ai';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
@@ -90,7 +90,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
 
                 await taskClient.update<SystemIdentificationTaskParams, IdentifySystemsResult>({
                   ..._task,
-                  status: 'completed',
+                  status: TaskStatus.Completed,
                   task: {
                     params: {
                       connectorId,
@@ -121,7 +121,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
 
                 await taskClient.update<SystemIdentificationTaskParams>({
                   ..._task,
-                  status: 'failed',
+                  status: TaskStatus.Failed,
                   task: {
                     params: {
                       connectorId,
