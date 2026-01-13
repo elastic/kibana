@@ -99,6 +99,7 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
   ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
     return {
       ...doc,
+      // @ts-expect-error there was a status field at some point so now TS gets angry because we re-added it but as optional.
       attributes: {
         ...doc.attributes,
         version: '7.13.0',
@@ -113,6 +114,7 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
     } = doc;
     const locatorId = getLocatorId(urlGeneratorId);
     const attributes = { ...otherAttrs, locatorId };
+    // @ts-expect-error there was a status field at some point so now TS gets angry because we re-added it but as optional.
     return { ...doc, attributes };
   },
   '8.6.0': (
