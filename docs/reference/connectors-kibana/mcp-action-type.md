@@ -1,0 +1,61 @@
+---
+navigation_title: "MCP"
+mapped_pages:
+  - https://www.elastic.co/guide/en/kibana/current/mcp-action-type.html
+applies_to:
+  stack: all
+  serverless: all
+---
+
+# MCP connector and action [mcp-action-type]
+todo
+
+## Create connectors in {{kib}} [define-mcp-ui]
+
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
+
+:::{image} ../images/mcp-connector.png # TODO
+:alt: MCP connector
+:screenshot:
+:::
+
+### Connector configuration [mcp-connector-configuration]
+
+MCP connectors have the following configuration properties:
+
+Name
+:   The name of the connector.
+
+Server URL
+:   The URL of the MCP server.
+
+HTTP headers (under Additional settings)
+:   A custom set of HTTP headers that you can user to connect to an MCP server.
+
+    Config
+    :   If you choose the config type, values in headers will be sent as plain text in requests.   
+
+    Secret {applies_to}`stack: ga 9.2` 
+    :   If you choose the secret type, values in your headers will be encrypted in requests. 
+
+## Test connectors [mcp-action-configuration]
+
+You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
+
+:::{image} ../images/mcp-params-test.png
+:alt: MCP params test
+:screenshot:
+:::
+
+MCP connectors offer three actions:
+
+test
+:   Test the connection to the remote MCP server with any auth that was provided.
+
+listTools
+:   Call the MCP server's listTools endpoint. Returns a list of tools and their input and output schemas.
+
+callTool
+:   Call a specific MCP server tool.
+
+Be sure to call listTools first to understand how to correctly call an MCP server's tools before using the callTool action. 
