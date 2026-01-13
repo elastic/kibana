@@ -49,30 +49,16 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     return;
   }
 
-  const scoutCiRunGroups = modulesWithTests.flatMap((module) => {
+  const scoutCiRunGroups = modulesWithTests.map((module) => {
     // Check if any config in this module uses parallel workers
     const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
 
-    if (module.name.includes('streams_app')) {
-      // 'streams_app' total tests runtime takes over 1h, as a temp workaround we split them by config path and serverRunFlags
-      return module.configs.flatMap((config) => {
-        return config.serverRunFlags.map((flag) => ({
-          label: `Scout: [ ${module.group} / ${module.name} ${flag} ] ${module.type}`,
-          key: `${module.name}-${flag.replace(/^--/, '').replace(/=/g, '-')}`,
-          agents: expandAgentQueue('n2-16-spot'),
-          group: module.group,
-        }));
-      });
-    } else {
-      return [
-        {
-          label: `Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
-          key: module.name,
-          agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-          group: module.group,
-        },
-      ];
-    }
+    return {
+      label: `Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
+      key: module.name,
+      agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+      group: module.group,
+    };
   });
 
   // upload the step definitions to Buildkite
