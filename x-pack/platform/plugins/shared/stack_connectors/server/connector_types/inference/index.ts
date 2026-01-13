@@ -14,7 +14,6 @@ import {
 } from '@kbn/actions-plugin/common';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { ProviderTaskSettings } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
@@ -71,12 +70,15 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     const esClient = services.scopedClusterClient.asInternalUser;
 
     try {
-      const { providerConfig } = config ?? {};
-      const { task_settings: taskSettings, service_settings: serviceSettings } =
-        providerConfig ?? {};
+      const {
+        task_settings: taskSettings,
+        service_settings: serviceSettings,
+        headers,
+      } = config ?? {};
 
-      const taskSettingsWithHeaders: ProviderTaskSettings = {
-        ...unflattenObject(taskSettings ?? {}),
+      const taskSettingsWithHeaders = {
+        ...(unflattenObject(taskSettings ?? {}) ?? {}),
+        ...(headers ? { headers } : {}),
       };
 
       const serviceSettingsWithSecrets = {
@@ -102,6 +104,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       }
 
       if (isUpdate && inferenceExists && config && config.provider) {
+        // test num_allocations
         await esClient?.inference.update({
           inference_id: config?.inferenceId,
           task_type: config?.taskType as InferenceTaskType,

@@ -23,7 +23,8 @@ const inferenceEndpointSchema = schema.object({
     inferenceId: schema.string(),
     provider: schema.string(),
     taskType: schema.string(),
-    providerConfig: schema.any(),
+    task_settings: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    service_settings: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
   secrets: schema.object({
@@ -106,8 +107,13 @@ export const getInferenceServicesRoute = (
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           const { config, secrets } = request.body;
-          const taskSettings = unflattenObject(config?.providerConfig?.task_settings ?? {});
-          const serviceSettings = config?.providerConfig?.service_settings ?? {};
+          const taskSettings = config?.task_settings ?? {};
+          const serviceSettings = config?.service_settings ?? {};
+
+          const taskSettingsWithHeaders = {
+            ...unflattenObject(taskSettings),
+            ...(config?.headers ? { headers: config.headers } : {}),
+          };
 
           const serviceSettingsWithSecrets = {
             ...unflattenObject(serviceSettings),
@@ -120,7 +126,9 @@ export const getInferenceServicesRoute = (
             inference_config: {
               service: config?.provider,
               service_settings: serviceSettingsWithSecrets,
-              ...(Object.keys(taskSettings).length ? { task_settings: taskSettings } : {}),
+              ...(Object.keys(taskSettingsWithHeaders).length
+                ? { task_settings: taskSettingsWithHeaders }
+                : {}),
             },
           });
 
@@ -211,7 +219,12 @@ export const getInferenceServicesRoute = (
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           const { config, secrets } = request.body;
-          const taskSettings = config?.providerConfig?.task_settings ?? {};
+          const taskSettings = config?.task_settings ?? {};
+
+          const taskSettingsWithHeaders = {
+            ...unflattenObject(taskSettings),
+            ...(config?.headers ? { headers: config.headers } : {}),
+          };
 
           // Currently, update API only allows 'api_key' and 'num_allocations'.
           const body = {
@@ -219,11 +232,13 @@ export const getInferenceServicesRoute = (
               ...(secrets?.providerSecrets?.api_key && {
                 api_key: secrets.providerSecrets.api_key,
               }),
-              ...(config?.providerConfig?.service_settings?.num_allocations !== undefined && {
-                num_allocations: config.providerConfig.service_settings.num_allocations,
+              ...(config?.service_settings?.num_allocations !== undefined && {
+                num_allocations: config.service_settings.num_allocations,
               }),
             },
-            ...(Object.keys(taskSettings).length ? { task_settings: taskSettings } : {}),
+            ...(Object.keys(taskSettingsWithHeaders).length
+              ? { task_settings: taskSettingsWithHeaders }
+              : {}),
           };
 
           const result = await esClient.transport.request<InferenceInferenceEndpointInfo>(
