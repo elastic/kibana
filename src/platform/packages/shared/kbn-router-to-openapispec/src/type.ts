@@ -28,7 +28,10 @@ export interface OpenAPIConverter {
     shared: { [key: string]: OpenAPIV3.SchemaObject };
   };
 
-  convert(schema: unknown): {
+  convert(
+    schema: unknown,
+    namespace?: string
+  ): {
     schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
     shared: { [key: string]: OpenAPIV3.SchemaObject };
   };

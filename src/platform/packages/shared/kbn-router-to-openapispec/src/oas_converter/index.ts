@@ -32,8 +32,8 @@ export class OasConverter {
     });
   }
 
-  public convert(schema: unknown) {
-    const { schema: oasSchema, shared } = this.#getConverter(schema)!.convert(schema);
+  public convert(schema: unknown, namespace?: string) {
+    const { schema: oasSchema, shared } = this.#getConverter(schema)!.convert(schema, namespace);
     this.#addComponents(shared);
     return oasSchema as OpenAPIV3.SchemaObject;
   }

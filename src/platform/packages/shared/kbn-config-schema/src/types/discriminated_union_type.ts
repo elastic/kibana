@@ -76,9 +76,16 @@ export class DiscriminatedUnionType<
       return acc;
     }, []);
 
-    let schema = internals
+    if (switchCases.length > 0) {
+      switchCases[0].then = (switchCases[0]!.then! as Schema).meta({
+        [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator,
+      });
+    }
+
+    const schema = internals
       .alternatives()
       .match('any')
+      .meta({ [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator })
       .conditional(
         internals.ref(`.${discriminator}`), // self reference object property
         {
@@ -86,8 +93,6 @@ export class DiscriminatedUnionType<
           otherwise,
         }
       );
-
-    schema = schema.meta({ [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator });
 
     super(schema, options);
 

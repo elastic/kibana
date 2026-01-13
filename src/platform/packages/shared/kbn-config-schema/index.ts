@@ -683,6 +683,7 @@ import {
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  META_FIELD_X_OAS_DISCRIMINATOR,
 } from './src/oas_meta_fields';
 
 export const metaFields = Object.freeze({
@@ -693,4 +694,5 @@ export const metaFields = Object.freeze({
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  META_FIELD_X_OAS_DISCRIMINATOR,
 });

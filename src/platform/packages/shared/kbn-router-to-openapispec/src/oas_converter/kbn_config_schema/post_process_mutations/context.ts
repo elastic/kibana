@@ -12,16 +12,20 @@ import type { OpenAPIV3 } from 'openapi-types';
 export interface IContext {
   addSharedSchema: (id: string, schema: OpenAPIV3.SchemaObject) => void;
   getSharedSchemas: () => { [id: string]: OpenAPIV3.SchemaObject };
+  getNamespace: () => string | undefined;
 }
 
 interface Options {
   sharedSchemas?: Map<string, OpenAPIV3.SchemaObject>;
+  namespace?: string;
 }
 
 class Context implements IContext {
   private readonly sharedSchemas: Map<string, OpenAPIV3.SchemaObject>;
+  private readonly namespace?: string;
   constructor(opts: Options) {
     this.sharedSchemas = opts.sharedSchemas ?? new Map();
+    this.namespace = opts.namespace;
   }
   public addSharedSchema(id: string, schema: OpenAPIV3.SchemaObject): void {
     this.sharedSchemas.set(id, schema);
@@ -29,6 +33,10 @@ class Context implements IContext {
 
   public getSharedSchemas() {
     return Object.fromEntries(this.sharedSchemas.entries());
+  }
+
+  public getNamespace() {
+    return this.namespace;
   }
 }
 

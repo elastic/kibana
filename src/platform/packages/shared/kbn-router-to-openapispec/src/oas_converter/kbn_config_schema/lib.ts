@@ -69,7 +69,7 @@ export const unwrapKbnConfigSchema = (schema: unknown): joi.Schema => {
   return schema.getSchema();
 };
 
-export const convert = (kbnConfigSchema: unknown) => {
+export const convert = (kbnConfigSchema: unknown, namespace?: string) => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
   const { result, shared } = parse({ schema, ctx: createCtx() });
   return { schema: result, shared };
