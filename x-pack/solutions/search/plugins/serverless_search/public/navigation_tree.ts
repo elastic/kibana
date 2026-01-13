@@ -76,7 +76,15 @@ export function createNavigationTree({
           {
             id: 'ml_overview',
             title: '',
-            children: [{ link: 'ml:overview' }, { link: 'ml:dataVisualizer' }],
+            children: [
+              { link: 'ml:overview' },
+              { link: 'ml:dataVisualizer' },
+              { link: 'ml:dataDrift', sideNavStatus: 'hidden' },
+              { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
+              { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
+              { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
+              { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
+            ],
           },
           {
             id: 'category-anomaly_detection',
