@@ -84,6 +84,7 @@ export const useFetchSignificantEvents = (
               from: isoFrom,
               to: isoTo,
               bucketSize: intervalString,
+              query: query?.trim() ?? '',
             },
           },
           signal: signal ?? null,

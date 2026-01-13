@@ -348,20 +348,24 @@ export class QueryClient {
   }
 
   async findQueries(
-    name: string,
+    name: string | undefined,
     query: string,
     options?: { includeStreamName: true }
   ): Promise<Array<QueryLink & { streamName: string }>>;
   async findQueries(
-    name: string,
+    name: string | undefined,
     query: string,
     options?: { includeStreamName?: false }
   ): Promise<QueryLink[]>;
   async findQueries(
-    name: string,
+    name: string | undefined,
     query: string,
     options?: { includeStreamName?: boolean }
   ): Promise<QueryLink[] | Array<QueryLink & { streamName: string }>> {
+    const filter = name
+      ? [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')]
+      : [...termQuery(ASSET_TYPE, 'query')];
+
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
       track_total_hits: false,
@@ -371,7 +375,7 @@ export class QueryClient {
       },
       query: {
         bool: {
-          filter: [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')],
+          filter,
           should: [
             ...wildcardQuery(QUERY_TITLE, query),
             ...wildcardQuery(QUERY_KQL_BODY, query),
