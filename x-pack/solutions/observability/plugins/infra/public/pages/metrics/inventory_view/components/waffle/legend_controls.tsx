@@ -28,8 +28,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
 import type { SyntheticEvent } from 'react';
-import React, { useState, useCallback, useEffect } from 'react';
-import { first, last } from 'lodash';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { first, last, isEqual } from 'lodash';
 import type { EuiRangeProps, EuiSelectProps } from '@elastic/eui';
 import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
 import {
@@ -40,7 +40,7 @@ import {
 import { getColorPalette } from '../../lib/get_color_palette';
 import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
 import { ColorLabel } from './color_label';
-import { LegendSteps } from './legend_steps';
+import { LegendSteps, type LegendStep } from './legend_steps';
 import { PalettePreview } from './palette_preview';
 
 interface Props {
@@ -67,6 +67,24 @@ const PALETTE_NAMES: InventoryColorPalette[] = [
 
 const PALETTE_OPTIONS = PALETTE_NAMES.map((name) => ({ text: PALETTES[name], value: name }));
 
+interface DraftState {
+  auto: boolean;
+  bounds: { min: number; max: number };
+  legend: WaffleLegendOptions;
+  type: 'gradient' | 'steps';
+}
+
+const createDraftState = (
+  autoBounds: boolean,
+  boundsOverride: InfraWaffleMapBounds,
+  options: WaffleLegendOptions
+): DraftState => ({
+  auto: autoBounds,
+  bounds: convertBoundsToPercents(boundsOverride),
+  legend: options,
+  type: options.type || 'gradient',
+});
+
 export const LegendControls = ({
   autoBounds,
   boundsOverride,
@@ -74,37 +92,33 @@ export const LegendControls = ({
   dataBounds,
   options,
 }: Props) => {
-  const euiTheme = useEuiTheme();
   const [isPopoverOpen, setPopoverState] = useState(false);
-  const [draftAuto, setDraftAuto] = useState(autoBounds);
-  const [draftLegend, setLegendOptions] = useState(options);
-  const [draftBounds, setDraftBounds] = useState(convertBoundsToPercents(boundsOverride)); // should come from bounds prop
-  const [draftType, setDraftType] = useState(options.type || 'gradient');
+  const [draft, setDraft] = useState<DraftState>(() =>
+    createDraftState(autoBounds, boundsOverride, options)
+  );
 
-  const defaultRules = [
-    { color: euiTheme.euiTheme.colors.severity.success, label: 'OK', value: 0 },
-    {
-      color: euiTheme.euiTheme.colors.severity.warning,
-      label: 'WARNING',
-      value: 1,
-    },
-    {
-      color: euiTheme.euiTheme.colors.severity.danger,
-      label: 'CRITICAL',
-      value: 2,
-    },
-    {
-      color: euiTheme.euiTheme.colors.severity.unknown,
-      label: 'UNKNOWN',
-      value: 3,
-    },
-  ];
+  const { euiTheme } = useEuiTheme();
+  const defaultLegendSteps = useMemo<LegendStep[]>(
+    () => [
+      { color: euiTheme.colors.severity.success, label: 'OK', value: 0 },
+      { color: euiTheme.colors.severity.warning, label: 'WARNING', value: 1 },
+      { color: euiTheme.colors.severity.danger, label: 'CRITICAL', value: 2 },
+      { color: euiTheme.colors.severity.unknown, label: 'UNKNOWN', value: 3 },
+    ],
+    [euiTheme.colors.severity]
+  );
 
   useEffect(() => {
-    if (draftAuto) {
-      setDraftBounds(convertBoundsToPercents(dataBounds));
+    if (draft.auto) {
+      setDraft((prev) => ({ ...prev, bounds: convertBoundsToPercents(dataBounds) }));
     }
-  }, [autoBounds, dataBounds, draftAuto, onChange, options]);
+  }, [dataBounds, draft.auto]);
+
+  // Sync draft state from current values when opening popover
+  const handleOpenPopover = useCallback(() => {
+    setDraft(createDraftState(autoBounds, boundsOverride, options));
+    setPopoverState(true);
+  }, [autoBounds, boundsOverride, options]);
 
   const buttonComponent = (
     <EuiButtonIcon
@@ -115,7 +129,7 @@ export const LegendControls = ({
       aria-label={i18n.translate('xpack.infra.legendControls.buttonLabel', {
         defaultMessage: 'configure legend',
       })}
-      onClick={() => setPopoverState(true)}
+      onClick={handleOpenPopover}
       data-test-subj="openLegendControlsButton"
     />
   );
@@ -123,94 +137,93 @@ export const LegendControls = ({
   const handleAutoChange = useCallback(
     (e: EuiSwitchEvent) => {
       const auto = e.target.checked;
-      setDraftAuto(auto);
-      if (!auto) {
-        setDraftBounds(convertBoundsToPercents(boundsOverride));
-      }
+      setDraft((prev) => ({
+        ...prev,
+        auto,
+        bounds: auto ? prev.bounds : convertBoundsToPercents(boundsOverride),
+      }));
     },
     [boundsOverride]
   );
 
-  const handleReverseColors = useCallback(
-    (e: EuiSwitchEvent) => {
-      setLegendOptions((previous) => ({ ...previous, reverseColors: e.target.checked }));
-    },
-    [setLegendOptions]
-  );
+  const handleReverseColors = useCallback((e: EuiSwitchEvent) => {
+    setDraft((prev) => ({
+      ...prev,
+      legend: { ...prev.legend, reverseColors: e.target.checked },
+    }));
+  }, []);
 
-  const handleMaxBounds = useCallback(
-    (e: SyntheticEvent<HTMLInputElement>) => {
-      const value = parseFloat(e.currentTarget.value);
+  const handleMaxBounds = useCallback((e: SyntheticEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.currentTarget.value);
+    setDraft((prev) => {
       // Auto correct the max to be one larger then the min OR 100
-      const max = value <= draftBounds.min ? draftBounds.min + 1 : value > 100 ? 100 : value;
-      setDraftBounds({ ...draftBounds, max });
-    },
-    [draftBounds]
-  );
+      const max = value <= prev.bounds.min ? prev.bounds.min + 1 : value > 100 ? 100 : value;
+      return { ...prev, bounds: { ...prev.bounds, max } };
+    });
+  }, []);
 
-  const handleMinBounds = useCallback(
-    (e: SyntheticEvent<HTMLInputElement>) => {
-      const value = parseFloat(e.currentTarget.value);
+  const handleMinBounds = useCallback((e: SyntheticEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.currentTarget.value);
+    setDraft((prev) => {
       // Auto correct the min to be one smaller then the max OR ZERO
-      const min = value >= draftBounds.max ? draftBounds.max - 1 : value < 0 ? 0 : value;
-      setDraftBounds({ ...draftBounds, min });
-    },
-    [draftBounds]
-  );
+      const min = value >= prev.bounds.max ? prev.bounds.max - 1 : value < 0 ? 0 : value;
+      return { ...prev, bounds: { ...prev.bounds, min } };
+    });
+  }, []);
 
   const handleApplyClick = useCallback(() => {
     onChange({
-      auto: draftAuto,
-      bounds: { min: draftBounds.min / 100, max: draftBounds.max / 100 },
-      legend: draftLegend,
+      auto: draft.auto,
+      bounds: { min: draft.bounds.min / 100, max: draft.bounds.max / 100 },
+      legend: { ...draft.legend, type: draft.type },
     });
     setPopoverState(false);
-  }, [onChange, draftAuto, draftBounds, draftLegend]);
+  }, [onChange, draft]);
 
   const handleCancelClick = useCallback(() => {
-    setDraftBounds(convertBoundsToPercents(boundsOverride));
-    setDraftAuto(autoBounds);
-    setLegendOptions(options);
+    setDraft(createDraftState(autoBounds, boundsOverride, options));
     setPopoverState(false);
   }, [autoBounds, boundsOverride, options]);
 
-  const handleStepsChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
-    (e) => {
-      const steps = parseInt((e.target as HTMLInputElement).value, 10);
-      setLegendOptions((previous) => ({ ...previous, steps }));
-    },
-    [setLegendOptions]
-  );
+  const handleStepsChange = useCallback<NonNullable<EuiRangeProps['onChange']>>((e) => {
+    const steps = parseInt((e.target as HTMLInputElement).value, 10);
+    setDraft((prev) => ({ ...prev, legend: { ...prev.legend, steps } }));
+  }, []);
 
-  const handlePaletteChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
-    (e) => {
-      const palette = e.target.value as WaffleLegendOptions['palette'];
-      setLegendOptions((previous) => ({ ...previous, palette }));
-    },
-    [setLegendOptions]
-  );
+  const handlePaletteChange = useCallback<NonNullable<EuiSelectProps['onChange']>>((e) => {
+    const palette = e.target.value as WaffleLegendOptions['palette'];
+    setDraft((prev) => ({ ...prev, legend: { ...prev.legend, palette } }));
+  }, []);
 
-  const commited =
-    draftAuto === autoBounds &&
-    boundsOverride.min * 100 === draftBounds.min &&
-    boundsOverride.max * 100 === draftBounds.max &&
-    options.steps === draftLegend.steps &&
-    options.reverseColors === draftLegend.reverseColors &&
-    options.palette === draftLegend.palette;
+  const handleRulesChange = useCallback((rules: LegendStep[]) => {
+    setDraft((prev) => ({ ...prev, legend: { ...prev.legend, rules } }));
+  }, []);
 
-  const boundsValidRange = draftBounds.min < draftBounds.max;
+  const originalState = createDraftState(autoBounds, boundsOverride, options);
+  const commited = isEqual(draft, originalState);
+
+  const boundsValidRange = draft.bounds.min < draft.bounds.max;
   const paletteColors = getColorPalette(
-    draftLegend.palette,
-    draftLegend.steps,
-    draftLegend.reverseColors
+    draft.legend.palette,
+    draft.legend.steps,
+    draft.legend.reverseColors
   );
-  const errors = !boundsValidRange
-    ? [
-        i18n.translate('xpack.infra.legendControls.boundRangeError', {
-          defaultMessage: 'Minimum must be smaller than the maximum',
-        }),
-      ]
-    : [];
+
+  const currentRules: LegendStep[] = draft.legend.rules || defaultLegendSteps;
+  const stepsValid =
+    draft.type !== 'steps' ||
+    currentRules.every((step) => step.label?.trim() && typeof step.value === 'number');
+
+  const isFormValid = draft.type === 'gradient' ? boundsValidRange : stepsValid;
+
+  const errors =
+    !boundsValidRange && draft.type === 'gradient'
+      ? [
+          i18n.translate('xpack.infra.legendControls.boundRangeError', {
+            defaultMessage: 'Minimum must be smaller than the maximum',
+          }),
+        ]
+      : [];
 
   return (
     <EuiPopover
@@ -228,7 +241,7 @@ export const LegendControls = ({
       </EuiPopoverTitle>
       <EuiButtonGroup
         color="primary"
-        idSelected={draftType}
+        idSelected={draft.type}
         isFullWidth={true}
         legend={i18n.translate('xpack.infra.legendControls.legendOptionsPopoverTypeLabel', {
           defaultMessage: 'Legend type',
@@ -250,12 +263,12 @@ export const LegendControls = ({
             }),
           },
         ]}
-        onChange={(id) => setDraftType(id as 'gradient' | 'steps')}
+        onChange={(id) => setDraft((prev) => ({ ...prev, type: id as 'gradient' | 'steps' }))}
         type="single"
       />
       <EuiSpacer size="s" />
       <StyledEuiForm>
-        {draftType === 'gradient' && (
+        {draft.type === 'gradient' && (
           <>
             <EuiFormRow
               display="columnCompressed"
@@ -269,7 +282,7 @@ export const LegendControls = ({
                     defaultMessage: 'Color palette selection',
                   })}
                   options={PALETTE_OPTIONS}
-                  value={draftLegend.palette}
+                  value={draft.legend.palette}
                   id="palette"
                   onChange={handlePaletteChange}
                   compressed
@@ -277,9 +290,9 @@ export const LegendControls = ({
                 />
                 <EuiSpacer size="m" />
                 <PalettePreview
-                  palette={draftLegend.palette}
-                  steps={draftLegend.steps}
-                  reverse={draftLegend.reverseColors}
+                  palette={draft.legend.palette}
+                  steps={draft.legend.steps}
+                  reverse={draft.legend.reverseColors}
                 />
               </>
             </EuiFormRow>
@@ -294,7 +307,7 @@ export const LegendControls = ({
                 min={2}
                 max={18}
                 step={1}
-                value={draftLegend.steps}
+                value={draft.legend.steps}
                 onChange={handleStepsChange}
                 showValue
                 fullWidth
@@ -313,7 +326,7 @@ export const LegendControls = ({
                 label={i18n.translate('xpack.infra.legendControls.euiSwitch.reversecolorsLabel', {
                   defaultMessage: 'Reverse colors direction',
                 })}
-                checked={draftLegend.reverseColors}
+                checked={draft.legend.reverseColors}
                 onChange={handleReverseColors}
                 compressed
               />
@@ -331,7 +344,7 @@ export const LegendControls = ({
                 label={i18n.translate('xpack.infra.legendControls.euiSwitch.boundsLabel', {
                   defaultMessage: 'Auto calculate range',
                 })}
-                checked={draftAuto}
+                checked={draft.auto}
                 onChange={handleAutoChange}
                 compressed
               />
@@ -340,7 +353,7 @@ export const LegendControls = ({
               fullWidth
               label={
                 <ColorLabel
-                  paletteSelected={draftLegend.palette}
+                  paletteSelected={draft.legend.palette}
                   color={first(paletteColors)!}
                   label={i18n.translate('xpack.infra.legendControls.minLabel', {
                     defaultMessage: 'Minimum',
@@ -354,9 +367,9 @@ export const LegendControls = ({
               <div style={{ maxWidth: 150 }}>
                 <EuiFieldNumber
                   data-test-subj="infraLegendControlsFieldNumber"
-                  disabled={draftAuto}
+                  disabled={draft.auto}
                   step={1}
-                  value={isNaN(draftBounds.min) ? '' : draftBounds.min}
+                  value={isNaN(draft.bounds.min) ? '' : draft.bounds.min}
                   isInvalid={!boundsValidRange}
                   name="legendMin"
                   onChange={handleMinBounds}
@@ -370,7 +383,7 @@ export const LegendControls = ({
               display="columnCompressed"
               label={
                 <ColorLabel
-                  paletteSelected={draftLegend.palette}
+                  paletteSelected={draft.legend.palette}
                   color={last(paletteColors)!}
                   label={i18n.translate('xpack.infra.legendControls.maxLabel', {
                     defaultMessage: 'Maximum',
@@ -383,10 +396,10 @@ export const LegendControls = ({
               <div style={{ maxWidth: 150 }}>
                 <EuiFieldNumber
                   data-test-subj="infraLegendControlsFieldNumber"
-                  disabled={draftAuto}
+                  disabled={draft.auto}
                   step={1}
                   isInvalid={!boundsValidRange}
-                  value={isNaN(draftBounds.max) ? '' : draftBounds.max}
+                  value={isNaN(draft.bounds.max) ? '' : draft.bounds.max}
                   name="legendMax"
                   onChange={handleMaxBounds}
                   append="%"
@@ -396,7 +409,12 @@ export const LegendControls = ({
             </EuiFormRow>
           </>
         )}
-        {draftType === 'steps' && <LegendSteps steps={draftLegend.rules || defaultRules} />}
+        {draft.type === 'steps' && (
+          <LegendSteps
+            steps={draft.legend.rules ?? defaultLegendSteps}
+            onChange={handleRulesChange}
+          />
+        )}
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -420,7 +438,7 @@ export const LegendControls = ({
               type="submit"
               size="s"
               fill
-              disabled={commited || !boundsValidRange}
+              disabled={commited || !isFormValid}
               onClick={handleApplyClick}
               data-test-subj="applyLegendControlsButton"
             >

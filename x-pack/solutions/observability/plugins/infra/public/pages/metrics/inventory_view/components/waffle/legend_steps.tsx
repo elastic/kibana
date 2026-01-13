@@ -12,90 +12,153 @@ import {
   EuiButtonIcon,
   EuiColorPicker,
   EuiColorPickerSwatch,
+  EuiFieldNumber,
   EuiFieldText,
-  EuiFormRow,
-  EuiSpacer,
-  useColorPickerState,
+  useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-interface ColorPickerProps {
-  initialColor: string;
+export interface LegendStep {
+  color: string;
+  label: string;
+  value: number;
 }
 
-function ColorPicker({ initialColor }: ColorPickerProps) {
-  const [color, setColor, errors] = useColorPickerState(initialColor);
-  const [selectedColor, setSelectedColor] = useState(color);
-  const handleColorChange: EuiColorPicker['onChange'] = (text, { hex, isValid }) => {
-    setColor(text, { hex, isValid });
-    setSelectedColor(hex);
-  };
+interface LegendStepsProps {
+  steps: LegendStep[];
+  onChange: (steps: LegendStep[]) => void;
+}
+
+interface ColorCellProps {
+  color: string;
+  onChange: (color: string) => void;
+}
+
+function ColorCell({ color, onChange }: ColorCellProps) {
   return (
-    <>
-      <EuiFormRow error={errors}>
-        <EuiColorPicker
-          onChange={handleColorChange}
+    <EuiColorPicker
+      onChange={onChange}
+      color={color}
+      compressed
+      button={
+        <EuiColorPickerSwatch
           color={color}
-          secondaryInputDisplay="top"
-          button={<EuiColorPickerSwatch color={selectedColor} aria-label="Select a new color" />}
-          isClearable={true}
+          aria-label={i18n.translate('xpack.infra.legendSteps.selectColorAriaLabel', {
+            defaultMessage: 'Select color',
+          })}
         />
-      </EuiFormRow>
-      <EuiSpacer />
-      <EuiColorPicker
-        onChange={handleColorChange}
-        color={color}
-        isInvalid={!!errors}
-        button={<></>}
-      />
-    </>
+      }
+    />
   );
 }
 
-export function LegendSteps({ steps }) {
-  function handleAddStep() {}
+export function LegendSteps({ steps, onChange }: LegendStepsProps) {
+  const { euiTheme } = useEuiTheme();
 
-  const columns: EuiBasicTableColumn<{}> = [
-    {
-      field: 'color',
-      name: 'Color',
-      render: (color) => <ColorPicker initialColor={color} />,
+  const updateStep = useCallback(
+    (step: LegendStep, updates: Partial<LegendStep>) => {
+      const index = steps.findIndex((s) => s === step);
+      if (index === -1) return;
+      const updatedSteps = [...steps];
+      updatedSteps[index] = { ...updatedSteps[index], ...updates };
+      onChange(updatedSteps);
     },
-    {
-      field: 'label',
-      name: 'Label',
-      render: (label) => {
-        return <EuiFieldText compressed={true} fullWidth={false} value={label} />;
+    [steps, onChange]
+  );
+
+  const handleDeleteStep = useCallback(
+    (step: LegendStep) => {
+      const updatedSteps = steps.filter((s) => s !== step);
+      onChange(updatedSteps);
+    },
+    [steps, onChange]
+  );
+
+  const handleAddStep = useCallback(() => {
+    const lastStep = steps[steps.length - 1];
+    const newStep: LegendStep = {
+      color: euiTheme.colors.textSubdued,
+      label: '',
+      value: lastStep ? lastStep.value + 1 : 0,
+    };
+    onChange([...steps, newStep]);
+  }, [steps, onChange, euiTheme.colors.textSubdued]);
+
+  const columns: Array<EuiBasicTableColumn<LegendStep>> = useMemo(
+    () => [
+      {
+        field: 'color',
+        name: i18n.translate('xpack.infra.legendSteps.colorColumnLabel', {
+          defaultMessage: 'Color',
+        }),
+        width: '60px',
+        render: (color: string, item: LegendStep) => (
+          <ColorCell color={color} onChange={(newColor) => updateStep(item, { color: newColor })} />
+        ),
       },
-    },
-    {
-      field: 'value',
-      name: 'Value',
-      render: (value) => {
-        return <EuiFieldText compressed={true} fullWidth={false} value={value} />;
+      {
+        field: 'label',
+        name: i18n.translate('xpack.infra.legendSteps.labelColumnLabel', {
+          defaultMessage: 'Label',
+        }),
+        render: (label: string, item: LegendStep) => (
+          <EuiFieldText
+            compressed
+            fullWidth={false}
+            value={label}
+            placeholder={i18n.translate('xpack.infra.legendSteps.labelPlaceholder', {
+              defaultMessage: 'Label',
+            })}
+            onChange={(e) => updateStep(item, { label: e.target.value })}
+            aria-label={i18n.translate('xpack.infra.legendSteps.labelInputAriaLabel', {
+              defaultMessage: 'Step label',
+            })}
+            data-test-subj={`infraLegendStepsLabelInput-${item.value}`}
+          />
+        ),
       },
-      width: '50px',
-    },
-    {
-      field: 'delete',
-      name: '',
-      render: () => {
-        return (
+      {
+        field: 'value',
+        name: i18n.translate('xpack.infra.legendSteps.valueColumnLabel', {
+          defaultMessage: 'Value',
+        }),
+        width: '80px',
+        render: (value: number, item: LegendStep) => (
+          <EuiFieldNumber
+            compressed
+            fullWidth={false}
+            value={value}
+            onChange={(e) => updateStep(item, { value: parseFloat(e.target.value) || 0 })}
+            aria-label={i18n.translate('xpack.infra.legendSteps.valueInputAriaLabel', {
+              defaultMessage: 'Step value',
+            })}
+            data-test-subj={`infraLegendStepsValueInput-${item.value}`}
+          />
+        ),
+      },
+      {
+        field: 'actions',
+        name: '',
+        width: '40px',
+        render: (_value: unknown, item: LegendStep) => (
           <EuiButtonIcon
-            aria-label={i18n.translate('xpack.infra.infra.legendSteps.deleteButtonAriaLabel', {
-              defaultMessage: 'delete',
+            aria-label={i18n.translate('xpack.infra.legendSteps.deleteButtonAriaLabel', {
+              defaultMessage: 'Delete step',
             })}
             color="danger"
-            data-test-subj="infraLegendStepsDeleteStepButton"
-            disabled={false}
-            size="xs"
             iconType="trash"
+            size="xs"
+            onClick={() => handleDeleteStep(item)}
+            disabled={steps.length <= 1}
+            data-test-subj="infraLegendStepsDeleteStepButton"
           />
-        );
+        ),
       },
-    },
-  ];
+    ],
+    [updateStep, handleDeleteStep, steps.length]
+  );
+
   return (
     <>
       <EuiBasicTable
@@ -103,13 +166,24 @@ export function LegendSteps({ steps }) {
         items={steps}
         tableLayout="auto"
         responsiveBreakpoint={false}
+        tableCaption={i18n.translate('xpack.infra.legendSteps.tableCaption', {
+          defaultMessage: 'Legend steps configuration',
+        })}
+        rowProps={(item) => ({
+          'data-test-subj': `legendStepRow-${item.value}`,
+        })}
       />
-      <EuiSpacer size="s" />
-      <EuiFormRow fullWidth={true} display="columnCompressed">
-        <EuiButton color="text" size="s" onClick={handleAddStep} iconType="plus">
-          Add step
-        </EuiButton>
-      </EuiFormRow>
+      <EuiButton
+        color="text"
+        size="s"
+        onClick={handleAddStep}
+        iconType="plus"
+        data-test-subj="infraLegendStepsAddStepButton"
+      >
+        {i18n.translate('xpack.infra.legendSteps.addStepButtonLabel', {
+          defaultMessage: 'Add step',
+        })}
+      </EuiButton>
     </>
   );
 }
