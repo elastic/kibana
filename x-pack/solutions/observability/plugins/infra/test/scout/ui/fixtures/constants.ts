@@ -7,12 +7,9 @@
 
 import moment from 'moment';
 
-export const DATE_WITH_HOSTS_DATA_FROM = moment().subtract(11, 'minutes').toISOString();
-export const DATE_WITH_HOSTS_DATA_TO = moment().subtract(1, 'minute').toISOString();
-export const DATE_WITH_HOSTS_DATA = moment()
-  .subtract(1, 'minute')
-  .subtract(1, 'second')
-  .format('MM/DD/YYYY h:mm:ss A');
+export const DATE_WITH_HOSTS_DATA_FROM = '2023-03-28T18:20:00.000Z';
+export const DATE_WITH_HOSTS_DATA_TO = '2023-03-28T18:21:00.000Z';
+export const DATE_WITH_HOSTS_DATA = '03/28/2023 8:20:59 PM';
 
 export const HOST1_NAME = 'host-1';
 export const HOST2_NAME = 'host-2';
@@ -51,12 +48,9 @@ export const HOSTS = [
   },
 ];
 
-export const DATE_WITH_HOSTS_WITHOUT_DATA_FROM = moment().subtract(22, 'minutes').toISOString();
-export const DATE_WITH_HOSTS_WITHOUT_DATA_TO = moment().subtract(12, 'minutes').toISOString();
-export const DATE_WITH_HOSTS_WITHOUT_DATA = moment()
-  .subtract(12, 'minutes')
-  .subtract(1, 'second')
-  .format('MM/DD/YYYY h:mm:ss A');
+export const DATE_WITH_HOSTS_WITHOUT_DATA_FROM = '2023-03-28T18:20:00.000Z';
+export const DATE_WITH_HOSTS_WITHOUT_DATA_TO = '2023-03-28T18:21:00.000Z';
+export const DATE_WITH_HOSTS_WITHOUT_DATA = '03/28/2023 8:20:59 PM';
 
 export const HOST7_NAME = 'host-7';
 
@@ -66,12 +60,9 @@ export const HOSTS_WITHOUT_DATA = [
   },
 ];
 
-export const DATE_WITH_K8S_HOSTS_DATA_FROM = moment().subtract(33, 'minutes').toISOString();
-export const DATE_WITH_K8S_HOSTS_DATA_TO = moment().subtract(23, 'minutes').toISOString();
-export const DATE_WITH_K8S_HOSTS_DATA = moment()
-  .subtract(23, 'minutes')
-  .subtract(1, 'second')
-  .format('MM/DD/YYYY h:mm:ss A');
+export const DATE_WITH_K8S_HOSTS_DATA_FROM = '2023-03-28T18:20:00.000Z';
+export const DATE_WITH_K8S_HOSTS_DATA_TO = '2023-03-28T18:21:00.000Z';
+export const DATE_WITH_K8S_HOSTS_DATA = '03/28/2023 8:20:59 PM';
 
 export const K8S_POD_NAME = 'demo-stack-kubernetes-pod-1';
 export const K8S_HOST_NAME = 'demo-stack-kubernetes-01';
@@ -85,24 +76,18 @@ export const K8S_HOSTS = [
   },
 ];
 
-export const DATE_WITH_DOCKER_DATA_FROM = moment().subtract(44, 'minutes').toISOString();
-export const DATE_WITH_DOCKER_DATA_TO = moment().subtract(34, 'minutes').toISOString();
-export const DATE_WITH_DOCKER_DATA = moment()
-  .subtract(34, 'minutes')
-  .subtract(1, 'second')
-  .format('MM/DD/YYYY h:mm:ss A');
+export const DATE_WITH_DOCKER_DATA_FROM = '2023-03-28T18:20:00.000Z';
+export const DATE_WITH_DOCKER_DATA_TO = '2023-03-28T18:21:00.000Z';
+export const DATE_WITH_DOCKER_DATA = '03/28/2023 8:20:59 PM';
 export const CONTAINER_COUNT = 1;
 export const CONTAINER_NAMES = Array.from(
   { length: CONTAINER_COUNT },
   (_, i) => `container-container-${i}`
 );
 
-export const DATE_WITH_POD_DATA_FROM = moment().subtract(94, 'minutes').toISOString();
-export const DATE_WITH_POD_DATA_TO = moment().subtract(84, 'minutes').toISOString();
-export const DATE_WITH_POD_DATA = moment()
-  .subtract(84, 'minutes')
-  .subtract(1, 'second')
-  .format('MM/DD/YYYY h:mm:ss A');
+export const DATE_WITH_POD_DATA_FROM = '2023-03-28T18:20:00.000Z';
+export const DATE_WITH_POD_DATA_TO = '2023-03-28T18:21:00.000Z';
+export const DATE_WITH_POD_DATA = '03/28/2023 8:20:59 PM';
 export const POD_COUNT = 1;
 export const POD_NAMES = Array.from({ length: POD_COUNT }, (_, i) => `pod-${i}`);
 

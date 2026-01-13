@@ -42,7 +42,8 @@ export async function getSynthtraceClient<
   TClient extends SynthtraceClientTypes = SynthtraceClientTypes
 >(
   synthClient: TClient,
-  { esClient, kbnUrl, log, config }: SynthtraceClientOptions
+  { esClient, kbnUrl, log, config }: SynthtraceClientOptions,
+  overrides: { skipInstallation?: boolean } = {}
 ): Promise<GetClientsReturn<TClient>> {
   if (instantiatedClients[synthClient]) {
     return instantiatedClients[synthClient] as unknown as GetClientsReturn<TClient>;
@@ -69,7 +70,7 @@ export async function getSynthtraceClient<
 
   await clientManager.initFleetPackageForClient({
     clients,
-    skipInstallation: false,
+    skipInstallation: overrides.skipInstallation ?? false,
   });
 
   log.serviceLoaded(synthClient);

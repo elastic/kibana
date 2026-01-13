@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
 import { generateHostData } from '../fixtures/synthtrace/host_data';
 import {
   CONTAINER_COUNT,
@@ -30,6 +29,7 @@ import { generatePodsData } from '../fixtures/synthtrace/pods_data';
 import { generateLogsDataForHosts } from '../fixtures/synthtrace/logs_data_for_hosts';
 import { generateAddServicesToExistingHost } from '../fixtures/synthtrace/add_services_to_existing_hosts';
 import { generateDockerContainersData } from '../fixtures/synthtrace/docker_containers_data';
+import { globalSetupHook } from '../fixtures';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',

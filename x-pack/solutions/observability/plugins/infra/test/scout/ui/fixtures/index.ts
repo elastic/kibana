@@ -11,7 +11,14 @@ import type {
   ObltWorkerFixtures,
   KibanaUrl,
 } from '@kbn/scout-oblt';
-import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
+import {
+  test as base,
+  createLazyPageObject,
+  globalSetupHook as baseGlobalSetupHook,
+  getSynthtraceClient,
+} from '@kbn/scout-oblt';
+import type { InfraDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
+import { Readable } from 'stream';
 import { InventoryPage } from './page_objects/inventory';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
@@ -39,5 +46,28 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
     };
 
     await use(extendedPageObjects);
+  },
+});
+
+export const globalSetupHook = baseGlobalSetupHook.extend({
+  infraSynthtraceEsClient: async ({ esClient, config, kbnUrl, log }, use) => {
+    const { infraEsClient } = await getSynthtraceClient(
+      'infraEsClient',
+      {
+        esClient,
+        kbnUrl: kbnUrl.get(),
+        log,
+        config,
+      },
+      { skipInstallation: true }
+    );
+
+    const index = async (events: SynthtraceGenerator<InfraDocument>) => {
+      await infraEsClient.index(Readable.from(Array.from(events)));
+    };
+
+    const clean = async () => await infraEsClient.clean();
+
+    await use({ index, clean });
   },
 });
