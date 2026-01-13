@@ -28,11 +28,14 @@ dependsOn:
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-http-server'
+  - '@kbn/config-schema'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
   - group-security
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -41,4 +44,16 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

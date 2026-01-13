@@ -21,6 +21,7 @@ import type {
 import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
+import { registerUiSettings } from './infra/feature_flags/register';
 
 export class EntityStorePlugin implements Plugin {
   private readonly logger: Logger;
@@ -33,11 +34,16 @@ export class EntityStorePlugin implements Plugin {
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
-      (context, request) => createRequestHandlerContext({ context, core, logger: this.logger })
+      (context, request) =>
+        createRequestHandlerContext({ context, coreSetup: core, logger: this.logger })
     );
 
     registerTasks(plugins.taskManager, this.logger);
+    this.logger.debug('Registering routes');
     registerRoutes(router);
+
+    this.logger.debug('Registering ui settings');
+    registerUiSettings(core.uiSettings);
   }
 
   public start(core: CoreStart, plugins: EntityStoreStartPlugins) {

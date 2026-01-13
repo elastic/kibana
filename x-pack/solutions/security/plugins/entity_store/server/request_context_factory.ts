@@ -14,9 +14,10 @@ import type {
   EntityStoreStartPlugins,
 } from './types';
 import { ResourcesService } from './domain/resources_service';
+import { FeatureFlags } from './infra/feature_flags';
 
 interface EntityStoreApiRequestHandlerContextDeps {
-  core: CoreSetup<EntityStoreStartPlugins, void>;
+  coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
 }
@@ -32,12 +33,14 @@ export async function getTaskManagerStart(
 export async function createRequestHandlerContext({
   logger,
   context,
-  core,
+  coreSetup,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
+  const core = await context.core;
   return {
-    core: await context.core,
+    core,
     logger,
     resourcesService: new ResourcesService(logger),
-    taskManagerStart: await getTaskManagerStart(core),
+    featureFlags: new FeatureFlags(core.uiSettings.client),
+    taskManagerStart: await getTaskManagerStart(coreSetup),
   };
 }

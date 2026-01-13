@@ -78,10 +78,8 @@ describe('Options List Control Api', () => {
       (async () => {
         await factory.buildEmbeddable({
           initialState: {
-            rawState: {
-              dataViewId: 'myDataViewId',
-              fieldName: 'myFieldName',
-            },
+            dataViewId: 'myDataViewId',
+            fieldName: 'myFieldName',
           },
           finalizeApi,
           uuid,
@@ -102,11 +100,9 @@ describe('Options List Control Api', () => {
       (async () => {
         await factory.buildEmbeddable({
           initialState: {
-            rawState: {
-              dataViewId: 'myDataViewId',
-              fieldName: 'myFieldName',
-              selectedOptions: ['cool', 'test'],
-            },
+            dataViewId: 'myDataViewId',
+            fieldName: 'myFieldName',
+            selectedOptions: ['cool', 'test'],
           },
           finalizeApi,
           uuid,
@@ -135,10 +131,8 @@ describe('Options List Control Api', () => {
     test('should not set appliedFilters$ when selectedOptions is not provided', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -150,11 +144,9 @@ describe('Options List Control Api', () => {
     test('should set appliedFilters$ when selectedOptions is provided', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            selectedOptions: ['cool', 'test'],
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          selectedOptions: ['cool', 'test'],
         },
         finalizeApi,
         uuid,
@@ -193,11 +185,9 @@ describe('Options List Control Api', () => {
     test('should set appliedFilters$ when exists is selected', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            existsSelected: true,
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          existsSelected: true,
         },
         finalizeApi,
         uuid,
@@ -222,12 +212,10 @@ describe('Options List Control Api', () => {
     test('should set appliedFilters$ when exclude is selected', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            existsSelected: true,
-            exclude: true,
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          existsSelected: true,
+          exclude: true,
         },
         finalizeApi,
         uuid,
@@ -267,11 +255,9 @@ describe('Options List Control Api', () => {
     test('renders a "(blank)" option', async () => {
       const { Component } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            existsSelected: true,
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          existsSelected: true,
         },
         finalizeApi,
         uuid,
@@ -298,11 +284,9 @@ describe('Options List Control Api', () => {
     test('clicking another option unselects "Exists"', async () => {
       const { Component } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            existsSelected: true,
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          existsSelected: true,
         },
         finalizeApi,
         uuid,
@@ -329,11 +313,9 @@ describe('Options List Control Api', () => {
     test('clicking "Exists" unselects all other selections', async () => {
       const { Component } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            selectedOptions: ['woof', 'bark'],
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          selectedOptions: ['woof', 'bark'],
         },
         finalizeApi,
         uuid,
@@ -365,11 +347,9 @@ describe('Options List Control Api', () => {
     test('deselects when showOnlySelected is true', async () => {
       const { Component, api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            selectedOptions: ['woof', 'bark'],
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          selectedOptions: ['woof', 'bark'],
         },
         finalizeApi,
         uuid,
@@ -410,12 +390,10 @@ describe('Options List Control Api', () => {
     test('replace selection when singleSelect is true', async () => {
       const { Component, api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            singleSelect: true,
-            selectedOptions: ['woof'],
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          singleSelect: true,
+          selectedOptions: ['woof'],
         },
         finalizeApi,
         uuid,

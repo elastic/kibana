@@ -13,6 +13,6 @@ export class ResourcesService {
   constructor(private logger: Logger) {}
 
   public install(entityTypes: EntityType[] = ALL_ENTITY_TYPES) {
-    this.logger.info(`Should initialize entity store for types ${JSON.stringify(entityTypes)}`);
+    this.logger.debug(`Should initialize entity store for types ${JSON.stringify(entityTypes)}`);
   }
 }
