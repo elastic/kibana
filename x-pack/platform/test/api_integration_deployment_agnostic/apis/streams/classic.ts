@@ -361,12 +361,51 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           'logs-invalid_pipeline-default',
           body,
-          500
+          400
         );
-
-        expect((streamsResponse as any).message).to.contain('Failed to change state:');
         expect((streamsResponse as any).message).to.contain(
-          `The stream state may be inconsistent. Revert your last change, or use the resync API to restore a consistent state.`
+          'Desired stream state is invalid: parse_exception'
+        );
+        expect((streamsResponse as any).message).to.contain(
+          "processor [set] doesn't support one or more provided configuration parameters [fail]"
+        );
+      });
+
+      it('fails to store invalid ingest pipeline script', async () => {
+        const body: Streams.ClassicStream.UpsertRequest = {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              settings: {},
+              processing: {
+                steps: [
+                  {
+                    action: 'manual_ingest_pipeline',
+                    processors: [
+                      {
+                        script: {
+                          source: 'ctx.age = ', // invalid painless script
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+              classic: {
+                field_overrides: {},
+              },
+              failure_store: { inherit: {} },
+            },
+          },
+        };
+        const streamsResponse = await putStream(apiClient, TEST_STREAM_NAME, body, 400);
+        expect((streamsResponse as any).message).to.contain(
+          'Desired stream state is invalid: script_exception'
+        );
+        expect((streamsResponse as any).message).to.contain(
+          'illegal_argument_exception: unexpected end of script'
         );
       });
     });

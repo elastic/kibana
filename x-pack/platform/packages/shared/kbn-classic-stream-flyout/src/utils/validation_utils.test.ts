@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+
 import {
   hasEmptyWildcards,
   hasInvalidFormat,
@@ -172,10 +173,15 @@ describe('validation_utils', () => {
   });
 
   describe('validateStreamName', () => {
-    const mockTemplate: TemplateDeserialized = {
+    const mockTemplate: IndexTemplate = {
       name: 'test-template',
       indexPatterns: ['logs-*'],
-    } as TemplateDeserialized;
+      allowAutoCreate: 'NO_OVERWRITE',
+      _kbnMeta: { type: 'default', hasDatastream: true },
+      hasSettings: false,
+      hasAliases: false,
+      hasMappings: false,
+    };
 
     describe('without external validator', () => {
       it('returns empty error when stream name contains wildcards', async () => {

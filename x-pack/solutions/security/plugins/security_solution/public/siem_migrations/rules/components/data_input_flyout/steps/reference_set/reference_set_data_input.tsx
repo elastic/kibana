@@ -27,7 +27,7 @@ import { QradarDataInputStep, type OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
 import { useMissingReferenceSetsListStep } from './sub_steps/missing_reference_set_list';
 import { useReferencesFileUploadStep } from './sub_steps/reference_sets_file_upload';
-import type { MigrationStepProps } from '../../../../../common/types';
+import { type MigrationStepProps } from '../../../../../common/types';
 
 interface ReferenceSetDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -42,7 +42,7 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
       [missingResourcesIndexed]
     );
     const onAllReferenceSetCreated = useCallback(() => {
-      setDataInputStep(QradarDataInputStep.MitreMapping);
+      setDataInputStep(QradarDataInputStep.Enhancements);
     }, [setDataInputStep]);
 
     const dataInputStatus = useMemo(
@@ -118,8 +118,11 @@ export const ReferenceSetDataInputSubSteps = React.memo<ReferenceSetDataInputSub
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-      telemetry.reportSetupLookupNameCopied({ migrationId: migrationStats.id });
-    }, [telemetry, migrationStats.id]);
+      telemetry.reportSetupLookupNameCopied({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+      });
+    }, [telemetry, migrationStats.id, migrationStats.vendor]);
 
     const copyStep = useMissingReferenceSetsListStep({
       status: getEuiStepStatus(1, subStep),
@@ -130,7 +133,7 @@ export const ReferenceSetDataInputSubSteps = React.memo<ReferenceSetDataInputSub
       onCopied,
     });
 
-    // Upload macros step
+    // Upload reference sets step
     const uploadStep = useReferencesFileUploadStep({
       status: getEuiStepStatus(2, subStep),
       migrationStats,

@@ -8,8 +8,8 @@
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
-import type { ESQLColumn } from '@kbn/esql-ast';
-import { Parser, walk } from '@kbn/esql-ast';
+import type { ESQLColumn } from '@kbn/esql-language';
+import { Parser, walk } from '@kbn/esql-language';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getRemoteClustersFromESQLQuery,
@@ -32,6 +32,7 @@ import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
   hasDateBreakdown,
+  hasOnlySourceCommand,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1184,6 +1185,28 @@ describe('esql query helpers', () => {
           },
         ])
       ).toBe(true);
+    });
+  });
+
+  describe('hasOnlySourceCommand', () => {
+    it('should return true for queries with only FROM command', () => {
+      expect(hasOnlySourceCommand('FROM index')).toBe(true);
+    });
+
+    it('should return true for queries with only TS command', () => {
+      expect(hasOnlySourceCommand('TS index')).toBe(true);
+    });
+
+    it('should return false for queries with FROM and other commands', () => {
+      expect(hasOnlySourceCommand('FROM index | STATS count()')).toBe(false);
+    });
+
+    it('should return false for queries with TS and other commands', () => {
+      expect(hasOnlySourceCommand('TS index | WHERE field > 0')).toBe(false);
+    });
+
+    it('should return false for empty query', () => {
+      expect(hasOnlySourceCommand('')).toBe(false);
     });
   });
 });

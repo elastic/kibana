@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { suggest } from '@kbn/esql-validation-autocomplete';
+import { suggest } from '@kbn/esql-language';
 import type { MutableRefObject } from 'react';
 import { setupConsoleErrorsProvider } from './console_errors_provider';
 import { ConsoleWorkerProxyService } from './console_worker_proxy';

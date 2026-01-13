@@ -9,32 +9,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  countMetricOperationSchema,
-  counterRateOperationSchema,
-  cumulativeSumOperationSchema,
-  differencesOperationSchema,
-  formulaOperationDefinitionSchema,
-  lastValueOperationSchema,
-  metricOperationSchema,
-  movingAverageOperationSchema,
-  percentileOperationSchema,
-  percentileRanksOperationSchema,
-  staticOperationDefinitionSchema,
-  uniqueCountMetricOperationSchema,
-  sumMetricOperationSchema,
-  esqlColumnSchema,
-  genericOperationOptionsSchema,
-} from '../metric_ops';
+import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import {
-  bucketDateHistogramOperationSchema,
-  bucketTermsOperationSchema,
-  bucketHistogramOperationSchema,
-  bucketRangesOperationSchema,
-  bucketFiltersOperationSchema,
-} from '../bucket_ops';
+
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import {
   legendNestedSchema,
@@ -43,6 +21,10 @@ import {
   legendSizeSchema,
   valueDisplaySchema,
 } from './partition_shared';
+import {
+  mergeAllBucketsWithChartDimensionSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+} from './shared';
 
 const mosaicStateSharedSchema = {
   legend: schema.maybe(

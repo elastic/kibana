@@ -362,6 +362,7 @@ kibana_vars=(
     xpack.reporting.csv.scroll.size
     xpack.reporting.csv.scroll.strategy
     xpack.reporting.csv.useByteOrderMarkEncoding
+    xpack.reporting.csv.maxRows
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
     xpack.reporting.kibanaApp
@@ -435,6 +436,8 @@ kibana_vars=(
     xpack.task_manager.auto_calculate_default_ech_capacity
     xpack.task_manager.discovery.active_nodes_lookback
     xpack.task_manager.discovery.interval
+    xpack.task_manager.invalidate_api_key_task.interval
+    xpack.task_manager.invalidate_api_key_task.removalDelay
     xpack.task_manager.kibanas_per_partition
     xpack.task_manager.max_attempts
     xpack.task_manager.max_workers

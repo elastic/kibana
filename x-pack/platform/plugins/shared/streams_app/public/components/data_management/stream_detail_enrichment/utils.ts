@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { htmlIdGenerator } from '@elastic/eui';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
   GrokProcessor,
+  LowercaseProcessor,
+  MathProcessor,
   ProcessorType,
   ReplaceProcessor,
+  StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
-  StreamlangConditionBlockWithUIAttributes,
+  TrimProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -30,8 +31,8 @@ import {
 import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ProcessorResources } from './state_management/steps_state_machine';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
@@ -41,17 +42,21 @@ import type {
   ConfigDrivenProcessors,
 } from './steps/blocks/action/config_driven/types';
 import type {
+  ConditionBlockFormState,
   ConvertFormState,
   DateFormState,
   DissectFormState,
   DropFormState,
   EnrichmentDataSourceWithUIAttributes,
   GrokFormState,
+  LowercaseFormState,
   ManualIngestPipelineFormState,
+  MathFormState,
   ProcessorFormState,
   ReplaceFormState,
   SetFormState,
-  ConditionBlockFormState,
+  TrimFormState,
+  UppercaseFormState,
 } from './types';
 
 /**
@@ -62,9 +67,13 @@ export const SPECIALISED_TYPES = [
   'date',
   'dissect',
   'grok',
+  'math',
   'set',
   'replace',
   'drop_document',
+  'uppercase',
+  'lowercase',
+  'trim',
 ];
 
 interface FormStateDependencies {
@@ -214,6 +223,39 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultUppercaseProcessorFormState = (): UppercaseFormState => ({
+  action: 'uppercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultLowercaseProcessorFormState = (): LowercaseFormState => ({
+  action: 'lowercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultTrimProcessorFormState = (): TrimFormState => ({
+  action: 'trim' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultMathProcessorFormState = (): MathFormState => ({
+  action: 'math' as const,
+  expression: '',
+  to: '',
+  ignore_failure: true,
+  ignore_missing: false,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -231,7 +273,11 @@ const defaultProcessorFormStateByType: Record<
   drop_document: defaultDropProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
+  math: defaultMathProcessorFormState,
   replace: defaultReplaceProcessorFormState,
+  uppercase: defaultUppercaseProcessorFormState,
+  lowercase: defaultLowercaseProcessorFormState,
+  trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -271,7 +317,11 @@ export const getFormStateFromActionStep = (
     step.action === 'drop_document' ||
     step.action === 'set' ||
     step.action === 'convert' ||
-    step.action === 'replace'
+    step.action === 'replace' ||
+    step.action === 'math' ||
+    step.action === 'uppercase' ||
+    step.action === 'lowercase' ||
+    step.action === 'trim'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -319,7 +369,7 @@ export const convertFormStateToProcessor = (
 
   if ('action' in formState) {
     if (formState.action === 'grok') {
-      const { patterns, from, ignore_failure, ignore_missing } = formState;
+      const { patterns, pattern_definitions, from, ignore_failure, ignore_missing } = formState;
 
       return {
         processorDefinition: {
@@ -329,6 +379,7 @@ export const convertFormStateToProcessor = (
           patterns: patterns
             .map((pattern) => pattern.getExpression().trim())
             .filter((pattern) => !isEmpty(pattern)),
+          pattern_definitions,
           from,
           ignore_failure,
           ignore_missing,
@@ -462,6 +513,68 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'math') {
+      const { expression, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'math',
+          expression,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as MathProcessor,
+      };
+    }
+
+    if (formState.action === 'uppercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'uppercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        },
+      };
+    }
+
+    if (formState.action === 'lowercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'lowercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as LowercaseProcessor,
+      };
+    }
+
+    if (formState.action === 'trim') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'trim',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as TrimProcessor,
+      };
+    }
+
     if (configDrivenProcessors[formState.action]) {
       return {
         processorDefinition: {
@@ -574,12 +687,13 @@ export const getValidSteps = (
       validSteps.push(step);
       return true;
     } else {
-      // Action step: check validity
-      if (isSchema(streamlangProcessorSchema, step)) {
-        validSteps.push(step);
-        return true;
+      // Action step: check schema validity
+      if (!isSchema(streamlangProcessorSchema, step)) {
+        return false;
       }
-      return false;
+
+      validSteps.push(step);
+      return true;
     }
   }
 

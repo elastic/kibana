@@ -926,7 +926,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"debug\" | \"trace\" | \"warn\" | undefined"
+              "\"info\" | \"error\" | \"trace\" | \"debug\" | \"warn\" | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
             "deprecated": false,

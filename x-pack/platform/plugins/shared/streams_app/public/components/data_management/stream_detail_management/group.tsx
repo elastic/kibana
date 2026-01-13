@@ -36,7 +36,7 @@ export function GroupStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
 
-  if (!groupStreams?.enabled) {
+  if (!groupStreams.enabled) {
     return <RedirectTo path="/" />;
   }
 

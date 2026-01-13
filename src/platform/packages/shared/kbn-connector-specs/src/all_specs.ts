@@ -9,8 +9,11 @@
 
 export * from './specs/abuseipdb/abuseipdb';
 export * from './specs/alienvault_otx/alienvault_otx';
+export * from './specs/brave_search/brave_search';
+export * from './specs/github/github';
 export * from './specs/greynoise/greynoise';
 export * from './specs/notion/notion';
 export * from './specs/shodan/shodan';
 export * from './specs/urlvoid/urlvoid';
 export * from './specs/virustotal/virustotal';
+export * from './specs/jina/jina_reader';

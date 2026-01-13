@@ -28,11 +28,16 @@ import {
 export interface CaseViewTabsProps {
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
+  searchTerm?: string;
 }
 
-export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
+export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab, searchTerm }) => {
   const { navigateToCaseView } = useCaseViewNavigation();
-  const { tabs: attachmentTabs, totalAttachments } = useCaseAttachmentTabs({ caseData, activeTab });
+  const { tabs: attachmentTabs, totalAttachments } = useCaseAttachmentTabs({
+    caseData,
+    activeTab,
+    searchTerm,
+  });
 
   const { euiTheme } = useEuiTheme();
 

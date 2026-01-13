@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
@@ -22,6 +23,8 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { ResourceTypes } from '@kbn/product-doc-common';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   useProductDocStatus,
   useInstallProductDoc,
@@ -30,7 +33,7 @@ import {
 } from '@kbn/product-doc-base-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
-import { ELASTIC_DOCS_ID } from './types';
+import { ELASTIC_DOCS_ID, SECURITY_LABS_ID } from './types';
 import * as i18n from './translations';
 
 interface DocumentationSectionProps {
@@ -39,44 +42,81 @@ interface DocumentationSectionProps {
 
 export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ productDocBase }) => {
   const { services } = useKibana();
-  const { notifications, application } = services;
+  const { notifications, application, rendering, docLinks } = services;
 
   // Check if user has Agent Builder 'All' privileges (manageAgents capability)
   const hasManagePrivilege = application.capabilities.agentBuilder?.manageAgents === true;
 
-  const { status, isLoading, refetch } = useProductDocStatus(productDocBase);
+  const {
+    status: productDocsStatusResponse,
+    isLoading: isLoadingProductDocs,
+    refetch: refetchProductDocs,
+  } = useProductDocStatus(productDocBase);
 
-  const { mutate: installDoc, isLoading: isInstalling } = useInstallProductDoc(productDocBase, {
+  const {
+    status: securityLabsStatusResponse,
+    isLoading: isLoadingSecurityLabs,
+    refetch: refetchSecurityLabs,
+  } = useProductDocStatus(productDocBase, {
+    inferenceId: defaultInferenceEndpoints.ELSER,
+    resourceType: ResourceTypes.securityLabs,
+  });
+
+  const isLoading = isLoadingProductDocs || isLoadingSecurityLabs;
+
+  const refetch = useCallback(() => {
+    refetchProductDocs();
+    refetchSecurityLabs();
+  }, [refetchProductDocs, refetchSecurityLabs]);
+
+  const installMutation = useInstallProductDoc(productDocBase, {
     onSuccess: () => {
       notifications.toasts.addSuccess({ title: i18n.INSTALL_SUCCESS });
     },
     onError: (error) => {
-      notifications.toasts.addError(new Error(error.body?.message ?? error.message), {
+      const message = error.body?.message ?? error.message;
+      notifications.toasts.addDanger({
         title: i18n.INSTALL_ERROR,
+        text: toMountPoint(
+          <EuiText size="s">
+            <p>{message}</p>
+            <p>{i18n.AIR_GAPPED_HINT}</p>
+            <p>
+              <EuiLink href={docLinks.links.aiAssistantSettings} target="_blank" external>
+                {i18n.LEARN_MORE}
+              </EuiLink>
+            </p>
+          </EuiText>,
+          rendering
+        ),
       });
     },
   });
+  const { mutate: installDoc, isLoading: isInstalling } = installMutation;
 
-  const { mutate: uninstallDoc, isLoading: isUninstalling } = useUninstallProductDoc(
-    productDocBase,
-    {
-      onSuccess: () => {
-        notifications.toasts.addSuccess({ title: i18n.UNINSTALL_SUCCESS });
-      },
-      onError: (error) => {
-        notifications.toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.UNINSTALL_ERROR,
-        });
-      },
-    }
-  );
+  const uninstallMutation = useUninstallProductDoc(productDocBase, {
+    onSuccess: () => {
+      notifications.toasts.addSuccess({ title: i18n.UNINSTALL_SUCCESS });
+    },
+    onError: (error) => {
+      notifications.toasts.addError(new Error(error.body?.message ?? error.message), {
+        title: i18n.UNINSTALL_ERROR,
+      });
+    },
+  });
+  const { mutate: uninstallDoc, isLoading: isUninstalling } = uninstallMutation;
 
   const handleInstall = useCallback(
     (itemId: string) => {
       if (itemId === ELASTIC_DOCS_ID) {
         installDoc(defaultInferenceEndpoints.ELSER);
       }
-      // Security labs is stubbed - no action
+      if (itemId === SECURITY_LABS_ID) {
+        installDoc({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+          resourceType: ResourceTypes.securityLabs,
+        });
+      }
     },
     [installDoc]
   );
@@ -86,7 +126,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       if (itemId === ELASTIC_DOCS_ID) {
         uninstallDoc(defaultInferenceEndpoints.ELSER);
       }
-      // Security labs is stubbed - no action
+      if (itemId === SECURITY_LABS_ID) {
+        uninstallDoc({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+          resourceType: ResourceTypes.securityLabs,
+        });
+      }
     },
     [uninstallDoc]
   );
@@ -99,7 +144,18 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
   );
 
   const documentationItems: DocumentationItem[] = useMemo(() => {
-    const elasticDocsStatus: DocumentationStatus = status?.overall ?? 'uninstalled';
+    const elasticDocsStatus: DocumentationStatus =
+      (productDocsStatusResponse && 'overall' in productDocsStatusResponse
+        ? productDocsStatusResponse.overall
+        : 'uninstalled') ?? 'uninstalled';
+    const securityLabsStatus: DocumentationStatus =
+      (securityLabsStatusResponse && 'status' in securityLabsStatusResponse
+        ? securityLabsStatusResponse.status
+        : 'uninstalled') ?? 'uninstalled';
+    const securityLabsUpdateAvailable =
+      securityLabsStatusResponse &&
+      'isUpdateAvailable' in securityLabsStatusResponse &&
+      Boolean(securityLabsStatusResponse.isUpdateAvailable);
 
     return [
       {
@@ -110,17 +166,17 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         isStubbed: false,
         icon: 'logoElastic',
       },
-      // TODO: Enable Security Labs after https://github.com/elastic/kibana/issues/244946 is worked
-      // {
-      //   id: SECURITY_LABS_ID,
-      //   name: i18n.SECURITY_LABS_NAME,
-      //   status: 'uninstalled',
-      //   isTechPreview: false,
-      //   isStubbed: true,
-      //   icon: 'logoSecurity',
-      // },
+      {
+        id: SECURITY_LABS_ID,
+        name: i18n.SECURITY_LABS_NAME,
+        status: securityLabsStatus,
+        updateAvailable: securityLabsUpdateAvailable,
+        isTechPreview: false,
+        isStubbed: false,
+        icon: 'logoSecurity',
+      },
     ];
-  }, [status]);
+  }, [productDocsStatusResponse, securityLabsStatusResponse]);
 
   const getStatusBadge = useCallback((itemStatus: DocumentationStatus) => {
     // Status badge only shows binary state: Installed or Not installed
@@ -143,11 +199,25 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
   const getActionButton = useCallback(
     (item: DocumentationItem) => {
+      const installItemId =
+        installMutation.variables && typeof installMutation.variables === 'object'
+          ? installMutation.variables.resourceType === ResourceTypes.securityLabs
+            ? SECURITY_LABS_ID
+            : ELASTIC_DOCS_ID
+          : ELASTIC_DOCS_ID;
+
+      const uninstallItemId =
+        uninstallMutation.variables && typeof uninstallMutation.variables === 'object'
+          ? uninstallMutation.variables.resourceType === ResourceTypes.securityLabs
+            ? SECURITY_LABS_ID
+            : ELASTIC_DOCS_ID
+          : ELASTIC_DOCS_ID;
+
       // Use server status OR local mutation state to determine if action is in progress
       const isItemInstalling =
-        item.status === 'installing' || (isInstalling && item.id === ELASTIC_DOCS_ID);
+        item.status === 'installing' || (isInstalling && item.id === installItemId);
       const isItemUninstalling =
-        item.status === 'uninstalling' || (isUninstalling && item.id === ELASTIC_DOCS_ID);
+        item.status === 'uninstalling' || (isUninstalling && item.id === uninstallItemId);
 
       // Helper to wrap button with tooltip when user lacks privileges
       const wrapWithPrivilegeTooltip = (button: React.ReactElement) => {
@@ -221,6 +291,40 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
       // Installed - show uninstall button
       if (item.status === 'installed') {
+        if (item.updateAvailable) {
+          return wrapWithPrivilegeTooltip(
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="flexEnd"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="refresh"
+                  onClick={hasManagePrivilege ? () => handleInstall(item.id) : undefined}
+                  isDisabled={!hasManagePrivilege}
+                  data-test-subj={`documentation-update-${item.id}`}
+                >
+                  {i18n.ACTION_UPDATE}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="returnKey"
+                  onClick={hasManagePrivilege ? () => handleUninstall(item.id) : undefined}
+                  isDisabled={!hasManagePrivilege}
+                  data-test-subj={`documentation-uninstall-${item.id}`}
+                >
+                  {i18n.ACTION_UNINSTALL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+
         return wrapWithPrivilegeTooltip(
           <EuiButtonEmpty
             size="xs"
@@ -269,6 +373,8 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       isUninstalling,
       refetch,
       hasManagePrivilege,
+      installMutation.variables,
+      uninstallMutation.variables,
     ]
   );
 
@@ -289,6 +395,11 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
             {item.isTechPreview && (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge label={i18n.TECH_PREVIEW} size="s" alignment="middle" />
+              </EuiFlexItem>
+            )}
+            {item.updateAvailable && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">{i18n.UPDATE_AVAILABLE}</EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -322,7 +433,10 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
         <EuiText size="s" color="subdued">
-          {i18n.DOCUMENTATION_DESCRIPTION}
+          {i18n.DOCUMENTATION_DESCRIPTION}{' '}
+          <EuiLink href={docLinks.links.aiAssistantSettings} target="_blank" external>
+            {i18n.LEARN_MORE}
+          </EuiLink>
         </EuiText>
         <EuiSpacer size="m" />
         <EuiText size="xs" color="subdued">

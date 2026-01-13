@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_RULES_WITH_GAPS_TO_FETCH } from '../../../common/constants';
 
 export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
@@ -598,6 +599,15 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_TITLE = i18n.transla
   }
 );
 
+export const RULES_TABLE_MAX_RULES_WITH_GAPS_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.rulesTable.maxRulesWithGapsWarningMessage',
+  {
+    values: { maxRules: MAX_RULES_WITH_GAPS_TO_FETCH },
+    defaultMessage:
+      'Showing up to the first {maxRules} rules with gaps in the selected time range. Adjust your filters to narrow down the selection.',
+  }
+);
+
 export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxLabel',
   {
@@ -659,6 +669,13 @@ export const CLEAR_SELECTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.clearSelectionTitle',
   {
     defaultMessage: 'Clear selection',
+  }
+);
+
+export const RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tableCaption',
+  {
+    defaultMessage: 'Detection rules',
   }
 );
 

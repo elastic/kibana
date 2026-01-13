@@ -2,7 +2,7 @@
 navigation_title: Advanced settings
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/advanced-options.html
-applies_to: 
+applies_to:
   stack: ga
   serverless: ga
 description: List of Kibana advanced settings.
@@ -167,12 +167,6 @@ $$$metrics-maxbuckets$$$`metrics:max_buckets` {applies_to}`stack: ga` {applies_t
 $$$metrics:allowStringIndices$$$`metrics:allowStringIndices` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   Enables you to use {{es}} indices in **TSVB** visualizations. `false` by default.
 
-$$$agent-builder-enabled$$$`agentBuilder:enabled` {applies_to}`stack: preview 9.2` {applies_to}`elasticsearch: preview`
-:   Enables Elastic Agent Builder.
-
-    - {applies_to}`stack:` `false` by default.
-    - {applies_to}`elasticsearch:` `true` by default.
-
 $$$fields-popularlimit$$$`fields:popularLimit` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The top N most popular fields to show. `10` by default.
 
@@ -181,7 +175,7 @@ $$$aiAssistant:preferredAIAssistantType$$$`aiAssistant:preferredAIAssistantType`
 
       ::::{note}
       :applies_to: stack: ga 9.2
-      Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md). 
+      Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md).
       ::::
 
 
@@ -211,7 +205,7 @@ $$$accessibility-disableanimations$$$`accessibility:disableAnimations` {applies_
 $$$autocomplete-valuesuggestionmethod$$$`autocomplete:valueSuggestionMethod` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The method to retrieve values for KQL autocomplete suggestions. `terms_enum` by default.
 
-    - When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. {{product.kibana}} returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range. (Note that this API is incompatible with [Document-Level-Security](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/controlling-access-at-document-field-level.md).) 
+    - When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. {{product.kibana}} returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range. (Note that this API is incompatible with [Document-Level-Security](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/controlling-access-at-document-field-level.md).)
     - When set to `terms_agg`, {{product.kibana}} uses a terms aggregation for value suggestions, which is slower, but suggestions include all values that optionally match your time range and are sorted by popularity.
 
 $$$auto-complete-use-time-range$$$`autocomplete:useTimeRange` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
@@ -356,7 +350,7 @@ $$$observability-ai-assistant-simulated-function-calling$$$`observability:aiAssi
 :   Simulated function calling does not need API support for functions or tools, but it can decrease performance. Currently always activated for connectors that do not have API support for Native function calling. `false` by default.
 
 $$$observability-ai-assistant-search-connector-index-pattern$$$`observability:aiAssistantSearchConnectorIndexPattern` {applies_to}`stack: preview` {applies_to}`observability: ga` {applies_to}`elasticsearch: ga`
-:   Index pattern used by the AI Assistant when querying search connectors indices (part of the knowledge base). Empty by default: the index for every search connector is queried. 
+:   Index pattern used by the AI Assistant when querying search connectors indices (part of the knowledge base). Empty by default: the index for every search connector is queried.
 
 $$$observability-new-logs-overview$$$`observability:newLogsOverview` {applies_to}`stack: preview` {applies_to}`observability: preview`
 :   Enable the new logs overview experience. `true` by default.
@@ -424,7 +418,7 @@ $$$observability-apm-critical-path$$$`observability:apmEnableCriticalPath` {appl
 $$$observability-synthetics-throttling-enabled$$$`observability:syntheticsThrottlingEnabled` {applies_to}`stack: preview` {applies_to}`serverless: unavailable`
 :   Enable the throttling setting in Synthetics monitor configurations. Throttling might still not be available for your monitors even if the setting is active. `false` by default.
 
-    :::{warning} 
+    :::{warning}
     This setting is intended for Elastic-internal use only. [Learn more](https://github.com/elastic/synthetics/blob/main/docs/throttling.md)
     :::
 
@@ -587,7 +581,7 @@ $$$security-solution-excluded-data-tiers-for-rule-execution$$$`securitySolution:
 :   Specifies data tiers to exclude from searching during rule execution. Excludes events from the specified data tiers, which might help improve rule performance or reduce execution time. For example: `data_frozen,data_cold`. Empty by default.
 
 
-$$$security-solution-enable-privileged-user-monitoring$$$`securitySolution:enablePrivilegedUserMonitoring` {applies_to}`stack: preview` {applies_to}`serverless: unavailable`
+$$$security-solution-enable-privileged-user-monitoring$$$`securitySolution:enablePrivilegedUserMonitoring` {applies_to}`stack: preview 9.1, removed 9.3` {applies_to}`serverless: unavailable`
 :   Enables the privileged user monitoring dashboard and onboarding experience, which are in technical preview. `true` by default.
 
 $$$security-solution-enable-esql-risk-scoring$$$`securitySolution:enableEsqlRiskScoring` {applies_to}`stack: preview 9.0, removed 9.3` {applies_to}`serverless: unavailable`

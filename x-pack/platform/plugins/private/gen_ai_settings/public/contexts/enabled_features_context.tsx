@@ -37,8 +37,12 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   children,
   config,
 }) => {
-  const { services } = useKibana();
-  const spaces = services?.spaces ?? undefined;
+  const {
+    services: {
+      spaces,
+      application: { capabilities },
+    },
+  } = useKibana();
 
   const activeSpace$ = React.useMemo(
     () => spaces?.getActiveSpace$?.() ?? of<Space | undefined>(undefined),
@@ -52,14 +56,22 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
     const showAiAssistantsVisibilitySetting =
       config.showAiAssistantsVisibilitySetting === false ? false : !isSolutionView;
 
+    const hasObservabilityAssistant = capabilities.observabilityAIAssistant?.show === true;
+    const hasSecurityAssistant = capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
+    const hasAgent = capabilities.agentBuilder?.manageAgents === true;
+    const hasAgentAndAnyAssistant = (hasObservabilityAssistant || hasSecurityAssistant) && hasAgent;
+
+    const showChatExperienceSetting =
+      config.showChatExperienceSetting === false ? false : hasAgentAndAnyAssistant;
+
     return {
       showSpacesIntegration: config.showSpacesIntegration,
       showAiBreadcrumb: config.showAiBreadcrumb,
       isPermissionsBased: isSolutionView,
       showAiAssistantsVisibilitySetting,
-      showChatExperienceSetting: config.showChatExperienceSetting,
+      showChatExperienceSetting,
     };
-  }, [config, activeSpace]);
+  }, [config, activeSpace, capabilities]);
 
   return (
     <EnabledFeaturesContext.Provider value={contextFeatures}>

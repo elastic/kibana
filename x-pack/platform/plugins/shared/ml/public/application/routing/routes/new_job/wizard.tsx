@@ -198,6 +198,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
       data: { dataViews: dataViewsService },
       savedSearch: savedSearchService,
       mlServices: { mlApi },
+      notifications,
     },
   } = useMlKibana();
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
@@ -211,7 +212,8 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
         mlApi,
         dataViewsService,
         savedSearchService,
-        ANOMALY_DETECTOR
+        ANOMALY_DETECTOR,
+        notifications
       ),
     existingJobsAndGroups: () => mlApi.jobs.getAllJobAndGroupIds(),
   });

@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import {
+  AI_AGENTS_FEATURE_FLAG,
+  AI_AGENTS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/ai-assistant-common/src/constants/feature_flags';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -34,13 +45,18 @@ export class AIAssistantManagementSelectionPlugin
     >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<
+      AIAssistantManagementSelectionPluginServerDependenciesStart,
+      AIAssistantManagementSelectionPluginServerStart
+    >,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
     this.registerUiSettings(core, plugins);
@@ -49,7 +65,10 @@ export class AIAssistantManagementSelectionPlugin
   }
 
   private registerUiSettings(
-    core: CoreSetup,
+    core: CoreSetup<
+      AIAssistantManagementSelectionPluginServerDependenciesStart,
+      AIAssistantManagementSelectionPluginServerStart
+    >,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
     const { cloud } = plugins;
@@ -67,10 +86,44 @@ export class AIAssistantManagementSelectionPlugin
 
     // Register chat experience setting for both stateful and serverless (except workplaceai)
     if (serverlessProjectType !== 'workplaceai') {
+      // Default Agent for Elasticsearch solution view, Classic for all other cases
       core.uiSettings.register({
         [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
           ...chatExperienceSetting,
-          value: this.config.preferredChatExperience ?? AIChatExperience.Classic,
+          getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
+            try {
+              const [coreStart, startServices] = await core.getStartServices();
+
+              const isAiAgentsEnabled = await coreStart.featureFlags.getBooleanValue(
+                AI_AGENTS_FEATURE_FLAG,
+                AI_AGENTS_FEATURE_FLAG_DEFAULT
+              );
+
+              if (!isAiAgentsEnabled) {
+                return AIChatExperience.Classic;
+              }
+
+              // Avoid security exceptions before login - only check space when authenticated
+              if (request && startServices.spaces && request.auth.isAuthenticated) {
+                const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
+                  request
+                );
+                if (activeSpace?.solution === 'es') {
+                  return AIChatExperience.Agent;
+                }
+              }
+
+              if (this.config.preferredChatExperience) {
+                return this.config.preferredChatExperience;
+              }
+
+              return AIChatExperience.Classic;
+            } catch (e) {
+              this.logger.error('Error in chat experience setting:');
+              this.logger.error(e);
+              return AIChatExperience.Classic;
+            }
+          },
         },
       });
     }

@@ -690,9 +690,9 @@
         "signature": [
           "(renameFunction: ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
@@ -700,17 +700,17 @@
           "FunctionSubtype",
           ", string>) => { original: ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLColumn",
             "text": "ESQLColumn"
           },
           "; renamed: ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLColumn",
             "text": "ESQLColumn"
           },
@@ -729,9 +729,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/esql-ast",
+                "pluginId": "@kbn/esql-language",
                 "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
+                "docId": "kibKbnEsqlLanguagePluginApi",
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               },
@@ -3157,6 +3157,43 @@
         ],
         "returnComment": [
           "true if the query contains a timeseries bucket aggregation, false otherwise"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.hasOnlySourceCommand",
+        "type": "Function",
+        "tags": [],
+        "label": "hasOnlySourceCommand",
+        "description": [
+          "\nChecks if the ESQL query contains only source commands (e.g., FROM, TS)."
+        ],
+        "signature": [
+          "(query: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.hasOnlySourceCommand.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "true if the query contains only source commands, false otherwise"
         ],
         "initialIsOpen": false
       },

@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { EuiAccordion, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { StreamExistingFeaturesTable } from './stream_existing_features_table';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
 
 const getUnderlineOnHoverStyle = (textDecorationValue: 'underline' | 'none') => css`
   &:hover,
@@ -24,11 +25,13 @@ export const StreamFeaturesAccordion = ({
   features,
   loading,
   refresh,
+  aiFeatures,
 }: {
   definition: Streams.all.Definition;
-  features: Feature[];
+  features: System[];
   loading: boolean;
   refresh: () => void;
+  aiFeatures: AIFeatures | null;
 }) => {
   return (
     <EuiAccordion
@@ -54,6 +57,7 @@ export const StreamFeaturesAccordion = ({
         features={features}
         definition={definition}
         refreshFeatures={refresh}
+        aiFeatures={aiFeatures}
       />
     </EuiAccordion>
   );

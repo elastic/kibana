@@ -1289,7 +1289,7 @@
             "section": "def-public.EmbeddablePackageState",
             "text": "EmbeddablePackageState"
           },
-          "<SerializedStateType>"
+          "<SerializedState>"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
         "deprecated": false,
@@ -1309,19 +1309,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.EmbeddablePackageState.serializedState",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "serializedState",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<SerializedStateType>"
+              "SerializedState"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
             "deprecated": false,
@@ -1739,6 +1732,74 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.ADD_PANEL_ANNOTATION_GROUP.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ADD_PANEL_LEGACY_GROUP",
+        "type": "Object",
+        "tags": [],
+        "label": "ADD_PANEL_LEGACY_GROUP",
+        "description": [],
+        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_LEGACY_GROUP.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_LEGACY_GROUP.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_LEGACY_GROUP.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_LEGACY_GROUP.order",
             "type": "number",
             "tags": [],
             "label": "order",
@@ -2331,7 +2392,7 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[] | undefined) => object) | undefined>) => void"
+            "[] | undefined, id?: string | undefined) => object) | undefined>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
@@ -2376,7 +2437,7 @@
                   "section": "def-server.Reference",
                   "text": "Reference"
                 },
-                "[] | undefined) => object) | undefined>"
+                "[] | undefined, id?: string | undefined) => object) | undefined>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
               "deprecated": false,
@@ -2655,7 +2716,7 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[] | undefined) => object) | undefined>"
+            "[] | undefined, id?: string | undefined) => object) | undefined>"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
@@ -3404,7 +3465,7 @@
         "label": "EmbeddableTransforms",
         "description": [],
         "signature": [
-          "{ transformOutInjectsReferences?: boolean | undefined; transformOut?: ((storedState: StoredEmbeddableState, panelReferences?: ",
+          "{ transformOut?: ((storedState: StoredEmbeddableState, panelReferences?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -3420,7 +3481,7 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[] | undefined) => EmbeddableState) | undefined; transformIn?: ((state: EmbeddableState) => { state: StoredEmbeddableState; references?: ",
+          "[] | undefined, id?: string | undefined) => EmbeddableState) | undefined; transformIn?: ((state: EmbeddableState) => { state: StoredEmbeddableState; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

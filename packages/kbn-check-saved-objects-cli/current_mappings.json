@@ -70,6 +70,9 @@
           },
           "group": {
             "type": "keyword"
+          },
+          "params": {
+            "type": "flattened"
           }
         },
         "type": "nested"
@@ -316,6 +319,17 @@
     }
   },
   "api_key_pending_invalidation": {
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      }
+    }
+  },
+  "api_key_to_invalidate": {
+    "dynamic": false,
     "properties": {
       "apiKeyId": {
         "type": "keyword"
@@ -1090,6 +1104,31 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "data_connector": {
+    "dynamic": false,
+    "properties": {
+      "kscIds": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "toolIds": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "workflowIds": {
+        "type": "keyword"
       }
     }
   },
@@ -3222,6 +3261,9 @@
       },
       "product_version": {
         "type": "keyword"
+      },
+      "resource_type": {
+        "type": "keyword"
       }
     }
   },
@@ -3859,6 +3901,23 @@
   "slo-settings": {
     "dynamic": false,
     "properties": {}
+  },
+  "slo_template": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "tags": {
+        "type": "keyword"
+      }
+    }
   },
   "space": {
     "dynamic": false,

@@ -41,6 +41,7 @@ import { StatusError } from '../../errors/status_error';
 import {
   validateAncestorFields,
   validateDescendantFields,
+  validateSimulation,
   validateSystemFields,
 } from '../../helpers/validate_fields';
 import {
@@ -525,6 +526,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     validateSettings(this._definition, this.dependencies.isServerless);
 
+    await validateSimulation(this._definition, this.dependencies.scopedClusterClient);
+
     return { isValid: true, errors: [] };
   }
 
@@ -925,7 +928,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
       {
-        type: 'unlink_features',
+        type: 'unlink_systems',
         request: {
           name: this._definition.name,
         },

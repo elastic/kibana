@@ -58,8 +58,9 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
 
   const { getUrlForApp } = coreStart.application;
   const { toasts } = coreStart.notifications;
+  const { links: docLinks } = coreStart.docLinks;
 
-  const hasAgentBuilder = coreStart.application.capabilities.agentBuilder?.show === true;
+  const hasAgentBuilder = coreStart.application.capabilities.agentBuilder?.manageAgents === true;
   const isAiAgentsEnabled = getIsAiAgentsEnabled(coreStart.featureFlags);
 
   const [selectedType, setSelectedType] = useState<AIExperienceSelection>(AIAssistantType.Default);
@@ -132,7 +133,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                 {i18n.translate(
                   'aiAssistantManagementSelection.headerButton.selectAIChatExperienceTitle',
                   {
-                    defaultMessage: 'Select an AI chat experience',
+                    defaultMessage: 'Select a chat experience',
                   }
                 )}
               </EuiModalHeaderTitle>
@@ -160,9 +161,8 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       </EuiLink>
                     ),
                     learnMoreLink: (
-                      // TODO: Update link when documentation is ready
                       <EuiLink
-                        href="#"
+                        href={docLinks.agentBuilder.learnMore}
                         target="_blank"
                         data-test-subj="aiAgentBuilderLearnMoreLink"
                       >
@@ -299,6 +299,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
         <AIAgentConfirmationModal
           onConfirm={handleConfirmAgent}
           onCancel={() => setConfirmModalOpen(false)}
+          docLinks={docLinks}
         />
       )}
     </>

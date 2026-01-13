@@ -27,7 +27,7 @@ function getVisibility(
   activeSpace?: Space
 ) {
   // If AI Agents are enabled, hide the nav control
-  // OnechatNavControl will be used instead
+  // AgentBuilderNavControl will be used instead
   if (chatExperience === AIChatExperience.Agent) {
     return false;
   }
@@ -62,8 +62,7 @@ export function useIsNavControlVisible(coreStart: CoreStart, spaces?: SpacesPlug
   );
 
   const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
-    PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-    AIChatExperience.Classic
+    PREFERRED_CHAT_EXPERIENCE_SETTING_KEY
   );
 
   const activeSpace$ = useMemo(

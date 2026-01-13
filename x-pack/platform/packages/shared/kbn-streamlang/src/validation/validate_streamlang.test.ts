@@ -1672,4 +1672,41 @@ describe('validateStreamlang', () => {
       });
     });
   });
+
+  describe('processor value validation', () => {
+    it('should detect invalid math expression', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'math',
+            expression: '?',
+            to: 'attributes.result',
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [] });
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some((e) => e.type === 'invalid_value')).toBe(true);
+      expect(result.errors.find((e) => e.type === 'invalid_value')?.field).toBe('expression');
+    });
+
+    it('should pass validation for valid math expression', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'math',
+            expression: 'attributes.value + log(attributes.other)',
+            to: 'attributes.result',
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [] });
+
+      const valueErrors = result.errors.filter((e) => e.type === 'invalid_value');
+      expect(valueErrors).toHaveLength(0);
+    });
+  });
 });

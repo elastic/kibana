@@ -40,7 +40,6 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/inspector-plugin'
   - '@kbn/embeddable-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/interpreter'
   - '@kbn/data-plugin'
   - '@kbn/share-plugin'
@@ -67,6 +66,7 @@ dependsOn:
   - '@kbn/chart-icons'
   - '@kbn/alerts-ui-shared'
   - '@kbn/cps'
+  - '@kbn/control-group-renderer'
 tags:
   - shared-common
   - package

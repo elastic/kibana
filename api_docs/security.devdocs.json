@@ -1824,12 +1824,12 @@
                 "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts"
               },
               {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
               },
               {
                 "plugin": "fleet",
@@ -6019,6 +6019,10 @@
             {
               "plugin": "reindexService",
               "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/credential_store.ts"
+            },
+            {
+              "plugin": "taskManagerDependencies",
+              "path": "x-pack/platform/plugins/private/task_manager_dependencies/server/plugin.ts"
             },
             {
               "plugin": "transform",

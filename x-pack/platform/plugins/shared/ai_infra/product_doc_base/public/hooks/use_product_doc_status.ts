@@ -7,7 +7,11 @@
 
 import { useQuery } from '@kbn/react-query';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import type { InstallationStatusResponse } from '../../common/http_api/installation';
+import type { ResourceType } from '@kbn/product-doc-common';
+import type {
+  InstallationStatusResponse,
+  SecurityLabsInstallStatusResponse,
+} from '../../common/http_api/installation';
 import type { ProductDocBasePluginStart } from '../types';
 import { REACT_QUERY_KEYS } from './constants';
 
@@ -16,7 +20,15 @@ const POLLING_INTERVAL_MS = 5000; // Poll every 5 seconds during installation/un
 export interface UseProductDocStatusOptions {
   /** The inference ID to check status for. Defaults to ELSER. */
   inferenceId?: string;
+  /** The resource type to check status for. Defaults to product docs. */
+  resourceType?: ResourceType;
 }
+
+const isProductDocsStatus = (
+  value: InstallationStatusResponse | SecurityLabsInstallStatusResponse | undefined
+): value is InstallationStatusResponse => {
+  return value != null && typeof value === 'object' && 'overall' in value;
+};
 
 /**
  * Hook to fetch the installation status of product documentation.
@@ -26,18 +38,19 @@ export function useProductDocStatus(
   productDocBase: ProductDocBasePluginStart,
   options: UseProductDocStatusOptions = {}
 ) {
-  const { inferenceId = defaultInferenceEndpoints.ELSER } = options;
+  const { inferenceId = defaultInferenceEndpoints.ELSER, resourceType } = options;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
-    queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId],
-    queryFn: async (): Promise<InstallationStatusResponse> => {
-      return productDocBase.installation.getStatus({ inferenceId });
+    queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId, resourceType],
+    queryFn: async (): Promise<InstallationStatusResponse | SecurityLabsInstallStatusResponse> => {
+      // The response shape depends on resourceType (product docs vs security labs)
+      return productDocBase.installation.getStatus({ inferenceId, resourceType });
     },
     keepPreviousData: false,
     refetchOnWindowFocus: false,
     // Poll when installation or uninstallation is in progress
     refetchInterval: (queryData) => {
-      const status = queryData?.overall;
+      const status = isProductDocsStatus(queryData) ? queryData.overall : queryData?.status;
       if (status === 'installing' || status === 'uninstalling') {
         return POLLING_INTERVAL_MS;
       }

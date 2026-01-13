@@ -52,6 +52,7 @@ export {
 
 export {
   type RuntimeStateManager,
+  type ReactiveTabRuntimeState,
   type CombinedRuntimeState,
   type InitialUnifiedHistogramLayoutProps,
   DEFAULT_HISTOGRAM_KEY_PREFIX,
@@ -70,6 +71,7 @@ export {
   type TabActionInjector,
   createTabActionInjector,
   createTabItem,
+  getSerializedSearchSourceDataViewDetails,
   parseControlGroupJson,
   extractEsqlVariables,
 } from './utils';

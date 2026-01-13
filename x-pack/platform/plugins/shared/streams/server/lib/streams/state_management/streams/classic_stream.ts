@@ -9,35 +9,35 @@ import type {
   IndicesDataStream,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { isNotFoundError } from '@kbn/es-errors';
 import type {
   FailureStore,
   IngestStreamLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
-import _, { cloneDeep } from 'lodash';
-import { isNotFoundError } from '@kbn/es-errors';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import _, { cloneDeep } from 'lodash';
+import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { StatusError } from '../../errors/status_error';
+import { validateClassicFields, validateSimulation } from '../../helpers/validate_fields';
+import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
 import { getDataStreamSettings, getUnmanagedElasticsearchAssets } from '../../stream_crud';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
-import type { StateDependencies, StreamChange } from '../types';
 import type {
-  StreamChangeStatus,
   StreamChanges,
+  StreamChangeStatus,
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
-import { validateClassicFields } from '../../helpers/validate_fields';
-import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
-import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
+import type { StateDependencies, StreamChange } from '../types';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
 
 interface ClassicStreamChanges extends StreamChanges {
@@ -232,6 +232,8 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateBracketsInFieldNames(this._definition);
 
     validateSettings(this._definition, this.dependencies.isServerless);
+
+    await validateSimulation(this._definition, this.dependencies.scopedClusterClient);
 
     return { isValid: true, errors: [] };
   }
@@ -493,7 +495,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         },
       },
       {
-        type: 'unlink_features',
+        type: 'unlink_systems',
         request: {
           name: this._definition.name,
         },

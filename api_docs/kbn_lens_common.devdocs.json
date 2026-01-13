@@ -4360,10 +4360,10 @@
               "NotificationsStart",
               "; application: ",
               "ApplicationStart",
-              "; http: ",
-              "HttpSetup",
               "; docLinks: ",
               "DocLinksStart",
+              "; http: ",
+              "HttpSetup",
               "; overlays: ",
               "OverlayStart",
               "; uiSettings: ",
@@ -4611,7 +4611,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4619,7 +4619,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4627,7 +4627,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4635,7 +4635,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4643,7 +4643,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4651,7 +4651,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4659,7 +4659,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4667,7 +4667,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -6804,7 +6804,17 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[]) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
+              "[]) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[]> | undefined; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/esql-types",
                 "scope": "common",
@@ -7064,17 +7074,7 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[]>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlVariable",
-                "text": "ESQLControlVariable"
-              },
-              "[]> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "[]>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -7146,55 +7146,65 @@
               "Observable",
               "<any> | undefined; readonly value: Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined; error: (err: any) => void; forEach: { (next: (value: Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined) => void): Promise<void>; (next: (value: Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
-              "> | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => Partial<",
+              "> | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
+              },
+              "> | undefined> | undefined; complete: () => void; getValue: () => Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined>; <A>(op1: ",
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>): ",
               "Observable",
@@ -7202,11 +7212,11 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>, op2: ",
               "OperatorFunction",
@@ -7216,11 +7226,11 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>, op2: ",
               "OperatorFunction",
@@ -7232,11 +7242,11 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>, op2: ",
               "OperatorFunction",
@@ -7250,11 +7260,11 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>, op2: ",
               "OperatorFunction",
@@ -7270,11 +7280,11 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>, op2: ",
               "OperatorFunction",
@@ -7292,11 +7302,11 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>, op2: ",
               "OperatorFunction",
@@ -7316,11 +7326,11 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>, op2: ",
               "OperatorFunction",
@@ -7342,11 +7352,11 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>, op2: ",
               "OperatorFunction",
@@ -7370,11 +7380,11 @@
               "OperatorFunction",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, A>, op2: ",
               "OperatorFunction",
@@ -7400,21 +7410,21 @@
               "Observer",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined, R>) => ",
               "Observable",
@@ -7422,75 +7432,65 @@
               "Observable",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
-              "> | undefined>; operator: ",
-              "Operator",
-              "<any, Partial<",
-              {
-                "pluginId": "@kbn/presentation-containers",
-                "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
-              },
-              "> | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "> | undefined>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined>> | ((value: Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
               "; }; toPromise: { (): Promise<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined>; (PromiseCtor: PromiseConstructor): Promise<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<Partial<",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/control-group-renderer",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.CanAddNewPanel",
-                "text": "CanAddNewPanel"
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
               },
               "> | undefined>; }; }"
             ],
@@ -7508,7 +7508,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: { [key: string]: unknown; }; error: (err: any) => void; forEach: { (next: (value: { [key: string]: unknown; }) => void): Promise<void>; (next: (value: { [key: string]: unknown; }) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => { [key: string]: unknown; }; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: { [key: string]: unknown; }; error: (err: any) => void; forEach: { (next: (value: { [key: string]: unknown; }) => void): Promise<void>; (next: (value: { [key: string]: unknown; }) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, { [key: string]: unknown; }> | undefined; complete: () => void; getValue: () => { [key: string]: unknown; }; closed: boolean; pipe: { (): ",
               "Observable",
               "<{ [key: string]: unknown; }>; <A>(op1: ",
               "OperatorFunction",
@@ -7648,9 +7650,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<{ [key: string]: unknown; }>; operator: ",
-              "Operator",
-              "<any, { [key: string]: unknown; }> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<{ [key: string]: unknown; }>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<{ [key: string]: unknown; }>> | ((value: { [key: string]: unknown; }) => void) | undefined): ",
               "Subscription",
@@ -10088,7 +10088,7 @@
             "label": "updateOverrides",
             "description": [],
             "signature": [
-              "(newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+              "(newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -10110,7 +10110,7 @@
               "MakeOverridesSerializable",
               "<",
               "ExternalPointerEventsSettings",
-              " | undefined>; pointBuffer?: ",
+              " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
               "MarkBuffer",
               " | undefined; pointerUpdateTrigger?: ",
               "PointerUpdateTrigger",
@@ -10212,7 +10212,7 @@
                 "label": "newOverrides",
                 "description": [],
                 "signature": [
-                  "Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+                  "Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
                   "MakeOverridesSerializable",
                   "<",
                   "RecursivePartial",
@@ -10234,7 +10234,7 @@
                   "MakeOverridesSerializable",
                   "<",
                   "ExternalPointerEventsSettings",
-                  " | undefined>; pointBuffer?: ",
+                  " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
                   "MarkBuffer",
                   " | undefined; pointerUpdateTrigger?: ",
                   "PointerUpdateTrigger",
@@ -10348,7 +10348,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>"
+              "<object, object>[]>"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
             "deprecated": false,
@@ -11074,7 +11074,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -11202,7 +11202,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11210,7 +11210,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11218,7 +11218,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11226,7 +11226,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11234,7 +11234,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11242,7 +11242,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11250,7 +11250,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -11258,7 +11258,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -13247,7 +13247,17 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
+              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              "> | undefined; complete: () => void; getValue: () => ",
               {
                 "pluginId": "inspector",
                 "scope": "common",
@@ -13507,17 +13517,7 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ">; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              "> | undefined; subscribe: { (observerOrNext?: Partial<",
+              ">; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -13601,7 +13601,7 @@
               "\nOverrides can tweak the style of the final embeddable and are executed at the end of the Lens rendering pipeline.\nEach visualization type offers various type of overrides, per component (i.e. 'setting', 'axisX', 'partition', etc...)\n\nWhile it is not possible to pass function/callback/handlers to the renderer, it is possible to overwrite\nthe current behaviour by passing the \"ignore\" string to the override prop (i.e. onBrushEnd: \"ignore\" to stop brushing)"
             ],
             "signature": [
-              "Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+              "Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -13623,7 +13623,7 @@
               "MakeOverridesSerializable",
               "<",
               "ExternalPointerEventsSettings",
-              " | undefined>; pointBuffer?: ",
+              " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
               "MarkBuffer",
               " | undefined; pointerUpdateTrigger?: ",
               "PointerUpdateTrigger",
@@ -15294,7 +15294,7 @@
             "label": "orientation",
             "description": [],
             "signature": [
-              "\"single\" | \"right angled\" | \"multiple\""
+              "\"multiple\" | \"single\" | \"right angled\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/tagcloud/types.ts",
             "deprecated": false,
@@ -17861,7 +17861,7 @@
             "label": "changeType",
             "description": [],
             "signature": [
-              "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"initial\" | \"layers\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,
@@ -18158,7 +18158,7 @@
               "\nThe change type indicates what was changed in this table compared to the currently active table of this layer."
             ],
             "signature": [
-              "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"initial\" | \"layers\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,
@@ -18733,7 +18733,7 @@
             "label": "severity",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"warning\""
+              "\"info\" | \"error\" | \"warning\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,
@@ -18836,7 +18836,7 @@
             "label": "severity",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"warning\""
+              "\"info\" | \"error\" | \"warning\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,
@@ -18928,7 +18928,7 @@
             "label": "severity",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"warning\" | undefined"
+              "\"info\" | \"error\" | \"warning\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,
@@ -18970,7 +18970,7 @@
             "label": "severity",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"warning\" | undefined"
+              "\"info\" | \"error\" | \"warning\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,
@@ -19116,7 +19116,9 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; operator: ",
+              "Operator",
+              "<any, boolean> | undefined; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
               "Observable",
               "<boolean>; <A>(op1: ",
               "OperatorFunction",
@@ -19256,9 +19258,7 @@
               "Observable",
               "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
               "Observable",
-              "<boolean>; operator: ",
-              "Operator",
-              "<any, boolean> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<boolean>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<boolean>> | ((value: boolean) => void) | undefined): ",
               "Subscription",
@@ -25897,7 +25897,7 @@
           },
           "<T, { isDimensionComplete?: boolean | undefined; forceRender?: boolean | undefined; }>; core: Pick<",
           "CoreStart",
-          ", \"notifications\" | \"i18n\" | \"http\" | \"analytics\" | \"docLinks\" | \"overlays\" | \"uiSettings\" | \"theme\" | \"userProfile\">; dateRange: ",
+          ", \"notifications\" | \"docLinks\" | \"i18n\" | \"http\" | \"analytics\" | \"overlays\" | \"uiSettings\" | \"theme\" | \"userProfile\">; dateRange: ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -26656,7 +26656,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -26678,7 +26678,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -26776,7 +26776,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -26784,7 +26784,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -27531,7 +27531,7 @@
             "section": "def-common.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -27553,7 +27553,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -27649,7 +27649,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; }"
+          "<object, object>[]>; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
         "deprecated": false,
@@ -27694,7 +27694,7 @@
         "label": "LensByReferenceInput",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; onLoad?: ((isLoading: boolean, adapters?: Partial<",
+          "{ id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; onLoad?: ((isLoading: boolean, adapters?: Partial<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -27710,7 +27710,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined> | undefined) => void) | undefined; description?: string | undefined; viewMode?: ",
+          "<boolean | undefined> | undefined) => void) | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -27750,7 +27750,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -27772,7 +27772,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -27886,15 +27886,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -27918,7 +27910,15 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; esqlVariables?: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -27942,7 +27942,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
+          "<object, object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -27981,7 +27981,7 @@
         "label": "LensByRefSerializedState",
         "description": [],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -28003,7 +28003,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -28190,7 +28190,7 @@
           "\nBackward compatibility types"
         ],
         "signature": [
-          "{ id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; onLoad?: ((isLoading: boolean, adapters?: Partial<",
+          "{ id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; onLoad?: ((isLoading: boolean, adapters?: Partial<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -28206,7 +28206,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined> | undefined) => void) | undefined; description?: string | undefined; viewMode?: ",
+          "<boolean | undefined> | undefined) => void) | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -28246,7 +28246,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -28268,7 +28268,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -29136,15 +29136,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -29168,7 +29160,15 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; esqlVariables?: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -29192,7 +29192,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
+          "<object, object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -29231,7 +29231,7 @@
         "label": "LensByValueSerializedState",
         "description": [],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -29253,7 +29253,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -29501,7 +29501,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; }"
+          "<object, object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
         "deprecated": false,
@@ -29591,7 +29591,7 @@
             "section": "def-common.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          ") => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          ") => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -29613,7 +29613,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -29773,7 +29773,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "<Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -29795,7 +29795,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -30027,7 +30027,7 @@
             "section": "def-common.VisualizationDisplayOptions",
             "text": "VisualizationDisplayOptions"
           },
-          "; }"
+          "; updateEditingState: (inProgress: boolean) => void; isEditingInProgress: () => boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
         "deprecated": false,
@@ -30149,7 +30149,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -30171,7 +30171,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -30277,7 +30277,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -30285,7 +30285,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -31081,7 +31081,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; } & ",
+          "<object, object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; } & ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -31167,7 +31167,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -31189,7 +31189,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -31287,7 +31287,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -31295,7 +31295,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -31407,7 +31407,7 @@
           "\nCompose together all the props and make them inspectable via Simplify\n\nThe LensSerializedState is the state stored for a dashboard panel\nthat contains:\n* Lens document state\n* Panel settings\n* other props from the embeddable"
         ],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -31429,7 +31429,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -31616,7 +31616,7 @@
           "\nCombined properties of serialized state stored on dashboard panel\n\n Includes:\n- Lens document state (for by-value)\n- Panel settings\n- other props from the embeddable"
         ],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -31638,7 +31638,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -31808,7 +31808,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes?: undefined; } | { overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes?: undefined; } | { overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -31830,7 +31830,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -32676,7 +32676,7 @@
         "label": "RangeType",
         "description": [],
         "signature": [
-          "{ label?: string | undefined; from: number; to: number; }"
+          "{ from: number; to: number; label?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/datasources/operations.ts",
         "deprecated": false,
@@ -32762,7 +32762,7 @@
         "label": "RowHeightMode",
         "description": [],
         "signature": [
-          "\"custom\" | \"auto\""
+          "\"auto\" | \"custom\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/datatable/types.ts",
         "deprecated": false,
@@ -32970,7 +32970,7 @@
           "\nIndicates what was changed in this table compared to the currently active table of this layer.\n* `initial` means the layer associated with this table does not exist in the current configuration\n* `unchanged` means the table is the same in the currently active configuration\n* `reduced` means the table is a reduced version of the currently active table (some columns dropped, but not all of them)\n* `extended` means the table is an extended version of the currently active table (added one or multiple additional columns)\n* `reorder` means the table columns have changed order, which change the data as well\n* `layers` means the change is a change to the layer structure, not to the table"
         ],
         "signature": [
-          "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+          "\"initial\" | \"layers\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
         "deprecated": false,
@@ -33068,7 +33068,7 @@
         "label": "TimeScaleUnit",
         "description": [],
         "signature": [
-          "\"m\" | \"s\" | \"d\" | \"h\""
+          "\"m\" | \"d\" | \"s\" | \"h\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
         "deprecated": false,
@@ -33136,7 +33136,7 @@
         "label": "TypedLensByValueInput",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; onLoad?: ((isLoading: boolean, adapters?: Partial<",
+          "{ id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; onLoad?: ((isLoading: boolean, adapters?: Partial<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -33152,7 +33152,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined> | undefined) => void) | undefined; description?: string | undefined; viewMode?: ",
+          "<boolean | undefined> | undefined) => void) | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -33192,7 +33192,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -33214,7 +33214,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -34082,15 +34082,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -34114,7 +34106,15 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; esqlVariables?: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -34138,7 +34138,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
+          "<object, object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -34219,7 +34219,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -34241,7 +34241,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -34347,7 +34347,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -34355,7 +34355,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          "; } | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -35628,7 +35628,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"right\" | \"bottom\" | \"left\" | \"auto\""
+          "\"auto\" | \"right\" | \"bottom\" | \"left\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/xy/types.ts",
         "deprecated": false,
@@ -35949,11 +35949,11 @@
                     "label": "props",
                     "description": [],
                     "signature": [
-                      "{ string?: string | number | undefined; id?: string | undefined; onError?: React.ReactEventHandler<SVGElement> | undefined; name?: string | undefined; transform?: string | undefined; min?: string | number | undefined; end?: string | number | undefined; filter?: string | undefined; max?: string | number | undefined; in?: string | undefined; mode?: string | number | undefined; order?: string | number | undefined; version?: string | undefined; format?: string | number | undefined; fill?: string | undefined; values?: string | undefined; className?: string | undefined; \"aria-label\"?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
+                      "{ string?: string | number | undefined; id?: string | undefined; onError?: React.ReactEventHandler<SVGElement> | undefined; name?: string | undefined; transform?: string | undefined; min?: string | number | undefined; end?: string | number | undefined; filter?: string | undefined; max?: string | number | undefined; in?: string | undefined; mode?: string | number | undefined; order?: string | number | undefined; version?: string | undefined; format?: string | number | undefined; fill?: string | undefined; values?: string | undefined; color?: string | undefined; size?: \"m\" | \"original\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined; suppressHydrationWarning?: boolean | undefined; className?: string | undefined; height?: string | number | undefined; lang?: string | undefined; media?: string | undefined; method?: string | undefined; style?: React.CSSProperties | undefined; target?: string | undefined; width?: string | number | undefined; role?: React.AriaRole | undefined; tabIndex?: number | undefined; crossOrigin?: CrossOrigin; accentHeight?: string | number | undefined; accumulate?: \"sum\" | \"none\" | undefined; additive?: \"sum\" | \"replace\" | undefined; alignmentBaseline?: \"alphabetic\" | \"hanging\" | \"ideographic\" | \"mathematical\" | \"inherit\" | \"auto\" | \"baseline\" | \"before-edge\" | \"text-before-edge\" | \"middle\" | \"central\" | \"after-edge\" | \"text-after-edge\" | undefined; allowReorder?: \"no\" | \"yes\" | undefined; alphabetic?: string | number | undefined; amplitude?: string | number | undefined; arabicForm?: \"initial\" | \"medial\" | \"terminal\" | \"isolated\" | undefined; ascent?: string | number | undefined; attributeName?: string | undefined; attributeType?: string | undefined; autoReverse?: Booleanish | undefined; azimuth?: string | number | undefined; baseFrequency?: string | number | undefined; baselineShift?: string | number | undefined; baseProfile?: string | number | undefined; bbox?: string | number | undefined; begin?: string | number | undefined; bias?: string | number | undefined; by?: string | number | undefined; calcMode?: string | number | undefined; capHeight?: string | number | undefined; clip?: string | number | undefined; clipPath?: string | undefined; clipPathUnits?: string | number | undefined; clipRule?: string | number | undefined; colorInterpolation?: string | number | undefined; colorInterpolationFilters?: \"inherit\" | \"auto\" | \"sRGB\" | \"linearRGB\" | undefined; colorProfile?: string | number | undefined; colorRendering?: string | number | undefined; contentScriptType?: string | number | undefined; contentStyleType?: string | number | undefined; cursor?: string | number | undefined; cx?: string | number | undefined; cy?: string | number | undefined; d?: string | undefined; decelerate?: string | number | undefined; descent?: string | number | undefined; diffuseConstant?: string | number | undefined; direction?: string | number | undefined; display?: string | number | undefined; divisor?: string | number | undefined; dominantBaseline?: string | number | undefined; dur?: string | number | undefined; dx?: string | number | undefined; dy?: string | number | undefined; edgeMode?: string | number | undefined; elevation?: string | number | undefined; enableBackground?: string | number | undefined; exponent?: string | number | undefined; externalResourcesRequired?: Booleanish | undefined; fillOpacity?: string | number | undefined; fillRule?: \"inherit\" | \"nonzero\" | \"evenodd\" | undefined; filterRes?: string | number | undefined; filterUnits?: string | number | undefined; floodColor?: string | number | undefined; floodOpacity?: string | number | undefined; focusable?: \"auto\" | Booleanish | undefined; fontFamily?: string | undefined; fontSize?: string | number | undefined; fontSizeAdjust?: string | number | undefined; fontStretch?: string | number | undefined; fontStyle?: string | number | undefined; fontVariant?: string | number | undefined; fontWeight?: string | number | undefined; fr?: string | number | undefined; from?: string | number | undefined; fx?: string | number | undefined; fy?: string | number | undefined; g1?: string | number | undefined; g2?: string | number | undefined; glyphName?: string | number | undefined; glyphOrientationHorizontal?: string | number | undefined; glyphOrientationVertical?: string | number | undefined; glyphRef?: string | number | undefined; gradientTransform?: string | undefined; gradientUnits?: string | undefined; hanging?: string | number | undefined; horizAdvX?: string | number | undefined; horizOriginX?: string | number | undefined; href?: string | undefined; ideographic?: string | number | undefined; imageRendering?: string | number | undefined; in2?: string | number | undefined; intercept?: string | number | undefined; k1?: string | number | undefined; k2?: string | number | undefined; k3?: string | number | undefined; k4?: string | number | undefined; k?: string | number | undefined; kernelMatrix?: string | number | undefined; kernelUnitLength?: string | number | undefined; kerning?: string | number | undefined; keyPoints?: string | number | undefined; keySplines?: string | number | undefined; keyTimes?: string | number | undefined; lengthAdjust?: string | number | undefined; letterSpacing?: string | number | undefined; lightingColor?: string | number | undefined; limitingConeAngle?: string | number | undefined; local?: string | number | undefined; markerEnd?: string | undefined; markerHeight?: string | number | undefined; markerMid?: string | undefined; markerStart?: string | undefined; markerUnits?: string | number | undefined; markerWidth?: string | number | undefined; mask?: string | undefined; maskContentUnits?: string | number | undefined; maskUnits?: string | number | undefined; mathematical?: string | number | undefined; numOctaves?: string | number | undefined; offset?: string | number | undefined; opacity?: string | number | undefined; operator?: string | number | undefined; orient?: string | number | undefined; orientation?: string | number | undefined; origin?: string | number | undefined; overflow?: string | number | undefined; overlinePosition?: string | number | undefined; overlineThickness?: string | number | undefined; paintOrder?: string | number | undefined; panose1?: string | number | undefined; path?: string | undefined; pathLength?: string | number | undefined; patternContentUnits?: string | undefined; patternTransform?: string | number | undefined; patternUnits?: string | undefined; pointerEvents?: string | number | undefined; points?: string | undefined; pointsAtX?: string | number | undefined; pointsAtY?: string | number | undefined; pointsAtZ?: string | number | undefined; preserveAlpha?: Booleanish | undefined; preserveAspectRatio?: string | undefined; primitiveUnits?: string | number | undefined; r?: string | number | undefined; radius?: string | number | undefined; refX?: string | number | undefined; refY?: string | number | undefined; renderingIntent?: string | number | undefined; repeatCount?: string | number | undefined; repeatDur?: string | number | undefined; requiredExtensions?: string | number | undefined; requiredFeatures?: string | number | undefined; restart?: string | number | undefined; result?: string | undefined; rotate?: string | number | undefined; rx?: string | number | undefined; ry?: string | number | undefined; scale?: string | number | undefined; seed?: string | number | undefined; shapeRendering?: string | number | undefined; slope?: string | number | undefined; spacing?: string | number | undefined; specularConstant?: string | number | undefined; specularExponent?: string | number | undefined; speed?: string | number | undefined; spreadMethod?: string | undefined; startOffset?: string | number | undefined; stdDeviation?: string | number | undefined; stemh?: string | number | undefined; stemv?: string | number | undefined; stitchTiles?: string | number | undefined; stopColor?: string | undefined; stopOpacity?: string | number | undefined; strikethroughPosition?: string | number | undefined; strikethroughThickness?: string | number | undefined; stroke?: string | undefined; strokeDasharray?: string | number | undefined; strokeDashoffset?: string | number | undefined; strokeLinecap?: \"inherit\" | \"butt\" | \"round\" | \"square\" | undefined; strokeLinejoin?: \"inherit\" | \"round\" | \"miter\" | \"bevel\" | undefined; strokeMiterlimit?: string | number | undefined; strokeOpacity?: string | number | undefined; strokeWidth?: string | number | undefined; surfaceScale?: string | number | undefined; systemLanguage?: string | number | undefined; tableValues?: string | number | undefined; targetX?: string | number | undefined; targetY?: string | number | undefined; textAnchor?: string | undefined; textDecoration?: string | number | undefined; textLength?: string | number | undefined; textRendering?: string | number | undefined; to?: string | number | undefined; u1?: string | number | undefined; u2?: string | number | undefined; underlinePosition?: string | number | undefined; underlineThickness?: string | number | undefined; unicode?: string | number | undefined; unicodeBidi?: string | number | undefined; unicodeRange?: string | number | undefined; unitsPerEm?: string | number | undefined; vAlphabetic?: string | number | undefined; vectorEffect?: string | number | undefined; vertAdvY?: string | number | undefined; vertOriginX?: string | number | undefined; vertOriginY?: string | number | undefined; vHanging?: string | number | undefined; vIdeographic?: string | number | undefined; viewBox?: string | undefined; viewTarget?: string | number | undefined; visibility?: string | number | undefined; vMathematical?: string | number | undefined; widths?: string | number | undefined; wordSpacing?: string | number | undefined; writingMode?: string | number | undefined; x1?: string | number | undefined; x2?: string | number | undefined; x?: string | number | undefined; xChannelSelector?: string | undefined; xHeight?: string | number | undefined; xlinkActuate?: string | undefined; xlinkArcrole?: string | undefined; xlinkHref?: string | undefined; xlinkRole?: string | undefined; xlinkShow?: string | undefined; xlinkTitle?: string | undefined; xlinkType?: string | undefined; xmlBase?: string | undefined; xmlLang?: string | undefined; xmlns?: string | undefined; xmlnsXlink?: string | undefined; xmlSpace?: string | undefined; y1?: string | number | undefined; y2?: string | number | undefined; y?: string | number | undefined; yChannelSelector?: string | undefined; z?: string | number | undefined; zoomAndPan?: string | undefined; \"aria-activedescendant\"?: string | undefined; \"aria-atomic\"?: Booleanish | undefined; \"aria-autocomplete\"?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; \"aria-braillelabel\"?: string | undefined; \"aria-brailleroledescription\"?: string | undefined; \"aria-busy\"?: Booleanish | undefined; \"aria-checked\"?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; \"aria-colcount\"?: number | undefined; \"aria-colindex\"?: number | undefined; \"aria-colindextext\"?: string | undefined; \"aria-colspan\"?: number | undefined; \"aria-controls\"?: string | undefined; \"aria-current\"?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"step\" | \"location\" | \"time\" | undefined; \"aria-describedby\"?: string | undefined; \"aria-description\"?: string | undefined; \"aria-details\"?: string | undefined; \"aria-disabled\"?: Booleanish | undefined; \"aria-dropeffect\"?: \"execute\" | \"link\" | \"none\" | \"copy\" | \"move\" | \"popup\" | undefined; \"aria-errormessage\"?: string | undefined; \"aria-expanded\"?: Booleanish | undefined; \"aria-flowto\"?: string | undefined; \"aria-grabbed\"?: Booleanish | undefined; \"aria-haspopup\"?: boolean | \"dialog\" | \"grid\" | \"listbox\" | \"menu\" | \"tree\" | \"true\" | \"false\" | undefined; \"aria-hidden\"?: Booleanish | undefined; \"aria-invalid\"?: boolean | \"true\" | \"false\" | \"grammar\" | \"spelling\" | undefined; \"aria-keyshortcuts\"?: string | undefined; \"aria-label\"?: string | undefined; \"aria-labelledby\"?: string | undefined; \"aria-level\"?: number | undefined; \"aria-live\"?: \"off\" | \"assertive\" | \"polite\" | undefined; \"aria-modal\"?: Booleanish | undefined; \"aria-multiline\"?: Booleanish | undefined; \"aria-multiselectable\"?: Booleanish | undefined; \"aria-orientation\"?: \"horizontal\" | \"vertical\" | undefined; \"aria-owns\"?: string | undefined; \"aria-placeholder\"?: string | undefined; \"aria-posinset\"?: number | undefined; \"aria-pressed\"?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; \"aria-readonly\"?: Booleanish | undefined; \"aria-relevant\"?: \"text\" | \"additions\" | \"additions removals\" | \"additions text\" | \"all\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; \"aria-required\"?: Booleanish | undefined; \"aria-roledescription\"?: string | undefined; \"aria-rowcount\"?: number | undefined; \"aria-rowindex\"?: number | undefined; \"aria-rowindextext\"?: string | undefined; \"aria-rowspan\"?: number | undefined; \"aria-selected\"?: Booleanish | undefined; \"aria-setsize\"?: number | undefined; \"aria-sort\"?: \"none\" | \"ascending\" | \"descending\" | \"other\" | undefined; \"aria-valuemax\"?: number | undefined; \"aria-valuemin\"?: number | undefined; \"aria-valuenow\"?: number | undefined; \"aria-valuetext\"?: string | undefined; children?: React.ReactNode; dangerouslySetInnerHTML?: { __html: string | TrustedHTML; } | undefined; onCopy?: React.ClipboardEventHandler<SVGElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onCut?: React.ClipboardEventHandler<SVGElement> | undefined; onCutCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onPaste?: React.ClipboardEventHandler<SVGElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionStart?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<SVGElement> | undefined; onFocus?: React.FocusEventHandler<SVGElement> | undefined; onFocusCapture?: React.FocusEventHandler<SVGElement> | undefined; onBlur?: React.FocusEventHandler<SVGElement> | undefined; onBlurCapture?: React.FocusEventHandler<SVGElement> | undefined; onChange?: React.FormEventHandler<SVGElement> | undefined; onChangeCapture?: React.FormEventHandler<SVGElement> | undefined; onBeforeInput?: React.FormEventHandler<SVGElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<SVGElement> | undefined; onInput?: React.FormEventHandler<SVGElement> | undefined; onInputCapture?: React.FormEventHandler<SVGElement> | undefined; onReset?: React.FormEventHandler<SVGElement> | undefined; onResetCapture?: React.FormEventHandler<SVGElement> | undefined; onSubmit?: React.FormEventHandler<SVGElement> | undefined; onSubmitCapture?: React.FormEventHandler<SVGElement> | undefined; onInvalid?: React.FormEventHandler<SVGElement> | undefined; onInvalidCapture?: React.FormEventHandler<SVGElement> | undefined; onLoad?: React.ReactEventHandler<SVGElement> | undefined; onLoadCapture?: React.ReactEventHandler<SVGElement> | undefined; onErrorCapture?: React.ReactEventHandler<SVGElement> | undefined; onKeyDown?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyPress?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyUp?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onAbort?: React.ReactEventHandler<SVGElement> | undefined; onAbortCapture?: React.ReactEventHandler<SVGElement> | undefined; onCanPlay?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<SVGElement> | undefined; onDurationChange?: React.ReactEventHandler<SVGElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onEmptied?: React.ReactEventHandler<SVGElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<SVGElement> | undefined; onEncrypted?: React.ReactEventHandler<SVGElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<SVGElement> | undefined; onEnded?: React.ReactEventHandler<SVGElement> | undefined; onEndedCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadedData?: React.ReactEventHandler<SVGElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<SVGElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadStart?: React.ReactEventHandler<SVGElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<SVGElement> | undefined; onPause?: React.ReactEventHandler<SVGElement> | undefined; onPauseCapture?: React.ReactEventHandler<SVGElement> | undefined; onPlay?: React.ReactEventHandler<SVGElement> | undefined; onPlayCapture?: React.ReactEventHandler<SVGElement> | undefined; onPlaying?: React.ReactEventHandler<SVGElement> | undefined; onPlayingCapture?: React.ReactEventHandler<SVGElement> | undefined; onProgress?: React.ReactEventHandler<SVGElement> | undefined; onProgressCapture?: React.ReactEventHandler<SVGElement> | undefined; onRateChange?: React.ReactEventHandler<SVGElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onResize?: React.ReactEventHandler<SVGElement> | undefined; onResizeCapture?: React.ReactEventHandler<SVGElement> | undefined; onSeeked?: React.ReactEventHandler<SVGElement> | undefined; onSeekedCapture?: React.ReactEventHandler<SVGElement> | undefined; onSeeking?: React.ReactEventHandler<SVGElement> | undefined; onSeekingCapture?: React.ReactEventHandler<SVGElement> | undefined; onStalled?: React.ReactEventHandler<SVGElement> | undefined; onStalledCapture?: React.ReactEventHandler<SVGElement> | undefined; onSuspend?: React.ReactEventHandler<SVGElement> | undefined; onSuspendCapture?: React.ReactEventHandler<SVGElement> | undefined; onTimeUpdate?: React.ReactEventHandler<SVGElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<SVGElement> | undefined; onVolumeChange?: React.ReactEventHandler<SVGElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onWaiting?: React.ReactEventHandler<SVGElement> | undefined; onWaitingCapture?: React.ReactEventHandler<SVGElement> | undefined; onAuxClick?: React.MouseEventHandler<SVGElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onClick?: React.MouseEventHandler<SVGElement> | undefined; onClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onContextMenu?: React.MouseEventHandler<SVGElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<SVGElement> | undefined; onDoubleClick?: React.MouseEventHandler<SVGElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onDrag?: React.DragEventHandler<SVGElement> | undefined; onDragCapture?: React.DragEventHandler<SVGElement> | undefined; onDragEnd?: React.DragEventHandler<SVGElement> | undefined; onDragEndCapture?: React.DragEventHandler<SVGElement> | undefined; onDragEnter?: React.DragEventHandler<SVGElement> | undefined; onDragEnterCapture?: React.DragEventHandler<SVGElement> | undefined; onDragExit?: React.DragEventHandler<SVGElement> | undefined; onDragExitCapture?: React.DragEventHandler<SVGElement> | undefined; onDragLeave?: React.DragEventHandler<SVGElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<SVGElement> | undefined; onDragOver?: React.DragEventHandler<SVGElement> | undefined; onDragOverCapture?: React.DragEventHandler<SVGElement> | undefined; onDragStart?: React.DragEventHandler<SVGElement> | undefined; onDragStartCapture?: React.DragEventHandler<SVGElement> | undefined; onDrop?: React.DragEventHandler<SVGElement> | undefined; onDropCapture?: React.DragEventHandler<SVGElement> | undefined; onMouseDown?: React.MouseEventHandler<SVGElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseEnter?: React.MouseEventHandler<SVGElement> | undefined; onMouseLeave?: React.MouseEventHandler<SVGElement> | undefined; onMouseMove?: React.MouseEventHandler<SVGElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseOut?: React.MouseEventHandler<SVGElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseOver?: React.MouseEventHandler<SVGElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseUp?: React.MouseEventHandler<SVGElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<SVGElement> | undefined; onSelect?: React.ReactEventHandler<SVGElement> | undefined; onSelectCapture?: React.ReactEventHandler<SVGElement> | undefined; onTouchCancel?: React.TouchEventHandler<SVGElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchEnd?: React.TouchEventHandler<SVGElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchMove?: React.TouchEventHandler<SVGElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchStart?: React.TouchEventHandler<SVGElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<SVGElement> | undefined; onPointerDown?: React.PointerEventHandler<SVGElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerMove?: React.PointerEventHandler<SVGElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerUp?: React.PointerEventHandler<SVGElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerCancel?: React.PointerEventHandler<SVGElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerEnter?: React.PointerEventHandler<SVGElement> | undefined; onPointerLeave?: React.PointerEventHandler<SVGElement> | undefined; onPointerOver?: React.PointerEventHandler<SVGElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerOut?: React.PointerEventHandler<SVGElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<SVGElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<SVGElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<SVGElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<SVGElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<SVGElement> | undefined; onScroll?: React.UIEventHandler<SVGElement> | undefined; onScrollCapture?: React.UIEventHandler<SVGElement> | undefined; onWheel?: React.WheelEventHandler<SVGElement> | undefined; onWheelCapture?: React.WheelEventHandler<SVGElement> | undefined; onAnimationStart?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<SVGElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<SVGElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<SVGElement> | undefined; 'data-test-subj'?: string | undefined; css?: ",
                       "Interpolation",
                       "<",
                       "Theme",
-                      ">; suppressHydrationWarning?: boolean | undefined; lang?: string | undefined; style?: React.CSSProperties | undefined; tabIndex?: number | undefined; title?: string | undefined; role?: React.AriaRole | undefined; color?: string | undefined; \"aria-activedescendant\"?: string | undefined; \"aria-atomic\"?: Booleanish | undefined; \"aria-autocomplete\"?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; \"aria-braillelabel\"?: string | undefined; \"aria-brailleroledescription\"?: string | undefined; \"aria-busy\"?: Booleanish | undefined; \"aria-checked\"?: boolean | \"false\" | \"true\" | \"mixed\" | undefined; \"aria-colcount\"?: number | undefined; \"aria-colindex\"?: number | undefined; \"aria-colindextext\"?: string | undefined; \"aria-colspan\"?: number | undefined; \"aria-controls\"?: string | undefined; \"aria-current\"?: boolean | \"page\" | \"date\" | \"location\" | \"false\" | \"true\" | \"time\" | \"step\" | undefined; \"aria-describedby\"?: string | undefined; \"aria-description\"?: string | undefined; \"aria-details\"?: string | undefined; \"aria-disabled\"?: Booleanish | undefined; \"aria-dropeffect\"?: \"execute\" | \"link\" | \"none\" | \"copy\" | \"move\" | \"popup\" | undefined; \"aria-errormessage\"?: string | undefined; \"aria-expanded\"?: Booleanish | undefined; \"aria-flowto\"?: string | undefined; \"aria-grabbed\"?: Booleanish | undefined; \"aria-haspopup\"?: boolean | \"grid\" | \"false\" | \"true\" | \"dialog\" | \"menu\" | \"listbox\" | \"tree\" | undefined; \"aria-hidden\"?: Booleanish | undefined; \"aria-invalid\"?: boolean | \"false\" | \"true\" | \"grammar\" | \"spelling\" | undefined; \"aria-keyshortcuts\"?: string | undefined; \"aria-labelledby\"?: string | undefined; \"aria-level\"?: number | undefined; \"aria-live\"?: \"off\" | \"assertive\" | \"polite\" | undefined; \"aria-modal\"?: Booleanish | undefined; \"aria-multiline\"?: Booleanish | undefined; \"aria-multiselectable\"?: Booleanish | undefined; \"aria-orientation\"?: \"horizontal\" | \"vertical\" | undefined; \"aria-owns\"?: string | undefined; \"aria-placeholder\"?: string | undefined; \"aria-posinset\"?: number | undefined; \"aria-pressed\"?: boolean | \"false\" | \"true\" | \"mixed\" | undefined; \"aria-readonly\"?: Booleanish | undefined; \"aria-relevant\"?: \"text\" | \"all\" | \"additions\" | \"additions removals\" | \"additions text\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; \"aria-required\"?: Booleanish | undefined; \"aria-roledescription\"?: string | undefined; \"aria-rowcount\"?: number | undefined; \"aria-rowindex\"?: number | undefined; \"aria-rowindextext\"?: string | undefined; \"aria-rowspan\"?: number | undefined; \"aria-selected\"?: Booleanish | undefined; \"aria-setsize\"?: number | undefined; \"aria-sort\"?: \"none\" | \"ascending\" | \"descending\" | \"other\" | undefined; \"aria-valuemax\"?: number | undefined; \"aria-valuemin\"?: number | undefined; \"aria-valuenow\"?: number | undefined; \"aria-valuetext\"?: string | undefined; children?: React.ReactNode; dangerouslySetInnerHTML?: { __html: string | TrustedHTML; } | undefined; onCopy?: React.ClipboardEventHandler<SVGElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onCut?: React.ClipboardEventHandler<SVGElement> | undefined; onCutCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onPaste?: React.ClipboardEventHandler<SVGElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<SVGElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionStart?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<SVGElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<SVGElement> | undefined; onFocus?: React.FocusEventHandler<SVGElement> | undefined; onFocusCapture?: React.FocusEventHandler<SVGElement> | undefined; onBlur?: React.FocusEventHandler<SVGElement> | undefined; onBlurCapture?: React.FocusEventHandler<SVGElement> | undefined; onChange?: React.FormEventHandler<SVGElement> | undefined; onChangeCapture?: React.FormEventHandler<SVGElement> | undefined; onBeforeInput?: React.FormEventHandler<SVGElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<SVGElement> | undefined; onInput?: React.FormEventHandler<SVGElement> | undefined; onInputCapture?: React.FormEventHandler<SVGElement> | undefined; onReset?: React.FormEventHandler<SVGElement> | undefined; onResetCapture?: React.FormEventHandler<SVGElement> | undefined; onSubmit?: React.FormEventHandler<SVGElement> | undefined; onSubmitCapture?: React.FormEventHandler<SVGElement> | undefined; onInvalid?: React.FormEventHandler<SVGElement> | undefined; onInvalidCapture?: React.FormEventHandler<SVGElement> | undefined; onLoad?: React.ReactEventHandler<SVGElement> | undefined; onLoadCapture?: React.ReactEventHandler<SVGElement> | undefined; onErrorCapture?: React.ReactEventHandler<SVGElement> | undefined; onKeyDown?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyPress?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyUp?: React.KeyboardEventHandler<SVGElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<SVGElement> | undefined; onAbort?: React.ReactEventHandler<SVGElement> | undefined; onAbortCapture?: React.ReactEventHandler<SVGElement> | undefined; onCanPlay?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<SVGElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<SVGElement> | undefined; onDurationChange?: React.ReactEventHandler<SVGElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onEmptied?: React.ReactEventHandler<SVGElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<SVGElement> | undefined; onEncrypted?: React.ReactEventHandler<SVGElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<SVGElement> | undefined; onEnded?: React.ReactEventHandler<SVGElement> | undefined; onEndedCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadedData?: React.ReactEventHandler<SVGElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<SVGElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<SVGElement> | undefined; onLoadStart?: React.ReactEventHandler<SVGElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<SVGElement> | undefined; onPause?: React.ReactEventHandler<SVGElement> | undefined; onPauseCapture?: React.ReactEventHandler<SVGElement> | undefined; onPlay?: React.ReactEventHandler<SVGElement> | undefined; onPlayCapture?: React.ReactEventHandler<SVGElement> | undefined; onPlaying?: React.ReactEventHandler<SVGElement> | undefined; onPlayingCapture?: React.ReactEventHandler<SVGElement> | undefined; onProgress?: React.ReactEventHandler<SVGElement> | undefined; onProgressCapture?: React.ReactEventHandler<SVGElement> | undefined; onRateChange?: React.ReactEventHandler<SVGElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onResize?: React.ReactEventHandler<SVGElement> | undefined; onResizeCapture?: React.ReactEventHandler<SVGElement> | undefined; onSeeked?: React.ReactEventHandler<SVGElement> | undefined; onSeekedCapture?: React.ReactEventHandler<SVGElement> | undefined; onSeeking?: React.ReactEventHandler<SVGElement> | undefined; onSeekingCapture?: React.ReactEventHandler<SVGElement> | undefined; onStalled?: React.ReactEventHandler<SVGElement> | undefined; onStalledCapture?: React.ReactEventHandler<SVGElement> | undefined; onSuspend?: React.ReactEventHandler<SVGElement> | undefined; onSuspendCapture?: React.ReactEventHandler<SVGElement> | undefined; onTimeUpdate?: React.ReactEventHandler<SVGElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<SVGElement> | undefined; onVolumeChange?: React.ReactEventHandler<SVGElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<SVGElement> | undefined; onWaiting?: React.ReactEventHandler<SVGElement> | undefined; onWaitingCapture?: React.ReactEventHandler<SVGElement> | undefined; onAuxClick?: React.MouseEventHandler<SVGElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onClick?: React.MouseEventHandler<SVGElement> | undefined; onClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onContextMenu?: React.MouseEventHandler<SVGElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<SVGElement> | undefined; onDoubleClick?: React.MouseEventHandler<SVGElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<SVGElement> | undefined; onDrag?: React.DragEventHandler<SVGElement> | undefined; onDragCapture?: React.DragEventHandler<SVGElement> | undefined; onDragEnd?: React.DragEventHandler<SVGElement> | undefined; onDragEndCapture?: React.DragEventHandler<SVGElement> | undefined; onDragEnter?: React.DragEventHandler<SVGElement> | undefined; onDragEnterCapture?: React.DragEventHandler<SVGElement> | undefined; onDragExit?: React.DragEventHandler<SVGElement> | undefined; onDragExitCapture?: React.DragEventHandler<SVGElement> | undefined; onDragLeave?: React.DragEventHandler<SVGElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<SVGElement> | undefined; onDragOver?: React.DragEventHandler<SVGElement> | undefined; onDragOverCapture?: React.DragEventHandler<SVGElement> | undefined; onDragStart?: React.DragEventHandler<SVGElement> | undefined; onDragStartCapture?: React.DragEventHandler<SVGElement> | undefined; onDrop?: React.DragEventHandler<SVGElement> | undefined; onDropCapture?: React.DragEventHandler<SVGElement> | undefined; onMouseDown?: React.MouseEventHandler<SVGElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseEnter?: React.MouseEventHandler<SVGElement> | undefined; onMouseLeave?: React.MouseEventHandler<SVGElement> | undefined; onMouseMove?: React.MouseEventHandler<SVGElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseOut?: React.MouseEventHandler<SVGElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseOver?: React.MouseEventHandler<SVGElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<SVGElement> | undefined; onMouseUp?: React.MouseEventHandler<SVGElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<SVGElement> | undefined; onSelect?: React.ReactEventHandler<SVGElement> | undefined; onSelectCapture?: React.ReactEventHandler<SVGElement> | undefined; onTouchCancel?: React.TouchEventHandler<SVGElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchEnd?: React.TouchEventHandler<SVGElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchMove?: React.TouchEventHandler<SVGElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<SVGElement> | undefined; onTouchStart?: React.TouchEventHandler<SVGElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<SVGElement> | undefined; onPointerDown?: React.PointerEventHandler<SVGElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerMove?: React.PointerEventHandler<SVGElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerUp?: React.PointerEventHandler<SVGElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerCancel?: React.PointerEventHandler<SVGElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerEnter?: React.PointerEventHandler<SVGElement> | undefined; onPointerLeave?: React.PointerEventHandler<SVGElement> | undefined; onPointerOver?: React.PointerEventHandler<SVGElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<SVGElement> | undefined; onPointerOut?: React.PointerEventHandler<SVGElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<SVGElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<SVGElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<SVGElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<SVGElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<SVGElement> | undefined; onScroll?: React.UIEventHandler<SVGElement> | undefined; onScrollCapture?: React.UIEventHandler<SVGElement> | undefined; onWheel?: React.WheelEventHandler<SVGElement> | undefined; onWheelCapture?: React.WheelEventHandler<SVGElement> | undefined; onAnimationStart?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<SVGElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<SVGElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<SVGElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<SVGElement> | undefined; size?: \"m\" | \"s\" | \"l\" | \"original\" | \"xl\" | \"xxl\" | undefined; path?: string | undefined; cursor?: string | number | undefined; from?: string | number | undefined; to?: string | number | undefined; clipPath?: string | undefined; mask?: string | undefined; offset?: string | number | undefined; href?: string | undefined; media?: string | undefined; target?: string | undefined; direction?: string | number | undefined; width?: string | number | undefined; textDecoration?: string | number | undefined; result?: string | undefined; by?: string | number | undefined; scale?: string | number | undefined; y?: string | number | undefined; d?: string | undefined; x?: string | number | undefined; stdDeviation?: string | number | undefined; operator?: string | number | undefined; display?: string | number | undefined; method?: string | undefined; strokeWidth?: string | number | undefined; stroke?: string | undefined; opacity?: string | number | undefined; height?: string | number | undefined; crossOrigin?: CrossOrigin; accentHeight?: string | number | undefined; accumulate?: \"sum\" | \"none\" | undefined; additive?: \"sum\" | \"replace\" | undefined; alignmentBaseline?: \"inherit\" | \"auto\" | \"alphabetic\" | \"hanging\" | \"ideographic\" | \"mathematical\" | \"baseline\" | \"before-edge\" | \"text-before-edge\" | \"middle\" | \"central\" | \"after-edge\" | \"text-after-edge\" | undefined; allowReorder?: \"yes\" | \"no\" | undefined; alphabetic?: string | number | undefined; amplitude?: string | number | undefined; arabicForm?: \"initial\" | \"medial\" | \"terminal\" | \"isolated\" | undefined; ascent?: string | number | undefined; attributeName?: string | undefined; attributeType?: string | undefined; autoReverse?: Booleanish | undefined; azimuth?: string | number | undefined; baseFrequency?: string | number | undefined; baselineShift?: string | number | undefined; baseProfile?: string | number | undefined; bbox?: string | number | undefined; begin?: string | number | undefined; bias?: string | number | undefined; calcMode?: string | number | undefined; capHeight?: string | number | undefined; clip?: string | number | undefined; clipPathUnits?: string | number | undefined; clipRule?: string | number | undefined; colorInterpolation?: string | number | undefined; colorInterpolationFilters?: \"inherit\" | \"auto\" | \"sRGB\" | \"linearRGB\" | undefined; colorProfile?: string | number | undefined; colorRendering?: string | number | undefined; contentScriptType?: string | number | undefined; contentStyleType?: string | number | undefined; cx?: string | number | undefined; cy?: string | number | undefined; decelerate?: string | number | undefined; descent?: string | number | undefined; diffuseConstant?: string | number | undefined; divisor?: string | number | undefined; dominantBaseline?: string | number | undefined; dur?: string | number | undefined; dx?: string | number | undefined; dy?: string | number | undefined; edgeMode?: string | number | undefined; elevation?: string | number | undefined; enableBackground?: string | number | undefined; exponent?: string | number | undefined; externalResourcesRequired?: Booleanish | undefined; fillOpacity?: string | number | undefined; fillRule?: \"inherit\" | \"nonzero\" | \"evenodd\" | undefined; filterRes?: string | number | undefined; filterUnits?: string | number | undefined; floodColor?: string | number | undefined; floodOpacity?: string | number | undefined; focusable?: Booleanish | \"auto\" | undefined; fontFamily?: string | undefined; fontSize?: string | number | undefined; fontSizeAdjust?: string | number | undefined; fontStretch?: string | number | undefined; fontStyle?: string | number | undefined; fontVariant?: string | number | undefined; fontWeight?: string | number | undefined; fr?: string | number | undefined; fx?: string | number | undefined; fy?: string | number | undefined; g1?: string | number | undefined; g2?: string | number | undefined; glyphName?: string | number | undefined; glyphOrientationHorizontal?: string | number | undefined; glyphOrientationVertical?: string | number | undefined; glyphRef?: string | number | undefined; gradientTransform?: string | undefined; gradientUnits?: string | undefined; hanging?: string | number | undefined; horizAdvX?: string | number | undefined; horizOriginX?: string | number | undefined; ideographic?: string | number | undefined; imageRendering?: string | number | undefined; in2?: string | number | undefined; intercept?: string | number | undefined; k1?: string | number | undefined; k2?: string | number | undefined; k3?: string | number | undefined; k4?: string | number | undefined; k?: string | number | undefined; kernelMatrix?: string | number | undefined; kernelUnitLength?: string | number | undefined; kerning?: string | number | undefined; keyPoints?: string | number | undefined; keySplines?: string | number | undefined; keyTimes?: string | number | undefined; lengthAdjust?: string | number | undefined; letterSpacing?: string | number | undefined; lightingColor?: string | number | undefined; limitingConeAngle?: string | number | undefined; local?: string | number | undefined; markerEnd?: string | undefined; markerHeight?: string | number | undefined; markerMid?: string | undefined; markerStart?: string | undefined; markerUnits?: string | number | undefined; markerWidth?: string | number | undefined; maskContentUnits?: string | number | undefined; maskUnits?: string | number | undefined; mathematical?: string | number | undefined; numOctaves?: string | number | undefined; orient?: string | number | undefined; orientation?: string | number | undefined; origin?: string | number | undefined; overflow?: string | number | undefined; overlinePosition?: string | number | undefined; overlineThickness?: string | number | undefined; paintOrder?: string | number | undefined; panose1?: string | number | undefined; pathLength?: string | number | undefined; patternContentUnits?: string | undefined; patternTransform?: string | number | undefined; patternUnits?: string | undefined; pointerEvents?: string | number | undefined; points?: string | undefined; pointsAtX?: string | number | undefined; pointsAtY?: string | number | undefined; pointsAtZ?: string | number | undefined; preserveAlpha?: Booleanish | undefined; preserveAspectRatio?: string | undefined; primitiveUnits?: string | number | undefined; r?: string | number | undefined; radius?: string | number | undefined; refX?: string | number | undefined; refY?: string | number | undefined; renderingIntent?: string | number | undefined; repeatCount?: string | number | undefined; repeatDur?: string | number | undefined; requiredExtensions?: string | number | undefined; requiredFeatures?: string | number | undefined; restart?: string | number | undefined; rotate?: string | number | undefined; rx?: string | number | undefined; ry?: string | number | undefined; seed?: string | number | undefined; shapeRendering?: string | number | undefined; slope?: string | number | undefined; spacing?: string | number | undefined; specularConstant?: string | number | undefined; specularExponent?: string | number | undefined; speed?: string | number | undefined; spreadMethod?: string | undefined; startOffset?: string | number | undefined; stemh?: string | number | undefined; stemv?: string | number | undefined; stitchTiles?: string | number | undefined; stopColor?: string | undefined; stopOpacity?: string | number | undefined; strikethroughPosition?: string | number | undefined; strikethroughThickness?: string | number | undefined; strokeDasharray?: string | number | undefined; strokeDashoffset?: string | number | undefined; strokeLinecap?: \"inherit\" | \"butt\" | \"round\" | \"square\" | undefined; strokeLinejoin?: \"inherit\" | \"round\" | \"miter\" | \"bevel\" | undefined; strokeMiterlimit?: string | number | undefined; strokeOpacity?: string | number | undefined; surfaceScale?: string | number | undefined; systemLanguage?: string | number | undefined; tableValues?: string | number | undefined; targetX?: string | number | undefined; targetY?: string | number | undefined; textAnchor?: string | undefined; textLength?: string | number | undefined; textRendering?: string | number | undefined; u1?: string | number | undefined; u2?: string | number | undefined; underlinePosition?: string | number | undefined; underlineThickness?: string | number | undefined; unicode?: string | number | undefined; unicodeBidi?: string | number | undefined; unicodeRange?: string | number | undefined; unitsPerEm?: string | number | undefined; vAlphabetic?: string | number | undefined; vectorEffect?: string | number | undefined; vertAdvY?: string | number | undefined; vertOriginX?: string | number | undefined; vertOriginY?: string | number | undefined; vHanging?: string | number | undefined; vIdeographic?: string | number | undefined; viewBox?: string | undefined; viewTarget?: string | number | undefined; visibility?: string | number | undefined; vMathematical?: string | number | undefined; widths?: string | number | undefined; wordSpacing?: string | number | undefined; writingMode?: string | number | undefined; x1?: string | number | undefined; x2?: string | number | undefined; xChannelSelector?: string | undefined; xHeight?: string | number | undefined; xlinkActuate?: string | undefined; xlinkArcrole?: string | undefined; xlinkHref?: string | undefined; xlinkRole?: string | undefined; xlinkShow?: string | undefined; xlinkTitle?: string | undefined; xlinkType?: string | undefined; xmlBase?: string | undefined; xmlLang?: string | undefined; xmlns?: string | undefined; xmlnsXlink?: string | undefined; xmlSpace?: string | undefined; y1?: string | number | undefined; y2?: string | number | undefined; yChannelSelector?: string | undefined; z?: string | number | undefined; zoomAndPan?: string | undefined; titleId?: string | undefined; onIconLoad?: (() => void) | undefined; }"
+                      ">; title?: string | undefined; titleId?: string | undefined; onIconLoad?: (() => void) | undefined; }"
                     ],
                     "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_heatmap.tsx",
                     "deprecated": false,
@@ -36397,7 +36397,7 @@
             "label": "orientation",
             "description": [],
             "signature": [
-              "\"single\" | \"right angled\" | \"multiple\""
+              "\"multiple\" | \"single\" | \"right angled\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/tagcloud/constants.ts",
             "deprecated": false,

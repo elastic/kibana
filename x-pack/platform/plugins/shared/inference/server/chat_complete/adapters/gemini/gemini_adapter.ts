@@ -56,7 +56,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
       map((line) => {
         return JSON.parse(line) as GenerateContentResponseChunk;
       }),
-      processVertexStream()
+      processVertexStream(modelName)
     );
   },
 };

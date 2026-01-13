@@ -49,9 +49,9 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
-  'agentBuilder:enabled': boolean;
   'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
+  'agentBuilder:externalMcp': boolean;
   'dataConnectors:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -74,7 +74,6 @@ export interface UsageStats {
   'securitySolution:enableVisualizationsInFlyout': boolean;
   'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;
-  'securitySolution:enablePrivilegedUserMonitoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'securitySolution:defaultValueReportMinutes': string;
@@ -188,4 +187,5 @@ export interface UsageStats {
   'observability:streamsEnableGroupStreams': boolean;
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
+  'securitySolution:entityStoreEnableV2': boolean;
 }

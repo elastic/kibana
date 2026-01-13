@@ -134,3 +134,4 @@ export const getEmsTileLayerId = () => {
 };
 
 export const getShareService = () => pluginsStart.share;
+export const getCps = () => pluginsStart.cps;

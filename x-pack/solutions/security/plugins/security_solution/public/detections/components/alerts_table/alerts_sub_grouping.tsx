@@ -12,7 +12,11 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation, NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DynamicGroupingProps, ParsedGroupingAggregation } from '@kbn/grouping/src';
+import type {
+  DynamicGroupingProps,
+  GroupChildComponentRenderer,
+  ParsedGroupingAggregation,
+} from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -67,7 +71,7 @@ interface OwnProps {
   pageIndex: number;
   pageSize: number;
   parentGroupingFilter?: string;
-  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
+  renderChildComponent: GroupChildComponentRenderer<AlertsGroupingAggregation>;
   runtimeMappings: RunTimeMappings;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
