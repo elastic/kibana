@@ -10,6 +10,7 @@ import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from './constants';
 import { EntityType } from '../domain/definitions/entity_type';
 import type { EntityStorePluginRouter } from '../types';
+import { wrapMiddlewares } from './middleware';
 
 const bodySchema = z.object({
   entityType: z.array(EntityType).optional(),
@@ -23,6 +24,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
+      enableQueryVersion: true,
     })
     .addVersion(
       {
@@ -33,19 +35,18 @@ export function registerInstall(router: EntityStorePluginRouter) {
           },
         },
       },
-      async (ctx, req, res) => {
+      wrapMiddlewares(async (ctx, req, res) => {
         const entityStoreCtx = await ctx.entityStore;
-        const logger = entityStoreCtx.getLogger();
+        const logger = entityStoreCtx.logger;
         const resourcesService = entityStoreCtx.getResourcesService();
-
         logger.debug('Install api called');
-        resourcesService.install(req.body.entityType);
 
+        resourcesService.install(req.body.entityType);
         return res.ok({
           body: {
             ok: true,
           },
         });
-      }
+      })
     );
 }
