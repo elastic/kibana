@@ -65,7 +65,7 @@ export interface ICommandMethods<TContext = any> {
    * @returns An array of column names or more detailed column definitions.
    */
   columnsAfter?: (
-    command: ESQLCommand,
+    command: ESQLAstAllCommands,
     previousColumns: ESQLColumnData[],
     query: string,
     newFields: IAdditionalFields

@@ -10,7 +10,11 @@ import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstQueryExpression } from '../..';
 import { BasicPrettyPrinter, SOURCE_COMMANDS } from '../..';
 import type { ESQLColumnData, ESQLPolicy } from '../commands/registry/types';
-import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
+import {
+  getCurrentQueryAvailableColumns,
+  getFieldsFromES,
+  getHeaderCommandAvailableColumns,
+} from './helpers';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -193,6 +197,11 @@ export class QueryColumns {
     fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
     getPolicies: () => Promise<Map<string, ESQLPolicy>>
   ) {
+    let headerColumns: ESQLColumnData[] = [];
+    if (typeof query.header !== 'undefined' && query.header.length > 0) {
+      headerColumns = await getHeaderCommandAvailableColumns(query.header, this.originalQueryText);
+    }
+
     const fieldsAvailableAfterPreviousCommand = await this.getFieldsFromPreviousCommands(
       query,
       fetchFields,
@@ -201,7 +210,7 @@ export class QueryColumns {
 
     const availableFields = await getCurrentQueryAvailableColumns(
       query.commands,
-      fieldsAvailableAfterPreviousCommand,
+      [...fieldsAvailableAfterPreviousCommand, ...headerColumns],
       fetchFields,
       getPolicies,
       this.originalQueryText

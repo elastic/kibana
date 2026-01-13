@@ -16,7 +16,7 @@ import {
   type ESQLAstCommand,
 } from '../..';
 import type { ESQLColumnData, ESQLPolicy } from '../commands/registry/types';
-import type { ESQLAstQueryExpression } from '../types';
+import type { ESQLAstHeaderCommand, ESQLAstQueryExpression } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 
@@ -87,9 +87,11 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
 }
 
 /**
- * @param query, the ES|QL query
  * @param commands, the AST commands
  * @param previousPipeFields, the fields from the previous pipe
+ * @param fetchFields, function to fetch fields from ES
+ * @param getPolicies, function to get policies
+ * @param originalQueryText, the original query text
  * @returns a list of fields that are available for the current pipe
  */
 export async function getCurrentQueryAvailableColumns(
@@ -127,4 +129,28 @@ export async function getCurrentQueryAvailableColumns(
     );
   }
   return previousPipeFields;
+}
+
+export function getHeaderCommandAvailableColumns(
+  headerCommands: ESQLAstHeaderCommand[],
+  originalQueryText: string
+) {
+  if (headerCommands.length === 0) {
+    return [];
+  }
+  const lastCommand = headerCommands[headerCommands.length - 1];
+  const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
+  if (!commandDef?.methods.columnsAfter) {
+    return [];
+  }
+
+  if (commandDef?.methods.columnsAfter) {
+    return commandDef.methods.columnsAfter(lastCommand, [], originalQueryText, {
+      fromJoin: async () => [],
+      fromEnrich: async () => [],
+      fromFrom: async () => [],
+    });
+  }
+
+  return [];
 }
