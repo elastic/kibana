@@ -30,6 +30,7 @@ type AppMenuActionButtonProps = (AppMenuPrimaryActionItem | AppMenuSecondaryActi
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
   popoverAnchorPosition?: PopoverAnchorPosition;
+  onCloseOverflowButton?: () => void;
 };
 
 export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
@@ -55,6 +56,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     onPopoverToggle,
     onPopoverClose,
     popoverAnchorPosition,
+    onCloseOverflowButton,
   } = props;
 
   const itemText = upperFirst(label);
@@ -198,6 +200,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         popoverWidth={popoverWidth}
         popoverTestId={popoverTestId}
         onClose={onPopoverClose}
+        onCloseOverflowButton={onCloseOverflowButton}
         anchorPosition={popoverAnchorPosition}
       />
     );

@@ -181,11 +181,11 @@ pageLoadAssetSize:
   telemetryManagementSection: 5522
   timelines: 192134
   transform: 16515
-  triggersActionsUi: 110000
+  triggersActionsUi: 111000
   uiActions: 24670
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513
-  unifiedSearch: 24000
+  unifiedSearch: 25000
   upgradeAssistant: 6898
   uptime: 48171
   urlDrilldown: 18939
