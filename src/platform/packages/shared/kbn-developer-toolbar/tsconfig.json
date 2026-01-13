@@ -6,5 +6,5 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/config"]
+  "kbn_references": ["@kbn/config", "@kbn/shared-ux-utility"]
 }
