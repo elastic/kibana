@@ -49,9 +49,9 @@ export const createBaseline: Task = async (ctx, task) => {
         // convert the fixtures into SavedObjectsBulkCreateObject[]
         const allDocs = Object.entries(ctx.fixtures.previous).flatMap(
           ([type, { version, documents }]) => {
-            // This is a special case for when a type has no migrations yet, we do not send the typeMigrationVersion field
-            // because this type has not been migrated under the model version system yet.
-            if (version === '10.0.0') {
+            // When a type has no migrations nor modelVersions
+            // we should not send the typeMigrationVersion field
+            if (version === '0.0.0') {
               version = undefined as unknown as string;
             }
 
