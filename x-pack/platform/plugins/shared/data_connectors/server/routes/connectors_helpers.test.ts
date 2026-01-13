@@ -10,8 +10,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   buildSecretsFromConnectorSpec,
-  createConnectorAndRelatedResources,
-  deleteConnectorAndRelatedResources,
+  createDataSourceAndRelatedResources,
+  deleteDataSourceAndRelatedResources,
 } from './connectors_helpers';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import * as connectorSpecsModule from '@kbn/connector-specs';
@@ -219,7 +219,7 @@ describe('createConnectorAndRelatedResources', () => {
     mockToolRegistry.create.mockResolvedValue(mockTool);
     mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as any);
 
-    const result = await createConnectorAndRelatedResources({
+    const result = await createDataSourceAndRelatedResources({
       name: 'My Test Connector',
       type: 'test_type',
       token: 'secret-token-123',
@@ -293,7 +293,7 @@ describe('createConnectorAndRelatedResources', () => {
     mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
     mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as any);
 
-    await createConnectorAndRelatedResources({
+    await createDataSourceAndRelatedResources({
       name: 'Test',
       type: 'test',
       token: 'token',
@@ -354,7 +354,7 @@ describe('deleteConnectorAndRelatedResources', () => {
     });
     mockSavedObjectsClient.delete.mockResolvedValue({});
 
-    const result = await deleteConnectorAndRelatedResources({
+    const result = await deleteDataSourceAndRelatedResources({
       connector: mockConnector as any,
       savedObjectsClient: mockSavedObjectsClient,
       actionsClient: mockActionsClient as any,
@@ -395,7 +395,7 @@ describe('deleteConnectorAndRelatedResources', () => {
     });
     mockSavedObjectsClient.update.mockResolvedValue({} as any);
 
-    const result = await deleteConnectorAndRelatedResources({
+    const result = await deleteDataSourceAndRelatedResources({
       connector: mockConnector as any,
       savedObjectsClient: mockSavedObjectsClient,
       actionsClient: mockActionsClient as any,
@@ -447,7 +447,7 @@ describe('deleteConnectorAndRelatedResources', () => {
     });
     mockSavedObjectsClient.delete.mockResolvedValue({});
 
-    const result = await deleteConnectorAndRelatedResources({
+    const result = await deleteDataSourceAndRelatedResources({
       connector: mockConnector as any,
       savedObjectsClient: mockSavedObjectsClient,
       actionsClient: mockActionsClient as any,

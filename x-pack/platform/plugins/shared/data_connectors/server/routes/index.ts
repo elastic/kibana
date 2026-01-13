@@ -15,8 +15,8 @@ import type {
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
-  createConnectorAndRelatedResources,
-  deleteConnectorAndRelatedResources,
+  createDataSourceAndRelatedResources,
+  deleteDataSourceAndRelatedResources,
 } from './connectors_helpers';
 import type { DataSourceAttributes } from '../saved_objects';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
@@ -162,7 +162,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           });
         }
 
-        const dataConnectorId = await createConnectorAndRelatedResources({
+        const dataConnectorId = await createDataSourceAndRelatedResources({
           name,
           type,
           token,
@@ -235,7 +235,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
         // Process each connector individually to handle partial failures
         for (const connector of connectors) {
-          const result = await deleteConnectorAndRelatedResources({
+          const result = await deleteDataSourceAndRelatedResources({
             connector,
             savedObjectsClient,
             actionsClient,
@@ -294,7 +294,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
-        const result = await deleteConnectorAndRelatedResources({
+        const result = await deleteDataSourceAndRelatedResources({
           connector: savedObject,
           savedObjectsClient,
           actionsClient,

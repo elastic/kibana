@@ -20,7 +20,7 @@ import type {
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
 
 /**
- * Builds the secrets object for a connector based on its spec
+ * Builds the secrets object for a stack connector based on its spec
  * @param connectorType - The connector type ID (e.g., '.notion')
  * @param token - The authentication token
  * @returns The secrets object to pass to the actions client
@@ -65,7 +65,7 @@ export function buildSecretsFromConnectorSpec(
   return secrets;
 }
 
-interface CreateConnectorAndResourcesParams {
+interface CreateDataSourceAndResourcesParams {
   name: string;
   type: string;
   token: string;
@@ -74,15 +74,15 @@ interface CreateConnectorAndResourcesParams {
   logger: Logger;
   workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
   actions: DataConnectorsServerStartDependencies['actions'];
-  dataConnectorTypeDef: DataSource;
+  dataSource: DataSource;
   agentBuilder: DataConnectorsServerStartDependencies['agentBuilder'];
 }
 
 /**
- * Creates data connector Saved Object, as well as all related resources (stack connectors, tools, workflows)
+ * Creates data source Saved Object, as well as all related resources (stack connectors, tools, workflows)
  */
-export async function createConnectorAndRelatedResources(
-  params: CreateConnectorAndResourcesParams
+export async function createDataSourceAndRelatedResources(
+  params: CreateDataSourceAndResourcesParams
 ): Promise<string> {
   const {
     name,
@@ -93,20 +93,20 @@ export async function createConnectorAndRelatedResources(
     logger,
     workflowManagement,
     actions,
-    dataConnectorTypeDef,
+    dataSource,
     agentBuilder,
   } = params;
 
   // Create stack connector - for now our spec only supports the case
   // where there's exactly one KSC type per data connector type
-  const connectorType = dataConnectorTypeDef.stackConnector.type;
+  const connectorType = dataSource.stackConnector.type;
   const secrets = buildSecretsFromConnectorSpec(connectorType, token);
 
   logger.info(`Creating Kibana stack connector for data connector '${name}'`);
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const stackConnector = await actionsClient.create({
     action: {
-      name: `${type} stack connector for data connector '${name}'`,
+      name: `${type} stack connector for data source '${name}'`,
       actionTypeId: connectorType,
       config: {},
       secrets,
@@ -115,10 +115,10 @@ export async function createConnectorAndRelatedResources(
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
-  const workflowInfos = dataConnectorTypeDef.generateWorkflows(stackConnector.id);
+  const workflowInfos = dataSource.generateWorkflows(stackConnector.id);
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
-  logger.info(`Creating workflows and tools for data connector '${name}'`);
+  logger.info(`Creating workflows and tools for data source '${name}'`);
   const workflowIds: string[] = [];
   const toolIds: string[] = [];
 
@@ -135,8 +135,8 @@ export async function createConnectorAndRelatedResources(
       const tool = await toolRegistry.create({
         id: `${type}-${workflow.id}`,
         type: ToolType.workflow,
-        description: `Workflow tool for ${type} data connector`,
-        tags: ['data-connector', type],
+        description: `Workflow tool for ${type} data source`,
+        tags: ['data-source', type],
         configuration: {
           workflow_id: workflow.id,
         },
@@ -146,7 +146,7 @@ export async function createConnectorAndRelatedResources(
     }
   }
 
-  // Create the data connector saved object
+  // Create the data source saved object
   const now = new Date().toISOString();
   logger.info(`Creating ${DATA_SOURCE_SAVED_OBJECT_TYPE} SO at ${now}`);
   const savedObject = await savedObjectsClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, {
@@ -216,7 +216,7 @@ async function deleteSingleResource<T>(
 }
 
 /**
- * Deletes all related resources for a data connector (stack connectors, tools, workflows)
+ * Deletes all related resources for a data source (stack connectors, tools, workflows)
  * This function is idempotent and handles partial failures gracefully
  */
 async function deleteRelatedResources(
@@ -333,8 +333,8 @@ async function deleteRelatedResources(
   return result;
 }
 
-interface DeleteConnectorAndRelatedResourcesParams {
-  connector: SavedObject<DataSourceAttributes>;
+interface DeleteDataSourceAndRelatedResourcesParams {
+  dataSource: SavedObject<DataSourceAttributes>;
   savedObjectsClient: SavedObjectsClientContract;
   actionsClient: Awaited<
     ReturnType<DataConnectorsServerStartDependencies['actions']['getActionsClientWithRequest']>
@@ -347,7 +347,7 @@ interface DeleteConnectorAndRelatedResourcesParams {
   logger: Logger;
 }
 
-interface DeleteConnectorAndRelatedResourcesResult {
+interface DeleteDataSourceAndRelatedResourcesResult {
   success: boolean;
   fullyDeleted: boolean;
   remaining?: {
@@ -358,14 +358,14 @@ interface DeleteConnectorAndRelatedResourcesResult {
 }
 
 /**
- * Deletes a data connector and all its related resources (stack connectors, tools, workflows)
+ * Deletes a data source and all its related resources (stack connectors, tools, workflows)
  * This function is idempotent and handles partial failures by updating the saved object with remaining resources
  */
-export async function deleteConnectorAndRelatedResources(
-  params: DeleteConnectorAndRelatedResourcesParams
-): Promise<DeleteConnectorAndRelatedResourcesResult> {
+export async function deleteDataSourceAndRelatedResources(
+  params: DeleteDataSourceAndRelatedResourcesParams
+): Promise<DeleteDataSourceAndRelatedResourcesResult> {
   const {
-    connector,
+    dataSource,
     savedObjectsClient,
     actionsClient,
     toolRegistry,
@@ -374,7 +374,7 @@ export async function deleteConnectorAndRelatedResources(
     logger,
   } = params;
 
-  const { kscIds, toolIds, workflowIds } = connector.attributes;
+  const { kscIds, toolIds, workflowIds } = dataSource.attributes;
   const spaceId = getSpaceId(savedObjectsClient);
 
   // Delete all related resources
@@ -393,8 +393,8 @@ export async function deleteConnectorAndRelatedResources(
   // Check if all deletions succeeded
   if (deletionResult.allSucceeded) {
     // All resources deleted successfully - delete the saved object
-    await savedObjectsClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, connector.id);
-    logger.info(`Fully deleted data connector ${connector.id}`);
+    await savedObjectsClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSource.id);
+    logger.info(`Fully deleted data source ${dataSource.id}`);
 
     return {
       success: true,
@@ -411,12 +411,12 @@ export async function deleteConnectorAndRelatedResources(
 
     await savedObjectsClient.update(
       DATA_SOURCE_SAVED_OBJECT_TYPE,
-      connector.id,
+      dataSource.id,
       remainingResources
     );
 
     logger.warn(
-      `Partially deleted data connector ${connector.id}. Remaining resources: ${deletionResult.failedKscIds.length} KSCs, ${deletionResult.failedToolIds.length} tools, ${deletionResult.failedWorkflowIds.length} workflows`
+      `Partially deleted data source ${dataSource.id}. Remaining resources: ${deletionResult.failedKscIds.length} KSCs, ${deletionResult.failedToolIds.length} tools, ${deletionResult.failedWorkflowIds.length} workflows`
     );
 
     return {

@@ -20,12 +20,12 @@ jest.mock('./connectors_helpers', () => ({
 }));
 
 const mockCreateConnectorAndRelatedResources =
-  helpers.createConnectorAndRelatedResources as jest.MockedFunction<
-    typeof helpers.createConnectorAndRelatedResources
+  helpers.createDataSourceAndRelatedResources as jest.MockedFunction<
+    typeof helpers.createDataSourceAndRelatedResources
   >;
 const mockDeleteConnectorAndRelatedResources =
-  helpers.deleteConnectorAndRelatedResources as jest.MockedFunction<
-    typeof helpers.deleteConnectorAndRelatedResources
+  helpers.deleteDataSourceAndRelatedResources as jest.MockedFunction<
+    typeof helpers.deleteDataSourceAndRelatedResources
   >;
 
 describe('registerRoutes', () => {
