@@ -10,6 +10,7 @@ import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Condition } from '@kbn/streamlang';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { StreamQueryKql } from '../../queries';
+import type { TaskStatus } from '../../tasks/types';
 
 /**
  * SignificantEvents Get Response
@@ -72,10 +73,34 @@ type SignificantEventsGenerateResponse = Observable<
   >
 >;
 
+interface SignificantEventsQueriesGenerationResult {
+  queries: GeneratedSignificantEventQuery[];
+  tokensUsed: Pick<ChatCompletionTokenCount, 'prompt' | 'completion'>;
+}
+
+type SignificantEventsQueriesGenerationTaskResult =
+  | {
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
+    }
+  | {
+      status: TaskStatus.Failed;
+      error: string;
+    }
+  | ({
+      status: TaskStatus.Completed | TaskStatus.Acknowledged;
+    } & SignificantEventsQueriesGenerationResult);
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 };
