@@ -168,7 +168,7 @@ const createIntegrationRoute = (
             authHeaders.authorization = request.headers.authorization;
           }
           if (request.headers['kbn-xsrf']) {
-            authHeaders['kbn-xsrf'] = request.headers['kbn-xsrf'] as string | string[];
+            authHeaders['kbn-xsrf'] = request.headers['kbn-xsrf'];
           }
 
           if (dataStreams) {

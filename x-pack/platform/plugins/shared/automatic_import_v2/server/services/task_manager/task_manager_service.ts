@@ -156,25 +156,6 @@ export class TaskManagerService {
     }
   }
 
-  public async getTaskResult(taskId: string): Promise<{
-    result: Record<string, unknown>;
-  }> {
-    if (!this.taskManager) {
-      throw new Error('TaskManager not initialized');
-    }
-
-    try {
-      const task = await this.taskManager.get(taskId);
-
-      return {
-        result: task.state?.result,
-      };
-    } catch (error: any) {
-      this.logger.error(`Failed to get task result for ${taskId}:`, error);
-      throw new Error(`Task ${taskId} not found or inaccessible`);
-    }
-  }
-
   private async runTask(
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup<AutomaticImportV2PluginStartDependencies>,
