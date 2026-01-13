@@ -65,10 +65,11 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
   const kibana = useKibana<ESQLEditorDeps>();
   const { core } = kibana.services;
   const getLicense = kibana.services?.esql?.getLicense;
+  const enrichSources = kibana.services?.esql?.enrichSources;
 
   useEffect(() => {
     async function fetchSources() {
-      const sources = await getESQLSources(core, getLicense);
+      const sources = await getESQLSources(core, getLicense, enrichSources);
       if (isMounted()) {
         const sourceNames = sources.filter((source) => !source.hidden).map((source) => source.name);
 
@@ -84,7 +85,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
       }
     }
     fetchSources();
-  }, [core, getLicense, isMounted]);
+  }, [core, enrichSources, getLicense, isMounted]);
 
   const sourcesOptions = useMemo(() => {
     const existingLabels = new Set(fetchedSources.map((option) => option.label));

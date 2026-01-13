@@ -479,7 +479,13 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
     const fn = memoize(
-      (...args: [CoreStart, (() => Promise<ILicense | undefined>) | undefined]) => ({
+      (
+        ...args: [
+          CoreStart,
+          (() => Promise<ILicense | undefined>) | undefined,
+          ((sources: any[]) => Promise<any[]>) | undefined
+        ]
+      ) => ({
         timestamp: Date.now(),
         result: getESQLSources(...args),
       })
@@ -568,7 +574,8 @@ const ESQLEditorInternal = function ESQLEditor({
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
         const getLicense = kibana.services?.esql?.getLicense;
-        const sources = await memoizedSources(core, getLicense).result;
+        const enrichSources = kibana.services?.esql?.enrichSources;
+        const sources = await memoizedSources(core, getLicense, enrichSources).result;
         return sources;
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {

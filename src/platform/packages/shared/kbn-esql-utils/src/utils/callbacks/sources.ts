@@ -84,11 +84,13 @@ const getIntegrations = async (
 /** Fetches ESQL sources including indices, aliases, data streams, and integrations.
  * @param core The core start contract to make HTTP requests and access application capabilities.
  * @param getLicense An optional function to retrieve the current license information.
+ * @param enrichSources An optional function to enrich sources with additional metadata from plugins.
  * @returns A promise that resolves to an array of ESQLSourceResult objects.
  */
 export const getESQLSources = async (
   core: Pick<CoreStart, 'application' | 'http'>,
-  getLicense: (() => Promise<ILicense | undefined>) | undefined
+  getLicense: (() => Promise<ILicense | undefined>) | undefined,
+  enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>
 ): Promise<ESQLSourceResult[]> => {
   const ls = await getLicense?.();
   const ccrFeature = ls?.getFeature('ccr');
@@ -97,5 +99,12 @@ export const getESQLSources = async (
     getIndicesList(core, areRemoteIndicesAvailable),
     getIntegrations(core),
   ]);
-  return [...allIndices, ...integrations];
+  let sources = [...allIndices, ...integrations];
+
+  // Allow plugins to enrich sources with additional metadata
+  if (enrichSources) {
+    sources = await enrichSources(sources);
+  }
+
+  return sources;
 };

@@ -25,7 +25,7 @@
       "usageCollection",
       "fieldsMetadata"
     ],
-    "optionalPlugins": ["cloud", "serverless", "globalSearch", "spaces"],
+    "optionalPlugins": ["cloud", "serverless", "globalSearch", "spaces", "esql"],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]
   }

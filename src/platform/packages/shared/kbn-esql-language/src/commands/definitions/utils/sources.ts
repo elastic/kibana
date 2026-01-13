@@ -50,10 +50,21 @@ function getSafeInsertSourceText(text: string) {
 }
 
 export const buildSourcesDefinitions = (
-  sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>,
+  sources: Array<{
+    name: string;
+    isIntegration: boolean;
+    title?: string;
+    type?: string;
+    enrichment?: {
+      description?: string;
+      metadata?: Array<{ label: string; value: string | number }>;
+      links?: Array<{ label: string; url: string }>;
+      iconType?: string;
+    };
+  }>,
   queryString?: string
 ): ISuggestionItem[] =>
-  sources.map(({ name, isIntegration, title, type }) => {
+  sources.map(({ name, isIntegration, title, type, enrichment }) => {
     let text = getSafeInsertSourceText(name);
     const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
     let rangeToReplace: { start: number; end: number } | undefined;
@@ -68,22 +79,81 @@ export const buildSourcesDefinitions = (
       };
     }
 
+    // Build detail text with enrichment metadata
+    let detail: string;
+    if (enrichment?.metadata && enrichment.metadata.length > 0) {
+      const metadataStr = enrichment.metadata.map((m) => `${m.value} ${m.label}`).join(', ');
+      const baseType = type ?? SOURCES_TYPES.INDEX;
+      detail = i18n.translate('kbn-esql-language.esql.autocomplete.enrichedSourceDefinition', {
+        defaultMessage: '{type} • {metadata}',
+        values: {
+          type: baseType,
+          metadata: metadataStr,
+        },
+      });
+    } else if (isIntegration) {
+      detail = i18n.translate('kbn-esql-language.esql.autocomplete.integrationDefinition', {
+        defaultMessage: SOURCES_TYPES.INTEGRATION,
+      });
+    } else {
+      detail = i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
+        defaultMessage: '{type}',
+        values: {
+          type: type ?? SOURCES_TYPES.INDEX,
+        },
+      });
+    }
+
+    // Build documentation with enrichment data
+    let documentation: { value: string } | undefined;
+    if (enrichment) {
+      const parts: string[] = [];
+
+      if (enrichment.description) {
+        parts.push(enrichment.description);
+        parts.push(''); // blank line
+      }
+
+      if (enrichment.metadata && enrichment.metadata.length > 0) {
+        enrichment.metadata.forEach((m) => {
+          parts.push(`**${m.label}:** ${m.value}`);
+        });
+        parts.push(''); // blank line
+      }
+
+      if (enrichment.links && enrichment.links.length > 0) {
+        enrichment.links.forEach((link) => {
+          parts.push(`[${link.label}](${link.url})`);
+        });
+      }
+
+      if (parts.length > 0) {
+        documentation = { value: parts.join('\n') };
+      }
+    }
+
+    // Determine the icon kind based on enrichment type
+    let kind: string;
+    if (enrichment?.iconType === 'streamWired') {
+      kind = 'Module'; // Different icon for wired streams
+    } else if (enrichment?.iconType === 'streamClassic') {
+      kind = 'Interface'; // Different icon for classic streams
+    } else if (enrichment?.iconType) {
+      kind = 'Module'; // Fallback for other enriched sources
+    } else if (isIntegration) {
+      kind = 'Class';
+    } else {
+      kind = 'Issue';
+    }
+
     return withAutoSuggest({
       label: title ?? name,
       text,
       asSnippet: isIntegration,
-      kind: isIntegration ? 'Class' : 'Issue',
-      detail: isIntegration
-        ? i18n.translate('kbn-esql-language.esql.autocomplete.integrationDefinition', {
-            defaultMessage: SOURCES_TYPES.INTEGRATION,
-          })
-        : i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
-            defaultMessage: '{type}',
-            values: {
-              type: type ?? SOURCES_TYPES.INDEX,
-            },
-          }),
-      sortText: 'A',
+      kind,
+      detail,
+      documentation,
+      sortText: enrichment ? '0' : 'A',
       // with filterText we are explicitly telling the Monaco editor's filtering engine
       //  to display the item when the text FROM  is present in the editor at the specified range,
       // even though the label is different.
@@ -142,8 +212,14 @@ export function getSourceSuggestions(
   return buildSourcesDefinitions(
     sources
       .filter(({ hidden, name }) => !hidden && !alreadyUsed.includes(name))
-      .map(({ name, dataStreams, title, type }) => {
-        return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
+      .map(({ name, dataStreams, title, type, enrichment }) => {
+        return {
+          name,
+          isIntegration: Boolean(dataStreams && dataStreams.length),
+          title,
+          type,
+          enrichment,
+        };
       }),
     queryString
   );

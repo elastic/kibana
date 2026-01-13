@@ -104,5 +104,6 @@ export interface ESQLCallbacks {
   getActiveProduct?: () => PricingProduct | undefined;
   getHistoryStarredItems?: () => Promise<string[]>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   isServerless?: boolean;
 }

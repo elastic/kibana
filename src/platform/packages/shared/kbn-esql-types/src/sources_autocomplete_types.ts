@@ -22,6 +22,12 @@ export interface ESQLSourceResult {
   title?: string;
   dataStreams?: Array<{ name: string; title?: string }>;
   type?: string;
+  enrichment?: {
+    description?: string;
+    metadata?: Array<{ label: string; value: string | number }>;
+    links?: Array<{ label: string; url: string }>;
+    iconType?: string;
+  };
 }
 
 // response from resolve_index api

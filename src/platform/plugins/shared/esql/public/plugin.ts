@@ -19,6 +19,7 @@ import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -47,22 +48,55 @@ interface EsqlPluginStartDependencies {
   fileUpload: FileUploadPluginStart;
 }
 
+export interface EsqlPluginSetup {
+  /**
+   * Register a function to enrich ESQL source suggestions.
+   * Multiple plugins can register enrichers - they'll be chained.
+   *
+   * @param enricher - Function that takes sources and returns enriched sources
+   * @example
+   * ```ts
+   * esql.registerSourceEnricher(async (sources) => {
+   *   return sources.map(source => ({
+   *     ...source,
+   *     enrichment: {
+   *       description: 'Custom description',
+   *       metadata: [{ label: 'Count', value: 42 }]
+   *     }
+   *   }));
+   * });
+   * ```
+   */
+  registerSourceEnricher(
+    enricher: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>
+  ): void;
+}
+
 export interface EsqlPluginStart {
   variablesService: EsqlVariablesService;
   isServerless: boolean;
+  enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
 }
 
-export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
+export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
+  private sourceEnrichers: Array<
+    (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>
+  > = [];
+
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
+  public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies): EsqlPluginSetup {
     uiActions.registerTrigger(updateESQLQueryTrigger);
     uiActions.registerTrigger(esqlControlTrigger);
 
     registerESQLEditorAnalyticsEvents(core.analytics);
     registerIndexEditorAnalyticsEvents(core.analytics);
 
-    return {};
+    return {
+      registerSourceEnricher: (enricher) => {
+        this.sourceEnrichers.push(enricher);
+      },
+    };
   }
 
   public start(
@@ -119,10 +153,28 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const variablesService = new EsqlVariablesService();
 
+    // Create composed enricher that chains all registered enrichers
+    const composedEnricher =
+      this.sourceEnrichers.length > 0
+        ? async (sources: ESQLSourceResult[]) => {
+            let enriched = sources;
+            for (const enricher of this.sourceEnrichers) {
+              try {
+                enriched = await enricher(enriched);
+              } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error('Error in source enricher:', error);
+              }
+            }
+            return enriched;
+          }
+        : undefined;
+
     const start = {
       isServerless,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
+      enrichSources: composedEnricher,
     };
 
     setKibanaServices(start, core, data, storage, uiActions, fieldsMetadata, usageCollection);
