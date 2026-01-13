@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
 
-  const tableTabTestId = 'docViewerTab-doc_view_table';
-  const jsonTabTestId = 'docViewerTab-doc_view_source';
+  const tableTabId = 'doc_view_table';
+  const jsonTabId = 'doc_view_source';
 
   describe('on tab change', function () {
     it('should maintain separate DocViewer state for different tabs and retain it while switching tabs', async () => {
@@ -30,32 +30,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataGrid.isShowingDocViewer()).to.be(true);
 
       // Switch to JSON tab in DocViewer
-      await testSubjects.click(jsonTabTestId);
-      expect(await testSubjects.getAttribute(jsonTabTestId, 'aria-selected')).to.be('true');
+      await dataGrid.clickDocViewerTab(jsonTabId);
+      expect(await dataGrid.isDocViewerTabSelected(jsonTabId)).to.be(true);
 
       // Open new tab, open DocViewer and leave the default Table tab selected
       await unifiedTabs.createNewTab();
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       expect(await dataGrid.isShowingDocViewer()).to.be(false);
       await dataGrid.clickRowToggle({ rowIndex: 1 });
       expect(await dataGrid.isShowingDocViewer()).to.be(true);
 
-      expect(await testSubjects.getAttribute(tableTabTestId, 'aria-selected')).to.be('true');
+      expect(await dataGrid.isDocViewerTabSelected(tableTabId)).to.be(true);
 
       // Switch back to first tab and verify it retained its state
       await unifiedTabs.selectTab(0);
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       expect(await dataGrid.isShowingDocViewer()).to.be(true);
-      expect(await testSubjects.getAttribute(jsonTabTestId, 'aria-selected')).to.be('true');
+      expect(await dataGrid.isDocViewerTabSelected(jsonTabId)).to.be(true);
 
       // Switch back to second tab and verify Table tab is selected
       await unifiedTabs.selectTab(1);
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       expect(await dataGrid.isShowingDocViewer()).to.be(true);
-      expect(await testSubjects.getAttribute(tableTabTestId, 'aria-selected')).to.be('true');
+      expect(await dataGrid.isDocViewerTabSelected(tableTabId)).to.be(true);
     });
 
     it('should close the vis edit flyout on tab change', async () => {

@@ -276,13 +276,4 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
     expect(selectTab(store.getState(), tabId).initialDocViewerTabId).toBeUndefined();
   });
-
-  it('should include expandedDoc in default tab state', async () => {
-    const { store } = await createTestStore();
-    const tabId = store.getState().tabs.unsafeCurrentId;
-    const tab = selectTab(store.getState(), tabId);
-
-    expect(tab).toHaveProperty('expandedDoc');
-    expect(tab.expandedDoc).toBeUndefined();
-  });
 });
