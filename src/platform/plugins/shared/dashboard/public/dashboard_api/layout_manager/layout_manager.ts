@@ -115,6 +115,11 @@ export function initializeLayoutManager(
     }
   );
 
+  /** Keep track of which children have unsaved changes and keep `currentChildState` in sync */
+  const setChildState = (uuid: string, state: object) => {
+    currentChildState[uuid] = state;
+  };
+
   const childrenWithUnsavedChanges$: Observable<string[]> = childrenUnsavedChanges$(children$).pipe(
     tap((childrenWithChanges) => {
       // propagate the latest serialized state back to the layout manager.
@@ -286,10 +291,6 @@ export function initializeLayoutManager(
     if (serializedState) currentChildState[uuid] = serializedState;
 
     return uuid;
-  };
-
-  const setChildState = (uuid: string, state: object) => {
-    currentChildState[uuid] = state;
   };
 
   const addNewPanel = async <ApiType>(
@@ -567,7 +568,6 @@ export function initializeLayoutManager(
         };
       },
 
-      setChildState,
       isSectionCollapsed,
     },
     api: {
