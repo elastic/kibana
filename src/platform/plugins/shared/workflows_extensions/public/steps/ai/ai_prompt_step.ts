@@ -16,10 +16,10 @@ import type {
   AiPromptStepOutputSchema,
 } from '../../../common/steps/ai';
 import {
+  AiPromptOutputSchema,
   AiPromptStepCommonDefinition,
   AiPromptStepTypeId,
   getStructuredOutputSchema,
-  OutputSchema,
 } from '../../../common/steps/ai';
 import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
 
@@ -36,7 +36,7 @@ export const AiPromptStepDefinition: PublicStepDefinition<
           return getStructuredOutputSchema(convertJsonSchemaToZod(input.schema));
         }
 
-        return OutputSchema;
+        return AiPromptOutputSchema;
       },
     },
   },

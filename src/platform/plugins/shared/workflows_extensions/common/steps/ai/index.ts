@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './ai_prompt_step';
+export {
+  AiPromptStepCommonDefinition,
+  AiPromptStepTypeId,
+  InputSchema as AiPormptInputSchema,
+  OutputSchema as AiPromptOutputSchema,
+  getStructuredOutputSchema,
+  type AiPromptStepConfigSchema,
+  type AiPromptStepInputSchema,
+  type AiPromptStepOutputSchema,
+} from './ai_prompt_step';
