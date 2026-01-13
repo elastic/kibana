@@ -291,6 +291,16 @@ export function LensEditConfigurationFlyout({
     esqlQueryState,
   ]);
 
+  // Tooltip message when Apply button is disabled due to an unrun ES|QL query
+  const applyButtonDisabledTooltip = useMemo(() => {
+    if (textBasedMode && esqlQueryState?.isQueryPendingSubmit) {
+      return i18n.translate('xpack.lens.config.applyFlyoutRunQueryTooltip', {
+        defaultMessage: 'Run the ES|QL query to apply changes',
+      });
+    }
+    return undefined;
+  }, [textBasedMode, esqlQueryState?.isQueryPendingSubmit]);
+
   const addLayerButton = useAddLayerButton(
     framePublicAPI,
     coreStart,
@@ -387,6 +397,7 @@ export function LensEditConfigurationFlyout({
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
+          applyButtonDisabledTooltip={applyButtonDisabledTooltip}
           toolbar={toolbar}
           layerTabs={layerTabs}
         >
@@ -427,6 +438,7 @@ export function LensEditConfigurationFlyout({
         isScrollable
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
+        applyButtonDisabledTooltip={applyButtonDisabledTooltip}
         toolbar={toolbar}
         layerTabs={layerTabs}
       >
