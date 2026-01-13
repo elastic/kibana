@@ -162,7 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.editExistingControl(controlId);
         await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
         await dashboardControls.controlEditorSave();
-        await dashboard.ensureMissingUnsavedChangesNotification();
+        await dashboard.ensureHasUnsavedChangesNotification();
       });
 
       it('wildcard searching works as expected', async () => {

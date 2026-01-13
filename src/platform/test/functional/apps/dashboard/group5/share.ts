@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardCustomizePanel.setCustomPanelTitle('Test New Title');
           await dashboardCustomizePanel.clickSaveButton();
           await dashboard.waitForRenderComplete();
-          await dashboard.ensureMissingUnsavedChangesNotification();
+          await dashboard.ensureHasUnsavedChangesNotification();
 
           const sharedUrl = await getSharedUrl('snapshot');
           const { appState } = getStateFromUrl(sharedUrl);

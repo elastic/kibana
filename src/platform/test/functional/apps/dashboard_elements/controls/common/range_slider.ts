@@ -239,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetLowerBound(firstId, '2');
         await dashboardControls.rangeSliderSetUpperBound(firstId, '3');
         await dashboardControls.rangeSliderWaitForLoading(firstId);
-        await dashboard.ensureMissingUnsavedChangesNotification();
+        await dashboard.ensureHasUnsavedChangesNotification();
       });
 
       it('changes to range can be discarded', async () => {
