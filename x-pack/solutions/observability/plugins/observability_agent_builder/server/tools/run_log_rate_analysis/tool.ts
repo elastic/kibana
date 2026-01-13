@@ -9,13 +9,9 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
 import { getToolHandler } from './handler';
 
@@ -49,10 +45,7 @@ export function createRunLogRateAnalysisTool({
   core,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
 }): StaticToolRegistration<typeof logRateAnalysisSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {

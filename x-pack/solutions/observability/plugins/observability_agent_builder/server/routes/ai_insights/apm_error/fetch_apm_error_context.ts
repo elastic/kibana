@@ -8,13 +8,11 @@
 import dedent from 'dedent';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreSetup } from '@kbn/core/server';
 import { termFilter } from '../../../utils/dsl_filters';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../../types';
 import { getFilteredLogCategories } from '../../../tools/get_log_categories/handler';
 import { getLogsIndices } from '../../../utils/get_logs_indices';
@@ -23,10 +21,7 @@ import { parseDatemath } from '../../../utils/time';
 import { fetchDistributedTrace } from './fetch_distributed_trace';
 
 export interface FetchApmErrorContextParams {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;

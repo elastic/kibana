@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStartDependencies,
-  ObservabilityAgentBuilderPluginStart,
 } from '../types';
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
@@ -21,10 +20,7 @@ export async function registerObservabilityAgent({
   plugins,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {

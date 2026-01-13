@@ -6,11 +6,8 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { Logger } from '@kbn/core/server';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { parseDatemath } from '../../utils/time';
 import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS, DEFAULT_LOG_SOURCE_FIELDS } from './constants';
@@ -74,10 +71,7 @@ export async function getToolHandler({
   maxSequences = 10,
   maxLogsPerSequence = 200,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   esClient: IScopedClusterClient;
   start: string;

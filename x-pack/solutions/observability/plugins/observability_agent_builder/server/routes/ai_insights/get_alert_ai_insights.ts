@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
@@ -13,9 +13,8 @@ import { isEmpty } from 'lodash';
 import moment from 'moment';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 
@@ -40,10 +39,7 @@ export interface AlertDocForInsight {
 }
 
 interface GetAlertAiInsightParams {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   alertDoc: AlertDocForInsight;
   inferenceClient: InferenceClient;
