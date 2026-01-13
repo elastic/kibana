@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../locator';
@@ -114,10 +114,12 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
         defaultMessage: 'Tailored predictive models',
       })}
       body={
-        <FormattedMessage
-          id="xpack.ml.overview.analyticsList.emptyPromptText"
-          defaultMessage="Categorize data, predict values, and detect outliers using supervised and unsupervised machine learning in data frame analytics."
-        />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.ml.overview.analyticsList.emptyPromptText"
+            defaultMessage="Categorize data, predict values, and detect outliers using supervised and unsupervised machine learning in data frame analytics."
+          />
+        </EuiText>
       }
       actions={availableActions}
       data-test-subj="mlOverviewDataFrameAnalyticsCard"

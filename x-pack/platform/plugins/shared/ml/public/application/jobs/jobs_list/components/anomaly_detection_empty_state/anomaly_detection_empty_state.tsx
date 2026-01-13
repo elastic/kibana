@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import adImage from './machine_learning_cog.png';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
@@ -51,12 +51,12 @@ export const AnomalyDetectionEmptyState: FC<{ showDocsLink?: boolean }> = ({
         defaultMessage: 'Anomaly detection',
       })}
       body={
-        <p>
+        <EuiText size="s">
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.emptyPromptText"
             defaultMessage="Automatically spot anomalies and surface issues before they become incidents, with detection that adapts to the unique patterns in your data."
           />
-        </p>
+        </EuiText>
       }
       actions={[
         ...[

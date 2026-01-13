@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dfaImage from './analysis_monitors.png';
@@ -62,10 +62,12 @@ export const AnalyticsEmptyPrompt: FC<{ showDocsLink?: boolean }> = ({ showDocsL
         defaultMessage: 'Tailored predictive models',
       })}
       body={
-        <FormattedMessage
-          id="xpack.ml.overview.analyticsList.emptyPromptText"
-          defaultMessage="Categorize data, predict values, and detect outliers using supervised and unsupervised machine learning in data frame analytics."
-        />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.ml.overview.analyticsList.emptyPromptText"
+            defaultMessage="Categorize data, predict values, and detect outliers using supervised and unsupervised machine learning in data frame analytics."
+          />
+        </EuiText>
       }
       actions={[
         ...[
