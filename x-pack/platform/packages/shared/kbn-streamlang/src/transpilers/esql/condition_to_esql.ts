@@ -116,14 +116,10 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       ]);
     }
     if ('includes' in condition) {
-      let value: string | number | boolean = condition.includes as string | number | boolean;
-      if (typeof value === 'string') {
-        const parsed = Number(value);
-        if (!isNaN(parsed) && value.trim() !== '') {
-          value = parsed;
-        }
-      }
-      return Builder.expression.func.call('MV_CONTAINS', [field, esqlLiteralFromAny(value)]);
+      return Builder.expression.func.call('MV_CONTAINS', [
+        field,
+        esqlLiteralFromAny(condition.includes),
+      ]);
     }
   } else if (isAndCondition(condition)) {
     const andConditions = condition.and.map((c) => conditionToESQLAst(c));
