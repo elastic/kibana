@@ -51,6 +51,15 @@ test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => 
     await expect(page).toHaveURL(/elasticsearch\/home/);
   });
 
+  test('Elasticsearch endpoint renders endpoint field and copy button', async ({ pageObjects }) => {
+    const endpointField = await pageObjects.gettingStarted.getEndpointValueField();
+    await expect(endpointField).toBeVisible();
+    await expect(endpointField).toContainText('https://');
+
+    const copyButton = await pageObjects.gettingStarted.getCopyEndpointButton();
+    await expect(copyButton).toBeVisible();
+  });
+
   test('Elasticsearch endpoint shows checkmark icon feedback when copy button is clicked', async ({
     pageObjects,
   }) => {
