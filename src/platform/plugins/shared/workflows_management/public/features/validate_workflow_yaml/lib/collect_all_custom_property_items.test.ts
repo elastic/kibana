@@ -47,7 +47,7 @@ steps:
     getPropertyHandler.mockImplementation(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'config' && key === 'agent-id') {
-          return { validate: validator };
+          return { validation: { validate: validator } };
         }
         return null;
       }
@@ -84,7 +84,7 @@ steps:
     getPropertyHandler.mockImplementation(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'input' && key === 'debug') {
-          return { validate: validator };
+          return { validation: { validate: validator } };
         }
         return null;
       }
@@ -124,10 +124,10 @@ steps:
     getPropertyHandler.mockImplementation(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'input' && key === 'obj.message') {
-          return { validate: validator };
+          return { validation: { validate: validator } };
         }
         if (stepType === 'run-agent' && scope === 'config' && key === 'agent-config.agent.id') {
-          return { validate: validator };
+          return { validation: { validate: validator } };
         }
         return null;
       }

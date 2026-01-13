@@ -46,27 +46,28 @@ describe('getCustomPropertySuggestions', () => {
   });
 
   const createMockGetPropertyHandler = (
-    handler: {
-      complete?: jest.Mock;
-    } | null = {
-      complete: jest.fn().mockResolvedValue([
-        { label: 'option-1', value: 'value-1' },
-        { label: 'option-2', value: 'value-2' },
-      ]),
-    }
+    getOptions: jest.Mock | null = jest.fn().mockResolvedValue([
+      { label: 'option-1', value: 'value-1' },
+      { label: 'option-2', value: 'value-2' },
+    ])
   ) => {
+    const handler = {
+      completion: {
+        getOptions,
+      },
+    };
     return jest.fn().mockReturnValue(handler);
   };
 
   describe('basic functionality', () => {
     it('should return suggestions for custom properties', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: jest.fn().mockResolvedValue([
+      const getPropertyHandler = createMockGetPropertyHandler(
+        jest.fn().mockResolvedValue([
           { label: 'custom-label', value: 'custom-value' },
           { label: 'custom-label-2', value: 'custom-value-2' },
-        ]),
-      });
+        ])
+      );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -113,7 +114,7 @@ describe('getCustomPropertySuggestions', () => {
           path: ['key'],
         },
       });
-      const getPropertyHandler = createMockGetPropertyHandler({ complete: completeMock });
+      const getPropertyHandler = createMockGetPropertyHandler(completeMock);
 
       await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -246,9 +247,7 @@ describe('getCustomPropertySuggestions', () => {
 
     it('should return empty array when propertyHandler.complete is null', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: null as unknown as jest.Mock,
-      });
+      const getPropertyHandler = createMockGetPropertyHandler(null as unknown as jest.Mock);
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -257,8 +256,10 @@ describe('getCustomPropertySuggestions', () => {
 
     it('should return empty array when propertyHandler.complete is undefined', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: undefined as unknown as jest.Mock,
+      const getPropertyHandler = jest.fn().mockResolvedValue({
+        completion: {
+          getOptions: undefined as unknown as jest.Mock,
+        },
       });
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
@@ -268,9 +269,7 @@ describe('getCustomPropertySuggestions', () => {
 
     it('should return empty array when completions array is empty', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: jest.fn().mockResolvedValue([]),
-      });
+      const getPropertyHandler = createMockGetPropertyHandler(jest.fn().mockResolvedValue([]));
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -332,12 +331,12 @@ describe('getCustomPropertySuggestions', () => {
   describe('suggestion properties', () => {
     it('should set CompletionItemKind.Value for all suggestions', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: jest.fn().mockResolvedValue([
+      const getPropertyHandler = createMockGetPropertyHandler(
+        jest.fn().mockResolvedValue([
           { label: 'opt1', value: 'val1' },
           { label: 'opt2', value: 'val2' },
-        ]),
-      });
+        ])
+      );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -348,11 +347,9 @@ describe('getCustomPropertySuggestions', () => {
 
     it('should use completion value as insertText', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: jest
-          .fn()
-          .mockResolvedValue([{ label: 'Display Label', value: 'actual-insert-value' }]),
-      });
+      const getPropertyHandler = createMockGetPropertyHandler(
+        jest.fn().mockResolvedValue([{ label: 'Display Label', value: 'actual-insert-value' }])
+      );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -361,11 +358,9 @@ describe('getCustomPropertySuggestions', () => {
 
     it('should include detail when provided by completion', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: jest
-          .fn()
-          .mockResolvedValue([{ label: 'option', value: 'val', detail: 'This is a detail' }]),
-      });
+      const getPropertyHandler = createMockGetPropertyHandler(
+        jest.fn().mockResolvedValue([{ label: 'option', value: 'val', detail: 'This is a detail' }])
+      );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -374,13 +369,13 @@ describe('getCustomPropertySuggestions', () => {
 
     it('should include documentation when provided by completion', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: jest
+      const getPropertyHandler = createMockGetPropertyHandler(
+        jest
           .fn()
           .mockResolvedValue([
             { label: 'option', value: 'val', documentation: 'Extended documentation here' },
-          ]),
-      });
+          ])
+      );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -389,9 +384,9 @@ describe('getCustomPropertySuggestions', () => {
 
     it('should handle completions without optional fields', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: jest.fn().mockResolvedValue([{ label: 'minimal', value: 'min-val' }]),
-      });
+      const getPropertyHandler = createMockGetPropertyHandler(
+        jest.fn().mockResolvedValue([{ label: 'minimal', value: 'min-val' }])
+      );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -460,7 +455,7 @@ describe('getCustomPropertySuggestions', () => {
           })
       );
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({ complete: completeMock });
+      const getPropertyHandler = createMockGetPropertyHandler(completeMock);
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -471,7 +466,7 @@ describe('getCustomPropertySuggestions', () => {
     it('should handle rejected promises from complete function', async () => {
       const completeMock = jest.fn().mockRejectedValue(new Error('Completion failed'));
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({ complete: completeMock });
+      const getPropertyHandler = createMockGetPropertyHandler(completeMock);
 
       await expect(getCustomPropertySuggestions(context, getPropertyHandler)).rejects.toThrow(
         'Completion failed'
@@ -487,9 +482,9 @@ describe('getCustomPropertySuggestions', () => {
         detail: `Detail ${i}`,
       }));
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: jest.fn().mockResolvedValue(manyCompletions),
-      });
+      const getPropertyHandler = createMockGetPropertyHandler(
+        jest.fn().mockResolvedValue(manyCompletions)
+      );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -505,9 +500,9 @@ describe('getCustomPropertySuggestions', () => {
         { label: 'mango', value: 'm' },
       ];
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler({
-        complete: jest.fn().mockResolvedValue(orderedCompletions),
-      });
+      const getPropertyHandler = createMockGetPropertyHandler(
+        jest.fn().mockResolvedValue(orderedCompletions)
+      );
 
       const suggestions = await getCustomPropertySuggestions(context, getPropertyHandler);
 
@@ -526,12 +521,12 @@ describe('getCustomPropertySuggestions', () => {
           stepYamlNode: new YAMLMap(),
           lineStart: 1,
           lineEnd: 1,
-          stepType: '.slack',
+          stepType: 'slack',
           propInfos: {},
         },
       });
       await getCustomPropertySuggestions(slackContext, getPropertyHandler);
-      expect(getPropertyHandler).toHaveBeenCalledWith('.slack', 'config', 'custom-id');
+      expect(getPropertyHandler).toHaveBeenCalledWith('slack', 'config', 'custom-id');
 
       getPropertyHandler.mockClear();
 

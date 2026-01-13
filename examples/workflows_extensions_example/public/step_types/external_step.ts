@@ -56,35 +56,41 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
     editorHandlers: {
       config: {
         'proxy.id': {
-          complete: async (currentValue) => {
-            const proxies = await deps.externalService.getProxies();
-            const currentValueString = typeof currentValue === 'string' ? currentValue.trim() : '';
-            return proxies
-              .filter(
-                (proxy) => currentValueString.length === 0 || proxy.id.includes(currentValueString)
-              )
-              .map((proxy) => ({
-                label: proxy.id,
-                value: proxy.id,
-                detail: 'URL: ' + proxy.url,
-              }));
+          completion: {
+            getOptions: async (currentValue) => {
+              const proxies = await deps.externalService.getProxies();
+              const currentValueString =
+                typeof currentValue === 'string' ? currentValue.trim() : '';
+              return proxies
+                .filter(
+                  (proxy) =>
+                    currentValueString.length === 0 || proxy.id.includes(currentValueString)
+                )
+                .map((proxy) => ({
+                  label: proxy.id,
+                  value: proxy.id,
+                  detail: 'URL: ' + proxy.url,
+                }));
+            },
           },
-          validate: async (value, _context: PropertyValidationContext) => {
-            if (value === null) {
-              return { severity: null };
-            }
-            if (typeof value !== 'string') {
-              return { severity: 'error', message: 'Proxy ID must be a string' };
-            }
-            const proxy = await deps.externalService.getProxy(value);
-            if (!proxy) {
-              return {
-                severity: 'error',
-                message: 'Proxy not found',
-                hoverMessage: 'Manage your proxies [here](https://example.com/proxies)',
-              };
-            }
-            return { severity: null, afterMessage: '✓ Proxy connected' };
+          validation: {
+            validate: async (value, _context: PropertyValidationContext) => {
+              if (value === null) {
+                return { severity: null };
+              }
+              if (typeof value !== 'string') {
+                return { severity: 'error', message: 'Proxy ID must be a string' };
+              }
+              const proxy = await deps.externalService.getProxy(value);
+              if (!proxy) {
+                return {
+                  severity: 'error',
+                  message: 'Proxy not found',
+                  hoverMessage: 'Manage your proxies [here](https://example.com/proxies)',
+                };
+              }
+              return { severity: null, afterMessage: '✓ Proxy connected' };
+            },
           },
         },
       },

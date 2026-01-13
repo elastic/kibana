@@ -442,17 +442,27 @@ export interface InternalConnectorContract extends BaseConnectorContract {
 
 export interface StepPropertyHandler<T = unknown> {
   /**
-   * Fetch available options for autocompletion.
-   * Called lazily when the user triggers completion.
+   * Autocompletion configuration for the property.
    */
-  complete?: PropertyCompletionFn<T>;
+  completion?: {
+    /**
+     * Fetch available options for autocompletion.
+     * Called lazily when the user triggers completion.
+     */
+    getOptions: PropertyCompletionFn<T>;
+  };
 
   /**
-   * Validate a value and return decoration/error info.
-   * Called when the YAML document changes.
-   * Returns null if no validation is needed (static Zod validation is sufficient).
+   * Additional validation configuration for the property.
    */
-  validate?: PropertyValidationFn<T>;
+  validation?: {
+    /**
+     * Validate a value and return decoration/error info.
+     * Called when the YAML document changes.
+     * Returns null if no validation is needed (static Zod validation is sufficient).
+     */
+    validate: PropertyValidationFn<T>;
+  };
 }
 
 export type PropertyCompletionFn<T = unknown> = (value: T) => Promise<PropertyCompletionOption[]>;

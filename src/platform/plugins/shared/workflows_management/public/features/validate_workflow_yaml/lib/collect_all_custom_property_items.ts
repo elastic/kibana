@@ -37,7 +37,7 @@ export function collectAllCustomPropertyItems(
         const scope = prop.path.length > 0 && prop.path[0] === 'with' ? 'input' : 'config';
         const key = scope === 'config' ? propKey : propKey.split('.').slice(1).join('.');
         const propertyHandler = getPropertyHandler(step.stepType, scope, key);
-        if (propertyHandler && propertyHandler.validate) {
+        if (propertyHandler && propertyHandler.validation?.validate) {
           const [startOffset, endOffset] = prop.valueNode.range;
           const startPos = lineCounter.linePos(startOffset);
           const endPos = lineCounter.linePos(endOffset);
@@ -52,7 +52,7 @@ export function collectAllCustomPropertyItems(
             stepType: step.stepType,
             propertyKey: key,
             propertyValue: prop.valueNode.value,
-            validator: propertyHandler.validate,
+            validator: propertyHandler.validation?.validate,
             yamlPath: prop.path,
             key: prop.keyNode.value,
           });

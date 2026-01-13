@@ -54,7 +54,7 @@ export async function getCustomPropertySuggestions(
     isInConfig ? 'config' : 'input',
     composedKey
   );
-  if (!propertyHandler || !propertyHandler.complete) {
+  if (!propertyHandler || !propertyHandler.completion?.getOptions) {
     return [];
   }
   const [startOffset, endOffset] = focusedYamlPair.valueNode.range;
@@ -68,7 +68,7 @@ export async function getCustomPropertySuggestions(
     endLineNumber: endPos.line,
     endColumn: endPos.col,
   };
-  const completions = await propertyHandler.complete(currentValue);
+  const completions = await propertyHandler.completion?.getOptions(currentValue);
   return completions.map(
     (completion): monaco.languages.CompletionItem => ({
       label: completion.label,
