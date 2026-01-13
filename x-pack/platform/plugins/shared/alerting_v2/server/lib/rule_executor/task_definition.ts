@@ -14,7 +14,7 @@ import type { PluginConfig } from '../../config';
 import type { AlertingServerStartDependencies } from '../../types';
 import { createRuleExecutorTaskRunner } from './task_runner';
 
-export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting:esql' as const;
+export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting_v2:rule_executor' as const;
 
 export function initializeRuleExecutorTaskDefinition(
   logger: Logger,
