@@ -74,6 +74,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       cloudConnect: `${ELASTIC_DOCS}deploy-manage/cloud-connect`,
       connectToAutoops: `${ELASTIC_DOCS}deploy-manage/monitor/autoops/cc-autoops-as-cloud-connected`,
       deploymentSignup: `${ELASTIC_WEBSITE_URL}cloud/elasticsearch-service/signup`,
+      cloudPricing: `${ELASTIC_WEBSITE_URL}pricing`,
     },
     console: {
       guide: `${ELASTIC_DOCS}explore-analyze/query-filter/tools/console`,
