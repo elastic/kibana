@@ -18,6 +18,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/run_log_rate_analysis.spec.ts'));
     loadTestFile(require.resolve('./tools/get_log_categories.spec.ts'));
     loadTestFile(require.resolve('./tools/get_correlated_logs.spec.ts'));
+    loadTestFile(require.resolve('./tools/get_change_events.spec.ts'));
     loadTestFile(require.resolve('./tools/get_hosts.spec.ts'));
     loadTestFile(require.resolve('./tools/get_trace_metrics.spec.ts'));
     loadTestFile(require.resolve('./tools/get_log_change_points.spec.ts'));
