@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export const LLM_PROXY_HANDOVER_INTERCEPTOR = 'handover-to-answer';
-export const LLM_PROXY_FINAL_MESSAGE = 'final';
+import React from 'react';
+import { ConnectorsView } from '../components/connectors_view';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+
+export const ConnectorsPage: React.FC = () => {
+  useBreadcrumbs([]);
+  return <ConnectorsView />;
+};

@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
@@ -83,7 +84,9 @@ export function StreamDetailRoutingImpl() {
       },
     },
   } = useKibana();
+
   const { onPageReady } = usePerformanceContext();
+  const { timeState } = useTimefilter();
 
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, saveChanges } = useStreamRoutingEvents();
@@ -105,21 +108,25 @@ export function StreamDetailRoutingImpl() {
     [streamsRepositoryClient, definition] // Refetch streams when the definition changes
   );
 
+  const queryRangeSeconds = getTimeDifferenceInSeconds(timeState.timeRange);
+
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_partitioning] streamType: ${streamType}`,
         },
         customMetrics: {
           key1: 'available_streams_count',
           value1: streamsListFetch.value?.streams?.length ?? 0,
+          key2: 'queryRangeSeconds',
+          value2: queryRangeSeconds,
         },
       });
     }
-  }, [streamsListFetch, onPageReady, definition.stream]);
+  }, [streamsListFetch, onPageReady, definition.stream, queryRangeSeconds]);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
