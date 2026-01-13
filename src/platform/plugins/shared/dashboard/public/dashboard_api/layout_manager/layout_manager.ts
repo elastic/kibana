@@ -20,6 +20,7 @@ import {
   mergeMap,
   startWith,
   tap,
+  Subject,
   type Observable,
 } from 'rxjs';
 import { v4 } from 'uuid';
@@ -120,21 +121,19 @@ export function initializeLayoutManager(
     currentChildState[uuid] = state;
   };
 
-  const childrenWithUnsavedChanges$: Observable<string[]> = childrenUnsavedChanges$(children$).pipe(
-    tap((childrenWithChanges) => {
-      // propagate the latest serialized state back to the layout manager.
-      for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
-        const childApi = children$.value[uuid];
-        if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
-        setChildState(uuid, childApi.serializeState());
-      }
-    }),
-    map((childrenWithChanges) => {
-      return childrenWithChanges
+  const childrenWithUnsavedChanges$: Subject<string[]> = new Subject<string[]>();
+  const childChanges$ = childrenUnsavedChanges$(children$).subscribe((childrenWithChanges) => {
+    for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
+      const childApi = children$.value[uuid];
+      if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
+      setChildState(uuid, childApi.serializeState());
+    }
+    childrenWithUnsavedChanges$.next(
+      childrenWithChanges
         .filter(({ hasUnsavedChanges }) => hasUnsavedChanges)
-        .map(({ uuid }) => uuid);
-    })
-  );
+        .map(({ uuid }) => uuid)
+    );
+  });
 
   /** Observable that publishes `true` when all children APIs are available */
   const childrenLoading$ = combineLatest([children$, layout$, viewModeManager.api.viewMode$]).pipe(
@@ -675,6 +674,7 @@ export function initializeLayoutManager(
       },
     },
     cleanup: () => {
+      childChanges$.unsubscribe();
       gridLayoutSubscription.unsubscribe();
     },
   };
