@@ -58,6 +58,12 @@ export const getLegendActions = (
       return null;
     }
 
+    // Don't show filter actions for columns that don't belong to the index, related to ESQL new columns
+    const column = visData.columns[columnIndex];
+    if (column?.isIndexField === false) {
+      return null;
+    }
+
     const title = getFilterPopoverTitle(
       visParams,
       visData,
