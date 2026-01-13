@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -48,6 +48,13 @@ export const useDiscoverTopNav = ({
       }),
     [stateContainer, services, hasUnsavedChanges, topNavCustomization, isMobile]
   );
+
+  useEffect(() => {
+    services.chrome.setBreadcrumbsBadges(topNavBadges);
+    return () => {
+      services.chrome.setBreadcrumbsBadges([]);
+    };
+  }, [topNavBadges, services.chrome]);
 
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);

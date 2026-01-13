@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { i18n } from '@kbn/i18n';
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
@@ -35,7 +35,7 @@ export const getTopNavBadges = ({
   stateContainer: DiscoverStateContainer;
   services: DiscoverServices;
   topNavCustomization: TopNavCustomization | undefined;
-}): TopNavMenuBadgeProps[] => {
+}): ChromeBreadcrumbsBadge[] => {
   const saveDiscoverSession = (initialCopyOnSave?: boolean) =>
     onSaveDiscoverSession({
       initialCopyOnSave,
@@ -44,16 +44,19 @@ export const getTopNavBadges = ({
     });
 
   const defaultBadges = topNavCustomization?.defaultBadges;
-  const entries: TopNavMenuBadgeProps[] = [];
+  const entries: ChromeBreadcrumbsBadge[] = [];
 
   const isManaged = stateContainer.savedSearchState.getState().managed;
 
+  // Show solutions view badge if spaces is enabled and not on mobile
   if (services.spaces && !isMobile) {
     entries.push({
       badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
         defaultMessage: 'Check out context-aware Discover',
       }),
-      renderCustomBadge: ({ badgeText }) => <SolutionsViewBadge badgeText={badgeText} />,
+      renderCustomBadge: ({ badgeText }) => (
+        <SolutionsViewBadge badgeText={badgeText} services={services} />
+      ),
     });
   }
 

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import {
   UnsavedChangesBadge,
   type UnsavedChangesBadgeProps,
@@ -34,7 +34,7 @@ export const getTopNavUnsavedChangesBadge = ({
   onRevert,
   onSave,
   onSaveAs,
-}: TopNavUnsavedChangesBadgeParams): TopNavMenuBadgeProps => {
+}: TopNavUnsavedChangesBadgeParams): ChromeBreadcrumbsBadge => {
   return {
     badgeText: i18n.translate('unsavedChangesBadge.unsavedChangesTitle', {
       defaultMessage: 'Unsaved changes',

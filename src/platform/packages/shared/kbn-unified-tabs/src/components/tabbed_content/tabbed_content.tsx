@@ -10,7 +10,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { escapeRegExp, omit, debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { getTabMenuItemsFn } from '../../utils/get_tab_menu_items';
@@ -54,12 +55,27 @@ export interface TabbedContentProps
   getPreviewData?: (item: TabItem) => TabPreviewData;
   onEBTEvent: (event: TabsEBTEvent) => void;
   tabContentIdOverride?: string;
+  appendRight?: React.ReactNode;
 }
 
 export interface TabbedContentState {
   items: TabItem[];
   selectedItem: TabItem | null;
 }
+
+const VerticalRule = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span
+      css={css`
+        width: ${euiTheme.border.width.thin};
+        height: 28px;
+        background-color: ${euiTheme.colors.borderBasePlain};
+      `}
+    />
+  );
+};
 
 export const TabbedContent: React.FC<TabbedContentProps> = ({
   items: managedItems,
@@ -81,7 +97,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableInlineLabelEditing = false,
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
+  appendRight,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [generatedId] = useState(() => tabContentIdOverride ?? htmlIdGenerator()());
   const tabContentId = tabContentIdOverride ?? generatedId;
@@ -322,32 +340,64 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     });
   }, [state, maxItemsCount, onDuplicate, onCloseOtherTabs, onCloseTabsToTheRight]);
 
+  const tabsBarContainerCss = css`
+    background-color: ${euiTheme.colors.lightestShade};
+  `;
+
+  const tabsBarComponentCss = css`
+    min-width: 0; /* without this, TabsBar would push out AppMenu */
+  `;
+
+  const appendRightContainerCss = css`
+    margin-right: ${euiTheme.size.s};
+  `;
+
   const tabsBar = (
-    <TabsBar
-      ref={tabsBarApi}
-      items={items}
-      selectedItem={selectedItem}
-      recentlyClosedItems={recentlyClosedItems}
-      unsavedItemIds={unsavedItemIds}
-      maxItemsCount={maxItemsCount}
-      tabContentId={tabContentId}
-      getTabMenuItems={getTabMenuItems}
-      services={services}
-      onAdd={onAdd}
-      onLabelEdited={onLabelEdited}
-      onSelect={onSelect}
-      onSelectRecentlyClosed={onSelectRecentlyClosed}
-      onClearRecentlyClosed={onClearRecentlyClosed}
-      onReorder={onReorder}
-      onClose={onClose}
-      getPreviewData={getPreviewData}
-      onEBTEvent={onEBTEvent}
-      customNewTabButton={customNewTabButton}
-      disableCloseButton={disableCloseButton}
-      disableInlineLabelEditing={disableInlineLabelEditing}
-      disableDragAndDrop={disableDragAndDrop}
-      disableTabsBarMenu={disableTabsBarMenu}
-    />
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      wrap={false}
+      responsive={false}
+      css={tabsBarContainerCss}
+    >
+      <EuiFlexItem grow={false} css={tabsBarComponentCss}>
+        <TabsBar
+          ref={tabsBarApi}
+          items={items}
+          selectedItem={selectedItem}
+          recentlyClosedItems={recentlyClosedItems}
+          unsavedItemIds={unsavedItemIds}
+          maxItemsCount={maxItemsCount}
+          tabContentId={tabContentId}
+          getTabMenuItems={getTabMenuItems}
+          services={services}
+          onAdd={onAdd}
+          onLabelEdited={onLabelEdited}
+          onSelect={onSelect}
+          onSelectRecentlyClosed={onSelectRecentlyClosed}
+          onClearRecentlyClosed={onClearRecentlyClosed}
+          onReorder={onReorder}
+          onClose={onClose}
+          getPreviewData={getPreviewData}
+          onEBTEvent={onEBTEvent}
+          customNewTabButton={customNewTabButton}
+          disableCloseButton={disableCloseButton}
+          disableInlineLabelEditing={disableInlineLabelEditing}
+          disableDragAndDrop={disableDragAndDrop}
+          disableTabsBarMenu={disableTabsBarMenu}
+        />
+      </EuiFlexItem>
+      {appendRight ? (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <VerticalRule />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={appendRightContainerCss}>
+            {appendRight}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
+    </EuiFlexGroup>
   );
 
   if (!renderContent) {

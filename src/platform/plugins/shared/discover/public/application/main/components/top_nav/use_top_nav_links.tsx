@@ -10,7 +10,6 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
 import {
@@ -24,6 +23,7 @@ import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -35,7 +35,6 @@ import {
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
   getInspectAppMenuItem,
-  convertAppMenuItemToTopNavItem,
   getBackgroundSearchFlyout,
 } from './app_menu_actions';
 import type { TopNavCustomization } from '../../../../customizations';
@@ -78,7 +77,7 @@ export const useTopNavLinks = ({
   shouldShowESQLToDataViewTransitionModal: boolean;
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
-}): TopNavMenuData[] => {
+}): AppMenuConfig => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -234,19 +233,75 @@ export const useTopNavLinks = ({
     return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
-  return useMemo(() => {
-    const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
-      convertAppMenuItemToTopNavItem({
-        appMenuItem,
-        services,
-      })
-    );
+  return useMemo((): AppMenuConfig => {
+    const items: AppMenuConfig['items'] = [];
+    let orderCounter = 100;
+
+    // Map app menu registry items to AppMenuConfig items
+    appMenuRegistry.getSortedItems().forEach((appMenuItem) => {
+      if ('actions' in appMenuItem) {
+        // Submenu item - map to item with popover items
+        items.push({
+          id: appMenuItem.id,
+          label: appMenuItem.label,
+          iconType: 'boxesHorizontal', // default icon for submenu
+          testId: appMenuItem.testId,
+          order: orderCounter++,
+          items: appMenuItem.actions
+            .filter((action) => action.type !== 'submenuHorizontalRule')
+            .map((action, index) => ({
+              id: action.id,
+              label: 'controlProps' in action ? action.controlProps.label : '',
+              order: action.order ?? index * 100,
+              run:
+                'controlProps' in action && action.controlProps.onClick
+                  ? () =>
+                      action.controlProps.onClick?.({
+                        anchorElement: document.body,
+                        onFinishAction: () => {},
+                      })
+                  : () => {},
+              ...('controlProps' in action && action.controlProps.testId
+                ? { testId: action.controlProps.testId }
+                : {}),
+              ...('controlProps' in action &&
+              'iconType' in action.controlProps &&
+              action.controlProps.iconType
+                ? { iconType: action.controlProps.iconType }
+                : {}),
+            })),
+        });
+      } else {
+        // Simple item
+        const controlProps = appMenuItem.controlProps;
+        items.push({
+          id: appMenuItem.id,
+          label: controlProps.label,
+          iconType: 'iconType' in controlProps ? controlProps.iconType : 'empty',
+          testId: controlProps.testId,
+          order: orderCounter++,
+          run: controlProps.onClick
+            ? () =>
+                controlProps.onClick?.({
+                  anchorElement: document.body,
+                  onFinishAction: () => {},
+                })
+            : () => {},
+          ...(controlProps.href ? { href: controlProps.href } : {}),
+          ...(controlProps.tooltip ? { tooltipContent: controlProps.tooltip } : {}),
+          ...(controlProps.disableButton !== undefined
+            ? { disableButton: controlProps.disableButton }
+            : {}),
+          ...(controlProps.isLoading !== undefined ? { isLoading: controlProps.isLoading } : {}),
+        });
+      }
+    });
 
     if (services.uiSettings.get(ENABLE_ESQL)) {
       /**
        * Switches from ES|QL to classic mode and vice versa
        */
-      const esqLDataViewTransitionToggle = {
+      items.unshift({
         id: 'esql',
         label: isEsqlMode
           ? i18n.translate('discover.localMenu.switchToClassicTitle', {
@@ -255,10 +310,10 @@ export const useTopNavLinks = ({
           : i18n.translate('discover.localMenu.tryESQLTitle', {
               defaultMessage: 'Try ES|QL',
             }),
-        emphasize: true,
-        fill: false,
-        color: 'text',
-        tooltip: isEsqlMode
+        iconType: 'editorCodeBlock',
+        // fill: false,
+        // color: 'text',
+        tooltipContent: isEsqlMode
           ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
               defaultMessage: 'Switch to KQL or Lucene syntax.',
             })
@@ -289,36 +344,32 @@ export const useTopNavLinks = ({
           }
         },
         testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
-      };
-      entries.unshift(esqLDataViewTransitionToggle);
+        order: 0,
+      });
     }
 
     if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
-      const saveSearch = {
+      items.push({
         id: 'save',
         label: i18n.translate('discover.localMenu.saveTitle', {
           defaultMessage: 'Save',
         }),
-        description: i18n.translate('discover.localMenu.saveSearchDescription', {
-          defaultMessage: 'Save session',
-        }),
+        // description: i18n.translate('discover.localMenu.saveSearchDescription', {
+        //   defaultMessage: 'Save session',
+        // }),
         testId: 'discoverSaveButton',
         iconType: 'save',
-        emphasize: true,
-        run: (anchorElement: HTMLElement) => {
+        run: () => {
           onSaveDiscoverSession({
             services,
             state,
-            onClose: () => {
-              anchorElement?.focus();
-            },
           });
         },
-      };
-      entries.push(saveSearch);
+        order: 1000,
+      });
     }
 
-    return entries;
+    return { items };
   }, [
     appMenuRegistry,
     services,

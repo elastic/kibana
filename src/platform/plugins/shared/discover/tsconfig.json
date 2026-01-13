@@ -122,7 +122,6 @@
     "@kbn/controls-schemas",
     "@kbn/zod",
     "@kbn/cps",
-    "@kbn/app-menu"
   ],
   "exclude": ["target/**/*"]
 }

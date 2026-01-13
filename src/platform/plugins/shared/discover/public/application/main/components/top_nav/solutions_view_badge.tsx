@@ -13,10 +13,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import type { DiscoverServices } from '../../../../build_services';
 
-export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ badgeText }) => {
-  const services = useDiscoverServices();
+export const SolutionsViewBadge: FunctionComponent<{
+  badgeText: string;
+  services: DiscoverServices;
+}> = ({ badgeText, services }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const activeSpace$ = useMemo(
     () => services.spaces?.getActiveSpace$() ?? of(undefined),
@@ -25,15 +27,18 @@ export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ b
   const activeSpace = useObservable(activeSpace$);
   const canManageSpaces = services.capabilities.spaces?.manage === true;
 
-  // Do not render this component if one of the following conditions is met:
-  // 1. Solution visibility feature is disabled
-  // 2. Spaces is disabled (No active space available)
-  // 3. Active space is already configured to use a solution view other than "classic".
-  if (
-    !services.spaces?.isSolutionViewEnabled ||
-    !activeSpace ||
-    (activeSpace.solution && activeSpace.solution !== 'classic')
-  ) {
+  // Don't render if solution view is disabled
+  if (!services.spaces?.isSolutionViewEnabled) {
+    return null;
+  }
+
+  // Don't render if no active space data yet (loading)
+  if (!activeSpace) {
+    return null;
+  }
+
+  // Don't render if already using a non-classic solution view
+  if (activeSpace.solution && activeSpace.solution !== 'classic') {
     return null;
   }
 

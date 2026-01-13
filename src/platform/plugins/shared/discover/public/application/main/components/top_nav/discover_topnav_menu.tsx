@@ -14,9 +14,9 @@ import React, {
   useState,
   useLayoutEffect,
 } from 'react';
-import { type TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { useDiscoverTopNav } from './use_discover_topnav';
 
 /**
@@ -27,7 +27,7 @@ import type { useDiscoverTopNav } from './use_discover_topnav';
  */
 
 const createTopNavMenuContext = () => ({
-  topNavMenu$: new BehaviorSubject<TopNavMenuData[] | undefined>(undefined),
+  topNavMenu$: new BehaviorSubject<AppMenuConfig | undefined>(undefined),
 });
 
 type DiscoverTopNavMenuContext = ReturnType<typeof createTopNavMenuContext>;
