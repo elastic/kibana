@@ -175,19 +175,19 @@ export async function scheduleExtractEntityTasks({
 }
 
 export async function stopExtractEntityTasks({
-    taskManager,
-    logger,
-    entityTypes,
+  taskManager,
+  logger,
+  entityTypes,
 }: {
-    taskManager: TaskManagerStartContract;
-    logger: Logger;
-    entityTypes: EntityType[];
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+  entityTypes: EntityType[];
 }): Promise<string[]> {
-    const taskIds = entityTypes.map((entityType) => getTaskId(entityType));
+  const taskIds = entityTypes.map((entityType) => getTaskId(entityType));
 
-    const {statuses} = await taskManager.bulkRemove(taskIds);
-    const stoppedTasksIds = statuses.filter((status) => status.success).map((status) => status.id);
-    logger.debug(`Successfully stopped ${stoppedTasksIds.length} task(s)`);
+  const { statuses } = await taskManager.bulkRemove(taskIds);
+  const stoppedTasksIds = statuses.filter((status) => status.success).map((status) => status.id);
+  logger.debug(`Successfully stopped ${stoppedTasksIds.length} task(s)`);
 
-    return stoppedTasksIds;
+  return stoppedTasksIds;
 }

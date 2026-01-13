@@ -7,12 +7,12 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_type';
 import { scheduleExtractEntityTasks } from '../../tasks/extract_entity_task';
 import { wrapMiddlewares } from '../middleware';
-import { IKibanaResponse } from '@kbn/core-http-server';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
@@ -57,7 +57,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         });
 
         resourcesService.install(entityTypes);
-        
+
         return res.ok({
           body: {
             ok: true,
