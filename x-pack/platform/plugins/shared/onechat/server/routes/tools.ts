@@ -24,7 +24,12 @@ import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
-export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+export function registerToolsRoutes({
+  router,
+  getInternalServices,
+  logger,
+  analyticsService,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   // list tools API
@@ -178,6 +183,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const createRequest: CreateToolPayload = request.body;
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.create(createRequest);
+        analyticsService?.reportToolCreated({
+          toolId: createRequest.id,
+          toolType: createRequest.type,
+        });
         return response.ok<CreateToolResponse>({
           body: await toDescriptorWithSchema(tool),
         });
