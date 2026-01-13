@@ -13,6 +13,10 @@ import type { LoggerService } from '../logger_service/logger_service';
 interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
   index: string;
   docs: TDocument[];
+  /**
+   * Optional deterministic id factory.
+   */
+  getId?: (doc: TDocument, index: number) => string;
 }
 
 @injectable()
@@ -25,13 +29,14 @@ export class StorageService {
   public async bulkIndexDocs<TDocument extends Record<string, unknown>>({
     index,
     docs,
+    getId,
   }: BulkIndexDocsParams<TDocument>): Promise<void> {
     if (docs.length === 0) {
       return;
     }
 
-    const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc) => [
-      { index: { _index: index } },
+    const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc, i) => [
+      { index: { _index: index, ...(getId ? { _id: getId(doc, i) } : {}) } },
       doc,
     ]);
 

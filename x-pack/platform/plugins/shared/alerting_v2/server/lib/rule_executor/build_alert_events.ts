@@ -6,13 +6,10 @@
  */
 
 import { createHash } from 'crypto';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
-import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import stringify from 'json-stable-stringify';
 
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
-import type { LoggerService } from '../services/logger_service/logger_service';
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
@@ -51,12 +48,7 @@ function buildGrouping({
   };
 }
 
-export interface WriteEsqlAlertsOpts {
-  services: {
-    logger: LoggerService;
-    esClient: ElasticsearchClient;
-    dataStreamName: string;
-  };
+export interface BuildAlertEventsOpts {
   input: {
     ruleId: string;
     spaceId: string;
@@ -69,15 +61,14 @@ export interface WriteEsqlAlertsOpts {
   };
 }
 
-export async function writeEsqlAlerts({
-  services: { logger, esClient, dataStreamName },
+export function buildAlertEventsFromEsqlResponse({
   input: { ruleId, spaceId, ruleAttributes, esqlResponse, scheduledTimestamp },
-}: WriteEsqlAlertsOpts) {
+}: BuildAlertEventsOpts): Array<{ id: string; doc: Record<string, unknown> }> {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
 
   if (columns.length === 0 || values.length === 0) {
-    return { created: 0 };
+    return [];
   }
 
   // Stable per run to support retries without duplicating documents.
@@ -87,8 +78,7 @@ export async function writeEsqlAlerts({
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
   const source = 'internal';
-  const operations: Array<Record<string, unknown>> = values.flatMap((valueRow, i) => {
-    const row = valueRow;
+  return values.map((row, i) => {
     const rowDoc = rowToDocument(columns, row);
     const grouping = buildGrouping({
       rowDoc,
@@ -105,7 +95,7 @@ export async function writeEsqlAlerts({
     // Deterministic document id: hash(@timestamp + alert_series_id)
     const alertUuid = sha256(`${wroteAt}|${alertSeriesId}`);
 
-    const doc = {
+    const doc: Record<string, unknown> = {
       '@timestamp': wroteAt,
       scheduled_timestamp: scheduledTimestamp,
       rule: {
@@ -120,25 +110,7 @@ export async function writeEsqlAlerts({
       ...(ruleAttributes.tags?.length ? { tags: ruleAttributes.tags } : {}),
     };
 
-    return [{ create: { _index: dataStreamName, _id: alertUuid } }, doc];
+    return { id: alertUuid, doc };
   });
-
-  const res = await esClient.bulk({
-    index: dataStreamName,
-    refresh: false,
-    operations,
-  });
-
-  if (res.errors) {
-    const bulkResponse = res as unknown as BulkResponse;
-    const firstErr = bulkResponse.items.find((i) => i.create?.error)?.create?.error;
-    throw new Error(
-      `Failed to bulk index alerts to ${dataStreamName}: ${firstErr?.type ?? 'unknown'} ${
-        firstErr?.reason ?? ''
-      }`
-    );
-  }
-
-  logger.debug({ message: `Indexed ${values.length} ES|QL alerts into ${dataStreamName}` });
-  return { created: values.length };
 }
+

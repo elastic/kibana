@@ -7,24 +7,23 @@
 
 import { schema } from '@kbn/config-schema';
 import { PluginSetup } from '@kbn/core-di';
-import { CoreStart, PluginInitializer } from '@kbn/core-di-server';
+import { PluginInitializer } from '@kbn/core-di-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
-import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 
 import type { PluginConfig } from '../../config';
-import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { RuleExecutorTaskParams } from './types';
-import { executeEsqlRule } from './execute_esql';
 import { ALERT_EVENTS_INDEX } from './constants';
-import { writeEsqlAlerts } from './write_alerts';
+import { buildAlertEventsFromEsqlResponse } from './build_alert_events';
+import { getQueryPayload } from './get_query_payload';
 import { AlertingResourcesService } from '../services/alerting_resources_service';
 import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { QueryService } from '../services/query_service/query_service';
 import { TaskRunScopeService } from '../services/task_run_scope_service/task_run_scope_service';
 import { LoggerService } from '../services/logger_service/logger_service';
 import type { AlertingServerSetupDependencies } from '../../types';
+import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 
 export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting:esql' as const;
 
@@ -69,39 +68,96 @@ export class RuleExecutorTaskDefinition {
               // Wait for the plugin-wide resource initialization started during plugin setup.
               await resourcesService.waitUntilReady();
 
-              let ruleAttributes: RuleSavedObjectAttributes;
-              let esqlResponse: Awaited<ReturnType<typeof executeEsqlRule>>;
-              let esClient: ElasticsearchServiceStart['client']['asInternalUser'];
               const { services, dispose } = this.taskRunScopeService.getScopedServices(
                 fakeRequest,
-                [RulesSavedObjectService, QueryService, CoreStart('elasticsearch')] as const
+                [RulesSavedObjectService, QueryService, StorageServiceInternalToken] as const
               );
 
               try {
-                const [rulesSavedObjectService, queryService, elasticsearch] = services;
+                const [rulesSavedObjectService, queryService, storageService] = services;
 
-                const attrs = await rulesSavedObjectService.getRuleAttributes({
+                const ruleAttributes = await rulesSavedObjectService.getRuleAttributes({
                   id: params.ruleId,
                   spaceId: params.spaceId,
                 });
 
-                ruleAttributes = attrs;
-                esqlResponse = await executeEsqlRule({
-                  logger,
-                  queryService,
-                  abortController,
-                  rule: {
-                    id: params.ruleId,
+                logger.debug({
+                  message: () =>
+                    `Rule saved object attributes: ${JSON.stringify(ruleAttributes, null, 2)}`,
+                });
+
+                if (!ruleAttributes.enabled) {
+                  return { state: taskInstance.state };
+                }
+
+                const { filter, params: queryParams } = getQueryPayload({
+                  query: ruleAttributes.query,
+                  timeField: ruleAttributes.timeField,
+                  lookbackWindow: ruleAttributes.lookbackWindow,
+                });
+
+                logger.debug({
+                  message: () =>
+                    `executing ES|QL query for rule ${params.ruleId} in space ${
+                      params.spaceId
+                    } - ${JSON.stringify({
+                      query: ruleAttributes.query,
+                      filter,
+                      params: queryParams,
+                    })}`,
+                });
+
+                let esqlResponse: Awaited<ReturnType<QueryService['executeQuery']>>;
+                try {
+                  esqlResponse = await queryService.executeQuery({
+                    query: ruleAttributes.query,
+                    filter,
+                    params: queryParams,
+                    abortSignal: abortController.signal,
+                  });
+                } catch (error) {
+                  if (abortController.signal.aborted) {
+                    throw new Error('Search has been aborted due to cancelled execution');
+                  }
+                  throw error;
+                }
+
+                logger.debug({
+                  message: () =>
+                    `ES|QL response values: ${JSON.stringify(esqlResponse.values, null, 2)}`,
+                });
+
+                const targetDataStream = ALERT_EVENTS_INDEX;
+
+                const scheduledAt = taskInstance.scheduledAt;
+                const scheduledTimestamp =
+                  (typeof scheduledAt === 'string' ? scheduledAt : undefined) ??
+                  (taskInstance.startedAt instanceof Date
+                    ? taskInstance.startedAt.toISOString()
+                    : undefined) ??
+                  new Date().toISOString();
+
+                const alertDocs = buildAlertEventsFromEsqlResponse({
+                  input: {
+                    ruleId: params.ruleId,
                     spaceId: params.spaceId,
-                    name: attrs.name,
-                  },
-                  params: {
-                    query: attrs.query,
-                    timeField: attrs.timeField,
-                    lookbackWindow: attrs.lookbackWindow,
+                    ruleAttributes,
+                    esqlResponse,
+                    scheduledTimestamp,
                   },
                 });
-                esClient = (elasticsearch as ElasticsearchServiceStart).client.asInternalUser;
+
+                await storageService.bulkIndexDocs({
+                  index: targetDataStream,
+                  docs: alertDocs.map(({ doc }) => doc),
+                  getId: (_doc, i) => alertDocs[i].id,
+                });
+
+                logger.debug({
+                  message: `alerting_v2:esql run: ruleId=${params.ruleId} spaceId=${params.spaceId} alertsDataStream=${targetDataStream}`,
+                });
+
+                return { state: {} };
               } catch (e) {
                 if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
                   // Rule was deleted.
@@ -111,47 +167,6 @@ export class RuleExecutorTaskDefinition {
               } finally {
                 dispose();
               }
-
-              logger.debug({
-                message: () =>
-                  `Rule saved object attributes: ${JSON.stringify(ruleAttributes, null, 2)}`,
-              });
-
-              if (!ruleAttributes.enabled) {
-                return { state: taskInstance.state };
-              }
-
-              logger.debug({
-                message: () =>
-                  `ES|QL response values: ${JSON.stringify(esqlResponse.values, null, 2)}`,
-              });
-
-              const targetDataStream = ALERT_EVENTS_INDEX;
-
-              const scheduledAt = taskInstance.scheduledAt;
-              const scheduledTimestamp =
-                (typeof scheduledAt === 'string' ? scheduledAt : undefined) ??
-                (taskInstance.startedAt instanceof Date
-                  ? taskInstance.startedAt.toISOString()
-                  : undefined) ??
-                new Date().toISOString();
-
-              await writeEsqlAlerts({
-                services: { logger, esClient, dataStreamName: targetDataStream },
-                input: {
-                  ruleId: params.ruleId,
-                  spaceId: params.spaceId,
-                  ruleAttributes,
-                  esqlResponse,
-                  scheduledTimestamp,
-                },
-              });
-
-              logger.debug({
-                message: `alerting_v2:esql run: ruleId=${params.ruleId} spaceId=${params.spaceId} alertsDataStream=${targetDataStream}`,
-              });
-
-              return { state: {} };
             },
           };
         },
