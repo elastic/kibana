@@ -11,8 +11,10 @@ import type { ChangePointType } from '@kbn/es-types/src';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { intervalToSeconds } from '@kbn/apm-data-access-plugin/common/utils/get_preferred_bucket_size_and_data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { TRANSACTION_DURATION_SUMMARY } from '../../../../common/es_fields/apm';
-import { getLatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import {
+  getLatencyAggregationType,
+  LatencyAggregationType,
+} from '../../../../common/latency_aggregation_types';
 import { getLatencyAggregation } from '../../../lib/helpers/latency_aggregation_type';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
@@ -100,10 +102,15 @@ export async function getTraceChangePoints({
 
   const { rollupInterval, hasDurationSummaryField } = source;
   const documentType = source.documentType as DocumentType;
-  const durationField = getDurationFieldForTransactions(documentType, hasDurationSummaryField);
+  const latencyAggregationType = getLatencyAggregationType(latencyType);
+  // cant calculate percentile aggregation on transaction.duration.summary field
+  const useDurationSummaryField =
+    hasDurationSummaryField &&
+    latencyAggregationType !== LatencyAggregationType.p95 &&
+    latencyAggregationType !== LatencyAggregationType.p99;
+  const durationField = getDurationFieldForTransactions(documentType, useDurationSummaryField);
   const outcomeAggs = getOutcomeAggregation(documentType);
   const bucketSizeInSeconds = intervalToSeconds(rollupInterval);
-  const latencyAggregationType = getLatencyAggregationType(latencyType);
 
   const calculateFailedTransactionRate =
     'params.successful_or_failed != null && params.successful_or_failed > 0 ? (params.successful_or_failed - params.success) / params.successful_or_failed : 0';
@@ -132,15 +139,7 @@ export async function getTraceChangePoints({
             },
             aggs: {
               ...outcomeAggs,
-              latency:
-                // cant calculate percentile aggregation on transaction.duration.summary field
-                durationField === TRANSACTION_DURATION_SUMMARY
-                  ? {
-                      avg: {
-                        field: durationField,
-                      },
-                    }
-                  : getLatencyAggregation(latencyAggregationType, durationField).latency,
+              ...getLatencyAggregation(latencyAggregationType, durationField),
               failure_rate:
                 documentType === ApmDocumentType.ServiceTransactionMetric
                   ? {
