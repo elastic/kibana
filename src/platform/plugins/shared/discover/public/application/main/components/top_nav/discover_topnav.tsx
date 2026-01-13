@@ -91,6 +91,8 @@ export const DiscoverTopNav = ({
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
   const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
+  const renderAppMenuOutsideTabs =
+    stateContainer.customizationContext.displayMode !== 'embedded' && !tabsEnabled;
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -279,7 +281,11 @@ export const DiscoverTopNav = ({
 
   return (
     <span>
-      <DiscoverTopNavMenu topNavMenu={topNavMenu} />
+      <DiscoverTopNavMenu
+        topNavMenu={topNavMenu}
+        renderAppMenuOutsideTabs={renderAppMenuOutsideTabs}
+        setAppMenu={services.chrome.setAppMenu}
+      />
       <SearchBar
         useBackgroundSearchButton={
           stateContainer.customizationContext.displayMode !== 'embedded' &&

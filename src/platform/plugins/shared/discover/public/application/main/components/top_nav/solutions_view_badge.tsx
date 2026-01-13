@@ -27,18 +27,15 @@ export const SolutionsViewBadge: FunctionComponent<{
   const activeSpace = useObservable(activeSpace$);
   const canManageSpaces = services.capabilities.spaces?.manage === true;
 
-  // Don't render if solution view is disabled
-  if (!services.spaces?.isSolutionViewEnabled) {
-    return null;
-  }
-
-  // Don't render if no active space data yet (loading)
-  if (!activeSpace) {
-    return null;
-  }
-
-  // Don't render if already using a non-classic solution view
-  if (activeSpace.solution && activeSpace.solution !== 'classic') {
+  // Do not render this component if one of the following conditions is met:
+  // 1. Solution visibility feature is disabled
+  // 2. Spaces is disabled (No active space available)
+  // 3. Active space is already configured to use a solution view other than "classic".
+  if (
+    !services.spaces?.isSolutionViewEnabled ||
+    !activeSpace ||
+    (activeSpace.solution && activeSpace.solution !== 'classic')
+  ) {
     return null;
   }
 

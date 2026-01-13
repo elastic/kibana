@@ -17,6 +17,7 @@ import React, {
 import { BehaviorSubject } from 'rxjs';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { AppMenu } from '@kbn/core-chrome-app-menu';
 import type { useDiscoverTopNav } from './use_discover_topnav';
 
 /**
@@ -52,12 +53,20 @@ export const DiscoverTopNavMenuProvider = ({ children }: PropsWithChildren) => {
 
 export const DiscoverTopNavMenu = ({
   topNavMenu,
-}: Pick<ReturnType<typeof useDiscoverTopNav>, 'topNavMenu'>) => {
+  renderAppMenuOutsideTabs,
+  setAppMenu,
+}: Pick<ReturnType<typeof useDiscoverTopNav>, 'topNavMenu'> & {
+  renderAppMenuOutsideTabs: boolean;
+  setAppMenu: (config?: AppMenuConfig) => void;
+}) => {
   const { topNavMenu$ } = useContext(discoverTopNavMenuContext);
 
   useLayoutEffect(() => {
     topNavMenu$.next(topNavMenu);
   }, [topNavMenu, topNavMenu$]);
 
+  if (renderAppMenuOutsideTabs) {
+    return <AppMenu config={topNavMenu$.getValue()} setAppMenu={setAppMenu} />;
+  }
   return null;
 };
