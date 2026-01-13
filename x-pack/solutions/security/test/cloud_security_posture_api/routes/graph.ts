@@ -1102,40 +1102,46 @@ export default function (providerContext: FtrProviderContext) {
       describe('Enrich graph with entity metadata', () => {
         // Entity store is initialized once at the parent level to avoid race conditions
         // Tests run sequentially: first v1 (ENRICH), then v2 (LOOKUP JOIN)
+        // All enrichment tests run in a dedicated space called 'entities-space'
         const enrichPolicyCreationTimeout = 15000;
-        const customNamespaceId = 'test';
-        let dataView: ReturnType<typeof dataViewRouteHelpersFactory>;
-        let customSpaceDataView: ReturnType<typeof dataViewRouteHelpersFactory>;
+        const entitiesSpaceId = 'entities-space';
+        let entitiesSpaceDataView: ReturnType<typeof dataViewRouteHelpersFactory>;
 
         // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
+        // All tests run in the dedicated entities-space
         const runEnrichmentTests = () => {
           it('should contain entity data when asset inventory is enabled', async () => {
             await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
-              const response = await postGraph(supertest, {
-                query: {
-                  originEventIds: [],
-                  start: '2024-09-01T00:00:00Z',
-                  end: '2024-09-02T00:00:00Z',
-                  esQuery: {
-                    bool: {
-                      filter: [
-                        {
-                          match_phrase: {
-                            'user.entity.id': 'admin@example.com',
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                    esQuery: {
+                      bool: {
+                        filter: [
+                          {
+                            match_phrase: {
+                              'user.entity.id': 'admin@example.com',
+                            },
                           },
-                        },
-                      ],
-                      must_not: [
-                        {
-                          match_phrase: {
-                            'event.action': 'google.iam.admin.v1.UpdateRole',
+                        ],
+                        must_not: [
+                          {
+                            match_phrase: {
+                              'event.action': 'google.iam.admin.v1.UpdateRole',
+                            },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
                   },
                 },
-              }).expect(result(200));
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
 
               expect(response.body).to.have.property('nodes').length(3);
               expect(response.body).to.have.property('edges').length(2);
@@ -1192,7 +1198,7 @@ export default function (providerContext: FtrProviderContext) {
             });
           });
 
-          it('should return enriched data when asset inventory is enabled in a different space - multi target', async () => {
+          it('should return enriched data when asset inventory is enabled - multi target', async () => {
             await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
               const response = await postGraph(
                 supertest,
@@ -1205,7 +1211,7 @@ export default function (providerContext: FtrProviderContext) {
                   },
                 },
                 undefined,
-                customNamespaceId
+                entitiesSpaceId
               ).expect(result(200, logger));
 
               // Should have 3 nodes: 1 actor (single service), 1 grouped target (2 hosts), 1 label
@@ -1283,14 +1289,19 @@ export default function (providerContext: FtrProviderContext) {
 
           it('should enrich graph with entity metadata for actor acting on single target', async () => {
             await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
-              const response = await postGraph(supertest, {
-                query: {
-                  indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
-                  originEventIds: [{ id: 'entity-enrichment-event-id', isAlert: true }],
-                  start: '2024-09-10T14:00:00Z',
-                  end: '2024-09-10T15:00:00Z',
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                    originEventIds: [{ id: 'entity-enrichment-event-id', isAlert: true }],
+                    start: '2024-09-10T14:00:00Z',
+                    end: '2024-09-10T15:00:00Z',
+                  },
                 },
-              }).expect(result(200));
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
 
               expect(response.body).to.have.property('nodes').length(3);
               expect(response.body).to.have.property('edges').length(2);
@@ -1373,14 +1384,19 @@ export default function (providerContext: FtrProviderContext) {
 
           it('should enrich graph with multiple targets from different fields with mixed grouping', async () => {
             await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
-              const response = await postGraph(supertest, {
-                query: {
-                  indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
-                  originEventIds: [{ id: 'multi-target-mixed-event-id', isAlert: false }],
-                  start: '2024-09-11T09:00:00Z',
-                  end: '2024-09-11T11:00:00Z',
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                    originEventIds: [{ id: 'multi-target-mixed-event-id', isAlert: false }],
+                    start: '2024-09-11T09:00:00Z',
+                    end: '2024-09-11T11:00:00Z',
+                  },
                 },
-              }).expect(result(200));
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
 
               // Expected structure:
               // - 1 actor node (single user)
@@ -1524,86 +1540,62 @@ export default function (providerContext: FtrProviderContext) {
         };
 
         before(async () => {
-          // Clean up any leftover resources from previous runs
-          await cleanupEntityStore({ supertest, logger }); // default space
-          await cleanupEntityStore({ supertest, logger, spaceId: customNamespaceId }); // test space
+          // Clean up any leftover resources from previous runs in entities-space
+          await cleanupEntityStore({ supertest, logger, spaceId: entitiesSpaceId });
 
           // delete v2 index manually since its not being deleted by the cleanupEntityStore function
           try {
             await es.indices.delete({
-              index: getEntitiesLatestIndexName(),
-              ignore_unavailable: true,
-            });
-
-            await es.indices.delete({
-              index: getEntitiesLatestIndexName(customNamespaceId),
+              index: getEntitiesLatestIndexName(entitiesSpaceId),
               ignore_unavailable: true,
             });
           } catch (e) {
             // Ignore if index doesn't exist
           }
 
-          await spacesService.delete(customNamespaceId);
-          // Create a test space
+          // Delete and recreate the entities-space
+          await spacesService.delete(entitiesSpaceId);
           await spacesService.create({
-            id: customNamespaceId,
-            name: `${customNamespaceId} namespace`,
+            id: entitiesSpaceId,
+            name: 'Entities Space',
             solution: 'security',
             disabledFeatures: [],
           });
 
-          // Enable asset inventory setting in both default and test spaces
-          await kibanaServer.uiSettings.update({
-            'securitySolution:enableAssetInventory': true,
-          });
+          // Enable asset inventory setting in entities-space
           await kibanaServer.uiSettings.update(
             { 'securitySolution:enableAssetInventory': true },
-            { space: customNamespaceId }
+            { space: entitiesSpaceId }
           );
 
-          // Initialize security-solution-default data-view
-          dataView = dataViewRouteHelpersFactory(supertest);
-          await dataView.create('security-solution');
+          // Initialize security-solution data-view in entities-space
+          entitiesSpaceDataView = dataViewRouteHelpersFactory(supertest, entitiesSpaceId);
+          await entitiesSpaceDataView.create('security-solution');
 
-          // Initialize security-solution-test data-view
-          customSpaceDataView = dataViewRouteHelpersFactory(supertest, customNamespaceId);
-          await customSpaceDataView.create('security-solution');
-
-          // Initialize entity engine for 'generic' type ONCE - this is reused by both v1 and v2 tests
+          // Initialize entity engine for 'generic' type in entities-space
           await initEntityEnginesWithRetry({
             supertest,
             retry,
             logger,
             entityTypes: ['generic'],
-          });
-          await initEntityEnginesWithRetry({
-            supertest,
-            retry,
-            logger,
-            entityTypes: ['generic'],
-            spaceId: customNamespaceId,
+            spaceId: entitiesSpaceId,
           });
 
-          await installCloudAssetInventoryPackage({ supertest, logger });
+          await installCloudAssetInventoryPackage({ supertest, logger, spaceId: entitiesSpaceId });
         });
 
         after(async () => {
-          // Clean up entity store resources
-          await cleanupEntityStore({ supertest, logger }); // default space
-          await cleanupEntityStore({ supertest, logger, spaceId: customNamespaceId }); // test space
+          // Clean up entity store resources in entities-space
+          await cleanupEntityStore({ supertest, logger, spaceId: entitiesSpaceId });
 
-          // Disable asset inventory setting
-          await kibanaServer.uiSettings.update({
-            'securitySolution:enableAssetInventory': false,
-          });
+          // Disable asset inventory setting in entities-space
           await kibanaServer.uiSettings.update(
             { 'securitySolution:enableAssetInventory': false },
-            { space: customNamespaceId }
+            { space: entitiesSpaceId }
           );
 
-          await dataView.delete('security-solution');
-          await customSpaceDataView.delete('security-solution');
-          await spacesService.delete(customNamespaceId);
+          await entitiesSpaceDataView.delete('security-solution');
+          await spacesService.delete(entitiesSpaceId);
         });
 
         describe('via ENRICH policy (v1)', () => {
@@ -1617,17 +1609,13 @@ export default function (providerContext: FtrProviderContext) {
               es,
               logger,
               retry,
-              entitiesIndex: '.entities.v1.latest.security_*',
-              expectedCount: 12,
+              entitiesIndex: `.entities.v1.latest.security_generic_${entitiesSpaceId}`,
+              expectedCount: 11,
             });
 
-            // Wait for enrich policy to be created
-            await waitForEnrichPolicyCreated({ es, retry, logger });
-            await waitForEnrichPolicyCreated({ es, retry, logger, spaceId: customNamespaceId });
-
-            // Execute enrich policies to pick up entity data
-            await executeEnrichPolicy({ es, retry, logger });
-            await executeEnrichPolicy({ es, retry, logger, spaceId: customNamespaceId });
+            // Wait for enrich policy to be created and execute it
+            await waitForEnrichPolicyCreated({ es, retry, logger, spaceId: entitiesSpaceId });
+            await executeEnrichPolicy({ es, retry, logger, spaceId: entitiesSpaceId });
           });
 
           runEnrichmentTests();
@@ -1644,8 +1632,8 @@ export default function (providerContext: FtrProviderContext) {
               es,
               logger,
               retry,
-              entitiesIndex: '.entities.v2.latest.security_*',
-              expectedCount: 12,
+              entitiesIndex: `.entities.v2.latest.security_generic_${entitiesSpaceId}`,
+              expectedCount: 11,
             });
           });
 
