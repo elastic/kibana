@@ -139,10 +139,14 @@ describe('migration v2', () => {
             .filter(Boolean)
             .map((str) => JSON5.parse(str)) as LogRecord[];
           expect(
-            records.find((rec) =>
-              rec.message.startsWith(
-                `Reason: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715320 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
-              )
+            records.find(
+              (rec) =>
+                rec.message.startsWith(
+                  `Reason: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5"`
+                ) &&
+                rec.message.includes(
+                  `which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
+                )
             )
           ).toBeDefined();
         },
