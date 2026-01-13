@@ -46,6 +46,7 @@ const getOpenedTabsList = (
     checked: selectedTab && tab.id === selectedTab.id ? 'on' : undefined,
     key: tab.id,
     tabitem: tab,
+    title: undefined, // disable default title tooltip
   }));
 };
 
@@ -62,6 +63,7 @@ const getRecentlyClosedTabsList = (
       'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
       tabitem: tab,
       formattedtime: formattedTime,
+      title: undefined, // disable default title tooltip
     };
   });
 };
