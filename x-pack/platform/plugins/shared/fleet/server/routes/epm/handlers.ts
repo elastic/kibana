@@ -623,7 +623,10 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
     username,
     pkgName,
     pkgVersion,
+    request,
   });
+
+  console.log('secondaryAuth', secondaryAuth);
 
   const resp: Array<{ transformId: string; success: boolean; error: null | any }> =
     await handleTransformReauthorizeAndStart({

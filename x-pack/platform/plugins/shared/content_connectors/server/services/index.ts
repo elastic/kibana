@@ -195,6 +195,7 @@ export class AgentlessConnectorsInfraService {
       description: '',
       namespace: '',
       enabled: true,
+      policy_template: connector.service_type,
       inputs: {
         [`${connector.service_type}-${connectorsInputName}`]: {
           enabled: true,
