@@ -57,7 +57,9 @@ export const aiPromptStepDefinition = (
             },
           },
           {
+            name: 'extract_structured_response',
             includeRaw: true,
+            method: 'jsonMode',
           }
         );
 

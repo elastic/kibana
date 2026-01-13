@@ -241,7 +241,7 @@ describe('aiPromptStepDefinition', () => {
           ...mockContext,
           input: {
             ...mockContext.input,
-            outputSchema: {
+            schema: {
               type: 'object',
               properties: {
                 summary: { type: 'string' },
@@ -281,7 +281,9 @@ describe('aiPromptStepDefinition', () => {
             },
           },
           {
+            name: 'extract_structured_response',
             includeRaw: true,
+            method: 'jsonMode',
           }
         );
 
@@ -309,7 +311,7 @@ describe('aiPromptStepDefinition', () => {
           ...mockContext,
           input: {
             ...mockContext.input,
-            outputSchema: {
+            schema: {
               type: 'array',
               items: { type: 'string' },
             },
@@ -339,7 +341,11 @@ describe('aiPromptStepDefinition', () => {
               },
             },
           },
-          { includeRaw: true }
+          {
+            name: 'extract_structured_response',
+            includeRaw: true,
+            method: 'jsonMode',
+          }
         );
 
         expect(result).toEqual({
@@ -377,7 +383,7 @@ describe('aiPromptStepDefinition', () => {
           ...mockContext,
           input: {
             ...mockContext.input,
-            outputSchema: { type: 'object', properties: {} },
+            schema: { type: 'object', properties: {} },
           },
         };
 
