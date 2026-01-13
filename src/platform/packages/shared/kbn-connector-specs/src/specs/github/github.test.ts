@@ -135,42 +135,13 @@ describe('GithubConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
         params: {
           q: 'repo:owner/repo is:issue is:open',
+          per_page: 10,
         },
         headers: {
           Accept: 'application/vnd.github.v3+json',
         },
       });
-      expect(result).toEqual({
-        total_count: 2,
-        items: [
-          {
-            number: 1,
-            title: 'Issue 1',
-            state: 'open',
-            html_url: 'https://github.com/owner/repo/issues/1',
-            labels: [{ name: 'bug', color: 'd73a4a' }],
-            created_at: '2024-01-01T00:00:00Z',
-            updated_at: '2024-01-02T00:00:00Z',
-            comments: 5,
-            body: 'Issue description',
-            assignees: ['user1'],
-            milestone: null,
-          },
-          {
-            number: 2,
-            title: 'Issue 2',
-            state: 'open',
-            html_url: 'https://github.com/owner/repo/issues/2',
-            labels: [],
-            created_at: '2024-01-03T00:00:00Z',
-            updated_at: '2024-01-04T00:00:00Z',
-            comments: 0,
-            body: null,
-            assignees: [],
-            milestone: 'v1.0',
-          },
-        ],
-      });
+      expect(result).toEqual(mockResponse.data);
     });
 
     it('should search for issues with query', async () => {
@@ -206,17 +177,13 @@ describe('GithubConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
         params: {
           q: 'repo:owner/repo is:issue is:open bug',
+          per_page: 10,
         },
         headers: {
           Accept: 'application/vnd.github.v3+json',
         },
       });
-      expect((result as { total_count: number; items: Array<{ title: string }> }).total_count).toBe(
-        1
-      );
-      expect(
-        (result as { total_count: number; items: Array<{ title: string }> }).items[0].title
-      ).toBe('Bug fix');
+      expect(result).toEqual(mockResponse.data);
     });
 
     it('should search for pull requests', async () => {
@@ -251,17 +218,13 @@ describe('GithubConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
         params: {
           q: 'repo:owner/repo is:pr is:open',
+          per_page: 10,
         },
         headers: {
           Accept: 'application/vnd.github.v3+json',
         },
       });
-      expect((result as { total_count: number; items: Array<{ title: string }> }).total_count).toBe(
-        1
-      );
-      expect(
-        (result as { total_count: number; items: Array<{ title: string }> }).items[0].title
-      ).toBe('PR 1');
+      expect(result).toEqual(mockResponse.data);
     });
 
     it('should handle invalid search query', async () => {

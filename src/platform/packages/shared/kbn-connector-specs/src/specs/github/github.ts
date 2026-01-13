@@ -66,69 +66,17 @@ export const GithubConnector: ConnectorSpec = {
 
         if (typedInput.query) queryParts.push(typedInput.query);
 
-        const params: { q: string } = {
-          q: queryParts.join(' '),
-        };
-
         const response = await ctx.client.get('https://api.github.com/search/issues', {
-          params,
+          params: {
+            q: queryParts.join(' '),
+            per_page: 10,
+          },
           headers: {
             Accept: 'application/vnd.github.v3+json',
           },
         });
 
-        // Transform response to only include essential fields for determining if worth investigating
-        const transformedItems = response.data.items.map(
-          (item: {
-            number: number;
-            title: string;
-            state: string;
-            html_url: string;
-            labels: Array<{ name: string; color?: string }>;
-            created_at: string;
-            updated_at: string;
-            comments: number;
-            body: string | null;
-            assignees: Array<{ login: string }>;
-            milestone: { title: string } | null;
-          }) => ({
-            number: item.number,
-            title: item.title,
-            state: item.state,
-            html_url: item.html_url,
-            labels: item.labels.map((label) => ({ name: label.name, color: label.color })),
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-            comments: item.comments,
-            body: item.body,
-            assignees: item.assignees.map((assignee) => assignee.login),
-            milestone: item.milestone?.title ?? null,
-          })
-        );
-
-        const searchIssuesResponseSchema = z.object({
-          total_count: z.number(),
-          items: z.array(
-            z.object({
-              number: z.number(),
-              title: z.string(),
-              state: z.string(),
-              html_url: z.string(),
-              labels: z.array(z.object({ name: z.string(), color: z.string().optional() })),
-              created_at: z.string(),
-              updated_at: z.string(),
-              comments: z.number(),
-              body: z.string().nullable(),
-              assignees: z.array(z.string()),
-              milestone: z.string().nullable(),
-            })
-          ),
-        });
-
-        return searchIssuesResponseSchema.parse({
-          total_count: response.data.total_count,
-          items: transformedItems,
-        });
+        return response.data;
       },
     },
     searchRepoContents: {

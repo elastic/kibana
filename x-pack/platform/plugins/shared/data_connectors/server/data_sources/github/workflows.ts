@@ -7,7 +7,7 @@
 export function generateGithubSearchIssuesOrPullRequestsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.github.search_issues_or_pull_requests'
-description: 'Search for issues or pull requests in a GitHub repository'
+description: 'Search for issues or pull requests in a GitHub repository. Returns up to 10 results per search. The first page of results contains the most relevant matches - do not paginate through subsequent pages as they are unlikely to be relevant to your query.'
 enabled: true
 triggers:
   - type: 'manual'
