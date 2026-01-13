@@ -15,7 +15,7 @@ import type { ServiceMapEdgeData } from './transform_data';
 const SERVICE_NODE_SIZE = 100;
 const DEPENDENCY_NODE_SIZE = 80;
 
-export type LayoutDirection = 'TB' | 'BT' | 'LR' | 'RL';
+export type LayoutDirection = 'LR' | 'TB';
 
 export interface LayoutOptions {
   /** Direction of the graph layout */
@@ -53,22 +53,17 @@ function getHandlePositions(direction: LayoutDirection): {
   sourcePosition: Position;
   targetPosition: Position;
 } {
-  switch (direction) {
-    case 'TB': // Top to Bottom
-      return { sourcePosition: Position.Bottom, targetPosition: Position.Top };
-    case 'BT': // Bottom to Top
-      return { sourcePosition: Position.Top, targetPosition: Position.Bottom };
-    case 'RL': // Right to Left
-      return { sourcePosition: Position.Left, targetPosition: Position.Right };
-    case 'LR': // Left to Right (default)
-    default:
-      return { sourcePosition: Position.Right, targetPosition: Position.Left };
+  if (direction === 'TB') {
+    // Top to Bottom (vertical)
+    return { sourcePosition: Position.Bottom, targetPosition: Position.Top };
   }
+  // Left to Right (horizontal, default)
+  return { sourcePosition: Position.Right, targetPosition: Position.Left };
 }
 
 /**
  * Apply Dagre layout to position nodes in a directed graph
- * Supports multiple orientations: LR, RL, TB, BT
+ * Supports horizontal (LR) and vertical (TB) orientations
  */
 export function applyLayout(
   nodes: Node<ServiceMapNodeData>[],

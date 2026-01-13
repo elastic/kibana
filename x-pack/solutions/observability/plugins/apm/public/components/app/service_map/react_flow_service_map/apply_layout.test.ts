@@ -179,32 +179,6 @@ describe('applyLayout', () => {
       expect(nodeA!.position.y).toBeLessThan(nodeB!.position.y);
     });
 
-    it('should respect custom rankdir option for BT (bottom-to-top)', () => {
-      const nodes = [createServiceNode('service-a'), createServiceNode('service-b')];
-      const edges = [createEdge('service-a', 'service-b')];
-
-      const result = applyLayout(nodes, edges, { rankdir: 'BT' });
-
-      const nodeA = result.nodes.find((n) => n.id === 'service-a');
-      const nodeB = result.nodes.find((n) => n.id === 'service-b');
-
-      // In BT layout, service-a (source) should be below service-b (target)
-      expect(nodeA!.position.y).toBeGreaterThan(nodeB!.position.y);
-    });
-
-    it('should respect custom rankdir option for RL (right-to-left)', () => {
-      const nodes = [createServiceNode('service-a'), createServiceNode('service-b')];
-      const edges = [createEdge('service-a', 'service-b')];
-
-      const result = applyLayout(nodes, edges, { rankdir: 'RL' });
-
-      const nodeA = result.nodes.find((n) => n.id === 'service-a');
-      const nodeB = result.nodes.find((n) => n.id === 'service-b');
-
-      // In RL layout, service-a (source) should be to the right of service-b (target)
-      expect(nodeA!.position.x).toBeGreaterThan(nodeB!.position.x);
-    });
-
     it('should respect custom nodesep option', () => {
       const nodes = [
         createServiceNode('gateway'),
@@ -316,26 +290,6 @@ describe('applyLayout', () => {
 
       expect(result.nodes[0].sourcePosition).toBe(Position.Bottom);
       expect(result.nodes[0].targetPosition).toBe(Position.Top);
-    });
-
-    it('should set correct handle positions for RL layout', () => {
-      const nodes = [createServiceNode('service-a')];
-      const edges: Edge<ServiceMapEdgeData>[] = [];
-
-      const result = applyLayout(nodes, edges, { rankdir: 'RL' });
-
-      expect(result.nodes[0].sourcePosition).toBe(Position.Left);
-      expect(result.nodes[0].targetPosition).toBe(Position.Right);
-    });
-
-    it('should set correct handle positions for BT layout', () => {
-      const nodes = [createServiceNode('service-a')];
-      const edges: Edge<ServiceMapEdgeData>[] = [];
-
-      const result = applyLayout(nodes, edges, { rankdir: 'BT' });
-
-      expect(result.nodes[0].sourcePosition).toBe(Position.Top);
-      expect(result.nodes[0].targetPosition).toBe(Position.Bottom);
     });
   });
 
