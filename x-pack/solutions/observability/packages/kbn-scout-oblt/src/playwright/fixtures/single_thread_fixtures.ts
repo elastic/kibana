@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { test as base, apiTest as apiBase } from '@kbn/scout';
+import { test as base, apiTest as apiBase, mergeTests } from '@kbn/scout';
 import type { ApiServicesFixture } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
 import { ObltApiServicesFixture, ObltTestFixtures, ObltWorkerFixtures } from './types';
+import { profilingSetupFixture } from './worker/profiling/profiling_setup_fixture';
 
 /**
  * Should be used for the test spec files executed seqentially.
@@ -43,7 +44,7 @@ export const test = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
   ],
 });
 
-export const apiTest = apiBase.extend<ObltApiServicesFixture>({
+const apiFixture = apiBase.extend<ObltApiServicesFixture>({
   apiServices: [
     async (
       { apiServices }: { apiServices: ApiServicesFixture },
@@ -57,3 +58,5 @@ export const apiTest = apiBase.extend<ObltApiServicesFixture>({
     { scope: 'worker' },
   ],
 });
+
+export const apiTest = mergeTests(apiFixture, profilingSetupFixture);
