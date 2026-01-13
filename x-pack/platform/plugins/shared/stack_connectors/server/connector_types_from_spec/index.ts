@@ -7,16 +7,30 @@
 
 import { type PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
-import { connectorsSpecs } from '@kbn/connector-specs';
+import { type ConnectorSpec, connectorsSpecs } from '@kbn/connector-specs';
 import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
+
+const GATED_CONNECTOR_SPECS: Record<string, keyof ExperimentalFeatures> = {
+  '.snyk': 'snykConnectorOn',
+};
+
+function isSpecEnabled(spec: ConnectorSpec, experimentalFeatures: ExperimentalFeatures): boolean {
+  const flag = GATED_CONNECTOR_SPECS[spec.metadata.id];
+  return experimentalFeatures[flag] ?? false;
+}
 
 export function registerConnectorTypesFromSpecs({
   actions,
+  experimentalFeatures,
 }: {
   actions: ActionsPluginSetupContract;
+  experimentalFeatures: ExperimentalFeatures;
 }) {
   // Register connector specs
   for (const spec of Object.values(connectorsSpecs)) {
-    actions.registerType(createConnectorTypeFromSpec(spec, actions));
+    if (isSpecEnabled(spec, experimentalFeatures)) {
+      actions.registerType(createConnectorTypeFromSpec(spec, actions));
+    }
   }
 }

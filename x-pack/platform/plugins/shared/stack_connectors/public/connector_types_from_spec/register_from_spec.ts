@@ -12,20 +12,31 @@ import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { getIcon } from './get_icon';
 import {
   createConnectorFormSerializer,
   createConnectorFormDeserializer,
 } from './connector_form_serializers';
 
+const GATED_CONNECTOR_SPECS: Record<string, keyof ExperimentalFeatures> = {
+  '.snyk': 'snykConnectorOn',
+};
+
+function isSpecEnabled(spec: ConnectorSpec, experimentalFeatures: ExperimentalFeatures): boolean {
+  const flag = GATED_CONNECTOR_SPECS[spec.metadata.id];
+  return flag ? experimentalFeatures[flag] === true : true;
+}
+
 export function registerConnectorTypesFromSpecs({
   connectorTypeRegistry,
   uiSettingsPromise,
-  isEarsEnabled,
+  experimentalFeatures,
 }: {
   connectorTypeRegistry: TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'];
   uiSettingsPromise: Promise<IUiSettingsClient>;
   isEarsEnabled: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }) {
   // TODO: Clean this up when workflows:ui:enabled setting is removed.
   // This is a workaround to avoid making the whole thing async.
@@ -53,9 +64,11 @@ export function registerConnectorTypesFromSpecs({
     ),
   ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
     for (const spec of Object.values(connectorsSpecs)) {
-      connectorTypeRegistry.register(
-        createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema, isEarsEnabled)
-      );
+      if (isSpecEnabled(spec, experimentalFeatures)) {
+        connectorTypeRegistry.register(
+          createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema, isEarsEnabled)
+        );
+      }
     }
   });
 }
