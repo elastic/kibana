@@ -35,7 +35,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
   return {
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const titlesManager = initializeTitleManager(state);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -45,10 +45,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
 
       function serializeState() {
         return {
-          rawState: {
-            ...selections.getLatestState(),
-          },
-          references: [],
+          ...selections.getLatestState(),
         };
       }
 
@@ -64,8 +61,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
           };
         },
         onReset: (lastSaved) => {
-          selections.reinitializeState(lastSaved?.rawState);
-          titlesManager.reinitializeState(lastSaved?.rawState);
+          selections.reinitializeState(lastSaved);
+          titlesManager.reinitializeState(lastSaved);
         },
       });
 
