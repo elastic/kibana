@@ -356,70 +356,120 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('with alternative error severity formats', () => {
-      before(async () => {
-        await indexCorrelatedLogs({
-          logsEsClient: logsSynthtraceEsClient,
-          logs: [
-            {
-              level: 'info',
-              message: 'Syslog request started',
-              'service.name': 'syslog-service',
-              'trace.id': 'syslog-trace',
-              'syslog.severity': 6,
-            },
-            {
-              level: 'info',
-              message: 'Syslog error occurred',
-              'service.name': 'syslog-service',
-              'trace.id': 'syslog-trace',
-              'syslog.severity': 3,
-            },
+      // Tests that errors are detected via alternative severity formats only (not log.level)
+      // Each describe block ingests logs with only a single severity format
 
-            {
-              level: 'info',
-              message: 'OpenTelemetry request started',
-              'service.name': 'otel-service',
-              'request.id': 'otel-req',
-              SeverityNumber: 9,
-            },
-            {
-              level: 'info',
-              message: 'OpenTelemetry error occurred',
-              'service.name': 'otel-service',
-              'request.id': 'otel-req',
-              SeverityNumber: 17,
-            },
-
-            {
-              level: 'info',
-              message: 'HTTP request started',
-              'service.name': 'http-service',
-              'correlation.id': 'http-corr',
-              'http.response.status_code': 200,
-            },
-            {
-              level: 'info',
-              message: 'HTTP error occurred',
-              'service.name': 'http-service',
-              'correlation.id': 'http-corr',
-              'http.response.status_code': 500,
-            },
-          ],
+      // Syslog severity: 0=Emergency, 1=Alert, 2=Critical, 3=Error, 4=Warning, 5=Notice, 6=Info, 7=Debug
+      describe('syslog.severity', () => {
+        before(async () => {
+          await indexCorrelatedLogs({
+            logsEsClient: logsSynthtraceEsClient,
+            logs: [
+              {
+                level: 'debug', // neutral value that won't trigger error detection
+                message: 'Syslog request started',
+                'service.name': 'syslog-service',
+                'trace.id': 'syslog-trace',
+                'syslog.severity': 6, // info
+              },
+              {
+                level: 'debug', // neutral value that won't trigger error detection
+                message: 'Syslog error occurred',
+                'service.name': 'syslog-service',
+                'trace.id': 'syslog-trace',
+                'syslog.severity': 3, // error
+              },
+            ],
+          });
         });
-      });
 
-      [
-        { service: 'syslog-service', format: 'syslog.severity (≤3)' },
-        { service: 'otel-service', format: 'OpenTelemetry SeverityNumber (≥17)' },
-        { service: 'http-service', format: 'HTTP status codes (≥500)' },
-      ].forEach(({ service, format }) => {
-        it(`detects errors using ${format}`, async () => {
+        it('detects errors using syslog.severity (≤4)', async () => {
           const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
             id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
             params: {
               start: 'now-10m',
               end: 'now',
-              kqlFilter: `service.name: "${service}"`,
+              kqlFilter: 'service.name: "syslog-service"',
+            },
+          });
+
+          const { sequences } = results[0].data;
+          expect(sequences.length).to.be(1);
+          expect(sequences[0].logs.length).to.be(2);
+        });
+      });
+
+      // OpenTelemetry SeverityNumber: 1-4=Trace, 5-8=Debug, 9-12=Info, 13-16=Warn, 17-20=Error, 21-24=Fatal
+      describe('OpenTelemetry SeverityNumber', () => {
+        before(async () => {
+          await indexCorrelatedLogs({
+            logsEsClient: logsSynthtraceEsClient,
+            logs: [
+              {
+                level: 'debug', // neutral value that won't trigger error detection
+                message: 'OpenTelemetry request started',
+                'service.name': 'otel-service',
+                'request.id': 'otel-req',
+                SeverityNumber: 9, // info
+              },
+              {
+                level: 'debug', // neutral value that won't trigger error detection
+                message: 'OpenTelemetry error occurred',
+                'service.name': 'otel-service',
+                'request.id': 'otel-req',
+                SeverityNumber: 17, // error
+              },
+            ],
+          });
+        });
+
+        it('detects errors using SeverityNumber (≥13)', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+            id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+            params: {
+              start: 'now-10m',
+              end: 'now',
+              kqlFilter: 'service.name: "otel-service"',
+            },
+          });
+
+          const { sequences } = results[0].data;
+          expect(sequences.length).to.be(1);
+          expect(sequences[0].logs.length).to.be(2);
+        });
+      });
+
+      // HTTP status codes: 2xx=Success, 4xx=Client error, 5xx=Server error
+      describe('HTTP status codes', () => {
+        before(async () => {
+          await indexCorrelatedLogs({
+            logsEsClient: logsSynthtraceEsClient,
+            logs: [
+              {
+                level: 'debug', // neutral value that won't trigger error detection
+                message: 'HTTP request started',
+                'service.name': 'http-service',
+                'correlation.id': 'http-corr',
+                'http.response.status_code': 200, // success
+              },
+              {
+                level: 'debug', // neutral value that won't trigger error detection
+                message: 'HTTP error occurred',
+                'service.name': 'http-service',
+                'correlation.id': 'http-corr',
+                'http.response.status_code': 500, // server error
+              },
+            ],
+          });
+        });
+
+        it('detects errors using http.response.status_code (≥500)', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+            id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+            params: {
+              start: 'now-10m',
+              end: 'now',
+              kqlFilter: 'service.name: "http-service"',
             },
           });
 
