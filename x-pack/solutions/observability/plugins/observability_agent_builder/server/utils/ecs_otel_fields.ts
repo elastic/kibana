@@ -76,6 +76,11 @@ export function warningAndAboveLogFilter(): QueryDslQueryContainer {
         // Error fields present
         { exists: { field: 'error.type' } },
         { exists: { field: 'error.code' } },
+        // Log exception fields (aliased to attributes.exception.* in OTel)
+        // Per OTel spec, at least one of message or type must be set
+        // https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/
+        { exists: { field: 'error.exception.message' } },
+        { exists: { field: 'error.exception.type' } },
       ],
       minimum_should_match: 1,
     },

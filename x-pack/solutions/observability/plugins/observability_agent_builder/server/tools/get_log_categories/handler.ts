@@ -81,7 +81,11 @@ export async function getToolHandler({
       fields,
       field: 'message',
     }),
-    // OTel exception events - these are always high severity (no log.level, uses event_name: "exception")
+    // OTel span exception events: Unlike ECS, OTel has no "error" document type. Exceptions are
+    // recorded as span events (via span.RecordException()) identified by event_name, not severity
+    // fields. Therefore there is no alias from `message` to `exception.message`, so we must query
+    // and categorize on `exception.message` explicitly.
+    // https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/
     getLogCategories({
       esClient,
       logsIndices,
