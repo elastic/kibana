@@ -22,13 +22,17 @@ function getEsErrorStatusCode(error: unknown): number | undefined {
   return error instanceof errors.ResponseError ? error.meta.statusCode : undefined;
 }
 
+export interface IRetryService {
+  retry<T>(callback: () => Promise<T>): Promise<T>;
+}
+
 /**
  * Retry wrapper used by alerting_v2 services.
  *
  * Note: RetryService instances keep internal attempt state; create a new one per operation.
  */
 @injectable()
-export class AlertingRetryService {
+export class AlertingRetryService implements IRetryService {
   constructor(@inject(LoggerToken) private readonly logger: KibanaLogger) {}
 
   public async retry<T>(callback: () => Promise<T>): Promise<T> {

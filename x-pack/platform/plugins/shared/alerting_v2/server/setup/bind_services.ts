@@ -19,10 +19,12 @@ import {
   StorageServiceScopedToken,
 } from '../lib/services/storage_service/tokens';
 import type { AlertingServerStartDependencies } from '../types';
+import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
+  bind(RetryServiceToken).toService(AlertingRetryService);
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(ResourceManager).toSelf().inSingletonScope();

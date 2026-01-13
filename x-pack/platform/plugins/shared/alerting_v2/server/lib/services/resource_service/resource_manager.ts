@@ -7,12 +7,13 @@
 
 import { inject, injectable } from 'inversify';
 
-import { AlertingRetryService } from '../retry_service/alerting_retry_service';
-import type { ResourceInitializer } from './resource_initializer';
+import type { IRetryService } from '../retry_service/alerting_retry_service';
+import type { IResourceInitializer } from './resource_initializer';
 import { LoggerService } from '../logger_service/logger_service';
+import { RetryServiceToken } from '../retry_service/tokens';
 
 interface ResourceState {
-  initializer?: ResourceInitializer;
+  initializer?: IResourceInitializer;
   promise?: Promise<void>;
   error?: Error;
   status: 'not_started' | 'pending' | 'ready' | 'failed';
@@ -25,7 +26,7 @@ export class ResourceManager {
 
   constructor(
     @inject(LoggerService) private readonly logger: LoggerService,
-    @inject(AlertingRetryService) private readonly retryService: AlertingRetryService
+    @inject(RetryServiceToken) private readonly retryService: IRetryService
   ) {}
 
   /**
@@ -34,7 +35,7 @@ export class ResourceManager {
    * A resource can later be initialized either at startup (via `startInitialization()`)
    * or on-demand (via `ensureResourceReady()`).
    */
-  public registerResource(key: string, initializer: ResourceInitializer): void {
+  public registerResource(key: string, initializer: IResourceInitializer): void {
     const existing = this.resources.get(key);
     if (
       existing?.status === 'pending' ||

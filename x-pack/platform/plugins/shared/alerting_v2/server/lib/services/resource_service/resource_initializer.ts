@@ -13,6 +13,10 @@ import type {
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/types';
 
+export interface IResourceInitializer {
+  initialize(): Promise<void>;
+}
+
 export interface ResourceInitializerOptions {
   esClient: ElasticsearchClient;
   resourceDefinition: ResourceDefinition;
@@ -24,7 +28,7 @@ function getEsErrorStatusCode(error: unknown): number | undefined {
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
-export class ResourceInitializer {
+export class ResourceInitializer implements IResourceInitializer {
   constructor(
     private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
