@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiTablePagination,
   EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -177,7 +178,16 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
             <SourceIcon source={source} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s">{name}</EuiText>
+            {onEdit ? (
+              <EuiLink
+                onClick={() => onEdit(source)}
+                data-test-subj={`activeSourceNameLink-${source.id}`}
+              >
+                <EuiText size="s">{name}</EuiText>
+              </EuiLink>
+            ) : (
+              <EuiText size="s">{name}</EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
