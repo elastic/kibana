@@ -11,7 +11,7 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
-import { DATA_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerApp } from './register';
 import type {
   DataConnectorsPluginSetup,
@@ -33,10 +33,8 @@ export class DataConnectorsPlugin
   setup(
     core: CoreSetup<DataConnectorsPluginStartDependencies, DataConnectorsPluginStart>
   ): DataConnectorsPluginSetup {
-    const isDataConnectorsEnabled = core.settings.client.get<boolean>(
-      DATA_CONNECTORS_ENABLED_SETTING_ID
-    );
-    if (isDataConnectorsEnabled) {
+    const isDataSourcesEnabled = core.settings.client.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID);
+    if (isDataSourcesEnabled) {
       registerApp({ core });
     }
     return {};
