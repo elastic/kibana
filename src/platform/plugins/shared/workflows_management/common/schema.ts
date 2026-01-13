@@ -86,31 +86,33 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
  * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
  */
 function getRegisteredStepDefinitions(): BaseConnectorContract[] {
-  return stepSchemas.getAllRegisteredStepDefinitions().map((stepDefinition) => {
-    const definition = {
-      type: stepDefinition.id,
-      paramsSchema: stepDefinition.inputSchema,
-      outputSchema: stepDefinition.outputSchema,
-      configSchema: stepDefinition.configSchema,
-      summary: null,
-      description: null,
-    };
-
-    if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-      // Only public step definitions have documentation and examples
-      return {
-        ...definition,
-        summary: stepDefinition.label,
-        description: stepDefinition.description ?? null,
-        documentation: stepDefinition.documentation?.url,
-        examples: stepDefinition.documentation?.examples
-          ? { snippet: stepDefinition.documentation?.examples.join('\n') }
-          : undefined,
-        propertyHandlers: stepDefinition.editorHandlers,
+  return stepSchemas
+    .getAllRegisteredStepDefinitions()
+    .map((stepDefinition): BaseConnectorContract => {
+      const definition = {
+        type: stepDefinition.id,
+        paramsSchema: stepDefinition.inputSchema,
+        outputSchema: stepDefinition.outputSchema,
+        configSchema: stepDefinition.configSchema,
+        summary: null,
+        description: null,
       };
-    }
-    return definition;
-  });
+
+      if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
+        // Only public step definitions have documentation and examples
+        return {
+          ...definition,
+          summary: stepDefinition.label,
+          description: stepDefinition.description ?? null,
+          documentation: stepDefinition.documentation?.url,
+          examples: stepDefinition.documentation?.examples
+            ? { snippet: stepDefinition.documentation?.examples.join('\n') }
+            : undefined,
+          editorHandlers: stepDefinition.editorHandlers,
+        };
+      }
+      return definition;
+    });
 }
 
 /**

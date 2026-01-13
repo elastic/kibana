@@ -394,8 +394,8 @@ export interface BaseConnectorContract {
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {
-    config?: Record<string, StepPropertyHandler>;
-    input?: Record<string, StepPropertyHandler>;
+    config?: Record<string, StepPropertyHandler | undefined>;
+    input?: Record<string, StepPropertyHandler | undefined>;
   };
 }
 
