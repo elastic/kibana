@@ -24,7 +24,6 @@ import {
   getAncestors,
   getParentId,
 } from '@kbn/streams-schema';
-import type { AssetClient } from './assets/asset_client';
 import type { QueryClient } from './assets/query/query_client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
@@ -34,11 +33,11 @@ import {
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
-import type { FeatureClient } from './feature/feature_client';
 import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
+import type { SystemClient } from './system/system_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -72,11 +71,10 @@ export class StreamsClient {
     private readonly dependencies: {
       lockManager: LockManagerService;
       scopedClusterClient: IScopedClusterClient;
-      assetClient: AssetClient;
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
+      systemClient: SystemClient;
       storageClient: StreamsStorageClient;
-      featureClient: FeatureClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
@@ -220,8 +218,8 @@ export class StreamsClient {
         }
       );
 
-      const { assetClient, attachmentClient, storageClient } = this.dependencies;
-      await Promise.all([assetClient.clean(), attachmentClient.clean(), storageClient.clean()]);
+      const { attachmentClient, queryClient, storageClient } = this.dependencies;
+      await Promise.all([queryClient.clean(), attachmentClient.clean(), storageClient.clean()]);
     }
 
     if (elasticsearchStreamsEnabled) {

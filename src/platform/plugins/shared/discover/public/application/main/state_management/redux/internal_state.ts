@@ -154,6 +154,17 @@ export const internalStateSlice = createSlice({
       state.tabsBarVisibility = action.payload;
     },
 
+    markNonActiveTabsForRefetch: (state) => {
+      // Mark all non-active tabs to refetch on selection
+      // Used when projectRouting changes in CPS Manager
+      const currentTabId = state.tabs.unsafeCurrentId;
+      state.tabs.allIds.forEach((tabId) => {
+        if (tabId !== currentTabId && state.tabs.byId[tabId]) {
+          state.tabs.byId[tabId].forceFetchOnSelect = true;
+        }
+      });
+    },
+
     setExpandedDoc: (
       state,
       action: PayloadAction<{
@@ -502,6 +513,20 @@ const createMiddleware = (options: InternalStateDependencies) => {
           );
         }
       });
+    },
+  });
+
+  startListening({
+    actionCreator: initializeTabs.fulfilled,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+
+      // Initialize CPS manager with session-level projectRouting after state is updated
+      if (services.cps?.cpsManager) {
+        services.cps.cpsManager.setProjectRouting(
+          services.cps.cpsManager.getDefaultProjectRouting()
+        );
+      }
     },
   });
 

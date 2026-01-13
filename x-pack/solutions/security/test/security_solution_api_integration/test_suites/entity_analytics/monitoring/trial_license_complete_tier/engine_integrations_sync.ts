@@ -7,12 +7,10 @@
 
 import expect from 'expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
-  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const privMonUtils = PrivMonUtils(getService);
 
@@ -27,7 +25,6 @@ export default ({ getService }: FtrProviderContext) => {
         await privMonUtils.integrationsSync.updateIntegrationsUsersWithRelativeTimestamps({
           indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
         });
-        await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
       });
 
@@ -37,7 +34,6 @@ export default ({ getService }: FtrProviderContext) => {
         );
         // delete the okta index
         await api.deleteMonitoringEngine({ query: { data: true } });
-        await disablePrivmonSetting(kibanaServer);
       });
 
       it('should sync integrations during update detection ', async () => {

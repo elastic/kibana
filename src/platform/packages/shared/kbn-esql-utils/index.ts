@@ -63,6 +63,7 @@ export {
   getEditorExtensions,
   hasDateBreakdown,
   getProjectRoutingFromEsqlQuery,
+  hasOnlySourceCommand,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

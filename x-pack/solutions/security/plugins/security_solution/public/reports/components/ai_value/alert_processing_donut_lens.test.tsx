@@ -56,7 +56,7 @@ describe('AlertProcessingDonut', () => {
         applyGlobalQueriesAndFilters: false,
         height: 250,
         width: '100%',
-        id: 'open',
+        id: 'aiValueAlertProcessingDonut-:r0:',
         isDonut: true,
         donutTitleLabel: 'Total alerts processed',
         donutTextWrapperClassName: 'donutText',
@@ -130,5 +130,18 @@ describe('AlertProcessingDonut', () => {
       attackAlertIds: [],
       spaceId: 'test-space-id',
     });
+  });
+  it('returns a unique embeddable id per instance', () => {
+    render(
+      <>
+        <AlertProcessingDonut {...defaultProps} />
+        <AlertProcessingDonut {...defaultProps} />
+      </>
+    );
+
+    const firstCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const secondCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[1][0];
+
+    expect(firstCallArgs.id).not.toEqual(secondCallArgs.id);
   });
 });

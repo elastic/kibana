@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/ai-agent-confirmation-modal'
   - '@kbn/product-doc-common'
   - '@kbn/react-kibana-mount'
+  - '@kbn/agent-builder-common'
 tags:
   - plugin
   - prod

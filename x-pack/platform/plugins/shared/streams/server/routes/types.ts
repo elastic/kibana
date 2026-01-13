@@ -14,9 +14,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ContentClient } from '../lib/content/content_client';
-import type { AssetClient } from '../lib/streams/assets/asset_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
-import type { AssetService } from '../lib/streams/assets/asset_service';
 import type { QueryClient } from '../lib/streams/assets/query/query_client';
 import type { StreamsClient } from '../lib/streams/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
@@ -25,6 +23,7 @@ import type { FeatureClient } from '../lib/streams/feature/feature_client';
 import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
 import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
+import type { SystemClient } from '../lib/streams/system/system_client';
 
 export type GetScopedClients = ({
   request,
@@ -35,10 +34,10 @@ export type GetScopedClients = ({
 export interface RouteHandlerScopedClients {
   scopedClusterClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
-  assetClient: AssetClient;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   featureClient: FeatureClient;
+  systemClient: SystemClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   queryClient: QueryClient;
@@ -49,7 +48,6 @@ export interface RouteHandlerScopedClients {
 }
 
 export interface RouteDependencies {
-  assets: AssetService;
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;

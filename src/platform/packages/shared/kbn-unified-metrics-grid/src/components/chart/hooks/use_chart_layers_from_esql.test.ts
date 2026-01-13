@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useChartLayersFromEsql } from './use_chart_layers_from_esql';
 import * as esqlModule from '@kbn/esql-utils';
 import * as esqlHook from '../../../hooks';
@@ -24,6 +24,18 @@ jest.mock('@kbn/esql-utils', () => ({
 jest.mock('../../../hooks', () => ({
   useEsqlQueryInfo: jest.fn(),
 }));
+
+const createDeferred = <T>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+};
 
 const getESQLQueryColumnsMock = esqlModule.getESQLQueryColumns as jest.MockedFunction<
   typeof esqlModule.getESQLQueryColumns
@@ -49,6 +61,7 @@ describe('useChartLayers', () => {
 
   it('returns empty yAxis if no columns', async () => {
     getESQLQueryColumnsMock.mockResolvedValue([]);
+
     useEsqlQueryInfoMock.mockReturnValue({
       dimensions: [],
       columns: [],
@@ -68,7 +81,7 @@ describe('useChartLayers', () => {
     );
 
     await waitFor(() => {
-      expect(result.current).toHaveLength(0);
+      expect(result.current.layers).toHaveLength(0);
     });
   });
 
@@ -78,6 +91,7 @@ describe('useChartLayers', () => {
       { name: 'value', meta: { type: 'number' }, id: 'value' },
       { name: 'service.name', meta: { type: 'string' }, id: 'service.name' },
     ]);
+
     useEsqlQueryInfoMock.mockReturnValue({
       dimensions: ['service.name'],
       columns: [],
@@ -97,10 +111,10 @@ describe('useChartLayers', () => {
     );
 
     await waitFor(() => {
-      expect(result.current).toHaveLength(1);
+      expect(result.current.layers).toHaveLength(1);
     });
 
-    const layer = result.current[0];
+    const layer = result.current.layers[0];
     expect(layer.xAxis).toStrictEqual({ field: '@timestamp', type: 'dateHistogram' });
     expect(layer.yAxis).toHaveLength(1);
     expect(layer.yAxis[0].label).toBe('value');
@@ -115,6 +129,7 @@ describe('useChartLayers', () => {
       { name: 'value', meta: { type: 'number' }, id: 'value' },
       { name: DIMENSIONS_COLUMN, meta: { type: 'string' }, id: DIMENSIONS_COLUMN },
     ]);
+
     useEsqlQueryInfoMock.mockReturnValue({
       dimensions: ['service.name', 'host.name'],
       columns: [],
@@ -134,10 +149,10 @@ describe('useChartLayers', () => {
     );
 
     await waitFor(() => {
-      expect(result.current).toHaveLength(1);
+      expect(result.current.layers).toHaveLength(1);
     });
 
-    const layer = result.current[0];
+    const layer = result.current.layers[0];
     expect(layer.xAxis).toStrictEqual({ field: '@timestamp', type: 'dateHistogram' });
     expect(layer.yAxis).toHaveLength(1);
     expect(layer.yAxis[0].label).toBe('value');
@@ -170,12 +185,81 @@ describe('useChartLayers', () => {
     );
 
     await waitFor(() => {
-      expect(result.current).toHaveLength(1);
+      expect(result.current.layers).toHaveLength(1);
     });
 
-    expect(result.current[0].xAxis).toStrictEqual({
+    expect(result.current.layers[0].xAxis).toStrictEqual({
       field: 'timestamp_field',
       type: 'dateHistogram',
     });
+  });
+
+  it('sets loading to true while columns request is pending', async () => {
+    const deferred = createDeferred<any[]>();
+
+    getESQLQueryColumnsMock.mockReturnValue(deferred.promise as any);
+
+    useEsqlQueryInfoMock.mockReturnValue({
+      dimensions: [],
+      columns: [],
+      metricField: '',
+      indices: [],
+      filters: [],
+    });
+
+    const { result } = renderHook(() =>
+      useChartLayersFromEsql({
+        query: 'FROM metrics-*',
+        timeRange,
+        seriesType: 'line',
+        services: mockServices.services,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(true);
+    });
+
+    expect(result.current.layers).toEqual([]);
+    expect(result.current.error).toBeUndefined();
+
+    await act(async () => {
+      deferred.resolve([]);
+      await deferred.promise;
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+  });
+
+  it('exposes error when columns request fails', async () => {
+    const columnsError = new Error('Columns request failed');
+
+    getESQLQueryColumnsMock.mockRejectedValue(columnsError);
+
+    useEsqlQueryInfoMock.mockReturnValue({
+      dimensions: [],
+      columns: [],
+      metricField: '',
+      indices: [],
+      filters: [],
+    });
+
+    const { result } = renderHook(() =>
+      useChartLayersFromEsql({
+        query: 'FROM metrics-*',
+        timeRange,
+        seriesType: 'line',
+        services: mockServices.services,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe(columnsError);
+    });
+
+    expect(result.current.layers).toEqual([]);
   });
 });

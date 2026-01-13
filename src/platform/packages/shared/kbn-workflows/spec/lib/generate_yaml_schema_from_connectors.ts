@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { type ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
+  DataSetStepSchema,
   getForEachStepSchema,
   getHttpStepSchema,
   getIfStepSchema,
@@ -20,6 +21,7 @@ import {
   getWorkflowSettingsSchema,
   WaitStepSchema,
   WorkflowSchema,
+  WorkflowSettingsSchema,
 } from '../schema';
 
 export function getStepId(stepName: string): string {
@@ -39,6 +41,7 @@ export function generateYamlSchemaFromConnectors(
 
   if (loose) {
     return WorkflowSchema.partial().extend({
+      settings: WorkflowSettingsSchema.optional(),
       steps: z.array(recursiveStepSchema).optional(),
     });
   }
@@ -76,6 +79,7 @@ function createRecursiveStepSchema(
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
+      DataSetStepSchema,
       httpSchema,
       ...connectorSchemas,
     ]);

@@ -1,10 +1,11 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
+  agentBuilder: 79354
   agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 13590
   aiops: 15359
-  alerting: 26932
+  alerting: 22371
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
@@ -20,8 +21,8 @@ pageLoadAssetSize:
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
-  cloudSecurityPosture: 19900
-  console: 31271
+  cloudSecurityPosture: 19745
+  console: 31192
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
@@ -42,10 +43,10 @@ pageLoadAssetSize:
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
   dataViews: 65000
-  dataVisualizer: 32800
+  dataVisualizer: 32797
   developerToolbar: 4467
   devTools: 8109
-  discover: 26000
+  discover: 28752
   discoverEnhanced: 5660
   discoverShared: 2322
   elasticAssistant: 338870
@@ -53,7 +54,8 @@ pageLoadAssetSize:
   embeddable: 18432
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
-  enterpriseSearch: 41839
+  enterpriseSearch: 40244
+  entityStore: 4075
   esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -92,7 +94,7 @@ pageLoadAssetSize:
   inspectComponent: 4900
   inspector: 17954
   interactiveSetup: 36524
-  intercepts: 21246
+  intercepts: 21066
   kibanaOverview: 6339
   kibanaReact: 22503
   kibanaUsageCollection: 1736
@@ -106,12 +108,11 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 3905
+  maintenanceWindows: 8783
   management: 12951
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44988
-  metricsExperience: 6655
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
@@ -119,14 +120,13 @@ pageLoadAssetSize:
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
-  observabilityAgentBuilder: 7079
+  observabilityAgentBuilder: 7077
   observabilityAIAssistant: 54556
   observabilityAIAssistantApp: 18012
-  observabilityAiAssistantManagement: 7438
+  observabilityAiAssistantManagement: 7126
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 88464
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
@@ -149,7 +149,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 6150
-  searchGettingStarted: 7327
+  searchGettingStarted: 6682
   searchHomepage: 7962
   searchIndices: 9991
   searchInferenceEndpoints: 8071
@@ -165,17 +165,17 @@ pageLoadAssetSize:
   securitySolutionServerless: 52082
   serverless: 7451
   serverlessObservability: 19472
-  serverlessSearch: 26393
-  serverlessWorkplaceAI: 6736
+  serverlessSearch: 26314
+  serverlessWorkplaceAI: 6645
   sessionView: 47912
   share: 58677
   slo: 36645
   snapshotRestore: 22068
-  spaces: 30665
+  spaces: 30016
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
-  streamsApp: 27784
+  streamsApp: 27134
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -207,6 +207,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 61264
+  workflowsExtensions: 77926
   workflowsManagement: 8497
   workplaceAIApp: 6135

@@ -15,7 +15,11 @@ import type {
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
-import { internalStateActions, useInternalStateDispatch } from '../state_management/redux';
+import {
+  internalStateActions,
+  useInternalStateDispatch,
+  useInternalStateSelector,
+} from '../state_management/redux';
 import { useActiveContexts } from '../../../context_awareness/hooks';
 
 export function useInspector({
@@ -25,6 +29,9 @@ export function useInspector({
   inspector: InspectorPublicPluginStart;
   stateContainer: DiscoverStateContainer;
 }) {
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
   const dispatch = useInternalStateDispatch();
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
@@ -54,16 +61,16 @@ export function useInspector({
           },
         }),
       },
-      { title: stateContainer.savedSearchState.getTitle() }
+      { title: persistedDiscoverSession?.title }
     );
 
     setInspectorSession(session);
   }, [
     dispatch,
-    stateContainer.dataState.inspectorAdapters,
-    stateContainer.savedSearchState,
-    inspector,
     getContextsAdapter,
+    inspector,
+    persistedDiscoverSession?.title,
+    stateContainer.dataState.inspectorAdapters,
   ]);
 
   useEffect(() => {

@@ -33,6 +33,8 @@ import {
   getInferenceEndpoints,
   getEditorExtensions,
   fixESQLQueryWithVariables,
+  prettifyQuery,
+  hasOnlySourceCommand,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -121,6 +123,7 @@ const ESQLEditorInternal = function ESQLEditor({
   formLabel,
   mergeExternalMessages,
   hideQuickSearch,
+  openVisorOnSourceCommands,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -192,6 +195,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
   const isVisorOpenRef = useRef(isVisorOpen);
+  const hasOpenedVisorOnMount = useRef(false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -201,6 +205,20 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+
+  // Open visor on initial render if query has only source commands
+  useEffect(() => {
+    if (
+      openVisorOnSourceCommands &&
+      !hasOpenedVisorOnMount.current &&
+      code &&
+      hasOnlySourceCommand(code)
+    ) {
+      setIsVisorOpen(true);
+      hasOpenedVisorOnMount.current = true;
+    }
+  }, [code, openVisorOnSourceCommands]);
+
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -257,6 +275,16 @@ const ESQLEditorInternal = function ESQLEditor({
     },
     [onQuerySubmit, onQueryUpdate, telemetryService]
   );
+
+  const onPrettifyQuery = useCallback(() => {
+    const qs = editorRef.current?.getValue();
+    if (qs) {
+      const prettyCode = prettifyQuery(qs);
+      if (qs !== prettyCode) {
+        onQueryUpdate(prettyCode);
+      }
+    }
+  }, [onQueryUpdate]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editorRef?.current?.getSelection();
@@ -343,9 +371,10 @@ const ESQLEditorInternal = function ESQLEditor({
 
     const { lineNumber, column } = position;
     const lineContent = model.getLineContent(lineNumber);
-    const charBeforeCursor = column > 1 ? lineContent[column - 2] : '';
+    const spaceHasBeenTyped = column > 1 && lineContent[column - 2] === ' ';
+    const inlineCastHasBeenTyped = lineContent.substring(0, column - 1).endsWith('::');
 
-    if (charBeforeCursor === ' ') {
+    if (spaceHasBeenTyped || inlineCastHasBeenTyped) {
       triggerSuggestions();
     }
   }, [triggerSuggestions]);
@@ -365,6 +394,14 @@ const ESQLEditorInternal = function ESQLEditor({
         // date picker is out of the editor
         absoluteLeft = absoluteLeft - DATEPICKER_WIDTH;
       }
+
+      // Set time picker date to the nearest half hour
+      setTimePickerDate(
+        moment()
+          .minute(Math.round(moment().minute() / 30) * 30)
+          .second(0)
+          .millisecond(0)
+      );
 
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
       datePickerOpenStatusRef.current = true;
@@ -1095,7 +1132,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     // Add editor key bindings
-                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor);
+                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor, onPrettifyQuery);
 
                     // Store disposables for cleanup
                     const currentEditor = editorRef.current;
@@ -1206,7 +1243,7 @@ const ESQLEditorInternal = function ESQLEditor({
         code={code}
         onErrorClick={onErrorClick}
         onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
-        updateQuery={onQueryUpdate}
+        onPrettifyQuery={onPrettifyQuery}
         detectedTimestamp={detectedTimestamp}
         hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}

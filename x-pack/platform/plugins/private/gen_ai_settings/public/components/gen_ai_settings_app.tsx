@@ -27,6 +27,7 @@ import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
@@ -43,9 +44,15 @@ interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 
+const TELEMETRY_SOURCE = 'stack_management' as const;
+
+const isAIChatExperience = (value: unknown): value is AIChatExperience =>
+  typeof value === 'string' &&
+  (value === AIChatExperience.Classic || value === AIChatExperience.Agent);
+
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks, productDocBase } = services;
+  const { application, http, docLinks, productDocBase, analytics } = services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -113,8 +120,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         <p>
           <FormattedMessage
             id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can use the Elastic Managed LLM ({atAdditionalCost}) or configure a third-party connector. 
-              When you set a default AI connector, it is pre-selected for all of these features in this space. 
+            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can use the Elastic Managed LLM ({atAdditionalCost}) or configure a third-party connector.
+              When you set a default AI connector, it is pre-selected for all of these features in this space.
               If you haven't set a default, the most recently used connector is selected automatically. {manageConnectors}`}
             values={{
               manageConnectors: (
@@ -217,8 +224,61 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   ]);
 
   async function handleSave() {
+    const savedChatExperience = isAIChatExperience(chatExperienceField?.savedValue)
+      ? chatExperienceField.savedValue
+      : undefined;
+    const defaultChatExperience = isAIChatExperience(chatExperienceField?.defaultValue)
+      ? (chatExperienceField.defaultValue as AIChatExperience)
+      : undefined;
+    const unsavedChatExperience = isAIChatExperience(
+      unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue
+    )
+      ? (unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue as AIChatExperience)
+      : undefined;
+    const normalizedSavedChatExperience = savedChatExperience ?? AIChatExperience.Classic;
+
+    // Telemetry should compare the effective "before" and "after" values.
+    // - "before" should include the default if there is no saved value.
+    // - "after" should reflect the unsaved change, or fall back to "before" if unchanged.
+    const telemetryBeforeChatExperience =
+      savedChatExperience ?? defaultChatExperience ?? AIChatExperience.Classic;
+    const telemetryAfterChatExperience = unsavedChatExperience ?? telemetryBeforeChatExperience;
+    const shouldTrackOptInConfirmed =
+      telemetryBeforeChatExperience !== AIChatExperience.Agent &&
+      telemetryAfterChatExperience === AIChatExperience.Agent;
+    const shouldTrackOptOut =
+      telemetryBeforeChatExperience === AIChatExperience.Agent &&
+      telemetryAfterChatExperience !== AIChatExperience.Agent;
+
     const needsReload = await saveAll();
+    if (shouldTrackOptInConfirmed) {
+      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
+        action: 'confirmed',
+        source: TELEMETRY_SOURCE,
+      });
+    }
+    if (shouldTrackOptOut) {
+      analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptOut, {
+        source: TELEMETRY_SOURCE,
+      });
+    }
     if (needsReload) {
+      // Only skip `step_reached` after reload if it could have been reported on this page load.
+      // This prevents suppressing the Agent -> Classic transition, where `step_reached` should be
+      // emitted after reload.
+      const shouldSkipStepReachedOnReload =
+        normalizedSavedChatExperience === AIChatExperience.Classic &&
+        !(savedChatExperience === undefined && defaultChatExperience === AIChatExperience.Agent);
+
+      if (shouldSkipStepReachedOnReload) {
+        try {
+          // We reload the page after saving; without this one-shot flag, `ChatExperience` would emit
+          // `step_reached` both before and after the reload.
+          window.sessionStorage.setItem('gen_ai_settings:skip_step_reached_once', `${Date.now()}`);
+        } catch {
+          // ignore
+        }
+      }
       window.location.reload();
     }
   }
