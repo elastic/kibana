@@ -78,9 +78,7 @@ export function createAddAnomalyChartsPanelAction(
               onConfirm={(initialState) => {
                 presentationContainerParent.addNewPanel({
                   panelType: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-                  serializedState: {
-                    rawState: initialState,
-                  },
+                  serializedState: initialState,
                 });
                 closeFlyout();
               }}
