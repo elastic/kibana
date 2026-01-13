@@ -8,5 +8,4 @@
  */
 
 export const ITEM_HEIGHT = 40;
-export const SHOW_MORE_HEIGHT = 40;
 export const INITIAL_MAX_NUMBER_OF_FIELDS = 7;

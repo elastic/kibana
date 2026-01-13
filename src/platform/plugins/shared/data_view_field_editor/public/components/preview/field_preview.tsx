@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiResizeObserver, EuiFieldSearch, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiFieldSearch, EuiCallOut } from '@elastic/eui';
 
 import { useFieldPreviewContext } from './field_preview_context';
 import { FieldPreviewHeader } from './field_preview_header';
@@ -28,7 +28,6 @@ const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview
 const isPreviewAvailableSelector = (state: PreviewState) => state.isPreviewAvailable;
 
 export const FieldPreview = () => {
-  const [fieldListHeight, setFieldListHeight] = useState(-1);
   const [searchValue, setSearchValue] = useState('');
 
   const {
@@ -56,10 +55,6 @@ export const FieldPreview = () => {
 
   const doRenderListOfFields = fetchDocError === null;
   const showWarningPreviewNotAvailable = isPreviewAvailable === false && fetchDocError === null;
-
-  const onFieldListResize = useCallback(({ height }: { height: number }) => {
-    setFieldListHeight(height);
-  }, []);
 
   const renderFieldsToPreview = () => {
     if (fields.length === 0) {
@@ -146,19 +141,10 @@ export const FieldPreview = () => {
                   {renderFieldsToPreview()}
 
                   {/* List of other fields in the document */}
-                  <EuiResizeObserver onResize={onFieldListResize}>
-                    {(resizeRef) => (
-                      <div ref={resizeRef} css={{ flex: 1 }}>
-                        <PreviewFieldList
-                          height={fieldListHeight}
-                          clearSearch={() => setSearchValue('')}
-                          searchValue={searchValue}
-                          // We add a key to force rerender the virtual list whenever the window height changes
-                          key={fieldListHeight}
-                        />
-                      </div>
-                    )}
-                  </EuiResizeObserver>
+                  <PreviewFieldList
+                    clearSearch={() => setSearchValue('')}
+                    searchValue={searchValue}
+                  />
                 </>
               )}
             </>
