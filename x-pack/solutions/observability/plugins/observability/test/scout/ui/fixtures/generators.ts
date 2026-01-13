@@ -115,7 +115,7 @@ export async function generateRulesData(apiServices: ApiServicesFixture) {
         alertOnGroupDisappear: false,
         searchConfiguration: {
           query: { query: '', language: 'kuery' },
-          index: { title: '.alerts-*' },
+          index: 'default-alerts-data-view',
         },
       },
       schedule: { interval: '1m' },
