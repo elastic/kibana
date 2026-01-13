@@ -6349,6 +6349,22 @@
                       }
                     }
                   }
+                },
+                "count_with_kql_filter": {
+                  "properties": {
+                    "record": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using record result type with a KQL filter"
+                      }
+                    },
+                    "influencer": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using influencer result type with a KQL filter"
+                      }
+                    }
+                  }
                 }
               }
             },
