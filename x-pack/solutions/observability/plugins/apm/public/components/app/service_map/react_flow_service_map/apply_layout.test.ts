@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Edge, Node } from '@xyflow/react';
+import { type Edge, type Node, Position } from '@xyflow/react';
 import type { ServiceMapNodeData } from './service_node';
 import type { ServiceMapEdgeData } from './transform_data';
 import { applyLayout } from './apply_layout';
@@ -166,11 +166,10 @@ describe('applyLayout', () => {
   });
 
   describe('when using custom layout options', () => {
-    it('should respect custom rankdir option', () => {
+    it('should respect custom rankdir option for TB (top-to-bottom)', () => {
       const nodes = [createServiceNode('service-a'), createServiceNode('service-b')];
       const edges = [createEdge('service-a', 'service-b')];
 
-      // Top-to-bottom layout
       const result = applyLayout(nodes, edges, { rankdir: 'TB' });
 
       const nodeA = result.nodes.find((n) => n.id === 'service-a');
@@ -178,6 +177,32 @@ describe('applyLayout', () => {
 
       // In TB layout, service-a (source) should be above service-b (target)
       expect(nodeA!.position.y).toBeLessThan(nodeB!.position.y);
+    });
+
+    it('should respect custom rankdir option for BT (bottom-to-top)', () => {
+      const nodes = [createServiceNode('service-a'), createServiceNode('service-b')];
+      const edges = [createEdge('service-a', 'service-b')];
+
+      const result = applyLayout(nodes, edges, { rankdir: 'BT' });
+
+      const nodeA = result.nodes.find((n) => n.id === 'service-a');
+      const nodeB = result.nodes.find((n) => n.id === 'service-b');
+
+      // In BT layout, service-a (source) should be below service-b (target)
+      expect(nodeA!.position.y).toBeGreaterThan(nodeB!.position.y);
+    });
+
+    it('should respect custom rankdir option for RL (right-to-left)', () => {
+      const nodes = [createServiceNode('service-a'), createServiceNode('service-b')];
+      const edges = [createEdge('service-a', 'service-b')];
+
+      const result = applyLayout(nodes, edges, { rankdir: 'RL' });
+
+      const nodeA = result.nodes.find((n) => n.id === 'service-a');
+      const nodeB = result.nodes.find((n) => n.id === 'service-b');
+
+      // In RL layout, service-a (source) should be to the right of service-b (target)
+      expect(nodeA!.position.x).toBeGreaterThan(nodeB!.position.x);
     });
 
     it('should respect custom nodesep option', () => {
@@ -269,6 +294,48 @@ describe('applyLayout', () => {
       expect(result.edges).toEqual(edges);
       expect(result.edges[0].data?.isBidirectional).toBe(true);
       expect(result.edges[0].style?.stroke).toBe('#0000FF');
+    });
+  });
+
+  describe('handle positions', () => {
+    it('should set correct handle positions for LR layout', () => {
+      const nodes = [createServiceNode('service-a')];
+      const edges: Edge<ServiceMapEdgeData>[] = [];
+
+      const result = applyLayout(nodes, edges, { rankdir: 'LR' });
+
+      expect(result.nodes[0].sourcePosition).toBe(Position.Right);
+      expect(result.nodes[0].targetPosition).toBe(Position.Left);
+    });
+
+    it('should set correct handle positions for TB layout', () => {
+      const nodes = [createServiceNode('service-a')];
+      const edges: Edge<ServiceMapEdgeData>[] = [];
+
+      const result = applyLayout(nodes, edges, { rankdir: 'TB' });
+
+      expect(result.nodes[0].sourcePosition).toBe(Position.Bottom);
+      expect(result.nodes[0].targetPosition).toBe(Position.Top);
+    });
+
+    it('should set correct handle positions for RL layout', () => {
+      const nodes = [createServiceNode('service-a')];
+      const edges: Edge<ServiceMapEdgeData>[] = [];
+
+      const result = applyLayout(nodes, edges, { rankdir: 'RL' });
+
+      expect(result.nodes[0].sourcePosition).toBe(Position.Left);
+      expect(result.nodes[0].targetPosition).toBe(Position.Right);
+    });
+
+    it('should set correct handle positions for BT layout', () => {
+      const nodes = [createServiceNode('service-a')];
+      const edges: Edge<ServiceMapEdgeData>[] = [];
+
+      const result = applyLayout(nodes, edges, { rankdir: 'BT' });
+
+      expect(result.nodes[0].sourcePosition).toBe(Position.Top);
+      expect(result.nodes[0].targetPosition).toBe(Position.Bottom);
     });
   });
 

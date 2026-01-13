@@ -10,8 +10,10 @@ import {
   ReactFlow,
   Background,
   Controls,
+  Panel,
   useNodesState,
   useEdgesState,
+  useReactFlow,
   ReactFlowProvider,
   type Node,
   type Edge,
@@ -19,7 +21,8 @@ import {
   type NodeTypes,
   type NodeMouseHandler,
 } from '@xyflow/react';
-import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiButtonGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type cytoscape from 'cytoscape';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
@@ -29,7 +32,7 @@ import type { ServiceMapNodeData } from './service_node';
 import { ServiceNode } from './service_node';
 import { DependencyNode } from './dependency_node';
 import { transformElements, type ServiceMapEdgeData } from './transform_data';
-import { applyLayout } from './apply_layout';
+import { applyLayout, type LayoutDirection } from './apply_layout';
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -46,16 +49,35 @@ interface ReactFlowGraphProps {
   status: FETCH_STATUS;
 }
 
+const layoutDirectionOptions = [
+  {
+    id: 'LR',
+    label: i18n.translate('xpack.apm.serviceMap.layoutDirection.horizontal', {
+      defaultMessage: 'Horizontal',
+    }),
+    iconType: 'sortRight',
+  },
+  {
+    id: 'TB',
+    label: i18n.translate('xpack.apm.serviceMap.layoutDirection.vertical', {
+      defaultMessage: 'Vertical',
+    }),
+    iconType: 'sortDown',
+  },
+];
+
 // Inner component that uses React Flow hooks
 function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) {
   const { euiTheme } = useEuiTheme();
+  const { fitView } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<ServiceMapNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<ServiceMapEdgeData>>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('LR');
 
   const primaryColor = euiTheme.colors.primary;
 
-  // Transform and layout elements when they change
+  // Transform and layout elements when they change or layout direction changes
   useEffect(() => {
     if (elements.length === 0) {
       setNodes([]);
@@ -69,12 +91,19 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
     );
     const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
       transformedNodes,
-      transformedEdges
+      transformedEdges,
+      { rankdir: layoutDirection }
     );
 
     setNodes(layoutedNodes);
     setEdges(layoutedEdges);
-  }, [elements, setNodes, setEdges]);
+    // Fit view after layout change with a small delay to ensure nodes are rendered
+    setTimeout(() => fitView({ padding: 0.2, duration: 200 }), 50);
+  }, [elements, layoutDirection, setNodes, setEdges, fitView]);
+
+  const handleLayoutDirectionChange = useCallback((optionId: string) => {
+    setLayoutDirection(optionId as LayoutDirection);
+  }, []);
 
   // Handle node click - update edges with highlight colors (GitHub discussion approach: https://github.com/xyflow/xyflow/discussions/3176)
   const handleNodeClick: NodeMouseHandler<Node<ServiceMapNodeData>> = useCallback(
@@ -180,10 +209,34 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
         edgesFocusable={false}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
+        <Panel position="top-right">
+          <EuiToolTip
+            content={i18n.translate('xpack.apm.serviceMap.layoutDirection.tooltip', {
+              defaultMessage: 'Change layout orientation',
+            })}
+          >
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.apm.serviceMap.layoutDirection.legend', {
+                defaultMessage: 'Layout direction',
+              })}
+              options={layoutDirectionOptions}
+              idSelected={layoutDirection}
+              onChange={handleLayoutDirectionChange}
+              buttonSize="compressed"
+              isIconOnly
+              css={css`
+                background-color: ${euiTheme.colors.backgroundBasePlain};
+                border-radius: ${euiTheme.border.radius.medium};
+                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                padding: ${euiTheme.size.xs};
+              `}
+            />
+          </EuiToolTip>
+        </Panel>
         <Controls
           showInteractive={false}
-          css={css`{  
-            backgroundColor: ${euiTheme.colors.backgroundBasePlain};
+          css={css`
+            background-color: ${euiTheme.colors.backgroundBasePlain};
             border-radius: ${euiTheme.border.radius.medium};
             border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
           `}

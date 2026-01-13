@@ -19,79 +19,93 @@ interface DependencyMapNodeData {
   spanSubtype: SpanSubtype;
 }
 
-export const DependencyNode = memo(({ data, selected }: NodeProps<Node<DependencyMapNodeData>>) => {
-  const { euiTheme } = useEuiTheme();
+export const DependencyNode = memo(
+  ({ data, selected, sourcePosition, targetPosition }: NodeProps<Node<DependencyMapNodeData>>) => {
+    const { euiTheme } = useEuiTheme();
 
-  const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
+    const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
 
-  const iconUrl = useMemo(() => {
-    if (data.spanType || data.spanSubtype) {
-      return getSpanIcon(data.spanType, data.spanSubtype);
-    }
-    return null;
-  }, [data.spanType, data.spanSubtype]);
+    const iconUrl = useMemo(() => {
+      if (data.spanType || data.spanSubtype) {
+        return getSpanIcon(data.spanType, data.spanSubtype);
+      }
+      return null;
+    }, [data.spanType, data.spanSubtype]);
 
-  return (
-    <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
-      <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          width: 48px;
-          height: 48px;
-          transform: rotate(45deg);
-          border: ${euiTheme.border.width.medium} solid ${borderColor};
-          background: ${euiTheme.colors.backgroundBasePlain};
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
-          box-sizing: border-box;
-          cursor: pointer;
-        `}
-      >
-        <div
+    return (
+      <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
+        <Handle
+          type="target"
+          position={targetPosition ?? Position.Left}
           css={css`
-            transform: rotate(-45deg);
+            visibility: hidden;
+          `}
+        />
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            width: 48px;
+            height: 48px;
+            transform: rotate(45deg);
+            border: ${euiTheme.border.width.medium} solid ${borderColor};
+            background: ${euiTheme.colors.backgroundBasePlain};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+            box-sizing: border-box;
+            cursor: pointer;
           `}
         >
-          {iconUrl && (
-            <img
-              src={iconUrl}
-              alt={data.spanSubtype || data.spanType}
-              css={css`
-                width: 20px;
-                height: 20px;
-                object-fit: contain;
-              `}
-            />
-          )}
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          margin-top: 16px;
-          font-size: ${euiTheme.size.s};
-          color: ${selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
-          font-family: ${euiTheme.font.family};
-          max-width: 200px;
-          text-align: center;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          background-color: ${selected
-            ? transparentize(euiTheme.colors.primary, 0.1)
-            : 'transparent'};
-          padding: ${euiTheme.size.xs} ${euiTheme.size.xs};
-          border-radius: ${euiTheme.border.radius.medium};
-        `}
-      >
-        {data.label}
-      </EuiFlexItem>
-      <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
-    </EuiFlexGroup>
-  );
-});
+          <div
+            css={css`
+              transform: rotate(-45deg);
+            `}
+          >
+            {iconUrl && (
+              <img
+                src={iconUrl}
+                alt={data.spanSubtype || data.spanType}
+                css={css`
+                  width: 20px;
+                  height: 20px;
+                  object-fit: contain;
+                `}
+              />
+            )}
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            margin-top: 16px;
+            font-size: ${euiTheme.size.s};
+            color: ${selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+            font-family: ${euiTheme.font.family};
+            max-width: 200px;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background-color: ${selected
+              ? transparentize(euiTheme.colors.primary, 0.1)
+              : 'transparent'};
+            padding: ${euiTheme.size.xs} ${euiTheme.size.xs};
+            border-radius: ${euiTheme.border.radius.medium};
+          `}
+        >
+          {data.label}
+        </EuiFlexItem>
+        <Handle
+          type="source"
+          position={sourcePosition ?? Position.Right}
+          css={css`
+            visibility: hidden;
+          `}
+        />
+      </EuiFlexGroup>
+    );
+  }
+);
 
 DependencyNode.displayName = 'DependencyNode';
