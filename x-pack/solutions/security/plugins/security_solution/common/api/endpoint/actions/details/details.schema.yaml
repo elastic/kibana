@@ -454,7 +454,7 @@ components:
                     - type
                   properties:
                     type:
-                      description: Kernel level memory dump
+                      description: Kernel-level memory dump
                       type: string
                       enum:
                         - kernel
@@ -465,7 +465,7 @@ components:
                     - pid
                   properties:
                     type:
-                      description: Process level memory dump using a process ID
+                      description: Process-level memory dump using a process ID
                       type: string
                       enum:
                         - process
@@ -479,7 +479,7 @@ components:
                     - entity_id
                   properties:
                     type:
-                      description: Process level memory dump using an entity ID
+                      description: Process-level memory dump using an entity ID
                       type: string
                       enum:
                         - process
