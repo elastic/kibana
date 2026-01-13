@@ -10,7 +10,7 @@ import {
   systemSchema,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
-  type SignificantEventsGetResponse
+  type SignificantEventsGetResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
