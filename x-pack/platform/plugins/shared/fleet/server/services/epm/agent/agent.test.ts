@@ -40,6 +40,9 @@ function getMockedMetaVariable() {
     input: {
       id: 'input-id',
     },
+    agent: {
+      version: '9.3.0',
+    },
   };
 }
 

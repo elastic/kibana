@@ -136,6 +136,7 @@ import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
+import { getVersionSpecificPolicies } from './utils/version_specific_policies';
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
@@ -1640,7 +1641,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyIds: string[],
     agentPolicies?: AgentPolicy[],
-    options?: { throwOnAgentlessError?: boolean }
+    options?: { throwOnAgentlessError?: boolean; agentVersions?: string[] }
   ) {
     const logger = this.getLogger('deployPolicies');
     logger.debug(
@@ -1694,14 +1695,15 @@ class AgentPolicyService {
       }
     );
 
-    const fleetServerPolicies = fullPolicies.reduce((acc, fullPolicy) => {
-      if (!fullPolicy || !fullPolicy.revision) {
-        return acc;
-      }
+    const fleetServerPolicies: FleetServerPolicy[] = [];
 
+    for (const fullPolicy of fullPolicies) {
+      if (!fullPolicy || !fullPolicy.revision) {
+        continue;
+      }
       const policy = policiesMap[fullPolicy.id];
       if (!policy) {
-        return acc;
+        continue;
       }
 
       const fleetServerPolicy: FleetServerPolicy = {
@@ -1714,9 +1716,23 @@ class AgentPolicyService {
         default_fleet_server: policy.is_default_fleet_server === true,
       };
 
-      acc.push(fleetServerPolicy);
-      return acc;
-    }, [] as FleetServerPolicy[]);
+      if (!options?.agentVersions) {
+        fleetServerPolicies.push(fleetServerPolicy);
+      }
+      if (
+        appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
+        policy.has_agent_version_conditions
+      ) {
+        fleetServerPolicies.push(
+          ...(await getVersionSpecificPolicies(
+            soClient,
+            fleetServerPolicy,
+            fullPolicy,
+            options?.agentVersions
+          ))
+        );
+      }
+    }
 
     logger.debug(
       () =>
@@ -1786,6 +1802,7 @@ class AgentPolicyService {
 
     const filteredFleetServerPolicies = fleetServerPolicies.filter((fleetServerPolicy) => {
       const policy = policiesMap[fleetServerPolicy.policy_id];
+      if (!policy) return false;
       return (
         !policy.schema_version || lt(policy.schema_version, FLEET_AGENT_POLICIES_SCHEMA_VERSION)
       );
@@ -1914,7 +1931,7 @@ class AgentPolicyService {
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
-    options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+    options?: { standalone?: boolean; agentPolicy?: AgentPolicy; agentVersion?: string }
   ): Promise<FullAgentPolicy | null> {
     return getFullAgentPolicy(soClient, id, options);
   }

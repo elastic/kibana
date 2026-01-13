@@ -141,6 +141,7 @@ export interface FullAgentPolicyMetaPackage {
   version: string;
   policy_template?: string;
   release?: string;
+  agentVersion?: string;
 }
 
 export type TemplateAgentPolicyInput = Pick<FullAgentPolicyInput, 'id' | 'type' | 'streams'>;
