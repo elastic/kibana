@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiBasicTableColumn, EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   useEuiTheme,
   EuiText,
-  EuiLink,
   EuiBasicTable,
   EuiHealth,
   EuiLoadingSpinner,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
 } from '@elastic/eui';
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, Partition, Settings, PartitionLayout, LIGHT_THEME } from '@elastic/charts';
@@ -30,77 +25,16 @@ import {
   useSiemReadinessApi,
 } from '@kbn/siem-readiness';
 import { useBasePath } from '../../../../../common/lib/kibana';
+import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 
-const SelectablePopover = (props: Pick<EuiSelectableProps, 'options' | 'onChange'>) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { options, onChange } = props;
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <EuiPopover
-      panelPaddingSize="none"
-      button={
-        <>
-          <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
-            <EuiFlexItem grow={false}>
-              <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-                {'View Integrations'}
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                color="text"
-                size="xs"
-                style={{
-                  backgroundColor: euiTheme.colors.backgroundLightText,
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                }}
-              >
-                {options.length}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-    >
-      <EuiSelectable
-        aria-label="Selectable + popover example"
-        searchable
-        singleSelection="always"
-        searchProps={{
-          placeholder: 'Filter list',
-          compressed: true,
-        }}
-        options={options}
-        onChange={(newOptions, event, changedOption) => {
-          onChange?.(newOptions, event, changedOption);
-        }}
-      >
-        {(list, search) => (
-          <div style={{ width: 240 }}>
-            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-            {list}
-          </div>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
-  );
+const getIntegrationUrl = (basePath: string, integration: string): string => {
+  const baseUrl = `${basePath}/app/integrations/detail`;
+  return integration ? `${baseUrl}/${integration}` : baseUrl;
 };
 
 export const AllRuleCoveragePanel: React.FC = () => {
   const basePath = useBasePath();
   const { euiTheme } = useEuiTheme();
-  const getIntegrationUrl = useCallback(
-    (integration: string): string => {
-      const baseUrl = `${basePath}/app/integrations/detail`;
-      return integration ? `${baseUrl}/${integration}` : baseUrl;
-    },
-    [basePath]
-  );
 
   const { getInstalledIntegrations, getDetectionRules } = useSiemReadinessApi();
 
@@ -134,16 +68,12 @@ export const AllRuleCoveragePanel: React.FC = () => {
     );
   }, [getIntegrationDisplayName, installedIntegrationRules.data?.analytics?.missingIntegrations]);
 
-  const onChangePopOver = (
-    popoverOptions: EuiSelectableOption[],
-    event?: React.MouseEvent | React.KeyboardEvent,
-    changedOption?: EuiSelectableOption
-  ) => {
+  const onChangePopOver = (popoverOptions: EuiSelectableOption[]) => {
     // Find the selected option
     const selectedOption = popoverOptions.find((option) => option.checked === 'on');
 
     if (selectedOption) {
-      const integrationUrl = getIntegrationUrl(selectedOption.key as string);
+      const integrationUrl = getIntegrationUrl(basePath, selectedOption.key as string);
       window.open(integrationUrl, '_blank', 'noopener,noreferrer');
     }
   };
@@ -219,12 +149,18 @@ export const AllRuleCoveragePanel: React.FC = () => {
       render: (actions: string, item) => {
         if (item.status === 'Installed integrations') {
           return (
-            <SelectablePopover options={installedIntegrationsOptions} onChange={onChangePopOver} />
+            <IntegrationSelectablePopover
+              options={installedIntegrationsOptions}
+              onChange={onChangePopOver}
+            />
           );
         } else {
           // For "Missing Integrations" row
           return (
-            <SelectablePopover options={missingIntegrationsOptions} onChange={onChangePopOver} />
+            <IntegrationSelectablePopover
+              options={missingIntegrationsOptions}
+              onChange={onChangePopOver}
+            />
           );
         }
       },

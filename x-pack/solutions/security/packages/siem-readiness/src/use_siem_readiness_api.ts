@@ -13,8 +13,6 @@ import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from './constants';
 
 // Fix: Use 'as const' to make these readonly tuples for proper React Query typing
 const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'] as const;
-const GET_INSTALLED_INTEGRATIONS_QUERY_KEY = ['installed-integrations'] as const;
-const GET_NOT_INSTALLED_INTEGRATIONS_QUERY_KEY = ['not-installed-integrations'] as const;
 const GET_DETECTION_RULES_QUERY_KEY = ['detection-rules'] as const;
 
 export const useSiemReadinessApi = () => {
@@ -27,25 +25,28 @@ export const useSiemReadinessApi = () => {
     },
   });
 
-  const getInstalledIntegrations = useQuery({
-    queryKey: GET_INSTALLED_INTEGRATIONS_QUERY_KEY,
+  const getIntegrations = useQuery({
+    queryKey: ['integrations'] as const,
     queryFn: () => {
       return http.get<{ items: FleetPackage[] }>('/api/fleet/epm/packages');
     },
     select: (data: { items: FleetPackage[] }) => {
-      return data.items?.filter((pkg: FleetPackage) => pkg.status === 'installed');
+      const installed = data.items?.filter((pkg: FleetPackage) => pkg.status === 'installed') || [];
+      const notInstalled =
+        data.items?.filter((pkg: FleetPackage) => pkg.status === 'not_installed') || [];
+      return { installed, notInstalled };
     },
   });
 
-  const getNotInstalledIntegrations = useQuery({
-    queryKey: GET_NOT_INSTALLED_INTEGRATIONS_QUERY_KEY,
-    queryFn: () => {
-      return http.get<{ items: FleetPackage[] }>('/api/fleet/epm/packages');
-    },
-    select: (data: { items: FleetPackage[] }) => {
-      return data.items?.filter((pkg: FleetPackage) => pkg.status === 'not_installed');
-    },
-  });
+  const getInstalledIntegrations = {
+    ...getIntegrations,
+    data: getIntegrations.data?.installed,
+  };
+
+  const getNotInstalledIntegrations = {
+    ...getIntegrations,
+    data: getIntegrations.data?.notInstalled,
+  };
 
   const getDetectionRules = useQuery({
     queryKey: GET_DETECTION_RULES_QUERY_KEY,
