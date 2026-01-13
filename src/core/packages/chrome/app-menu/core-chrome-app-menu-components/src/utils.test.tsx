@@ -407,9 +407,9 @@ describe('utils', () => {
       expect(childPanel?.title).toBe('Parent');
     });
 
-    it('should add separator above item when seperator is "above"', () => {
+    it('should add separator above item when separator is "above"', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1, seperator: 'above' },
+        { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'above' },
       ];
 
       const result = getPopoverPanels({ items });
@@ -419,9 +419,9 @@ describe('utils', () => {
       expect(panelItems[0].key).toBe('separator-1');
     });
 
-    it('should add separator below item when seperator is "below"', () => {
+    it('should add separator below item when separator is "below"', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1, seperator: 'below' },
+        { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'below' },
       ];
 
       const result = getPopoverPanels({ items });
