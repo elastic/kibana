@@ -34,6 +34,7 @@ import {
 import type { ChatService } from './types';
 import { createChatService } from './chat_service';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat';
+import type { HooksServiceStart } from '../hooks';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it
@@ -52,6 +53,7 @@ describe('ChatService', () => {
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
 
   let chatService: ChatService;
+  let hooks: HooksServiceStart;
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -61,6 +63,10 @@ describe('ChatService', () => {
     conversationService = createConversationServiceMock();
     uiSettings = uiSettingsServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
+    hooks = {
+      runBlocking: async (_event, context) => context,
+      runParallel: () => {},
+    };
 
     chatService = createChatService({
       inference,
@@ -69,6 +75,7 @@ describe('ChatService', () => {
       conversationService,
       uiSettings,
       savedObjects,
+      hooks,
     });
 
     const conversation = createEmptyConversation();
@@ -123,7 +130,7 @@ describe('ChatService', () => {
         request,
         agentService,
         defaultConnectorId: 'test-connector-id',
-        abortSignal: undefined,
+        abortSignal: expect.any(Object),
       })
     );
   });

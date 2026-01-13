@@ -32,6 +32,7 @@ import { createScopedRunner, createRunner } from './runner';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
+import { HookEvent } from '../hooks';
 
 jest.mock('../agents/modes/create_handler');
 jest.mock('@kbn/agent-builder-server/tools/utils');
@@ -128,6 +129,27 @@ describe('AgentBuilder runner', () => {
         ],
       });
     });
+
+    it('executes preToolCall hook and aborts when it throws', async () => {
+      scopedRunnerDeps.hooks!.runBlocking = jest.fn(async () => {
+        throw new Error('blocked by preToolCall');
+      }) as any;
+      scopedRunnerDeps.hooks!.runParallel = jest.fn();
+
+      const params: ScopedRunnerRunToolsParams = {
+        toolId: 'test-tool',
+        toolParams: { foo: 'bar' },
+      };
+
+      const runner = createScopedRunner(scopedRunnerDeps);
+      await expect(runner.runTool(params)).rejects.toMatchObject({
+        message: 'blocked by preToolCall',
+      });
+      expect(scopedRunnerDeps.hooks!.runBlocking).toHaveBeenCalledWith(
+        HookEvent.preToolCall,
+        expect.objectContaining({ toolId: 'test-tool' })
+      );
+    });
   });
 
   describe('runAgent', () => {
@@ -173,6 +195,7 @@ describe('AgentBuilder runner', () => {
         {
           runId: expect.any(String),
           agentParams: params.agentParams,
+          abortSignal: expect.any(Object),
         },
         expect.any(Object)
       );
@@ -202,6 +225,7 @@ describe('AgentBuilder runner', () => {
         {
           runId: expect.any(String),
           agentParams: params.agentParams,
+          abortSignal: expect.any(Object),
         },
         expect.any(Object)
       );
@@ -209,6 +233,32 @@ describe('AgentBuilder runner', () => {
       expect(response).toEqual({
         result: 'someResult',
       });
+    });
+
+    it('executes onAgentRunStart and onAgentRunEnd hooks', async () => {
+      const runBlocking = jest.fn(async (_event: any, ctx: any) => ctx);
+      const runParallel = jest.fn();
+      scopedRunnerDeps.hooks!.runBlocking = runBlocking as any;
+      scopedRunnerDeps.hooks!.runParallel = runParallel;
+
+      agentHandler.mockResolvedValue({ result: 'someResult' as any });
+
+      const params: ScopedRunnerRunAgentParams = {
+        agentId: 'test-tool',
+        agentParams: { nextInput: { message: 'dolly' } },
+      };
+
+      const runner = createScopedRunner(scopedRunnerDeps);
+      await runner.runAgent(params);
+
+      expect(runBlocking).toHaveBeenCalledWith(
+        HookEvent.onAgentRunStart,
+        expect.objectContaining({ agentId: 'test-tool', event: HookEvent.onAgentRunStart })
+      );
+      expect(runBlocking).toHaveBeenCalledWith(
+        HookEvent.onAgentRunEnd,
+        expect.objectContaining({ agentId: 'test-tool', event: HookEvent.onAgentRunEnd })
+      );
     });
   });
 });

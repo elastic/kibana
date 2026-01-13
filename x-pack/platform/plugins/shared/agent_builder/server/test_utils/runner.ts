@@ -26,6 +26,7 @@ import type { ConversationStateManager, PromptManager } from '@kbn/agent-builder
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
+import type { HooksServiceStart } from '../services/hooks';
 import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';
 import { createModelProviderMock, createModelProviderFactoryMock } from './model_provider';
 import type { ToolsServiceStartMock } from './tools';
@@ -181,6 +182,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     attachmentsService: createAttachmentsServiceStartMock(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
+    hooks: createHooksServiceStartMock(),
   };
 };
 
@@ -195,5 +197,13 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     agentsService: createAgentsServiceStartMock(),
     logger: loggerMock.create(),
     attachmentsService: createAttachmentsServiceStartMock(),
+    hooks: createHooksServiceStartMock(),
+  };
+};
+
+export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> => {
+  return {
+    runBlocking: jest.fn(async (_event: any, context: any) => context),
+    runParallel: jest.fn(),
   };
 };

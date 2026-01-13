@@ -35,6 +35,7 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
+import type { HooksServiceStart } from '../hooks';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { TrackingService } from '../../telemetry';
 import { createEmptyRunContext, createConversationStateManager } from './utils';
@@ -58,6 +59,7 @@ export interface CreateScopedRunnerDeps {
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;
+  hooks?: HooksServiceStart;
   // other deps
   logger: Logger;
   request: KibanaRequest;

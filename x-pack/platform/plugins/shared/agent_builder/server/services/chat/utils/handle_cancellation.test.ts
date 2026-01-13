@@ -6,7 +6,12 @@
  */
 
 import { of, Subject, toArray, firstValueFrom } from 'rxjs';
-import { isAgentBuilderError, AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import {
+  isAgentBuilderError,
+  AgentBuilderErrorCode,
+  createBadRequestError,
+  isBadRequestError,
+} from '@kbn/agent-builder-common';
 import { handleCancellation } from './handle_cancellation';
 
 describe('handleCancellation', () => {
@@ -49,5 +54,27 @@ describe('handleCancellation', () => {
     expect(isAgentBuilderError(thrownError)).toBe(true);
     expect(thrownError.code).toBe(AgentBuilderErrorCode.requestAborted);
     expect(thrownError.message).toContain('Converse request was aborted');
+  });
+
+  it('propagates abort reason when present', () => {
+    const abortController = new AbortController();
+
+    const source$ = new Subject<number>();
+    const output$ = source$.pipe(handleCancellation(abortController.signal));
+
+    let thrownError: any;
+    output$.subscribe({
+      error: (err) => {
+        thrownError = err;
+      },
+    });
+
+    const reason = createBadRequestError('guardrails violation', { hookId: 'x' });
+    abortController.abort(reason);
+
+    expect(thrownError).toBe(reason);
+    expect(isAgentBuilderError(thrownError)).toBe(true);
+    expect(isBadRequestError(thrownError)).toBe(true);
+    expect(thrownError.code).toBe(AgentBuilderErrorCode.badRequest);
   });
 });
