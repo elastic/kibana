@@ -158,7 +158,7 @@ describe('TabsBarMenu', () => {
     const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
-    const selectedTabOption = (await screen.findAllByTitle(mockTabs[0].label))[0];
+    const selectedTabOption = (await screen.findAllByText(mockTabs[0].label))[0];
     expect(selectedTabOption.closest('[aria-selected="true"]')).toBeInTheDocument();
   });
 
