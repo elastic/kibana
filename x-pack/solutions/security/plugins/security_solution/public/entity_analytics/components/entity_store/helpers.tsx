@@ -52,6 +52,16 @@ export const sourceFieldToText = (source: string) => {
     );
   }
 
+  // Osquery CAASM endpoint assets source
+  if (source === 'osquery' || source.match(/^endpoint-assets-osquery/)) {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.osqueryDescription"
+        defaultMessage="Osquery"
+      />
+    );
+  }
+
   return (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.eventDescription"

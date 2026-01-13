@@ -197,21 +197,19 @@ export const PrivilegesContent: React.FC = React.memo(() => {
   const [sortField, setSortField] = useState<keyof PrivilegeAsset>('adminCount');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  const onTableChange = useCallback(
-    ({ page, sort }: CriteriaWithPagination<PrivilegeAsset>) => {
-      if (page) {
-        setPageIndex(page.index);
-        setPageSize(page.size);
-      }
-      if (sort) {
-        setSortField(sort.field as keyof PrivilegeAsset);
-        setSortDirection(sort.direction);
-      }
-    },
-    []
-  );
+  const onTableChange = useCallback(({ page, sort }: CriteriaWithPagination<PrivilegeAsset>) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
+    if (sort) {
+      setSortField(sort.field as keyof PrivilegeAsset);
+      setSortDirection(sort.direction);
+    }
+  }, []);
 
   const displayedAssets = useMemo(() => {
+    console.log({ summary });
     if (!summary?.assets) return [];
 
     const sorted = [...summary.assets].sort((a, b) => {
@@ -255,11 +253,7 @@ export const PrivilegesContent: React.FC = React.memo(() => {
   // Empty state
   if (!summary || summary.assets.length === 0) {
     return (
-      <EuiEmptyPrompt
-        iconType="user"
-        title={<h2>{EMPTY_TITLE}</h2>}
-        body={<p>{EMPTY_BODY}</p>}
-      />
+      <EuiEmptyPrompt iconType="user" title={<h2>{EMPTY_TITLE}</h2>} body={<p>{EMPTY_BODY}</p>} />
     );
   }
 
@@ -470,9 +464,7 @@ export const PrivilegesContent: React.FC = React.memo(() => {
           </EuiTitle>
           <EuiSpacer size="xs" />
           <EuiText size="s" color="subdued">
-            <p>
-              Assets categorized by admin account count. Low (0-2), Medium (3-4), High (5+).
-            </p>
+            <p>Assets categorized by admin account count. Low (0-2), Medium (3-4), High (5+).</p>
           </EuiText>
           <EuiSpacer size="l" />
           <EuiFlexGroup gutterSize="l">

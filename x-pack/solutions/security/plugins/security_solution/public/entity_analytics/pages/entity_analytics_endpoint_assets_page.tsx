@@ -89,10 +89,9 @@ const TAB_DRIFT = i18n.translate('xpack.securitySolution.entityAnalytics.endpoin
   defaultMessage: 'Drift',
 });
 
-// Constants
-const ENTITY_STORE_INDEX = 'entities-generic-latest';
-const TRANSFORM_OUTPUT_INDEX = 'endpoint-assets-osquery-*';
-const ENDPOINT_ASSETS_SOURCE_FILTER = 'endpoint-assets-osquery-*';
+// Constants - Use Entity Store index for all queries
+// The Entity Store aggregates data from endpoint-assets-osquery-* via the host entity engine
+const ENTITY_STORE_HOST_INDEX = '.entities.v1.latest.security_host_*';
 const QUERY_KEY = 'endpoint-assets-entity-store';
 const ASSET_DETAIL_QUERY_KEY = 'endpoint-asset-detail';
 
@@ -243,7 +242,9 @@ const flattenObject = (
         result.push(...flattenObject(value, fullKey));
       }
     } else if (Array.isArray(value)) {
-      result.push({ key: fullKey, value: JSON.stringify(value) });
+      // Format arrays nicely - join with comma or show first value for single items
+      const formatted = value.length === 1 ? String(value[0]) : value.join(', ');
+      result.push({ key: fullKey, value: formatted || '-' });
     } else {
       result.push({ key: fullKey, value: String(value) });
     }
@@ -272,7 +273,7 @@ const useEndpointAssetsFromEntityStore = () => {
     >;
 
     const searchRequest: estypes.SearchRequest = {
-      index: TRANSFORM_OUTPUT_INDEX,
+      index: ENTITY_STORE_HOST_INDEX,
       size: 500,
       sort: [{ '@timestamp': 'desc' }],
       query: {
@@ -300,14 +301,36 @@ const useEndpointAssetsFromEntityStore = () => {
         ? response.rawResponse.hits.total
         : response.rawResponse.hits.total?.value ?? 0;
 
+    // DEBUG: Log Inventory tab Entity Store data
+    // eslint-disable-next-line no-console
+    console.log('[Inventory Tab] Entity Store data:', {
+      index: ENTITY_STORE_HOST_INDEX,
+      totalHits: hits.length,
+      total,
+      documents: hits.map((h) => ({
+        entityId: h._source?.entity?.id,
+        entityName: h._source?.entity?.name,
+        source: h._source?.entity?.source,
+        host: h._source?.host,
+        agent: h._source?.agent,
+        endpoint: h._source?.endpoint,
+      })),
+    });
+
     const assets: EndpointAssetRecord[] = hits.map((hit) => {
       const source = hit._source!;
+      // Entity Store uses arrays for 'collect' fields, single values for 'newestValue' fields
+      const getFirst = (val: unknown): string => {
+        if (Array.isArray(val)) return val[0] || '';
+        if (typeof val === 'string') return val;
+        return '';
+      };
       return {
         id: source.entity.id,
-        name: source.entity.name || source.host?.hostname || source.host?.name || 'Unknown',
-        hostname: source.host?.hostname || source.host?.name || '',
-        platform: source.host?.os?.platform || 'unknown',
-        osName: source.host?.os?.name || 'Unknown',
+        name: source.entity.name || getFirst(source.host?.hostname) || getFirst(source.host?.name) || 'Unknown',
+        hostname: getFirst(source.host?.hostname) || getFirst(source.host?.name) || '',
+        platform: source.host?.os?.platform || getFirst(source.host?.os?.type) || 'unknown',
+        osName: getFirst(source.host?.os?.name) || 'Unknown',
         osVersion: source.host?.os?.version || '',
         agentName: source.agent?.name || '',
         lastSeen: source['@timestamp'],
@@ -375,7 +398,7 @@ const useAssetDetails = (entityId: string | null) => {
     >;
 
     const searchRequest: estypes.SearchRequest = {
-      index: TRANSFORM_OUTPUT_INDEX,
+      index: ENTITY_STORE_HOST_INDEX,
       size: 1,
       query: {
         term: {
@@ -391,6 +414,16 @@ const useAssetDetails = (entityId: string | null) => {
     );
 
     const hits = response.rawResponse.hits.hits;
+
+    // DEBUG: Log Asset Detail flyout Entity Store data
+    // eslint-disable-next-line no-console
+    console.log('[Asset Detail Flyout] Entity Store data:', {
+      index: ENTITY_STORE_HOST_INDEX,
+      entityId,
+      found: hits.length > 0,
+      document: hits[0]?._source,
+    });
+
     if (hits.length === 0) return null;
 
     return hits[0]._source ?? null;
@@ -495,13 +528,30 @@ interface SecurityPostureSummary {
 
 /**
  * Read the already-processed posture fields from the ingest pipeline.
- * The ingest pipeline converts raw osquery values to normalized formats:
+ * Note: Entity Store may store values as strings due to mapping
  * - disk_encryption: "OK" | "FAIL" | "UNKNOWN"
- * - firewall_enabled: boolean
- * - secure_boot: boolean
- * - score: number (0-100)
+ * - firewall_enabled: "true" | "false" | true | false
+ * - secure_boot: "true" | "false" | true | false
+ * - score: "100" | 100 (string or number)
  * - level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
  */
+
+// Helper to parse string booleans
+const parseBoolean = (val: unknown): boolean | undefined => {
+  if (val === true || val === 'true') return true;
+  if (val === false || val === 'false') return false;
+  return undefined;
+};
+
+// Helper to parse string numbers
+const parseNumber = (val: unknown): number | undefined => {
+  if (typeof val === 'number') return val;
+  if (typeof val === 'string') {
+    const parsed = parseFloat(val);
+    return isNaN(parsed) ? undefined : parsed;
+  }
+  return undefined;
+};
 
 // Interpret disk encryption from processed field
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -512,13 +562,12 @@ const getDiskEncryptionStatus = (posture: any): PostureStatus => {
   return 'UNKNOWN';
 };
 
-// Interpret firewall from processed boolean field
+// Interpret firewall from processed boolean field (handles string "true"/"false")
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getFirewallStatus = (posture: any): PostureStatus => {
-  const value = posture?.firewall_enabled;
-  // Check if we have the raw field to determine if data was collected
-  const hasRawData = posture?.firewall_enabled_raw !== undefined && posture?.firewall_enabled_raw !== null;
-  if (!hasRawData) return 'UNKNOWN';
+  const value = parseBoolean(posture?.firewall_enabled);
+  // Check if we have data - if firewall_enabled exists at all
+  if (value === undefined) return 'UNKNOWN';
   return value === true ? 'PASS' : 'FAIL';
 };
 
@@ -545,26 +594,29 @@ const hasSecurityFindings = (security: any): boolean => {
   );
 };
 
-// Interpret secure boot from processed boolean field
+// Interpret secure boot from processed boolean field (handles string "true"/"false")
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getSecureBootStatus = (posture: any): PostureStatus => {
-  const value = posture?.secure_boot;
-  // Check if we have the raw field to determine if data was collected
-  const hasRawData = posture?.secure_boot_raw !== undefined && posture?.secure_boot_raw !== null;
-  if (!hasRawData) return 'UNKNOWN';
+  const value = parseBoolean(posture?.secure_boot);
+  // Check if we have data - if secure_boot exists at all
+  if (value === undefined) return 'UNKNOWN';
   return value === true ? 'PASS' : 'FAIL';
 };
 
-// Get admin count from privileges - ingest pipeline flattens to just the number
+// Get admin count from privileges (handles string numbers like "2")
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getAdminCount = (privileges: any): number => {
-  // After ingest pipeline processing, admin_count is either:
-  // - A nested object with count: { admin_count: { count: N } }
-  // - Or directly a number: { admin_count: N }
   const adminCount = privileges?.admin_count;
-  if (typeof adminCount === 'number') return adminCount;
+
+  // Handle string or number directly
+  const parsed = parseNumber(adminCount);
+  if (parsed !== undefined) return parsed;
+
+  // Handle nested object format
   if (typeof adminCount === 'object' && adminCount?.count !== undefined) {
-    return typeof adminCount.count === 'number' ? adminCount.count : adminCount.count?.value || 0;
+    const nestedParsed = parseNumber(adminCount.count);
+    if (nestedParsed !== undefined) return nestedParsed;
+    return parseNumber(adminCount.count?.value) ?? 0;
   }
   return 0;
 };
@@ -651,7 +703,7 @@ const useSecurityPosture = () => {
     >;
 
     const searchRequest: estypes.SearchRequest = {
-      index: TRANSFORM_OUTPUT_INDEX,
+      index: ENTITY_STORE_HOST_INDEX,
       size: 500,
     };
 
@@ -662,6 +714,21 @@ const useSecurityPosture = () => {
     );
 
     const hits = response.rawResponse.hits.hits;
+
+    // DEBUG: Log Security Posture tab Entity Store data
+    // eslint-disable-next-line no-console
+    console.log('[Security Posture Tab] Entity Store data:', {
+      index: ENTITY_STORE_HOST_INDEX,
+      totalHits: hits.length,
+      documents: hits.map((h) => ({
+        entityId: h._source?.entity?.id,
+        entityName: h._source?.entity?.name,
+        posture: h._source?.endpoint?.posture,
+        privileges: h._source?.endpoint?.privileges,
+        security: h._source?.endpoint?.security,
+        shell: h._source?.endpoint?.shell,
+      })),
+    });
 
     let passed = 0;
     let failed = 0;
@@ -1078,7 +1145,8 @@ const useSecurityPosture = () => {
 };
 
 /**
- * Extract a nested value from transform output using dot notation path
+ * Extract a nested value from Entity Store using dot notation path
+ * Handles both single values (newestValue) and arrays (collect)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getNestedValue = (obj: any, path: string): string => {
@@ -1090,6 +1158,11 @@ const getNestedValue = (obj: any, path: string): string => {
   for (const part of parts) {
     if (current === null || current === undefined) return '-';
     current = current[part];
+  }
+
+  // Handle arrays (from collect fields) - return first value
+  if (Array.isArray(current)) {
+    return current.length > 0 ? String(current[0]) : '-';
   }
 
   // Handle top_metrics format: { "field.name": "value" }

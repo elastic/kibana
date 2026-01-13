@@ -19,7 +19,8 @@ import type {
 } from '../../../common/endpoint_assets';
 
 const PRIVILEGES_QUERY_KEY = 'endpoint-assets-privileges';
-const TRANSFORM_OUTPUT_INDEX = 'endpoint-assets-osquery-*';
+// Use Entity Store index - aggregates data from endpoint-assets-osquery-* via host entity engine
+const ENTITY_STORE_HOST_INDEX = '.entities.v1.latest.security_host_*';
 
 /**
  * Determine risk level based on admin count
@@ -70,17 +71,22 @@ const classifyUserType = (username: string): TopAdminUser['userType'] => {
 };
 
 /**
- * Extract admin users from transform output
- * Handles various nested aggregation structures from transform
+ * Extract admin users from Entity Store or transform output
+ * Handles both Entity Store format (simple array) and transform format (nested objects)
  *
- * Transform flattens terms aggregation to: { username: doc_count } format
- * e.g., { "admins_list": { "Administrator": 5, "john.doe": 2 } }
+ * Entity Store format: local_admins = ["Administrator", "john.doe"]
+ * Transform format: local_admins.admins_list = { "Administrator": 5, "john.doe": 2 }
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const extractAdminUsers = (privileges: any): string[] => {
   if (!privileges) return [];
 
-  // Path 1: Flattened terms agg format (transform output)
+  // Path 1: Entity Store format - direct array of strings
+  if (Array.isArray(privileges.local_admins)) {
+    return privileges.local_admins.filter((u: string) => u && u !== '');
+  }
+
+  // Path 2: Flattened terms agg format (transform output)
   // Structure: local_admins.admins_list = { username: doc_count, ... }
   if (
     privileges.local_admins?.admins_list &&
@@ -92,51 +98,57 @@ const extractAdminUsers = (privileges: any): string[] => {
     );
   }
 
-  // Path 2: Standard buckets array format (if not flattened)
+  // Path 3: Standard buckets array format (if not flattened)
   if (privileges.local_admins?.admins_list?.buckets) {
     return privileges.local_admins.admins_list.buckets
       .map((b: { key: string }) => b.key)
       .filter((k: string) => k && k !== '');
   }
 
-  // Path 3: direct terms agg buckets
+  // Path 4: direct terms agg buckets
   if (privileges.local_admins?.buckets) {
     return privileges.local_admins.buckets
       .map((b: { key: string }) => b.key)
       .filter((k: string) => k && k !== '');
   }
 
-  // Path 4: direct array
-  if (Array.isArray(privileges.local_admins)) {
-    return privileges.local_admins.filter((u: string) => u && u !== '');
-  }
-
   return [];
 };
 
 /**
- * Get admin count from transform output
+ * Get admin count from Entity Store or transform output
  *
- * Transform stores cardinality as: admin_count.count = <number>
- * e.g., { "admin_count": { "count": 2 } }
+ * Entity Store may store values as strings due to ingest pipeline
+ * Entity Store format: admin_count = "0" or 0
+ * Transform format: admin_count.count = <number> (nested object)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getAdminCount = (privileges: any): number => {
   if (!privileges) return 0;
 
-  // Path 1: Transform flattened cardinality (admin_count.count = number)
-  if (typeof privileges.admin_count?.count === 'number') {
-    return privileges.admin_count.count;
+  const adminCount = privileges.admin_count;
+
+  // Path 1: Entity Store format - direct number or string number
+  if (typeof adminCount === 'number') {
+    return adminCount;
+  }
+  if (typeof adminCount === 'string') {
+    const parsed = parseInt(adminCount, 10);
+    return isNaN(parsed) ? 0 : parsed;
   }
 
-  // Path 2: Nested cardinality value (admin_count.count.value)
-  if (typeof privileges.admin_count?.count?.value === 'number') {
-    return privileges.admin_count.count.value;
+  // Path 2: Transform flattened cardinality (admin_count.count = number)
+  if (typeof adminCount?.count === 'number') {
+    return adminCount.count;
+  }
+  if (typeof adminCount?.count === 'string') {
+    const parsed = parseInt(adminCount.count, 10);
+    return isNaN(parsed) ? 0 : parsed;
   }
 
-  // Path 3: Direct number
-  if (typeof privileges.admin_count === 'number') {
-    return privileges.admin_count;
+  // Path 3: Nested cardinality value (admin_count.count.value)
+  if (typeof adminCount?.count?.value === 'number') {
+    return adminCount.count.value;
   }
 
   // Path 4: Fall back to extracted admin users length
@@ -145,7 +157,8 @@ const getAdminCount = (privileges: any): number => {
 };
 
 /**
- * Extract nested value from transform output using dot notation
+ * Extract nested value from Entity Store using dot notation
+ * Handles both single values (newestValue) and arrays (collect)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getNestedValue = (obj: any, path: string): string => {
@@ -157,6 +170,11 @@ const getNestedValue = (obj: any, path: string): string => {
   for (const part of parts) {
     if (current === null || current === undefined) return '-';
     current = current[part];
+  }
+
+  // Handle arrays (from collect fields) - return first value
+  if (Array.isArray(current)) {
+    return current.length > 0 ? String(current[0]) : '-';
   }
 
   // Handle top_metrics format
@@ -185,8 +203,8 @@ export interface UsePrivilegesResult {
 /**
  * Hook to fetch and aggregate privilege data from endpoint assets
  *
- * Queries the transform output index (endpoint-assets-osquery-*)
- * and aggregates privilege information for the Privileges tab.
+ * Queries the Entity Store host index which aggregates data from
+ * endpoint-assets-osquery-* via the host entity engine.
  */
 export const usePrivileges = (): UsePrivilegesResult => {
   const { services } = useKibana();
@@ -204,7 +222,7 @@ export const usePrivileges = (): UsePrivilegesResult => {
     >;
 
     const searchRequest: estypes.SearchRequest = {
-      index: TRANSFORM_OUTPUT_INDEX,
+      index: ENTITY_STORE_HOST_INDEX,
       size: 500,
     };
 
@@ -215,6 +233,19 @@ export const usePrivileges = (): UsePrivilegesResult => {
     );
 
     const hits = response.rawResponse.hits.hits;
+
+    // DEBUG: Log privileges data from Entity Store
+    // eslint-disable-next-line no-console
+    console.log('[Privileges] Entity Store data:', {
+      totalHits: hits.length,
+      firstDoc: hits[0]?._source,
+      privileges: hits.map((h) => ({
+        name: h._source?.entity?.name,
+        privileges: h._source?.endpoint?.privileges,
+        adminCount: h._source?.endpoint?.privileges?.admin_count,
+        localAdmins: h._source?.endpoint?.privileges?.local_admins,
+      })),
+    });
 
     // Aggregate privilege data
     const assets: PrivilegeAsset[] = [];

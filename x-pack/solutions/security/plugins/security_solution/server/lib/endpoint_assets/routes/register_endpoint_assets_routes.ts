@@ -12,7 +12,7 @@ import { APP_ID } from '../../../../common/constants';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import {
   ENDPOINT_ASSETS_ROUTES,
-  ENDPOINT_ASSETS_INDEX_PATTERN,
+  ENTITY_STORE_HOST_INDEX_PATTERN,
 } from '../../../../common/endpoint_assets';
 import type {
   PostureSummaryResponse,
@@ -255,9 +255,9 @@ export const registerEndpointAssetsRoutes = (
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-          // Query the transform output index for posture aggregations
+          // Query the Entity Store host index for posture aggregations
           const result = await esClient.search({
-            index: ENDPOINT_ASSETS_INDEX_PATTERN,
+            index: ENTITY_STORE_HOST_INDEX_PATTERN,
             size: 0,
             query: {
               exists: { field: 'endpoint.posture.score' },
@@ -362,9 +362,9 @@ export const registerEndpointAssetsRoutes = (
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-          // Query the transform output index for privileges aggregations
+          // Query the Entity Store host index for privileges aggregations
           const result = await esClient.search({
-            index: ENDPOINT_ASSETS_INDEX_PATTERN,
+            index: ENTITY_STORE_HOST_INDEX_PATTERN,
             size: 0,
             query: {
               exists: { field: 'entity.id' },

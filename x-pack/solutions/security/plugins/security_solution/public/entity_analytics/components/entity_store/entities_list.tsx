@@ -85,6 +85,25 @@ export const EntitiesList: React.FC = () => {
   );
   const { data, isLoading, isRefetching, refetch, error } = useEntitiesListQuery(searchParams);
 
+  // DEBUG: Log entity data to verify endpoint trust fields from osquery
+  // eslint-disable-next-line no-console
+  console.log('[Entity Store] Entities data:', {
+    total: data?.total,
+    records: data?.records?.map((record) => ({
+      name: record.entity?.name,
+      type: record.entity?.type,
+      source: record.entity?.source,
+      subType: record.entity?.sub_type,
+      hostOs: record.host?.os,
+      agent: record.agent,
+      asset: record.asset,
+      posture: record.endpoint?.posture,
+      privileges: record.endpoint?.privileges,
+      detections: record.endpoint?.detections,
+      lifecycle: record.endpoint?.lifecycle,
+    })),
+  });
+
   useQueryInspector({
     queryId: ENTITIES_LIST_TABLE_ID,
     loading: isLoading || isRefetching,

@@ -7,54 +7,13 @@
 
 import { useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { lastValueFrom } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { useKibana } from '../../common/lib/kibana';
+import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 
 const QUERY_KEY = 'endpoint-assets-list';
 
-/** Query the fact index directly instead of Entity Store for better performance */
-const ENDPOINT_ASSETS_INDEX = 'endpoint-assets-osquery-*';
-
-interface EndpointAssetHit {
-  '@timestamp': string;
-  entity?: {
-    id?: string;
-    name?: string;
-    source?: string;
-    type?: string;
-    sub_type?: string;
-  };
-  asset?: {
-    platform?: string;
-    category?: string;
-    criticality?: string;
-  };
-  host?: {
-    id?: string;
-    name?: string;
-    hostname?: string;
-    os?: {
-      name?: string;
-      platform?: string;
-      version?: string;
-      family?: string;
-      kernel?: string;
-      build?: string;
-      type?: string;
-    };
-  };
-  agent?: {
-    id?: string;
-    name?: string;
-    type?: string;
-    version?: string;
-  };
-  event?: {
-    ingested?: string;
-  };
-}
+/** Entity Store API endpoint for listing host entities */
+const ENTITY_STORE_LIST_API = '/api/entity_store/entities/list';
 
 export interface EndpointAssetRecord {
   id: string;
@@ -67,6 +26,24 @@ export interface EndpointAssetRecord {
   agentName: string;
   lastSeen: string;
   source: string;
+  // Endpoint trust intelligence fields
+  postureScore?: number;
+  postureLevel?: string;
+  adminCount?: number;
+  elevatedRisk?: boolean;
+  firewallEnabled?: boolean;
+  diskEncryption?: string;
+  detections?: {
+    encodedPowershell?: number;
+    suspiciousPorts?: number;
+  };
+}
+
+interface EntityStoreResponse {
+  records: Entity[];
+  total: number;
+  page: number;
+  per_page: number;
 }
 
 interface UseEndpointAssetsResult {
@@ -84,14 +61,78 @@ interface UseEndpointAssetsResult {
   } | null;
 }
 
-type EntitySearchRequest = IKibanaSearchRequest<estypes.SearchRequest>;
-type EntitySearchResponse = IKibanaSearchResponse<estypes.SearchResponse<EndpointAssetHit, never>>;
+/**
+ * Transform Entity Store record to EndpointAssetRecord format
+ */
+const transformEntityToAssetRecord = (entity: Entity): EndpointAssetRecord => {
+  // Type guard for HostEntity
+  const hostEntity = entity as Entity & {
+    host?: {
+      name?: string;
+      hostname?: string[];
+      os?: {
+        name?: string[];
+        platform?: string;
+        version?: string;
+        family?: string;
+      };
+    };
+    agent?: {
+      id?: string;
+      name?: string;
+    };
+    endpoint?: {
+      posture?: {
+        score?: number;
+        level?: string;
+        firewall_enabled?: boolean;
+        disk_encryption?: string;
+      };
+      privileges?: {
+        admin_count?: number;
+        elevated_risk?: boolean;
+      };
+      detections?: {
+        encoded_powershell_count?: number;
+        suspicious_ports_count?: number;
+      };
+    };
+  };
+
+  const host = hostEntity.host;
+  const agent = hostEntity.agent;
+  const endpoint = hostEntity.endpoint;
+
+  return {
+    id: entity.entity.id,
+    name: entity.entity.name || host?.name || 'Unknown',
+    hostname: host?.hostname?.[0] || host?.name || '',
+    platform: host?.os?.platform || host?.os?.family || 'unknown',
+    osName: host?.os?.name?.[0] || 'Unknown',
+    osVersion: host?.os?.version || '',
+    agentId: agent?.id || '',
+    agentName: agent?.name || '',
+    lastSeen: entity['@timestamp'] || '',
+    source: entity.entity.source || 'osquery',
+    // Endpoint trust fields
+    postureScore: endpoint?.posture?.score ? Number(endpoint.posture.score) : undefined,
+    postureLevel: endpoint?.posture?.level,
+    adminCount: endpoint?.privileges?.admin_count ? Number(endpoint.privileges.admin_count) : undefined,
+    elevatedRisk: endpoint?.privileges?.elevated_risk === true || endpoint?.privileges?.elevated_risk === 'true' as unknown as boolean,
+    firewallEnabled: endpoint?.posture?.firewall_enabled === true || endpoint?.posture?.firewall_enabled === 'true' as unknown as boolean,
+    diskEncryption: endpoint?.posture?.disk_encryption,
+    detections: {
+      encodedPowershell: endpoint?.detections?.encoded_powershell_count ? Number(endpoint.detections.encoded_powershell_count) : 0,
+      suspiciousPorts: endpoint?.detections?.suspicious_ports_count ? Number(endpoint.detections.suspicious_ports_count) : 0,
+    },
+  };
+};
 
 /**
- * Hook for fetching endpoint assets from the fact index.
+ * Hook for fetching endpoint assets from the Entity Store.
  *
- * Queries the endpoint-assets-osquery-* index directly for better
- * performance and to avoid Entity Store reprocessing overhead.
+ * Queries the Entity Store API which aggregates data from
+ * endpoint-assets-osquery-* via the host entity engine.
  */
 export const useEndpointAssets = (): UseEndpointAssetsResult => {
   const { services } = useKibana();
@@ -101,50 +142,29 @@ export const useEndpointAssets = (): UseEndpointAssetsResult => {
     assets: EndpointAssetRecord[];
     total: number;
   }> => {
-    const { data } = services;
-    if (!data?.search) {
-      throw new Error('Search service not available');
+    const { http } = services;
+    if (!http) {
+      throw new Error('HTTP service not available');
     }
 
-    const searchRequest: estypes.SearchRequest = {
-      index: ENDPOINT_ASSETS_INDEX,
-      size: 500,
-      sort: [{ '@timestamp': 'desc' }],
+    // Use Entity Store API to fetch host entities
+    const response = await http.get<EntityStoreResponse>(ENTITY_STORE_LIST_API, {
       query: {
-        match_all: {},
+        entity_types: 'host',
+        page: 1,
+        per_page: 500,
+        sort_field: '@timestamp',
+        sort_order: 'desc',
       },
-    };
-
-    const response = await lastValueFrom(
-      data.search.search<EntitySearchRequest, EntitySearchResponse>({
-        params: searchRequest as EntitySearchRequest['params'],
-      })
-    );
-
-    const hits = response.rawResponse.hits.hits;
-    const total =
-      typeof response.rawResponse.hits.total === 'number'
-        ? response.rawResponse.hits.total
-        : response.rawResponse.hits.total?.value ?? 0;
-
-    // Transform fact index records to EndpointAssetRecord format
-    const assets: EndpointAssetRecord[] = hits.map((hit) => {
-      const source = hit._source!;
-      return {
-        id: source.entity?.id || source.host?.id || hit._id || 'unknown',
-        name: source.entity?.name || source.host?.hostname || source.host?.name || 'Unknown',
-        hostname: source.host?.hostname || source.host?.name || '',
-        platform: source.host?.os?.platform || source.asset?.platform || 'unknown',
-        osName: source.host?.os?.name || 'Unknown',
-        osVersion: source.host?.os?.version || '',
-        agentId: source.agent?.id || '',
-        agentName: source.agent?.name || '',
-        lastSeen: source['@timestamp'],
-        source: source.entity?.source || hit._index || 'Osquery',
-      };
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
     });
 
-    return { assets, total };
+    // Transform Entity Store records to EndpointAssetRecord format
+    const assets: EndpointAssetRecord[] = response.records.map(transformEntityToAssetRecord);
+
+    return { assets, total: response.total };
   }, [services]);
 
   const { data, isLoading, error } = useQuery({
@@ -170,12 +190,27 @@ export const useEndpointAssets = (): UseEndpointAssetsResult => {
       return lastSeen >= oneDayAgo;
     }).length;
 
+    // Calculate critical posture (score < 60 or level CRITICAL/HIGH)
+    const criticalPosture = data.assets.filter((asset) => {
+      if (asset.postureLevel) {
+        const level = asset.postureLevel.toUpperCase();
+        return level === 'CRITICAL' || level === 'HIGH';
+      }
+      if (asset.postureScore !== undefined) {
+        return asset.postureScore < 60;
+      }
+      return false;
+    }).length;
+
+    // Calculate elevated privileges from Entity Store data
+    const elevatedPrivileges = data.assets.filter((asset) => asset.elevatedRisk === true).length;
+
     return {
       total: data.total,
       active24h,
-      criticalPosture: 0, // Not available from Entity Store yet
-      elevatedPrivileges: 0, // Not available from Entity Store yet
-      recentlyChanged: 0, // Not available from Entity Store yet
+      criticalPosture,
+      elevatedPrivileges,
+      recentlyChanged: 0, // Drift tracking - future enhancement
     };
   }, [data]);
 
