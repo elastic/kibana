@@ -94,21 +94,29 @@ export const ACTION_RETRY = i18n.translate('genAiSettings.documentation.action.r
   defaultMessage: 'Retry',
 });
 
-export const INSTALL_SUCCESS = i18n.translate('genAiSettings.documentation.install.success', {
-  defaultMessage: 'Documentation installed successfully',
-});
+export const getInstallSuccessTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.install.successWithName', {
+    defaultMessage: '{name} installed successfully',
+    values: { name },
+  });
 
-export const INSTALL_ERROR = i18n.translate('genAiSettings.documentation.install.error', {
-  defaultMessage: 'Failed to install documentation',
-});
+export const getInstallErrorTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.install.errorWithName', {
+    defaultMessage: 'Failed to install {name}',
+    values: { name },
+  });
 
-export const UNINSTALL_SUCCESS = i18n.translate('genAiSettings.documentation.uninstall.success', {
-  defaultMessage: 'Documentation uninstalled successfully',
-});
+export const getUninstallSuccessTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.uninstall.successWithName', {
+    defaultMessage: '{name} uninstalled successfully',
+    values: { name },
+  });
 
-export const UNINSTALL_ERROR = i18n.translate('genAiSettings.documentation.uninstall.error', {
-  defaultMessage: 'Failed to uninstall documentation',
-});
+export const getUninstallErrorTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.uninstall.errorWithName', {
+    defaultMessage: 'Failed to uninstall {name}',
+    values: { name },
+  });
 
 export const TECH_PREVIEW = i18n.translate('genAiSettings.documentation.techPreview', {
   defaultMessage: 'TECH PREVIEW',
