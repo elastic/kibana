@@ -18,7 +18,7 @@ interface DataStreamSettingsResponse {
   }>;
 }
 
-const SERVERLESS_SETTINGS_ALLOWLIST = ['index.refresh_interval'];
+const SERVERLESS_SETTINGS_ALLOWLIST: (keyof IngestStreamSettings)[] = ['index.refresh_interval'];
 
 export function validateSettings({
   settings,
