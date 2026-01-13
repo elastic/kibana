@@ -34,3 +34,37 @@ export enum QUERY_TIMEOUT {
   DEFAULT = 60, // 60 seconds
   MAX = 60 * 60 * 24, // 24 hours
 }
+
+// =============================================================================
+// ENDPOINT ASSETS (CAASM) CONSTANTS
+// =============================================================================
+
+export const ENDPOINT_ASSETS_INDEX_PREFIX = 'endpoint-assets-osquery';
+export const ENDPOINT_ASSETS_TRANSFORM_PREFIX = 'endpoint-assets-osquery-';
+export const ENDPOINT_ASSETS_PIPELINE_PREFIX = 'endpoint-assets-ingest-';
+
+export const ENDPOINT_ASSETS_DEFAULT_NAMESPACE = 'default';
+
+export const ENDPOINT_ASSETS_TRANSFORM_FREQUENCY = '5m';
+export const ENDPOINT_ASSETS_TRANSFORM_DELAY = '0s';
+
+export const ENDPOINT_ASSETS_ENTITY_TYPE = {
+  HOST: 'host',
+} as const;
+
+export const ENDPOINT_ASSETS_ENTITY_SUB_TYPE = {
+  ENDPOINT: 'endpoint',
+} as const;
+
+export const ENDPOINT_ASSETS_ENTITY_SOURCE = {
+  OSQUERY: 'osquery',
+} as const;
+
+/**
+ * Elasticsearch cluster privileges required for endpoint assets management
+ */
+export const ENDPOINT_ASSETS_REQUIRED_ES_PRIVILEGES = [
+  'manage_index_templates',
+  'manage_transform',
+  'manage_ingest_pipelines',
+] as const;

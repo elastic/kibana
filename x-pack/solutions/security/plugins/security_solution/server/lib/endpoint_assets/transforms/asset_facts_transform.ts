@@ -30,9 +30,7 @@ import {
 export const getAssetFactsTransformId = (namespace: string): string =>
   `${ENDPOINT_ASSET_FACTS_TRANSFORM_PREFIX}${namespace}`;
 
-export const getAssetFactsTransformConfig = (
-  namespace: string
-): TransformPutTransformRequest => ({
+export const getAssetFactsTransformConfig = (namespace: string): TransformPutTransformRequest => ({
   transform_id: getAssetFactsTransformId(namespace),
   description:
     'Aggregates osquery results into endpoint asset documents for CAASM visibility. Schema compatible with Entity Store.',
@@ -54,6 +52,7 @@ export const getAssetFactsTransformConfig = (
   },
   dest: {
     index: `endpoint-assets-osquery-${namespace}`,
+    pipeline: `endpoint-assets-ingest-${namespace}`,
   },
   pivot: {
     group_by: {
@@ -84,7 +83,7 @@ export const getAssetFactsTransformConfig = (
       // ASSET INVENTORY COMPATIBLE FIELDS
       // =================================================================
 
-      'asset.platform': {
+      tmp_asset_platform: {
         top_metrics: {
           metrics: [{ field: 'host.os.platform' }],
           sort: [{ '@timestamp': 'desc' }],
@@ -95,49 +94,49 @@ export const getAssetFactsTransformConfig = (
       // ECS HOST FIELDS (for correlation)
       // =================================================================
 
-      'host.id': {
+      tmp_host_id: {
         top_metrics: {
           metrics: [{ field: 'host.id' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'host.name': {
+      tmp_host_name: {
         top_metrics: {
           metrics: [{ field: 'host.name' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'host.hostname': {
+      tmp_host_hostname: {
         top_metrics: {
           metrics: [{ field: 'host.hostname' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'host.os.name': {
+      tmp_host_os_name: {
         top_metrics: {
           metrics: [{ field: 'host.os.name' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'host.os.version': {
+      tmp_host_os_version: {
         top_metrics: {
           metrics: [{ field: 'host.os.version' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'host.os.platform': {
+      tmp_host_os_platform: {
         top_metrics: {
           metrics: [{ field: 'host.os.platform' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'host.os.family': {
+      tmp_host_os_family: {
         top_metrics: {
           metrics: [{ field: 'host.os.family' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'host.architecture': {
+      tmp_host_architecture: {
         top_metrics: {
           metrics: [{ field: 'host.architecture' }],
           sort: [{ '@timestamp': 'desc' }],
@@ -148,13 +147,13 @@ export const getAssetFactsTransformConfig = (
       // NETWORK FIELDS (CAASM - Asset Identification)
       // =================================================================
 
-      'host.os.build': {
+      tmp_host_os_build: {
         top_metrics: {
           metrics: [{ field: 'host.os.build' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'host.os.kernel': {
+      tmp_host_os_kernel: {
         top_metrics: {
           metrics: [{ field: 'host.os.kernel' }],
           sort: [{ '@timestamp': 'desc' }],
@@ -162,13 +161,13 @@ export const getAssetFactsTransformConfig = (
       },
       // Note: host.ip and host.mac are arrays, top_metrics will get one value
       // For full array, would need scripted_metric aggregation
-      'host.ip': {
+      tmp_host_ip: {
         top_metrics: {
           metrics: [{ field: 'host.ip' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'host.mac': {
+      tmp_host_mac: {
         top_metrics: {
           metrics: [{ field: 'host.mac' }],
           sort: [{ '@timestamp': 'desc' }],
@@ -179,25 +178,25 @@ export const getAssetFactsTransformConfig = (
       // ECS AGENT FIELDS
       // =================================================================
 
-      'agent.id': {
+      tmp_agent_id: {
         top_metrics: {
           metrics: [{ field: 'agent.id' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'agent.name': {
+      tmp_agent_name: {
         top_metrics: {
           metrics: [{ field: 'agent.name' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'agent.type': {
+      tmp_agent_type: {
         top_metrics: {
           metrics: [{ field: 'agent.type' }],
           sort: [{ '@timestamp': 'desc' }],
         },
       },
-      'agent.version': {
+      tmp_agent_version: {
         top_metrics: {
           metrics: [{ field: 'agent.version' }],
           sort: [{ '@timestamp': 'desc' }],
@@ -425,7 +424,7 @@ export const getAssetFactsTransformConfig = (
       'endpoint.hardware.cpu': {
         filter: { exists: { field: 'osquery.cpu_brand' } },
         aggs: {
-          value: {
+          _value: {
             top_metrics: {
               metrics: [{ field: 'osquery.cpu_brand' }],
               sort: [{ '@timestamp': 'desc' }],
@@ -437,7 +436,7 @@ export const getAssetFactsTransformConfig = (
       'endpoint.hardware.cpu_cores': {
         filter: { exists: { field: 'osquery.cpu_logical_cores' } },
         aggs: {
-          value: {
+          _value: {
             top_metrics: {
               metrics: [{ field: 'osquery.cpu_logical_cores' }],
               sort: [{ '@timestamp': 'desc' }],
@@ -449,7 +448,7 @@ export const getAssetFactsTransformConfig = (
       'endpoint.hardware.memory_gb': {
         filter: { exists: { field: 'osquery.physical_memory' } },
         aggs: {
-          value: {
+          _value: {
             top_metrics: {
               metrics: [{ field: 'osquery.physical_memory' }],
               sort: [{ '@timestamp': 'desc' }],
@@ -461,7 +460,7 @@ export const getAssetFactsTransformConfig = (
       'endpoint.hardware.vendor': {
         filter: { exists: { field: 'osquery.hardware_vendor' } },
         aggs: {
-          value: {
+          _value: {
             top_metrics: {
               metrics: [{ field: 'osquery.hardware_vendor' }],
               sort: [{ '@timestamp': 'desc' }],
@@ -473,7 +472,7 @@ export const getAssetFactsTransformConfig = (
       'endpoint.hardware.model': {
         filter: { exists: { field: 'osquery.hardware_model' } },
         aggs: {
-          value: {
+          _value: {
             top_metrics: {
               metrics: [{ field: 'osquery.hardware_model' }],
               sort: [{ '@timestamp': 'desc' }],
@@ -515,7 +514,7 @@ export const getAssetFactsTransformConfig = (
       'endpoint.posture.disk_encryption_raw': {
         filter: { exists: { field: 'osquery.encrypted' } },
         aggs: {
-          value: {
+          _value: {
             top_metrics: {
               metrics: [{ field: 'osquery.encrypted' }],
               sort: [{ '@timestamp': 'desc' }],
@@ -535,12 +534,9 @@ export const getAssetFactsTransformConfig = (
           },
         },
         aggs: {
-          value: {
+          _value: {
             top_metrics: {
-              metrics: [
-                { field: 'osquery.firewall_enabled' },
-                { field: 'osquery.global_state' },
-              ],
+              metrics: [{ field: 'osquery.firewall_enabled' }, { field: 'osquery.global_state' }],
               sort: [{ '@timestamp': 'desc' }],
             },
           },
@@ -550,7 +546,7 @@ export const getAssetFactsTransformConfig = (
       'endpoint.posture.secure_boot_raw': {
         filter: { exists: { field: 'osquery.secure_boot' } },
         aggs: {
-          value: {
+          _value: {
             top_metrics: {
               metrics: [{ field: 'osquery.secure_boot' }],
               sort: [{ '@timestamp': 'desc' }],
@@ -573,7 +569,6 @@ export const getAssetFactsTransformConfig = (
           },
         },
       },
-
 
       // =================================================================
       // SECURITY: SUSPICIOUS SCHEDULED TASKS (filter: has detection_method)
@@ -788,10 +783,7 @@ export const getAssetFactsTransformConfig = (
       'endpoint.security.crontab': {
         filter: {
           bool: {
-            must: [
-              { exists: { field: 'osquery.command' } },
-              { exists: { field: 'osquery.path' } },
-            ],
+            must: [{ exists: { field: 'osquery.command' } }, { exists: { field: 'osquery.path' } }],
             should: [
               { exists: { field: 'osquery.minute' } },
               { exists: { field: 'osquery.hour' } },
@@ -872,7 +864,6 @@ export const getAssetFactsTransformConfig = (
         },
       },
 
-
       // =================================================================
       // QUERY METADATA
       // =================================================================
@@ -895,14 +886,15 @@ export const getAssetFactsTransformConfig = (
     docs_per_second: null, // No throttling
   },
   _meta: {
-    version: '7.0.0',
+    version: '8.0.0',
     managed: true,
     managed_by: 'endpoint_assets',
-    schema_version: 'caasm_v7_state_centric',
+    schema_version: 'caasm_v8_flattened_structure',
     entity_sub_type: ENTITY_SUB_TYPE.ENDPOINT,
     entity_source: ENTITY_SOURCE.OSQUERY,
     created_at: new Date().toISOString(),
-    changelog: 'Restructured from activity-centric to state-centric model. Removed forensic aggregations (prefetch, shimcache, BITS, LNK, USN journal, browser). Added full local_admins array, enhanced hardware facts, proper posture checks.',
+    changelog:
+      'Fixed ES transform underscore field filtering issue. Renamed aggregations from _host_* to tmp_host_* prefix (ES drops underscore-prefixed fields). Ingest pipeline flattens tmp_* fields to ECS paths then removes them.',
   },
 });
 
@@ -1208,6 +1200,12 @@ export const getAssetIndexMapping = () => ({
 });
 
 /**
+ * Get the ingest pipeline ID for the given namespace.
+ */
+export const getAssetIngestPipelineId = (namespace: string): string =>
+  `endpoint-assets-ingest-${namespace}`;
+
+/**
  * Ingest pipeline for post-processing transform output.
  *
  * This pipeline:
@@ -1216,10 +1214,330 @@ export const getAssetIndexMapping = () => ({
  * - Calculates posture score
  * - Sets event metadata
  */
-export const getAssetIngestPipeline = () => ({
+export const getAssetIngestPipeline = (namespace: string) => ({
+  id: getAssetIngestPipelineId(namespace),
   description: 'Post-process endpoint asset documents for Entity Store compatibility',
   processors: [
+    // Initialize nested structures and extract tmp_ fields using Painless script
+    // IMPORTANT: Must use containsKey() because top_metrics outputs keys with dots like "host.os.name"
+    // Mustache templates don't work because they interpret dots as nested paths
+    {
+      script: {
+        lang: 'painless',
+        description: 'Initialize nested structures and extract tmp_ fields to ECS paths',
+        source: `
+          // Initialize nested structures
+          if (ctx.host == null) { ctx.host = new HashMap(); }
+          if (ctx.host.os == null) { ctx.host.os = new HashMap(); }
+          if (ctx.agent == null) { ctx.agent = new HashMap(); }
+          if (ctx.asset == null) { ctx.asset = new HashMap(); }
+          if (ctx.entity == null) { ctx.entity = new HashMap(); }
+
+          // Extract host fields from tmp_ prefixed top_metrics output
+          if (ctx.tmp_host_id != null && ctx.tmp_host_id.containsKey('host.id')) {
+            ctx.host.id = ctx.tmp_host_id['host.id'];
+          }
+          if (ctx.tmp_host_name != null && ctx.tmp_host_name.containsKey('host.name')) {
+            ctx.host.name = ctx.tmp_host_name['host.name'];
+          }
+          if (ctx.tmp_host_hostname != null && ctx.tmp_host_hostname.containsKey('host.hostname')) {
+            ctx.host.hostname = ctx.tmp_host_hostname['host.hostname'];
+          }
+          if (ctx.tmp_host_os_name != null && ctx.tmp_host_os_name.containsKey('host.os.name')) {
+            ctx.host.os.name = ctx.tmp_host_os_name['host.os.name'];
+          }
+          if (ctx.tmp_host_os_version != null && ctx.tmp_host_os_version.containsKey('host.os.version')) {
+            ctx.host.os.version = ctx.tmp_host_os_version['host.os.version'];
+          }
+          if (ctx.tmp_host_os_platform != null && ctx.tmp_host_os_platform.containsKey('host.os.platform')) {
+            ctx.host.os.platform = ctx.tmp_host_os_platform['host.os.platform'];
+          }
+          if (ctx.tmp_host_os_family != null && ctx.tmp_host_os_family.containsKey('host.os.family')) {
+            ctx.host.os.family = ctx.tmp_host_os_family['host.os.family'];
+          }
+          if (ctx.tmp_host_os_build != null && ctx.tmp_host_os_build.containsKey('host.os.build')) {
+            ctx.host.os.build = ctx.tmp_host_os_build['host.os.build'];
+          }
+          if (ctx.tmp_host_os_kernel != null && ctx.tmp_host_os_kernel.containsKey('host.os.kernel')) {
+            ctx.host.os.kernel = ctx.tmp_host_os_kernel['host.os.kernel'];
+          }
+          if (ctx.tmp_host_architecture != null && ctx.tmp_host_architecture.containsKey('host.architecture')) {
+            ctx.host.architecture = ctx.tmp_host_architecture['host.architecture'];
+          }
+          if (ctx.tmp_host_ip != null && ctx.tmp_host_ip.containsKey('host.ip')) {
+            ctx.host.ip = ctx.tmp_host_ip['host.ip'];
+          }
+          if (ctx.tmp_host_mac != null && ctx.tmp_host_mac.containsKey('host.mac')) {
+            ctx.host.mac = ctx.tmp_host_mac['host.mac'];
+          }
+
+          // Extract agent fields
+          if (ctx.tmp_agent_id != null && ctx.tmp_agent_id.containsKey('agent.id')) {
+            ctx.agent.id = ctx.tmp_agent_id['agent.id'];
+          }
+          if (ctx.tmp_agent_name != null && ctx.tmp_agent_name.containsKey('agent.name')) {
+            ctx.agent.name = ctx.tmp_agent_name['agent.name'];
+          }
+          if (ctx.tmp_agent_type != null && ctx.tmp_agent_type.containsKey('agent.type')) {
+            ctx.agent.type = ctx.tmp_agent_type['agent.type'];
+          }
+          if (ctx.tmp_agent_version != null && ctx.tmp_agent_version.containsKey('agent.version')) {
+            ctx.agent.version = ctx.tmp_agent_version['agent.version'];
+          }
+
+          // Extract asset platform
+          if (ctx.tmp_asset_platform != null && ctx.tmp_asset_platform.containsKey('host.os.platform')) {
+            ctx.asset.platform = ctx.tmp_asset_platform['host.os.platform'];
+          }
+        `,
+      },
+    },
+    // Extract nested filter aggregation structures (endpoint.hardware.*, endpoint.posture.*_raw)
+    {
+      script: {
+        lang: 'painless',
+        description: 'Flatten nested filter aggregation structures',
+        source: `
+          // Initialize endpoint structure if needed
+          if (ctx.endpoint == null) { ctx.endpoint = new HashMap(); }
+          if (ctx.endpoint.hardware == null) { ctx.endpoint.hardware = new HashMap(); }
+          if (ctx.endpoint.posture == null) { ctx.endpoint.posture = new HashMap(); }
+
+          // Hardware fields from filtered aggregations
+          // Extract first non-null value from top_metrics {field_name: value} format
+          if (ctx.endpoint.hardware.cpu != null && ctx.endpoint.hardware.cpu._value != null) {
+            def v = ctx.endpoint.hardware.cpu._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.cpu = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.cpu_cores != null && ctx.endpoint.hardware.cpu_cores._value != null) {
+            def v = ctx.endpoint.hardware.cpu_cores._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.cpu_cores = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.memory_gb != null && ctx.endpoint.hardware.memory_gb._value != null) {
+            def v = ctx.endpoint.hardware.memory_gb._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.memory_gb = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.vendor != null && ctx.endpoint.hardware.vendor._value != null) {
+            def v = ctx.endpoint.hardware.vendor._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.vendor = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.model != null && ctx.endpoint.hardware.model._value != null) {
+            def v = ctx.endpoint.hardware.model._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.model = e.getValue(); break; } } }
+          }
+
+          // Initialize privileges structure
+          if (ctx.endpoint.privileges == null) { ctx.endpoint.privileges = new HashMap(); }
+
+          // Flatten privileges.local_admins - extract admin usernames from terms aggregation
+          if (ctx.endpoint.privileges.local_admins != null) {
+            def localAdmins = ctx.endpoint.privileges.local_admins;
+            if (localAdmins instanceof Map && localAdmins.containsKey('admins_list')) {
+              def adminsList = localAdmins.admins_list;
+              if (adminsList instanceof Map && adminsList.containsKey('buckets')) {
+                def buckets = adminsList.buckets;
+                def adminNames = new ArrayList();
+                for (bucket in buckets) {
+                  if (bucket.containsKey('key')) {
+                    adminNames.add(bucket.key);
+                  }
+                }
+                ctx.endpoint.privileges.local_admins = adminNames;
+              } else {
+                ctx.endpoint.privileges.local_admins = [];
+              }
+            } else if (!(localAdmins instanceof List)) {
+              ctx.endpoint.privileges.local_admins = [];
+            }
+          }
+
+          // Flatten privileges.admin_count - extract count value from cardinality aggregation
+          if (ctx.endpoint.privileges.admin_count != null) {
+            def adminCount = ctx.endpoint.privileges.admin_count;
+            if (adminCount instanceof Map && adminCount.containsKey('count')) {
+              def countObj = adminCount.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.privileges.admin_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.privileges.admin_count = countObj;
+              } else {
+                ctx.endpoint.privileges.admin_count = 0;
+              }
+            } else if (!(adminCount instanceof Number)) {
+              ctx.endpoint.privileges.admin_count = 0;
+            }
+          }
+
+          // Flatten privileges.root_users - extract usernames from terms aggregation
+          if (ctx.endpoint.privileges.root_users != null) {
+            def rootUsers = ctx.endpoint.privileges.root_users;
+            if (rootUsers instanceof Map && rootUsers.containsKey('root_list')) {
+              def rootList = rootUsers.root_list;
+              if (rootList instanceof Map && rootList.containsKey('buckets')) {
+                def buckets = rootList.buckets;
+                def userNames = new ArrayList();
+                for (bucket in buckets) {
+                  if (bucket.containsKey('key')) {
+                    userNames.add(bucket.key);
+                  }
+                }
+                ctx.endpoint.privileges.root_users = userNames;
+              } else {
+                ctx.endpoint.privileges.root_users = [];
+              }
+            } else if (!(rootUsers instanceof List)) {
+              ctx.endpoint.privileges.root_users = [];
+            }
+          }
+
+          // Set elevated_risk based on admin count
+          def adminCountVal = ctx.endpoint.privileges.admin_count;
+          ctx.endpoint.privileges.elevated_risk = (adminCountVal != null && adminCountVal > 2);
+
+          // Initialize security structure and flatten security detection fields
+          if (ctx.endpoint.security == null) { ctx.endpoint.security = new HashMap(); }
+
+          // Flatten suspicious_tasks fields - extract values from top_metrics format
+          if (ctx.endpoint.security.suspicious_tasks != null) {
+            def tasks = ctx.endpoint.security.suspicious_tasks;
+            if (tasks instanceof Map) {
+              def flatTasks = new HashMap();
+              flatTasks.doc_count = tasks.containsKey('doc_count') ? tasks.doc_count : 0;
+              // Extract values from latest_* fields (top_metrics format: {osquery.field: value})
+              for (def key : ['latest_name', 'latest_detection_method', 'latest_detection_reason', 'latest_command_line']) {
+                if (tasks.containsKey(key) && tasks[key] instanceof Map) {
+                  for (e in tasks[key].entrySet()) { if (e.getValue() != null) { flatTasks[key] = e.getValue(); break; } }
+                }
+              }
+              ctx.endpoint.security.suspicious_tasks = flatTasks;
+            }
+          }
+
+          // Flatten suspicious_services fields
+          if (ctx.endpoint.security.suspicious_services != null) {
+            def services = ctx.endpoint.security.suspicious_services;
+            if (services instanceof Map) {
+              def flatServices = new HashMap();
+              flatServices.doc_count = services.containsKey('doc_count') ? services.doc_count : 0;
+              for (def key : ['latest_name', 'latest_path', 'latest_signature_status']) {
+                if (services.containsKey(key) && services[key] instanceof Map) {
+                  for (e in services[key].entrySet()) { if (e.getValue() != null) { flatServices[key] = e.getValue(); break; } }
+                }
+              }
+              ctx.endpoint.security.suspicious_services = flatServices;
+            }
+          }
+
+          // Flatten services fields
+          if (ctx.endpoint.services != null) {
+            def svc = ctx.endpoint.services;
+            if (svc instanceof Map) {
+              def flatSvc = new HashMap();
+              flatSvc.doc_count = svc.containsKey('doc_count') ? svc.doc_count : 0;
+              for (def key : ['latest_name', 'latest_status']) {
+                if (svc.containsKey(key) && svc[key] instanceof Map) {
+                  for (e in svc[key].entrySet()) { if (e.getValue() != null) { flatSvc[key] = e.getValue(); break; } }
+                }
+              }
+              ctx.endpoint.services = flatSvc;
+            }
+          }
+
+          // Flatten software counts
+          if (ctx.endpoint.software != null) {
+            def sw = ctx.endpoint.software;
+            if (sw instanceof Map) {
+              if (sw.containsKey('installed_count') && sw.installed_count instanceof Map) {
+                def ic = sw.installed_count;
+                ctx.endpoint.software.installed_count = ic.containsKey('count') ?
+                  (ic.count instanceof Map ? ic.count.value : ic.count) : 0;
+              }
+              if (sw.containsKey('services_count') && sw.services_count instanceof Map) {
+                def sc = sw.services_count;
+                ctx.endpoint.software.services_count = sc.containsKey('count') ?
+                  (sc.count instanceof Map ? sc.count.value : sc.count) : 0;
+              }
+            }
+          }
+
+          // Posture raw fields from filtered aggregations
+          // IMPORTANT: If no data was collected (no _value), set to null so scoring knows there's no data
+          if (ctx.endpoint.posture.disk_encryption_raw != null) {
+            if (ctx.endpoint.posture.disk_encryption_raw._value != null) {
+              def encValue = ctx.endpoint.posture.disk_encryption_raw._value;
+              if (encValue.containsKey('osquery.encrypted')) {
+                ctx.endpoint.posture.disk_encryption_raw = encValue['osquery.encrypted'];
+              } else {
+                ctx.endpoint.posture.disk_encryption_raw = null;
+              }
+            } else {
+              // No data collected - set to null
+              ctx.endpoint.posture.disk_encryption_raw = null;
+            }
+          }
+          if (ctx.endpoint.posture.firewall_enabled_raw != null) {
+            if (ctx.endpoint.posture.firewall_enabled_raw._value != null) {
+              def fwValue = ctx.endpoint.posture.firewall_enabled_raw._value;
+              if (fwValue.containsKey('osquery.firewall_enabled')) {
+                ctx.endpoint.posture.firewall_enabled_raw = fwValue['osquery.firewall_enabled'];
+              } else if (fwValue.containsKey('osquery.global_state')) {
+                ctx.endpoint.posture.firewall_enabled_raw = fwValue['osquery.global_state'];
+              } else {
+                ctx.endpoint.posture.firewall_enabled_raw = null;
+              }
+            } else {
+              // No data collected - set to null
+              ctx.endpoint.posture.firewall_enabled_raw = null;
+            }
+          }
+          if (ctx.endpoint.posture.secure_boot_raw != null) {
+            if (ctx.endpoint.posture.secure_boot_raw._value != null) {
+              def sbValue = ctx.endpoint.posture.secure_boot_raw._value;
+              if (sbValue.containsKey('osquery.secure_boot')) {
+                ctx.endpoint.posture.secure_boot_raw = sbValue['osquery.secure_boot'];
+              } else {
+                ctx.endpoint.posture.secure_boot_raw = null;
+              }
+            } else {
+              // No data collected - set to null
+              ctx.endpoint.posture.secure_boot_raw = null;
+            }
+          }
+        `,
+      },
+    },
+    // Remove temporary tmp_* fields after flattening
+    {
+      remove: {
+        field: [
+          'tmp_host_id',
+          'tmp_host_name',
+          'tmp_host_hostname',
+          'tmp_host_os_name',
+          'tmp_host_os_version',
+          'tmp_host_os_platform',
+          'tmp_host_os_family',
+          'tmp_host_os_build',
+          'tmp_host_os_kernel',
+          'tmp_host_architecture',
+          'tmp_host_ip',
+          'tmp_host_mac',
+          'tmp_agent_id',
+          'tmp_agent_name',
+          'tmp_agent_type',
+          'tmp_agent_version',
+          'tmp_asset_platform',
+        ],
+        ignore_missing: true,
+      },
+    },
     // Set static entity fields
+    {
+      set: {
+        field: 'entity.type',
+        value: ENTITY_TYPE.HOST,
+      },
+    },
     {
       set: {
         field: 'entity.sub_type',
@@ -1249,6 +1567,22 @@ export const getAssetIngestPipeline = () => ({
       set: {
         field: 'event.ingested',
         value: '{{_ingest.timestamp}}',
+      },
+    },
+    // Copy entity.id and entity.name from host fields if not already set by transform group_by
+    {
+      script: {
+        lang: 'painless',
+        description: 'Copy entity.id/name from host if not set',
+        source: `
+          if (ctx.entity == null) { ctx.entity = new HashMap(); }
+          if (ctx.entity.id == null && ctx.host != null && ctx.host.id != null) {
+            ctx.entity.id = ctx.host.id;
+          }
+          if (ctx.entity.name == null && ctx.host != null && ctx.host.name != null) {
+            ctx.entity.name = ctx.host.name;
+          }
+        `,
       },
     },
     // Convert disk_encryption_raw to status
@@ -1285,39 +1619,76 @@ export const getAssetIngestPipeline = () => ({
       },
     },
     // Calculate posture score and level
+    // IMPORTANT: Only deduct points if we have DATA showing the feature is disabled.
+    // If no data was collected (raw field is null), it's UNKNOWN - don't deduct.
     {
       script: {
         lang: 'painless',
         source: `
           int score = 100;
           def failedChecks = new ArrayList();
+          int checksWithData = 0;
 
           // Disk encryption check (-25)
+          // Only deduct if we have data AND it shows disabled
           def diskEnc = ctx.endpoint?.posture?.disk_encryption;
-          if (diskEnc == 'FAIL' || diskEnc == '0' || diskEnc == 'false') {
+          if (diskEnc == 'FAIL') {
             score -= 25;
             failedChecks.add('disk_encryption');
+            checksWithData++;
+          } else if (diskEnc == 'OK') {
+            checksWithData++;
           }
+          // If diskEnc is 'UNKNOWN', we don't count it (no data)
 
           // Firewall check (-20)
+          // Only deduct if we have RAW data AND it shows disabled
+          def firewallRaw = ctx.endpoint?.posture?.firewall_enabled_raw;
           def firewall = ctx.endpoint?.posture?.firewall_enabled;
-          if (firewall == false || firewall == '0' || firewall == 'false') {
-            score -= 20;
-            failedChecks.add('firewall_disabled');
+          if (firewallRaw != null && firewallRaw != '') {
+            checksWithData++;
+            if (firewall == false) {
+              score -= 20;
+              failedChecks.add('firewall_disabled');
+            }
           }
+          // If firewallRaw is null, no data was collected - don't deduct
 
           // Secure boot check (-15)
+          // Only deduct if we have RAW data AND it shows disabled
+          def secureBootRaw = ctx.endpoint?.posture?.secure_boot_raw;
           def secureBoot = ctx.endpoint?.posture?.secure_boot;
-          if (secureBoot == false || secureBoot == '0' || secureBoot == 'false') {
-            score -= 15;
-            failedChecks.add('secure_boot_disabled');
+          if (secureBootRaw != null && secureBootRaw != '') {
+            checksWithData++;
+            if (secureBoot == false) {
+              score -= 15;
+              failedChecks.add('secure_boot_disabled');
+            }
           }
+          // If secureBootRaw is null, no data was collected - don't deduct
 
           // Admin count check (-10)
-          def adminCount = ctx.endpoint?.privileges?.admin_count?.count?.value;
-          if (adminCount != null && adminCount > 2) {
-            score -= 10;
-            failedChecks.add('excessive_admins');
+          // Handle both nested structure from transform {count: {value: X}} and flattened number
+          def adminCountObj = ctx.endpoint?.privileges?.admin_count;
+          def adminCount = null;
+          if (adminCountObj != null) {
+            if (adminCountObj instanceof Number) {
+              adminCount = adminCountObj;
+            } else if (adminCountObj instanceof Map && adminCountObj.containsKey('count')) {
+              def countObj = adminCountObj.count;
+              if (countObj instanceof Number) {
+                adminCount = countObj;
+              } else if (countObj instanceof Map && countObj.containsKey('value')) {
+                adminCount = countObj.value;
+              }
+            }
+          }
+          if (adminCount != null) {
+            checksWithData++;
+            if (adminCount > 2) {
+              score -= 10;
+              failedChecks.add('excessive_admins');
+            }
           }
 
           // Set score and failed checks
@@ -1339,8 +1710,9 @@ export const getAssetIngestPipeline = () => ({
           }
 
           // Set posture checks summary
-          def totalChecks = 4;
-          def passedChecks = totalChecks - failedChecks.size();
+          // Total checks is based on how many checks had data
+          def totalChecks = checksWithData;
+          def passedChecks = checksWithData - failedChecks.size();
           ctx.endpoint.posture.checks = new HashMap();
           ctx.endpoint.posture.checks.passed = passedChecks;
           ctx.endpoint.posture.checks.failed = failedChecks.size();

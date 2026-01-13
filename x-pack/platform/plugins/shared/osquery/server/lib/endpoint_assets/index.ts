@@ -6,9 +6,11 @@
  */
 
 export {
-  getAssetFactsTransformId,
-  getAssetFactsTransformConfig,
-  getAssetIndexMapping,
-  getAssetIngestPipeline,
-  getAssetIngestPipelineId,
-} from './asset_facts_transform';
+  getEndpointAssetsTransformId,
+  getEndpointAssetsTransformConfig,
+  getEndpointAssetsIndexName,
+} from './endpoint_assets_transform';
+export {
+  getEndpointAssetsPipelineId,
+  getEndpointAssetsPipelineConfig,
+} from './endpoint_assets_pipeline';

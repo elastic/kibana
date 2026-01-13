@@ -8,13 +8,78 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { actionResponsesTransform } from './action_responses_transform';
+import { ENDPOINT_ASSETS_DEFAULT_NAMESPACE } from '../../common/constants';
+import {
+  getEndpointAssetsTransformConfig,
+  getEndpointAssetsPipelineConfig,
+} from '../lib/endpoint_assets';
 
 // TODO: Move transforms to integration package
 export const initializeTransforms = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
-  await Promise.all([initializeTransform(esClient, actionResponsesTransform, logger)]);
+  await Promise.all([
+    initializeTransform(esClient, actionResponsesTransform, logger),
+    initializeEndpointAssetsTransform(esClient, logger),
+  ]);
+};
+
+/**
+ * Initialize endpoint assets transform and pipeline.
+ * Creates the ingest pipeline first (required by transform), then creates and starts the transform.
+ */
+const initializeEndpointAssetsTransform = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const namespace = ENDPOINT_ASSETS_DEFAULT_NAMESPACE;
+
+  try {
+    // 1. Create ingest pipeline first (transform references it)
+    const pipelineConfig = getEndpointAssetsPipelineConfig(namespace);
+    await createPipelineIfNotExists(esClient, pipelineConfig, logger);
+
+    // 2. Create and start transform
+    const transformConfig = getEndpointAssetsTransformConfig(namespace);
+    const succeeded = await createTransformIfNotExists(esClient, transformConfig, logger);
+    if (succeeded) {
+      await startTransformIfNotStarted(esClient, transformConfig.transform_id, logger);
+    }
+  } catch (error) {
+    const err = transformError(error);
+    logger.error(`Failed to initialize endpoint assets: ${err.message}`);
+  }
+};
+
+/**
+ * Create ingest pipeline if it doesn't exist.
+ */
+const createPipelineIfNotExists = async (
+  esClient: ElasticsearchClient,
+  pipeline: { id: string; [key: string]: unknown },
+  logger: Logger
+): Promise<boolean> => {
+  try {
+    await esClient.ingest.getPipeline({ id: pipeline.id });
+    logger.debug(`Pipeline already exists: ${pipeline.id}`);
+    return true;
+  } catch (existErr) {
+    const existError = transformError(existErr);
+    if (existError.statusCode === 404) {
+      try {
+        await esClient.ingest.putPipeline(pipeline);
+        logger.debug(`Created pipeline: ${pipeline.id}`);
+        return true;
+      } catch (createErr) {
+        const createError = transformError(createErr);
+        logger.error(`Failed to create pipeline ${pipeline.id}: ${createError.message}`);
+      }
+    } else {
+      logger.error(`Failed to check if pipeline ${pipeline.id} exists: ${existError.message}`);
+    }
+  }
+  return false;
 };
 
 export const initializeTransform = async (

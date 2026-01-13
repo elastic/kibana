@@ -10,7 +10,14 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { APP_ID } from '../../../../common/constants';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
-import { ENDPOINT_ASSETS_ROUTES } from '../../../../common/endpoint_assets';
+import {
+  ENDPOINT_ASSETS_ROUTES,
+  ENDPOINT_ASSETS_INDEX_PATTERN,
+} from '../../../../common/endpoint_assets';
+import type {
+  PostureSummaryResponse,
+  PrivilegesSummaryResponse,
+} from '../../../../common/endpoint_assets';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { createEndpointAssetsService } from '../endpoint_assets_service';
 
@@ -20,7 +27,10 @@ import { createEndpointAssetsService } from '../endpoint_assets_service';
  * These routes allow initialization, starting, stopping, and status checking
  * of the Osquery-to-Endpoint-Assets transform.
  */
-export const registerEndpointAssetsRoutes = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const registerEndpointAssetsRoutes = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   // POST /api/endpoint_assets/transform/init - Initialize transform and index
   router.versioned
     .post({
@@ -214,6 +224,187 @@ export const registerEndpointAssetsRoutes = (router: SecuritySolutionPluginRoute
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error getting endpoint assets transform status: ${error.message}`);
+          return siemResponse.error({
+            statusCode: error.statusCode,
+            body: error.message,
+          });
+        }
+      }
+    );
+
+  // GET /api/endpoint_assets/posture/summary - Get posture summary aggregations
+  router.versioned
+    .get({
+      access: 'public',
+      path: ENDPOINT_ASSETS_ROUTES.POSTURE_SUMMARY,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: false,
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+
+        try {
+          const coreContext = await context.core;
+          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+          // Query the transform output index for posture aggregations
+          const result = await esClient.search({
+            index: ENDPOINT_ASSETS_INDEX_PATTERN,
+            size: 0,
+            query: {
+              exists: { field: 'endpoint.posture.score' },
+            },
+            aggs: {
+              total_assets: {
+                value_count: { field: 'entity.id' },
+              },
+              posture_level_distribution: {
+                terms: { field: 'endpoint.posture.level', size: 10 },
+              },
+              average_score: {
+                avg: { field: 'endpoint.posture.score' },
+              },
+              failed_checks: {
+                terms: { field: 'endpoint.posture.failed_checks', size: 20 },
+              },
+            },
+          });
+
+          // Extract aggregation results
+          const aggs = result.aggregations as Record<string, unknown> | undefined;
+          const totalAssetsAgg = aggs?.total_assets as { value: number } | undefined;
+          const postureLevelAgg = aggs?.posture_level_distribution as
+            | {
+                buckets: Array<{ key: string; doc_count: number }>;
+              }
+            | undefined;
+          const avgScoreAgg = aggs?.average_score as { value: number | null } | undefined;
+          const failedChecksAgg = aggs?.failed_checks as
+            | {
+                buckets: Array<{ key: string; doc_count: number }>;
+              }
+            | undefined;
+
+          // Build posture distribution from aggregation buckets
+          const postureDistribution = {
+            critical: 0,
+            high: 0,
+            medium: 0,
+            low: 0,
+          };
+
+          if (postureLevelAgg?.buckets) {
+            for (const bucket of postureLevelAgg.buckets) {
+              const level = bucket.key.toLowerCase() as keyof typeof postureDistribution;
+              if (level in postureDistribution) {
+                postureDistribution[level] = bucket.doc_count;
+              }
+            }
+          }
+
+          // Build failed checks by type
+          const failedChecksByType: Record<string, number> = {};
+          if (failedChecksAgg?.buckets) {
+            for (const bucket of failedChecksAgg.buckets) {
+              failedChecksByType[bucket.key] = bucket.doc_count;
+            }
+          }
+
+          const summaryResponse: PostureSummaryResponse = {
+            total_assets: totalAssetsAgg?.value ?? 0,
+            posture_distribution: postureDistribution,
+            failed_checks_by_type: failedChecksByType,
+            average_score: avgScoreAgg?.value ?? 0,
+          };
+
+          return response.ok({
+            body: summaryResponse,
+          });
+        } catch (e) {
+          const error = transformError(e);
+          logger.error(`Error getting posture summary: ${error.message}`);
+          return siemResponse.error({
+            statusCode: error.statusCode,
+            body: error.message,
+          });
+        }
+      }
+    );
+
+  // GET /api/endpoint_assets/privileges/summary - Get privileges summary aggregations
+  router.versioned
+    .get({
+      access: 'public',
+      path: ENDPOINT_ASSETS_ROUTES.PRIVILEGES_SUMMARY,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: false,
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+
+        try {
+          const coreContext = await context.core;
+          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+          // Query the transform output index for privileges aggregations
+          const result = await esClient.search({
+            index: ENDPOINT_ASSETS_INDEX_PATTERN,
+            size: 0,
+            query: {
+              exists: { field: 'entity.id' },
+            },
+            aggs: {
+              total_assets: {
+                value_count: { field: 'entity.id' },
+              },
+              elevated_privileges: {
+                filter: { term: { 'endpoint.privileges.elevated_risk': true } },
+              },
+              total_admin_count: {
+                sum: { field: 'endpoint.privileges.admin_count' },
+              },
+              average_admin_count: {
+                avg: { field: 'endpoint.privileges.admin_count' },
+              },
+            },
+          });
+
+          // Extract aggregation results
+          const aggs = result.aggregations as Record<string, unknown> | undefined;
+          const totalAssetsAgg = aggs?.total_assets as { value: number } | undefined;
+          const elevatedAgg = aggs?.elevated_privileges as { doc_count: number } | undefined;
+          const totalAdminAgg = aggs?.total_admin_count as { value: number | null } | undefined;
+          const avgAdminAgg = aggs?.average_admin_count as { value: number | null } | undefined;
+
+          const summaryResponse: PrivilegesSummaryResponse = {
+            total_assets: totalAssetsAgg?.value ?? 0,
+            assets_with_elevated_privileges: elevatedAgg?.doc_count ?? 0,
+            total_local_admins: totalAdminAgg?.value ?? 0,
+            average_admin_count: avgAdminAgg?.value ?? 0,
+          };
+
+          return response.ok({
+            body: summaryResponse,
+          });
+        } catch (e) {
+          const error = transformError(e);
+          logger.error(`Error getting privileges summary: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

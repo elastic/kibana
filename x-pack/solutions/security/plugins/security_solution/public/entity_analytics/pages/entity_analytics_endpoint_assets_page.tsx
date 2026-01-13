@@ -272,17 +272,15 @@ const useEndpointAssetsFromEntityStore = () => {
     >;
 
     const searchRequest: estypes.SearchRequest = {
-      index: ENTITY_STORE_INDEX,
+      index: TRANSFORM_OUTPUT_INDEX,
       size: 500,
       sort: [{ '@timestamp': 'desc' }],
       query: {
         bool: {
           filter: [
             {
-              wildcard: {
-                'entity.source': {
-                  value: ENDPOINT_ASSETS_SOURCE_FILTER,
-                },
+              exists: {
+                field: 'entity.id',
               },
             },
           ],
@@ -495,56 +493,33 @@ interface SecurityPostureSummary {
   riskDistribution: RiskDistribution;
 }
 
-// Extract value from transform top_metrics format
+/**
+ * Read the already-processed posture fields from the ingest pipeline.
+ * The ingest pipeline converts raw osquery values to normalized formats:
+ * - disk_encryption: "OK" | "FAIL" | "UNKNOWN"
+ * - firewall_enabled: boolean
+ * - secure_boot: boolean
+ * - score: number (0-100)
+ * - level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+ */
+
+// Interpret disk encryption from processed field
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const extractPostureValue = (obj: any): string | null => {
-  if (!obj?.value) return null;
-  const keys = Object.keys(obj.value);
-  if (keys.length === 0) return null;
-  const firstKey = keys[0];
-  const value = obj.value[firstKey];
-  return value !== null && value !== undefined ? String(value) : null;
-};
-
-// Interpret disk encryption
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getDiskEncryptionStatus = (raw: any): PostureStatus => {
-  const value = extractPostureValue(raw);
-  if (value === null || value === '' || value === 'null') return 'UNKNOWN';
-  return value === '1' ? 'PASS' : 'FAIL';
-};
-
-// Interpret firewall - checks both firewall_enabled and global_state
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getFirewallStatus = (raw: any): PostureStatus => {
-  if (!raw?.value) return 'UNKNOWN';
-  const valueObj = raw.value;
-  const keys = Object.keys(valueObj);
-  if (keys.length === 0) return 'UNKNOWN';
-
-  // Check for global_state first (macOS ALF)
-  const globalState = valueObj['osquery.global_state'];
-  if (
-    globalState !== null &&
-    globalState !== undefined &&
-    globalState !== '' &&
-    globalState !== 'null'
-  ) {
-    return globalState === '1' || globalState === '2' ? 'PASS' : 'FAIL'; // 1=on, 2=block all
-  }
-
-  // Check for firewall_enabled (Windows)
-  const firewallEnabled = valueObj['osquery.firewall_enabled'];
-  if (
-    firewallEnabled !== null &&
-    firewallEnabled !== undefined &&
-    firewallEnabled !== '' &&
-    firewallEnabled !== 'null'
-  ) {
-    return firewallEnabled === '1' ? 'PASS' : 'FAIL';
-  }
-
+const getDiskEncryptionStatus = (posture: any): PostureStatus => {
+  const value = posture?.disk_encryption;
+  if (value === 'OK') return 'PASS';
+  if (value === 'FAIL') return 'FAIL';
   return 'UNKNOWN';
+};
+
+// Interpret firewall from processed boolean field
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getFirewallStatus = (posture: any): PostureStatus => {
+  const value = posture?.firewall_enabled;
+  // Check if we have the raw field to determine if data was collected
+  const hasRawData = posture?.firewall_enabled_raw !== undefined && posture?.firewall_enabled_raw !== null;
+  if (!hasRawData) return 'UNKNOWN';
+  return value === true ? 'PASS' : 'FAIL';
 };
 
 // Extract value from security findings (no .value wrapper, direct object)
@@ -570,26 +545,37 @@ const hasSecurityFindings = (security: any): boolean => {
   );
 };
 
-// Interpret secure boot status
-// secure_boot from osquery: 1 = enabled, 0 = disabled
-// SIP from macOS: enabled = 1 means SIP is on
+// Interpret secure boot from processed boolean field
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getSecureBootStatus = (raw: any): PostureStatus => {
-  const value = extractPostureValue(raw);
-  if (value === null || value === '' || value === 'null') return 'UNKNOWN';
-  // Handle both string and numeric values
-  return value === '1' || value === 'true' || value === 1 || value === true ? 'PASS' : 'FAIL';
+const getSecureBootStatus = (posture: any): PostureStatus => {
+  const value = posture?.secure_boot;
+  // Check if we have the raw field to determine if data was collected
+  const hasRawData = posture?.secure_boot_raw !== undefined && posture?.secure_boot_raw !== null;
+  if (!hasRawData) return 'UNKNOWN';
+  return value === true ? 'PASS' : 'FAIL';
 };
 
-// Get admin count from privileges
+// Get admin count from privileges - ingest pipeline flattens to just the number
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getAdminCount = (privileges: any): number => {
-  return privileges?.admin_count?.count || 0;
+  // After ingest pipeline processing, admin_count is either:
+  // - A nested object with count: { admin_count: { count: N } }
+  // - Or directly a number: { admin_count: N }
+  const adminCount = privileges?.admin_count;
+  if (typeof adminCount === 'number') return adminCount;
+  if (typeof adminCount === 'object' && adminCount?.count !== undefined) {
+    return typeof adminCount.count === 'number' ? adminCount.count : adminCount.count?.value || 0;
+  }
+  return 0;
 };
 
 // Check if admin count is excessive (>2 is considered a risk)
-const getAdminCountStatus = (adminCount: number): PostureStatus => {
-  if (adminCount === 0) return 'UNKNOWN'; // No data collected
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getAdminCountStatus = (adminCount: number, privileges: any): PostureStatus => {
+  // Check if we have any privilege data collected
+  const hasData = privileges?.admin_count !== undefined || privileges?.local_admins !== undefined;
+  if (!hasData) return 'UNKNOWN';
+  // If we have data but count is 0, that means we collected data and found no admins (PASS)
   return adminCount <= 2 ? 'PASS' : 'FAIL';
 };
 
@@ -752,12 +738,13 @@ const useSecurityPosture = () => {
       const missingChecks: string[] = [];
       const suggestedQueries: Array<{ name: string; description: string }> = [];
 
-      // Get all posture check statuses
-      const diskEncryption = getDiskEncryptionStatus(doc.endpoint?.posture?.disk_encryption_raw);
-      const firewall = getFirewallStatus(doc.endpoint?.posture?.firewall_enabled_raw);
-      const secureBoot = getSecureBootStatus(doc.endpoint?.posture?.secure_boot_raw);
+      // Get all posture check statuses from already-processed fields
+      // The ingest pipeline converts raw osquery values to normalized formats
+      const diskEncryption = getDiskEncryptionStatus(doc.endpoint?.posture);
+      const firewall = getFirewallStatus(doc.endpoint?.posture);
+      const secureBoot = getSecureBootStatus(doc.endpoint?.posture);
       const adminCount = getAdminCount(doc.endpoint?.privileges);
-      const adminCountStatus = getAdminCountStatus(adminCount);
+      const adminCountStatus = getAdminCountStatus(adminCount, doc.endpoint?.privileges);
       // Shell data doesn't have .value wrapper like posture fields - use extractSecurityValue
       const suspiciousShell = extractSecurityValue(doc.endpoint?.shell?.suspicious);
       const shellHistoryStatus: PostureStatus =

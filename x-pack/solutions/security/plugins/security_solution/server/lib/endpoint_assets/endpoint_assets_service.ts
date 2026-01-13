@@ -28,6 +28,8 @@ import {
   getAssetFactsTransformId,
   getAssetFactsTransformConfig,
   getAssetIndexMapping,
+  getAssetIngestPipeline,
+  getAssetIngestPipelineId,
 } from './transforms';
 import {
   createTransform,
@@ -293,7 +295,20 @@ export class EndpointAssetsService {
     // logs-osquery_manager.endpoint_assets-* matches a data stream template.
     // The index will be created automatically when the transform writes data.
 
-    // Create transform
+    // 1. Create ingest pipeline first (required for transform to use it)
+    const pipelineId = getAssetIngestPipelineId(this.namespace);
+    const pipelineConfig = getAssetIngestPipeline(this.namespace);
+    this.logger.info(`Creating ingest pipeline: ${pipelineId}`);
+
+    await this.esClient.ingest.putPipeline({
+      id: pipelineId,
+      description: pipelineConfig.description,
+      processors: pipelineConfig.processors,
+    });
+
+    this.logger.info(`Ingest pipeline ${pipelineId} created successfully`);
+
+    // 2. Create transform
     const transformConfig = getAssetFactsTransformConfig(this.namespace);
     await createTransform({
       esClient: this.esClient,
