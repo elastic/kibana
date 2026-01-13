@@ -13,36 +13,29 @@ import type { AiClassifyStepOutputSchema } from '../../../../common/steps/ai';
 
 export function validateModelResponse({
   modelResponse,
-  schema,
   expectedCategories,
   fallbackCategory,
   responseMetadata,
 }: {
-  modelResponse: unknown;
-  schema: z.ZodType;
+  modelResponse: z.infer<AiClassifyStepOutputSchema> | null | undefined;
   expectedCategories: string[];
   fallbackCategory: string | undefined;
   responseMetadata: Record<string, unknown>;
 }): void {
-  const safeParseResult = schema.safeParse(modelResponse);
-
-  if (safeParseResult.error) {
+  if (!modelResponse) {
     throw new ExecutionError({
-      type: 'InvalidResponse',
-      message: 'Model returned invalid JSON',
+      type: 'InvalidModelResponse',
+      message: 'Model response is null or undefined.',
       details: {
-        validationMessage: safeParseResult.error,
         modelResponse,
         metadata: responseMetadata,
       },
     });
   }
 
-  const parsedResponse = safeParseResult.data as z.infer<AiClassifyStepOutputSchema>;
-
-  const returnedCategories = parsedResponse.categories?.length
-    ? parsedResponse.categories
-    : [parsedResponse.category as string];
+  const returnedCategories = modelResponse.categories?.length
+    ? modelResponse.categories
+    : [modelResponse.category as string];
   const categoriesSet = new Set([
     ...expectedCategories,
     ...(fallbackCategory ? [fallbackCategory] : []),

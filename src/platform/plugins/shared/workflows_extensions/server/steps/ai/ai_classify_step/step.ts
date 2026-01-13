@@ -9,7 +9,6 @@
 
 import type { MessageFieldWithRole } from '@langchain/core/messages';
 import type { CoreSetup } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
 import {
   buildClassificationRequestPart,
   buildDataPart,
@@ -70,8 +69,10 @@ export const aiClassifyStepDefinition = (
       ];
 
       const invocationResult = await chatModel
-        .withStructuredOutput(z.toJSONSchema(responseZodSchema), {
+        .withStructuredOutput(responseZodSchema, {
+          name: 'classify',
           includeRaw: true,
+          method: 'json',
         })
         .invoke(modelInput, {
           signal: context.abortSignal,
@@ -79,7 +80,6 @@ export const aiClassifyStepDefinition = (
 
       validateModelResponse({
         modelResponse: invocationResult.parsed,
-        schema: responseZodSchema,
         expectedCategories: context.input.categories,
         fallbackCategory: context.input.fallbackCategory,
         responseMetadata: invocationResult.raw.response_metadata,

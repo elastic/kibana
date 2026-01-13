@@ -8,152 +8,13 @@
  */
 
 import { ExecutionError } from '@kbn/workflows/common/errors';
-import { z } from '@kbn/zod/v4';
-
 import { validateModelResponse } from './validate_model_response';
 
 describe('validateModelResponse', () => {
-  const mockSchema = z.object({
-    category: z.string().optional(),
-    categories: z.array(z.string()).optional(),
-    rationale: z.string().optional(),
-    metadata: z.record(z.string(), z.any()),
-  });
-
   const responseMetadata = {
     modelId: 'test-model',
     timestamp: Date.now(),
   };
-
-  describe('schema validation', () => {
-    it('should validate a response with single category successfully', () => {
-      const modelResponse = {
-        category: 'category1',
-        metadata: {},
-      };
-
-      expect(() => {
-        validateModelResponse({
-          modelResponse,
-          schema: mockSchema,
-          expectedCategories: ['category1', 'category2'],
-          fallbackCategory: undefined,
-          responseMetadata,
-        });
-      }).not.toThrow();
-    });
-
-    it('should validate a response with multiple categories successfully', () => {
-      const modelResponse = {
-        categories: ['category1', 'category2'],
-        metadata: {},
-      };
-
-      expect(() => {
-        validateModelResponse({
-          modelResponse,
-          schema: mockSchema,
-          expectedCategories: ['category1', 'category2', 'category3'],
-          fallbackCategory: undefined,
-          responseMetadata,
-        });
-      }).not.toThrow();
-    });
-
-    it('should validate a response with rationale successfully', () => {
-      const modelResponse = {
-        category: 'category1',
-        rationale: 'This is the rationale for the classification',
-        metadata: {},
-      };
-
-      expect(() => {
-        validateModelResponse({
-          modelResponse,
-          schema: mockSchema,
-          expectedCategories: ['category1', 'category2'],
-          fallbackCategory: undefined,
-          responseMetadata,
-        });
-      }).not.toThrow();
-    });
-
-    it('should throw InvalidResponse error when model response does not match schema', () => {
-      const invalidResponse = {
-        invalidField: 'value',
-      };
-
-      expect(() => {
-        validateModelResponse({
-          modelResponse: invalidResponse,
-          schema: mockSchema,
-          expectedCategories: ['category1', 'category2'],
-          fallbackCategory: undefined,
-          responseMetadata,
-        });
-      }).toThrow(ExecutionError);
-
-      try {
-        validateModelResponse({
-          modelResponse: invalidResponse,
-          schema: mockSchema,
-          expectedCategories: ['category1', 'category2'],
-          fallbackCategory: undefined,
-          responseMetadata,
-        });
-      } catch (error) {
-        expect(error).toBeInstanceOf(ExecutionError);
-        expect((error as ExecutionError).type).toBe('InvalidResponse');
-        expect((error as ExecutionError).message).toBe('Model returned invalid JSON');
-        expect((error as ExecutionError).details).toMatchObject({
-          modelResponse: invalidResponse,
-          metadata: responseMetadata,
-        });
-        expect((error as ExecutionError).details?.validationMessage).toBeDefined();
-      }
-    });
-
-    it('should throw InvalidResponse error when model response is null', () => {
-      expect(() => {
-        validateModelResponse({
-          modelResponse: null,
-          schema: mockSchema,
-          expectedCategories: ['category1', 'category2'],
-          fallbackCategory: undefined,
-          responseMetadata,
-        });
-      }).toThrow(ExecutionError);
-    });
-
-    it('should throw InvalidResponse error when model response is undefined', () => {
-      expect(() => {
-        validateModelResponse({
-          modelResponse: undefined,
-          schema: mockSchema,
-          expectedCategories: ['category1', 'category2'],
-          fallbackCategory: undefined,
-          responseMetadata,
-        });
-      }).toThrow(ExecutionError);
-    });
-
-    it('should throw InvalidResponse error when model response has wrong types', () => {
-      const invalidResponse = {
-        category: 123, // Should be string
-        metadata: {},
-      };
-
-      expect(() => {
-        validateModelResponse({
-          modelResponse: invalidResponse,
-          schema: mockSchema,
-          expectedCategories: ['category1', 'category2'],
-          fallbackCategory: undefined,
-          responseMetadata,
-        });
-      }).toThrow(ExecutionError);
-    });
-  });
 
   describe('category validation', () => {
     it('should accept a category that matches expected categories', () => {
@@ -165,7 +26,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -182,7 +42,7 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
+
           expectedCategories: ['category1', 'category2', 'category3'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -199,7 +59,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: 'fallback',
           responseMetadata,
@@ -216,7 +75,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: 'fallback',
           responseMetadata,
@@ -233,7 +91,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -243,7 +100,7 @@ describe('validateModelResponse', () => {
       try {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
+
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -268,7 +125,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -278,7 +134,7 @@ describe('validateModelResponse', () => {
       try {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
+
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -298,7 +154,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -315,7 +170,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: 'fallback',
           responseMetadata,
@@ -334,7 +188,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: [],
           fallbackCategory: 'fallback',
           responseMetadata,
@@ -352,7 +205,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2', 'category3'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -370,7 +222,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -387,7 +238,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -408,7 +258,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -425,7 +274,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -442,7 +290,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata: {},
@@ -464,7 +311,7 @@ describe('validateModelResponse', () => {
       try {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
+
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata: customMetadata,
@@ -485,7 +332,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -495,7 +341,6 @@ describe('validateModelResponse', () => {
       try {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,
@@ -514,7 +359,6 @@ describe('validateModelResponse', () => {
       expect(() => {
         validateModelResponse({
           modelResponse,
-          schema: mockSchema,
           expectedCategories: ['category1', 'category2'],
           fallbackCategory: undefined,
           responseMetadata,

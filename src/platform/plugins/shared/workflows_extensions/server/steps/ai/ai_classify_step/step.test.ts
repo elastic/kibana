@@ -9,7 +9,6 @@
 
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { z } from '@kbn/zod/v4';
 
 // Mock all external dependencies
 jest.mock('./build_prompts', () => ({
@@ -40,17 +39,6 @@ jest.mock('../../../step_registry/types', () => ({
 jest.mock('../utils/resolve_connector_id', () => ({
   resolveConnectorId: jest.fn(),
 }));
-
-jest.mock('@kbn/zod/v4', () => {
-  const actualZod = jest.requireActual('@kbn/zod/v4');
-  return {
-    ...actualZod,
-    z: {
-      ...actualZod.z,
-      toJSONSchema: jest.fn((schema) => ({ type: 'object', properties: {} })),
-    },
-  };
-});
 
 import {
   buildClassificationRequestPart,
@@ -404,15 +392,15 @@ describe('aiClassifyStepDefinition', () => {
       expect(mockBuildStructuredOutputSchema).toHaveBeenCalledWith(mockContext.input);
     });
 
-    it('should convert schema to JSON schema for model', async () => {
+    it('should pass Zod schema directly to withStructuredOutput', async () => {
       const stepDefinition = aiClassifyStepDefinition(mockCoreSetup);
       await stepDefinition.handler(mockContext);
 
-      expect(z.toJSONSchema).toHaveBeenCalledWith(mockSchema);
-      expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith(
-        { type: 'object', properties: {} },
-        { includeRaw: true }
-      );
+      expect(mockChatModel.withStructuredOutput).toHaveBeenCalledWith(mockSchema, {
+        name: 'classify',
+        includeRaw: true,
+        method: 'json',
+      });
     });
 
     it('should validate model response', async () => {
@@ -424,7 +412,6 @@ describe('aiClassifyStepDefinition', () => {
           category: 'test-category',
           metadata: {},
         },
-        schema: mockSchema,
         expectedCategories: ['category1', 'category2'],
         fallbackCategory: undefined,
         responseMetadata: {
