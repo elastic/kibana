@@ -54,7 +54,7 @@ export const StatusPopoverButton = memo(({ enrichedFieldInfo }: StatusPopoverBut
         workflowStatus: currentWorkflowStatus,
       },
     ],
-    closePopover: () => togglePopover,
+    closePopover: togglePopover,
     onSuccess: () => {
       closeFlyout();
     },

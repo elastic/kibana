@@ -8,12 +8,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import userEvent from '@testing-library/user-event';
 
 import { StatusPopoverButton } from './status_popover_button';
 import { TestProviders } from '../../../common/mock';
 import type { EnrichedFieldInfoWithValues } from '../../document_details/right/utils/enriched_field_info';
 import { FILTER_OPEN } from '@kbn/securitysolution-data-table';
-import userEvent from '@testing-library/user-event';
+
+import { useAttackWorkflowStatusContextMenuItems } from '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
 
 jest.mock('../context', () => ({
   useAttackDetailsContext: () => ({
@@ -32,9 +34,11 @@ jest.mock('../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
 }));
 
+const mockCloseFlyout = jest.fn();
+
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: () => ({
-    closeFlyout: jest.fn(),
+    closeFlyout: mockCloseFlyout,
   }),
 }));
 
@@ -50,6 +54,13 @@ jest.mock('../../../attack_discovery/pages/results/take_action/use_update_alerts
   }),
 }));
 
+jest.mock(
+  '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items',
+  () => ({
+    useAttackWorkflowStatusContextMenuItems: jest.fn(),
+  })
+);
+
 const enrichedFieldInfo: EnrichedFieldInfoWithValues = {
   values: [FILTER_OPEN],
   linkValue: undefined,
@@ -62,38 +73,35 @@ const enrichedFieldInfo: EnrichedFieldInfoWithValues = {
 describe('StatusPopoverButton (attack details)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useAttackWorkflowStatusContextMenuItems as jest.Mock).mockImplementation(
+      ({ onSuccess }: { onSuccess: () => void }) => ({
+        items: [
+          {
+            name: 'Mark as acknowledged',
+            onClick: () => onSuccess(),
+          },
+          {
+            name: 'Mark as closed',
+            onClick: () => onSuccess(),
+          },
+        ],
+        panels: [],
+      })
+    );
   });
 
   test('it renders the current status', () => {
-    const { getByText } = render(
+    render(
       <TestProviders>
         <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} />
       </TestProviders>
     );
 
-    getByText('open');
+    expect(screen.getByText('open')).toBeInTheDocument();
   });
 
   test('it shows the correct options when clicked', async () => {
-    const { getByText, container } = render(
-      <TestProviders>
-        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} />
-      </TestProviders>
-    );
-
-    // Click the status badge/button
-    getByText('open').click();
-    await waitForEuiPopoverOpen();
-
-    // Popover arrow should be visible
-    expect(container.querySelector('.euiBadge__icon')).not.toBeNull();
-
-    // Available actions (OPEN is current, so excluded)
-    getByText('Mark as acknowledged');
-    getByText('Mark as closed');
-  });
-
-  test('it opens the confirmation modal after selecting a new status', async () => {
     const user = userEvent.setup();
 
     render(
@@ -102,29 +110,28 @@ describe('StatusPopoverButton (attack details)', () => {
       </TestProviders>
     );
 
-    // Click the status badge/button
-    const statusButton = screen.getByText('open');
-    await user.click(statusButton);
-
-    // Wait for popover to open
+    await user.click(screen.getByText('open'));
     await waitForEuiPopoverOpen();
 
-    // Click one of the status options
-    const acknowledgeButton = screen.getByText('Mark as acknowledged');
-    await user.click(acknowledgeButton);
+    expect(screen.getByText('Change attack status')).toBeInTheDocument();
+    expect(screen.getByText('Mark as acknowledged')).toBeInTheDocument();
+    expect(screen.getByText('Mark as closed')).toBeInTheDocument();
+  });
 
-    // Check that modal appeared
-    const modal = await screen.findByTestId('confirmModal');
-    expect(modal).toBeInTheDocument();
+  test('it closes the flyout on successful status change', async () => {
+    const user = userEvent.setup();
 
-    // Modal has two buttons: markDiscoveriesOnly and markAlertsAndDiscoveries
-    expect(screen.getByTestId('markDiscoveriesOnly')).toBeInTheDocument();
-    expect(screen.getByTestId('markAlertsAndDiscoveries')).toBeInTheDocument();
+    render(
+      <TestProviders>
+        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} />
+      </TestProviders>
+    );
 
-    // Click confirm button to simulate user confirming
-    await user.click(screen.getByTestId('markAlertsAndDiscoveries'));
+    await user.click(screen.getByText('open'));
+    await waitForEuiPopoverOpen();
 
-    // Optionally: check modal is closed after confirmation
-    expect(screen.queryByTestId('confirmModal')).not.toBeInTheDocument();
+    await user.click(screen.getByText('Mark as acknowledged'));
+
+    expect(mockCloseFlyout).toHaveBeenCalledTimes(1);
   });
 });
