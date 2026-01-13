@@ -1075,7 +1075,6 @@ export class ExceptionListClient {
     sortOrder,
   }: FindEndpointListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
-    await this.createEndpointList();
 
     const findOptions = {
       filter,
