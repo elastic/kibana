@@ -9,11 +9,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
 import {
   CreateExceptionListItemRequestBody,
   CreateExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
-import type { EntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
@@ -87,8 +88,8 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
             });
           }
 
-          // Cast to io-ts types for compatibility with downstream functions
-          const entriesArray = entries as EntriesArray;
+          // Cast entries to the expected array type (request body is a union type)
+          const entriesArray = entries as ExceptionListItemEntryArray;
           const osTypesArray = (osTypes ?? []) as OsTypeArray;
           const tagsArray = tags ?? [];
 
