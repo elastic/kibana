@@ -44,7 +44,7 @@ export async function readStream({
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, { [name]: queryLinks }, attachments] = await Promise.all([
     streamsClient.getStream(name),
-    queryClient.getQueryLinks([name]),
+    queryClient.getStreamToQueryLinksMap([name]),
     attachmentClient.getAttachments(name),
   ]);
 
