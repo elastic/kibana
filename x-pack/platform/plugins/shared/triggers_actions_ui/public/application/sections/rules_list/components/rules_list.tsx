@@ -1035,21 +1035,13 @@ export const RulesList = ({
               }
             }}
             onSelectTemplate={(templateId) => {
-              if (navigateToCreateRuleForm) {
-                // For templates, we need to extract the ruleTypeId or handle it differently
-                // For now, fall back to default behavior
-                navigateToApp('management', {
-                  path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                    encodeURIComponent(templateId)
-                  )}`,
-                });
-              } else {
-                navigateToApp('management', {
-                  path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                    encodeURIComponent(templateId)
-                  )}`,
-                });
-              }
+              // For templates, we need to extract the ruleTypeId or handle it differently
+              // For now, fall back to default behavior
+              navigateToApp('management', {
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                  encodeURIComponent(templateId)
+                )}`,
+              });
             }}
             http={http}
             toasts={toasts}
