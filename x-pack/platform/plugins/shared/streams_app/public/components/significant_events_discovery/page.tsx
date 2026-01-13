@@ -14,7 +14,7 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { StreamsTree } from './components/streams_tree/streams_tree';
+import { StreamsView } from './components/streams_view/streams_view';
 
 export function SignificantEventsDiscoveryPage() {
   const {
@@ -68,7 +68,7 @@ export function SignificantEventsDiscoveryPage() {
         }
       />
       <StreamsAppPageTemplate.Body grow>
-        <StreamsTree />
+        <StreamsView />
       </StreamsAppPageTemplate.Body>
     </>
   );
