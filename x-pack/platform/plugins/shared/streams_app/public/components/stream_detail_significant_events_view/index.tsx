@@ -180,6 +180,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
                 size="s"
                 color="primary"
                 onClick={() => {
+                  setSelectedFeatures([]);
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
@@ -250,7 +251,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout(false)}
+      {editFlyout(selectedFeatures.length > 0)}
     </>
   );
 }
