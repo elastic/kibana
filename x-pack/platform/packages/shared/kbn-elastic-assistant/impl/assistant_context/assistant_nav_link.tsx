@@ -53,9 +53,9 @@ export const AssistantNavLink: FC = () => {
     return () => sub.unsubscribe();
   }, [completeOpenChat, openChatTrigger$, showOverlay]);
 
-  // Visibility based on assistantAvailability.hasAssistantPrivilege is now handled
+  // Visibility based on assistantAvailability.hasAssistantPrivilege is handled
   // by the enabled$ observable at the nav control registration level.
-  // We still need to wait for chromeStyle to load to determine which button component to use.
+  // This check ensures the chromeStyle is loaded so we can determine which button component to use.
   if (!chromeStyle) {
     return null;
   }

@@ -15,7 +15,7 @@ import { HeaderExtension } from './header_extension';
 describe('HeaderExtension', () => {
   it('calls navControl.render with div node', () => {
     const renderSpy = jest.fn();
-    mount(<HeaderExtension extension={renderSpy} />);
+    mount(<HeaderExtension extension={renderSpy} id={'testId'} />);
 
     expect(renderSpy.mock.calls.length).toEqual(1);
 
@@ -25,7 +25,7 @@ describe('HeaderExtension', () => {
 
   it('calls navControl.render with div node as inlineBlock', () => {
     const renderSpy = jest.fn();
-    mount(<HeaderExtension extension={renderSpy} display={'inlineBlock'} />);
+    mount(<HeaderExtension extension={renderSpy} display={'inlineBlock'} id={'testId'} />);
 
     const [divNode] = renderSpy.mock.calls[0];
     expect(divNode).toHaveAttribute('style', 'display: inline-block;');
@@ -35,7 +35,7 @@ describe('HeaderExtension', () => {
     const unrenderSpy = jest.fn();
     const render = () => unrenderSpy;
 
-    const wrapper = mount(<HeaderExtension extension={render} />);
+    const wrapper = mount(<HeaderExtension extension={render} id={'testId'} />);
 
     wrapper.unmount();
     expect(unrenderSpy.mock.calls.length).toEqual(1);

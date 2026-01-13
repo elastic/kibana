@@ -343,6 +343,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
           <>
             {customLinks && <EuiSpacer size="xs" />}
             <HeaderExtension
+              id="helpMenuExtensionContent"
               extension={(domNode) => content(domNode, { hideHelpMenu: this.closeMenu })}
             />
           </>
