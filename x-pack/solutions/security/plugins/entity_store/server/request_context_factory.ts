@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type {
   EntityStoreApiRequestHandlerContext,
   EntityStoreRequestHandlerContext,
@@ -15,9 +15,10 @@ import type {
 } from './types';
 import { ResourcesService } from './domain/resources_service';
 import { FeatureFlags } from './infra/feature_flags';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 interface EntityStoreApiRequestHandlerContextDeps {
-  core: CoreSetup<EntityStoreStartPlugins, void>;
+  coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
 }
@@ -33,13 +34,14 @@ export async function getTaskManagerStart(
 export async function createRequestHandlerContext({
   logger,
   context,
-  core,
+  coreSetup
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
+  const core = await context.core;
   return {
-    core: await context.core,
+    core,
     logger,
     resourcesService: new ResourcesService(logger),
-    taskManagerStart: await getTaskManagerStart(core),
     featureFlags: new FeatureFlags(core.uiSettings.client),
+    taskManagerStart: await getTaskManagerStart(coreSetup),
   };
 }
