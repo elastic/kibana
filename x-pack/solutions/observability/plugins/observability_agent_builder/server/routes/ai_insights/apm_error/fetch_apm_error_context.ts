@@ -161,7 +161,7 @@ export async function fetchApmErrorContext({
           },
           logger,
           categoryCount: 10,
-          terms: { 'trace.id': traceId },
+          fields: ['trace.id'],
         });
 
         return logCategories?.categories;

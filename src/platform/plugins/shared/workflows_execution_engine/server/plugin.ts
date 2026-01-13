@@ -27,6 +27,7 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { checkLicense } from './lib/check_license';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -105,6 +106,8 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -150,6 +153,8 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -198,6 +203,8 @@ export class WorkflowsExecutionEnginePlugin
                 triggerType: string;
               };
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -366,6 +373,8 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+      await checkLicense(plugins.licensing);
+
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       // We can determine this from context and request before creating the execution
       const isRunningInTaskManager =
@@ -412,6 +421,8 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
+      await checkLicense(plugins.licensing);
+
       const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
         context,
@@ -440,6 +451,8 @@ export class WorkflowsExecutionEnginePlugin
       contextOverride,
       request
     ) => {
+      await checkLicense(plugins.licensing);
+
       // Check if request is required before creating execution
       // Workflow steps require user context to run with proper permissions
       if (!request) {
@@ -506,6 +519,8 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecutionId,
       spaceId
     ) => {
+      await checkLicense(plugins.licensing);
+
       await this.initialize(coreStart);
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
