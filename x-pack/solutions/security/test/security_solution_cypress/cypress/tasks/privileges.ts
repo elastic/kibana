@@ -264,9 +264,7 @@ export const rulesRead: Role = {
     kibana: [
       {
         feature: {
-          // siemV5: ['all'], // TODO: Remove before merge
-          // securitySolutionRulesV1: ['read'],
-          securitySolutionRulesV2: ['read', 'securitySolutionExceptionsRead'],
+          securitySolutionRulesV2: ['read'],
           savedObjectManagement: ['all'],
           indexPatterns: ['all'],
         },

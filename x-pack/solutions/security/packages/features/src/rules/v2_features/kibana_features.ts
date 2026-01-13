@@ -25,6 +25,7 @@ import {
   ALERTS_API_READ,
   APP_ID,
   EXCEPTIONS_API_READ,
+  EXCEPTIONS_UI_READ,
   INITIALIZE_SECURITY_SOLUTION,
   LEGACY_NOTIFICATIONS_ID,
   LISTS_API_ALL,
@@ -120,7 +121,7 @@ export const getRulesV2BaseKibanaFeature = (
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
-      ui: [RULES_UI_READ],
+      ui: [RULES_UI_READ, EXCEPTIONS_UI_READ],
       api: [
         RULES_API_READ,
         ALERTS_API_READ,

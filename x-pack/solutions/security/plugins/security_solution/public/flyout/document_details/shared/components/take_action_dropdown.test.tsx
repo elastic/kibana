@@ -159,7 +159,7 @@ describe('take action dropdown', () => {
         timelinePrivileges: { read: true },
         rulesPrivileges: {
           rules: { read: true, edit: true },
-          exceptions: { read: true, crud: true },
+          exceptions: { read: true, edit: true },
         },
       });
 

@@ -340,7 +340,6 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_all',
         'minimal_read',
         'security_solution_exceptions_all',
-        'securitySolutionExceptionsRead',
       ],
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
       logs: ['all', 'read', 'minimal_all', 'minimal_read'],
