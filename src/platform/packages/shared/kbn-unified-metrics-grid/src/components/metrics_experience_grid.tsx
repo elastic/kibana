@@ -48,99 +48,50 @@ export const MetricsExperienceGrid = ({
 
   const { allMetricFields, visibleMetricFields, dimensions } = useMetricFields();
 
-  // Track previous breakdownField to avoid unnecessary updates and detect clearing
-  // Initialize to undefined so effect runs on initial mount if breakdownField is set
-  const prevBreakdownFieldRef = useRef<string | undefined>(undefined);
-  const hasInitializedRef = useRef(false);
-
-  // Sync breakdownField from Discover's sidebar "Add Breakdown" action to selectedDimensions
-  useEffect(() => {
-    // Skip if breakdownField hasn't changed (but allow initial mount to proceed)
-    if (prevBreakdownFieldRef.current === breakdownField && hasInitializedRef.current) {
+  // Helper function to sync breakdownField to selectedDimensions
+  const syncBreakdownFieldToDimensions = useCallback(() => {
+    if (!breakdownField || dimensions.length === 0) {
       return;
     }
 
-    const previousBreakdownField = prevBreakdownFieldRef.current;
-    prevBreakdownFieldRef.current = breakdownField;
-    hasInitializedRef.current = true;
-
-    // Case 1: breakdownField is cleared (undefined/null)
-    if (!breakdownField) {
-      // Clear selection if it matches the previously selected field (only if single selection)
-      if (
-        selectedDimensions.length === 1 &&
-        selectedDimensions[0]?.name === previousBreakdownField
-      ) {
-        onDimensionsChange([]);
-      }
-      return;
-    }
-
-    // Case 2: Idempotent check - if already selected, do nothing
-    const isAlreadySelected = selectedDimensions.some((d) => d.name === breakdownField);
-    if (isAlreadySelected) {
-      return;
-    }
-
-    // Case 3: Find the matching dimension in available dimensions
-    const matchingDimension = dimensions.find((d) => d.name === breakdownField);
-    if (!matchingDimension) {
-      // Field not found in available dimensions - this can happen if dimensions haven't loaded yet
-      // or if the field is not a valid dimension. Do nothing - will be handled by dimensions effect.
-      return;
-    }
-
-    // Case 4: No previous selection - add the clicked dimension
-    if (selectedDimensions.length === 0) {
-      onDimensionsChange([matchingDimension]);
-      return;
-    }
-
-    // Case 5: Replace existing selection (since MAX_DIMENSIONS_SELECTIONS = 1)
-    // If max is 1, replace; otherwise add up to max limit
-    if (MAX_DIMENSIONS_SELECTIONS === 1) {
-      onDimensionsChange([matchingDimension]);
-    } else {
-      const newSelection = [...selectedDimensions, matchingDimension].slice(
-        0,
-        MAX_DIMENSIONS_SELECTIONS
-      );
-      onDimensionsChange(newSelection);
-    }
-  }, [breakdownField, dimensions, selectedDimensions, onDimensionsChange]);
-
-  // Sync when dimensions become available (handles case where breakdownField is set before dimensions load)
-  useEffect(() => {
-    // Only sync if breakdownField is set, dimensions are available, and we've initialized
-    if (!breakdownField || dimensions.length === 0 || !hasInitializedRef.current) {
-      return;
-    }
-
-    // Check if breakdownField should be synced but wasn't because dimensions weren't ready
     const matchingDimension = dimensions.find((d) => d.name === breakdownField);
     if (!matchingDimension) {
       return;
     }
 
-    // Idempotent check - if already selected, do nothing
-    const isAlreadySelected = selectedDimensions.some((d) => d.name === breakdownField);
-    if (isAlreadySelected) {
+    // Idempotent check
+    if (selectedDimensions.some((d) => d.name === breakdownField)) {
       return;
     }
 
-    // Sync the breakdownField to selectedDimensions
+    // Update selection
     if (selectedDimensions.length === 0) {
       onDimensionsChange([matchingDimension]);
     } else if (MAX_DIMENSIONS_SELECTIONS === 1) {
       onDimensionsChange([matchingDimension]);
     } else {
-      const newSelection = [...selectedDimensions, matchingDimension].slice(
-        0,
-        MAX_DIMENSIONS_SELECTIONS
+      onDimensionsChange(
+        [...selectedDimensions, matchingDimension].slice(0, MAX_DIMENSIONS_SELECTIONS)
       );
-      onDimensionsChange(newSelection);
     }
   }, [breakdownField, dimensions, selectedDimensions, onDimensionsChange]);
+
+  // Track previous breakdownField to detect changes
+  const prevBreakdownFieldRef = useRef<string | undefined>(breakdownField);
+
+  // Sync breakdownField to selectedDimensions when it changes or dimensions become available
+  useEffect(() => {
+    const hasBreakdownFieldChanged = prevBreakdownFieldRef.current !== breakdownField;
+
+    if (hasBreakdownFieldChanged) {
+      prevBreakdownFieldRef.current = breakdownField;
+    }
+
+    // Only sync if breakdownField is set and dimensions are available
+    if (breakdownField && dimensions.length > 0) {
+      syncBreakdownFieldToDimensions();
+    }
+  }, [breakdownField, dimensions, syncBreakdownFieldToDimensions]);
 
   const { onPageReady } = usePerformanceContext();
   useEffect(() => {
