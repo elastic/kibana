@@ -71,10 +71,9 @@ export const DiscoverTopNav = ({
 
   const query = useAppStateSelector((state) => state.query);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const { timeRangeAbsolute, timeRangeRelative } = useCurrentTabSelector(
-    (tab) => tab.dataRequestParams
-  );
+  const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
+  const timeRangeRelative = useCurrentTabSelector((state) => state.globalState.timeRange);
   const appFilters = useAppStateSelector((state) => state.filters);
   const globalFilters = useCurrentTabSelector((state) => state.globalState.filters);
 
