@@ -110,19 +110,19 @@ export const PageViewLogInContext: React.FC = () => {
               <LogEntryContext context={contextEntry.context} discoverLink={discoverLink} />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
-            {logSources.value ? (
-              <LazySavedSearchComponent
-                dependencies={{ embeddable, searchSource, dataViews }}
-                index={logSources.value}
-                timeRange={timeRange}
-                query={contextQuery}
-                height={'100%'}
-                displayOptions={{
-                  solutionNavIdOverride: 'oblt',
-                  enableFilters: false,
-                }}
-              />
-            ) : null}
+              {logSources.value ? (
+                <LazySavedSearchComponent
+                  dependencies={{ embeddable, searchSource, dataViews }}
+                  index={logSources.value}
+                  timeRange={timeRange}
+                  query={contextQuery}
+                  height={'100%'}
+                  displayOptions={{
+                    solutionNavIdOverride: 'oblt',
+                    enableFilters: false,
+                  }}
+                />
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </LogInContextWrapper>
