@@ -17,7 +17,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { inject, injectable, optional } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 
@@ -39,7 +39,7 @@ export class RulesClient {
     @inject(CoreStart('http')) private readonly http: HttpServiceStart,
     @inject(CoreStart('savedObjects')) private readonly savedObjects: SavedObjectsServiceStart,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
+    @inject(PluginStart('security')) private readonly security: SecurityPluginStart
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
@@ -56,7 +56,7 @@ export class RulesClient {
   }
 
   private async getUserName(): Promise<string | null> {
-    return this.security?.authc.getCurrentUser(this.request)?.username ?? null;
+    return this.security.authc.getCurrentUser(this.request)?.username ?? null;
   }
 
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {

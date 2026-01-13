@@ -29,5 +29,5 @@ export interface AlertingServerStartDependencies {
   features: FeaturesPluginStart;
   spaces: SpacesPluginStart;
   data: DataPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
 }

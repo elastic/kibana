@@ -13,9 +13,9 @@
       "taskManager",
       "features",
       "spaces",
-      "data"
+      "data",
+      "security"
     ],
-    "optionalPlugins": ["security"],
     "extraPublicDirs": []
   }
 }
