@@ -629,6 +629,7 @@
     "@kbn/files-plugin": "link:src/platform/plugins/shared/files",
     "@kbn/fleet-plugin": "link:x-pack/platform/plugins/shared/fleet",
     "@kbn/flot-charts": "link:src/platform/packages/shared/kbn-flot-charts",
+    "@kbn/flyout-system-example-plugin": "link:examples/flyout_system",
     "@kbn/foo-plugin": "link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin",
     "@kbn/fs": "link:x-pack/platform/packages/shared/kbn-fs",
     "@kbn/ftr-apis-plugin": "link:src/platform/plugins/private/ftr_apis",
