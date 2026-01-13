@@ -40,6 +40,13 @@ export interface OnboardClusterRequest {
   name?: string;
 }
 
+export interface UpdateClusterRequest extends OnboardClusterRequest {
+  services?: {
+    auto_ops?: { enabled: boolean };
+    eis?: { enabled: boolean };
+  };
+}
+
 export interface ServiceConfig {
   enabled: boolean;
   supported: boolean;

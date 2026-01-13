@@ -8,22 +8,29 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiHighlight,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
+  EuiPopoverFooter,
   EuiSelectable,
-  EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
+import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { getMaxListHeight, useSelectorListStyles } from '../input_actions.styles';
+import {
+  getMaxListHeight,
+  selectorPopoverPanelStyles,
+  useSelectorListStyles,
+} from '../input_actions.styles';
 import { InputPopoverButton } from '../input_popover_button';
+import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
 
 const selectableAriaLabel = i18n.translate(
@@ -71,28 +78,12 @@ const ConnectorPopoverButton: React.FC<{
 const ConnectorOption: React.FC<{
   connectorId?: string;
   connectorName: string;
-  searchValue: string;
-}> = ({ connectorId, connectorName, searchValue }) => {
-  const { euiTheme } = useEuiTheme();
+}> = ({ connectorId, connectorName }) => {
   if (!connectorId) {
     return null;
   }
 
-  const fontWeightStyles = css`
-    h4 {
-      font-weight: ${euiTheme.font.weight.regular};
-    }
-    .euiSelectableListItem-isFocused & h4 {
-      font-weight: ${euiTheme.font.weight.semiBold};
-    }
-  `;
-  return (
-    <EuiText size="s" css={fontWeightStyles}>
-      <h4>
-        <EuiHighlight search={searchValue}>{connectorName}</EuiHighlight>
-      </h4>
-    </EuiText>
-  );
+  return <OptionText>{connectorName}</OptionText>;
 };
 
 const DefaultConnectorBadge = () => {
@@ -103,10 +94,42 @@ const DefaultConnectorBadge = () => {
   );
 };
 
+const manageConnectorsAriaLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.manageConnectors.ariaLabel',
+  {
+    defaultMessage: 'Manage connectors',
+  }
+);
+
+const ConnectorListFooter: React.FC = () => {
+  const { manageConnectorsUrl } = useNavigation();
+  const { showManagement } = useUiPrivileges();
+  return (
+    <EuiPopoverFooter paddingSize="s">
+      <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            size="s"
+            iconType="gear"
+            color="text"
+            aria-label={manageConnectorsAriaLabel}
+            href={manageConnectorsUrl}
+            disabled={!showManagement}
+          >
+            <FormattedMessage
+              id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+              defaultMessage="Manage"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopoverFooter>
+  );
+};
+
 type ConnectorOptionData = EuiSelectableOption<{}>;
 
 export const ConnectorSelector: React.FC<{}> = () => {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { http, settings },
   } = useKibana();
@@ -129,10 +152,6 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
-
-  const panelStyles = css`
-    inline-size: calc(${euiTheme.size.xxl} * 8);
-  `;
 
   const connectorOptions = useMemo(() => {
     const options = connectors.map((connector) => {
@@ -180,7 +199,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   return (
     <EuiPopover
-      panelProps={{ css: panelStyles }}
+      panelProps={{ css: selectorPopoverPanelStyles }}
       button={
         <ConnectorPopoverButton
           isPopoverOpen={isPopoverOpen}
@@ -208,14 +227,13 @@ export const ConnectorSelector: React.FC<{}> = () => {
             closePopover();
           }
         }}
-        renderOption={(option, searchValue) => {
+        renderOption={(option) => {
           const { key: connectorId, label: connectorName } = option;
           return (
             <ConnectorOption
               key={connectorId}
               connectorId={connectorId}
               connectorName={connectorName}
-              searchValue={searchValue}
             />
           );
         }}
@@ -227,7 +245,12 @@ export const ConnectorSelector: React.FC<{}> = () => {
           onFocusBadge: false,
         }}
       >
-        {(list) => <div>{list}</div>}
+        {(list) => (
+          <div>
+            {list}
+            <ConnectorListFooter />
+          </div>
+        )}
       </EuiSelectable>
     </EuiPopover>
   );

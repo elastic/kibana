@@ -14,9 +14,9 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatAgentEvent } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type {
+  AgentBuilderToolEvent,
   AgentEventEmitterFn,
   ExecutableTool,
-  AgentBuilderToolEvent,
   RunToolReturn,
   ToolEventHandlerFn,
   ToolProvider,
@@ -124,7 +124,7 @@ export const toolToLangchain = async ({
 
       let onEvent: ToolEventHandlerFn | undefined;
       if (sendEvent) {
-        const convertEvent = getToolEventConverter({ toolCallId });
+        const convertEvent = getToolEventConverter({ toolId: tool.id, toolCallId });
         onEvent = (event) => {
           sendEvent(convertEvent(event));
         };
@@ -134,7 +134,12 @@ export const toolToLangchain = async ({
       const input = omit(rawInput, ['_reasoning']);
 
       try {
-        const toolReturn = await tool.execute({ toolParams: input, onEvent, toolCallId });
+        const toolReturn = await tool.execute({
+          toolParams: input,
+          onEvent,
+          toolCallId,
+          source: 'agent',
+        });
         const content = JSON.stringify({ results: toolReturn.results });
         return [content, toolReturn];
       } catch (e) {
@@ -184,7 +189,7 @@ function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
   return reversed;
 }
 
-const getToolEventConverter = ({ toolCallId }: { toolCallId: string }) => {
+const getToolEventConverter = ({ toolId, toolCallId }: { toolId: string; toolCallId: string }) => {
   return (toolEvent: AgentBuilderToolEvent): ChatAgentEvent => {
     if (toolEvent.type === ChatEventType.toolProgress) {
       return {
@@ -195,6 +200,18 @@ const getToolEventConverter = ({ toolCallId }: { toolCallId: string }) => {
         },
       };
     }
+    if (toolEvent.type === ChatEventType.toolUi) {
+      return {
+        type: ChatEventType.toolUi,
+        data: {
+          ...toolEvent.data,
+          tool_id: toolId,
+          tool_call_id: toolCallId,
+        },
+      };
+    }
+
+    // @ts-expect-error all possible subtypes are handled
     throw new Error(`Invalid tool call type ${toolEvent.type}`);
   };
 };

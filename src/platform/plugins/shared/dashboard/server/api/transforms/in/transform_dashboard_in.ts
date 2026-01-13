@@ -15,7 +15,6 @@ import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
-import { isLegacyControlGroupReference } from '../out/transform_references_out';
 
 export const transformDashboardIn = (
   dashboardState: DashboardState
@@ -37,18 +36,12 @@ export const transformDashboardIn = (
       filters,
       panels,
       query,
-      references: incomingReferences,
       tags,
       time_range,
       refresh_interval,
       project_routing,
       ...rest
     } = dashboardState;
-
-    const controlGroupReferences = (incomingReferences ?? []).filter(isLegacyControlGroupReference);
-    if (incomingReferences && controlGroupReferences.length !== incomingReferences.length) {
-      throw new Error(`References are only supported for controlGroupInput.`);
-    }
 
     const tagReferences = transformTagsIn(tags);
 
@@ -69,11 +62,16 @@ export const transformDashboardIn = (
       query
     );
 
+    const { controlsJSON, references: controlGroupReferences } =
+      transformControlGroupIn(controlGroupInput);
+
     const attributes = {
       description: '',
       ...rest,
-      ...(controlGroupInput && {
-        controlGroupInput: transformControlGroupIn(controlGroupInput),
+      ...(controlsJSON && {
+        controlGroupInput: {
+          panelsJSON: controlsJSON,
+        },
       }),
       optionsJSON: transformOptionsIn(options),
       panelsJSON,
@@ -89,8 +87,8 @@ export const transformDashboardIn = (
       attributes,
       references: [
         ...tagReferences,
-        ...controlGroupReferences,
         ...panelReferences,
+        ...controlGroupReferences,
         ...searchSourceReferences,
       ],
       error: null,
