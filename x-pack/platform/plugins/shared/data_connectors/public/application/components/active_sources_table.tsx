@@ -197,7 +197,11 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.typeColumn', {
         defaultMessage: 'Type',
       }),
-      render: (type: string) => <EuiText size="s">{type}</EuiText>,
+      render: (type: string) => {
+        // Capitalize first letter: "notion" -> "Notion", "github" -> "Github"
+        const formattedType = type.charAt(0).toUpperCase() + type.slice(1);
+        return <EuiText size="s">{formattedType}</EuiText>;
+      },
     },
     {
       field: 'workflows',
