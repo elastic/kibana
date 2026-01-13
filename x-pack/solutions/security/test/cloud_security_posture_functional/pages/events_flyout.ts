@@ -37,7 +37,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const timelinePage = pageObjects.timeline;
 
-  describe('Security Network Page - Graph visualization', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/247414
+  describe.skip('Security Network Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
