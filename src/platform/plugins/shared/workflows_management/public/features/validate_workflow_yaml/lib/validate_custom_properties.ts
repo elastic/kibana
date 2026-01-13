@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CustomPropertyItem, YamlValidationResult } from '../model/types';
+import type { CustomPropertyItem, CustomPropertyValidationResult } from '../model/types';
 
 export async function validateCustomProperties(
   customPropertyItems: CustomPropertyItem[]
-): Promise<YamlValidationResult[]> {
-  const validationResultsPromises: Promise<YamlValidationResult | null>[] = [];
+): Promise<CustomPropertyValidationResult[]> {
+  const validationResultsPromises: Promise<CustomPropertyValidationResult | null>[] = [];
   for (const customPropertyItem of customPropertyItems) {
     validationResultsPromises.push(
       customPropertyItem
@@ -21,29 +21,40 @@ export async function validateCustomProperties(
           scope: customPropertyItem.scope,
           propertyKey: customPropertyItem.propertyKey,
         })
-        .then((result) => {
+        .then((result): CustomPropertyValidationResult | null => {
           if (!result) {
             return null;
           }
-          return {
+          const baseResult = {
             id: customPropertyItem.id,
-            severity: result.severity,
-            message: result.message,
             afterMessage: result.afterMessage ?? undefined,
-            hoverMessage: result.hoverMessage ?? undefined,
             startLineNumber: customPropertyItem.startLineNumber,
             startColumn: customPropertyItem.startColumn,
             endLineNumber: customPropertyItem.endLineNumber,
             endColumn: customPropertyItem.endColumn,
             yamlPath: customPropertyItem.yamlPath,
             key: customPropertyItem.key,
-            owner: 'custom-property-validation',
-          } as YamlValidationResult;
+            owner: 'custom-property-validation' as const,
+          };
+          if (result.severity === null) {
+            return {
+              ...baseResult,
+              severity: null,
+              message: null,
+              hoverMessage: result.hoverMessage ?? null,
+            };
+          }
+          return {
+            ...baseResult,
+            severity: result.severity,
+            message: result.message ?? '',
+            hoverMessage: result.hoverMessage ?? null,
+          };
         })
     );
   }
   const validationResults = await Promise.all(validationResultsPromises);
   return validationResults.filter(
-    (result): result is YamlValidationResult => result !== null
-  ) as YamlValidationResult[];
+    (result): result is CustomPropertyValidationResult => result !== null
+  );
 }

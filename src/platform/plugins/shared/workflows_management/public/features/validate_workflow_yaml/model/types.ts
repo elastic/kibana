@@ -113,6 +113,10 @@ interface YamlValidationResultCustomPropertyValid extends YamlValidationResultBa
   owner: 'custom-property-validation';
 }
 
+export type CustomPropertyValidationResult =
+  | YamlValidationResultCustomPropertyError
+  | YamlValidationResultCustomPropertyValid;
+
 export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'step-name-validation',
   'variable-validation',
