@@ -81,29 +81,37 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
   ) => React.ReactNode;
 }
 
-interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
+interface CascadeGroupNodeUIInteraction<G extends GroupNode> {
+  /**
+   * The row instance that was interacted with in the group by hierarchy.
+   */
   row: G;
   /**
-   * @description The path of the row that was expanded in the group by hierarchy.
-   */
-  nodePath: string[];
-  /**
-   * @description KV record of the path values for the row node.
-   */
-  nodePathMap: Record<string, string>;
-}
-
-interface OnCascadeGroupNodeCollapsedArgs<G extends GroupNode> {
-  row: G;
-  /**
-   * The path of the row that was collapsed in the group by hierarchy.
+   * The path of the row that was interacted with in the group by hierarchy.
+   *
+   * @example
+   * ```
+   * ['@timestamp', 'geo.src.country_name']
+   * ```
    */
   nodePath: string[];
   /**
    * KV record of the path values for the row node.
+   *
+   * @example
+   * ```
+   * {
+   *   '@timestamp': '2026-01-13T00:00:00.000Z',
+   *   'geo.src.country_name': 'United States'
+   * }
+   * ```
    */
   nodePathMap: Record<string, string>;
 }
+
+type OnCascadeGroupNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
+
+type OnCascadeGroupNodeCollapsedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
 
 export interface CascadeRowActionProps {
   maxActionCount?: number;
@@ -136,7 +144,7 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
    */
   isGroupNode: boolean;
   /**
-   * @description Callback function that is called when a cascade node is expanded.
+   * Callback function that is called when a cascade node is expanded.
    */
   onCascadeGroupNodeExpanded: (args: OnCascadeGroupNodeExpandedArgs<G>) => Promise<G[]>;
   /**
@@ -144,15 +152,15 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
    */
   onCascadeGroupNodeCollapsed?: (args: OnCascadeGroupNodeCollapsedArgs<G>) => void;
   /**
-   * @description The row instance for the cascade row.
+   * The row instance for the cascade row.
    */
   rowInstance: Row<G>;
   /**
-   * @description The row header title slot for the cascade row.
+   * The row header title slot for the cascade row.
    */
   rowHeaderTitleSlot: React.FC<{ rowData: G; nodePath: string[] }>;
   /**
-   * @description The row header meta slots for the cascade row.
+   * The row header meta slots for the cascade row.
    */
   rowHeaderMetaSlots?: (props: {
     rowDepth: number;
@@ -160,14 +168,14 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
     nodePath: string[];
   }) => React.ReactNode[];
   /**
-   * @description The row header actions slot for the cascade row.
+   * The row header actions slot for the cascade row.
    */
   rowHeaderActions?: (params: {
     rowData: G;
     nodePath: string[];
   }) => CascadeRowActionProps['headerRowActions'];
   /**
-   * @description The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
+   * The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
    */
   size: CascadeRowCellPrimitiveProps<G, L>['size'];
 }
@@ -179,17 +187,23 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
 export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode>
   extends Omit<CascadeRowHeaderPrimitiveProps<G, L>, 'isGroupNode'> {
   /**
-   * ref used to portal the active sticky header.
+   * Ref that provides a reference to the DOM element that will be used to portal the active sticky header.
    */
   activeStickyRenderSlotRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * Denotes if the row is sticky.
+   */
   isActiveSticky: boolean;
+  /**
+   * Ref that provides a reference to the DOM element that renders the cascade row.
+   */
   innerRef: React.LegacyRef<HTMLDivElement>;
   /**
-   * @description The virtual row for the cascade row.
+   * The virtual row for the cascade row.
    */
   virtualRow: VirtualItem;
   /**
-   * @description The virtual row style for the cascade row.
+   * Style for the virtual row of the cascade row.
    */
   virtualRowStyle: React.CSSProperties;
 }
