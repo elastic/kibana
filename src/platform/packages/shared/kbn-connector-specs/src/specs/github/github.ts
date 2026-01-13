@@ -45,54 +45,28 @@ export const GithubConnector: ConnectorSpec = {
     },
     searchIssues: {
       isTool: false,
-      input: z
-        .object({
-          owner: z.string(),
-          repo: z.string(),
-          type: z.enum(['issue', 'pr']),
-          query: z.string().optional(),
-          state: z.enum(['open', 'closed']).optional(),
-          author: z.string().optional(),
-          assignee: z.string().optional(),
-          label: z.string().optional(),
-          milestone: z.string().optional(),
-        })
-        .refine(
-          (data) =>
-            ['query', 'state', 'author', 'assignee', 'label', 'milestone'].some(
-              (key) => data[key as keyof typeof data] !== undefined
-            ),
-          {
-            message:
-              'At least one query-building parameter (query, state, author, assignee, label, or milestone) must be provided',
-          }
-        ),
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        type: z.enum(['issue', 'pr']),
+        query: z.string().optional(),
+      }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           owner: string;
           repo: string;
           type: 'issue' | 'pr';
           query?: string;
-          state?: 'open' | 'closed';
-          author?: string;
-          assignee?: string;
-          label?: string;
-          milestone?: string;
         };
         const queryParts = [
           `repo:${typedInput.owner}/${typedInput.repo}`,
           `is:${typedInput.type}`,
-          `is:${typedInput.state || 'open'}`,
+          `is:open`,
         ];
 
-        // Add structured filters
-        if (typedInput.author) queryParts.push(`author:${typedInput.author}`);
-        if (typedInput.assignee) queryParts.push(`assignee:${typedInput.assignee}`);
-        if (typedInput.label) queryParts.push(`label:${typedInput.label}`);
-        if (typedInput.milestone) queryParts.push(`milestone:"${typedInput.milestone}"`);
         if (typedInput.query) queryParts.push(typedInput.query);
 
-        const params: { q: string; sort?: string; order?: string } = {
+        const params: { q: string } = {
           q: queryParts.join(' '),
         };
 

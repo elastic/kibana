@@ -21,21 +21,6 @@ inputs:
   - name: query
     type: string
     required: false
-  - name: state
-    type: string
-    required: false
-  - name: author
-    type: string
-    required: false
-  - name: assignee
-    type: string
-    required: false
-  - name: label
-    type: string
-    required: false
-  - name: milestone
-    type: string
-    required: false
 steps:
   - name: search-issues
     type: github.searchIssues
@@ -45,11 +30,6 @@ steps:
       repo: "\${{inputs.repo}}"
       type: "\${{inputs.type}}"
       query: "\${{inputs.query}}"
-      state: "\${{inputs.state}}"
-      author: "\${{inputs.author}}"
-      assignee: "\${{inputs.assignee}}"
-      label: "\${{inputs.label}}"
-      milestone: "\${{inputs.milestone}}"
 `;
 }
 
