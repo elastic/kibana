@@ -195,7 +195,8 @@ describe(
       });
     });
 
-    describe('User should be able to add response action to ESQL rule', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/248743
+    describe.skip('User should be able to add response action to ESQL rule', () => {
       const [ruleName, ruleDescription] = generateRandomStringName(2);
 
       beforeEach(() => {

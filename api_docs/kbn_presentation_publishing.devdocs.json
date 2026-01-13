@@ -4988,15 +4988,7 @@
               "\n"
             ],
             "signature": [
-              "(newId: string) => ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<ByReferenceSerializedState>"
+              "(newId: string) => ByReferenceSerializedState"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
@@ -5032,15 +5024,7 @@
               "\n"
             ],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<ByValueSerializedState>"
+              "() => ByValueSerializedState"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
@@ -5171,7 +5155,7 @@
             "section": "def-public.HasSerializableState",
             "text": "HasSerializableState"
           },
-          "<State>"
+          "<SerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
         "deprecated": false,
@@ -5187,15 +5171,7 @@
               "\nSerializes all state into a format that can be saved into\nsome external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}"
             ],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<State>"
+              "() => SerializedState"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
             "deprecated": false,
@@ -10131,67 +10107,6 @@
               " | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-public.SerializedPanelState",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedPanelState",
-        "description": [
-          "\nA package containing the serialized Embeddable state, with references extracted. When saving Embeddables using any\nstrategy, this is the format that should be used."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<RawStateType>"
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedPanelState.references",
-            "type": "Array",
-            "tags": [],
-            "label": "references",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "server",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-server.Reference",
-                "text": "Reference"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedPanelState.rawState",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "rawState",
-            "description": [],
-            "signature": [
-              "RawStateType"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_serializable_state.ts",
             "deprecated": false,
             "trackAdoption": false
           }
