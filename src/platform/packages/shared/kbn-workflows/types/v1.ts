@@ -458,8 +458,13 @@ export interface StepPropertyHandler<T = unknown> {
   validation?: {
     /**
      * Validate a value and return decoration/error info.
-     * Called when the YAML document changes.
-     * Returns null if no validation is needed (static Zod validation is sufficient).
+     * Return null if no validation is needed (static Zod validation is sufficient).
+     *
+     * Important: Called everytime when the YAML document changes.
+     *
+     * For validators that check external resources, consider using a client-side caching solution
+     * (e.g., React Query) within your validator implementation to handle cache invalidation
+     * when external data changes.
      */
     validate: PropertyValidationFn<T>;
   };
