@@ -89,9 +89,11 @@ import {
   addEditorKeyBindings,
   addTabKeybindingRules,
 } from './custom_editor_commands';
-import { IndicesBrowserPopup } from './indices_browser/indices_browser_popup';
-import { FieldsBrowserPopup } from './fields_browser/fields_browser_popup';
-import { useResourcesBadge } from './resources_badge/resources_badge';
+import {
+  IndicesBrowserPopover,
+  FieldsBrowserPopover,
+  useResourcesBadge,
+} from './resource_browser';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -1564,7 +1566,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
       {enableIndicesBrowser && (
         <>
-          <IndicesBrowserPopup
+          <IndicesBrowserPopover
             isOpen={isIndicesBrowserOpen}
             onClose={closeIndicesBrowser}
             onSelectIndex={handleIndexSelect}
@@ -1573,7 +1575,7 @@ const ESQLEditorInternal = function ESQLEditor({
             anchorElement={indicesBrowserAnchorRef.current || undefined}
             position={browserPopoverPosition}
           />
-          <FieldsBrowserPopup
+          <FieldsBrowserPopover
             isOpen={isFieldsBrowserOpen}
             onClose={closeFieldsBrowser}
             onSelectField={handleFieldSelect}
