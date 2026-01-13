@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { GetColumnMapFn } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
 import type { ESQLColumnData } from '@kbn/esql-language/src/commands/registry/types';
@@ -151,6 +151,41 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const closeButtonRef = useRef<HTMLElement | null>(null);
+  const filterButtonRef = useRef<HTMLElement | null>(null);
+
+  const setSearchInputRef = useCallback((node: HTMLInputElement | null) => {
+    searchInputRef.current = node;
+  }, []);
+
+  const setCloseButtonRef = useCallback((node: HTMLElement | null) => {
+    closeButtonRef.current = node;
+  }, []);
+
+  const setFilterButtonRef = useCallback((node: HTMLElement | null) => {
+    filterButtonRef.current = node;
+  }, []);
+
+  // Find the actual button elements after render
+  useEffect(() => {
+    if (isOpen) {
+      // Find close button
+      if (closeButtonRef.current) {
+        const button = closeButtonRef.current.querySelector('button');
+        if (button) {
+          closeButtonRef.current = button as HTMLElement;
+        }
+      }
+      // Find filter button
+      if (filterButtonRef.current) {
+        const button = filterButtonRef.current.querySelector('button');
+        if (button) {
+          filterButtonRef.current = button as HTMLElement;
+        }
+      }
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && getColumnMap) {
@@ -183,6 +218,16 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
       setIsLoading(false);
     }
   }, [isOpen, getColumnMap]);
+
+  // Focus the search input when popover opens
+  useEffect(() => {
+    if (isOpen && !isLoading) {
+      // Use setTimeout to ensure the DOM is ready
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 0);
+    }
+  }, [isOpen, isLoading]);
 
   // Get unique field types from fields
   const availableTypes = useMemo(() => {
@@ -274,6 +319,7 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
       aria-label={i18n.translate('esqlEditor.fieldsBrowser.filterByType', {
         defaultMessage: 'Filter by field type',
       })}
+      buttonRef={setFilterButtonRef}
     >
       <EuiIcon type="filter" />
     </EuiFilterButton>
@@ -319,6 +365,7 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
           compressed: true,
           value: searchValue,
           onChange: (value) => setSearchValue(value),
+          inputRef: setSearchInputRef,
           append: (
             <EuiPopover
               button={filterButton}
@@ -386,6 +433,7 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
                       defaultMessage: 'Close',
                     })}
                     onClick={onClose}
+                    buttonRef={setCloseButtonRef}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

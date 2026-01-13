@@ -21,7 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { getESQLSources } from '@kbn/esql-utils';
 import type { CoreStart } from '@kbn/core/public';
@@ -80,6 +80,41 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const [selectedIndices, setSelectedIndices] = useState<string[]>([]);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const closeButtonRef = useRef<HTMLElement | null>(null);
+  const filterButtonRef = useRef<HTMLElement | null>(null);
+
+  const setSearchInputRef = useCallback((node: HTMLInputElement | null) => {
+    searchInputRef.current = node;
+  }, []);
+
+  const setCloseButtonRef = useCallback((node: HTMLElement | null) => {
+    closeButtonRef.current = node;
+  }, []);
+
+  const setFilterButtonRef = useCallback((node: HTMLElement | null) => {
+    filterButtonRef.current = node;
+  }, []);
+
+  // Find the actual button elements after render
+  useEffect(() => {
+    if (isOpen) {
+      // Find close button
+      if (closeButtonRef.current) {
+        const button = closeButtonRef.current.querySelector('button');
+        if (button) {
+          closeButtonRef.current = button as HTMLElement;
+        }
+      }
+      // Find filter button
+      if (filterButtonRef.current) {
+        const button = filterButtonRef.current.querySelector('button');
+        if (button) {
+          filterButtonRef.current = button as HTMLElement;
+        }
+      }
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -94,6 +129,16 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
         });
     }
   }, [isOpen, core, getLicense]);
+
+  // Focus the search input when popover opens
+  useEffect(() => {
+    if (isOpen && !isLoading) {
+      // Use setTimeout to ensure the DOM is ready
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 0);
+    }
+  }, [isOpen, isLoading]);
 
   // Get unique source types from sources
   const availableTypes = useMemo(() => {
@@ -188,6 +233,7 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
       aria-label={i18n.translate('esqlEditor.indicesBrowser.filterByType', {
         defaultMessage: 'Filter by data source',
       })}
+      buttonRef={setFilterButtonRef}
     >
       <EuiIcon type="filter" />
     </EuiFilterButton>
@@ -233,6 +279,7 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
           compressed: true,
           value: searchValue,
           onChange: (value) => setSearchValue(value),
+          inputRef: setSearchInputRef,
           append: (
             <EuiPopover
               button={filterButton}
@@ -300,6 +347,7 @@ export const IndicesBrowserPopup: React.FC<IndicesBrowserPopupProps> = ({
                       defaultMessage: 'Close',
                     })}
                     onClick={onClose}
+                    buttonRef={setCloseButtonRef}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
