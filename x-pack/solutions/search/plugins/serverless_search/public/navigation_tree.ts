@@ -110,8 +110,11 @@ export function createNavigationTree({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'ml:logRateAnalysis' },
+              { link: 'ml:logRateAnalysisPage', sideNavStatus: 'hidden' },
               { link: 'ml:logPatternAnalysis' },
+              { link: 'ml:logPatternAnalysisPage', sideNavStatus: 'hidden' },
               { link: 'ml:changePointDetections' },
+              { link: 'ml:changePointDetectionsPage', sideNavStatus: 'hidden' },
             ],
           },
         ],
