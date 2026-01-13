@@ -196,7 +196,7 @@ export class AgentlessConnectorsInfraService {
       namespace: '',
       enabled: true,
       inputs: {
-        [connectorsInputName]: {
+        [`${connector.service_type}-${connectorsInputName}`]: {
           enabled: true,
           vars: {
             connector_id: connector.id,

@@ -491,7 +491,7 @@ describe('AgentlessConnectorsInfraService', () => {
           description: '',
           enabled: true,
           inputs: {
-            'connectors-py': {
+            'github-connectors-py': {
               enabled: true,
               streams: {},
               vars: {
