@@ -30,6 +30,9 @@ const REGISTRY_SPEC_MIN_VERSION = '2.3';
 const REGISTRY_SPEC_MAX_VERSION = '3.5';
 
 export const config: PluginConfigDescriptor = {
+  dynamicConfig: {
+    experimentalFeatures: true, // To allow to be changed for tests
+  },
   exposeToBrowser: {
     epm: true,
     agents: {

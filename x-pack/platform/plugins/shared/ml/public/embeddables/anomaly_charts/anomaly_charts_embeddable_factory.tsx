@@ -59,23 +59,20 @@ export const getAnomalyChartsReactEmbeddableFactory = (
 
       const subscriptions = new Subscription();
 
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
 
       const chartsManager = initializeAnomalyChartsControls(
-        initialState.rawState,
+        initialState,
         titleManager.api,
         parentApi
       );
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...chartsManager.getLatestState(),
-          },
-          references: [],
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...chartsManager.getLatestState(),
         };
       }
 
@@ -96,9 +93,9 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           };
         },
         onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (lastSaved) chartsManager.reinitializeState(lastSaved?.rawState);
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) chartsManager.reinitializeState(lastSaved);
         },
       });
 
@@ -195,7 +192,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                 >
                   <LazyAnomalyChartsContainer
                     id={uuid}
-                    severityThreshold={initialState.rawState.severityThreshold}
+                    severityThreshold={initialState.severityThreshold}
                     api={api}
                     services={anomalyChartsDependencies}
                     onLoading={onLoading}
