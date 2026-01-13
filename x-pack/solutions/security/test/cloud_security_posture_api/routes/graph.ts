@@ -26,7 +26,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   result,
   dataViewRouteHelpersFactory,
-  cleanupEntityStore,
   waitForEnrichPolicyCreated,
   executeEnrichPolicy,
   installCloudAssetInventoryPackage,
@@ -1540,9 +1539,6 @@ export default function (providerContext: FtrProviderContext) {
         };
 
         before(async () => {
-          // Clean up any leftover resources from previous runs in entities-space
-          await cleanupEntityStore({ supertest, logger, spaceId: entitiesSpaceId });
-
           // delete v2 index manually since its not being deleted by the cleanupEntityStore function
           try {
             await es.indices.delete({
@@ -1585,9 +1581,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         after(async () => {
-          // Clean up entity store resources in entities-space
-          await cleanupEntityStore({ supertest, logger, spaceId: entitiesSpaceId });
-
           // Disable asset inventory setting in entities-space
           await kibanaServer.uiSettings.update(
             { 'securitySolution:enableAssetInventory': false },
@@ -1632,7 +1625,7 @@ export default function (providerContext: FtrProviderContext) {
               es,
               logger,
               retry,
-              entitiesIndex: `.entities.v2.latest.security_generic_${entitiesSpaceId}`,
+              entitiesIndex: getEntitiesLatestIndexName(entitiesSpaceId),
               expectedCount: 11,
             });
           });

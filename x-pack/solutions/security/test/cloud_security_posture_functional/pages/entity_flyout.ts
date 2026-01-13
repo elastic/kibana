@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
-import { dataViewRouteHelpersFactory } from '../../cloud_security_posture_api/utils';
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  waitForPluginInitialized,
+  cleanupEntityStore,
+  waitForEntityDataIndexed,
+  waitForEnrichPolicyCreated,
+  executeEnrichPolicy,
+  dataViewRouteHelpersFactory,
+  initEntityEnginesWithRetry,
+} from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
@@ -29,64 +37,35 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const genericEntityFlyout = pageObjects.genericEntityFlyout;
 
-  const cleanupSpaceEnrichResources = async (spaceId?: string) => {
-    const spacePath = spaceId ? `/s/${spaceId}` : '';
-
-    // Delete the generic entity engine which will properly clean up:
-    // - Platform pipeline
-    // - Field retention enrich policy
-    // - Enrich indices
-    // Note: Asset Inventory uses the 'generic' entity type
-    try {
-      await supertest
-        .delete(`${spacePath}/api/entity_store/engines/generic?data=true`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
-      logger.debug(`Deleted entity store generic engine for space: ${spaceId || 'default'}`);
-    } catch (e) {
-      // Ignore 404 errors if the engine doesn't exist
-      if (e.status !== 404) {
-        logger.debug(
-          `Error deleting entity store for space ${spaceId || 'default'}: ${
-            e && e.message ? e.message : JSON.stringify(e)
-          }`
-        );
-      }
-    }
-  };
-
   describe('Security Network Page - Generic Entity Popover', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
-    const entitiesIndex = '.entities.v1.latest.security_*';
-    let dataView: ReturnType<typeof dataViewRouteHelpersFactory>;
-
-    /**
-     * Waits for the enrich index to be created and populated with data.
-     */
-    const waitForEnrichIndexPopulated = async () => {
-      await retry.waitFor(
-        'enrich index to be created and populated for default space',
-        async () => {
-          try {
-            // Check if the index has data (policy has been executed)
-            const count = await es.count({
-              index: `.enrich-entity_store_field_retention_generic_default_v1.0.0`,
-            });
-            return count.count > 0;
-          } catch (e) {
-            return false;
-          }
-        }
-      );
-    };
-
     before(async () => {
-      // Clean up any leftover resources from previous runs
-      await cleanupSpaceEnrichResources();
+      await cleanupEntityStore({ supertest, logger });
 
-      // Enable asset inventory
+      try {
+        await es.indices.delete({
+          index: getEntitiesLatestIndexName(),
+          ignore_unavailable: true,
+        });
+      } catch (e) {
+        // Ignore if index doesn't exist
+      }
+
+      // Enable asset inventory setting
       await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+
+      // Initialize security-solution-default data-view (required by entity store)
+      const dataView = dataViewRouteHelpersFactory(supertest);
+      await dataView.create('security-solution');
+
+      // Initialize entity engine for 'generic' type ONCE - this is reused by both v1 and v2 tests
+      await initEntityEnginesWithRetry({
+        supertest,
+        retry,
+        logger,
+        entityTypes: ['generic'],
+      });
 
       // Load security alerts with modified mappings (includes actor and target)
       await esArchiver.load(
@@ -96,43 +75,16 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
-      // Load entity store data
-      await esArchiver.load(
-        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
-      );
-
-      // Wait for entity data to be indexed before proceeding
-      await retry.waitFor('entity data to be indexed', async () => {
-        const response = await es.count({
-          index: entitiesIndex,
-        });
-        // We expect at least 1 document for the default space
-        return response.count >= 1;
-      });
-
-      // Initialize security-solution-default data-view
-      dataView = dataViewRouteHelpersFactory(supertest);
-      await dataView.create('security-solution');
-
-      // Enable asset inventory - install underlying indexes and enrich policies
-      await supertest
-        .post(`/api/asset_inventory/enable`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({})
-        .expect(200);
-
-      // Wait for enrich index to be created AND populated with data
-      await waitForEnrichIndexPopulated();
 
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true);
     });
 
     after(async () => {
-      // Clean up all enrich resources
-      await cleanupSpaceEnrichResources();
+      // Clean up entity store resources
+      await cleanupEntityStore({ supertest, logger });
 
-      // Disable asset inventory
+      // Disable asset inventory setting
       await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
 
       // Delete alerts
@@ -146,35 +98,97 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
-
-      // Delete data view
-      await dataView.delete('security-solution');
     });
 
-    it('expanded flyout - show generic entity details', async () => {
-      // Setting the timerange to fit the data and open the flyout for a specific alert
-      await networkEventsPage.navigateToNetworkEventsPage(
-        `${networkEventsPage.getAbsoluteTimerangeFilter(
-          '2024-09-01T00:00:00.000Z',
-          '2024-09-02T00:00:00.000Z'
-        )}&${networkEventsPage.getFlyoutFilter('1')}`
-      );
-      await networkEventsPage.waitForListToHaveEvents();
+    // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
+    const runEnrichmentTests = () => {
+      it('expanded flyout - show generic entity details', async () => {
+        // Setting the timerange to fit the data and open the flyout for a specific event
+        await networkEventsPage.navigateToNetworkEventsPage(
+          `${networkEventsPage.getAbsoluteTimerangeFilter(
+            '2024-09-01T00:00:00.000Z',
+            '2024-09-02T00:00:00.000Z'
+          )}&${networkEventsPage.getFlyoutFilter('MultiTargetEventDoc789')}`
+        );
+        await networkEventsPage.waitForListToHaveEvents();
 
-      await networkEventsPage.flyout.expandVisualizations();
-      await networkEventsPage.flyout.assertGraphPreviewVisible();
-      await networkEventsPage.flyout.assertGraphNodesNumber(3);
+        await networkEventsPage.flyout.expandVisualizations();
+        await networkEventsPage.flyout.assertGraphPreviewVisible();
+        await networkEventsPage.flyout.assertGraphNodesNumber(3);
 
-      await expandedFlyoutGraph.expandGraph();
-      await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertGraphNodesNumber(3);
+        await expandedFlyoutGraph.expandGraph();
+        await expandedFlyoutGraph.waitGraphIsLoaded();
+        await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
-      // Click on the entity node to show entity details
-      await expandedFlyoutGraph.showEntityDetails('admin@example.com');
+        // Click on the entity node to show entity details
+        await expandedFlyoutGraph.showEntityDetails(
+          'api-service@your-project-id.iam.gserviceaccount.com'
+        );
 
-      // Verify the generic entity preview panel is open
-      await genericEntityFlyout.assertGenericEntityPanelIsOpen();
-      await genericEntityFlyout.assertGenericEntityPanelHeader('admin@example.com');
+        // Verify the generic entity preview panel is open
+        await genericEntityFlyout.assertGenericEntityPanelIsOpen();
+        await genericEntityFlyout.assertGenericEntityPanelHeader('ApiServiceAccount');
+      });
+    };
+
+    describe('via ENRICH policy (v1)', () => {
+      before(async () => {
+        // Load v1 entity data
+        await esArchiver.load(
+          'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
+        );
+
+        // Wait for entity data to be fully indexed
+        await waitForEntityDataIndexed({
+          es,
+          logger,
+          retry,
+          entitiesIndex: '.entities.v1.latest.security_*',
+          expectedCount: 12,
+        });
+
+        // Execute enrich policy to pick up entity data
+        await waitForEnrichPolicyCreated({ es, retry, logger });
+        await executeEnrichPolicy({ es, retry, logger });
+      });
+
+      runEnrichmentTests();
+    });
+
+    describe('via LOOKUP JOIN (v2)', () => {
+      before(async () => {
+        // Delete v2 manually since its not being deleted by the cleanupEntityStore function
+        try {
+          await es.indices.delete({
+            index: getEntitiesLatestIndexName(),
+            ignore_unavailable: true,
+          });
+        } catch (e) {
+          // Ignore if index doesn't exist
+        }
+
+        // Load v2 entity data
+        await esArchiver.load(
+          'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
+        );
+
+        // Wait for entity data to be fully indexed
+        await waitForEntityDataIndexed({
+          es,
+          logger,
+          retry,
+          entitiesIndex: getEntitiesLatestIndexName(),
+          expectedCount: 12,
+        });
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
+        );
+      });
+
+      runEnrichmentTests();
     });
   });
 }
