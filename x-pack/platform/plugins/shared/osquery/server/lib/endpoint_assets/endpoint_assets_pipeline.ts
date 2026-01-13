@@ -108,6 +108,56 @@ export const getEndpointAssetsPipelineConfig = (
           if (ctx.tmp_asset_platform != null && ctx.tmp_asset_platform.containsKey('host.os.platform')) {
             ctx.asset.platform = ctx.tmp_asset_platform['host.os.platform'];
           }
+
+          // Extract hardware fields
+          if (ctx.endpoint == null) { ctx.endpoint = new HashMap(); }
+          if (ctx.endpoint.hardware == null) { ctx.endpoint.hardware = new HashMap(); }
+
+          if (ctx.tmp_hardware_cpu != null && ctx.tmp_hardware_cpu.containsKey('osquery.cpu_brand')) {
+            ctx.endpoint.hardware.cpu = ctx.tmp_hardware_cpu['osquery.cpu_brand'];
+          }
+          if (ctx.tmp_hardware_cpu_cores != null && ctx.tmp_hardware_cpu_cores.containsKey('osquery.cpu_physical_cores')) {
+            def cores = ctx.tmp_hardware_cpu_cores['osquery.cpu_physical_cores'];
+            if (cores != null) {
+              ctx.endpoint.hardware.cpu_cores = Integer.parseInt(cores.toString());
+            }
+          }
+          if (ctx.tmp_hardware_memory_gb != null && ctx.tmp_hardware_memory_gb.containsKey('osquery.physical_memory')) {
+            def memBytes = ctx.tmp_hardware_memory_gb['osquery.physical_memory'];
+            if (memBytes != null) {
+              ctx.endpoint.hardware.memory_gb = Double.parseDouble(memBytes.toString()) / (1024 * 1024 * 1024);
+            }
+          }
+          if (ctx.tmp_hardware_vendor != null && ctx.tmp_hardware_vendor.containsKey('osquery.hardware_vendor')) {
+            ctx.endpoint.hardware.vendor = ctx.tmp_hardware_vendor['osquery.hardware_vendor'];
+          }
+          if (ctx.tmp_hardware_model != null && ctx.tmp_hardware_model.containsKey('osquery.hardware_model')) {
+            ctx.endpoint.hardware.model = ctx.tmp_hardware_model['osquery.hardware_model'];
+          }
+
+          // Extract disk fields from top_metrics (osquery.disk_size is a keyword field)
+          if (ctx.endpoint.hardware.disk == null) { ctx.endpoint.hardware.disk = new HashMap(); }
+          if (ctx.tmp_disk_size != null && ctx.tmp_disk_size.containsKey('osquery.disk_size')) {
+            def diskBytes = ctx.tmp_disk_size['osquery.disk_size'];
+            if (diskBytes != null && diskBytes.toString() != 'null') {
+              try {
+                ctx.endpoint.hardware.disk.total_capacity_gb = Double.parseDouble(diskBytes.toString()) / (1024.0 * 1024.0 * 1024.0);
+              } catch (Exception e) {}
+            }
+          }
+          if (ctx.tmp_disk_free != null && ctx.tmp_disk_free.containsKey('osquery.free_space')) {
+            def freeBytes = ctx.tmp_disk_free['osquery.free_space'];
+            if (freeBytes != null && freeBytes.toString() != 'null') {
+              try {
+                ctx.endpoint.hardware.disk.total_free_gb = Double.parseDouble(freeBytes.toString()) / (1024.0 * 1024.0 * 1024.0);
+              } catch (Exception e) {}
+            }
+          }
+          // Calculate disk usage percentage
+          if (ctx.endpoint.hardware.disk.total_capacity_gb != null && ctx.endpoint.hardware.disk.total_capacity_gb > 0) {
+            def used = ctx.endpoint.hardware.disk.total_capacity_gb - (ctx.endpoint.hardware.disk.total_free_gb != null ? ctx.endpoint.hardware.disk.total_free_gb : 0);
+            ctx.endpoint.hardware.disk.usage_percent = (used / ctx.endpoint.hardware.disk.total_capacity_gb) * 100.0;
+          }
         `,
       },
     },
@@ -120,6 +170,12 @@ export const getEndpointAssetsPipelineConfig = (
           // Initialize endpoint structure if needed
           if (ctx.endpoint == null) { ctx.endpoint = new HashMap(); }
           if (ctx.endpoint.posture == null) { ctx.endpoint.posture = new HashMap(); }
+          if (ctx.endpoint.software == null) { ctx.endpoint.software = new HashMap(); }
+          if (ctx.endpoint.network == null) { ctx.endpoint.network = new HashMap(); }
+          if (ctx.endpoint.hardware == null) { ctx.endpoint.hardware = new HashMap(); }
+          if (ctx.endpoint.hardware.disk == null) { ctx.endpoint.hardware.disk = new HashMap(); }
+          if (ctx.endpoint.privileges == null) { ctx.endpoint.privileges = new HashMap(); }
+          if (ctx.endpoint.detections == null) { ctx.endpoint.detections = new HashMap(); }
 
           // Posture raw fields from filtered aggregations
           if (ctx.endpoint.posture.disk_encryption_raw != null && ctx.endpoint.posture.disk_encryption_raw._value != null) {
@@ -141,6 +197,76 @@ export const getEndpointAssetsPipelineConfig = (
             if (sbValue.containsKey('osquery.secure_boot')) {
               ctx.endpoint.posture.secure_boot_raw = sbValue['osquery.secure_boot'];
             }
+          }
+          if (ctx.endpoint.posture.sip_enabled_raw != null && ctx.endpoint.posture.sip_enabled_raw._value != null) {
+            def sipValue = ctx.endpoint.posture.sip_enabled_raw._value;
+            if (sipValue.containsKey('osquery.config_flag')) {
+              ctx.endpoint.posture.sip_enabled_raw = sipValue['osquery.config_flag'];
+            }
+          }
+          if (ctx.endpoint.posture.gatekeeper_enabled_raw != null && ctx.endpoint.posture.gatekeeper_enabled_raw._value != null) {
+            def gkValue = ctx.endpoint.posture.gatekeeper_enabled_raw._value;
+            if (gkValue.containsKey('osquery.assessments_enabled')) {
+              ctx.endpoint.posture.gatekeeper_enabled_raw = gkValue['osquery.assessments_enabled'];
+            }
+          }
+
+          // Note: Disk fields are now handled in the first script using top_metrics
+          // (osquery.disk_size is a keyword field, so we can't use sum aggregation)
+
+          // Hardware - USB removable count
+          if (ctx.endpoint.hardware.usb_removable_count != null && ctx.endpoint.hardware.usb_removable_count.count != null) {
+            ctx.endpoint.hardware.usb_removable_count = ctx.endpoint.hardware.usb_removable_count.count;
+          }
+
+          // Software count fields
+          if (ctx.endpoint.software.installed_count != null && ctx.endpoint.software.installed_count.count != null) {
+            ctx.endpoint.software.installed_count = ctx.endpoint.software.installed_count.count;
+          }
+          if (ctx.endpoint.software.services_count != null && ctx.endpoint.software.services_count.count != null) {
+            ctx.endpoint.software.services_count = ctx.endpoint.software.services_count.count;
+          }
+          if (ctx.endpoint.software.browser_extensions_count != null && ctx.endpoint.software.browser_extensions_count.count != null) {
+            ctx.endpoint.software.browser_extensions_count = ctx.endpoint.software.browser_extensions_count.count;
+          }
+          if (ctx.endpoint.software.chrome_extensions_count != null && ctx.endpoint.software.chrome_extensions_count.count != null) {
+            ctx.endpoint.software.chrome_extensions_count = ctx.endpoint.software.chrome_extensions_count.count;
+          }
+          if (ctx.endpoint.software.startup_items_count != null && ctx.endpoint.software.startup_items_count.count != null) {
+            ctx.endpoint.software.startup_items_count = ctx.endpoint.software.startup_items_count.count;
+          }
+          if (ctx.endpoint.software.launch_agents_count != null && ctx.endpoint.software.launch_agents_count.count != null) {
+            ctx.endpoint.software.launch_agents_count = ctx.endpoint.software.launch_agents_count.count;
+          }
+          if (ctx.endpoint.software.launch_daemons_count != null && ctx.endpoint.software.launch_daemons_count.count != null) {
+            ctx.endpoint.software.launch_daemons_count = ctx.endpoint.software.launch_daemons_count.count;
+          }
+          if (ctx.endpoint.software.scheduled_tasks_count != null && ctx.endpoint.software.scheduled_tasks_count.count != null) {
+            ctx.endpoint.software.scheduled_tasks_count = ctx.endpoint.software.scheduled_tasks_count.count;
+          }
+          if (ctx.endpoint.software.unsigned_apps_count != null && ctx.endpoint.software.unsigned_apps_count.count != null) {
+            ctx.endpoint.software.unsigned_apps_count = ctx.endpoint.software.unsigned_apps_count.count;
+          }
+
+          // Network count fields
+          if (ctx.endpoint.network.listening_ports_count != null && ctx.endpoint.network.listening_ports_count.count != null) {
+            ctx.endpoint.network.listening_ports_count = ctx.endpoint.network.listening_ports_count.count;
+          }
+
+          // Privileges - SSH keys count
+          if (ctx.endpoint.privileges.ssh_keys_count != null && ctx.endpoint.privileges.ssh_keys_count.count != null) {
+            ctx.endpoint.privileges.ssh_keys_count = ctx.endpoint.privileges.ssh_keys_count.count;
+          }
+
+          // Detections - security detection counts
+          if (ctx.endpoint.detections.encoded_powershell_count != null && ctx.endpoint.detections.encoded_powershell_count.count != null) {
+            ctx.endpoint.detections.encoded_powershell_count = ctx.endpoint.detections.encoded_powershell_count.count;
+          }
+          if (ctx.endpoint.detections.hidden_temp_files_count != null && ctx.endpoint.detections.hidden_temp_files_count.count != null) {
+            ctx.endpoint.detections.hidden_temp_files_count = ctx.endpoint.detections.hidden_temp_files_count.count;
+          }
+          if (ctx.endpoint.detections.suspicious_ports_count != null && ctx.endpoint.detections.suspicious_ports_count.count != null) {
+            ctx.endpoint.detections.suspicious_ports_count = ctx.endpoint.detections.suspicious_ports_count.count;
           }
         `,
       },
@@ -166,6 +292,13 @@ export const getEndpointAssetsPipelineConfig = (
           'tmp_agent_type',
           'tmp_agent_version',
           'tmp_asset_platform',
+          'tmp_hardware_cpu',
+          'tmp_hardware_cpu_cores',
+          'tmp_hardware_memory_gb',
+          'tmp_hardware_vendor',
+          'tmp_hardware_model',
+          'tmp_disk_size',
+          'tmp_disk_free',
         ],
         ignore_missing: true,
       },
@@ -239,7 +372,7 @@ export const getEndpointAssetsPipelineConfig = (
 
           // Disk encryption
           def diskRaw = ctx.endpoint.posture.disk_encryption_raw;
-          if (diskRaw == null) {
+          if (diskRaw == null || diskRaw instanceof Map) {
             ctx.endpoint.posture.disk_encryption = 'UNKNOWN';
           } else if (diskRaw == '1' || diskRaw == 'true' || diskRaw == 'yes') {
             ctx.endpoint.posture.disk_encryption = 'OK';
@@ -249,27 +382,83 @@ export const getEndpointAssetsPipelineConfig = (
             failedChecks.add('disk_encryption');
           }
 
-          // Firewall
+          // Firewall - includes Windows-specific 'Good' value
           def fwRaw = ctx.endpoint.posture.firewall_enabled_raw;
-          ctx.endpoint.posture.firewall_enabled = (fwRaw == '1' || fwRaw == 'true' || fwRaw == 'yes');
-          if (ctx.endpoint.posture.firewall_enabled == false) {
+          boolean fwValid = fwRaw != null && !(fwRaw instanceof Map);
+          ctx.endpoint.posture.firewall_enabled = fwValid && (fwRaw == '1' || fwRaw == 'true' || fwRaw == 'yes' || fwRaw == 'Good' || fwRaw == 'on' || fwRaw == 'enabled');
+          if (ctx.endpoint.posture.firewall_enabled == false && fwValid) {
             score -= 20;
             failedChecks.add('firewall_disabled');
           }
 
           // Secure boot
           def sbRaw = ctx.endpoint.posture.secure_boot_raw;
-          ctx.endpoint.posture.secure_boot = (sbRaw == '1' || sbRaw == 'true' || sbRaw == 'yes');
-          if (ctx.endpoint.posture.secure_boot == false) {
+          boolean sbValid = sbRaw != null && !(sbRaw instanceof Map);
+          ctx.endpoint.posture.secure_boot = sbValid && (sbRaw == '1' || sbRaw == 'true' || sbRaw == 'yes');
+          if (ctx.endpoint.posture.secure_boot == false && sbValid) {
             score -= 15;
             failedChecks.add('secure_boot_disabled');
           }
 
-          // Admin count check
-          def adminCount = ctx.endpoint.privileges.admin_count?.count?.value;
-          if (adminCount != null && adminCount > 2) {
+          // SIP (System Integrity Protection) - macOS only
+          def sipRaw = ctx.endpoint.posture.sip_enabled_raw;
+          boolean sipValid = sipRaw != null && !(sipRaw instanceof Map);
+          ctx.endpoint.posture.sip_enabled = sipValid && (sipRaw == '1' || sipRaw == 'true' || sipRaw == 'enabled');
+          if (sipValid && ctx.endpoint.posture.sip_enabled == false) {
+            score -= 15;
+            failedChecks.add('sip_disabled');
+          }
+
+          // Gatekeeper - macOS only
+          def gkRaw = ctx.endpoint.posture.gatekeeper_enabled_raw;
+          boolean gkValid = gkRaw != null && !(gkRaw instanceof Map);
+          ctx.endpoint.posture.gatekeeper_enabled = gkValid && (gkRaw == '1' || gkRaw == 'true' || gkRaw == 'yes');
+          if (gkValid && ctx.endpoint.posture.gatekeeper_enabled == false) {
+            score -= 10;
+            failedChecks.add('gatekeeper_disabled');
+          }
+
+          // Admin count check - use flattened value (now a simple number, not nested)
+          int adminCount = 0;
+          if (ctx.endpoint.privileges.admin_count != null && ctx.endpoint.privileges.admin_count instanceof Number) {
+            adminCount = ctx.endpoint.privileges.admin_count.intValue();
+          }
+          if (adminCount > 2) {
             score -= 10;
             failedChecks.add('excessive_admins');
+            ctx.endpoint.privileges.elevated_risk = true;
+          } else {
+            ctx.endpoint.privileges.elevated_risk = false;
+          }
+
+          // Unsigned applications check - use flattened value
+          int unsignedApps = 0;
+          if (ctx.endpoint.software.unsigned_apps_count != null && ctx.endpoint.software.unsigned_apps_count instanceof Number) {
+            unsignedApps = ctx.endpoint.software.unsigned_apps_count.intValue();
+          }
+          if (unsignedApps > 5) {
+            score -= 5;
+            failedChecks.add('unsigned_applications');
+          }
+
+          // Security detections check - use flattened values
+          int encodedPS = 0;
+          int hiddenFiles = 0;
+          int suspiciousPorts = 0;
+          if (ctx.endpoint.detections.encoded_powershell_count != null && ctx.endpoint.detections.encoded_powershell_count instanceof Number) {
+            encodedPS = ctx.endpoint.detections.encoded_powershell_count.intValue();
+          }
+          if (ctx.endpoint.detections.hidden_temp_files_count != null && ctx.endpoint.detections.hidden_temp_files_count instanceof Number) {
+            hiddenFiles = ctx.endpoint.detections.hidden_temp_files_count.intValue();
+          }
+          if (ctx.endpoint.detections.suspicious_ports_count != null && ctx.endpoint.detections.suspicious_ports_count instanceof Number) {
+            suspiciousPorts = ctx.endpoint.detections.suspicious_ports_count.intValue();
+          }
+          int totalDetections = encodedPS + hiddenFiles + suspiciousPorts;
+
+          if (totalDetections > 0) {
+            score -= Math.min(20, totalDetections * 5);
+            failedChecks.add('security_detections');
           }
 
           // Set score and level
@@ -287,7 +476,7 @@ export const getEndpointAssetsPipelineConfig = (
           }
 
           // Posture checks summary
-          def totalChecks = 4;
+          def totalChecks = 8;
           def passedChecks = totalChecks - failedChecks.size();
           ctx.endpoint.posture.checks = new HashMap();
           ctx.endpoint.posture.checks.passed = passedChecks;
@@ -303,6 +492,84 @@ export const getEndpointAssetsPipelineConfig = (
           }
           if (ctx.endpoint.privileges.local_admins == null) {
             ctx.endpoint.privileges.local_admins = new ArrayList();
+          }
+          if (ctx.endpoint.privileges.root_users == null) {
+            ctx.endpoint.privileges.root_users = new ArrayList();
+          }
+
+          // Initialize software defaults
+          if (ctx.endpoint.software == null) { ctx.endpoint.software = new HashMap(); }
+          if (ctx.endpoint.software.installed_count == null) {
+            ctx.endpoint.software.installed_count = 0;
+          }
+          if (ctx.endpoint.software.services_count == null) {
+            ctx.endpoint.software.services_count = 0;
+          }
+          if (ctx.endpoint.software.browser_extensions_count == null) {
+            ctx.endpoint.software.browser_extensions_count = 0;
+          }
+          if (ctx.endpoint.software.chrome_extensions_count == null) {
+            ctx.endpoint.software.chrome_extensions_count = 0;
+          }
+          if (ctx.endpoint.software.startup_items_count == null) {
+            ctx.endpoint.software.startup_items_count = 0;
+          }
+          if (ctx.endpoint.software.launch_agents_count == null) {
+            ctx.endpoint.software.launch_agents_count = 0;
+          }
+          if (ctx.endpoint.software.launch_daemons_count == null) {
+            ctx.endpoint.software.launch_daemons_count = 0;
+          }
+          if (ctx.endpoint.software.scheduled_tasks_count == null) {
+            ctx.endpoint.software.scheduled_tasks_count = 0;
+          }
+          if (ctx.endpoint.software.unsigned_apps_count == null) {
+            ctx.endpoint.software.unsigned_apps_count = 0;
+          }
+
+          // Initialize network defaults
+          if (ctx.endpoint.network == null) { ctx.endpoint.network = new HashMap(); }
+          if (ctx.endpoint.network.listening_ports_count == null) {
+            ctx.endpoint.network.listening_ports_count = 0;
+          }
+          if (ctx.endpoint.network.interfaces == null) {
+            ctx.endpoint.network.interfaces = new ArrayList();
+          }
+
+          // Initialize hardware defaults
+          if (ctx.endpoint.hardware == null) { ctx.endpoint.hardware = new HashMap(); }
+          if (ctx.endpoint.hardware.disk == null) { ctx.endpoint.hardware.disk = new HashMap(); }
+          if (ctx.endpoint.hardware.usb_removable_count == null) {
+            ctx.endpoint.hardware.usb_removable_count = 0;
+          }
+
+          // Initialize privileges defaults - SSH keys
+          if (ctx.endpoint.privileges.ssh_keys_count == null) {
+            ctx.endpoint.privileges.ssh_keys_count = 0;
+          }
+
+          // Initialize detections defaults
+          if (ctx.endpoint.detections == null) { ctx.endpoint.detections = new HashMap(); }
+          if (ctx.endpoint.detections.encoded_powershell_count == null) {
+            ctx.endpoint.detections.encoded_powershell_count = 0;
+          }
+          if (ctx.endpoint.detections.hidden_temp_files_count == null) {
+            ctx.endpoint.detections.hidden_temp_files_count = 0;
+          }
+          if (ctx.endpoint.detections.suspicious_ports_count == null) {
+            ctx.endpoint.detections.suspicious_ports_count = 0;
+          }
+
+          // Initialize lifecycle defaults
+          if (ctx.endpoint.lifecycle == null) { ctx.endpoint.lifecycle = new HashMap(); }
+
+          // Initialize drift defaults
+          if (ctx.endpoint.drift == null) { ctx.endpoint.drift = new HashMap(); }
+          if (ctx.endpoint.drift.change_types == null) {
+            ctx.endpoint.drift.change_types = new ArrayList();
+          }
+          if (ctx.endpoint.drift.recently_changed == null) {
+            ctx.endpoint.drift.recently_changed = false;
           }
         `,
       },

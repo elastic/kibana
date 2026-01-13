@@ -1,0 +1,325 @@
+[
+  {
+    "agent": {
+      "name": "tomaszciecierski-osquery-1-ubuntu-9277",
+      "id": "9cd83e0e-fcbe-4eea-aeb9-c8dacab0313b",
+      "type": "osquerybeat",
+      "version": "9.2.3"
+    },
+    "endpoint": {
+      "lifecycle": {
+        "first_seen": "2026-01-13T10:57:08.858Z",
+        "last_seen": "2026-01-13T17:30:02.185Z"
+      },
+      "privileges": {
+        "local_admins": [],
+        "root_users": [],
+        "admin_count": 1.0,
+        "ssh_keys_count": 0.0,
+        "elevated_risk": false
+      },
+      "software": {
+        "launch_agents_count": 0.0,
+        "launch_daemons_count": 0.0,
+        "services_count": 0.0,
+        "scheduled_tasks_count": 0.0,
+        "installed_count": 1.0,
+        "browser_extensions_count": 0.0,
+        "chrome_extensions_count": 0.0,
+        "startup_items_count": 2762.0,
+        "unsigned_apps_count": 0.0
+      },
+      "posture": {
+        "firewall_enabled": false,
+        "secure_boot": false,
+        "level": "LOW",
+        "failed_checks": [],
+        "secure_boot_raw": null,
+        "firewall_enabled_raw": null,
+        "gatekeeper_enabled": false,
+        "score": 100.0,
+        "checks": {
+          "total": 8,
+          "passed": 8,
+          "failed": 0
+        },
+        "sip_enabled": false,
+        "gatekeeper_enabled_raw": null,
+        "disk_encryption": "UNKNOWN",
+        "disk_encryption_raw": null,
+        "sip_enabled_raw": null
+      },
+      "queries": {
+        "total_results": 3714
+      },
+      "hardware": {
+        "disk": {},
+        "vendor": "null",
+        "cpu": "null",
+        "model": "null",
+        "usb_removable_count": 0.0
+      },
+      "network": {
+        "interfaces": [],
+        "listening_ports_count": 0.0
+      },
+      "detections": {
+        "encoded_powershell_count": 0.0,
+        "suspicious_ports_count": 0.0,
+        "hidden_temp_files_count": 0.0
+      },
+      "drift": {
+        "change_types": [],
+        "recently_changed": false
+      }
+    },
+    "host": {
+      "hostname": "tomaszciecierski-osquery-1-ubuntu-9277",
+      "os": {
+        "build": "null",
+        "kernel": "5.15.0-164-generic",
+        "name": "Ubuntu",
+        "family": "debian",
+        "version": "22.04.3 LTS (Jammy Jellyfish)",
+        "platform": "ubuntu"
+      },
+      "ip": "192.168.2.17",
+      "name": "tomaszciecierski-osquery-1-ubuntu-9277",
+      "id": "4fb1781ac9f64d5cad47e77f1ed4f268",
+      "mac": "1A-63-23-39-A4-2C",
+      "architecture": "aarch64"
+    },
+    "event": {
+      "ingested": "2026-01-13T17:32:22.673454Z",
+      "kind": "state"
+    },
+    "@timestamp": "2026-01-13T17:30:02.185Z",
+    "asset": {
+      "category": "endpoint",
+      "platform": "ubuntu"
+    },
+    "entity": {
+      "sub_type": "endpoint",
+      "name": "tomaszciecierski-osquery-1-ubuntu-9277",
+      "id": "4fb1781ac9f64d5cad47e77f1ed4f268",
+      "source": "osquery",
+      "type": "host"
+    }
+  },
+  {
+    "agent": {
+      "name": "tomaszciecierski-osquery-1-windows-1466",
+      "id": "cb9ab0a3-ba29-40a6-96d3-779de3e8fc54",
+      "type": "osquerybeat",
+      "version": "9.3.0"
+    },
+    "endpoint": {
+      "lifecycle": {
+        "first_seen": "2026-01-13T10:58:11.716Z",
+        "last_seen": "2026-01-13T15:15:20.883Z"
+      },
+      "privileges": {
+        "local_admins": [],
+        "root_users": [],
+        "admin_count": 2.0,
+        "ssh_keys_count": 12.0,
+        "elevated_risk": false
+      },
+      "software": {
+        "launch_agents_count": 0.0,
+        "launch_daemons_count": 0.0,
+        "services_count": 41.0,
+        "scheduled_tasks_count": 343.0,
+        "installed_count": 115.0,
+        "browser_extensions_count": 0.0,
+        "chrome_extensions_count": 0.0,
+        "startup_items_count": 264.0,
+        "unsigned_apps_count": 0.0
+      },
+      "posture": {
+        "firewall_enabled": true,
+        "secure_boot": false,
+        "level": "MEDIUM",
+        "failed_checks": [
+          "security_detections"
+        ],
+        "secure_boot_raw": null,
+        "firewall_enabled_raw": "Good",
+        "gatekeeper_enabled": false,
+        "score": 80.0,
+        "checks": {
+          "total": 8,
+          "passed": 7,
+          "failed": 1
+        },
+        "sip_enabled": false,
+        "gatekeeper_enabled_raw": null,
+        "disk_encryption": "UNKNOWN",
+        "disk_encryption_raw": null,
+        "sip_enabled_raw": null
+      },
+      "queries": {
+        "total_results": 2700
+      },
+      "hardware": {
+        "disk": {},
+        "vendor": "null",
+        "cpu": "null",
+        "model": "null",
+        "usb_removable_count": 0.0
+      },
+      "network": {
+        "interfaces": [],
+        "listening_ports_count": 0.0
+      },
+      "detections": {
+        "encoded_powershell_count": 5.0,
+        "suspicious_ports_count": 0.0,
+        "hidden_temp_files_count": 0.0
+      },
+      "drift": {
+        "change_types": [],
+        "recently_changed": false
+      }
+    },
+    "host": {
+      "hostname": "tomaszciecierski-osquery-1-windows-1466",
+      "os": {
+        "build": "26100.7462",
+        "kernel": "10.0.26100.7462 (WinBuild.160101.0800)",
+        "name": "Windows 11 Pro",
+        "family": "windows",
+        "version": "10.0",
+        "platform": "windows"
+      },
+      "ip": "192.168.2.8",
+      "name": "tomaszciecierski-osquery-1-windows-1466",
+      "id": "2fcbbff4-4800-497a-973d-64eba43c9348",
+      "mac": "2E-23-66-0C-7D-9E",
+      "architecture": "arm64"
+    },
+    "event": {
+      "ingested": "2026-01-13T17:22:21.393808Z",
+      "kind": "state"
+    },
+    "@timestamp": "2026-01-13T15:15:20.883Z",
+    "asset": {
+      "category": "endpoint",
+      "platform": "windows"
+    },
+    "entity": {
+      "sub_type": "endpoint",
+      "name": "tomaszciecierski-osquery-1-windows-1466",
+      "id": "2fcbbff4-4800-497a-973d-64eba43c9348",
+      "source": "osquery",
+      "type": "host"
+    }
+  },
+  {
+    "agent": {
+      "name": "dev-fleet-server.8220.dcft",
+      "id": "ab3bdb16-549a-4138-a9e4-acdf00ad02e0",
+      "type": "osquerybeat",
+      "version": "9.4.0"
+    },
+    "endpoint": {
+      "lifecycle": {
+        "first_seen": "2026-01-13T10:57:08.836Z",
+        "last_seen": "2026-01-13T14:27:04.445Z"
+      },
+      "privileges": {
+        "local_admins": [],
+        "root_users": [],
+        "admin_count": 0.0,
+        "ssh_keys_count": 0.0,
+        "elevated_risk": false
+      },
+      "software": {
+        "launch_agents_count": 0.0,
+        "launch_daemons_count": 0.0,
+        "services_count": 0.0,
+        "scheduled_tasks_count": 0.0,
+        "installed_count": 1.0,
+        "browser_extensions_count": 0.0,
+        "chrome_extensions_count": 0.0,
+        "startup_items_count": 538.0,
+        "unsigned_apps_count": 0.0
+      },
+      "posture": {
+        "firewall_enabled": false,
+        "secure_boot": false,
+        "level": "LOW",
+        "failed_checks": [],
+        "secure_boot_raw": null,
+        "firewall_enabled_raw": null,
+        "gatekeeper_enabled": false,
+        "score": 100.0,
+        "checks": {
+          "total": 8,
+          "passed": 8,
+          "failed": 0
+        },
+        "sip_enabled": false,
+        "gatekeeper_enabled_raw": null,
+        "disk_encryption": "UNKNOWN",
+        "disk_encryption_raw": null,
+        "sip_enabled_raw": null
+      },
+      "queries": {
+        "total_results": 733
+      },
+      "hardware": {
+        "disk": {},
+        "vendor": "null",
+        "cpu": "null",
+        "model": "null",
+        "usb_removable_count": 0.0
+      },
+      "network": {
+        "interfaces": [],
+        "listening_ports_count": 0.0
+      },
+      "detections": {
+        "encoded_powershell_count": 0.0,
+        "suspicious_ports_count": 0.0,
+        "hidden_temp_files_count": 0.0
+      },
+      "drift": {
+        "change_types": [],
+        "recently_changed": false
+      }
+    },
+    "host": {
+      "hostname": "dev-fleet-server.8220.dcft",
+      "os": {
+        "build": "null",
+        "kernel": "6.12.54-linuxkit",
+        "name": "Red Hat Enterprise Linux",
+        "family": "redhat",
+        "version": "9.7 (Plow)",
+        "platform": "rhel"
+      },
+      "ip": "172.18.0.2",
+      "name": "dev-fleet-server.8220.dcft",
+      "id": "ec2e11987cfd60a6aa48e1e4bf5db6cd",
+      "mac": "36-72-F3-71-51-A7",
+      "architecture": "aarch64"
+    },
+    "event": {
+      "ingested": "2026-01-13T17:22:21.394595Z",
+      "kind": "state"
+    },
+    "@timestamp": "2026-01-13T14:27:04.445Z",
+    "asset": {
+      "category": "endpoint",
+      "platform": "rhel"
+    },
+    "entity": {
+      "sub_type": "endpoint",
+      "name": "dev-fleet-server.8220.dcft",
+      "id": "ec2e11987cfd60a6aa48e1e4bf5db6cd",
+      "source": "osquery",
+      "type": "host"
+    }
+  }
+]

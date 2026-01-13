@@ -48,6 +48,13 @@ export const ENDPOINT_ASSETS_DEFAULT_NAMESPACE = 'default';
 export const ENDPOINT_ASSETS_TRANSFORM_FREQUENCY = '5m';
 export const ENDPOINT_ASSETS_TRANSFORM_DELAY = '0s';
 
+/**
+ * Index pattern for endpoint assets - used for Entity Store integration
+ * Pattern matches: endpoint-assets-osquery-{namespace}
+ * Example: endpoint-assets-osquery-default
+ */
+export const ENDPOINT_ASSETS_INDEX_PATTERN = `${ENDPOINT_ASSETS_INDEX_PREFIX}-*`;
+
 export const ENDPOINT_ASSETS_ENTITY_TYPE = {
   HOST: 'host',
 } as const;

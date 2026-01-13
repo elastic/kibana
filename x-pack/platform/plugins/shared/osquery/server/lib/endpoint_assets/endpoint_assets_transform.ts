@@ -272,11 +272,68 @@ export const getEndpointAssetsTransformConfig = (
         },
       },
 
+      // Hardware - CPU info
+      tmp_hardware_cpu: {
+        top_metrics: {
+          metrics: [{ field: 'osquery.cpu_brand' }],
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      },
+      tmp_hardware_cpu_cores: {
+        top_metrics: {
+          metrics: [{ field: 'osquery.cpu_physical_cores' }],
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      },
+      tmp_hardware_memory_gb: {
+        top_metrics: {
+          metrics: [{ field: 'osquery.physical_memory' }],
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      },
+      tmp_hardware_vendor: {
+        top_metrics: {
+          metrics: [{ field: 'osquery.hardware_vendor' }],
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      },
+      tmp_hardware_model: {
+        top_metrics: {
+          metrics: [{ field: 'osquery.hardware_model' }],
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      },
+
+      // Network - listening ports count
+      'endpoint.network.listening_ports_count': {
+        filter: {
+          bool: {
+            must: [
+              { exists: { field: 'osquery.port' } },
+              { term: { 'osquery.state': 'LISTEN' } },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.port',
+            },
+          },
+        },
+      },
+
       // Software counts
       'endpoint.software.installed_count': {
         filter: { exists: { field: 'osquery.version' } },
         aggs: {
           count: { cardinality: { field: 'osquery.name' } },
+        },
+      },
+      'endpoint.software.services_count': {
+        filter: { exists: { field: 'osquery.service_name' } },
+        aggs: {
+          count: { cardinality: { field: 'osquery.service_name' } },
         },
       },
 
@@ -325,6 +382,268 @@ export const getEndpointAssetsTransformConfig = (
             top_metrics: {
               metrics: [{ field: 'osquery.secure_boot' }],
               sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      // Posture - macOS SIP (System Integrity Protection)
+      'endpoint.posture.sip_enabled_raw': {
+        filter: { exists: { field: 'osquery.config_flag' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.config_flag' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      // Posture - macOS Gatekeeper
+      'endpoint.posture.gatekeeper_enabled_raw': {
+        filter: { exists: { field: 'osquery.assessments_enabled' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.assessments_enabled' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      // Hardware - Disk capacity and free space
+      // Uses top_metrics since osquery.disk_size is a keyword field
+      tmp_disk_size: {
+        top_metrics: {
+          metrics: [{ field: 'osquery.disk_size' }],
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      },
+      tmp_disk_free: {
+        top_metrics: {
+          metrics: [{ field: 'osquery.free_space' }],
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      },
+
+      // Hardware - USB removable devices count
+      'endpoint.hardware.usb_removable_count': {
+        filter: {
+          bool: {
+            must: [
+              { exists: { field: 'osquery.vendor_id' } },
+              { term: { 'osquery.removable': '1' } },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.vendor_id',
+            },
+          },
+        },
+      },
+
+      // Software - Browser extensions
+      'endpoint.software.browser_extensions_count': {
+        filter: { exists: { field: 'osquery.identifier' } },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.identifier',
+            },
+          },
+        },
+      },
+      'endpoint.software.chrome_extensions_count': {
+        filter: {
+          bool: {
+            must: [
+              { exists: { field: 'osquery.identifier' } },
+              { term: { 'osquery.browser_type': 'chrome' } },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.identifier',
+            },
+          },
+        },
+      },
+
+      // Software - Startup items (Windows)
+      'endpoint.software.startup_items_count': {
+        filter: { exists: { field: 'osquery.path' } },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.path',
+            },
+          },
+        },
+      },
+
+      // Software - Launch agents (macOS)
+      'endpoint.software.launch_agents_count': {
+        filter: {
+          bool: {
+            must: [
+              { exists: { field: 'osquery.program' } },
+              { wildcard: { 'osquery.path': '*LaunchAgents*' } },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.label',
+            },
+          },
+        },
+      },
+
+      // Software - Launch daemons (macOS)
+      'endpoint.software.launch_daemons_count': {
+        filter: {
+          bool: {
+            must: [
+              { exists: { field: 'osquery.program' } },
+              { wildcard: { 'osquery.path': '*LaunchDaemons*' } },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.label',
+            },
+          },
+        },
+      },
+
+      // Software - Scheduled tasks (Windows)
+      'endpoint.software.scheduled_tasks_count': {
+        filter: { exists: { field: 'osquery.action' } },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.name',
+            },
+          },
+        },
+      },
+
+      // Software - Unsigned applications
+      'endpoint.software.unsigned_apps_count': {
+        filter: {
+          bool: {
+            must: [
+              { exists: { field: 'osquery.path' } },
+              { term: { 'osquery.signed': '0' } },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.path',
+            },
+          },
+        },
+      },
+
+      // Detections - Encoded PowerShell commands (LOTL)
+      'endpoint.detections.encoded_powershell_count': {
+        filter: {
+          bool: {
+            should: [
+              { wildcard: { 'osquery.cmdline': '*-enc*' } },
+              { wildcard: { 'osquery.cmdline': '*-EncodedCommand*' } },
+              { wildcard: { 'osquery.cmdline': '*FromBase64String*' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        aggs: {
+          count: {
+            value_count: {
+              field: 'osquery.cmdline',
+            },
+          },
+        },
+      },
+
+      // Detections - Hidden files in temp directories
+      'endpoint.detections.hidden_temp_files_count': {
+        filter: {
+          bool: {
+            must: [
+              { term: { 'osquery.hidden': '1' } },
+              {
+                bool: {
+                  should: [
+                    { wildcard: { 'osquery.path': '*tmp*' } },
+                    { wildcard: { 'osquery.path': '*temp*' } },
+                    { wildcard: { 'osquery.path': '*Temp*' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            value_count: {
+              field: 'osquery.path',
+            },
+          },
+        },
+      },
+
+      // Detections - Listening on suspicious ports
+      'endpoint.detections.suspicious_ports_count': {
+        filter: {
+          bool: {
+            must: [
+              { term: { 'osquery.state': 'LISTEN' } },
+              {
+                bool: {
+                  should: [
+                    { term: { 'osquery.port': 4444 } },
+                    { term: { 'osquery.port': 5555 } },
+                    { term: { 'osquery.port': 6666 } },
+                    { term: { 'osquery.port': 1337 } },
+                    { term: { 'osquery.port': 31337 } },
+                    { range: { 'osquery.port': { gte: 49152, lte: 65535 } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.port',
+            },
+          },
+        },
+      },
+
+      // Privileges - SSH authorized keys count
+      'endpoint.privileges.ssh_keys_count': {
+        filter: { exists: { field: 'osquery.key' } },
+        aggs: {
+          count: {
+            value_count: {
+              field: 'osquery.key',
             },
           },
         },
