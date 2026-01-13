@@ -14,7 +14,7 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../../types';
-import { getFilteredLogCategories } from '../../../tools/get_log_categories/handler';
+import { getLogCategories } from '../../../tools/get_log_categories/handler';
 import { getLogsIndices } from '../../../utils/get_logs_indices';
 import { getApmIndices } from '../../../utils/get_apm_indices';
 import { parseDatemath } from '../../../utils/time';
@@ -137,13 +137,14 @@ export async function fetchApmErrorContext({
       handler: async () => {
         const logsIndices = await getLogsIndices({ core, logger });
 
-        const logCategories = await getFilteredLogCategories({
+        const messageField = 'message';
+        const logCategories = await getLogCategories({
           esClient,
           logsIndices,
           boolQuery: {
             filter: [
               ...termFilter('trace.id', traceId),
-              { exists: { field: 'message' } },
+              { exists: { field: messageField } },
               {
                 range: {
                   '@timestamp': {
@@ -157,6 +158,7 @@ export async function fetchApmErrorContext({
           logger,
           categoryCount: 10,
           fields: ['trace.id'],
+          messageField,
         });
 
         return logCategories?.categories;

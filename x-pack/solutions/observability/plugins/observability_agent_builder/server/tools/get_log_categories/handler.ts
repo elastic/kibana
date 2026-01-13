@@ -13,6 +13,7 @@ import { getTypedSearch } from '../../utils/get_typed_search';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
+import { warningAndAboveLogFilter } from '../../utils/ecs_otel_fields';
 
 export async function getToolHandler({
   core,
@@ -61,38 +62,27 @@ export async function getToolHandler({
     { bool: { must_not: { exists: { field: 'message' } } } },
   ];
 
-  const lowSeverityLogLevels = [
-    {
-      terms: {
-        'log.level': ['trace', 'debug', 'info'].flatMap((level) => [
-          level.toLowerCase(),
-          level.toUpperCase(),
-        ]),
-      },
-    },
-  ];
-
   const [highSeverityResult, lowSeverityCategories, exceptionResult] = await Promise.all([
-    getFilteredLogCategories({
+    getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: messageFilters, must_not: lowSeverityLogLevels },
+      boolQuery: { filter: messageFilters, must: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 20,
       fields,
       field: 'message',
     }),
-    getFilteredLogCategories({
+    getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: messageFilters, must: lowSeverityLogLevels },
+      boolQuery: { filter: messageFilters, must_not: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 10,
       fields,
       field: 'message',
     }),
     // OTel exception events - these are always high severity (no log.level, uses event_name: "exception")
-    getFilteredLogCategories({
+    getLogCategories({
       esClient,
       logsIndices,
       boolQuery: { filter: spanExceptionFilters },
@@ -119,7 +109,7 @@ export async function getToolHandler({
   return { highSeverityCategories, lowSeverityCategories };
 }
 
-export async function getFilteredLogCategories({
+export async function getLogCategories({
   esClient,
   logsIndices,
   boolQuery,

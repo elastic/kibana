@@ -7,14 +7,22 @@
 
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { DataConnectorsLandingPage } from '../pages/data_connectors_landing';
+import { DataConnectorsLayout } from './components/data_connectors_layout';
+import { ConnectorsPage } from './pages/connectors_page';
+import { ActiveSourcesPage } from './pages/active_sources_page';
 
-export const DataConnectorsRoutes = () => {
+export const DataConnectorsRoutes: React.FC = () => {
   return (
-    <Routes>
-      <Route path="/">
-        <DataConnectorsLandingPage />
-      </Route>
-    </Routes>
+    <DataConnectorsLayout>
+      <Routes>
+        <Route exact path="/active-sources">
+          <ActiveSourcesPage />
+        </Route>
+        {/* Default to connectors page for all other routes */}
+        <Route path="/">
+          <ConnectorsPage />
+        </Route>
+      </Routes>
+    </DataConnectorsLayout>
   );
 };
