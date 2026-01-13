@@ -43,7 +43,6 @@ dependsOn:
   - '@kbn/doc-links'
   - '@kbn/cloud'
   - '@kbn/deeplinks-search'
-  - '@kbn/scout-search'
 tags:
   - plugin
   - prod
