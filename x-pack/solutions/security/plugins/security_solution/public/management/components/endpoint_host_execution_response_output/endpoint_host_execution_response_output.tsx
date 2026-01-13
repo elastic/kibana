@@ -29,20 +29,20 @@ const emptyValue = getEmptyValue();
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
   context: i18n.translate(
-    'xpack.securitySolution.responseActionExecuteAccordion.executionContext',
+    'xpack.securitySolution.EndpointHostExecutionResponseOutput.executionContext',
     {
       defaultMessage: 'Execution context',
     }
   ),
   output: {
     regular: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.outputButtonTextRegular',
+      'xpack.securitySolution.EndpointHostExecutionResponseOutput.outputButtonTextRegular',
       {
         defaultMessage: 'Execution output',
       }
     ),
     truncated: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.outputButtonTextTruncated',
+      'xpack.securitySolution.EndpointHostExecutionResponseOutput.outputButtonTextTruncated',
       {
         defaultMessage: 'Execution output (truncated)',
       }
@@ -50,13 +50,13 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
   },
   error: {
     regular: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.errorButtonTextRegular',
+      'xpack.securitySolution.EndpointHostExecutionResponseOutput.errorButtonTextRegular',
       {
         defaultMessage: 'Execution error',
       }
     ),
     truncated: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.errorButtonTextTruncated',
+      'xpack.securitySolution.EndpointHostExecutionResponseOutput.errorButtonTextTruncated',
       {
         defaultMessage: 'Execution error (truncated)',
       }
@@ -65,18 +65,21 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
 });
 
 const SHELL_INFO = Object.freeze({
-  shell: i18n.translate('xpack.securitySolution.responseActionExecuteAccordion.shellInformation', {
-    defaultMessage: 'Shell',
-  }),
+  shell: i18n.translate(
+    'xpack.securitySolution.EndpointHostExecutionResponseOutput.shellInformation',
+    {
+      defaultMessage: 'Shell',
+    }
+  ),
 
   returnCode: i18n.translate(
-    'xpack.securitySolution.responseActionExecuteAccordion.shellReturnCode',
+    'xpack.securitySolution.EndpointHostExecutionResponseOutput.shellReturnCode',
     {
       defaultMessage: 'Return code',
     }
   ),
   currentDir: i18n.translate(
-    'xpack.securitySolution.responseActionExecuteAccordion.currentWorkingDirectory',
+    'xpack.securitySolution.EndpointHostExecutionResponseOutput.currentWorkingDirectory',
     {
       defaultMessage: 'Executed from',
     }
@@ -178,7 +181,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
 );
 ExecutionActionOutputAccordion.displayName = 'ExecutionActionOutputAccordion';
 
-export interface ExecuteActionHostResponseOutputProps {
+export interface EndpointHostExecutionResponseOutputProps {
   outputContent: ResponseActionExecuteOutputContent | ResponseActionEndpointRunScriptOutputContent;
   'data-test-subj'?: string;
   /** Default is `xs` (normally used in the Action History log) */
@@ -190,7 +193,7 @@ export interface ExecuteActionHostResponseOutputProps {
  * the response will include some output that may be truncated along with a file that includes all of the
  * output from the execution.
  */
-export const EndpointHostExecutionResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
+export const EndpointHostExecutionResponseOutput = memo<EndpointHostExecutionResponseOutputProps>(
   ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
     const contextContent = useMemo(
       () => (
