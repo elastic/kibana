@@ -8,8 +8,40 @@
  */
 
 import React from 'react';
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
+import { useAppStateSelector } from '../../../../../application/main/state_management/redux';
+import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
+import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+
+/**
+ * Wrapper component that reads breakdownField from Discover's app state
+ * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector
+ */
+const MetricsExperienceGridWrapper = (
+  props: ChartSectionProps & { actions: ChartSectionConfigurationExtensionParams['actions'] }
+) => {
+  const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
+
+  // This will prevent the filter being added to the query for multi-dimensional breakdowns when the user clicks on a data point on the series.
+  const handleFilter = (event: ExpressionRendererEvent['data']) => {
+    if (props.onFilter) {
+      props.onFilter(event);
+    }
+    event.preventDefault();
+  };
+
+  return (
+    <UnifiedMetricsExperienceGrid
+      {...props}
+      onFilter={handleFilter}
+      actions={props.actions}
+      breakdownField={breakdownField}
+    />
+  );
+};
 
 export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
@@ -18,7 +50,7 @@ export const createChartSection =
     return {
       ...prev(params),
       renderChartSection: (props) => {
-        return <UnifiedMetricsExperienceGrid {...props} actions={params.actions} />;
+        return <MetricsExperienceGridWrapper {...props} actions={params.actions} />;
       },
       replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
