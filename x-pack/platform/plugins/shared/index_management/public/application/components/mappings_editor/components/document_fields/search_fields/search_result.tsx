@@ -95,17 +95,18 @@ export const SearchResult = React.memo(
         }
       />
     ) : (
-      <VirtualList
-        data-test-subj="mappingsEditorSearchResult"
-        style={{ overflowX: 'hidden', ...virtualListStyle }}
-        width="100%"
-        height={listHeight}
-        itemData={itemData}
-        itemCount={result.length}
-        itemSize={ITEM_HEIGHT}
-      >
-        {Row}
-      </VirtualList>
+      <div data-test-subj="mappingsEditorSearchResult">
+        <VirtualList
+          style={{ overflowX: 'hidden', ...virtualListStyle }}
+          width="100%"
+          height={listHeight}
+          itemData={itemData}
+          itemCount={result.length}
+          itemSize={ITEM_HEIGHT}
+        >
+          {Row}
+        </VirtualList>
+      </div>
     );
   }
 );

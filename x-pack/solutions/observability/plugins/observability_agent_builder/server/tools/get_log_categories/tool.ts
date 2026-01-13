@@ -16,14 +16,15 @@ import type {
 } from '../../types';
 import { timeRangeSchemaOptional, indexDescription } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import type { getFilteredLogCategories } from './handler';
+import type { getLogCategories } from './handler';
 import { getToolHandler } from './handler';
+import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '../get_correlated_logs/tool';
 
 export interface GetLogCategoriesToolResult {
   type: ToolResultType.other;
   data: {
-    highSeverityCategories: Awaited<ReturnType<typeof getFilteredLogCategories>>;
-    lowSeverityCategories: Awaited<ReturnType<typeof getFilteredLogCategories>>;
+    highSeverityCategories: Awaited<ReturnType<typeof getLogCategories>>;
+    lowSeverityCategories: Awaited<ReturnType<typeof getLogCategories>>;
   };
 }
 
@@ -37,11 +38,23 @@ export const OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID = 'observability.get_log_c
 const getLogsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   index: z.string().describe(indexDescription).optional(),
-  terms: z
-    .record(z.string(), z.string())
+  kqlFilter: z
+    .string()
     .optional()
     .describe(
-      'Optional field filters to narrow down results. Each key-value pair filters logs where the field exactly matches the value. Example: { "service.name": "payment", "host.name": "web-server-01" }. Multiple filters are combined with AND logic.'
+      'A KQL query to filter logs. Examples: service.name:"payment", host.name:"web-server-01", service.name:"payment" AND log.level:error'
+    ),
+  fields: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Additional fields to return for each log sample. "@timestamp" and the message field are always included. Example: ["service.name", "host.name"]'
+    ),
+  messageField: z
+    .string()
+    .optional()
+    .describe(
+      'The field containing the log message. Use "message" for ECS logs or "body.text" for OpenTelemetry logs. Defaults to "message".'
     ),
 });
 
@@ -69,9 +82,15 @@ When to use:
 How it works:
 Groups similar log messages together using pattern recognition, returning representative categories with counts.
 
+After using this tool:
+- For high-count error categories, use \`${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID}\` to trace the sequence of events leading to those errors
+- Compare error patterns across services - the origin service often has different error types than affected downstream services (e.g., "constraint violation" vs "connection timeout")
+- Patterns like "timeout", "exhausted", "capacity", "limit reached" are often SYMPTOMS - look for what's causing the resource pressure
+- If you see resource lifecycle logs (acquire/release, open/close), check if counts match - mismatches can indicate leaks
+
 Do NOT use for:
-- Understanding the sequence of events for a specific error (use get_correlated_logs)
-- Investigating a specific incident in detail (use get_correlated_logs)
+- Understanding the sequence of events for a specific error (use ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID})
+- Investigating a specific incident in detail (use ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID})
 - Analyzing changes in log volume over time (use run_log_rate_analysis)`,
     schema: getLogsSchema,
     tags: ['observability', 'logs'],
@@ -81,10 +100,16 @@ Do NOT use for:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      { index, start = DEFAULT_TIME_RANGE.start, end = DEFAULT_TIME_RANGE.end, terms },
-      { esClient }
-    ) => {
+    handler: async (toolParams, { esClient }) => {
+      const {
+        index,
+        start = DEFAULT_TIME_RANGE.start,
+        end = DEFAULT_TIME_RANGE.end,
+        kqlFilter,
+        fields = [],
+        messageField = 'message',
+      } = toolParams;
+
       try {
         const { highSeverityCategories, lowSeverityCategories } = await getToolHandler({
           core,
@@ -93,7 +118,9 @@ Do NOT use for:
           index,
           start,
           end,
-          terms,
+          kqlFilter,
+          fields,
+          messageField,
         });
 
         return {

@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const dataGrid = getService('dataGrid');
 
-  // Failing: See https://github.com/elastic/kibana/issues/245197
-  describe.skip('discover - ES|QL controls', function () {
+  describe('discover - ES|QL controls', function () {
     it('should add an ES|QL value control', async () => {
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
@@ -173,8 +172,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check control is present
       await retry.try(async () => {
-        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
-        expect(controlGroupVisible).to.be(true);
+        const controlCount = await dashboardControls.getControlsCount();
+        expect(controlCount).to.be(1);
       });
     });
 
@@ -191,8 +190,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check control is present
       await retry.try(async () => {
-        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
-        expect(controlGroupVisible).to.be(true);
+        const controlCount = await dashboardControls.getControlsCount();
+        expect(controlCount).to.be(1);
       });
     });
   });

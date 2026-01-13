@@ -3162,6 +3162,43 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.hasOnlySourceCommand",
+        "type": "Function",
+        "tags": [],
+        "label": "hasOnlySourceCommand",
+        "description": [
+          "\nChecks if the ESQL query contains only source commands (e.g., FROM, TS)."
+        ],
+        "signature": [
+          "(query: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.hasOnlySourceCommand.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "true if the query contains only source commands, false otherwise"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.hasStartEndParams",
         "type": "Function",
         "tags": [],

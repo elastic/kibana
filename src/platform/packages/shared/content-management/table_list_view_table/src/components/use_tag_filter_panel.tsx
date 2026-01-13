@@ -11,10 +11,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import type { MouseEvent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
 import type { FieldValueOptionType, Query } from '@elastic/eui';
+import { isMac } from '@kbn/shared-ux-utility';
 
 import type { Tag } from '../types';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const toArray = (item: unknown) => (Array.isArray(item) ? item : [item]);
 
