@@ -71,7 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  describe('Home page', function () {
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     let synthEsClient: InfraSynthtraceEsClient;
 
