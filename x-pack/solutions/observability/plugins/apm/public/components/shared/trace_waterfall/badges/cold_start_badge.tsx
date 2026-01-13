@@ -12,7 +12,7 @@ import React from 'react';
 export function ColdStartBadge() {
   return (
     <EuiBadge color="warning">
-      {i18n.translate('xpack.apm.transactionDetails.coldstartBadge', {
+      {i18n.translate('xpack.apm.traceWaterfall.coldstartBadge', {
         defaultMessage: 'cold start',
       })}
     </EuiBadge>
