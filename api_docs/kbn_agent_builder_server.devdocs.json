@@ -220,6 +220,14 @@
                     "pluginId": "@kbn/agent-builder-common",
                     "scope": "common",
                     "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.ToolUiEvent",
+                    "text": "ToolUiEvent"
+                  },
+                  "<string, object> | ",
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
                     "section": "def-common.ToolResultEvent",
                     "text": "ToolResultEvent"
                   },
@@ -653,7 +661,8 @@
             "section": "def-common.ToolType",
             "text": "ToolType"
           },
-          ", Record<string, unknown>>, \"type\" | \"readonly\" | \"configuration\">"
+          ", Record<string, unknown>>, \"type\" | \"readonly\" | \"configuration\">,",
+          "BuiltInToolSpecificConfig"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "deprecated": false,
@@ -807,6 +816,29 @@
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.BuiltinToolDefinition.summarizeToolReturn",
+            "type": "Function",
+            "tags": [],
+            "label": "summarizeToolReturn",
+            "description": [
+              "\nOptional function to summarize a tool return for conversation history.\nWhen provided, this function will be called when processing conversation history\nto replace large tool results with compact summaries.\nThis helps prevent context bloat in long conversations."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ToolReturnSummarizerFn",
+                "text": "ToolReturnSummarizerFn"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -919,7 +951,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ onEvent?: ",
+                  "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
                   {
                     "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
@@ -1135,6 +1167,46 @@
                 "text": "LlmDescriptionHandler"
               },
               "<TConfig> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.InternalToolDefinition.summarizeToolReturn",
+            "type": "Function",
+            "tags": [],
+            "label": "summarizeToolReturn",
+            "description": [
+              "\nOptional function to summarize a tool return for conversation history.\nWhen provided, this function will be called when processing conversation history\nto replace large tool results with compact summaries."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ToolReturnSummarizerFn",
+                "text": "ToolReturnSummarizerFn"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.InternalToolDefinition.confirmation",
+            "type": "Object",
+            "tags": [],
+            "label": "confirmation",
+            "description": [
+              "\nTool call policy to control tool call confirmation behavior"
+            ],
+            "signature": [
+              "ToolConfirmationPolicy",
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
             "deprecated": false,
@@ -1767,6 +1839,39 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.RunToolParams.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "\nOptional source of the tool invocation.\nDefaults to 'unknown'."
+            ],
+            "signature": [
+              "\"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.RunToolParams.promptState",
+            "type": "Object",
+            "tags": [],
+            "label": "promptState",
+            "description": [
+              "\nOptional prompt storage state to use for tool invocation."
+            ],
+            "signature": [
+              "PromptStorageState",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
             "id": "def-common.RunToolParams.onEvent",
             "type": "Function",
             "tags": [],
@@ -2016,7 +2121,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ onEvent?: ",
+                  "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
                   {
                     "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
@@ -2067,7 +2172,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ onEvent?: ",
+                  "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
                   {
                     "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
@@ -2402,7 +2507,6 @@
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/agent-builder-server",
@@ -2411,11 +2515,65 @@
                 "tags": [],
                 "label": "progressMessage",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ToolEventEmitter.sendUiEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "sendUiEvent",
+            "description": [
+              "\nEmit a UI event which can be listened to on the front-end.\n\nNote: UI events aren't persisted, they are just meant to be used during streaming by the UI."
+            ],
+            "signature": [
+              "<TEvent extends string, TData extends object>(event: TEvent, data: TData) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ToolEventEmitter.sendUiEvent.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "TEvent"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ToolEventEmitter.sendUiEvent.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "TData"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2679,7 +2837,8 @@
               "\nGet the status for the given confirmation prompt"
             ],
             "signature": [
-              "(promptId: string) => ConfirmationInfo"
+              "(promptId: string) => ",
+              "ConfirmationInfo"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/prompt_manager.ts",
             "deprecated": false,
@@ -3348,24 +3507,10 @@
         "label": "AgentBuilderToolEvent",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderEvent",
-            "text": "AgentBuilderEvent"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.ChatEventType",
-            "text": "ChatEventType"
-          },
-          ".toolProgress, ",
-          "InternalToolProgressEventData",
-          ">"
+          "InternalToolProgressEvent",
+          " | ",
+          "InternalToolUiEvent",
+          "<string, object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
         "deprecated": false,
@@ -3429,6 +3574,14 @@
                 "text": "ToolProgressEvent"
               },
               " | ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolUiEvent",
+                "text": "ToolUiEvent"
+              },
+              "<string, object> | ",
               {
                 "pluginId": "@kbn/agent-builder-common",
                 "scope": "common",
@@ -3626,7 +3779,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ onEvent?: ",
+              "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -3653,7 +3806,7 @@
           "\nParam type for {@link ExecutableToolHandlerFn}"
         ],
         "signature": [
-          "{ onEvent?: ",
+          "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
           {
             "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
@@ -3900,6 +4053,14 @@
                 "pluginId": "@kbn/agent-builder-common",
                 "scope": "common",
                 "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolUiEvent",
+                "text": "ToolUiEvent"
+              },
+              "<string, object> | ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
                 "section": "def-common.ToolResultEvent",
                 "text": "ToolResultEvent"
               },
@@ -4124,7 +4285,7 @@
           "\nParams for {@link ScopedRunner.runTool}"
         ],
         "signature": [
-          "{ onEvent?: ",
+          "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
           {
             "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
@@ -4180,7 +4341,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ onEvent?: ",
+              "{ source?: \"unknown\" | \"user\" | \"agent\" | \"mcp\" | undefined; onEvent?: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -4213,15 +4374,8 @@
             "section": "def-common.EsqlToolDefinition",
             "text": "EsqlToolDefinition"
           },
-          ", \"readonly\"> & { availability?: ",
-          {
-            "pluginId": "@kbn/agent-builder-server",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderServerPluginApi",
-            "section": "def-common.ToolAvailabilityConfig",
-            "text": "ToolAvailabilityConfig"
-          },
-          " | undefined; }"
+          ", \"readonly\"> & ",
+          "BuiltInToolSpecificConfig"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "deprecated": false,
@@ -4238,15 +4392,8 @@
         "signature": [
           "Omit<",
           "IndexSearchToolDefinition",
-          ", \"readonly\"> & { availability?: ",
-          {
-            "pluginId": "@kbn/agent-builder-server",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderServerPluginApi",
-            "section": "def-common.ToolAvailabilityConfig",
-            "text": "ToolAvailabilityConfig"
-          },
-          " | undefined; }"
+          ", \"readonly\"> & ",
+          "BuiltInToolSpecificConfig"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "deprecated": false,
@@ -4308,15 +4455,8 @@
         "signature": [
           "Omit<",
           "WorkflowToolDefinition",
-          ", \"readonly\"> & { availability?: ",
-          {
-            "pluginId": "@kbn/agent-builder-server",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderServerPluginApi",
-            "section": "def-common.ToolAvailabilityConfig",
-            "text": "ToolAvailabilityConfig"
-          },
-          " | undefined; }"
+          ", \"readonly\"> & ",
+          "BuiltInToolSpecificConfig"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "deprecated": false,
@@ -4398,7 +4538,13 @@
         ],
         "signature": [
           "(event: ",
-          "InternalToolProgressEvent",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.AgentBuilderToolEvent",
+            "text": "AgentBuilderToolEvent"
+          },
           ") => void"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
@@ -4409,29 +4555,15 @@
           {
             "parentPluginId": "@kbn/agent-builder-server",
             "id": "def-common.ToolEventHandlerFn.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "event",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/agent-builder-common",
-                "scope": "common",
-                "docId": "kibKbnAgentBuilderCommonPluginApi",
-                "section": "def-common.AgentBuilderEvent",
-                "text": "AgentBuilderEvent"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/agent-builder-common",
-                "scope": "common",
-                "docId": "kibKbnAgentBuilderCommonPluginApi",
-                "section": "def-common.ChatEventType",
-                "text": "ChatEventType"
-              },
-              ".toolProgress, ",
-              "InternalToolProgressEventData",
-              ">"
+              "InternalToolProgressEvent",
+              " | ",
+              "InternalToolUiEvent",
+              "<string, object>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
             "deprecated": false,
@@ -4565,29 +4697,58 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-server",
-        "id": "def-common.ToolProgressEmitterFn",
+        "id": "def-common.ToolReturnSummarizerFn",
         "type": "Type",
         "tags": [],
-        "label": "ToolProgressEmitterFn",
+        "label": "ToolReturnSummarizerFn",
         "description": [
-          "\nProgress event reporter, sending a tool progress event based on the provided progress info"
+          "\nFunction to summarize a tool return for conversation history.\nUsed to reduce context size by replacing large tool results with compact summaries.\n\nThis function receives all results from a single tool call, allowing it to\naggregate and summarize multiple results together (e.g., converting 10 search\nresults into a single summary like \"search returned 10 docs, ids are: ...\").\n"
         ],
         "signature": [
-          "(progressMessage: string) => void"
+          "(toolReturn: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ToolCallWithResult",
+            "text": "ToolCallWithResult"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ToolResult",
+            "text": "ToolResult"
+          },
+          "<Record<string, unknown>>[] | undefined"
         ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [],
+        "returnComment": [
+          "The summarized results, or undefined if no summarization should be applied"
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/agent-builder-server",
-            "id": "def-common.ToolProgressEmitterFn.$1",
-            "type": "string",
+            "id": "def-common.ToolReturnSummarizerFn.$1",
+            "type": "Object",
             "tags": [],
-            "label": "progressMessage",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
+            "label": "toolReturn",
+            "description": [
+              "- All results from a single tool call"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolCallWithResult",
+                "text": "ToolCallWithResult"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
             "deprecated": false,
             "trackAdoption": false
           }

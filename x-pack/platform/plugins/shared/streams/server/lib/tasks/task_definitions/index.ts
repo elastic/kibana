@@ -5,15 +5,22 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { GetScopedClients } from '../../../routes/types';
+import { createStreamsSystemIdentificationTask } from './system_identification';
+import type { EbtTelemetryClient } from '../../telemetry';
 
 export interface TaskContext {
+  logger: Logger;
   getScopedClients: GetScopedClients;
+  telemetry: EbtTelemetryClient;
 }
 
 export function createTaskDefinitions(taskContext: TaskContext) {
-  return {} satisfies TaskDefinitionRegistry;
+  return {
+    ...createStreamsSystemIdentificationTask(taskContext),
+  } satisfies TaskDefinitionRegistry;
 }
 
 export type StreamsTaskType = keyof ReturnType<typeof createTaskDefinitions>;

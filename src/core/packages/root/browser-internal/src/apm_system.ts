@@ -58,6 +58,9 @@ export class ApmSystem {
     if (globalLabels) {
       apm.addLabels(globalLabels);
     }
+    apm.addLabels({
+      user_agent: navigator.userAgent,
+    });
 
     apm.addFilter(ebtSpanFilter);
 
