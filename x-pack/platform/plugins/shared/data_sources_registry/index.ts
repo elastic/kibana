@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'dataSourcesRegistry';
-export const PLUGIN_NAME = 'dataSourcesRegistry';
-export const API_BASE_PATH = '/api/data_sources_registry';
+export type {
+  DataTypeDefinition,
+  StackConnectorConfig,
+  EARSOAuthConfiguration,
+  CustomOAuthConfiguration,
+  WorkflowInfo,
+} from './common';
+
+export { PLUGIN_ID, PLUGIN_NAME, API_BASE_PATH, EARSSupportedOAuthProvider } from './common';

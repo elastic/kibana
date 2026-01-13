@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'dataSourcesRegistry';
-export const PLUGIN_NAME = 'dataSourcesRegistry';
-export const API_BASE_PATH = '/api/data_sources_registry';
+export { DataConnectorTypesService } from './data_sources_api';

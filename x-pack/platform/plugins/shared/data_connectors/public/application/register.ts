@@ -7,9 +7,9 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { AppMountParameters, CoreSetup } from '@kbn/core/public';
-import { DATA_CONNECTORS_ROUTE } from '../common';
-import { DATA_CONNECTORS_APP_ID, DATA_CONNECTORS_FULL_TITLE } from '../common/constants';
-import type { DataConnectorsPluginStart, DataConnectorsPluginStartDependencies } from './types';
+import { DATA_CONNECTORS_ROUTE } from '../../common';
+import { DATA_CONNECTORS_APP_ID, DATA_CONNECTORS_FULL_TITLE } from '../../common/constants';
+import type { DataConnectorsPluginStart, DataConnectorsPluginStartDependencies } from '../types';
 
 export const registerApp = ({
   core,
@@ -24,7 +24,7 @@ export const registerApp = ({
     euiIconType: 'logoElasticsearch', // TODO: Workplace AI solution icon
     visibleIn: ['sideNav', 'globalSearch'],
     mount: async (params: AppMountParameters) => {
-      const { renderApp } = await import('./application');
+      const { renderApp } = await import('./mount');
       const [coreStart, pluginsStart, services] = await core.getStartServices();
       return renderApp({ core: coreStart, plugins: pluginsStart, services, params });
     },

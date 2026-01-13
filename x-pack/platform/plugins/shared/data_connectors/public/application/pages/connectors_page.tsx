@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'dataSourcesRegistry';
-export const PLUGIN_NAME = 'dataSourcesRegistry';
-export const API_BASE_PATH = '/api/data_sources_registry';
+import React from 'react';
+import { ConnectorsView } from '../components/connectors_view';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+
+export const ConnectorsPage: React.FC = () => {
+  useBreadcrumbs([]);
+  return <ConnectorsView />;
+};
