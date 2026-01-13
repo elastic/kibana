@@ -47,11 +47,7 @@ export const useEditActiveSourceFlyout = ({
       : null;
 
   // Fetch stack connector using useQuery
-  const {
-    data: stackConnector,
-    isLoading: isLoadingConnector,
-    error: loadError,
-  } = useQuery(
+  const { data: stackConnector, isLoading: isLoadingConnector } = useQuery(
     queryKeys.stackConnectors.byId(stackConnectorId ?? ''),
     async () => {
       if (!stackConnectorId) {
