@@ -31,7 +31,7 @@ export class StorageService {
     }
 
     const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc) => [
-      { index: { _index: index } },
+      { create: { _index: index } },
       doc,
     ]);
 
