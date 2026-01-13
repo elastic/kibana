@@ -401,11 +401,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         this.logger.debug(`Upserting write operation for checkpoint ${checkpointId}`);
 
         return {
-          update: {
+          index: {
             _id: compositeId,
-            doc,
-            doc_as_upsert: true,
-            retry_on_conflict: 3,
+            document: doc,
           },
         };
       })

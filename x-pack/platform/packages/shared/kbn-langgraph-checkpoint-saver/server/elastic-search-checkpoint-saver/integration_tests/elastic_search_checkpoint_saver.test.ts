@@ -453,7 +453,7 @@ describe('ElasticSearchSaver', () => {
       const namespace1 = 'namespace-1';
       const namespace2 = 'namespace-2';
 
-      const checkpoint1: Checkpoint = {
+      const namespace1Checkpoint: Checkpoint = {
         v: 1,
         id: checkpointId,
         ts: '2025-07-22T17:42:34.754Z',
@@ -462,7 +462,7 @@ describe('ElasticSearchSaver', () => {
         versions_seen: {},
       };
 
-      const checkpoint2: Checkpoint = {
+      const namespace2Checkpoint: Checkpoint = {
         v: 1,
         id: checkpointId,
         ts: '2025-07-22T17:42:34.754Z',
@@ -474,13 +474,13 @@ describe('ElasticSearchSaver', () => {
       // Save checkpoint with same ID to different namespaces
       await saver.put(
         { configurable: { thread_id: THREAD_ID, checkpoint_ns: namespace1 } },
-        checkpoint1,
+        namespace1Checkpoint,
         { source: 'update', step: -1, parents: {} }
       );
 
       await saver.put(
         { configurable: { thread_id: THREAD_ID, checkpoint_ns: namespace2 } },
-        checkpoint2,
+        namespace2Checkpoint,
         { source: 'update', step: -1, parents: {} }
       );
 
@@ -497,7 +497,7 @@ describe('ElasticSearchSaver', () => {
 
       // Upsert namespace1 checkpoint
       const updatedCheckpoint1: Checkpoint = {
-        ...checkpoint1,
+        ...namespace1Checkpoint,
         channel_values: { namespace: 'first-updated' },
       };
       await saver.put(

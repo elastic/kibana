@@ -31,6 +31,10 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
+import {
+  createCheckpointsStorage,
+  createCheckpointWritesStorage,
+} from '@kbn/langgraph-checkpoint-saver/server/storage-adapter-checkpoint-saver';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { ESSearchRequest } from '@kbn/es-types';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
@@ -187,15 +191,39 @@ export class AIAssistantService {
       fieldMap: alertSummaryFieldsFieldMap,
     });
 
+    // Field maps for checkpoint indices (managed by storage adapter)
+    const checkpointsFieldMap: FieldMap = {
+      '@timestamp': { type: 'date', required: true },
+      thread_id: { type: 'keyword', required: true },
+      checkpoint_ns: { type: 'keyword', required: true },
+      checkpoint_id: { type: 'keyword', required: true },
+      parent_checkpoint_id: { type: 'keyword', required: false },
+      type: { type: 'keyword', required: true },
+      checkpoint: { type: 'binary', required: true },
+      metadata: { type: 'binary', required: true },
+    };
+
+    const checkpointWritesFieldMap: FieldMap = {
+      '@timestamp': { type: 'date', required: true },
+      thread_id: { type: 'keyword', required: true },
+      checkpoint_ns: { type: 'keyword', required: true },
+      checkpoint_id: { type: 'keyword', required: true },
+      task_id: { type: 'keyword', required: true },
+      idx: { type: 'long', required: true },
+      channel: { type: 'keyword', required: true },
+      type: { type: 'keyword', required: true },
+      value: { type: 'binary', required: true },
+    };
+
     this.checkpointsDataStream = this.createIndexPattern({
       resource: 'checkpoints',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: ElasticSearchSaver.checkpointsFieldMap,
+      fieldMap: checkpointsFieldMap,
     });
     this.checkpointWritesDataStream = this.createIndexPattern({
       resource: 'checkpointWrites',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: ElasticSearchSaver.checkpointWritesFieldMap,
+      fieldMap: checkpointWritesFieldMap,
     });
 
     this.initPromise = this.initializeResources();
@@ -684,11 +712,29 @@ export class AIAssistantService {
       opts.spaceId
     ).alias;
 
+    // Extract prefix from index name (e.g., ".kibana-observability-ai-assistant-checkpoints-default" -> ".kibana-observability-ai-assistant-")
+    // The index names follow the pattern: <prefix>checkpoints-<spaceId> and <prefix>checkpoint-writes-<spaceId>
+    const prefixMatch = checkpointIndex.match(/^(.+?)(?:checkpoints|checkpoint-writes)/);
+    const indexPrefix = prefixMatch ? prefixMatch[1] : '.kibana-observability-ai-assistant-';
+
+    const checkpointsStorage = createCheckpointsStorage({
+      indexPrefix,
+      logger: this.options.logger,
+      esClient,
+    });
+
+    const checkpointWritesStorage = createCheckpointWritesStorage({
+      indexPrefix,
+      logger: this.options.logger,
+      esClient,
+    });
+
     const elasticSearchSaver = new ElasticSearchSaver({
-      client: esClient,
       checkpointIndex,
       checkpointWritesIndex,
       logger: this.options.logger,
+      checkpointsStorage: checkpointsStorage.getClient(),
+      checkpointWritesStorage: checkpointWritesStorage.getClient(),
     });
     return elasticSearchSaver;
   }
