@@ -13,6 +13,7 @@ import type {
   EntityStoreRequestHandlerContext,
 } from './types';
 import { ResourcesService } from './domain/resources_service';
+import { FeatureFlags } from './infra/feature_flags';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   core: CoreSetup;
@@ -24,11 +25,11 @@ export async function createRequestHandlerContext({
   logger,
   context,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
-  const coreCtx = await context.core;
-
+  const core = await context.core;
   return {
-    core: coreCtx,
-    getLogger: memoize(() => logger),
+    core,
+    logger,
     getResourcesService: memoize(() => new ResourcesService(logger)),
+    getFeatureFlags: memoize(() => new FeatureFlags(core.uiSettings.client)),
   };
 }

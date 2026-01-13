@@ -16,7 +16,8 @@
     "package.json",
     "cypress.config.ts",
     "cypress.config.space_awareness.ts",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -129,5 +130,6 @@
     "@kbn/react-query",
     "@kbn/fs",
     "@kbn/kql",
+    "@kbn/scout",
   ]
 }
