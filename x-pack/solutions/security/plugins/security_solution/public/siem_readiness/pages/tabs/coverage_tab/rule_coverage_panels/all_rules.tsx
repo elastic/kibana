@@ -287,7 +287,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
           )}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           {isLoading ? (
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 200 }}>
@@ -358,7 +358,12 @@ export const AllRuleCoveragePanel: React.FC = () => {
             </div>
           )}
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={3}
+          style={{
+            paddingTop: euiTheme.size.l,
+          }}
+        >
           <EuiBasicTable
             tableCaption="Demo of EuiBasicTable"
             responsiveBreakpoint={false}
