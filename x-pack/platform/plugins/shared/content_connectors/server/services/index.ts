@@ -201,7 +201,6 @@ export class AgentlessConnectorsInfraService {
           vars: {
             connector_id: connector.id,
             connector_name: connector.name,
-            service_type: connector.service_type,
           },
           streams: {},
         },
