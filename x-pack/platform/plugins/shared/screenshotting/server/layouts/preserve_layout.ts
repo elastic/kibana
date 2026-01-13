@@ -13,19 +13,11 @@ import { BaseLayout } from './base_layout';
 import type { PageSizeParams, PdfImageSize } from './base_layout';
 
 // We default to a zoom of two to bump up the resolution of the screenshot a bit.
-// However, Chromium/Skia can become unstable or produce visual artifacts when the
-// output bitmap exceeds certain size limits (observed as blank vertical bands in CI
-// for very tall dashboards). We defensively cap the zoom so that the *output*
-// dimension in device pixels stays within a safe range.
+// However, Chromium/Skia has a height limit of 16384px, so for anything larger
+// than 8000, we should use a zoom of one.
+// https://github.com/puppeteer/puppeteer/issues/359
 const DEFAULT_ZOOM = 2;
-// 32767 is a common upper bound in graphics stacks (int16 boundary). Keeping under
-// this avoids known "blank stripe" artifacts for extremely large screenshots.
-const MAX_OUTPUT_DIMENSION_PX = 32767;
-// Allow downscaling if needed (deviceScaleFactor < 1), but keep a small floor to
-// avoid invalid values.
-const MIN_ZOOM = 0.25;
-
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const MAX_HEIGHT_PX = 8000;
 
 export class PreserveLayout extends BaseLayout implements Layout {
   public readonly selectors: LayoutSelectorDictionary;
@@ -40,10 +32,7 @@ export class PreserveLayout extends BaseLayout implements Layout {
     super('preserve_layout');
     this.height = size.height;
     this.width = size.width;
-    const maxDimension = Math.max(size.width, size.height);
-    const zoomCap = maxDimension > 0 ? MAX_OUTPUT_DIMENSION_PX / maxDimension : DEFAULT_ZOOM;
-    this.zoom = clamp(Math.min(DEFAULT_ZOOM, zoomCap), MIN_ZOOM, DEFAULT_ZOOM);
-
+    this.zoom = this.height <= MAX_HEIGHT_PX ? DEFAULT_ZOOM : 1;
     this.scaledHeight = size.height * this.zoom;
     this.scaledWidth = size.width * this.zoom;
 

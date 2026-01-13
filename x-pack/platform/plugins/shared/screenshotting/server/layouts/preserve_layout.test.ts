@@ -59,18 +59,17 @@ it('preserve layout allows customizable selectors', () => {
   `);
 });
 
-it('preserve layout caps browser zoom for extremely large screenshots to avoid Chromium artifacts', () => {
-  // A very tall layout would exceed common graphics limits at zoom=2.
-  // (height * 2) would be 53608 which is > 32767.
-  const testPreserveLayout = new PreserveLayout({ width: 1727, height: 26804 });
-
-  // The zoom should be reduced so that output height stays <= 32767 pixels.
-  expect(testPreserveLayout.getBrowserZoom()).toBeLessThan(2);
-  expect(testPreserveLayout.getBrowserViewport().height).toBeLessThanOrEqual(32767);
+it('preserve layout use a default zoom of 2', () => {
+  const testPreserveLayout = new PreserveLayout({ width: 1000, height: 2000 });
+  expect(testPreserveLayout.getBrowserZoom()).toBe(2);
+  expect(testPreserveLayout.getBrowserViewport().height).toBe(4000);
 });
 
-it('preserve layout allows downscaling for very large dimensions', () => {
-  const testPreserveLayout = new PreserveLayout({ width: 1000, height: 200000 });
-  expect(testPreserveLayout.getBrowserZoom()).toBeGreaterThan(0);
-  expect(testPreserveLayout.getBrowserViewport().height).toBeLessThanOrEqual(32767);
+it('preserve layout caps browser zoom for extremely large screenshots to avoid Chromium artifacts', () => {
+  // A very tall layout would exceed Chrome limits at zoom=2.
+  const testPreserveLayout = new PreserveLayout({ width: 1727, height: 15000 });
+
+  // The zoom should be reduced so that output height stays <= 16000 pixels.
+  expect(testPreserveLayout.getBrowserZoom()).toBe(1);
+  expect(testPreserveLayout.getBrowserViewport().height).toBeLessThanOrEqual(16000);
 });
