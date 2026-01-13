@@ -143,13 +143,20 @@ export function isDateHistogramOperation(operation: OperationMetadata | null | u
  * - Date histogram: recommends "None" (redundant info - timestamp per bucket shown in chart)
  * - Non-date histogram: recommends "Auto" (axis label is useful)
  * - Respects user's manual choice (e.g., if user set Auto on date histogram, keeps it)
+ * - Preserves custom title settings (if xTitle is set, don't change visibility)
  *
  * @returns Updated settings if a change is recommended, undefined otherwise
  */
 export function getRecommendedXAxisTitleVisibility(
   currentSettings: AxesSettingsConfig | undefined,
-  operation: OperationMetadata | null | undefined
+  operation: OperationMetadata | null | undefined,
+  xTitle: string | undefined
 ): AxesSettingsConfig | undefined {
+  // Don't change visibility if user has set a custom title
+  if (xTitle) {
+    return undefined;
+  }
+
   const isDateHistogram = isDateHistogramOperation(operation);
   const currentXAxisTitleSetting = currentSettings?.x;
 

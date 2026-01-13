@@ -1087,6 +1087,43 @@ describe('xy_visualization', () => {
       });
     });
 
+    it('preserves custom title when switching between field types', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // Was Auto (visible)
+          xTitle: 'My Custom Title', // User has set a custom title
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should preserve visibility setting when custom title is set
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
     it('does not change settings for non-date histogram with undefined setting', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',

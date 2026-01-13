@@ -620,7 +620,8 @@ export const getXyVisualization = ({
       const operation = datasourceLayer?.getOperationForColumnId(columnId);
       const recommendedAxisSettings = getRecommendedXAxisTitleVisibility(
         prevState.axisTitlesVisibilitySettings,
-        operation
+        operation,
+        prevState.xTitle
       );
       if (recommendedAxisSettings) {
         stateWithSmartXTitleVisibility = {
