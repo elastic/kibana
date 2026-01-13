@@ -311,10 +311,7 @@ export class QueryClient {
       },
     });
 
-    return queriesResponse.hits.hits.map((hit) => ({
-      ...fromStorage(hit._source),
-      stream_name: hit._source[STREAM_NAME],
-    }));
+    return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
@@ -364,10 +361,7 @@ export class QueryClient {
       },
     });
 
-    return assetsResponse.hits.hits.map((hit) => ({
-      ...fromStorage(hit._source),
-      stream_name: hit._source[STREAM_NAME],
-    }));
+    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
   private async bulkStorage(name: string, operations: QueryBulkOperation[]) {
