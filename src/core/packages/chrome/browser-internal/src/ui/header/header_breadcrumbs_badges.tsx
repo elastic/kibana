@@ -12,6 +12,7 @@ import React, { Fragment } from 'react';
 
 import type { EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
 import { EuiBadge, EuiBadgeGroup, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export type HeaderBreadcrumbsBadgeProps = EuiBadgeProps & {
   badgeText: string;
@@ -21,12 +22,19 @@ export type HeaderBreadcrumbsBadgeProps = EuiBadgeProps & {
 
 export const HeaderBreadcrumbsBadges = ({
   badges,
+  hasLeftMargin,
 }: {
   badges: HeaderBreadcrumbsBadgeProps[] | undefined;
+  hasLeftMargin: boolean;
 }) => {
   if (!badges || badges.length === 0) return null;
   return (
-    <EuiBadgeGroup data-test-subj="header-breadcrumbs-badge-group">
+    <EuiBadgeGroup
+      data-test-subj="header-breadcrumbs-badge-group"
+      css={css`
+        margin-left: ${hasLeftMargin ? '4px' : '0px'};
+      `}
+    >
       {badges.map(createBadge)}
     </EuiBadgeGroup>
   );
