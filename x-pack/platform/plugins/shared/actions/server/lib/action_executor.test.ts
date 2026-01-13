@@ -1555,7 +1555,9 @@ describe('Action Executor', () => {
         new Error('Client network socket disconnected before secure TLS connection was established')
       );
       err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
-      connectorType.executor.mockRejectedValueOnce(err);
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(err);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
       );
