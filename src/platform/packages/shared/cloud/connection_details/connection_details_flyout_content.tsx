@@ -21,7 +21,7 @@ import { ConnectionDetails } from './connection_details';
 import { useConnectionDetailsOpts, useConnectionDetailsService } from './context';
 import { Tabs } from './tabs';
 
-export const ConnectionDetailsFlyoutContent: React.FC<{ headerId: string }> = ({ headerId }) => {
+export const ConnectionDetailsFlyoutContent: React.FC<{ headerId?: string }> = ({ headerId }) => {
   const ctx = useConnectionDetailsOpts();
   const service = useConnectionDetailsService();
 
