@@ -53,6 +53,9 @@ export class ColumnValidator {
 
   private get treatMissingColumnAsUnmapped(): boolean {
     const unmappedFieldsTreatment = this.context.unmappedFieldsTreatment;
-    return !unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL;
+    return (
+      unmappedFieldsTreatment === UnmappedFieldsTreatment.LOAD ||
+      unmappedFieldsTreatment === UnmappedFieldsTreatment.NULLIFY
+    );
   }
 }

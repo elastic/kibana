@@ -117,6 +117,14 @@ export function getUnmappedFields(
     return [];
   }
 
+  // Unmapped fields are treated as keyword type if the treatment is LOAD
+  // If the treatment is NULLIFY, the type is unknown becuase it will come with a type if found in one index,
+  // but with null type if not found in any, we can't know without executing the query.
+  let unmappedFieldsType = 'unknown';
+  if (unmappedFieldsTreatment === UnmappedFieldsTreatment.LOAD) {
+    unmappedFieldsType = 'keyword';
+  }
+
   const unmappedFields: ESQLColumnData[] = [];
   const columsSet = new Set(previousPipeFields.map((col) => col.name));
 
@@ -128,8 +136,7 @@ export function getUnmappedFields(
       ) {
         unmappedFields.push({
           name: node.parts.join('.'),
-          // Unmapped fields are treated as keyword type
-          type: 'keyword',
+          type: unmappedFieldsType,
           isUnmappedField: true,
           userDefined: false,
         });
