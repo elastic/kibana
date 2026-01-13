@@ -13,7 +13,7 @@ import classNames from 'classnames';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoCss } from '../utils/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   items: ReactNode[];
