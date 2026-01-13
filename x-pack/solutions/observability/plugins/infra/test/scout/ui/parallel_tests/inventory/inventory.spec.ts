@@ -19,6 +19,10 @@ import {
 
 const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
 
+test.use({
+  timezoneId: 'GMT',
+});
+
 test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsViewer();
