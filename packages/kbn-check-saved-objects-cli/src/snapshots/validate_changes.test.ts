@@ -66,7 +66,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('two_new_model_versions.json');
     expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
-      `❌ The SO type 'task' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://www.elastic.co/docs/extend/kibana/saved-objects#troubleshooting`
+      `❌ The SO type 'task' is defining two (or more) new model versions.`
     );
   });
 

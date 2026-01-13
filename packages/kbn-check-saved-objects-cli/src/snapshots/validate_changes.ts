@@ -39,9 +39,7 @@ export function validateChangesExistingType({ from, to }: ValidateChangesExistin
 
   // check that current changes don't define more than 1 new modelVersion
   if (to.modelVersions.length - from.modelVersions.length > 1) {
-    throw new Error(
-      `❌ The SO type '${name}' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://www.elastic.co/docs/extend/kibana/saved-objects#troubleshooting`
-    );
+    throw new Error(`❌ The SO type '${name}' is defining two (or more) new model versions.`);
   }
 
   // check that existing model versions have not been mutated

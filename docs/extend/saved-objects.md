@@ -297,11 +297,22 @@ const myType: SavedObjectsType = {
 };
 ```
 
-### Defining model versions for existing Saved Objects
+### Transitioning legacy Saved Objects
 
-If you are updating a legacy Saved Object type that lacks an existing model version, you must establish a baseline by creating an initial version, which defines the current, existing shape of the Saved Object.
+If you are updating a legacy Saved Object (SO) type that lacks a model version, you must first establish a baseline. This requires a two-step PR process to ensure that Serverless environments can be safely rolled back in an emergency.
 
-While the example below shows the minimal configuration for an initial version, we recommend defining `create` and `forwardCompatibility` schemas that closely match your Saved Object's structure. Doing so ensures you benefit from full **Saved Objects Repository (SOR)** validation during both creation and retrieval.
+#### The Initial Version PR
+
+The first PR must define the **current, existing shape** of the Saved Object.
+
+- No Mapping Changes: The initial version must not alter any existing mappings; it should only introduce the required schemas.
+- Deployment Requirement: This PR must be merged and released in Serverless before you submit a second PR with your desired changes.
+
+#### Schema definition
+
+While you can use a minimal configuration for the initial version, we recommend defining `create` and `forwardCompatibility` schemas that closely reflect your SO’s current structure. This enables full **Saved Objects Repository (SOR)** validation for both creation and retrieval.
+
+#### Minimal configuration example
 
 ```ts
 const myType: SavedObjectsType = {
