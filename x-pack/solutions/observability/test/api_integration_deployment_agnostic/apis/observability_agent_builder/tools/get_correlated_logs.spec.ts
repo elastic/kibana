@@ -11,6 +11,7 @@ import { timerange } from '@kbn/synthtrace-client';
 import {
   type LogsSynthtraceEsClient,
   generateCorrelatedLogsData,
+  createLogSequence,
   type CorrelatedLogEvent,
 } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
@@ -55,38 +56,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       before(async () => {
         await indexCorrelatedLogs({
           logsEsClient: logsSynthtraceEsClient,
-          logs: [
-            {
-              level: 'info',
-              message: 'Starting payment processing',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-            {
-              level: 'debug',
-              message: 'Validating payment details',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-            {
-              level: 'error',
-              message: 'Payment gateway timeout',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-            {
-              level: 'warn',
-              message: 'Retrying payment',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-            {
-              level: 'info',
-              message: 'Payment completed',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-          ],
+          logs: createLogSequence({
+            service: 'payment-service',
+            correlation: { 'trace.id': 'trace-123' },
+            logs: [
+              { level: 'info', message: 'Starting payment processing' },
+              { level: 'debug', message: 'Validating payment details' },
+              { level: 'error', message: 'Payment gateway timeout' },
+              { level: 'warn', message: 'Retrying payment' },
+              { level: 'info', message: 'Payment completed' },
+            ],
+          }),
         });
       });
 
@@ -148,19 +128,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with multiple errors sharing the same correlation ID', () => {
       before(async () => {
-        const sharedLogAttributes = {
-          'service.name': 'checkout-service',
-          'request.id': 'req-456',
-        };
-
         await indexCorrelatedLogs({
           logsEsClient: logsSynthtraceEsClient,
-          logs: [
-            { level: 'info', message: 'Request started', ...sharedLogAttributes },
-            { level: 'error', message: 'Database connection failed', ...sharedLogAttributes },
-            { level: 'error', message: 'Rollback failed', ...sharedLogAttributes },
-            { level: 'warn', message: 'Request aborted', ...sharedLogAttributes },
-          ],
+          logs: createLogSequence({
+            service: 'checkout-service',
+            correlation: { 'request.id': 'req-456' },
+            logs: [
+              { level: 'info', message: 'Request started' },
+              { level: 'error', message: 'Database connection failed' },
+              { level: 'error', message: 'Rollback failed' },
+              { level: 'warn', message: 'Request aborted' },
+            ],
+          }),
         });
       });
 
@@ -364,22 +343,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         before(async () => {
           await indexCorrelatedLogs({
             logsEsClient: logsSynthtraceEsClient,
-            logs: [
-              {
-                level: 'debug', // neutral value that won't trigger error detection
-                message: 'Syslog request started',
-                'service.name': 'syslog-service',
-                'trace.id': 'syslog-trace',
-                'syslog.severity': 6, // info
-              },
-              {
-                level: 'debug', // neutral value that won't trigger error detection
-                message: 'Syslog error occurred',
-                'service.name': 'syslog-service',
-                'trace.id': 'syslog-trace',
-                'syslog.severity': 3, // error
-              },
-            ],
+            logs: createLogSequence({
+              service: 'syslog-service',
+              correlation: { 'trace.id': 'syslog-trace' },
+              logs: [
+                { message: 'Syslog request started', 'syslog.severity': 6 }, // info
+                { message: 'Syslog error occurred', 'syslog.severity': 3 }, // error
+              ],
+            }),
           });
         });
 
@@ -404,22 +375,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         before(async () => {
           await indexCorrelatedLogs({
             logsEsClient: logsSynthtraceEsClient,
-            logs: [
-              {
-                level: 'debug', // neutral value that won't trigger error detection
-                message: 'OpenTelemetry request started',
-                'service.name': 'otel-service',
-                'request.id': 'otel-req',
-                SeverityNumber: 9, // info
-              },
-              {
-                level: 'debug', // neutral value that won't trigger error detection
-                message: 'OpenTelemetry error occurred',
-                'service.name': 'otel-service',
-                'request.id': 'otel-req',
-                SeverityNumber: 17, // error
-              },
-            ],
+            logs: createLogSequence({
+              service: 'otel-service',
+              correlation: { 'request.id': 'otel-req' },
+              logs: [
+                { message: 'OpenTelemetry request started', SeverityNumber: 9 }, // info
+                { message: 'OpenTelemetry error occurred', SeverityNumber: 17 }, // error
+              ],
+            }),
           });
         });
 
@@ -444,22 +407,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         before(async () => {
           await indexCorrelatedLogs({
             logsEsClient: logsSynthtraceEsClient,
-            logs: [
-              {
-                level: 'debug', // neutral value that won't trigger error detection
-                message: 'HTTP request started',
-                'service.name': 'http-service',
-                'correlation.id': 'http-corr',
-                'http.response.status_code': 200, // success
-              },
-              {
-                level: 'debug', // neutral value that won't trigger error detection
-                message: 'HTTP error occurred',
-                'service.name': 'http-service',
-                'correlation.id': 'http-corr',
-                'http.response.status_code': 500, // server error
-              },
-            ],
+            logs: createLogSequence({
+              service: 'http-service',
+              correlation: { 'correlation.id': 'http-corr' },
+              logs: [
+                { message: 'HTTP request started', 'http.response.status_code': 200 }, // success
+                { message: 'HTTP error occurred', 'http.response.status_code': 500 }, // server error
+              ],
+            }),
           });
         });
 
@@ -807,6 +762,123 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             service: { name: 'fields-service' },
           },
         ]);
+      });
+    });
+
+    describe('with errorLogsOnly=false', () => {
+      // Tests that ANY log can be an anchor when errorLogsOnly is false
+      // Useful for investigating slow requests or specific events that aren't errors
+
+      before(async () => {
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
+          logs: createLogSequence({
+            service: 'non-error-anchor-service',
+            correlation: { 'trace.id': 'trace-non-error' },
+            logs: [
+              { level: 'info', message: 'Request started' },
+              { level: 'info', message: 'Slow database query' },
+              { level: 'info', message: 'Request completed' },
+            ],
+          }),
+        });
+      });
+
+      it('returns sequences when anchoring on non-error logs', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'service.name: "non-error-anchor-service"',
+            errorLogsOnly: false,
+          },
+        });
+
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(1);
+        expect(sequences[0].logs.length).to.be(3);
+
+        const messages = sequences[0].logs.map((log) => log.message);
+        expect(messages).to.eql(['Request started', 'Slow database query', 'Request completed']);
+      });
+
+      it('returns empty when errorLogsOnly=true (default) and no errors exist', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'service.name: "non-error-anchor-service"',
+            // errorLogsOnly defaults to true
+          },
+        });
+
+        const { sequences, message } = results[0].data;
+        expect(sequences.length).to.be(0);
+        expect(message).to.contain('No log sequences found');
+      });
+    });
+
+    describe('with custom correlationFields', () => {
+      // Tests that user-specified correlation fields work
+      // Useful when logs use non-standard correlation identifiers
+
+      before(async () => {
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
+          logs: createLogSequence({
+            service: 'custom-correlation-service',
+            correlation: { order_id: 'ORD-12345' },
+            logs: [
+              { level: 'info', message: 'Order created' },
+              { level: 'info', message: 'Payment processing' },
+              { level: 'error', message: 'Order fulfillment failed' },
+            ],
+          }),
+        });
+      });
+
+      it('correlates logs using custom field (order_id)', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'service.name: "custom-correlation-service"',
+            correlationFields: ['order_id'],
+          },
+        });
+
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(1);
+        expect(sequences[0].correlation.field).to.be('order_id');
+        expect(sequences[0].correlation.value).to.be('ORD-12345');
+        expect(sequences[0].logs.length).to.be(3);
+
+        const messages = sequences[0].logs.map((log) => log.message);
+        expect(messages).to.eql([
+          'Order created',
+          'Payment processing',
+          'Order fulfillment failed',
+        ]);
+      });
+
+      it('returns empty when custom field is not in default correlationFields', async () => {
+        // Without specifying correlationFields, order_id won't be recognized
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'service.name: "custom-correlation-service"',
+            // correlationFields not specified, so order_id won't be used
+          },
+        });
+
+        const { sequences, message } = results[0].data;
+        expect(sequences.length).to.be(0);
+        expect(message).to.contain('No log sequences found');
       });
     });
 
