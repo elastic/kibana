@@ -369,7 +369,7 @@ export const convertFormStateToProcessor = (
 
   if ('action' in formState) {
     if (formState.action === 'grok') {
-      const { patterns, from, ignore_failure, ignore_missing } = formState;
+      const { patterns, pattern_definitions, from, ignore_failure, ignore_missing } = formState;
 
       return {
         processorDefinition: {
@@ -379,6 +379,7 @@ export const convertFormStateToProcessor = (
           patterns: patterns
             .map((pattern) => pattern.getExpression().trim())
             .filter((pattern) => !isEmpty(pattern)),
+          pattern_definitions,
           from,
           ignore_failure,
           ignore_missing,
