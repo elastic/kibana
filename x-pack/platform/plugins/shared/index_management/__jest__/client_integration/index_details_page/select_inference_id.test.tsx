@@ -571,13 +571,11 @@ describe('SelectInferenceId', () => {
 
     describe('AND .elser-2-elastic is available', () => {
       it('SHOULD prioritize .elser-2-elastic over other endpoints IF has enterprise license', async () => {
-        setupInferenceEndpointsMocks({
-          data: [
-            { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
-            { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
-            { inference_id: 'endpoint-1', task_type: 'text_embedding' },
-          ] as InferenceAPIConfigResponse[],
-        });
+        setupMocks([
+          { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
+          { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
+          { inference_id: 'endpoint-1', task_type: 'text_embedding' },
+        ] as InferenceAPIConfigResponse[]);
 
         render(
           <TestFormWrapper initialValue="">
@@ -595,18 +593,22 @@ describe('SelectInferenceId', () => {
         // Mock license to return false for enterprise
         mockIsAtLeast.mockImplementation((level: string) => level !== 'enterprise');
 
-        setupInferenceEndpointsMocks({
-          data: [
-            { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
-            { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
-            { inference_id: 'endpoint-1', task_type: 'text_embedding' },
-          ] as InferenceAPIConfigResponse[],
-        });
+        setupMocks([
+          { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
+          { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
+          { inference_id: 'endpoint-1', task_type: 'text_embedding' },
+        ] as InferenceAPIConfigResponse[]);
 
-        renderSelectInferenceId({ initialValue: '' });
+        render(
+          <TestFormWrapper initialValue="">
+            <SelectInferenceId {...defaultProps} />
+          </TestFormWrapper>
+        );
+
+        await flushPendingTimers();
 
         const button = await screen.findByTestId('inferenceIdButton');
-        await waitFor(() => expect(button).toHaveTextContent('.preconfigured-elser'));
+        expect(button).toHaveTextContent('.preconfigured-elser');
         expect(button).not.toHaveTextContent('.elser-2-elastic');
       });
     });
