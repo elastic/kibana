@@ -60,9 +60,6 @@ async function discoverRerankEndpoint(
   }
 }
 
-/**
- * Extract a value from an object using a path like ["user", "name"]
- */
 function getValueAtPath(obj: unknown, path: string[]): string {
   let value: unknown = obj;
   for (const key of path) {
@@ -75,8 +72,27 @@ function getValueAtPath(obj: unknown, path: string[]): string {
   return value != null ? String(value) : '';
 }
 
-function extractFieldsFromDocument(doc: unknown, fieldPaths: string[][]): string {
-  const values = fieldPaths.map((path) => getValueAtPath(doc, path)).filter((v) => v.length > 0);
+function truncateString(str: string, maxLength: number): string {
+  if (str.length <= maxLength) {
+    return str;
+  }
+  return str.substring(0, maxLength);
+}
+
+function extractFieldsFromDocument(
+  doc: unknown,
+  fieldPaths: string[][],
+  maxFieldLength?: number
+): string {
+  const values = fieldPaths
+    .map((path) => {
+      const value = getValueAtPath(doc, path);
+      if (value.length === 0) {
+        return '';
+      }
+      return maxFieldLength ? truncateString(value, maxFieldLength) : value;
+    })
+    .filter((v) => v.length > 0);
   return values.join(' ');
 }
 
@@ -114,16 +130,25 @@ export const rerankStepDefinition = createServerStepDefinition({
 
       // Prepare input for rerank endpoint
       let inputForRerank: string[];
+      const maxFieldLength = context.input.max_input_field_length;
+      const maxTotalLength = context.input.max_input_total_length;
+
       if (context.input.fields && context.input.fields.length > 0) {
-        // Extract specified fields and concatenate into strings
-        inputForRerank = dataToRerank.map((doc) =>
-          extractFieldsFromDocument(doc, context.input.fields || [])
-        );
+        // Extract specified fields and concatenate into strings with truncation
+        inputForRerank = dataToRerank.map((doc) => {
+          const extracted = extractFieldsFromDocument(
+            doc,
+            context.input.fields || [],
+            maxFieldLength
+          );
+          return maxTotalLength ? truncateString(extracted, maxTotalLength) : extracted;
+        });
       } else {
-        // Stringify objects or pass strings through
-        inputForRerank = dataToRerank.map((doc) =>
-          typeof doc === 'string' ? doc : JSON.stringify(doc)
-        );
+        // Stringify objects or pass strings through with truncation
+        inputForRerank = dataToRerank.map((doc) => {
+          const stringified = typeof doc === 'string' ? doc : JSON.stringify(doc);
+          return maxTotalLength ? truncateString(stringified, maxTotalLength) : stringified;
+        });
       }
 
       let inferenceId: string | null | undefined = context.input.inference_id;

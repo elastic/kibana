@@ -25,13 +25,15 @@ const createMockEsClient = (mockResponse?: any) => ({
         { inference_id: '.jina-reranker-v2', task_type: 'rerank', service: 'elasticsearch' },
       ],
     }),
-    inference: jest.fn().mockResolvedValue(mockResponse || {
-      rerank: [
-        { index: 1, relevance_score: 0.95, text: 'doc2' },
-        { index: 0, relevance_score: 0.85, text: 'doc1' },
-        { index: 2, relevance_score: 0.75, text: 'doc3' },
-      ],
-    }),
+    inference: jest.fn().mockResolvedValue(
+      mockResponse || {
+        rerank: [
+          { index: 1, relevance_score: 0.95, text: 'doc2' },
+          { index: 0, relevance_score: 0.85, text: 'doc1' },
+          { index: 2, relevance_score: 0.75, text: 'doc3' },
+        ],
+      }
+    ),
   },
 });
 
@@ -146,11 +148,7 @@ describe('rerankStepDefinition', () => {
         inference_id: '.jina-reranker-v2',
         task_type: 'rerank',
         query: 'What is the best laptop?',
-        input: [
-          'Laptop A Good laptop',
-          'Laptop B Great laptop',
-          'Laptop C Average laptop',
-        ],
+        input: ['Laptop A Good laptop', 'Laptop B Great laptop', 'Laptop C Average laptop'],
         timeout: '5m',
       });
     });
@@ -167,7 +165,10 @@ describe('rerankStepDefinition', () => {
             { user: { name: 'Bob' }, message: { text: 'Fix bug' } },
             { user: { name: 'Charlie' }, message: { text: 'Update deployment config' } },
           ],
-          fields: [['user', 'name'], ['message', 'text']],
+          fields: [
+            ['user', 'name'],
+            ['message', 'text'],
+          ],
         },
         logger: mockLogger as any,
         contextManager: mockContextManager as any,
@@ -179,11 +180,7 @@ describe('rerankStepDefinition', () => {
         inference_id: '.jina-reranker-v2',
         task_type: 'rerank',
         query: 'Find messages about deployment',
-        input: [
-            'Alice Deploy to prod',
-            'Bob Fix bug',
-            'Charlie Update deployment config',
-          ],
+        input: ['Alice Deploy to prod', 'Bob Fix bug', 'Charlie Update deployment config'],
         timeout: '5m',
       });
 
@@ -195,9 +192,9 @@ describe('rerankStepDefinition', () => {
         rerank: [
           { index: 4, relevance_score: 0.99 },
           { index: 2, relevance_score: 0.95 },
-          { index: 0, relevance_score: 0.90 },
+          { index: 0, relevance_score: 0.9 },
           { index: 3, relevance_score: 0.85 },
-          { index: 1, relevance_score: 0.80 },
+          { index: 1, relevance_score: 0.8 },
         ],
       });
       const mockContextManager = createMockContextManager(mockEsClient);
@@ -205,13 +202,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           rerank_text: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-            { id: 4 },
-            { id: 5 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
         },
         logger: mockLogger as any,
         contextManager: mockContextManager as any,
@@ -221,13 +212,7 @@ describe('rerankStepDefinition', () => {
 
       // All documents reranked
       expect(result.output).toHaveLength(5);
-      expect(result.output).toEqual([
-        { id: 5 },
-        { id: 3 },
-        { id: 1 },
-        { id: 4 },
-        { id: 2 },
-      ]);
+      expect(result.output).toEqual([{ id: 5 }, { id: 3 }, { id: 1 }, { id: 4 }, { id: 2 }]);
 
       // API called with all 5 documents
       expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
@@ -243,7 +228,7 @@ describe('rerankStepDefinition', () => {
       const mockEsClient = createMockEsClient({
         rerank: [
           { index: 2, relevance_score: 0.95 },
-          { index: 0, relevance_score: 0.90 },
+          { index: 0, relevance_score: 0.9 },
           { index: 1, relevance_score: 0.85 },
         ],
       });
@@ -252,13 +237,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           rerank_text: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-            { id: 4 },
-            { id: 5 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
           rank_window_size: 3,
         },
         logger: mockLogger as any,
@@ -270,19 +249,12 @@ describe('rerankStepDefinition', () => {
       // Returns all 5 documents
       expect(result.output).toBeDefined();
       expect(result.output).toHaveLength(5);
-      
+
       // First 3 are reranked
-      expect(result.output!.slice(0, 3)).toEqual([
-        { id: 3 },
-        { id: 1 },
-        { id: 2 },
-      ]);
-      
+      expect(result.output!.slice(0, 3)).toEqual([{ id: 3 }, { id: 1 }, { id: 2 }]);
+
       // Last 2 are in original order
-      expect(result.output!.slice(3)).toEqual([
-        { id: 4 },
-        { id: 5 },
-      ]);
+      expect(result.output!.slice(3)).toEqual([{ id: 4 }, { id: 5 }]);
 
       // API called with only 3 documents (cost optimization)
       const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
@@ -301,10 +273,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           rerank_text: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-          ],
+          data: [{ id: 1 }, { id: 2 }],
           rank_window_size: 10,
         },
         logger: mockLogger as any,
@@ -315,10 +284,7 @@ describe('rerankStepDefinition', () => {
 
       // All documents reranked, no remaining
       expect(result.output).toHaveLength(2);
-      expect(result.output).toEqual([
-        { id: 2 },
-        { id: 1 },
-      ]);
+      expect(result.output).toEqual([{ id: 2 }, { id: 1 }]);
 
       const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(2);
@@ -353,13 +319,13 @@ describe('rerankStepDefinition', () => {
 
       // Returns all 4 documents
       expect(result.output).toHaveLength(4);
-      
+
       // First 2 are reranked
       expect(result.output!.slice(0, 2)).toEqual([
         { id: 2, title: 'Doc 2', content: 'Content 2' },
         { id: 1, title: 'Doc 1', content: 'Content 1' },
       ]);
-      
+
       // Last 2 are in original order
       expect(result.output!.slice(2)).toEqual([
         { id: 3, title: 'Doc 3', content: 'Content 3' },
@@ -419,11 +385,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           rerank_text: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }],
         },
         logger: mockLogger as any,
         contextManager: mockContextManager as any,
@@ -472,11 +434,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           rerank_text: 'Test query',
-          data: [
-            { title: 'Doc 1' },
-            { content: 'Doc 2 content' },
-            {},
-          ],
+          data: [{ title: 'Doc 1' }, { content: 'Doc 2 content' }, {}],
           fields: [['title'], ['content'], ['missing']],
         },
         logger: mockLogger as any,
@@ -487,12 +445,8 @@ describe('rerankStepDefinition', () => {
 
       expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
         expect.objectContaining({
-            query: 'Test query',
-            input: [
-              'Doc 1',
-              'Doc 2 content',
-              '',
-            ],
+          query: 'Test query',
+          input: ['Doc 1', 'Doc 2 content', ''],
         })
       );
 
@@ -506,9 +460,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           rerank_text: 'Test query',
-          data: [
-            { title: 'Title 1', content: '', metadata: null },
-          ],
+          data: [{ title: 'Title 1', content: '', metadata: null }],
           fields: [['title'], ['content'], ['metadata']],
         },
         logger: mockLogger as any,
@@ -519,8 +471,8 @@ describe('rerankStepDefinition', () => {
 
       expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
         expect.objectContaining({
-            query: 'Test query',
-            input: ['Title 1'],
+          query: 'Test query',
+          input: ['Title 1'],
         })
       );
     });
@@ -542,8 +494,7 @@ describe('rerankStepDefinition', () => {
       await rerankStepDefinition.handler(context);
 
       expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
-        expect.objectContaining({ inference_id: 'custom-rerank-model',
-        })
+        expect.objectContaining({ inference_id: 'custom-rerank-model' })
       );
     });
 
@@ -640,27 +591,21 @@ describe('rerankStepDefinition', () => {
 
       // When rank_window_size is 0 (falsy), should rerank all
       expect(result.output).toHaveLength(2);
-      
+
       const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(2);
     });
 
     it('should handle rank_window_size of 1', async () => {
       const mockEsClient = createMockEsClient({
-        rerank: [
-          { index: 0, relevance_score: 0.95 },
-        ],
+        rerank: [{ index: 0, relevance_score: 0.95 }],
       });
       const mockContextManager = createMockContextManager(mockEsClient);
 
       const context: StepHandlerContext = {
         input: {
           rerank_text: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }],
           rank_window_size: 1,
         },
         logger: mockLogger as any,
@@ -670,12 +615,8 @@ describe('rerankStepDefinition', () => {
       const result = await rerankStepDefinition.handler(context);
 
       // Only first doc reranked (stays in place), rest appended
-      expect(result.output).toEqual([
-        { id: 1 },
-        { id: 2 },
-        { id: 3 },
-      ]);
-      
+      expect(result.output).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
+
       const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(1);
     });
@@ -687,12 +628,7 @@ describe('rerankStepDefinition', () => {
       const context: StepHandlerContext = {
         input: {
           rerank_text: 'Test query',
-          data: [
-            { id: 1 },
-            { id: 2 },
-            { id: 3 },
-            { id: 4 },
-          ],
+          data: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
           rank_window_size: 2,
         },
         logger: mockLogger as any,
@@ -704,7 +640,7 @@ describe('rerankStepDefinition', () => {
       // Throws error when response is invalid
       expect(result.error).toBeDefined();
       expect(result.error?.message).toContain('unexpected response format');
-      
+
       // Only first 2 sent to API
       const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(2);
@@ -778,6 +714,165 @@ describe('rerankStepDefinition', () => {
       const validOutput = [{ id: 1 }, { id: 2 }];
       const result = rerankStepDefinition.outputSchema.safeParse(validOutput);
       expect(result.success).toBe(true);
+    });
+
+    it('should accept custom max_input_field_length parameter', () => {
+      const inputWithMaxFieldLength = {
+        rerank_text: 'Test',
+        data: [{ id: 1 }],
+        max_input_field_length: 500,
+      };
+
+      const result = rerankStepDefinition.inputSchema.safeParse(inputWithMaxFieldLength);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.max_input_field_length).toBe(500);
+      }
+    });
+
+    it('should accept custom max_input_total_length parameter', () => {
+      const inputWithMaxTotalLength = {
+        rerank_text: 'Test',
+        data: [{ id: 1 }],
+        max_input_total_length: 3000,
+      };
+
+      const result = rerankStepDefinition.inputSchema.safeParse(inputWithMaxTotalLength);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.max_input_total_length).toBe(3000);
+      }
+    });
+  });
+
+  describe('truncation behavior', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should truncate individual fields to max_input_field_length', async () => {
+      const mockEsClient = createMockEsClient();
+      const mockContextManager = createMockContextManager(mockEsClient);
+
+      const longTitle = 'A'.repeat(2000);
+      const longContent = 'B'.repeat(2000);
+
+      const context: StepHandlerContext = {
+        input: {
+          rerank_text: 'Test query',
+          data: [{ title: longTitle, content: longContent }],
+          fields: [['title'], ['content']],
+          max_input_field_length: 100,
+        },
+        logger: mockLogger as any,
+        contextManager: mockContextManager as any,
+      } as any;
+
+      await rerankStepDefinition.handler(context);
+
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
+      // Each field truncated to 100, then joined with space: 100 + 1 + 100 = 201
+      expect(callInput[0].length).toBe(201);
+      expect(callInput[0]).toBe(`${'A'.repeat(100)} ${'B'.repeat(100)}`);
+    });
+
+    it('should truncate total input to max_input_total_length', async () => {
+      const mockEsClient = createMockEsClient();
+      const mockContextManager = createMockContextManager(mockEsClient);
+
+      const longTitle = 'A'.repeat(2000);
+      const longContent = 'B'.repeat(2000);
+
+      const context: StepHandlerContext = {
+        input: {
+          rerank_text: 'Test query',
+          data: [{ title: longTitle, content: longContent }],
+          fields: [['title'], ['content']],
+          max_input_total_length: 150,
+        },
+        logger: mockLogger as any,
+        contextManager: mockContextManager as any,
+      } as any;
+
+      await rerankStepDefinition.handler(context);
+
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
+      // Total truncated to 150
+      expect(callInput[0].length).toBe(150);
+    });
+
+    it('should apply both field and total length limits', async () => {
+      const mockEsClient = createMockEsClient();
+      const mockContextManager = createMockContextManager(mockEsClient);
+
+      const longTitle = 'A'.repeat(500);
+      const longContent = 'B'.repeat(500);
+
+      const context: StepHandlerContext = {
+        input: {
+          rerank_text: 'Test query',
+          data: [{ title: longTitle, content: longContent }],
+          fields: [['title'], ['content']],
+          max_input_field_length: 200,
+          max_input_total_length: 250,
+        },
+        logger: mockLogger as any,
+        contextManager: mockContextManager as any,
+      } as any;
+
+      await rerankStepDefinition.handler(context);
+
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
+      // First each field truncated to 200 (would be 200 + 1 + 200 = 401),
+      // then total truncated to 250
+      expect(callInput[0].length).toBe(250);
+    });
+
+    it('should truncate stringified objects to max_input_total_length', async () => {
+      const mockEsClient = createMockEsClient();
+      const mockContextManager = createMockContextManager(mockEsClient);
+
+      const largeObject = {
+        id: 1,
+        data: 'X'.repeat(5000),
+      };
+
+      const context: StepHandlerContext = {
+        input: {
+          rerank_text: 'Test query',
+          data: [largeObject],
+          max_input_total_length: 100,
+        },
+        logger: mockLogger as any,
+        contextManager: mockContextManager as any,
+      } as any;
+
+      await rerankStepDefinition.handler(context);
+
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
+      expect(callInput[0].length).toBe(100);
+    });
+
+    it('should not truncate when values are within limits', async () => {
+      const mockEsClient = createMockEsClient();
+      const mockContextManager = createMockContextManager(mockEsClient);
+
+      const context: StepHandlerContext = {
+        input: {
+          rerank_text: 'Test query',
+          data: [{ title: 'Short title', content: 'Short content' }],
+          fields: [['title'], ['content']],
+          max_input_field_length: 1000,
+          max_input_total_length: 2000,
+        },
+        logger: mockLogger as any,
+        contextManager: mockContextManager as any,
+      } as any;
+
+      await rerankStepDefinition.handler(context);
+
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
+      expect(callInput[0]).toBe('Short title Short content');
     });
   });
 });
