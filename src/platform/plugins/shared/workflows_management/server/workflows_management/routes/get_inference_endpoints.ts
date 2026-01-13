@@ -35,12 +35,14 @@ export function registerGetInferenceEndpointsRoute({
           task_type: 'rerank',
         });
 
-        const inferenceEndpoints = (endpoints || []).map((endpoint: any) => ({
-          id: endpoint.inference_id,
-          name: endpoint.inference_id,
-          service: endpoint.service,
-          task_type: endpoint.task_type,
-        }));
+        const inferenceEndpoints = (endpoints || []).map(
+          (endpoint: { inference_id: string; service: string; task_type: string }) => ({
+            id: endpoint.inference_id,
+            name: endpoint.inference_id,
+            service: endpoint.service,
+            task_type: endpoint.task_type,
+          })
+        );
 
         return response.ok({
           body: {
