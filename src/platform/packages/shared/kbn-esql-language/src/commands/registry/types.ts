@@ -119,6 +119,7 @@ export interface ESQLUserDefinedColumn {
   type: SupportedDataType | 'unknown';
   userDefined: true;
   location: ESQLLocation; // TODO should this be optional?
+  isUnmappedField?: boolean;
 }
 
 export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
