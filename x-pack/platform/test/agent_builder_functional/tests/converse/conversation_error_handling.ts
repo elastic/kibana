@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const browser = getService('browser');
 
-  describe('FOO Conversation Error Handling', function () {
+  describe('Conversation Error Handling', function () {
     let llmProxy: LlmProxy;
 
     before(async () => {
