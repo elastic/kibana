@@ -94,5 +94,22 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
           },
         },
       },
+      input: {
+        input: {
+          completion: {
+            getOptions: async (currentValue) => {
+              if (currentValue.length === 0) {
+                return [
+                  {
+                    label: 'Hello World',
+                    value: 'Hello World',
+                  },
+                ];
+              }
+              return [];
+            },
+          },
+        },
+      },
     },
   });

@@ -71,29 +71,50 @@ export interface PublicStepDefinition<
   /**
    * Property handlers for the step.
    */
-  editorHandlers?: {
-    config?: {
-      [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<DotObject<z.infer<Config>>[K]>;
-    };
-    input?: {
-      // If Input is not an object, default to an empty object
-      [K in DotKeysOf<z.infer<Input> & {}>]?: StepPropertyHandler<
-        DotObject<z.infer<Input> & {}>[K]
-      >;
-    };
-    dynamicSchema?: {
-      /**
-       * Dynamic Zod schema for validating step output based on input.
-       * Allows for more flexible output structure based on the specific input provided.
-       * @param input The input data for the step.
-       * @returns A Zod schema defining structure and validation rules for the output of the step.
-       */
-      getOutputSchema?: (params: {
-        input: z.infer<Input>;
-        config: z.infer<Config>;
-      }) => z.ZodType<z.infer<Output>>;
-    };
-  };
+  editorHandlers?: EditorHandlers<Input, Output, Config>;
+}
+
+/**
+ * Editor handlers type that maintains type safety while allowing variance
+ */
+export interface EditorHandlers<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> {
+  config?: EditorHandlersConfig<Config>;
+  input?: EditorHandlersInput<Input>;
+  dynamicSchema?: DynamicSchema<Input, Output, Config>;
+}
+
+export type EditorHandlersConfig<Config extends z.ZodObject = z.ZodObject> = {
+  [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<DotObject<z.infer<Config>>[K]>;
+};
+
+export type EditorHandlersInput<Input extends z.ZodType = z.ZodType> = Input extends z.ZodObject
+  ? {
+      [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<DotObject<z.infer<Input>>[K]>;
+    }
+  : {};
+
+/**
+ * Dynamic schema handlers for a step
+ */
+export interface DynamicSchema<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> {
+  /**
+   * Dynamic Zod schema for validating step output based on input.
+   * Allows for more flexible output structure based on the specific input provided.
+   * @param input The input data for the step.
+   * @returns A Zod schema defining structure and validation rules for the output of the step.
+   */
+  getOutputSchema?(params: {
+    input: z.infer<Input>;
+    config: z.infer<Config>;
+  }): z.ZodType<z.infer<Output>>;
 }
 
 /**
