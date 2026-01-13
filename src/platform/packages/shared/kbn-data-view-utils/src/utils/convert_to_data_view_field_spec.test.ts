@@ -20,6 +20,7 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         type: 'number' as DatatableColumnType,
       },
       isNull: false,
+      isIndexField: true,
     };
     const result = convertDatatableColumnToDataViewFieldSpec(column);
     expect(result).toEqual(
@@ -44,6 +45,7 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         type: 'string' as DatatableColumnType,
       },
       isNull: false,
+      isIndexField: true,
     };
     const result = convertDatatableColumnToDataViewFieldSpec(column);
     expect(result.timeSeriesMetric).toBeUndefined();
@@ -53,6 +55,31 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         type: 'string',
         esTypes: ['keyword'],
         searchable: true,
+        aggregatable: false,
+        isNull: false,
+      })
+    );
+  });
+
+  it('should return a DataViewField object with searchable false if the column is not indexed', () => {
+    const column = {
+      id: 'test',
+      name: 'test',
+      meta: {
+        esType: 'keyword',
+        type: 'string' as DatatableColumnType,
+      },
+      isNull: false,
+      isIndexField: false,
+    };
+    const result = convertDatatableColumnToDataViewFieldSpec(column);
+    expect(result.timeSeriesMetric).toBeUndefined();
+    expect(result).toEqual(
+      expect.objectContaining({
+        name: 'test',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: false,
         aggregatable: false,
         isNull: false,
       })
