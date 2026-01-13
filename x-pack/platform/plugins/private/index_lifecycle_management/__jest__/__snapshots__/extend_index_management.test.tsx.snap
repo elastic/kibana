@@ -61,12 +61,12 @@ Array [
     "name": "Lifecycle status",
     "options": Array [
       Object {
+        "name": "Managed",
         "value": true,
-        "view": "Managed",
       },
       Object {
+        "name": "Unmanaged",
         "value": false,
-        "view": "Unmanaged",
       },
     ],
     "type": "field_value_selection",
