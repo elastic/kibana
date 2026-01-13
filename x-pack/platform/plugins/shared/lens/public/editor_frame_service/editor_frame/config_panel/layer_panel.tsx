@@ -397,9 +397,10 @@ export function LayerPanel(props: LayerPanelProps) {
         tabIndex={-1}
         css={css`
           margin-bottom: ${euiTheme.size.base};
-          // disable focus ring for mouse clicks, leave it for keyboard users
-          &:focus:not(:focus-visible) {
-            animation: none !important; // sass-lint:disable-line no-important
+          // disable focus ring - this is a container element that receives programmatic focus
+          // for screen reader announcements, not an interactive element
+          &:focus {
+            outline: none;
           }
         `}
         data-test-subj={`lns-layerPanel-${layerIndex}`}
