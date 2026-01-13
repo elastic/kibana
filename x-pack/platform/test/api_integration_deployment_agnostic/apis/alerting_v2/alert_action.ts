@@ -62,10 +62,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 200 for ack action', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/ack`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'ack' });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -73,10 +73,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 200 for unack action', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/unack`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'unack' });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -84,10 +84,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 200 for tag action with tags', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/tag`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ tags: ['tag1', 'tag2'] });
+        .send({ action_type: 'tag', tags: ['tag1', 'tag2'] });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -95,20 +95,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 400 for tag action without tags', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/tag`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'tag' });
 
       expect(response.status).to.be(400);
     });
 
     it('should return 200 for untag action with tags', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/untag`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ tags: ['tag1'] });
+        .send({ action_type: 'untag', tags: ['tag1'] });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -116,10 +116,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 200 for snooze action', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/snooze`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'snooze' });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -127,10 +127,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 200 for unsnooze action', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/unsnooze`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'unsnooze' });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -138,10 +138,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 200 for set_severity action with sev_level', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/set_severity`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ sev_level: 1 });
+        .send({ action_type: 'set_severity', sev_level: 1 });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -149,20 +149,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 400 for set_severity action without sev_level', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/set_severity`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'set_severity' });
 
       expect(response.status).to.be(400);
     });
 
     it('should return 200 for clear_severity action', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/clear_severity`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'clear_severity' });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -170,10 +170,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 200 for activate action with reason', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/activate`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ reason: 'test reason' });
+        .send({ action_type: 'activate', reason: 'test reason' });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -181,20 +181,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 400 for activate action without reason', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/activate`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'activate' });
 
       expect(response.status).to.be(400);
     });
 
     it('should return 200 for deactivate action with reason', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/deactivate`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ reason: 'test reason' });
+        .send({ action_type: 'deactivate', reason: 'test reason' });
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('message', 'not implemented yet');
@@ -202,20 +202,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return 400 for deactivate action without reason', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action/deactivate`)
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'deactivate' });
 
       expect(response.status).to.be(400);
     });
 
     it('should return 404 for unknown alert_series_id', async () => {
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/unknown-alert-series-id/action/ack`)
+        .post(`${ALERT_ACTION_API_PATH}/unknown-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ action_type: 'ack' });
 
       expect(response.status).to.be(404);
     });

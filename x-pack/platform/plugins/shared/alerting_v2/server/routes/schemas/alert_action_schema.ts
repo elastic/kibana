@@ -67,30 +67,8 @@ export const alertActionSchema = z.discriminatedUnion('action_type', [
 
 export type AlertAction = z.infer<typeof alertActionSchema>;
 
-export const alertActionBodySchema = z
-  .object({
-    tags: z.array(z.string()).optional(),
-    sev_level: z.number().optional(),
-    reason: z.string().optional(),
-  })
-  .optional()
-  .nullable();
-
 export const alertActionParamsSchema = z.object({
   alert_series_id: z.string(),
-  action_type: z.enum([
-    'ack',
-    'unack',
-    'tag',
-    'untag',
-    'snooze',
-    'unsnooze',
-    'set_severity',
-    'clear_severity',
-    'activate',
-    'deactivate',
-  ]),
 });
 
 export type AlertActionParams = z.infer<typeof alertActionParamsSchema>;
-export type AlertActionBody = z.infer<typeof alertActionBodySchema>;

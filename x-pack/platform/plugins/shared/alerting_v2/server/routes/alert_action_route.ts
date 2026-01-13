@@ -13,17 +13,16 @@ import { AlertActionsClient } from '../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from './constants';
 import {
-  alertActionBodySchema,
   alertActionParamsSchema,
   alertActionSchema,
-  type AlertActionBody,
+  type AlertAction,
   type AlertActionParams,
 } from './schemas/alert_action_schema';
 
 @injectable()
 export class AlertActionRoute {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/{alert_series_id}/action/{action_type}`;
+  static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/{alert_series_id}/action`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
@@ -33,29 +32,22 @@ export class AlertActionRoute {
   static validate = {
     request: {
       params: alertActionParamsSchema,
-      body: alertActionBodySchema,
+      body: alertActionSchema,
     },
   } as const;
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<AlertActionParams, unknown, AlertActionBody>,
+    private readonly request: KibanaRequest<AlertActionParams, unknown, AlertAction>,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
   ) {}
 
   async handle() {
     try {
-      const { alert_series_id, action_type } = this.request.params;
-      const body = this.request.body ?? {};
-      const result = alertActionSchema.safeParse({ action_type, ...body });
-      if (!result.success) {
-        throw Boom.badRequest(result.error.message);
-      }
-
       await this.alertActionsClient.executeAction({
-        alertSeriesId: alert_series_id,
-        action: result.data,
+        alertSeriesId: this.request.params.alert_series_id,
+        action: this.request.body,
       });
 
       return this.response.ok({

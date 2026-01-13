@@ -11,7 +11,7 @@ import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable, optional } from 'inversify';
-import { zipObject } from 'lodash';
+import { omit, zipObject } from 'lodash';
 import type { AlertAction } from '../../routes/schemas/alert_action_schema';
 import { LoggerService } from '../services/logger_service/logger_service';
 import { QueryService } from '../services/query_service/query_service';
@@ -53,6 +53,7 @@ export class AlertActionsClient {
           action_type: params.action.action_type,
           episode_id: alertTransition.episode_id,
           rule_id: alertEvent['rule.id'],
+          ...omit(params.action, 'action_type'),
         },
       ],
     });
