@@ -33,11 +33,11 @@ import {
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
-import type { FeatureClient } from './feature/feature_client';
 import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
+import type { SystemClient } from './system/system_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -73,8 +73,8 @@ export class StreamsClient {
       scopedClusterClient: IScopedClusterClient;
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
+      systemClient: SystemClient;
       storageClient: StreamsStorageClient;
-      featureClient: FeatureClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
@@ -101,10 +101,6 @@ export class StreamsClient {
 
   public async checkStreamStatus(): Promise<boolean | 'conflict'> {
     const rootLogsStreamExists = await this.checkRootLogsStreamExists();
-    if (this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      return rootLogsStreamExists;
-    }
     const isEnabledOnElasticsearch = await this.checkElasticsearchStreamStatus();
     if (isEnabledOnElasticsearch !== rootLogsStreamExists) {
       return 'conflict';
@@ -157,16 +153,13 @@ export class StreamsClient {
       );
     }
 
-    if (!this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
+    const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
-      if (!elasticsearchStreamsEnabled) {
-        await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
-          method: 'POST',
-          path: '_streams/logs/_enable',
-        });
-      }
+    if (!elasticsearchStreamsEnabled) {
+      await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+        method: 'POST',
+        path: '_streams/logs/_enable',
+      });
     }
 
     return { acknowledged: true, result: 'created' };
@@ -723,10 +716,6 @@ export class StreamsClient {
   }
 
   private async checkElasticsearchStreamStatus(): Promise<boolean> {
-    if (this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      return false;
-    }
     const response = (await this.dependencies.scopedClusterClient.asInternalUser.transport.request({
       method: 'GET',
       path: '/_streams/status',
