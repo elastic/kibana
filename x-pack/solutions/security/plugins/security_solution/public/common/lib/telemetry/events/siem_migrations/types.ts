@@ -8,6 +8,7 @@
 import type { RootSchema } from '@kbn/core/public';
 import type { SiemMigrationResourceType } from '../../../../../../common/siem_migrations/model/common.gen';
 import type { SiemMigrationRetryFilter } from '../../../../../../common/siem_migrations/constants';
+import type { SiemMigrationVendor } from '../../../../../../common/siem_migrations/types';
 
 export enum SiemMigrationsDashboardEventTypes {
   SetupConnectorSelected = 'siem_migrations_dashboard_setup_connector_selected',
@@ -103,31 +104,38 @@ export interface ReportSetupMigrationOpenResourcesActionParams {
   eventName: string;
   migrationId: string;
   missingResourcesCount: number;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupQueryCopiedActionParams {
   eventName: string;
   migrationId?: string;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupMigrationCreatedActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId?: string;
   count: number;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupMigrationDeletedActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId: string;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupMacrosQueryCopiedActionParams {
   eventName: string;
   migrationId: string;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupLookupNameCopiedActionParams {
   eventName: string;
   migrationId: string;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupResourcesUploadedActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId: string;
+  vendor?: SiemMigrationVendor;
   type: SiemMigrationResourceType;
   count: number;
 }
@@ -135,6 +143,7 @@ export interface ReportSetupResourcesUploadedActionParams extends BaseResultActi
 export interface ReportStartMigrationActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId: string;
+  vendor?: SiemMigrationVendor;
   connectorId: string;
   skipPrebuiltRulesMatching: boolean;
   isRetry: boolean;
@@ -144,6 +153,7 @@ export interface ReportStartMigrationActionParams extends BaseResultActionParams
 export interface ReportStopMigrationActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId: string;
+  vendor?: SiemMigrationVendor;
 }
 
 // Translated rule actions
@@ -152,11 +162,13 @@ export interface ReportTranslatedItemUpdateActionParams {
   eventName: string;
   migrationId: string;
   ruleMigrationId: string;
+  vendor?: SiemMigrationVendor;
 }
 
 export interface ReportTranslatedItemInstallActionParams {
   eventName: string;
   migrationId: string;
+  vendor?: SiemMigrationVendor;
   ruleMigrationId: string;
   author: 'elastic' | 'custom';
   enabled: boolean;
@@ -170,6 +182,7 @@ export interface ReportTranslatedItemBulkInstallActionParams {
   eventName: string;
   migrationId: string;
   enabled: boolean;
+  vendor?: SiemMigrationVendor;
   count: number;
 }
 

@@ -189,7 +189,11 @@ export function StreamListView() {
             )}
             {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
               <EuiFlexItem grow={false}>
-                <EuiButton href={router.link('/_discovery')} iconType="crosshairs">
+                <EuiButton
+                  href={router.link('/_discovery')}
+                  iconType="crosshairs"
+                  data-test-subj="streamsSignificantEventsDiscoveryButton"
+                >
                   {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
                     defaultMessage: 'SigEvents Discovery',
                   })}
