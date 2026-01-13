@@ -267,4 +267,101 @@ describe('getLegendAction', function () {
       legendCellValueActions.map((action) => ({ ...action, execute: expect.any(Function) }))
     );
   });
+
+  it('is not rendered if column has isIndexField set to false', () => {
+    const tableWithNonIndexField: Datatable = {
+      ...table,
+      columns: table.columns.map((col) =>
+        col.id === 'splitAccessorId' ? { ...col, isIndexField: false } : col
+      ),
+    };
+    const layerWithNonIndexField = { ...sampleLayer, table: tableWithNonIndexField };
+    const ComponentWithNonIndexField = getLegendAction(
+      [layerWithNonIndexField],
+      jest.fn(),
+      [legendCellValueActions],
+      {
+        first: {
+          splitSeriesAccessors: {
+            splitAccessorId: {
+              format: { id: 'string' },
+              formatter: {
+                convert(x: unknown) {
+                  return x;
+                },
+              } as FieldFormat,
+            },
+          },
+        } as unknown as LayerFieldFormats,
+      },
+      {
+        first: {
+          table: tableWithNonIndexField,
+          invertedRawValueMap,
+          formattedColumns: {},
+        },
+      },
+      {}
+    );
+    const newProps = {
+      ...wrapperProps,
+      series: [
+        {
+          seriesKeys: ["Women's Accessories", 'b'],
+          splitAccessors: new Map().set('splitAccessorId', "Women's Accessories"),
+        },
+      ] as unknown as SeriesIdentifier[],
+    };
+    wrapper = mountWithIntl(<ComponentWithNonIndexField {...newProps} />);
+    expect(wrapper).toEqual({});
+    expect(wrapper.find(EuiPopover).length).toBe(0);
+  });
+
+  it('is rendered if column has isIndexField set to true', () => {
+    const tableWithIndexField: Datatable = {
+      ...table,
+      columns: table.columns.map((col) =>
+        col.id === 'splitAccessorId' ? { ...col, isIndexField: true } : col
+      ),
+    };
+    const layerWithIndexField = { ...sampleLayer, table: tableWithIndexField };
+    const ComponentWithIndexField = getLegendAction(
+      [layerWithIndexField],
+      jest.fn(),
+      [legendCellValueActions],
+      {
+        first: {
+          splitSeriesAccessors: {
+            splitAccessorId: {
+              format: { id: 'string' },
+              formatter: {
+                convert(x: unknown) {
+                  return x;
+                },
+              } as FieldFormat,
+            },
+          },
+        } as unknown as LayerFieldFormats,
+      },
+      {
+        first: {
+          table: tableWithIndexField,
+          invertedRawValueMap,
+          formattedColumns: {},
+        },
+      },
+      {}
+    );
+    const newProps = {
+      ...wrapperProps,
+      series: [
+        {
+          seriesKeys: ["Women's Accessories", 'b'],
+          splitAccessors: new Map().set('splitAccessorId', "Women's Accessories"),
+        },
+      ] as unknown as SeriesIdentifier[],
+    };
+    wrapper = mountWithIntl(<ComponentWithIndexField {...newProps} />);
+    expect(wrapper.find(EuiPopover).length).toBe(1);
+  });
 });

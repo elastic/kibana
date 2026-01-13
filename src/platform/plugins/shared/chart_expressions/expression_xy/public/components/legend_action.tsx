@@ -81,6 +81,16 @@ export const getLegendAction = (
       return null;
     }
 
+    // Don't show filter actions for columns that don't belong to the index, related to ESQL new columns
+    const hasNonIndexField = filterActionData.some((data) => {
+      const column = data.table.columns[data.column];
+      return column?.isIndexField === false;
+    });
+
+    if (hasNonIndexField) {
+      return null;
+    }
+
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
       onFilter({ data: filterActionData, negate });
     };

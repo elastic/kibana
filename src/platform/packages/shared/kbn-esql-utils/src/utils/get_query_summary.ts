@@ -42,3 +42,15 @@ export function getQuerySummary(query: string): ESQLCommandSummary {
     metadataColumns: allMetadataColumns,
   };
 }
+
+/**
+ * Checks if a given field name belongs to the original index fields in the query,
+ * excluding any new or metadata columns introduced by the query.
+ * @param fieldName The name of the field to check.
+ * @param query The ES|QL query string.
+ * @returns True if the field belongs to the original index, false otherwise.
+ */
+export function isIndexField(fieldName: string, query: string): boolean {
+  const summary = getQuerySummary(query);
+  return !summary.newColumns.has(fieldName) && !summary?.metadataColumns?.has(fieldName);
+}

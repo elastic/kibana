@@ -128,6 +128,8 @@ export interface DatatableColumn {
   name: string;
   meta: DatatableColumnMeta;
   isNull?: boolean;
+  // Whether the field exists in the index or is a user defined column
+  isIndexField?: boolean;
   variable?: string;
 }
 

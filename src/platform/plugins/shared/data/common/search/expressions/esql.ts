@@ -21,8 +21,13 @@ import type {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
-import { getIndexPatternFromESQLQuery, fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  fixESQLQueryWithVariables,
+  getNamedParams,
+  mapVariableToColumn,
+  isIndexField,
+} from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
@@ -393,6 +398,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                   },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
+                isIndexField: isIndexField(name, query),
               };
             }) ?? [];
 

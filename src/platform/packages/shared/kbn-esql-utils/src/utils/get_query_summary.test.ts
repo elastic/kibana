@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getQuerySummary } from './get_query_summary';
+import { getQuerySummary, isIndexField } from './get_query_summary';
 
 describe('getQuerySummary', () => {
   it('returns new columns from ROW command', () => {
@@ -159,5 +159,37 @@ describe('getQuerySummary', () => {
     const result = getQuerySummary(query);
 
     expect(result.newColumns).toEqual(new Set());
+  });
+});
+
+describe('isIndexField', () => {
+  it('returns true for original index fields', () => {
+    const query = 'FROM index | WHERE price > 100';
+    expect(isIndexField('price', query)).toBe(true);
+  });
+
+  it('returns false for fields created with EVAL', () => {
+    const query = 'FROM index | EVAL computed = price * 2';
+    expect(isIndexField('computed', query)).toBe(false);
+  });
+
+  it('returns false for fields created with STATS', () => {
+    const query = 'FROM index | STATS avg_price = AVG(price)';
+    expect(isIndexField('avg_price', query)).toBe(false);
+  });
+
+  it('returns false for fields created with RENAME', () => {
+    const query = 'FROM index | RENAME old_name AS new_name';
+    expect(isIndexField('new_name', query)).toBe(false);
+  });
+
+  it('returns true for fields used in BY clause', () => {
+    const query = 'FROM index | STATS avg = AVG(price) BY category';
+    expect(isIndexField('category', query)).toBe(true);
+  });
+
+  it('returns false for metadata fields', () => {
+    const query = 'FROM index METADATA _id | KEEP _id';
+    expect(isIndexField('_id', query)).toBe(false);
   });
 });
