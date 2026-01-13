@@ -33,18 +33,10 @@ export const extractRulesCapabilities = (capabilities: Capabilities): RulesUICap
 
   // Exceptions permissions
   const readExceptions = rulesCapabilities?.[EXCEPTIONS_UI_READ] === true;
-<<<<<<< HEAD
-  const crudExceptions = rulesCapabilities?.[EXCEPTIONS_UI_EDIT] === true;
-
-  return {
-    rules: { read: readRules, edit: editRules },
-    exceptions: { read: readExceptions, edit: crudExceptions },
-=======
   const editExceptions = rulesCapabilities?.[EXCEPTIONS_UI_EDIT] === true;
 
   return {
     rules: { read: readRules, edit: editRules },
     exceptions: { read: readExceptions, edit: editExceptions },
->>>>>>> upstream/rules-exceptions-subfeatures-squashed
   };
 };
