@@ -38,7 +38,6 @@ import type {
 import { getInheritedFieldsFromAncestors, Streams } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
@@ -48,6 +47,7 @@ import {
 } from '../../../../lib/streams/helpers/normalize_geo_points';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
+import { buildSimulationProcessorsWithConditionNoops } from './simulation_condition_noops';
 
 export interface ProcessingSimulationParams {
   path: {
@@ -182,10 +182,8 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
    * 1. Force each processor to not ignore failures to collect all errors
    * 2. Append the error message to the `_errors` field on failure
    */
-  const transpiledIngestPipelineProcessors = transpileIngestPipeline(processing, {
-    ignoreMalformed: true,
-    traceCustomIdentifiers: true,
-  }).processors;
+  const transpiledIngestPipelineProcessors =
+    buildSimulationProcessorsWithConditionNoops(processing);
 
   return transpiledIngestPipelineProcessors.map((processor) => {
     const type = Object.keys(processor)[0];
@@ -481,12 +479,10 @@ const computePipelineSimulationResult = (
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
 } => {
-  const transpiledProcessors = transpileIngestPipeline(processing, {
-    ignoreMalformed: true,
-    traceCustomIdentifiers: true,
-  }).processors;
+  const transpiledProcessors = buildSimulationProcessorsWithConditionNoops(processing);
 
   const processorsMap = initProcessorMetricsMap(transpiledProcessors);
+  const conditionProcessorTags = collectConditionBlockIds(processing);
 
   const forbiddenFields = Object.entries(streamFields)
     .filter(([, { type }]) => type === 'system')
@@ -500,14 +496,16 @@ const computePipelineSimulationResult = (
     const { errors, status, value } = getLastDoc(
       pipelineDocResult,
       sampleDocs[id]._source,
-      ingestDocErrors
+      ingestDocErrors,
+      conditionProcessorTags
     );
 
     const diff = computeSimulationDocDiff(
       sampleDocs[id]._source,
       pipelineDocResult,
       isWiredStream,
-      forbiddenFields
+      forbiddenFields,
+      conditionProcessorTags
     );
 
     pipelineDocResult.processor_results.forEach((processor) => {
@@ -616,13 +614,23 @@ const extractProcessorMetrics = ({
 
 const getDocumentStatus = (
   doc: SuccessfulPipelineSimulateDocumentResult,
-  ingestDocErrors: SimulationError[]
+  ingestDocErrors: SimulationError[],
+  conditionProcessorTags: Set<string>
 ): DocSimulationStatus => {
   // If there is an ingestion mapping error, the document parsing should be considered failed
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  const processorResults = doc.processor_results;
+  const processorResults = filterOutConditionNoopProcessorResults(
+    doc.processor_results,
+    conditionProcessorTags
+  );
+
+  // If a simulation run contains no non-condition processors, treat it as parsed (noop pipeline),
+  // rather than incorrectly classifying it as "skipped" (Array.every() is true on empty arrays).
+  if (processorResults.length === 0) {
+    return 'parsed';
+  }
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
@@ -648,12 +656,16 @@ const getDocumentStatus = (
 const getLastDoc = (
   docResult: SuccessfulPipelineSimulateDocumentResult,
   sample: FlattenRecord,
-  ingestDocErrors: SimulationError[]
+  ingestDocErrors: SimulationError[],
+  conditionProcessorTags: Set<string>
 ) => {
-  const status = getDocumentStatus(docResult, ingestDocErrors);
+  const status = getDocumentStatus(docResult, ingestDocErrors, conditionProcessorTags);
+  const processorResults = filterOutConditionNoopProcessorResults(
+    docResult.processor_results,
+    conditionProcessorTags
+  );
   const lastDocSource =
-    docResult.processor_results.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
-    sample;
+    processorResults.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ?? sample;
 
   if (status === 'parsed') {
     return {
@@ -675,10 +687,14 @@ const computeSimulationDocDiff = (
   base: FlattenRecord,
   docResult: SuccessfulPipelineSimulateDocumentResult,
   isWiredStream: boolean,
-  forbiddenFields: string[]
+  forbiddenFields: string[],
+  conditionProcessorTags: Set<string>
 ) => {
   // Keep only the successful processors defined from the user, skipping the on_failure processors from the simulation
-  const successfulProcessors = docResult.processor_results.filter(isSuccessfulProcessor);
+  const successfulProcessors = filterOutConditionNoopProcessorResults(
+    docResult.processor_results,
+    conditionProcessorTags
+  ).filter(isSuccessfulProcessor);
 
   const comparisonDocs = [
     { processor_id: 'base', value: base },
@@ -735,6 +751,7 @@ const collectProcessedByProcessorIds = (
   const processedBy = new Set<string>();
 
   processorResults.forEach((processor) => {
+    // Include condition-noop tags as well: the UI uses them to filter docs by condition match.
     if (!processor.tag || isSkippedProcessor(processor)) {
       return;
     }
@@ -743,6 +760,30 @@ const collectProcessedByProcessorIds = (
   });
 
   return Array.from(processedBy);
+};
+
+const filterOutConditionNoopProcessorResults = (
+  processorResults: SuccessfulPipelineSimulateDocumentResult['processor_results'],
+  conditionProcessorTags: Set<string>
+) => {
+  return processorResults.filter((proc) => !proc.tag || !conditionProcessorTags.has(proc.tag));
+};
+
+const collectConditionBlockIds = (processing: StreamlangDSL): Set<string> => {
+  const ids = new Set<string>();
+  const traverse = (steps: StreamlangDSL['steps']) => {
+    for (const step of steps) {
+      if ('condition' in step && !('action' in step)) {
+        if (step.customIdentifier) {
+          ids.add(step.customIdentifier);
+        }
+        traverse(step.condition.steps);
+      }
+    }
+  };
+
+  traverse(processing.steps);
+  return ids;
 };
 
 const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocumentResult) => {

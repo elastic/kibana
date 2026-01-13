@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isConditionBlock } from '@kbn/streamlang';
@@ -13,6 +20,8 @@ import { useSelector } from '@xstate5/react';
 import React from 'react';
 import { ConditionDisplay } from '../../../../shared';
 import { CreateStepButton } from '../../../create_step_button';
+import { getPercentageFormatter } from '../../../../../../util/formatters';
+import { useSimulatorSelector } from '../../../state_management/stream_enrichment_state_machine';
 import type { StepConfigurationProps } from '../../steps_list';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { StepContextMenu } from '../context_menu';
@@ -20,6 +29,8 @@ import { StepContextMenu } from '../context_menu';
 interface WhereBlockSummaryProps extends StepConfigurationProps {
   onClick?: () => void;
 }
+
+const formatter = getPercentageFormatter();
 
 export const WhereBlockSummary = ({
   stepRef,
@@ -32,6 +43,13 @@ export const WhereBlockSummary = ({
   onClick,
 }: WhereBlockSummaryProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+  const conditionMatchRate = useSimulatorSelector((snapshot) => {
+    const metrics = snapshot.context.simulation?.processors_metrics?.[stepRef.id];
+    if (!metrics) return undefined;
+    return 1 - (metrics.skipped_rate ?? 0);
+  });
+  const conditionMatchPercentage =
+    conditionMatchRate !== undefined ? formatter.format(conditionMatchRate) : undefined;
 
   const handleTitleClick = (event?: React.MouseEvent) => {
     event?.stopPropagation();
@@ -100,6 +118,33 @@ export const WhereBlockSummary = ({
           )}
         />
       </EuiFlexItem>
+
+      {conditionMatchPercentage !== undefined && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('xpack.streams.whereBlockSummary.matchRateTooltip', {
+              defaultMessage: '{matchRate} of the sampled documents matched this condition',
+              values: { matchRate: conditionMatchPercentage },
+            })}
+          >
+            <EuiTextColor
+              color="success"
+              css={css`
+                pointer-events: all;
+              `}
+              data-test-subj="streamsAppConditionMatchRateBadge"
+            >
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="check" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{conditionMatchPercentage}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiTextColor>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
 
       {!readOnly && (
         <EuiFlexItem
