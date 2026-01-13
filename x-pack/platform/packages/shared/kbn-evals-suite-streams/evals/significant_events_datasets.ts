@@ -27,6 +27,8 @@ export interface SignificantEventsEvaluationExample {
     feature_description: string;
     // Sample log messages that characterize the stream
     sample_logs: string[];
+    // How to ingest the sample logs
+    ingest_mode?: 'single_doc' | 'multi_doc';
   };
   output: SignificantEventsGroundTruth;
   metadata: {
@@ -99,6 +101,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
             '    at com.example.myproject.MyClass.myMethod(MyClass.java:123)',
             '    at com.example.myproject.AnotherClass.anotherMethod(AnotherClass.java:456)',
           ],
+          ingest_mode: 'single_doc',
         },
         output: {
           expected_query: {

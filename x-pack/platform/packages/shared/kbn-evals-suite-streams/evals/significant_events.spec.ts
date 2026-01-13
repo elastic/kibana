@@ -31,13 +31,12 @@ const codeBasedEvaluator = {
   name: 'significant_events_code_evaluator',
   kind: 'CODE' as const,
   evaluate: async ({ output, esClient, example, metadata }: any) => {
-    // The output from the task is an array of queries, we take the first one
-    const query = Array.isArray(output) ? output[0] : output;
+    const queries = Array.isArray(output) ? output : [output];
 
-    if (!query || !query.kql) {
+    if (queries.length === 0 || !queries[0] || !queries[0].kql) {
       return {
         score: 0,
-        reasoning: 'No query generated',
+        reasoning: 'No queries generated',
         details: {
           syntaxValidityRate: 0,
           executionHitRate: 0,
@@ -45,54 +44,73 @@ const codeBasedEvaluator = {
       };
     }
 
-    const { kql, category, severity_score, evidence } = query;
-    const { sample_logs } = example.input;
+    let validSyntaxCount = 0;
+    let executionHitCount = 0;
+    const validationDetails = [];
 
-    // 1. KQL Syntax Validation
-    let isSyntaxValid = false;
-    try {
-      fromKueryExpression(kql);
-      isSyntaxValid = true;
-    } catch (e) {
-      // KQL is invalid
-    }
+    for (const query of queries) {
+      const { kql, category, severity_score, evidence } = query;
+      const { sample_logs } = example.input;
 
-    // 2. Execution Verification
-    let isExecutionHit = false;
-    if (isSyntaxValid) {
-      const searchResult = await esClient.search({
-        index: metadata.test_index,
-        q: kql,
-      });
-      const hits = searchResult.hits.total.value;
-      isExecutionHit = hits > 0;
-    }
-
-    // 3. Category Compliance
-    const isCategoryCompliant = ALLOWED_CATEGORIES.includes(category);
-
-    // 4. Severity Score Compliance
-    const isSeverityCompliant = severity_score >= 0 && severity_score <= 100;
-
-    // 5. Evidence Validation
-    const evidenceValidation: {
-      allEvidenceFound: boolean;
-      missingEvidence: string[];
-    } = {
-      allEvidenceFound: true,
-      missingEvidence: [],
-    };
-    if (evidence && evidence.length > 0) {
-      const allLogs = sample_logs.join('\n');
-      const missing = evidence.filter((ev: string) => !allLogs.includes(ev));
-      if (missing.length > 0) {
-        evidenceValidation.allEvidenceFound = false;
-        evidenceValidation.missingEvidence = missing;
+      // 1. KQL Syntax Validation
+      let isSyntaxValid = false;
+      try {
+        fromKueryExpression(kql);
+        isSyntaxValid = true;
+        validSyntaxCount++;
+      } catch (e) {
+        // KQL is invalid
       }
+
+      // 2. Execution Verification
+      let isExecutionHit = false;
+      if (isSyntaxValid) {
+        const searchResult = await esClient.search({
+          index: metadata.test_index,
+          q: kql,
+        });
+        const hits = searchResult.hits.total.value;
+        if (hits > 0) {
+          isExecutionHit = true;
+          executionHitCount++;
+        }
+      }
+
+      // 3. Category Compliance
+      const isCategoryCompliant = ALLOWED_CATEGORIES.includes(category);
+
+      // 4. Severity Score Compliance
+      const isSeverityCompliant = severity_score >= 0 && severity_score <= 100;
+
+      // 5. Evidence Validation
+      const evidenceValidation: {
+        allEvidenceFound: boolean;
+        missingEvidence: string[];
+      } = {
+        allEvidenceFound: true,
+        missingEvidence: [],
+      };
+      if (evidence && evidence.length > 0) {
+        const allLogs = sample_logs.join('\n');
+        const missing = evidence.filter((ev: string) => !allLogs.includes(ev));
+        if (missing.length > 0) {
+          evidenceValidation.allEvidenceFound = false;
+          evidenceValidation.missingEvidence = missing;
+        }
+      }
+
+      validationDetails.push({
+        kql,
+        isSyntaxValid,
+        isExecutionHit,
+        isCategoryCompliant,
+        isSeverityCompliant,
+        evidenceValidation,
+      });
     }
 
-    const syntaxValidityRate = isSyntaxValid ? 1 : 0;
-    const executionHitRate = isExecutionHit ? 1 : 0;
+    const syntaxValidityRate = validSyntaxCount / queries.length;
+    const executionHitRate = executionHitCount / queries.length;
 
     // The final score is a simple average of the two main metrics.
     const score = (syntaxValidityRate + executionHitRate) / 2;
@@ -102,9 +120,7 @@ const codeBasedEvaluator = {
       details: {
         syntaxValidityRate,
         executionHitRate,
-        isCategoryCompliant,
-        isSeverityCompliant,
-        evidenceValidation,
+        queries: validationDetails,
       },
     };
   },
@@ -125,16 +141,23 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
         evaluate(
           example.input.stream_name,
           async ({ phoenixClient, evaluators, connector, fetch, esClient }) => {
-            // Create a test index and ingest sample logs
-            const testIndex = `test-sig-events-${Date.now()}`;
-            await esClient.indices.create({
-              index: testIndex,
-              mappings: { properties: { message: { type: 'text' } } },
-            });
-            const bulkBody = example.input.sample_logs.flatMap((doc) => [
-              { index: { _index: testIndex } },
-              { message: doc },
-            ]);
+            const testIndex = `logs-sig-events-test-${Date.now()}`;
+
+            let bulkBody;
+            if ((example.input as any).ingest_mode === 'single_doc') {
+              bulkBody = [
+                { index: { _index: testIndex } },
+                {
+                  '@timestamp': new Date().toISOString(),
+                  'event.original': example.input.sample_logs.join('\n'),
+                },
+              ];
+            } else {
+              bulkBody = example.input.sample_logs.flatMap((doc) => [
+                { index: { _index: testIndex } },
+                { '@timestamp': new Date().toISOString(), 'event.original': doc },
+              ]);
+            }
             await esClient.bulk({ refresh: true, body: bulkBody });
 
             await phoenixClient.runExperiment(
@@ -146,7 +169,10 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
                     {
                       input: example.input,
                       output: example.output as unknown as Record<string, unknown>,
-                      metadata: { ...example.metadata, test_index: testIndex },
+                      metadata: {
+                        ...example.metadata,
+                        test_index: testIndex,
+                      },
                     },
                   ],
                 },
@@ -188,8 +214,8 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
               ]
             );
 
-            // Cleanup the test index
-            await esClient.indices.delete({ index: testIndex });
+            // Cleanup the test data stream
+            await esClient.indices.deleteDataStream({ name: testIndex });
           }
         );
       });
