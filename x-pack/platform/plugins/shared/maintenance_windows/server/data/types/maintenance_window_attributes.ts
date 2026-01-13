@@ -7,7 +7,7 @@
 
 import type { RRuleAttributes } from './r_rule_attributes';
 import type { AlertsFilterQueryAttributes } from './alerts_filter_query_attributes';
-import { Schedule } from '../../application/types';
+import type { Schedule } from '../../application/types';
 
 export const maintenanceWindowCategoryIdTypes = {
   OBSERVABILITY: 'observability',

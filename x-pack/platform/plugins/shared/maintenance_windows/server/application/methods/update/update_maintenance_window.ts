@@ -27,7 +27,6 @@ import {
 import { getMaintenanceWindowSo, createMaintenanceWindowSo } from '../../../data';
 import type { UpdateMaintenanceWindowParams } from './types';
 import { updateMaintenanceWindowParamsSchema } from './schemas';
-import { getDurationInMilliseconds } from '../../../routes/schemas/schedule';
 
 export async function updateMaintenanceWindow(
   context: MaintenanceWindowClientContext,
@@ -48,7 +47,7 @@ async function updateWithOCC(
 ): Promise<MaintenanceWindow> {
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
   const { id, data } = params;
-  const { title, enabled, rRule, schedule, scope, categoryIds, scopedQuery } = data;
+  const { title, enabled, duration, rRule, schedule, scope, categoryIds } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -57,19 +56,19 @@ async function updateWithOCC(
     throw Boom.badRequest(`Error validating update maintenance window data - ${error.message}`);
   }
 
-  let scopedQueryWithGeneratedValue = scopedQuery;
+  let scopedQueryWithGeneratedValue = scope?.alerting;
   try {
-    if (scopedQuery) {
+    if (scope?.alerting) {
       const dsl = JSON.stringify(
         buildEsQuery(
           undefined,
-          [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[],
+          [{ query: scope.alerting.kql, language: 'kuery' }],
+          scope.alerting.filters as Filter[],
           esQueryConfig
         )
       );
       scopedQueryWithGeneratedValue = {
-        ...scopedQuery,
+        ...scope.alerting,
         dsl,
       };
     }
@@ -97,24 +96,20 @@ async function updateWithOCC(
       throw Boom.badRequest('Cannot edit archived maintenance windows');
     }
 
-    const durationInMilliseconds = schedule?.custom.duration
-      ? getDurationInMilliseconds(schedule.custom.duration)
-      : getDurationInMilliseconds(maintenanceWindow.schedule.custom.duration);
-
     const expirationDate: string = getMaintenanceWindowExpirationDate({
       schedule: schedule ? schedule.custom : maintenanceWindow.schedule.custom,
-      duration: durationInMilliseconds,
+      duration: duration ? duration : maintenanceWindow.duration,
     });
 
     const modificationMetadata = await getModificationMetadata();
 
     let events = generateMaintenanceWindowEvents({
       schedule: schedule ? schedule.custom : maintenanceWindow.schedule.custom,
-      duration: durationInMilliseconds,
+      duration: typeof duration === 'number' ? duration : maintenanceWindow.duration,
       expirationDate,
     });
 
-    if (!shouldRegenerateEvents({ maintenanceWindow, rRule, duration: durationInMilliseconds })) {
+    if (!shouldRegenerateEvents({ maintenanceWindow, schedule: schedule?.custom, duration })) {
       events = mergeEvents({ oldEvents: maintenanceWindow.events, newEvents: events });
     }
 
@@ -127,14 +122,16 @@ async function updateWithOCC(
         ...(scopedQueryWithGeneratedValue !== undefined
           ? { scopedQuery: scopedQueryWithGeneratedValue }
           : {}),
-        ...(typeof durationInMilliseconds === 'number' ? { duration: durationInMilliseconds } : {}),
+        ...(typeof duration === 'number' ? { duration } : {}),
         ...(typeof enabled === 'boolean' ? { enabled } : {}),
         expirationDate,
         events,
         updatedBy: modificationMetadata.updatedBy,
         updatedAt: modificationMetadata.updatedAt,
         ...(schedule ? { schedule } : {}),
-        ...(scope ? { scope } : {}),
+        ...(scopedQueryWithGeneratedValue !== undefined
+          ? { scope: { alerting: scopedQueryWithGeneratedValue } }
+          : {}),
       });
 
     // We are deleting and then creating rather than updating because SO.update

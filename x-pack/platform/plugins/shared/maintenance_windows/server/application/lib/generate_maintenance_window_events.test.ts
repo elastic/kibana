@@ -6,8 +6,11 @@
  */
 
 import moment from 'moment-timezone';
-import { Frequency } from '@kbn/rrule';
-import { generateMaintenanceWindowEvents } from './generate_maintenance_window_events';
+import {
+  generateMaintenanceWindowEvents,
+  shouldRegenerateEvents,
+} from './generate_maintenance_window_events';
+import type { MaintenanceWindow } from '../types';
 
 describe('generateMaintenanceWindowEvents', () => {
   beforeAll(() => {
@@ -22,11 +25,12 @@ describe('generateMaintenanceWindowEvents', () => {
         .tz('UTC')
         .add(2, 'weeks')
         .toISOString(),
-      rRule: {
-        tzid: 'UTC',
-        freq: Frequency.DAILY,
-        interval: 1,
-        dtstart: '2023-02-27T00:00:00.000Z',
+      schedule: {
+        duration: '1h',
+        start: '2023-02-27T00:00:00.000Z',
+        recurring: {
+          every: '1d',
+        },
       },
     });
 
@@ -53,11 +57,12 @@ describe('generateMaintenanceWindowEvents', () => {
         .tz('UTC')
         .add(5, 'weeks')
         .toISOString(),
-      rRule: {
-        tzid: 'UTC',
-        freq: Frequency.WEEKLY,
-        interval: 1,
-        dtstart: '2023-02-27T00:00:00.000Z',
+      schedule: {
+        duration: '1h',
+        start: '2023-02-27T00:00:00.000Z',
+        recurring: {
+          every: '1w',
+        },
       },
     });
 
@@ -84,11 +89,12 @@ describe('generateMaintenanceWindowEvents', () => {
         .tz('UTC')
         .add(8, 'months')
         .toISOString(),
-      rRule: {
-        tzid: 'UTC',
-        freq: Frequency.MONTHLY,
-        interval: 1,
-        dtstart: '2023-02-27T00:00:00.000Z',
+      schedule: {
+        duration: '1h',
+        start: '2023-02-27T00:00:00.000Z',
+        recurring: {
+          every: '1M',
+        },
       },
     });
 
@@ -114,12 +120,13 @@ describe('generateMaintenanceWindowEvents', () => {
         .tz('UTC')
         .add(5, 'weeks')
         .toISOString(),
-      rRule: {
-        tzid: 'UTC',
-        freq: Frequency.WEEKLY,
-        interval: 1,
-        byweekday: ['TU', 'TH'],
-        dtstart: '2023-02-27T00:00:00.000Z',
+      schedule: {
+        duration: '1h',
+        start: '2023-02-27T00:00:00.000Z',
+        recurring: {
+          every: '1w',
+          onWeekDay: ['TU', 'TH'],
+        },
       },
     });
 
@@ -145,12 +152,13 @@ describe('generateMaintenanceWindowEvents', () => {
         .tz('UTC')
         .add(5, 'weeks')
         .toISOString(),
-      rRule: {
-        tzid: 'UTC',
-        freq: Frequency.WEEKLY,
-        interval: 1,
-        byweekday: ['WE', 'TU', 'TH'],
-        dtstart: '2023-01-27T00:00:00.000Z',
+      schedule: {
+        duration: '1h',
+        start: '2023-01-27T00:00:00.000Z',
+        recurring: {
+          every: '1w',
+          onWeekDay: ['TU', 'WE', 'TH'],
+        },
       },
       startDate: '2023-03-01T00:00:00.000Z',
     });
@@ -160,5 +168,79 @@ describe('generateMaintenanceWindowEvents', () => {
 
     expect(result[result.length - 1].lte).toEqual('2023-03-30T01:00:00.000Z'); // events ended before expiration date
     expect(result[result.length - 1].gte).toEqual('2023-03-30T00:00:00.000Z');
+  });
+
+  describe('shouldRegenerateEvents', () => {
+    it('should return true if duration has changed', () => {
+      expect(
+        shouldRegenerateEvents({
+          maintenanceWindow: {
+            id: '1',
+            title: 'Test MW',
+            duration: 3600000,
+            enabled: true,
+            schedule: {
+              custom: {
+                duration: '1h',
+                start: '2023-02-27T00:00:00.000Z',
+                recurring: {
+                  every: '1d',
+                },
+              },
+            },
+          } as MaintenanceWindow,
+          duration: 7200000,
+        })
+      ).toBe(true);
+    });
+
+    it('should return true if schedule has changed', () => {
+      expect(
+        shouldRegenerateEvents({
+          maintenanceWindow: {
+            id: '1',
+            title: 'Test MW',
+            enabled: true,
+            schedule: {
+              custom: {
+                duration: '1h',
+                start: '2023-02-27T00:00:00.000Z',
+                recurring: {
+                  every: '1d',
+                },
+              },
+            },
+          } as MaintenanceWindow,
+          schedule: {
+            duration: '2h',
+            start: '2023-02-27T00:00:00.000Z',
+            recurring: {
+              every: '1d',
+            },
+          },
+        })
+      ).toBe(true);
+    });
+
+    it('should return false if schedule or duration has not changed', () => {
+      expect(
+        shouldRegenerateEvents({
+          maintenanceWindow: {
+            id: '1',
+            title: 'Updated test MW',
+            enabled: true,
+            schedule: {
+              custom: {
+                duration: '1h',
+                start: '2023-02-27T00:00:00.000Z',
+                recurring: {
+                  every: '1d',
+                },
+              },
+            },
+          } as MaintenanceWindow,
+        })
+      ).toBe(false);
+    });
   });
 });

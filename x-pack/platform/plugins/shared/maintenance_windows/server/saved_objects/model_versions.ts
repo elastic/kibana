@@ -60,22 +60,28 @@ export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
   },
   '4': {
     changes: [
-      // {
-      //   type: 'data_backfill',
-      //   backfillFunction: async (doc) => {
-      //     // Add default schedule object to existing maintenance windows
-      //     if (!doc.attributes.schedule) {
-      //       const schedule = transformRRuleToCustomSchedule({
-      //         duration: doc.attributes.duration,
-      //         rRule: doc.attributes.rRule,
-      //       });
-      //       doc.attributes.schedule = {
-      //         custom: schedule,
-      //       };
-      //     }
-      //     return doc;
-      //   },
-      // },
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          // Add schedule and scope objects to existing maintenance windows
+          let schedule = doc.attributes.schedule;
+          let scope = doc.attributes.scope;
+          if (doc.attributes.duration && doc.attributes.rRule && !doc.attributes.schedule) {
+            const scheduleWithoutCustom = transformRRuleToCustomSchedule({
+              duration: doc.attributes.duration,
+              rRule: doc.attributes.rRule,
+            });
+
+            schedule = { custom: scheduleWithoutCustom };
+          }
+          if (doc.attributes.scopedQuery && !doc.attributes.scope) {
+            scope = {
+              alerting: doc.attributes.scopedQuery,
+            };
+          }
+          return { attributes: { ...doc.attributes, schedule, scope } };
+        },
+      },
     ],
     schemas: {
       forwardCompatibility: rawMaintenanceWindowSchemaV2.extends({}, { unknowns: 'ignore' }),

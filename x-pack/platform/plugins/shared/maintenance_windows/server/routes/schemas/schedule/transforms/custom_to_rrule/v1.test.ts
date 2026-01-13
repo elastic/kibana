@@ -12,7 +12,6 @@ describe('transformCustomScheduleToRRule', () => {
     expect(
       transformCustomScheduleToRRule({ duration: '2h', start: '2021-05-10T00:00:00.000Z' })
     ).toEqual({
-      duration: 7200000,
       rRule: {
         bymonth: undefined,
         bymonthday: undefined,
@@ -35,7 +34,6 @@ describe('transformCustomScheduleToRRule', () => {
         timezone: 'America/New_York',
       })
     ).toEqual({
-      duration: 1500000,
       rRule: {
         bymonth: undefined,
         bymonthday: undefined,
@@ -58,7 +56,6 @@ describe('transformCustomScheduleToRRule', () => {
         recurring: { every: '4w' },
       })
     ).toEqual({
-      duration: 1800000,
       rRule: {
         bymonth: undefined,
         bymonthday: undefined,
@@ -81,7 +78,6 @@ describe('transformCustomScheduleToRRule', () => {
         recurring: { every: '1d', end: '2025-05-17T05:05:00.000Z', onWeekDay: ['MO', 'FR'] },
       })
     ).toEqual({
-      duration: 1800000,
       rRule: {
         bymonth: undefined,
         bymonthday: undefined,
@@ -109,7 +105,6 @@ describe('transformCustomScheduleToRRule', () => {
         },
       })
     ).toEqual({
-      duration: 18000000,
       rRule: {
         bymonth: [1, 3, 5],
         bymonthday: [1, 31],
@@ -132,7 +127,6 @@ describe('transformCustomScheduleToRRule', () => {
         recurring: { every: '2w', occurrences: 3 },
       })
     ).toEqual({
-      duration: 300000,
       rRule: {
         bymonth: undefined,
         bymonthday: undefined,
@@ -154,7 +148,6 @@ describe('transformCustomScheduleToRRule', () => {
         start: '2025-01-14T05:05:00.000Z',
       })
     ).toEqual({
-      duration: 0,
       rRule: {
         bymonth: undefined,
         bymonthday: undefined,
@@ -177,7 +170,6 @@ describe('transformCustomScheduleToRRule', () => {
         recurring: { every: '-1h' },
       })
     ).toEqual({
-      duration: 60000,
       rRule: {
         bymonth: undefined,
         bymonthday: undefined,

@@ -22,7 +22,6 @@ import {
 import { createMaintenanceWindowSo } from '../../../data';
 import { createMaintenanceWindowParamsSchema } from './schemas';
 import { getMaintenanceWindowExpirationDate } from '../../lib';
-import { getDurationInMilliseconds } from '@kbn/maintenance-windows-plugin/server/routes/schemas/schedule';
 
 export async function createMaintenanceWindow(
   context: MaintenanceWindowClientContext,
@@ -30,7 +29,7 @@ export async function createMaintenanceWindow(
 ): Promise<MaintenanceWindow> {
   const { data } = params;
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
-  const { title, schedule, scope, rRule, duration, enabled = true } = data;
+  const { title, schedule, scope, rRule, categoryIds, duration, enabled = true } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -83,16 +82,18 @@ export async function createMaintenanceWindow(
     title,
     enabled,
     expirationDate,
-    rRule,
+    categoryIds,
     scopedQuery: scopedQueryWithGeneratedValue,
+    rRule,
     duration,
     events,
     schedule,
-    scope,
+    ...(scopedQueryWithGeneratedValue
+      ? { scope: { alerting: scopedQueryWithGeneratedValue } }
+      : {}),
+
     ...modificationMetadata,
   });
-
-  console.log('createMaintenanceWindow - ', { maintenanceWindowAttributes });
 
   try {
     const result = await createMaintenanceWindowSo({
@@ -103,14 +104,10 @@ export async function createMaintenanceWindow(
       },
     });
 
-    console.log('createMaintenanceWindow - SO ', { result });
-
-    const res = transformMaintenanceWindowAttributesToMaintenanceWindow({
+    return transformMaintenanceWindowAttributesToMaintenanceWindow({
       attributes: result.attributes,
       id: result.id,
     });
-    console.log('createMaintenanceWindow - transformed ', { res });
-    return res;
   } catch (e) {
     const errorMessage = `Failed to create maintenance window, Error: ${e}`;
     logger.error(errorMessage);

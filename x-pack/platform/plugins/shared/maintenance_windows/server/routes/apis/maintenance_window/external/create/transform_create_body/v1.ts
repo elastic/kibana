@@ -23,16 +23,6 @@ export const transformCreateBody = (
   const duration = getDurationInMilliseconds(createBody.schedule.custom.duration);
   const kql = createBody.scope?.alerting.query.kql;
 
-  console.log('transformCreateBody - ', {
-    title: createBody.title,
-    enabled: createBody.enabled,
-    ...(kql && { scopedQuery: { kql, filters: [] } }),
-    ...(kql && { scope: { alerting: { kql, filters: [] } } }),
-    duration,
-    schedule: createBody.schedule,
-    rRule,
-  });
-
   return {
     title: createBody.title,
     enabled: createBody.enabled,

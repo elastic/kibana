@@ -8,7 +8,6 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { RRule } from '@kbn/rrule';
-import type { RRuleParams } from '@kbn/alerting-types';
 import type { DateRange } from '../../../common';
 import type { MaintenanceWindow, Schedule } from '../types';
 import {
@@ -65,20 +64,17 @@ export const generateMaintenanceWindowEvents = ({
  */
 export const shouldRegenerateEvents = ({
   maintenanceWindow,
-  rRule,
+  schedule,
   duration,
 }: {
   maintenanceWindow: MaintenanceWindow;
-  rRule?: RRuleParams;
+  schedule?: Schedule;
   duration?: number;
 }): boolean => {
-  // If the rRule fails a deep equality check (there is a change), we should regenerate events
-  const { rRule: transformedRRule } = transformCustomScheduleToRRule(
-    maintenanceWindow.schedule.custom
-  );
+  // If the schedule fails a deep equality check (there is a change), we should regenerate events
   const transformedDuration = getDurationInMilliseconds(maintenanceWindow.schedule.custom.duration);
 
-  if (rRule && !_.isEqual(rRule, transformedRRule)) {
+  if (schedule && !_.isEqual(schedule, maintenanceWindow.schedule.custom)) {
     return true;
   }
   // If the duration changes, we should regenerate events

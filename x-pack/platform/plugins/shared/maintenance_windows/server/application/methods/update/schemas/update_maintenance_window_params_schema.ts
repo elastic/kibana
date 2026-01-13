@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { maintenanceWindowCategoryIdsSchema } from '../../../schemas/maintenance_window';
 import { alertsFilterQuerySchema } from '../../../schemas/alerts_filter_query_schemas';
 import { rRuleRequestSchema } from '../../../../routes/apis/r_rule';
-import { scheduleSchema } from '../../../schemas/schedule';
+import { scheduleRequestSchema } from '../../../../routes/schemas/schedule';
 
 export const updateMaintenanceWindowParamsSchema = schema.object({
   id: schema.string(),
@@ -20,7 +20,7 @@ export const updateMaintenanceWindowParamsSchema = schema.object({
     rRule: schema.maybe(rRuleRequestSchema),
     categoryIds: maintenanceWindowCategoryIdsSchema,
     scopedQuery: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
-    schedule: schema.maybe(schema.object({ custom: scheduleSchema })),
+    schedule: schema.maybe(schema.object({ custom: scheduleRequestSchema })),
     scope: schema.maybe(
       schema.object({
         alerting: schema.nullable(alertsFilterQuerySchema),

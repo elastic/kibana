@@ -5,11 +5,10 @@
  * 2.0.
  */
 import moment from 'moment';
-import { Schedule } from '../types';
+import type { Schedule } from '../types';
 
 // Returns a date in ISO format one year in the future if the rule is recurring or until the end of the MW if it is not recurring.
 export const getMaintenanceWindowExpirationDate = ({
-  // rRule,
   schedule,
   duration,
 }: {

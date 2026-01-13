@@ -285,10 +285,10 @@ export async function generateEvents({
           maintenanceWindow.events.length
       )
       .map((filteredMaintenanceWindow) => {
-        const { rRule, duration, expirationDate: oldExpirationDate } = filteredMaintenanceWindow;
+        const { schedule, duration, expirationDate: oldExpirationDate } = filteredMaintenanceWindow;
 
         const newEvents = generateMaintenanceWindowEventsViaRRule({
-          rRule,
+          schedule: schedule.custom,
           expirationDate: newExpirationDate,
           duration,
           startDate: startRangeDate, // here start range date is 1 week before current expiration date

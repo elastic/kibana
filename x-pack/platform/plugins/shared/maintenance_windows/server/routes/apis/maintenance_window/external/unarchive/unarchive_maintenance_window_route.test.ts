@@ -89,9 +89,10 @@ describe('unarchiveMaintenanceWindowRoute', () => {
         id: 'test-id',
         schedule: {
           custom: {
-            duration: '60m',
+            duration: '1h',
             recurring: {
               occurrences: 2,
+              every: '1w',
             },
             start: '2023-02-26T00:00:00.000Z',
             timezone: 'UTC',

@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { maintenanceWindowStatus } from './constants';
 import type { maintenanceWindowSchema } from './schemas/maintenance_window';
 import type { rRuleSchema } from './schemas/r_rule';
-import { scheduleSchema } from './schemas/schedule';
+import type { scheduleSchema } from './schemas/schedule';
 
 export type MaintenanceWindow = TypeOf<typeof maintenanceWindowSchema>;
 export type MaintenanceWindowStatus =

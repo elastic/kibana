@@ -9,7 +9,6 @@ import { Frequency } from '@kbn/rrule';
 import type { RRuleRequestV1 } from '../../../r_rule';
 import type { ScheduleRequest } from '../../types/v1';
 import { DEFAULT_TIMEZONE, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
-import { getDurationInMilliseconds } from './util';
 
 const transformEveryToFrequency = (frequency?: string) => {
   switch (frequency) {
@@ -21,6 +20,8 @@ const transformEveryToFrequency = (frequency?: string) => {
       return Frequency.WEEKLY;
     case 'd':
       return Frequency.DAILY;
+    case 'h':
+      return Frequency.HOURLY;
     default:
       return;
   }
