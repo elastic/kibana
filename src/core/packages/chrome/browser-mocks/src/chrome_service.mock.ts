@@ -35,7 +35,7 @@ const createStartContractMock = () => {
     getProjectHeaderComponentForGridLayout: jest.fn(),
     getProjectSideNavComponentForGridLayout: jest.fn(),
     getSidebarComponent: jest.fn(),
-    wrapInChromeProvider: jest.fn(),
+    wrapInChromeProvider: jest.fn((children) => children),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
     navLinks: lazyObject({
       getNavLinks$: jest.fn(),
