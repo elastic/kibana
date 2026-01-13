@@ -8,6 +8,7 @@
 import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiDraggable,
   EuiFieldText,
   EuiFlexGroup,
@@ -119,9 +120,10 @@ interface FromBuilderItemProps {
   type: ConcatFormState['from'][number]['type'];
   id: string;
   index: number;
+  onRemove: (index: number) => void;
 }
 
-const FromBuilderItem = ({ type, id, index }: FromBuilderItemProps) => {
+const FromBuilderItem = ({ type, id, index, onRemove }: FromBuilderItemProps) => {
   return (
     <EuiDraggable
       draggableId={id}
@@ -130,7 +132,7 @@ const FromBuilderItem = ({ type, id, index }: FromBuilderItemProps) => {
       hasInteractiveChildren={true}
     >
       {(provided) => (
-        <EuiFlexGroup direction="row" gutterSize="s">
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiPanel
               color="transparent"
@@ -149,6 +151,16 @@ const FromBuilderItem = ({ type, id, index }: FromBuilderItemProps) => {
             ) : (
               <DraggableConcatTextInput id={id} index={index} />
             )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              aria-label={i18n.translate('xpack.streams.fromBuilderItem.removeLabel', {
+                defaultMessage: 'Remove',
+              })}
+              onClick={() => onRemove(index)}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -169,6 +181,10 @@ export const ConcatFromBuilder = () => {
     append({ type: 'literal', value: '' });
   };
 
+  const handleRemove = (index: number) => {
+    remove(index);
+  };
+
   const handleFromBuilderDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       move(source.index, destination.index);
@@ -187,7 +203,12 @@ export const ConcatFromBuilder = () => {
           <EuiFlexGroup direction="column" gutterSize="s">
             {fields.map((field, index) => (
               <EuiFlexItem key={field.id}>
-                <FromBuilderItem type={field.type} id={field.id} index={index} />
+                <FromBuilderItem
+                  type={field.type}
+                  id={field.id}
+                  index={index}
+                  onRemove={handleRemove}
+                />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
