@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 
 export interface HasLastSavedChildState<SerializedState extends object = object> {
-  lastSavedStateForChild$: (
-    childId: string
-  ) => Observable<SerializedPanelState<SerializedState> | undefined>;
-  getLastSavedStateForChild: (childId: string) => SerializedPanelState<SerializedState> | undefined;
+  lastSavedStateForChild$: (childId: string) => Observable<SerializedState | undefined>;
+  getLastSavedStateForChild: (childId: string) => SerializedState | undefined;
 }
 
 export const apiHasLastSavedChildState = <SerializedState extends object = object>(
