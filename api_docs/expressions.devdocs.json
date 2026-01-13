@@ -40906,7 +40906,7 @@
                     "section": "def-common.ExpressionValueError",
                     "text": "ExpressionValueError"
                   },
-                  ", \"error\" | \"info\">>"
+                  ", \"info\" | \"error\">>"
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/error.ts",
                 "deprecated": false,
