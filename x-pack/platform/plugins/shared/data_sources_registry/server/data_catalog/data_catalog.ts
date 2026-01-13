@@ -7,32 +7,32 @@
 import type { DataSource } from './data_type';
 
 export interface DataCatalog {
-  get(dataTypeId: string): DataSource | undefined;
+  get(dataSourceId: string): DataSource | undefined;
   list(): DataSource[];
-  register(dataType: DataSource): void;
+  register(dataSource: DataSource): void;
 }
 
 class DataCatalogImpl implements DataCatalog {
-  private dataTypes: Map<string, DataSource> = new Map();
+  private dataSources: Map<string, DataSource> = new Map();
 
   constructor() {}
 
-  get(dataTypeId: string) {
-    if (!this.dataTypes.has(dataTypeId)) {
-      throw new Error(`Unknown data type: ${dataTypeId}`);
+  get(dataSourceId: string) {
+    if (!this.dataSources.has(dataSourceId)) {
+      throw new Error(`Unknown data type: ${dataSourceId}`);
     }
-    return this.dataTypes.get(dataTypeId);
+    return this.dataSources.get(dataSourceId);
   }
 
   list() {
-    return [...this.dataTypes.values()];
+    return [...this.dataSources.values()];
   }
 
-  register(dataType: DataSource) {
-    if (this.dataTypes.has(dataType.id)) {
-      throw new Error(`Data type with id ${dataType.id} already registered`);
+  register(dataSource: DataSource) {
+    if (this.dataSources.has(dataSource.id)) {
+      throw new Error(`Data type with id ${dataSource.id} already registered`);
     }
-    this.dataTypes.set(dataType.id, dataType);
+    this.dataSources.set(dataSource.id, dataSource);
   }
 }
 

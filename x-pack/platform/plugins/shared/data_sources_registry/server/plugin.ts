@@ -36,15 +36,13 @@ export class DataSourcesRegistryPlugin
     registerRoutes(router, this.dataCatalog);
 
     return {
-      register: (dataType: DataSource) => this.dataCatalog.register(dataType),
+      register: (dataSource: DataSource) => this.dataCatalog.register(dataSource),
     };
   }
 
   public start(core: CoreStart): DataSourcesRegistryPluginStart {
-    this.logger.debug('dataSourcesRegistry: Started');
-
-    const registeredTypes = this.dataCatalog.list();
-    this.logger.debug(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);
+    const availableDataSources = this.dataCatalog.list();
+    this.logger.debug(`DataCatalog contents: ${JSON.stringify(availableDataSources, null, 2)}`);
 
     return {
       getCatalog: () => this.dataCatalog,
