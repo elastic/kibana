@@ -7,9 +7,9 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
-export const DATA_CONNECTOR_SAVED_OBJECT_TYPE = 'data_connector';
+export const DATA_SOURCE_SAVED_OBJECT_TYPE = 'data_connector';
 
-export interface DataConnectorAttributes {
+export interface DataSourceAttributes {
   name: string;
   type: string;
   config: Record<string, unknown>;
@@ -21,7 +21,7 @@ export interface DataConnectorAttributes {
   kscIds: string[];
 }
 
-export const dataConnectorSchemaV1 = schema.object({
+export const dataSourceSchemaV1 = schema.object({
   name: schema.string(),
   type: schema.string(),
   config: schema.object({}),
@@ -33,7 +33,7 @@ export const dataConnectorSchemaV1 = schema.object({
   kscIds: schema.arrayOf(schema.string()),
 });
 
-export const dataConnectorMappings: SavedObjectsTypeMappingDefinition = {
+export const dataSourceMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
     name: {
@@ -61,25 +61,25 @@ export const dataConnectorMappings: SavedObjectsTypeMappingDefinition = {
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
-    name: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+    name: DATA_SOURCE_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'multiple-isolated',
-    mappings: dataConnectorMappings,
+    mappings: dataSourceMappings,
     management: {
-      displayName: 'Data Connector',
+      displayName: 'Data Source',
       defaultSearchField: 'name',
       importableAndExportable: true,
       getTitle(obj) {
         const attrs = obj.attributes as unknown as { name: string };
-        return `Data Connector[${attrs.name}]`;
+        return `Data Source[${attrs.name}]`;
       },
     },
     modelVersions: {
       1: {
         changes: [],
         schemas: {
-          forwardCompatibility: dataConnectorSchemaV1.extends({}, { unknowns: 'ignore' }),
-          create: dataConnectorSchemaV1,
+          forwardCompatibility: dataSourceSchemaV1.extends({}, { unknowns: 'ignore' }),
+          create: dataSourceSchemaV1,
         },
       },
     },

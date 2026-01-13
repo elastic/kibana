@@ -9,7 +9,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerRoutes, type RouteDependencies } from '.';
-import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import * as helpers from './connectors_helpers';
 
 // Mock the helper functions
@@ -91,7 +91,7 @@ describe('registerRoutes', () => {
       const mockConnectors = [
         {
           id: 'connector-1',
-          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           attributes: {
             name: 'Test Connector 1',
             type: 'notion',
@@ -105,7 +105,7 @@ describe('registerRoutes', () => {
         },
         {
           id: 'connector-2',
-          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           attributes: {
             name: 'Test Connector 2',
             type: 'notion',
@@ -135,7 +135,7 @@ describe('registerRoutes', () => {
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-        type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         perPage: 100,
       });
       expect(mockResponse.ok).toHaveBeenCalledWith({
@@ -173,7 +173,7 @@ describe('registerRoutes', () => {
     it('should get a single data connector by ID', async () => {
       const mockConnector = {
         id: 'connector-1',
-        type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         attributes: {
           name: 'Test Connector',
           type: 'notion',
@@ -199,7 +199,7 @@ describe('registerRoutes', () => {
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
-        DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
         'connector-1'
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({
@@ -345,7 +345,7 @@ describe('registerRoutes', () => {
       const mockConnectors = [
         {
           id: 'connector-1',
-          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           attributes: {
             name: 'Connector 1',
             type: 'notion',
@@ -356,7 +356,7 @@ describe('registerRoutes', () => {
         },
         {
           id: 'connector-2',
-          type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           attributes: {
             name: 'Connector 2',
             type: 'notion',
@@ -460,7 +460,7 @@ describe('registerRoutes', () => {
     it('should delete a single connector and return the result', async () => {
       const mockConnector = {
         id: 'connector-1',
-        type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         attributes: {
           name: 'Test Connector',
           type: 'notion',
@@ -488,7 +488,7 @@ describe('registerRoutes', () => {
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
-        DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
         'connector-1'
       );
       expect(mockDeleteConnectorAndRelatedResources).toHaveBeenCalledWith(
@@ -507,7 +507,7 @@ describe('registerRoutes', () => {
     it('should return partial deletion result', async () => {
       const mockConnector = {
         id: 'connector-1',
-        type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         attributes: {
           workflowIds: ['workflow-1'],
           toolIds: ['tool-1'],

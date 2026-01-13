@@ -18,8 +18,8 @@ import {
   createConnectorAndRelatedResources,
   deleteConnectorAndRelatedResources,
 } from './connectors_helpers';
-import type { DataConnectorAttributes } from '../saved_objects';
-import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
+import type { DataSourceAttributes } from '../saved_objects';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
   DataConnectorsServerSetupDependencies,
   DataConnectorsServerStartDependencies,
@@ -73,9 +73,9 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const findResult: SavedObjectsFindResponse<DataConnectorAttributes> =
+        const findResult: SavedObjectsFindResponse<DataSourceAttributes> =
           await savedObjectsClient.find({
-            type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
             perPage: DEFAULT_PAGE_SIZE,
           });
 
@@ -113,8 +113,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const savedObject: SavedObject<DataConnectorAttributes> = await savedObjectsClient.get(
-          DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        const savedObject: SavedObject<DataSourceAttributes> = await savedObjectsClient.get(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
           request.params.id
         );
 
@@ -205,9 +205,9 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const findResponse: SavedObjectsFindResponse<DataConnectorAttributes> =
+        const findResponse: SavedObjectsFindResponse<DataSourceAttributes> =
           await savedObjectsClient.find({
-            type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
             perPage: MAX_PAGE_SIZE,
           });
         const connectors = findResponse.saved_objects;
@@ -284,8 +284,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const savedObject: SavedObject<DataConnectorAttributes> = await savedObjectsClient.get(
-          DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        const savedObject: SavedObject<DataSourceAttributes> = await savedObjectsClient.get(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
           request.params.id
         );
 

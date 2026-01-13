@@ -17,7 +17,7 @@ import type {
   DataConnectorsServerSetupDependencies,
   DataConnectorsServerStartDependencies,
 } from '../types';
-import { DATA_CONNECTOR_SAVED_OBJECT_TYPE, type DataConnectorAttributes } from '../saved_objects';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
 
 /**
  * Builds the secrets object for a connector based on its spec
@@ -148,8 +148,8 @@ export async function createConnectorAndRelatedResources(
 
   // Create the data connector saved object
   const now = new Date().toISOString();
-  logger.info(`Creating ${DATA_CONNECTOR_SAVED_OBJECT_TYPE} SO at ${now}`);
-  const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
+  logger.info(`Creating ${DATA_SOURCE_SAVED_OBJECT_TYPE} SO at ${now}`);
+  const savedObject = await savedObjectsClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, {
     name,
     type,
     createdAt: now,
@@ -334,7 +334,7 @@ async function deleteRelatedResources(
 }
 
 interface DeleteConnectorAndRelatedResourcesParams {
-  connector: SavedObject<DataConnectorAttributes>;
+  connector: SavedObject<DataSourceAttributes>;
   savedObjectsClient: SavedObjectsClientContract;
   actionsClient: Awaited<
     ReturnType<DataConnectorsServerStartDependencies['actions']['getActionsClientWithRequest']>
@@ -393,7 +393,7 @@ export async function deleteConnectorAndRelatedResources(
   // Check if all deletions succeeded
   if (deletionResult.allSucceeded) {
     // All resources deleted successfully - delete the saved object
-    await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id);
+    await savedObjectsClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, connector.id);
     logger.info(`Fully deleted data connector ${connector.id}`);
 
     return {
@@ -410,7 +410,7 @@ export async function deleteConnectorAndRelatedResources(
     };
 
     await savedObjectsClient.update(
-      DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      DATA_SOURCE_SAVED_OBJECT_TYPE,
       connector.id,
       remainingResources
     );

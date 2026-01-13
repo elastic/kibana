@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import type { DataConnectorAttributes } from '../saved_objects';
+import type { DataSourceAttributes } from '../saved_objects';
 
 export interface DataConnectorAPIResponse {
   id: string;
@@ -21,7 +21,7 @@ export interface DataConnectorAPIResponse {
 }
 
 export function convertSOtoAPIResponse(
-  savedObject: SavedObject<DataConnectorAttributes>
+  savedObject: SavedObject<DataSourceAttributes>
 ): DataConnectorAPIResponse {
   return {
     id: savedObject.id,

@@ -13,7 +13,7 @@ import {
   createConnectorAndRelatedResources,
   deleteConnectorAndRelatedResources,
 } from './connectors_helpers';
-import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import * as connectorSpecsModule from '@kbn/connector-specs';
 
 const mockConnectorSpecs = {
@@ -195,7 +195,7 @@ describe('createConnectorAndRelatedResources', () => {
     };
     const mockSavedObject = {
       id: 'connector-1',
-      type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       attributes: {
         name: 'My Test Connector',
         type: 'test_type',
@@ -260,7 +260,7 @@ describe('createConnectorAndRelatedResources', () => {
       })
     );
     expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-      DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      DATA_SOURCE_SAVED_OBJECT_TYPE,
       expect.objectContaining({
         name: 'My Test Connector',
         type: 'test_type',
@@ -335,7 +335,7 @@ describe('deleteConnectorAndRelatedResources', () => {
   it('should fully delete connector when all resources succeed', async () => {
     const mockConnector = {
       id: 'connector-1',
-      type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       attributes: {
         name: 'Test',
         type: 'test',
@@ -369,7 +369,7 @@ describe('deleteConnectorAndRelatedResources', () => {
       fullyDeleted: true,
     });
     expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-      DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      DATA_SOURCE_SAVED_OBJECT_TYPE,
       'connector-1'
     );
     expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
@@ -378,7 +378,7 @@ describe('deleteConnectorAndRelatedResources', () => {
   it('should partially delete connector when some resources fail', async () => {
     const mockConnector = {
       id: 'connector-1',
-      type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       attributes: {
         workflowIds: ['workflow-1'],
         toolIds: ['tool-1'],
@@ -415,7 +415,7 @@ describe('deleteConnectorAndRelatedResources', () => {
       },
     });
     expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-      DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      DATA_SOURCE_SAVED_OBJECT_TYPE,
       'connector-1',
       expect.objectContaining({
         kscIds: ['ksc-1'],
@@ -429,7 +429,7 @@ describe('deleteConnectorAndRelatedResources', () => {
   it('should handle idempotency with 404 errors', async () => {
     const mockConnector = {
       id: 'connector-1',
-      type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       attributes: {
         workflowIds: ['workflow-1'],
         toolIds: ['tool-1'],
@@ -462,7 +462,7 @@ describe('deleteConnectorAndRelatedResources', () => {
       fullyDeleted: true,
     });
     expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-      DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      DATA_SOURCE_SAVED_OBJECT_TYPE,
       'connector-1'
     );
     expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
