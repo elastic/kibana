@@ -17,7 +17,6 @@ interface QueriesColumnProps {
 export function QueriesColumn({ streamName }: QueriesColumnProps) {
   const significantEventsFetchState = useFetchSignificantEvents({
     name: streamName,
-    query: '',
   });
 
   return (
