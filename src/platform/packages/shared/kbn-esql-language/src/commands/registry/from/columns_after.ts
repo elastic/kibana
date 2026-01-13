@@ -15,7 +15,7 @@ import type { IAdditionalFields } from '../registry';
 
 export const columnsAfter = async (
   command: ESQLCommand,
-  _previousColumns: ESQLColumnData[], // will always be empty for FROM
+  previousColumns: ESQLColumnData[],
   query: string,
   additionalFields: IAdditionalFields
 ) => {
@@ -33,7 +33,7 @@ export const columnsAfter = async (
   const results = await Promise.all(promises);
   const allColumns = results.flat();
 
-  return uniqBy(allColumns, 'name');
+  return uniqBy(allColumns.concat(previousColumns), 'name');
 };
 
 async function processSubquery(
