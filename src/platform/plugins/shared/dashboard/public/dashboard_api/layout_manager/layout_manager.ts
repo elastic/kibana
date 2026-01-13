@@ -496,8 +496,8 @@ export function initializeLayoutManager(
       startComparing: (
         lastSavedState$: BehaviorSubject<DashboardState>
       ): Observable<{
-        controlGroupInput?: DashboardState['controlGroupInput'];
         panels?: DashboardState['panels'];
+        pinned_panels?: DashboardState['pinned_panels'];
       }> => {
         return combineLatest([layout$, childrenChanges$]).pipe(
           debounceTime(100),
@@ -519,16 +519,16 @@ export function initializeLayoutManager(
             const hasPinnedPanelChanges =
               childrenChanges.some(
                 (childChanges) =>
-                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.controls
+                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.pinnedPanels
               ) || !arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
 
             if (!hasPanelChanges && !hasPinnedPanelChanges) {
               return {};
             }
 
-            const { controlGroupInput, panels } = serializeLayout(currentLayout, currentChildState);
+            const { pinned_panels, panels } = serializeLayout(currentLayout, currentChildState);
             if (shouldLogStateDiff()) {
-              const { controlGroupInput: oldPinnedPanels, panels: oldPanels } = serializeLayout(
+              const { pinned_panels: oldPinnedPanels, panels: oldPanels } = serializeLayout(
                 lastSavedLayout,
                 lastSavedChildState
               );
@@ -536,13 +536,13 @@ export function initializeLayoutManager(
                 logStateDiff('dashboard panels', oldPanels, panels);
               }
               if (hasPinnedPanelChanges) {
-                logStateDiff('dashboard pinned panels', oldPinnedPanels, controlGroupInput);
+                logStateDiff('dashboard pinned panels', oldPinnedPanels, pinned_panels);
               }
             }
 
             return {
               ...(hasPanelChanges ? { panels } : {}),
-              ...(hasPinnedPanelChanges ? { controlGroupInput } : {}),
+              ...(hasPinnedPanelChanges ? { pinned_panels } : {}),
             };
           })
         );
