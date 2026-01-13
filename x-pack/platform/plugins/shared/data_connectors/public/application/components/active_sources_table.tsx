@@ -172,10 +172,15 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     }
   }, [application, chrome]);
 
-  const navigateToTools = useCallback(() => {
-    // Navigate to Agent Builder tools section
-    application?.navigateToApp(AGENT_BUILDER_APP_ID, { path: '/tools' });
-  }, [application]);
+  const navigateToTools = useCallback(
+    (sourceType: string) => {
+      // Navigate to Agent Builder tools section with search param
+      application?.navigateToApp(AGENT_BUILDER_APP_ID, {
+        path: `/tools?search=${encodeURIComponent(sourceType)}`,
+      });
+    },
+    [application]
+  );
 
   const paginatedSources = useMemo(() => {
     const start = activePage * itemsPerPage;
@@ -242,9 +247,9 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
         defaultMessage: 'Tools',
       }),
       align: 'center',
-      render: (agentTools: string[]) =>
+      render: (agentTools: string[], source: ActiveSource) =>
         agentTools.length > 0 ? (
-          <EuiLink onClick={navigateToTools} data-test-subj="toolsLink">
+          <EuiLink onClick={() => navigateToTools(source.type)} data-test-subj="toolsLink">
             <EuiText size="s">{agentTools.length}</EuiText>
           </EuiLink>
         ) : (
