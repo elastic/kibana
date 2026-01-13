@@ -19,6 +19,13 @@ import type { GetCorrelatedLogsToolResult } from '@kbn/observability-agent-build
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 
+interface Log {
+  message?: string;
+  level?: string;
+  trace?: { id?: string };
+  transaction?: { id?: string };
+}
+
 async function indexCorrelatedLogs({
   logsEsClient,
   logs,
@@ -168,10 +175,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         const group = results[0].data.sequences[0];
-        const errorLogs = group.logs.filter((log: any) => log.log?.level === 'ERROR');
+        const errorLogs = group.logs.filter((log: Log) => log.level?.toUpperCase() === 'ERROR');
         expect(errorLogs.length).to.be(2);
 
-        const messages = errorLogs.map((log: any) => log.message);
+        const messages = errorLogs.map((log: Log) => log.message);
         expect(messages).to.contain('Database connection failed');
         expect(messages).to.contain('Rollback failed');
       });
@@ -239,10 +246,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Find payment group
         const paymentGroup = sequences.find((group) =>
-          group.logs.some((log: any) => log.message === 'Payment error')
+          group.logs.some((log: Log) => log.message === 'Payment error')
         );
         expect(paymentGroup).to.not.be(undefined);
-        expect(paymentGroup!.logs.every((log: any) => log.trace?.id === 'trace-payment')).to.be(
+        expect(paymentGroup!.logs.every((log: Log) => log.trace?.id === 'trace-payment')).to.be(
           true
         );
         expect(paymentGroup!.correlation.field).to.be('trace.id');
@@ -250,10 +257,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Find refund group
         const refundGroup = sequences.find((group) =>
-          group.logs.some((log: any) => log.message === 'Refund error')
+          group.logs.some((log: Log) => log.message === 'Refund error')
         );
         expect(refundGroup).to.not.be(undefined);
-        expect(refundGroup!.logs.every((log: any) => log.transaction?.id === 'txn-refund')).to.be(
+        expect(refundGroup!.logs.every((log: Log) => log.transaction?.id === 'txn-refund')).to.be(
           true
         );
         expect(refundGroup!.correlation.field).to.be('transaction.id');
@@ -468,7 +475,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Verify all logs in the group have the same trace.id (highest priority)
         const allHaveTraceId = sequences[0].logs.every(
-          (log: any) => log.trace?.id === 'trace-priority-123'
+          (log: Log) => log.trace?.id === 'trace-priority-123'
         );
         expect(allHaveTraceId).to.be(true);
         expect(sequences[0].correlation.field).to.be('trace.id');
