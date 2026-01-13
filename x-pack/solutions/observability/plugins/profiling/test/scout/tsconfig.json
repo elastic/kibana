@@ -91,6 +91,8 @@
     "@kbn/scout-oblt",
     "@kbn/fleet-plugin",
     "@kbn/scout-oblt",
+    "@kbn/fleet-plugin",
+    "@kbn/scout-oblt",
     "@kbn/fleet-plugin"
   ],
   "exclude": [
