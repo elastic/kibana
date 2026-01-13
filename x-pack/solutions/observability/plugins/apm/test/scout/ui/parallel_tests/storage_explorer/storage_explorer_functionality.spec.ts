@@ -29,7 +29,7 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       await expect(storageExplorerPage.pageTitle).toBeVisible();
 
       // Verify the chart is present
-      await expect(await storageExplorerPage.storageChart).toBeVisible();
+      await expect(storageExplorerPage.storageChart).toBeVisible();
 
       // Verify the summary title elements are present
       const summaryStatTitleElements = await storageExplorerPage.getSummaryStatTitleElements();
@@ -40,6 +40,11 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       // Wait for the services table to finish loading
       await storageExplorerPage.waitForServicesTableLoaded();
       await expect(storageExplorerPage.servicesTableLoadedIndicator).toBeVisible();
+
+      // Change the environment to production to work better in MKI environment
+      await page.getByTestId('comboBoxSearchInput').fill('production');
+      await page.getByTestId('comboBoxSearchInput').press('Enter');
+      await expect(page.getByTestId('StorageExplorerDownloadReportButton')).toBeEnabled();
 
       await expect(
         page.getByTestId('tableHeaderCell_serviceName_0').getByTestId('tableHeaderSortButton')

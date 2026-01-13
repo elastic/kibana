@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { docLinks } from '../../../../../common/doc_links';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { PromptLayout, type PromptLayoutVariant } from './prompt_layout';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
@@ -19,9 +19,15 @@ export interface NoPrivilegePromptProps {
 export const NoPrivilegePrompt: React.FC<NoPrivilegePromptProps> = ({ variant }) => {
   const { colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
+  const { docLinksService } = useAgentBuilderServices();
 
   const primaryButton = (
-    <EuiButtonEmpty href={docLinks.agentBuilder} target="_blank" iconType="popout" iconSide="right">
+    <EuiButtonEmpty
+      href={docLinksService.agentBuilder}
+      target="_blank"
+      iconType="popout"
+      iconSide="right"
+    >
       <FormattedMessage
         id="xpack.agentBuilder.access.prompt.noPrivilege.actions.docsLink"
         defaultMessage="Learn more"
