@@ -172,7 +172,6 @@ const formatSummaryAttachments = (attachments: VersionedAttachment[]): string =>
 
 /**
  * Formats attachment content based on type.
- * Special handling for visualization_ref to show reference info instead of full resolved content.
  */
 const formatAttachmentContent = (attachment: VersionedAttachment, data: unknown): string => {
   if (typeof data === 'string') {

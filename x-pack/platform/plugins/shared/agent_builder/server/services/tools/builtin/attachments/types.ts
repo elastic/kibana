@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 
 /**
  * Options for creating attachment tools with a specific state manager.
@@ -13,4 +14,5 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 export interface AttachmentToolsOptions {
   /** The attachment state manager to operate on */
   attachmentManager: AttachmentStateManager;
+  getTypeDefinition?: (type: string) => AttachmentTypeDefinition | undefined;
 }

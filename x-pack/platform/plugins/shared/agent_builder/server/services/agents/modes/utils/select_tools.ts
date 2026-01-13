@@ -45,6 +45,7 @@ export const selectTools = async ({
   const versionedAttachmentTools = createVersionedAttachmentTools({
     attachmentStateManager: conversation.attachmentStateManager,
     runner,
+    attachmentsService,
   });
 
   // pick tools from provider (from agent config and attachment-type tools)
@@ -64,11 +65,16 @@ export const selectTools = async ({
 const createVersionedAttachmentTools = ({
   attachmentStateManager,
   runner,
+  attachmentsService,
 }: {
   attachmentStateManager: AttachmentStateManager;
   runner: ScopedRunner;
+  attachmentsService: AttachmentsService;
 }): ExecutableTool[] => {
-  const builtinTools = createAttachmentTools({ attachmentManager: attachmentStateManager });
+  const builtinTools = createAttachmentTools({
+    attachmentManager: attachmentStateManager,
+    getTypeDefinition: attachmentsService.getTypeDefinition,
+  });
 
   return builtinTools.map((tool) => ({
     id: tool.id,

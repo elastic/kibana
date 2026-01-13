@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentType, AttachmentDataOf } from './attachment_types';
+import type { VisualizationRefAttachmentData } from './attachment_types';
 
 /**
  * Represents a conversation attachment, as returned by the conversation API.
@@ -34,6 +35,10 @@ export type UnknownAttachment = Attachment<string, unknown>;
 export type TextAttachment = Attachment<AttachmentType.text>;
 export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
+export type VisualizationRefAttachment = Attachment<
+  AttachmentType.visualizationRef,
+  VisualizationRefAttachmentData
+>;
 
 /**
  * Input version of an attachment, where the id is optional

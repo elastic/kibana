@@ -6,6 +6,12 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentResolveContext,
+  AttachmentTypeDefinition,
+} from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -25,7 +31,9 @@ describe('attachment tools', () => {
     attachmentManager = createAttachmentStateManager([], { getTypeDefinition });
   });
 
-  const getTools = () => createAttachmentTools({ attachmentManager });
+  const getTools = (opts?: {
+    getTypeDefinition?: (type: string) => AttachmentTypeDefinition | undefined;
+  }) => createAttachmentTools({ attachmentManager, ...opts });
   const getTool = (id: string) => getTools().find((t) => t.id === id)!;
 
   describe('attachment_add', () => {
@@ -103,6 +111,62 @@ describe('attachment tools', () => {
       expect(result.results).toHaveLength(1);
       expect((result.results[0] as any).data.type).toBe('text');
       expect((result.results[0] as any).data.data).toBe('hello');
+    });
+
+    it('resolves visualization_ref attachments when savedObjectsClient is available', async () => {
+      const attachment = await attachmentManager.add({
+        type: AttachmentType.visualizationRef,
+        data: {
+          saved_object_id: 'so-123',
+        },
+        description: 'Lens ref',
+      });
+
+      const tool = getTools({
+        getTypeDefinition: () =>
+          ({
+            id: AttachmentType.visualizationRef,
+            validate: () => ({ valid: true, data: {} }),
+            format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+            resolve: async (_a: Attachment, ctx: AttachmentResolveContext) => {
+              const resolved = await ctx.savedObjectsClient!.resolve('lens', 'so-123');
+              return {
+                found: true,
+                outcome: resolved.outcome,
+                alias_target_id: resolved.alias_target_id,
+                saved_object_id: resolved.saved_object.id,
+                saved_object_type: resolved.saved_object.type,
+                updated_at: resolved.saved_object.updated_at,
+                attributes: resolved.saved_object.attributes,
+                title: (resolved.saved_object.attributes as any).title,
+                description: (resolved.saved_object.attributes as any).description,
+              };
+            },
+          } as unknown as AttachmentTypeDefinition),
+      }).find((t) => t.id === 'platform.core.attachment_read')!;
+      const result = (await tool.handler({ attachment_id: attachment.id }, {
+        savedObjectsClient: {
+          resolve: async () => ({
+            outcome: 'exactMatch',
+            alias_target_id: null,
+            saved_object: {
+              id: 'so-123',
+              type: 'lens',
+              updated_at: '2026-01-01T00:00:00.000Z',
+              attributes: { title: 'My Lens', description: 'Desc', state: { a: 1 } },
+            },
+          }),
+        },
+      } as any)) as ToolHandlerStandardReturn;
+
+      expect((result.results[0] as any).data.type).toBe(AttachmentType.visualizationRef);
+      expect((result.results[0] as any).data.resolved.found).toBe(true);
+      expect((result.results[0] as any).data.resolved.title).toBe('My Lens');
+      expect((result.results[0] as any).data.resolved.attributes).toEqual({
+        title: 'My Lens',
+        description: 'Desc',
+        state: { a: 1 },
+      });
     });
 
     it('reads a specific version', async () => {

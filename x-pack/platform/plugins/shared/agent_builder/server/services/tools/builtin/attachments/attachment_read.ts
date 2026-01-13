@@ -27,6 +27,7 @@ const attachmentReadSchema = z.object({
  */
 export const createAttachmentReadTool = ({
   attachmentManager,
+  getTypeDefinition,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentReadSchema> => ({
   id: platformCoreTools.attachmentRead,
   type: ToolType.builtin,
@@ -34,7 +35,7 @@ export const createAttachmentReadTool = ({
     'Read the content of a conversation attachment by ID. Use this to retrieve data you previously stored or to check the current state of an attachment.',
   schema: attachmentReadSchema,
   tags: ['attachment'],
-  handler: async ({ attachment_id: attachmentId, version }) => {
+  handler: async ({ attachment_id: attachmentId, version }, context) => {
     const attachment = attachmentManager.get(attachmentId);
 
     if (!attachment) {
@@ -63,6 +64,23 @@ export const createAttachmentReadTool = ({
       };
     }
 
+    let resolved: unknown;
+    const definition = getTypeDefinition?.(attachment.type);
+    if (definition?.resolve && context) {
+      resolved = await definition.resolve(
+        {
+          id: attachmentId,
+          type: attachment.type,
+          data: versionData.data,
+        },
+        {
+          request: context.request,
+          spaceId: context.spaceId,
+          savedObjectsClient: context.savedObjectsClient,
+        }
+      );
+    }
+
     return {
       results: [
         {
@@ -73,6 +91,7 @@ export const createAttachmentReadTool = ({
             type: attachment.type,
             version: versionData.version,
             data: versionData.data,
+            ...(resolved !== undefined ? { resolved } : {}),
           },
         },
       ],
