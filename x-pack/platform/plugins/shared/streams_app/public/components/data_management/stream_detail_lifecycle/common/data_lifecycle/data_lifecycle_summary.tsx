@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiFlexItemProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +24,7 @@ export interface LifecyclePhase {
   color?: string;
   label?: string;
   size?: string;
-  grow: number | boolean;
+  grow: EuiFlexItemProps['grow'];
   isDelete?: boolean;
   timelineValue?: string;
 }
@@ -69,10 +70,7 @@ export const DataLifecycleSummary = ({ phases, loading = false }: DataLifecycleS
         ) : (
           <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
             {phasesWithPosition.map((phase, index) => (
-              <EuiFlexItem
-                key={index}
-                grow={phase.grow as false | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true}
-              >
+              <EuiFlexItem key={index} grow={phase.grow}>
                 <LifecyclePhaseBar
                   color={phase.color}
                   label={phase.label}
