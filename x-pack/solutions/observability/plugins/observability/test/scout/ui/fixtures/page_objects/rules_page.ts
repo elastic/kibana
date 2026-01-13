@@ -440,15 +440,7 @@ export class RulesPage {
    * Waits for the form to be ready after data view changes
    */
   async waitForFormReady() {
-    // Wait for loading spinner to disappear
-    const loadingSpinner = this.page.locator('.euiLoadingSpinner');
-    try {
-      await expect(loadingSpinner).toBeHidden({ timeout: 10000 });
-    } catch {
-      // Loading spinner might not appear, which is fine
-    }
-
-    // Ensure save button is enabled
+    // Ensure save button is enabled (form is valid)
     await expect(this.ruleSaveButton).toBeEnabled({ timeout: SHORTER_TIMEOUT });
   }
 
