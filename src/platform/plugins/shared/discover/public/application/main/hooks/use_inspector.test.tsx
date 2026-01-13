@@ -34,7 +34,7 @@ describe('test useInspector', () => {
     stateContainer.internalState.dispatch(
       internalStateActions.setExpandedDoc({
         tabId: currentTabId,
-        expandedDoc: undefined as unknown as DataTableRecord,
+        expandedDoc: {} as unknown as DataTableRecord,
       })
     );
     const { result } = renderHook(
