@@ -271,6 +271,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverFeatureFlags: {
       getTabsEnabled: () => true,
     },
+    embeddableEditor: {
+      isByValueEditor: jest.fn(() => false),
+      isEmbeddedEditor: jest.fn(() => false),
+      transferBackToEditor: jest.fn(),
+    },
   } as unknown as DiscoverServices;
 }
 
