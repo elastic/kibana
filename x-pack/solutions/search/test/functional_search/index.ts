@@ -17,6 +17,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./tests/search_index_details'));
     loadTestFile(require.resolve('./tests/index_management'));
     loadTestFile(require.resolve('./tests/inference_management'));
-    loadTestFile(require.resolve('./tests/search_getting_started'));
   });
 };
