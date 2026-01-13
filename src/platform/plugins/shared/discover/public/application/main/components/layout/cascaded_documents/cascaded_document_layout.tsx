@@ -20,7 +20,7 @@ import {
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
-import { EsqlQuery } from '@kbn/esql-ast';
+import { EsqlQuery } from '@kbn/esql-language';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';

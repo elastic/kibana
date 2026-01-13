@@ -37,7 +37,7 @@ import {
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { StatsCommandSummary } from '@kbn/esql-ast/src/ast/mutate/commands/stats';
+import type { StatsCommandSummary } from '@kbn/esql-language/src/ast/mutate/commands/stats';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 

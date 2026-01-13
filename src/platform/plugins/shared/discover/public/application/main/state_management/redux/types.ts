@@ -32,7 +32,6 @@ import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { CascadedDocumentsRestorableState } from '../../components/layout/cascaded_documents/cascaded_documents_restorable_state';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
-import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
