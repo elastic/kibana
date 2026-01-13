@@ -19,8 +19,13 @@ const mockLogger = {
 };
 
 const createMockEsClient = (mockResponse?: any) => ({
-  transport: {
-    request: jest.fn().mockResolvedValue(mockResponse || {
+  inference: {
+    get: jest.fn().mockResolvedValue({
+      endpoints: [
+        { inference_id: '.jina-reranker-v2', task_type: 'rerank', service: 'elasticsearch' },
+      ],
+    }),
+    inference: jest.fn().mockResolvedValue(mockResponse || {
       rerank: [
         { index: 1, relevance_score: 0.95, text: 'doc2' },
         { index: 0, relevance_score: 0.85, text: 'doc1' },
@@ -46,7 +51,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'What is the best laptop?',
+          rerank_text: 'What is the best laptop?',
           data: [
             { id: 1, title: 'Laptop A', content: 'Good laptop' },
             { id: 2, title: 'Laptop B', content: 'Great laptop' },
@@ -66,20 +71,16 @@ describe('rerankStepDefinition', () => {
         { id: 3, title: 'Laptop C', content: 'Average laptop' },
       ]);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/_inference/rerank/.jina-reranker-v2',
-        querystring: {
-          timeout: '5m',
-        },
-        body: {
-          query: 'What is the best laptop?',
-          input: [
-            '{"id":1,"title":"Laptop A","content":"Good laptop"}',
-            '{"id":2,"title":"Laptop B","content":"Great laptop"}',
-            '{"id":3,"title":"Laptop C","content":"Average laptop"}',
-          ],
-        },
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith({
+        inference_id: '.jina-reranker-v2',
+        task_type: 'rerank',
+        query: 'What is the best laptop?',
+        input: [
+          '{"id":1,"title":"Laptop A","content":"Good laptop"}',
+          '{"id":2,"title":"Laptop B","content":"Great laptop"}',
+          '{"id":3,"title":"Laptop C","content":"Average laptop"}',
+        ],
+        timeout: '5m',
       });
     });
 
@@ -89,7 +90,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'What is the best laptop?',
+          rerank_text: 'What is the best laptop?',
           data: [
             'This is a great laptop with amazing features',
             'Budget-friendly option for students',
@@ -102,20 +103,16 @@ describe('rerankStepDefinition', () => {
 
       await rerankStepDefinition.handler(context);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/_inference/rerank/.jina-reranker-v2',
-        querystring: {
-          timeout: '5m',
-        },
-        body: {
-          query: 'What is the best laptop?',
-          input: [
-            'This is a great laptop with amazing features',
-            'Budget-friendly option for students',
-            'Premium ultrabook for professionals',
-          ],
-        },
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith({
+        inference_id: '.jina-reranker-v2',
+        task_type: 'rerank',
+        query: 'What is the best laptop?',
+        input: [
+          'This is a great laptop with amazing features',
+          'Budget-friendly option for students',
+          'Premium ultrabook for professionals',
+        ],
+        timeout: '5m',
       });
     });
 
@@ -125,7 +122,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'What is the best laptop?',
+          rerank_text: 'What is the best laptop?',
           data: [
             { id: 1, title: 'Laptop A', content: 'Good laptop', price: 999 },
             { id: 2, title: 'Laptop B', content: 'Great laptop', price: 1299 },
@@ -145,20 +142,16 @@ describe('rerankStepDefinition', () => {
         { id: 3, title: 'Laptop C', content: 'Average laptop', price: 799 },
       ]);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/_inference/rerank/.jina-reranker-v2',
-        querystring: {
-          timeout: '5m',
-        },
-        body: {
-          query: 'What is the best laptop?',
-          input: [
-            'Laptop A Good laptop',
-            'Laptop B Great laptop',
-            'Laptop C Average laptop',
-          ],
-        },
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith({
+        inference_id: '.jina-reranker-v2',
+        task_type: 'rerank',
+        query: 'What is the best laptop?',
+        input: [
+          'Laptop A Good laptop',
+          'Laptop B Great laptop',
+          'Laptop C Average laptop',
+        ],
+        timeout: '5m',
       });
     });
 
@@ -168,7 +161,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Find messages about deployment',
+          rerank_text: 'Find messages about deployment',
           data: [
             { user: { name: 'Alice' }, message: { text: 'Deploy to prod' } },
             { user: { name: 'Bob' }, message: { text: 'Fix bug' } },
@@ -182,20 +175,16 @@ describe('rerankStepDefinition', () => {
 
       const result = await rerankStepDefinition.handler(context);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/_inference/rerank/.jina-reranker-v2',
-        querystring: {
-          timeout: '5m',
-        },
-        body: {
-          query: 'Find messages about deployment',
-          input: [
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith({
+        inference_id: '.jina-reranker-v2',
+        task_type: 'rerank',
+        query: 'Find messages about deployment',
+        input: [
             'Alice Deploy to prod',
             'Bob Fix bug',
             'Charlie Update deployment config',
           ],
-        },
+        timeout: '5m',
       });
 
       expect(result.output).toHaveLength(3);
@@ -215,7 +204,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [
             { id: 1 },
             { id: 2 },
@@ -241,14 +230,12 @@ describe('rerankStepDefinition', () => {
       ]);
 
       // API called with all 5 documents
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            input: expect.arrayContaining([expect.any(String)]),
-          }),
+          input: expect.arrayContaining([expect.any(String)]),
         })
       );
-      const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(5);
     });
 
@@ -264,7 +251,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [
             { id: 1 },
             { id: 2 },
@@ -298,7 +285,7 @@ describe('rerankStepDefinition', () => {
       ]);
 
       // API called with only 3 documents (cost optimization)
-      const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(3);
     });
 
@@ -313,7 +300,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [
             { id: 1 },
             { id: 2 },
@@ -333,7 +320,7 @@ describe('rerankStepDefinition', () => {
         { id: 1 },
       ]);
 
-      const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(2);
     });
 
@@ -348,7 +335,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [
             { id: 1, title: 'Doc 1', content: 'Content 1' },
             { id: 2, title: 'Doc 2', content: 'Content 2' },
@@ -380,7 +367,7 @@ describe('rerankStepDefinition', () => {
       ]);
 
       // API called with only 2 concatenated field values
-      const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(2);
       expect(callInput).toEqual(['Doc 1 Content 1', 'Doc 2 Content 2']);
     });
@@ -391,7 +378,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [],
         },
         logger: mockLogger as any,
@@ -402,7 +389,7 @@ describe('rerankStepDefinition', () => {
 
       expect(result.output).toEqual([]);
       expect(mockLogger.warn).toHaveBeenCalledWith('No data to rerank');
-      expect(mockEsClient.transport.request).not.toHaveBeenCalled();
+      expect(mockEsClient.inference.inference).not.toHaveBeenCalled();
     });
 
     it('should return empty array when data is not an array', async () => {
@@ -411,7 +398,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: 'not an array' as any,
         },
         logger: mockLogger as any,
@@ -422,16 +409,16 @@ describe('rerankStepDefinition', () => {
 
       expect(result.output).toEqual([]);
       expect(mockLogger.warn).toHaveBeenCalledWith('No data to rerank');
-      expect(mockEsClient.transport.request).not.toHaveBeenCalled();
+      expect(mockEsClient.inference.inference).not.toHaveBeenCalled();
     });
 
-    it('should fallback to original order when rerank response is invalid', async () => {
+    it('should throw error when rerank response is invalid', async () => {
       const mockEsClient = createMockEsClient({ invalid: 'response' });
       const mockContextManager = createMockContextManager(mockEsClient);
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [
             { id: 1 },
             { id: 2 },
@@ -444,26 +431,29 @@ describe('rerankStepDefinition', () => {
 
       const result = await rerankStepDefinition.handler(context);
 
-      expect(result.output).toEqual([
-        { id: 1 },
-        { id: 2 },
-        { id: 3 },
-      ]);
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('unexpected response format');
     });
 
     it('should handle errors and return error object', async () => {
       const mockError = new Error('Elasticsearch request failed');
       const mockEsClient = {
-        transport: {
-          request: jest.fn().mockRejectedValue(mockError),
+        inference: {
+          get: jest.fn().mockResolvedValue({
+            endpoints: [
+              { inference_id: 'test-model', task_type: 'rerank', service: 'elasticsearch' },
+            ],
+          }),
+          inference: jest.fn().mockRejectedValue(mockError),
         },
       };
       const mockContextManager = createMockContextManager(mockEsClient);
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [{ id: 1 }],
+          inference_id: 'test-model',
         },
         logger: mockLogger as any,
         contextManager: mockContextManager as any,
@@ -481,7 +471,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [
             { title: 'Doc 1' },
             { content: 'Doc 2 content' },
@@ -495,16 +485,14 @@ describe('rerankStepDefinition', () => {
 
       const result = await rerankStepDefinition.handler(context);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: {
             query: 'Test query',
             input: [
               'Doc 1',
               'Doc 2 content',
               '',
             ],
-          },
         })
       );
 
@@ -517,7 +505,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [
             { title: 'Title 1', content: '', metadata: null },
           ],
@@ -529,12 +517,10 @@ describe('rerankStepDefinition', () => {
 
       await rerankStepDefinition.handler(context);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: {
             query: 'Test query',
             input: ['Title 1'],
-          },
         })
       );
     });
@@ -545,7 +531,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [{ id: 1 }],
           inference_id: 'custom-rerank-model',
         },
@@ -555,9 +541,8 @@ describe('rerankStepDefinition', () => {
 
       await rerankStepDefinition.handler(context);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/_inference/rerank/custom-rerank-model',
+      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+        expect.objectContaining({ inference_id: 'custom-rerank-model',
         })
       );
     });
@@ -573,7 +558,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [{ id: 1 }, { id: 2 }],
           fields: [['id']],
           inference_id: 'test-model',
@@ -586,7 +571,7 @@ describe('rerankStepDefinition', () => {
       await rerankStepDefinition.handler(context);
 
       expect(mockLogger.info).toHaveBeenCalledWith('Rerank step started', {
-        userQuestion: 'Test query',
+        rerankQuery: 'Test query',
         dataLength: 2,
         inferenceId: 'test-model',
         hasFieldExtraction: true,
@@ -613,7 +598,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
           rank_window_size: 2,
         },
@@ -643,7 +628,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [{ id: 1 }, { id: 2 }],
           rank_window_size: 0,
         },
@@ -656,7 +641,7 @@ describe('rerankStepDefinition', () => {
       // When rank_window_size is 0 (falsy), should rerank all
       expect(result.output).toHaveLength(2);
       
-      const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(2);
     });
 
@@ -670,7 +655,7 @@ describe('rerankStepDefinition', () => {
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [
             { id: 1 },
             { id: 2 },
@@ -691,17 +676,17 @@ describe('rerankStepDefinition', () => {
         { id: 3 },
       ]);
       
-      const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(1);
     });
 
-    it('should handle rank_window_size with invalid API response fallback', async () => {
+    it('should throw error with rank_window_size when invalid API response', async () => {
       const mockEsClient = createMockEsClient({ invalid: 'response' });
       const mockContextManager = createMockContextManager(mockEsClient);
 
       const context: StepHandlerContext = {
         input: {
-          user_question: 'Test query',
+          rerank_text: 'Test query',
           data: [
             { id: 1 },
             { id: 2 },
@@ -716,16 +701,12 @@ describe('rerankStepDefinition', () => {
 
       const result = await rerankStepDefinition.handler(context);
 
-      // Falls back to original order for window, then appends remaining
-      expect(result.output).toEqual([
-        { id: 1 },
-        { id: 2 },
-        { id: 3 },
-        { id: 4 },
-      ]);
+      // Throws error when response is invalid
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('unexpected response format');
       
       // Only first 2 sent to API
-      const callInput = mockEsClient.transport.request.mock.calls[0][0].body.input;
+      const callInput = mockEsClient.inference.inference.mock.calls[0][0].input;
       expect(callInput).toHaveLength(2);
     });
   });
@@ -737,7 +718,7 @@ describe('rerankStepDefinition', () => {
 
     it('should validate valid input', () => {
       const validInput = {
-        user_question: 'Test query',
+        rerank_text: 'Test query',
         data: [{ id: 1 }],
       };
 
@@ -747,18 +728,20 @@ describe('rerankStepDefinition', () => {
 
     it('should apply default values', () => {
       const input = {
-        user_question: 'Test query',
+        rerank_text: 'Test query',
         data: [{ id: 1 }],
       };
 
       const result = rerankStepDefinition.inputSchema.parse(input);
-      expect(result.inference_id).toBe('.jina-reranker-v2');
-      expect(result.rank_window_size).toBeUndefined(); // Optional, no default
+      expect(result.inference_id).toBeUndefined(); // Optional, discovered at runtime
+      expect(result.rank_window_size).toBe(100); // Has default value
+      expect(result.max_input_field_length).toBe(1000); // Has default value
+      expect(result.max_input_total_length).toBe(2000); // Has default value
     });
 
     it('should reject invalid input', () => {
       const invalidInput = {
-        user_question: 123, // Should be string
+        rerank_text: 123, // Should be string
         data: 'not an array', // Should be array
       };
 
@@ -768,7 +751,7 @@ describe('rerankStepDefinition', () => {
 
     it('should validate optional fields parameter', () => {
       const inputWithFields = {
-        user_question: 'Test',
+        rerank_text: 'Test',
         data: [{ id: 1 }],
         fields: [['title'], ['content']],
       };
@@ -779,7 +762,7 @@ describe('rerankStepDefinition', () => {
 
     it('should validate optional rank_window_size parameter', () => {
       const inputWithRankWindow = {
-        user_question: 'Test',
+        rerank_text: 'Test',
         data: [{ id: 1 }],
         rank_window_size: 5,
       };
