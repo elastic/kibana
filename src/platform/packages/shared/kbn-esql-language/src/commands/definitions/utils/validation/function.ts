@@ -158,7 +158,7 @@ class FunctionValidator {
     }
 
     const columnMessages = columnsToValidate.flatMap((arg) => {
-      return new ColumnValidator(arg, this.context, this.parentCommand.name, this.ast).validate();
+      return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
     });
 
     this.report(...columnMessages);

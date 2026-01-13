@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstCommand, ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types';
+
+import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types';
 import { UnmappedFieldsTreatment, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getColumnExists } from '../columns';
@@ -15,18 +16,16 @@ import { isParametrized } from '../../../../ast/is';
 export function validateColumnForCommand(
   column: ESQLColumn | ESQLIdentifier,
   commandName: string,
-  context: ICommandContext,
-  ast: ESQLAstCommand[]
+  context: ICommandContext
 ): ESQLMessage[] {
-  return new ColumnValidator(column, context, commandName, ast).validate();
+  return new ColumnValidator(column, context, commandName).validate();
 }
 
 export class ColumnValidator {
   constructor(
     private readonly column: ESQLColumn | ESQLIdentifier,
     private readonly context: ICommandContext,
-    private readonly commandName: string,
-    private readonly ast: ESQLAstCommand[]
+    private readonly commandName: string
   ) {}
 
   validate(): ESQLMessage[] {
@@ -54,14 +53,6 @@ export class ColumnValidator {
 
   private get treatMissingColumnAsUnmapped(): boolean {
     const unmappedFieldsTreatment = this.context.unmappedFieldsTreatment;
-
-    if (!unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
-      return false;
-    }
-    return true;
-    // const parentCommand = this.ast.find((cmd) => within(this.column, cmd));
-    // if (parentCommand) {
-    //   const previousCommands = this.ast.slice(0, this.ast.indexOf(parentCommand));
-    // }
+    return !unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL;
   }
 }
