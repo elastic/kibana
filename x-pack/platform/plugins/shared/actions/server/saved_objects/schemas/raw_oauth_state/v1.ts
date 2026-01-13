@@ -12,7 +12,6 @@ export const rawOAuthStateSchema = schema.object({
   codeVerifier: schema.string(),
   connectorId: schema.string(),
   redirectUri: schema.string(),
-  authorizationUrl: schema.string(),
   scope: schema.maybe(schema.string()),
   kibanaReturnUrl: schema.string(), // in case of OAuth success, redirect to this URL
   createdAt: schema.string(),
