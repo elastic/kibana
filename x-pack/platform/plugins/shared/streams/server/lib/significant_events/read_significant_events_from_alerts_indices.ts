@@ -33,8 +33,8 @@ export async function readSignificantEventsFromAlertsIndices(
   const { name, from, to, bucketSize, query } = params;
 
   const queryLinks = query
-    ? await queryClient.findQueries(name, query, { includeStreamName: true })
-    : await queryClient.getQueryLinks(name, { includeStreamName: true });
+    ? await queryClient.findQueries(name, query)
+    : await queryClient.getQueryLinks(name);
 
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };
