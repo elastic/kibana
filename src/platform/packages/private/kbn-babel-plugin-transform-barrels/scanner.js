@@ -356,7 +356,24 @@ function parseBarrelExports(content, filePath) {
         const sourcePath = node.source.value;
         const resolvedPath = resolveModulePath(sourcePath, barrelDir);
 
-        if (!resolvedPath) return;
+        if (!resolvedPath) {
+          // External package re-export - treat as local export
+          // This ensures exports like `export { Direction } from '@kbn/timelines-plugin/common'`
+          // are preserved in the barrel index and not lost during export * transformation
+          for (const specifier of node.specifiers) {
+            if (specifier.type === 'ExportSpecifier') {
+              const exported = specifier.exported;
+              const exportedName = exported.type === 'Identifier' ? exported.name : exported.value;
+              exports[exportedName] = {
+                path: filePath,
+                type: 'named',
+                localName: exportedName,
+                importedName: specifier.local.name,
+              };
+            }
+          }
+          return;
+        }
 
         for (const specifier of node.specifiers) {
           if (specifier.type === 'ExportSpecifier') {
@@ -823,7 +840,19 @@ function parseAllFileExports(filePath, visited) {
       // Re-export: export { X, Y, Z } from './source'
       if (node.source) {
         const resolved = resolveModulePath(node.source.value, barrelDir);
-        if (!resolved) return;
+        if (!resolved) {
+          // External package re-export - treat as local export
+          // This ensures exports like `export { Direction } from '@kbn/timelines-plugin/common'`
+          // are preserved and not lost during export * chain resolution
+          for (const spec of node.specifiers) {
+            if (spec.type === 'ExportSpecifier') {
+              const exported = spec.exported;
+              const expName = exported.type === 'Identifier' ? exported.name : exported.value;
+              exports.set(expName, { path: filePath, localName: expName, isDefault: false });
+            }
+          }
+          return;
+        }
 
         for (const spec of node.specifiers) {
           if (spec.type === 'ExportSpecifier') {

@@ -962,4 +962,81 @@ export const DefendInsightStatus = { Enum: { running: 'running' } };`
       );
     });
   });
+
+  describe('external package re-exports', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-external-reexport-'));
+
+      // Create directory structure
+      await Fsp.mkdir(Path.join(tempDir, 'common'), { recursive: true });
+
+      // Create a barrel file that re-exports from an external scoped package
+      // This simulates: export { Direction } from '@kbn/timelines-plugin/common'
+      await Fsp.writeFile(
+        Path.join(tempDir, 'common', 'index.ts'),
+        `export { Direction, SortField } from '@kbn/timelines-plugin/common';
+export type Maybe<T> = T | null;
+export const LOCAL_CONST = 'local';`
+      );
+
+      // Create parent barrel that re-exports via export *
+      await Fsp.writeFile(Path.join(tempDir, 'index.ts'), `export * from './common';`);
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('treats external package re-exports as local exports in barrel index', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const commonBarrelPath = Path.join(tempDir, 'common', 'index.ts');
+
+      expect(barrelIndex[commonBarrelPath]).toBeDefined();
+      const entry = barrelIndex[commonBarrelPath];
+
+      // External re-exports should be captured in localExports (not exports)
+      // because they point to the barrel file itself and can't be transformed to a different path
+      expect(entry.localExports).toBeDefined();
+      expect(entry.localExports).toContain('Direction');
+      expect(entry.localExports).toContain('SortField');
+
+      // Type alias 'Maybe' is also a local export
+      expect(entry.localExports).toContain('Maybe');
+
+      // LOCAL_CONST is also a local export
+      expect(entry.localExports).toContain('LOCAL_CONST');
+
+      // exports object should be empty since all exports are local
+      expect(Object.keys(entry.exports)).toHaveLength(0);
+    });
+
+    it('propagates external re-exports through export * chains', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+      const commonBarrelPath = Path.join(tempDir, 'common', 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const mainEntry = barrelIndex[mainBarrelPath];
+
+      // When export * from './common' is processed, parseAllFileExports is called.
+      // External re-exports in common/index.ts are captured with path=common/index.ts.
+      // These should appear in main barrel's exports pointing to the common barrel.
+      expect(mainEntry.exports.Direction).toBeDefined();
+      expect(mainEntry.exports.Direction.path).toBe(commonBarrelPath);
+      expect(mainEntry.exports.Direction.localName).toBe('Direction');
+
+      expect(mainEntry.exports.SortField).toBeDefined();
+      expect(mainEntry.exports.SortField.path).toBe(commonBarrelPath);
+
+      // Type alias 'Maybe' should also be propagated
+      expect(mainEntry.exports.Maybe).toBeDefined();
+      expect(mainEntry.exports.Maybe.path).toBe(commonBarrelPath);
+
+      // LOCAL_CONST should also be propagated
+      expect(mainEntry.exports.LOCAL_CONST).toBeDefined();
+      expect(mainEntry.exports.LOCAL_CONST.path).toBe(commonBarrelPath);
+    });
+  });
 });

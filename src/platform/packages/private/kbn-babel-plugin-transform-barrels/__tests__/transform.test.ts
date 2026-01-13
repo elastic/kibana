@@ -1142,4 +1142,112 @@ describe('barrel transform plugin', () => {
       expect(result?.code).toContain('Status');
     });
   });
+
+  describe('external package re-exports via export *', () => {
+    // This tests the fix for exports that originate from external packages.
+    // When a barrel file does: export { Direction } from '@kbn/timelines-plugin/common'
+    // The scanner cannot resolve the external path, but records it with path=filePath.
+    // These become localExports in the barrel index (path equals barrel path).
+    // When a parent barrel does export * from './common', the transformer emits
+    // explicit exports for the localExports, preserving them in the output.
+    const SEARCH_STRATEGY_COMMON_PATH = '/test/src/search_strategy/common/index.ts';
+    const SEARCH_STRATEGY_PATH = '/test/src/search_strategy/index.ts';
+
+    const externalReexportBarrelIndex: TestBarrelIndex = {
+      // The inner barrel that re-exports from an external package
+      // Since external re-exports have path=filePath, they appear in localExports, not exports
+      [SEARCH_STRATEGY_COMMON_PATH]: {
+        exports: {},
+        // External re-exports are captured as local exports (path points to barrel itself)
+        localExports: ['Direction', 'SortField', 'Maybe'],
+      },
+      // The outer barrel that has export * from './common'
+      // The scanner's parseAllFileExports sees the external re-exports and captures them
+      // with path pointing to the common barrel
+      [SEARCH_STRATEGY_PATH]: {
+        exports: {
+          // When export * from './common' is evaluated by scanner, Direction is captured
+          // with path pointing to the common barrel (where the external re-export lives)
+          Direction: {
+            path: SEARCH_STRATEGY_COMMON_PATH,
+            type: 'named',
+            localName: 'Direction',
+            importedName: 'Direction',
+            expectedPath: './search_strategy/common',
+          },
+          SortField: {
+            path: SEARCH_STRATEGY_COMMON_PATH,
+            type: 'named',
+            localName: 'SortField',
+            importedName: 'SortField',
+            expectedPath: './search_strategy/common',
+          },
+          Maybe: {
+            path: SEARCH_STRATEGY_COMMON_PATH,
+            type: 'named',
+            localName: 'Maybe',
+            importedName: 'Maybe',
+            expectedPath: './search_strategy/common',
+          },
+        },
+      },
+    };
+
+    it('transforms export * to include external re-exports from nested barrel', () => {
+      const result = transform({
+        code: `export * from './search_strategy';`,
+        barrelIndex: externalReexportBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // Direction (external re-export) should be included in the transformation
+      expect(result?.code).toContain('Direction');
+      expect(result?.code).toContain('./search_strategy/common');
+      // SortField should also be included
+      expect(result?.code).toContain('SortField');
+      // Maybe (local type) should also be included
+      expect(result?.code).toContain('Maybe');
+      // Original export * should be replaced
+      expect(result?.code).not.toContain('export *');
+    });
+
+    it('transforms named import of external re-export', () => {
+      const result = transform({
+        code: `import { Direction } from './search_strategy';`,
+        barrelIndex: externalReexportBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // Should be transformed to direct path to the common barrel
+      expect(result?.code).toContain('./search_strategy/common');
+      expect(result?.code).toContain('Direction');
+      expect(result?.code).not.toMatch(/['"]\.\/search_strategy['"]/);
+    });
+
+    it('transforms multiple imports including external re-exports', () => {
+      const result = transform({
+        code: `import { Direction, SortField, Maybe } from './search_strategy';`,
+        barrelIndex: externalReexportBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // All three should be transformed to point to common barrel
+      expect(result?.code).toContain('Direction');
+      expect(result?.code).toContain('SortField');
+      expect(result?.code).toContain('Maybe');
+      expect(result?.code).toContain('./search_strategy/common');
+    });
+
+    it('transforms named re-export of external package export', () => {
+      const result = transform({
+        code: `export { Direction } from './search_strategy';`,
+        barrelIndex: externalReexportBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      expect(result?.code).toContain('Direction');
+      expect(result?.code).toContain('./search_strategy/common');
+      expect(result?.code).not.toMatch(/['"]\.\/search_strategy['"]/);
+    });
+  });
 });
