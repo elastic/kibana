@@ -115,7 +115,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     const aggs = getFindAttackDiscoveryAlertsAggregation(includeUniqueAlertIds);
 
     let index;
-    if (typeof scheduled === 'undefined') {
+    if (scheduled === undefined) {
       index = this.getScheduledAndAdHocIndexPattern();
     } else {
       index = scheduled
