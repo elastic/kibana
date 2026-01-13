@@ -17,14 +17,14 @@ import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
-import { RulesList } from '../rules_list/components/rules_list';
 import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
 import type { Section } from '../../constants';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
 const LogsList = lazy(() => import('../rule_details/components/global_rule_event_log_list'));
+const RulesList = lazy(() => import('../rules_list/components/rules_list'));
 
-export const RulesPage = () => {
+const RulesPage = () => {
   const history = useHistory();
   const location = useLocation();
   const {
@@ -183,3 +183,6 @@ export const RulesPage = () => {
     </RulesPageTemplate>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default RulesPage;

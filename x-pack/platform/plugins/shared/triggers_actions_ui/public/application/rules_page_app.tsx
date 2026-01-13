@@ -16,12 +16,12 @@ import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { queryClient } from './query_client';
-import { RulesPage } from './sections/rules_page/rules_page';
 import type { TriggersAndActionsUiServices } from './rules_app';
 
 const RuleDetailsRouteWrapper = lazy(
   () => import('./sections/rule_details/components/rule_details_route_wrapper')
 );
+const RulesPage = lazy(() => import('./sections/rules_page/rules_page'));
 
 export const renderRulesPageApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
