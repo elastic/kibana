@@ -52,12 +52,6 @@ globalSetupHook(
       client: logsSynthtraceEsClient,
     });
 
-    await createDataView(kbnClient, {
-      name: 'test-data-view-name_1',
-      id: 'test-data-view-id_1',
-      title: 'logs-*',
-    });
-
     await generateMetricsData({
       client: infraSynthtraceEsClient,
       from: Date.now() - 3 * 60 * 1000,
