@@ -12,11 +12,11 @@ import { Observable } from 'rxjs';
 import { useAppContext } from '../application/app_context';
 
 interface UseLicenseReturnValue {
+  isLoading: boolean;
   isAtLeast: (level: LicenseType) => boolean;
   isAtLeastPlatinum: () => boolean;
   isAtLeastGold: () => boolean;
   isAtLeastEnterprise: () => boolean;
-  getLicense: () => ILicense | null | undefined;
 }
 
 export const useLicense = (): UseLicenseReturnValue => {
@@ -24,6 +24,7 @@ export const useLicense = (): UseLicenseReturnValue => {
     plugins: { licensing },
   } = useAppContext();
   const license = useObservable<ILicense | null>(licensing?.license$ ?? new Observable(), null);
+  const isLoading = license === null;
 
   const isAtLeast = useCallback(
     (level: LicenseType): boolean => {
@@ -37,10 +38,10 @@ export const useLicense = (): UseLicenseReturnValue => {
   const isAtLeastEnterprise = useCallback(() => isAtLeast('enterprise'), [isAtLeast]);
 
   return {
+    isLoading,
     isAtLeast,
     isAtLeastPlatinum,
     isAtLeastGold,
     isAtLeastEnterprise,
-    getLicense: () => license,
   };
 };

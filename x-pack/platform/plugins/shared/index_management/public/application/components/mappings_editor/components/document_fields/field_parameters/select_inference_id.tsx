@@ -27,19 +27,13 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { InferenceCostsTransparencyTour } from '@kbn/search-api-panels';
 
-import {
-  INFERENCE_ENDPOINT_LICENSE_MAP,
-  LICENSE_TIER_ENTERPRISE,
-  LICENSE_TIER_PLATINUM,
-} from '../../../../../constants/mappings';
+import { useCompatibleInferenceEndpoints } from '../../../../../../hooks/use_compatible_inference_endpoints';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { documentationService, UseField } from '../../../shared_imports';
-import { useLicense } from '../../../../../../hooks/use_license';
 
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 export interface SelectInferenceIdProps {
@@ -49,24 +43,6 @@ export interface SelectInferenceIdProps {
 type SelectInferenceIdContentProps = SelectInferenceIdProps & {
   setValue: (value: string) => void;
   value: string;
-};
-
-// Task types that are compatible with semantic_text field type
-const COMPATIBLE_TASK_TYPES = ['text_embedding', 'sparse_embedding'] as const;
-type CompatibleTaskType = (typeof COMPATIBLE_TASK_TYPES)[number];
-
-/**
- * Type guard to check if a task type is compatible with semantic_text fields
- */
-const isCompatibleTaskType = (taskType: string): taskType is CompatibleTaskType => {
-  return COMPATIBLE_TASK_TYPES.includes(taskType as CompatibleTaskType);
-};
-
-/**
- * Gets the required license for an endpoint from the license map, if there is one.
- */
-const getRequiredLicense = (inferenceId: string): string | undefined => {
-  return INFERENCE_ENDPOINT_LICENSE_MAP[inferenceId];
 };
 
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
@@ -102,9 +78,14 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     docLinks,
     plugins: { cloud, share },
   } = useAppContext();
-  const { isLoading, data: endpoints, resendRequest } = useLoadInferenceEndpoints();
+  const {
+    isLoading: endpointsLoading,
+    data: endpoints,
+    resendRequest,
+  } = useLoadInferenceEndpoints();
   const { euiTheme } = useEuiTheme();
-  const { isAtLeastPlatinum, isAtLeastEnterprise } = useLicense();
+  const { compatibleEndpoints, isLoading: isCompatibleEndpointsLoading } =
+    useCompatibleInferenceEndpoints(endpoints, endpointsLoading);
   const [isSelectInferenceIdOpen, setIsSelectInferenceIdOpen] = useState(false);
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
@@ -131,106 +112,38 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   );
 
   /**
-   * Checks if the user has access to an endpoint based on the required license.
-   * If no license requirement is specified (undefined), access is granted by default.
-   */
-  const hasEndpointAccess = useCallback(
-    (requiredLicense: string | undefined): boolean => {
-      if (requiredLicense === LICENSE_TIER_ENTERPRISE) {
-        return isAtLeastEnterprise();
-      }
-      if (requiredLicense === LICENSE_TIER_PLATINUM) {
-        return isAtLeastPlatinum();
-      }
-      // If no license requirement is specified, assume access is granted
-      return true;
-    },
-    [isAtLeastPlatinum, isAtLeastEnterprise]
-  );
-
-  /**
-   * Filters endpoints to only those compatible with semantic_text field type.
-   */
-  const compatibleEndpoints = useMemo(
-    () => endpoints?.filter((endpoint) => isCompatibleTaskType(endpoint.task_type)) ?? [],
-    [endpoints]
-  );
-
-  /**
-   * Finds the ELSER in EIS endpoint from compatible endpoints.
-   */
-  const elserInEis = useMemo(
-    () =>
-      compatibleEndpoints.find(
-        (endpoint) => endpoint.inference_id === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
-      ),
-    [compatibleEndpoints]
-  );
-
-  /**
-   * Determines the default inference endpoint ID to select.
-   * Prioritizes .elser-2-elastic (ELSER in EIS) if user has access, falls back to the first available compatible endpoint that user has access to.
-   * Only considers endpoints compatible with semantic_text field type.
-   */
-  const getDefaultInferenceId = useCallback(() => {
-    if (!compatibleEndpoints.length) {
-      return undefined;
-    }
-
-    if (elserInEis) {
-      const elserLicense = getRequiredLicense(elserInEis.inference_id);
-      if (hasEndpointAccess(elserLicense)) {
-        return elserInEis.inference_id;
-      }
-    }
-
-    // Find the first compatible endpoint that the user has access to
-    const accessibleEndpoint = compatibleEndpoints.find((endpoint) => {
-      const requiredLicense = getRequiredLicense(endpoint.inference_id);
-      return hasEndpointAccess(requiredLicense);
-    });
-
-    return accessibleEndpoint?.inference_id;
-  }, [compatibleEndpoints, elserInEis, hasEndpointAccess]);
-
-  /**
    * Computes the selectable options for the inference endpoint dropdown.
    * Only includes endpoints compatible with semantic_text (text_embedding and sparse_embedding).
    * Includes optimistic updates for newly created endpoints that may not be in the list yet.
    */
   const options: EuiSelectableOption[] = useMemo(() => {
-    const selectableOptions: EuiSelectableOption[] = compatibleEndpoints.map((endpoint) => {
-      const requiredLicense = getRequiredLicense(endpoint.inference_id);
-      const hasAccess = hasEndpointAccess(requiredLicense);
-
-      const baseOption: EuiSelectableOption = {
-        label: endpoint.inference_id,
-        'data-test-subj': `custom-inference_${endpoint.inference_id}`,
-        checked: value === endpoint.inference_id ? 'on' : undefined,
-      };
-
-      // If user doesn't have access and a license requirement exists, disable the option
-      if (!hasAccess && requiredLicense) {
-        baseOption.disabled = true;
-        baseOption.append = (
-          <EuiBadge color="hollow" iconType="lock">
-            {requiredLicense[0].toUpperCase() + requiredLicense.slice(1)}
-          </EuiBadge>
-        );
-        baseOption['aria-label'] = i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.disabledOption.ariaLabel',
-          {
-            defaultMessage: '{inferenceId} endpoint disabled - {license} license required',
-            values: {
-              inferenceId: endpoint.inference_id,
-              license: requiredLicense,
-            },
-          }
-        );
-      }
-
-      return baseOption;
-    });
+    const selectableOptions: EuiSelectableOption[] =
+      compatibleEndpoints?.endpointDefinitions?.map((endpoint) => {
+        return {
+          label: endpoint.inference_id,
+          'data-test-subj': `custom-inference_${endpoint.inference_id}`,
+          checked: value === endpoint.inference_id ? 'on' : undefined,
+          disabled: !endpoint.accessible,
+          append: !endpoint.accessible && endpoint.requiredLicense && (
+            <EuiBadge color="hollow" iconType="lock">
+              {endpoint.requiredLicense[0].toUpperCase() + endpoint.requiredLicense.slice(1)}
+            </EuiBadge>
+          ),
+          'aria-label':
+            !endpoint.accessible && endpoint.requiredLicense
+              ? i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.disabledOption.ariaLabel',
+                  {
+                    defaultMessage: '{inferenceId} endpoint disabled - {license} license required',
+                    values: {
+                      inferenceId: endpoint.inference_id,
+                      license: endpoint.requiredLicense,
+                    },
+                  }
+                )
+              : undefined,
+        };
+      }) || [];
 
     // Optimistic update: if a value is set but not in the list, add it
     // (handles race condition where backend hasn't updated yet after creating a new endpoint)
@@ -242,9 +155,8 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         'data-test-subj': `custom-inference_${value}`,
       });
     }
-
     return selectableOptions;
-  }, [compatibleEndpoints, value, hasEndpointAccess]);
+  }, [compatibleEndpoints, value]);
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
 
@@ -255,16 +167,10 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
    * This ensures a good default UX without requiring manual selection.
    */
   useEffect(() => {
-    const shouldSetDefault = !value && endpoints?.length;
-    if (!shouldSetDefault) {
-      return;
+    if (!value && compatibleEndpoints?.defaultInferenceId) {
+      setValue(compatibleEndpoints?.defaultInferenceId);
     }
-
-    const defaultId = getDefaultInferenceId();
-    if (defaultId) {
-      setValue(defaultId);
-    }
-  }, [endpoints, value, setValue, getDefaultInferenceId]);
+  }, [value, setValue, compatibleEndpoints]);
 
   /**
    * Sets state to indicate the dropdown select is open after a delay to match animation timing.
@@ -385,7 +291,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                     )}
                     data-test-subj={dataTestSubj}
                     searchable
-                    isLoading={isLoading}
+                    isLoading={isCompatibleEndpointsLoading}
                     singleSelection="always"
                     defaultChecked
                     searchProps={{
