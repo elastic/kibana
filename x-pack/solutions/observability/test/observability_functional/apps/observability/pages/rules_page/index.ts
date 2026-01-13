@@ -73,63 +73,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Rules table', () => {
-      let metricThresholdRuleId: string;
-      let logThresholdRuleId: string;
-      before(async () => {
-        const metricThresholdRule = {
-          params: {
-            criteria: [
-              {
-                aggType: 'avg',
-                comparator: '>',
-                threshold: [0.5],
-                timeSize: 5,
-                timeUnit: 'm',
-                metric: 'system.cpu.user.pct',
-              },
-            ],
-            sourceId: 'default',
-            alertOnNoData: true,
-            alertOnGroupDisappear: true,
-          },
-          consumer: 'infrastructure',
-          tags: ['infrastructure'],
-          name: 'metric-threshold',
-          schedule: { interval: '1m' },
-          rule_type_id: 'metrics.alert.threshold',
-          notify_when: 'onActionGroupChange',
-          actions: [],
-        };
-        const logThresholdRule = {
-          params: {
-            logView: {
-              logViewId: 'Default',
-              type: 'log-view-reference',
-            },
-            timeSize: 5,
-            timeUnit: 'm',
-            count: { value: 75, comparator: 'more than' },
-            criteria: [{ field: 'log.level', comparator: 'equals', value: 'error' }],
-          },
-          consumer: 'alerts',
-          schedule: { interval: '1m' },
-          tags: [],
-          name: 'error-log',
-          rule_type_id: 'logs.alert.document.count',
-          notify_when: 'onActionGroupChange',
-          actions: [],
-        };
-        metricThresholdRuleId = await createRule(metricThresholdRule);
-        logThresholdRuleId = await createRule(logThresholdRule);
-        await observability.alerts.common.navigateToRulesPage();
-      });
-      after(async () => {
-        await deleteRuleById(metricThresholdRuleId);
-        await deleteRuleById(logThresholdRuleId);
-      });
-    });
-
     describe('User permissions', () => {
       describe('permission prompt', function () {
         this.tags('skipFIPS');
