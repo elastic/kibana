@@ -11,22 +11,8 @@ export const evaluate = base.extend<
   {},
   {
     chatClient: AgentBuilderEvaluationChatClient;
-    agentBuilderSetup: void;
   }
 >({
-  agentBuilderSetup: [
-    async ({ uiSettings, log }, use) => {
-      // Ensure AgentBuilder API is enabled before running the evaluation.
-      // Using Scout's uiSettings fixture is more robust than calling /internal/kibana/settings directly.
-      await uiSettings.set({ ['agentBuilder:enabled']: true });
-      log.debug('Agent Builder enabled for the evaluation');
-      await use();
-    },
-    {
-      scope: 'worker',
-      auto: true, // This ensures it runs automatically
-    },
-  ],
   chatClient: [
     async ({ fetch, log, connector }, use) => {
       const chatClient = new AgentBuilderEvaluationChatClient(fetch, log, connector.id);

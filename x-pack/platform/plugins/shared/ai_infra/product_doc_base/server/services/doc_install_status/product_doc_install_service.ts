@@ -85,7 +85,15 @@ export class ProductDocInstallClient {
           )
         : response?.saved_objects.filter((so) => so.attributes.inference_id === inferenceId);
 
-      savedObjects?.forEach(({ attributes }) => {
+      // Filter out Security Labs records (stored in the same SO type) so they don't overwrite
+      // the product docs "security" product status.
+      const productDocsSavedObjects = savedObjects?.filter((so) => {
+        // Treat missing resource_type as product_doc for backwards compatibility.
+        const resourceType = so.attributes?.resource_type ?? ResourceTypes.productDoc;
+        return resourceType === ResourceTypes.productDoc;
+      });
+
+      productDocsSavedObjects?.forEach(({ attributes }) => {
         installStatus[attributes.product_name as ProductName] = {
           status: attributes.installation_status,
           version: attributes.product_version,
@@ -119,6 +127,7 @@ export class ProductDocInstallClient {
       installation_status: 'installing' as const,
       last_installation_failure_reason: '',
       inference_id: inferenceId,
+      resource_type: ResourceTypes.productDoc,
     };
     await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
       upsert: attributes,
@@ -130,6 +139,7 @@ export class ProductDocInstallClient {
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       installation_status: 'uninstalling',
       inference_id: inferenceId,
+      resource_type: ResourceTypes.productDoc,
     });
   }
 
@@ -143,6 +153,7 @@ export class ProductDocInstallClient {
       installation_status: 'installed',
       index_name: indexName,
       inference_id: inferenceId,
+      resource_type: ResourceTypes.productDoc,
     });
   }
 
@@ -156,6 +167,7 @@ export class ProductDocInstallClient {
       installation_status: 'error',
       last_installation_failure_reason: failureReason,
       inference_id: inferenceId,
+      resource_type: ResourceTypes.productDoc,
     });
   }
 
@@ -166,6 +178,7 @@ export class ProductDocInstallClient {
         installation_status: 'uninstalled',
         last_installation_failure_reason: '',
         inference_id: inferenceId,
+        resource_type: ResourceTypes.productDoc,
       });
     } catch (e) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
