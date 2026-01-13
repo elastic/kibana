@@ -495,8 +495,10 @@ export function initializeLayoutManager(
 
       startComparing: (
         lastSavedState$: BehaviorSubject<DashboardState>
-      ): Observable<{ controlGroupInput?: DashboardState['controlGroupInput']; panels?: DashboardState['panels'] }> => {
-        
+      ): Observable<{
+        controlGroupInput?: DashboardState['controlGroupInput'];
+        panels?: DashboardState['panels'];
+      }> => {
         return combineLatest([layout$, childrenChanges$]).pipe(
           debounceTime(100),
           combineLatestWith(
@@ -509,13 +511,21 @@ export function initializeLayoutManager(
             )
           ),
           map(([[currentLayout, childrenChanges]]) => {
-            const hasPanelChanges = childrenChanges.some((childChanges) => childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.panels) || arePanelLayoutsEqual(lastSavedLayout, currentLayout);
-            const hasPinnedPanelChanges = childrenChanges.some((childChanges) => childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.controls) || arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
+            const hasPanelChanges =
+              childrenChanges.some(
+                (childChanges) =>
+                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.panels
+              ) || !arePanelLayoutsEqual(lastSavedLayout, currentLayout);
+            const hasPinnedPanelChanges =
+              childrenChanges.some(
+                (childChanges) =>
+                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.controls
+              ) || !arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
 
             if (!hasPanelChanges && !hasPinnedPanelChanges) {
               return {};
             }
-            
+
             const { controlGroupInput, panels } = serializeLayout(currentLayout, currentChildState);
             if (shouldLogStateDiff()) {
               const { controlGroupInput: oldPinnedPanels, panels: oldPanels } = serializeLayout(
@@ -532,7 +542,7 @@ export function initializeLayoutManager(
 
             return {
               ...(hasPanelChanges ? { panels } : {}),
-              ...(hasPinnedPanelChanges ? { controlGroupInput } : {})
+              ...(hasPinnedPanelChanges ? { controlGroupInput } : {}),
             };
           })
         );
