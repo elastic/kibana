@@ -67,10 +67,12 @@ export async function getApmDownstreamDependencies({
     // @ts-expect-error - dependencyName exists when collapsing downstream
     const dependencyName = location.dependencyName!;
 
+    const rawThroughput = stats.throughput?.value;
     const metrics = {
       errorRate: stats.errorRate?.value ?? undefined,
       latencyMs: stats.latency?.value ?? undefined,
-      throughputPerMin: stats.throughput?.value ?? undefined,
+      // Round to 3 decimal places for cleaner LLM output
+      throughputPerMin: rawThroughput != null ? Math.round(rawThroughput * 1000) / 1000 : undefined,
     };
 
     if (location.type === NodeType.service) {
