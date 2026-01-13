@@ -12,6 +12,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerGetWorkflowAggsRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.get(
@@ -21,7 +22,7 @@ export function registerGetWorkflowAggsRoute({ router, api, logger, spaces }: Ro
       security: WORKFLOW_READ_SECURITY,
       validate: { query: schema.object({ fields: schema.arrayOf(schema.string()) }) },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const { fields } = request.query as { fields: string[] };
         const spaceId = spaces.getSpaceId(request);
@@ -31,6 +32,6 @@ export function registerGetWorkflowAggsRoute({ router, api, logger, spaces }: Ro
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }
