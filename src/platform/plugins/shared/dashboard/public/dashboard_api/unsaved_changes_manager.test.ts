@@ -36,7 +36,7 @@ const layoutManagerMock = {
     children$: new BehaviorSubject<DashboardChildren>({}),
   },
   internalApi: {
-    startComparing: () => ({
+    startComparing$: () => ({
       hasPanelUnsavedChanges$: panelUnsavedChanges$,
       hasPinnedPanelUnsavedChanges$: pinnedPanelUnsavedChanges$,
     }),

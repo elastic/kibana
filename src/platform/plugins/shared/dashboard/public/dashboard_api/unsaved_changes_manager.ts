@@ -65,7 +65,7 @@ export function initializeUnsavedChangesManager({
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
 
   const { hasPanelUnsavedChanges$, hasPinnedPanelUnsavedChanges$ } =
-    layoutManager.internalApi.startComparing(lastSavedState$);
+    layoutManager.internalApi.startComparing$(lastSavedState$);
 
   const dashboardStateChanges$ = combineLatest([
     settingsManager.internalApi.startComparing$(lastSavedState$),

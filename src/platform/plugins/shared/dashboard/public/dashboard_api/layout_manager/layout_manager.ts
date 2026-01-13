@@ -504,7 +504,7 @@ export function initializeLayoutManager(
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
 
-      startComparing: (
+      startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
       ): {
         hasPanelUnsavedChanges$: Observable<{ panels?: DashboardState['panels'] }>;
