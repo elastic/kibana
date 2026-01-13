@@ -150,14 +150,14 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const [, { actions, dataSourcesRegistry, agentBuilder }] = await getStartServices();
         const savedObjectsClient = coreContext.savedObjects.client;
 
-        // Validate data connector type exists
+        // Validate data source type exists
         const dataCatalog = dataSourcesRegistry.getCatalog();
-        const dataConnectorTypeDef = dataCatalog.get(type);
-        if (!dataConnectorTypeDef) {
+        const dataSource = dataCatalog.get(type);
+        if (!dataSource) {
           return response.customError({
             statusCode: 400,
             body: {
-              message: `Data connector type "${request.body.type}" not found`,
+              message: `Data source of type "${request.body.type}" not found`,
             },
           });
         }
@@ -171,7 +171,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           logger,
           workflowManagement,
           actions,
-          dataConnectorTypeDef,
+          dataSource,
           agentBuilder,
         });
 
@@ -210,11 +210,11 @@ export function registerRoutes(dependencies: RouteDependencies) {
             type: DATA_SOURCE_SAVED_OBJECT_TYPE,
             perPage: MAX_PAGE_SIZE,
           });
-        const connectors = findResponse.saved_objects;
+        const dataSources = findResponse.saved_objects;
 
-        logger.debug(`Found ${connectors.length} data connector(s) to delete`);
+        logger.debug(`Found ${dataSources.length} data source(s) to delete`);
 
-        if (connectors.length === 0) {
+        if (dataSources.length === 0) {
           return response.ok({
             body: {
               success: true,
@@ -233,10 +233,10 @@ export function registerRoutes(dependencies: RouteDependencies) {
         let fullyDeletedCount = 0;
         let partiallyDeletedCount = 0;
 
-        // Process each connector individually to handle partial failures
-        for (const connector of connectors) {
+        // Process each data source individually to handle partial failures
+        for (const dataSource of dataSources) {
           const result = await deleteDataSourceAndRelatedResources({
-            connector,
+            dataSource,
             savedObjectsClient,
             actionsClient,
             toolRegistry,
@@ -255,14 +255,14 @@ export function registerRoutes(dependencies: RouteDependencies) {
         return response.ok({
           body: {
             success: true,
-            deletedCount: connectors.length,
+            deletedCount: dataSources.length,
             fullyDeletedCount,
             partiallyDeletedCount,
           },
         });
       } catch (error) {
-        logger.error(`Failed to delete all connectors: ${(error as Error).message}`);
-        return createErrorResponse(response, 'Failed to delete all connectors', error as Error);
+        logger.error(`Failed to delete all data sources: ${(error as Error).message}`);
+        return createErrorResponse(response, 'Failed to delete all data sources', error as Error);
       }
     }
   );
@@ -284,7 +284,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const savedObject: SavedObject<DataSourceAttributes> = await savedObjectsClient.get(
+        const dataSource: SavedObject<DataSourceAttributes> = await savedObjectsClient.get(
           DATA_SOURCE_SAVED_OBJECT_TYPE,
           request.params.id
         );
@@ -295,7 +295,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
         const result = await deleteDataSourceAndRelatedResources({
-          connector: savedObject,
+          dataSource,
           savedObjectsClient,
           actionsClient,
           toolRegistry,
