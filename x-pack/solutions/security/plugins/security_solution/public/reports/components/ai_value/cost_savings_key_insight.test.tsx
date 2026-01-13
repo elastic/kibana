@@ -86,35 +86,35 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('CostSavingsKeyInsight', () => {
   const createMockKibanaServices = (overrides: Partial<StartServices> = {}) =>
-    ({
-      services: {
-        http: {
-          fetch: jest.fn(),
-        },
-        notifications: {
-          toasts: {
-            addError: jest.fn(),
-            addSuccess: jest.fn(),
-            addWarning: jest.fn(),
-          },
-        },
-        inference: {
-          chatComplete: jest.fn(),
-        },
-        uiSettings: {
-          get: jest.fn().mockReturnValue('test-connector-id'),
-        },
-        settings: {
-          client: {
-            get: jest.fn(),
-          },
-        },
-        featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(false),
-        },
-        ...overrides,
+  ({
+    services: {
+      http: {
+        fetch: jest.fn(),
       },
-    } as Partial<StartServices>);
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+          addSuccess: jest.fn(),
+          addWarning: jest.fn(),
+        },
+      },
+      inference: {
+        chatComplete: jest.fn(),
+      },
+      uiSettings: {
+        get: jest.fn().mockReturnValue('test-connector-id'),
+      },
+      settings: {
+        client: {
+          get: jest.fn(),
+        },
+      },
+      featureFlags: {
+        getBooleanValue: jest.fn().mockReturnValue(false),
+      },
+      ...overrides,
+    },
+  } as Partial<StartServices>);
   const chatCompleteResult = 'Test result';
 
   const mockChatComplete = jest.fn().mockResolvedValue({
@@ -386,6 +386,46 @@ describe('CostSavingsKeyInsight', () => {
           expect(screen.getByText(chatCompleteResult)).toBeInTheDocument();
         });
       });
+    });
+  });
+
+  describe('render complete signaling for reporting', () => {
+    it('should transition data-render-complete from false to true and dispatch renderComplete event when Markdown finishes rendering', async () => {
+      const renderCompleteHandler = jest.fn();
+
+      mockUseAIValueExportContext.mockReturnValue({
+        forwardedState: { insight: 'Test insight content' },
+        isInsightVerified: true,
+        shouldRegenerateInsight: false,
+        setInsight: mockSetInsightInExportContext,
+      });
+
+      const { rerender } = render(
+        <CostSavingsKeyInsight isLoading={true} lensResponse={mockLensResponse} />,
+        { wrapper }
+      );
+
+      const container = screen.getByTestId('alertProcessingKeyInsightsGreetingGroup');
+      container.addEventListener('renderComplete', renderCompleteHandler);
+
+      expect(container).toHaveAttribute('data-shared-item');
+      expect(container).toHaveAttribute('data-render-complete', 'false');
+      expect(renderCompleteHandler).not.toHaveBeenCalled();
+
+      // Change props to isLoading = false to render the insight
+      rerender(<CostSavingsKeyInsight isLoading={false} lensResponse={mockLensResponse} />);
+
+      await waitFor(() => {
+        expect(container).toHaveAttribute('data-render-complete', 'true');
+      });
+
+      expect(renderCompleteHandler).toHaveBeenCalledTimes(1);
+      expect(renderCompleteHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'renderComplete',
+          bubbles: true,
+        })
+      );
     });
   });
 });
