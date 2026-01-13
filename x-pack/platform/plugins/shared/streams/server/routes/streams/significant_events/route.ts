@@ -153,9 +153,9 @@ const readStreamSignificantEventsRoute = createServerRoute({
       { queryClient, scopedClusterClient }
     );
 
-    // Strip streamName from response to match public API schema
+    // Strip stream_name from response to match public API schema
     return {
-      significant_events: response.significant_events.map(({ streamName, ...event }) => event),
+      significant_events: response.significant_events.map(({ stream_name, ...event }) => event),
       aggregated_occurrences: response.aggregated_occurrences,
     };
   },

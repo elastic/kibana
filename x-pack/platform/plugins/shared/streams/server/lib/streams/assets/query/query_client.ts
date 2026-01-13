@@ -293,7 +293,7 @@ export class QueryClient {
    * Returns all query links for a given stream or
    * all query links if no stream is provided.
    */
-  async getQueryLinks(name?: string): Promise<Array<QueryLink & { streamName: string }>> {
+  async getQueryLinks(name?: string): Promise<Array<QueryLink & { stream_name: string }>> {
     const filter = name
       ? [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')]
       : [...termQuery(ASSET_TYPE, 'query')];
@@ -310,7 +310,7 @@ export class QueryClient {
 
     return queriesResponse.hits.hits.map((hit) => ({
       ...fromStorage(hit._source),
-      streamName: hit._source[STREAM_NAME],
+      stream_name: hit._source[STREAM_NAME],
     }));
   }
 
@@ -338,7 +338,7 @@ export class QueryClient {
   async findQueries(
     name: string | undefined,
     query: string
-  ): Promise<Array<QueryLink & { streamName: string }>> {
+  ): Promise<Array<QueryLink & { stream_name: string }>> {
     const filter = name
       ? [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')]
       : [...termQuery(ASSET_TYPE, 'query')];
@@ -366,7 +366,7 @@ export class QueryClient {
 
     return assetsResponse.hits.hits.map((hit) => ({
       ...fromStorage(hit._source),
-      streamName: hit._source[STREAM_NAME],
+      stream_name: hit._source[STREAM_NAME],
     }));
   }
 

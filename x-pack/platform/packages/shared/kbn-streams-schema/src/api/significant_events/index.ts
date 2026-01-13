@@ -48,7 +48,7 @@ interface SignificantEventsGetResponse {
 }
 
 type SignificantEventsResponseWithStreamName = SignificantEventsResponse & {
-  streamName: string;
+  stream_name: string;
 };
 
 interface SignificantEventsGetResponseWithStreamName {
