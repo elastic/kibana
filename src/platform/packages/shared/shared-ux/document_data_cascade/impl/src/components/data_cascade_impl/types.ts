@@ -20,29 +20,37 @@ import type { SelectionDropdownProps } from './data_cascade_header/group_selecti
  */
 export type CascadeSizing = keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
 
-interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
+interface CascadeGroupNodeUIInteraction<G extends GroupNode> {
+  /**
+   * The row instance that was interacted with in the group by hierarchy.
+   */
   row: G;
   /**
-   * The path of the row that was expanded in the group by hierarchy.
+   * The path of the row that was interacted with in the group by hierarchy.
+   *
+   * @example
+   * ```
+   * ['@timestamp', 'geo.src.country_name']
+   * ```
    */
   nodePath: string[];
   /**
    * KV record of the path values for the row node.
+   *
+   * @example
+   * ```
+   * {
+   *   '@timestamp': '2026-01-13T00:00:00.000Z',
+   *   'geo.src.country_name': 'United States'
+   * }
+   * ```
    */
   nodePathMap: Record<string, string>;
 }
 
-interface OnCascadeLeafNodeCollapsedArgs<G extends GroupNode> {
-  row: G;
-  /**
-   * The path of the row that was collapsed in the group by hierarchy.
-   */
-  nodePath: string[];
-  /**
-   * KV record of the path values for the row node.
-   */
-  nodePathMap: Record<string, string>;
-}
+type OnCascadeLeafNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
+
+type OnCascadeLeafNodeCollapsedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
 
 /**
  * Provides the props required to anchor another virtualized list
@@ -79,34 +87,6 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
       nodePath: string[];
     } & CascadeRowCellNestedVirtualizationAnchorProps<G>
   ) => React.ReactNode;
-}
-
-interface CascadeGroupNodeUIInteraction<G extends GroupNode> {
-  /**
-   * The row instance that was interacted with in the group by hierarchy.
-   */
-  row: G;
-  /**
-   * The path of the row that was interacted with in the group by hierarchy.
-   *
-   * @example
-   * ```
-   * ['@timestamp', 'geo.src.country_name']
-   * ```
-   */
-  nodePath: string[];
-  /**
-   * KV record of the path values for the row node.
-   *
-   * @example
-   * ```
-   * {
-   *   '@timestamp': '2026-01-13T00:00:00.000Z',
-   *   'geo.src.country_name': 'United States'
-   * }
-   * ```
-   */
-  nodePathMap: Record<string, string>;
 }
 
 type OnCascadeGroupNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
