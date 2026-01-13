@@ -66,13 +66,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(1);
 
     // save dashboard, navigate to view mode
-    await testSubjects.existOrFail('split-button-notification-indicator');
+    await dashboard.ensureMissingUnsavedChangesNotification();
     await dashboard.saveDashboard(dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME, {
       saveAsNew: false,
       waitDialogIsClosed: true,
       exitFromEditMode: true,
     });
-    await testSubjects.missingOrFail('split-button-notification-indicator');
+    await dashboard.ensureMissingUnsavedChangesNotification();
   };
 
   const createControls = async (

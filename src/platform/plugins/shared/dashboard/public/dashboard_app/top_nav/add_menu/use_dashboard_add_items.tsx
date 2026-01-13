@@ -23,13 +23,11 @@ import type { DashboardApi } from '../../../dashboard_api/types';
 import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
 import { getCreateVisualizationButtonTitle } from '../../_dashboard_app_strings';
 
-interface UseDashboardAddMenuItemsProps {
+interface Props {
   dashboardApi: DashboardApi;
 }
 
-export const useDashboardAddItems = ({
-  dashboardApi,
-}: UseDashboardAddMenuItemsProps): AppMenuPopoverItem[] => {
+export const useDashboardAddItems = ({ dashboardApi }: Props): AppMenuPopoverItem[] => {
   const [canCreateTimeSlider, setCanCreateTimeSlider] = useState(false);
 
   useEffect(() => {

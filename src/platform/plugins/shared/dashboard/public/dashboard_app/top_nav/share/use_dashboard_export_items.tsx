@@ -21,7 +21,7 @@ import {
   mapExportIntegrationToMetaData,
 } from './share_options_utils';
 
-interface UseDashboardExportItemsProps {
+interface Props {
   dashboardApi: DashboardApi;
   objectId?: string;
   isDirty: boolean;
@@ -32,7 +32,7 @@ export const useDashboardExportItems = ({
   objectId,
   isDirty,
   dashboardTitle,
-}: UseDashboardExportItemsProps): AppMenuPopoverItem[] => {
+}: Props): AppMenuPopoverItem[] => {
   const intl = useI18n();
 
   return useMemo(() => {

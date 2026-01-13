@@ -10,6 +10,7 @@
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
+export const UNSAVED_CHANGES_NOTIFICATION = 'split-button-notification-indicator';
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
@@ -416,9 +417,9 @@ export class DashboardPageObject extends FtrService {
     }
     await this.retry.try(async () => {
       // avoid flaky test by surrounding in retry
-      await this.testSubjects.existOrFail('split-button-notification-indicator');
+      await this.ensureHasUnsavedChangesNotification();
       await this.clickQuickSave();
-      await this.testSubjects.missingOrFail('split-button-notification-indicator');
+      await this.ensureMissingUnsavedChangesNotification();
       await this.testSubjects.click('toastCloseButton');
     });
     if (switchMode) {
@@ -426,18 +427,32 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
-  public async expectUnsavedChangesBadge() {
-    this.log.debug('Expect unsaved changes badge to be present');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('split-button-notification-indicator');
-    });
+  public async ensureHasUnsavedChangesNotification(retry = false) {
+    this.log.debug('Expect unsaved changes notification indicator to be present');
+    if (retry) {
+      await this.retry.try(async () => {
+        await this.testSubjects.existOrFail(UNSAVED_CHANGES_NOTIFICATION);
+      });
+      return;
+    } else {
+      await this.testSubjects.existOrFail(UNSAVED_CHANGES_NOTIFICATION);
+    }
   }
 
-  public async expectMissingUnsavedChangesBadge() {
-    this.log.debug('Expect there to be no unsaved changes badge');
-    await this.retry.try(async () => {
-      await this.testSubjects.missingOrFail('split-button-notification-indicator');
-    });
+  public async ensureMissingUnsavedChangesNotification(retry = false) {
+    this.log.debug('Expect there to be no unsaved changes notification indicator');
+    if (retry) {
+      await this.retry.try(async () => {
+        await this.testSubjects.missingOrFail(UNSAVED_CHANGES_NOTIFICATION);
+      });
+      return;
+    } else {
+      await this.testSubjects.missingOrFail(UNSAVED_CHANGES_NOTIFICATION);
+    }
+  }
+
+  public async expectUnsavedChangesNotificationExists(timeout: number | undefined = undefined) {
+    await this.testSubjects.exists(UNSAVED_CHANGES_NOTIFICATION, { timeout });
   }
 
   public async clickNewDashboard(
@@ -564,9 +579,7 @@ export class DashboardPageObject extends FtrService {
       }
 
       this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
-      return await this.testSubjects.exists('split-button-notification-indicator', {
-        timeout: 1500,
-      });
+      return await this.expectUnsavedChangesNotificationExists(1500);
     });
   }
 
