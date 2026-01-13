@@ -156,7 +156,7 @@ describe('prepareConversation', () => {
 
       const nextInput: ConverseInput = {
         message: 'Hello',
-        attachments: [{ id: 'a-1', type: 'text', data: { title: 'Doc', content: 'v1' } }],
+        attachments: [{ id: 'a-1', type: 'text', data: { content: 'v1' } }],
       };
 
       const result = await prepareConversation({
@@ -170,25 +170,22 @@ describe('prepareConversation', () => {
       expect(result.attachmentStateManager.getAll()[0]).toMatchObject({
         id: 'a-1',
         type: 'text',
-        description: 'Doc',
         current_version: 1,
       });
       expect(result.attachmentTypes.map((t) => t.type)).toEqual(['text']);
       expect(result.versionedAttachmentPresentation?.activeCount).toBe(1);
     });
 
-    it('treats same title/name as a new version of an existing attachment', async () => {
-      const title = 'Doc';
+    it('treats same ID as a new version of an existing attachment', async () => {
       const existing: VersionedAttachment = {
         id: 'a-1',
         type: 'text',
-        description: title,
         active: true,
         current_version: 1,
         versions: [
           {
             version: 1,
-            data: { title, content: 'v1' },
+            data: { content: 'v1' },
             created_at: '2024-01-01T00:00:00.000Z',
             content_hash: 'hash-v1',
             estimated_tokens: 1,
@@ -206,7 +203,7 @@ describe('prepareConversation', () => {
 
       const nextInput: ConverseInput = {
         message: 'Hello',
-        attachments: [{ id: 'a-2', type: 'text', data: { title, content: 'v2' } }],
+        attachments: [{ id: 'a-1', type: 'text', data: { content: 'v2' } }],
       };
 
       const result = await prepareConversation({
@@ -219,7 +216,6 @@ describe('prepareConversation', () => {
       expect(all).toHaveLength(1);
       expect(all[0].id).toBe('a-1');
       expect(all[0].current_version).toBe(2);
-      expect(all[0].description).toBe(title);
     });
   });
 
