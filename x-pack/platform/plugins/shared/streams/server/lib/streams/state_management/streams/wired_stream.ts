@@ -64,7 +64,7 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
-import { validateSettingsWithDryRun } from './validate_settings';
+import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -532,10 +532,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       ancestorsAndSelf.map((ancestor) => ancestor.definition) as Streams.WiredStream.Definition[]
     );
 
-    const shouldValidateSettingsWithDryRun =
-      !existsInStartingState || ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
+    const allowlistValidation = validateSettings({
+      settings: inheritedSettings,
+      isServerless: this.dependencies.isServerless,
+    });
 
-    // Run ES validations in parallel to avoid sequential latency
+    if (!allowlistValidation.isValid) {
+      return allowlistValidation;
+    }
+
+    const shouldValidateSettingsWithDryRun =
+      existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
+
     const [settingsValidation] = await Promise.all([
       shouldValidateSettingsWithDryRun
         ? validateSettingsWithDryRun({

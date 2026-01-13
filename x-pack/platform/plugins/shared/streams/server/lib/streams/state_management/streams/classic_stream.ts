@@ -39,7 +39,7 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import type { StateDependencies, StreamChange } from '../types';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
-import { validateSettingsWithDryRun } from './validate_settings';
+import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
@@ -231,6 +231,15 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     validateClassicFields(this._definition);
     validateBracketsInFieldNames(this._definition);
+
+    const allowlistValidation = validateSettings({
+      settings: this._definition.ingest.settings,
+      isServerless: this.dependencies.isServerless,
+    });
+
+    if (!allowlistValidation.isValid) {
+      return allowlistValidation;
+    }
 
     const [settingsValidation] = await Promise.all([
       validateSettingsWithDryRun({

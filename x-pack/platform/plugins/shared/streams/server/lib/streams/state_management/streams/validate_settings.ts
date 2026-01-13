@@ -20,18 +20,13 @@ interface DataStreamSettingsResponse {
 
 const SERVERLESS_SETTINGS_ALLOWLIST = ['index.refresh_interval'];
 
-export async function validateSettingsWithDryRun({
-  scopedClusterClient,
-  streamName,
+export function validateSettings({
   settings,
   isServerless,
 }: {
-  scopedClusterClient: IScopedClusterClient;
-  streamName: string;
   settings: IngestStreamSettings;
   isServerless: boolean;
-}): Promise<ValidationResult> {
-  // Local validation: Check serverless allowlist
+}): ValidationResult {
   if (isServerless) {
     const disallowedSettings = Object.keys(settings).filter(
       (setting) => !SERVERLESS_SETTINGS_ALLOWLIST.includes(setting)
@@ -46,6 +41,20 @@ export async function validateSettingsWithDryRun({
     }
   }
 
+  return { isValid: true, errors: [] };
+}
+
+export async function validateSettingsWithDryRun({
+  scopedClusterClient,
+  streamName,
+  settings,
+  isServerless,
+}: {
+  scopedClusterClient: IScopedClusterClient;
+  streamName: string;
+  settings: IngestStreamSettings;
+  isServerless: boolean;
+}): Promise<ValidationResult> {
   const formattedSettings = formatSettings(settings, isServerless);
 
   const settingsToValidate = Object.fromEntries(
@@ -56,20 +65,11 @@ export async function validateSettingsWithDryRun({
     return { isValid: true, errors: [] };
   }
 
-  let response: DataStreamSettingsResponse;
-  try {
-    response = (await scopedClusterClient.asCurrentUser.indices.putDataStreamSettings({
-      name: streamName,
-      settings: settingsToValidate,
-      dry_run: true,
-    })) as DataStreamSettingsResponse;
-  } catch (e) {
-    const statusCode = e?.meta?.statusCode;
-    if (statusCode === 404) {
-      return { isValid: true, errors: [] };
-    }
-    throw e;
-  }
+  const response = (await scopedClusterClient.asCurrentUser.indices.putDataStreamSettings({
+    name: streamName,
+    settings: settingsToValidate,
+    dry_run: true,
+  })) as DataStreamSettingsResponse;
 
   if (!response.data_streams || response.data_streams.length === 0) {
     return {
