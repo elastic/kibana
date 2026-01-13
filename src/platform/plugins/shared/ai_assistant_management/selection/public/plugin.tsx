@@ -28,6 +28,7 @@ import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
 } from '../common/ui_setting_keys';
+import { getIsNavControlVisible$ } from './hooks/get_is_nav_control_visible';
 import { NavControlInitiator } from './components/navigation_control/lazy_nav_control';
 import type { AIExperienceSelection } from './types';
 
@@ -227,6 +228,7 @@ export class AIAssistantManagementPlugin
     ) {
       coreStart.chrome.navControls.registerRight({
         id: 'aiAssistantNavControl',
+        enabled: getIsNavControlVisible$(coreStart, spaces),
         mount: (element) => {
           ReactDOM.render(
             coreStart.rendering.addContext(
@@ -237,7 +239,6 @@ export class AIAssistantManagementPlugin
                 triggerOpenChat={(selection: AIExperienceSelection) =>
                   openChatSubject.next(selection)
                 }
-                spaces={spaces}
               />
             ),
             element

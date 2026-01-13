@@ -16,6 +16,8 @@ export interface ChromeNavControl {
   order?: number;
   /** Required unique identifier. */
   id: string;
+  /** Optional enabled flag or observable to control whether the nav control container renders or not. Defaults to true. */
+  enabled?: boolean | Observable<boolean>;
   /** Mount function to mount the nav control. */
   mount: MountPoint;
 }
