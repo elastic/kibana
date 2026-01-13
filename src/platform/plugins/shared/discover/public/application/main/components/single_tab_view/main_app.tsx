@@ -16,7 +16,6 @@ import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_me
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search_alias_match_redirect';
 import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
-import type { EmbeddedState } from '../../hooks/use_embedded_state';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -25,10 +24,9 @@ export interface DiscoverMainProps {
    * Central state container
    */
   stateContainer: DiscoverStateContainer;
-  embeddableState: EmbeddedState;
 }
 
-export function DiscoverMainApp({ stateContainer, embeddableState }: DiscoverMainProps) {
+export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   const services = useDiscoverServices();
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
   const { chrome, docLinks, spaces, history } = services;
@@ -48,7 +46,7 @@ export function DiscoverMainApp({ stateContainer, embeddableState }: DiscoverMai
 
   return (
     <RootDragDropProvider>
-      <DiscoverLayoutMemoized stateContainer={stateContainer} embeddableState={embeddableState} />
+      <DiscoverLayoutMemoized stateContainer={stateContainer} />
     </RootDragDropProvider>
   );
 }

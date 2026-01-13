@@ -36,11 +36,6 @@ describe('DiscoverMainApp', () => {
     await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
     const props = {
       stateContainer,
-      embeddableState: {
-        isByValueEditor: () => false,
-        isEmbeddedEditor: () => false,
-        transferBackToEditor: () => {},
-      },
     };
     const history = createMemoryHistory({
       initialEntries: ['/'],

@@ -20,7 +20,6 @@ import { createTabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { DiscoverSearchSessionManager } from '../discover_search_session';
-import { type EmbeddedState, useEmbeddedState } from '../../hooks/use_embedded_state';
 
 interface UseStateManagers {
   customizationContext: DiscoverCustomizationContext;
@@ -32,7 +31,6 @@ interface UseStateManagersReturn {
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   searchSessionManager: DiscoverSearchSessionManager;
-  embeddableState: EmbeddedState;
 }
 
 export const useStateManagers = ({
@@ -40,10 +38,8 @@ export const useStateManagers = ({
   urlStateStorage,
   customizationContext,
 }: UseStateManagers): UseStateManagersReturn => {
-  const embeddableState = useEmbeddedState();
-
   const tabsEnabled =
-    !embeddableState.isByValueEditor() && services.discoverFeatureFlags.getTabsEnabled();
+    !services.embeddableEditor.isByValueEditor() && services.discoverFeatureFlags.getTabsEnabled();
 
   // syncing with the _tab part URL
   const [tabsStorageManager] = useState(() =>
@@ -92,8 +88,7 @@ export const useStateManagers = ({
       internalState,
       runtimeStateManager,
       searchSessionManager,
-      embeddableState,
     }),
-    [internalState, runtimeStateManager, searchSessionManager, embeddableState]
+    [internalState, runtimeStateManager, searchSessionManager]
   );
 };

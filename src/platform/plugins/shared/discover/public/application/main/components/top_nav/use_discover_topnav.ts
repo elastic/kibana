@@ -24,16 +24,13 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
-import type { EmbeddedState } from '../../hooks/use_embedded_state';
 
 export const useDiscoverTopNav = ({
   stateContainer,
   persistedDiscoverSession,
-  embeddableState,
 }: {
   stateContainer: DiscoverStateContainer;
   persistedDiscoverSession: DiscoverSession | undefined;
-  embeddableState: EmbeddedState;
 }) => {
   const services = useDiscoverServices();
   const topNavCustomization = useDiscoverCustomization('top_nav');
@@ -77,7 +74,6 @@ export const useDiscoverTopNav = ({
     shouldShowESQLToDataViewTransitionModal,
     hasShareIntegration,
     persistedDiscoverSession,
-    embeddableState,
   });
 
   return {

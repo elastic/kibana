@@ -50,7 +50,6 @@ import type { DiscoverAppLocatorParams } from '../../../../../common';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDataState } from '../../hooks/use_data_state';
-import type { EmbeddedState } from '../../hooks/use_embedded_state';
 
 /**
  * Helper function to build the top nav links
@@ -67,7 +66,6 @@ export const useTopNavLinks = ({
   shouldShowESQLToDataViewTransitionModal,
   hasShareIntegration,
   persistedDiscoverSession,
-  embeddableState,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -80,7 +78,6 @@ export const useTopNavLinks = ({
   shouldShowESQLToDataViewTransitionModal: boolean;
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
-  embeddableState: EmbeddedState;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
@@ -299,7 +296,7 @@ export const useTopNavLinks = ({
     if (
       services.capabilities.discover_v2.save &&
       !defaultMenu?.saveItem?.disabled &&
-      embeddableState.isEmbeddedEditor()
+      services.embeddableEditor.isEmbeddedEditor()
     ) {
       const cancelSearch = {
         id: 'cancel',
@@ -313,20 +310,20 @@ export const useTopNavLinks = ({
         emphasize: true,
         fill: false,
         color: 'text',
-        run: embeddableState.transferBackToEditor,
+        run: services.embeddableEditor.transferBackToEditor,
       };
       entries.push(cancelSearch);
     }
 
     if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
-      const saveLabel = embeddableState.isEmbeddedEditor()
+      const saveLabel = services.embeddableEditor.isEmbeddedEditor()
         ? i18n.translate('discover.localMenu.saveAndReturnTitle', {
             defaultMessage: 'Save and return',
           })
         : i18n.translate('discover.localMenu.saveTitle', {
             defaultMessage: 'Save',
           });
-      const saveDescription = embeddableState.isEmbeddedEditor()
+      const saveDescription = services.embeddableEditor.isEmbeddedEditor()
         ? i18n.translate('discover.localMenu.saveSearchAndReturnDescription', {
             defaultMessage: 'Save session and return to dashboard',
           })
@@ -339,7 +336,7 @@ export const useTopNavLinks = ({
         label: saveLabel,
         description: saveDescription,
         testId: 'discoverSaveButton',
-        iconType: embeddableState.isEmbeddedEditor() ? 'checkInCircleFilled' : 'save',
+        iconType: services.embeddableEditor.isEmbeddedEditor() ? 'checkInCircleFilled' : 'save',
         emphasize: true,
         fill: true,
         color: 'primary',
@@ -347,7 +344,7 @@ export const useTopNavLinks = ({
           onSaveDiscoverSession({
             services,
             state,
-            onSaveCb: embeddableState.transferBackToEditor,
+            onSaveCb: services.embeddableEditor.transferBackToEditor,
             onClose: () => {
               anchorElement?.focus();
             },
@@ -367,6 +364,5 @@ export const useTopNavLinks = ({
     shouldShowESQLToDataViewTransitionModal,
     dispatch,
     state,
-    embeddableState,
   ]);
 };

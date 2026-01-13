@@ -135,11 +135,6 @@ async function mountComponent(
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },
     stateContainer,
-    embeddableState: {
-      isByValueEditor: () => false,
-      isEmbeddedEditor: () => false,
-      transferBackToEditor: () => {},
-    },
     setExpandedDoc: jest.fn(),
     updateDataViewList: jest.fn(),
   };

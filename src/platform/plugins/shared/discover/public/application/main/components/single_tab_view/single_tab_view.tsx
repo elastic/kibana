@@ -46,7 +46,6 @@ import { ScopedServicesProvider } from '../../../../components/scoped_services_p
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
 import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
-import type { EmbeddedState } from '../../hooks/use_embedded_state';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -55,7 +54,6 @@ export interface SingleTabViewProps {
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   searchSessionManager: DiscoverSearchSessionManager;
-  embeddableState: EmbeddedState;
 }
 
 export const SingleTabView = ({
@@ -65,7 +63,6 @@ export const SingleTabView = ({
   internalState,
   runtimeStateManager,
   searchSessionManager,
-  embeddableState,
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
@@ -193,10 +190,7 @@ export const SingleTabView = ({
             scopedProfilesManager={scopedProfilesManager}
             scopedEBTManager={scopedEbtManager}
           >
-            <DiscoverMainApp
-              stateContainer={currentStateContainer}
-              embeddableState={embeddableState}
-            />
+            <DiscoverMainApp stateContainer={currentStateContainer} />
           </ScopedServicesProvider>
         </RuntimeStateProvider>
       </DiscoverMainProvider>

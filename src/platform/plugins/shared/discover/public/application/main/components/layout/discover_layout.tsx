@@ -68,7 +68,6 @@ import {
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import type { EmbeddedState } from '../../hooks/use_embedded_state';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -82,10 +81,9 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
 
 export interface DiscoverLayoutProps {
   stateContainer: DiscoverStateContainer;
-  embeddableState: EmbeddedState;
 }
 
-export function DiscoverLayout({ stateContainer, embeddableState }: DiscoverLayoutProps) {
+export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -427,7 +425,6 @@ export function DiscoverLayout({ stateContainer, embeddableState }: DiscoverLayo
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
-        embeddableState={embeddableState}
         esqlModeErrors={esqlModeErrors}
         esqlModeWarning={esqlModeWarning}
         onFieldEdited={onFieldEdited}

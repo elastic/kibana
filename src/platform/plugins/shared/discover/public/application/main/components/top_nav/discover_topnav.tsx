@@ -37,12 +37,10 @@ import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
-import type { EmbeddedState } from '../../hooks/use_embedded_state';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
   stateContainer: DiscoverStateContainer;
-  embeddableState: EmbeddedState;
   esqlModeErrors?: Error;
   esqlModeWarning?: string;
   onFieldEdited: (options: {
@@ -56,7 +54,6 @@ export interface DiscoverTopNavProps {
 export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
-  embeddableState,
   esqlModeErrors,
   esqlModeWarning,
   onFieldEdited,
@@ -203,7 +200,6 @@ export const DiscoverTopNav = ({
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({
     stateContainer,
     persistedDiscoverSession,
-    embeddableState,
   });
 
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {

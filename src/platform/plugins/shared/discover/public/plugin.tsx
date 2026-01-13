@@ -374,9 +374,10 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const [{ buildServices }, historyService] = await Promise.all([
+    const [{ buildServices }, historyService, { EmbeddableEditorService }] = await Promise.all([
       getSharedServices(),
       getHistoryService(),
+      getEmbeddableServices(),
     ]);
     return buildServices({
       core,
@@ -391,6 +392,10 @@ export class DiscoverPlugin
       profilesManager,
       ebtManager,
       setHeaderActionMenu,
+      embeddableEditor: new EmbeddableEditorService(
+        core.application,
+        plugins.embeddable.getStateTransfer()
+      ),
     });
   };
 
