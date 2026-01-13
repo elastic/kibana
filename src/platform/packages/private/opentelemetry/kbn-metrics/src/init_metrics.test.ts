@@ -112,6 +112,7 @@ describe('initMetrics', () => {
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterGrpc),
       exportIntervalMillis: 5000,
+      exportTimeoutMillis: 5000,
     });
   });
 
@@ -138,6 +139,7 @@ describe('initMetrics', () => {
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterGrpc),
       exportIntervalMillis: 5000,
+      exportTimeoutMillis: 5000,
     });
   });
 
@@ -164,6 +166,7 @@ describe('initMetrics', () => {
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterGrpc),
       exportIntervalMillis: 5000,
+      exportTimeoutMillis: 5000,
     });
   });
 
@@ -192,10 +195,12 @@ describe('initMetrics', () => {
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterGrpc),
       exportIntervalMillis: 10000,
+      exportTimeoutMillis: 10000,
     });
     expect(PeriodicExportingMetricReader).toHaveBeenCalledWith({
       exporter: expect.any(OTLPMetricExporterHttp),
       exportIntervalMillis: 10000,
+      exportTimeoutMillis: 10000,
     });
   });
 

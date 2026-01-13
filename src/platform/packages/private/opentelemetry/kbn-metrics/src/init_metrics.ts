@@ -116,11 +116,13 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
       }
 
       const exportInterval = variant.value.exportIntervalMillis ?? globalExportIntervalMillis;
+      const exportIntervalMillis =
+        typeof exportInterval === 'number' ? exportInterval : exportInterval.asMilliseconds();
 
       return new metrics.PeriodicExportingMetricReader({
         exporter,
-        exportIntervalMillis:
-          typeof exportInterval === 'number' ? exportInterval : exportInterval.asMilliseconds(),
+        exportIntervalMillis,
+        exportTimeoutMillis: exportIntervalMillis,
       });
     })
   );
