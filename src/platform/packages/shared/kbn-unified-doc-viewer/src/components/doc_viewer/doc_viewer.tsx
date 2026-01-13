@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RefAttributes } from 'react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState, useEffect } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
@@ -20,7 +21,7 @@ export interface DocViewerApi {
   setSelectedTabId: (tabId: string) => void;
 }
 
-interface DocViewerInternalProps extends DocViewRenderProps {
+export interface DocViewerProps extends DocViewRenderProps, RefAttributes<DocViewerApi> {
   docViews: DocView[];
   initialTabId?: DocView['id'];
   onUpdateSelectedTabId?: (tabId: string | undefined) => void;
@@ -35,7 +36,7 @@ const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewe
  * A view can contain a React `component`, or any JS framework by using
  * a `render` function.
  */
-export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
+export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
   ({ docViews, initialTabId, onUpdateSelectedTabId, ...renderProps }, ref) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
@@ -96,5 +97,3 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
     );
   }
 );
-
-export type DocViewerProps = Parameters<typeof DocViewer>[0];
