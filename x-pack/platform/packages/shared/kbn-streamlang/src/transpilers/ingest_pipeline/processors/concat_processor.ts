@@ -35,6 +35,7 @@ export const processConcatProcessor = (
   processor: Omit<ConcatProcessor, 'where' | 'action' | 'to'> & {
     if?: string;
     field: string;
+    tag?: string;
   }
 ): IngestProcessorContainer => {
   let value = '';
@@ -54,7 +55,7 @@ export const processConcatProcessor = (
       description: processor.description,
       if: processor.if,
       ignore_failure: processor.ignore_failure,
-      tag: processor.customIdentifier,
+      tag: processor.tag,
     },
   };
 
