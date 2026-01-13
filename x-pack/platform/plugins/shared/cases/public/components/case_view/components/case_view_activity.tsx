@@ -226,6 +226,8 @@ export const CaseViewActivity = ({
           onUpdateField={onUpdateField}
         />
         <EuiSpacer size="l" />
+        <CaseViewTemplateFields caseData={caseData} />
+        <EuiSpacer size="l" />
         <EuiFlexItem grow={false}>
           <UserActionsActivityBar
             onUserActionsActivityChanged={handleUserActionsActivityChanged}
@@ -274,7 +276,6 @@ export const CaseViewActivity = ({
           <h2>{i18n.CASE_SETTINGS}</h2>
         </EuiScreenReaderOnly>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
-          {<CaseViewTemplateFields caseData={caseData} />}
           {caseAssignmentAuthorized ? (
             <>
               <AssignUsers

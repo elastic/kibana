@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { CasePostRequest } from '../../../common';
 import { GENERAL_CASES_OWNER } from '../../../common';
 import type { ActionConnector } from '../../../common/types/domain';
@@ -37,7 +38,7 @@ export const getInitialCaseValue = ({
   settings: { syncAlerts: true, extractObservables: true },
   customFields: [],
   template: undefined,
-  templateFields: {},
+  [CASE_EXTENDED_FIELDS]: {},
   ...restFields,
   connector: connector ?? getNoneConnector(),
   owner,

@@ -10,6 +10,7 @@ import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form
 import { VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { CasePostRequest } from '../../../common';
 import {
+  CASE_EXTENDED_FIELDS,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -115,5 +116,5 @@ export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
   template: {
     defaultValue: null,
   },
-  templateFields: {},
+  [CASE_EXTENDED_FIELDS]: {},
 };

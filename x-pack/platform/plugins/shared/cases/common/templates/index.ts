@@ -40,6 +40,7 @@ export interface ParsedTemplate extends Omit<Template, 'definition'> {
     fields: Array<{
       control: string;
       name: string;
+      label?: string;
       type: 'keyword';
       metadata: Record<string, unknown>;
     }>;

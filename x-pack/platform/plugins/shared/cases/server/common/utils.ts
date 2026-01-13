@@ -36,6 +36,7 @@ import {
 } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
+  CASE_EXTENDED_FIELDS,
   CASE_VIEW_COMMENT_PATH,
   CASE_VIEW_PATH,
   CASE_VIEW_TAB_PATH,
@@ -94,7 +95,7 @@ export const transformNewCase = ({
   total_observables: 0,
   incremental_id: undefined,
   template: newCase.template,
-  templateFields: newCase.templateFields,
+  [CASE_EXTENDED_FIELDS]: newCase[CASE_EXTENDED_FIELDS],
 });
 
 export const transformCases = ({

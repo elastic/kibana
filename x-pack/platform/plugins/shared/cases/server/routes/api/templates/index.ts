@@ -22,7 +22,11 @@ import type {
   Template,
   UpdateTemplateInput,
 } from '../../../../common/templates';
-import { CASE_TEMPLATE_SAVED_OBJECT, CASES_INTERNAL_URL } from '../../../../common/constants';
+import {
+  CASE_EXTENDED_FIELDS,
+  CASE_TEMPLATE_SAVED_OBJECT,
+  CASES_INTERNAL_URL,
+} from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
@@ -130,7 +134,7 @@ export class TemplatesService {
       properties: {
         cases: {
           properties: {
-            templateFields: {
+            [CASE_EXTENDED_FIELDS]: {
               properties: parsedDefinition.fields.reduce((acc, field) => {
                 acc[[field.name, field.type].join('_as_')] = {
                   type: field.type,
@@ -218,7 +222,7 @@ export class TemplatesService {
 }
 
 // TODO:
-// 3. add new fields to a case - templateFields and templateId
+// 3. add new fields to a case - extendedFields and templateId
 // 4. add validate method to check case fields against the template
 // 5. add case rendering based on the template
 

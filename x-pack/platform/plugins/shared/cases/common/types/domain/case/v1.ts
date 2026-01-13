@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
+import { CASE_EXTENDED_FIELDS } from '../../../constants';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
@@ -155,7 +156,7 @@ export const CaseAttributesRt = rt.intersection([
       /**
        * Validated using external schema
        */
-      templateFields: rt.any,
+      [CASE_EXTENDED_FIELDS]: rt.any,
     })
   ),
 ]);

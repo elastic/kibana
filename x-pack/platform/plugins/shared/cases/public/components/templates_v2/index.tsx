@@ -23,6 +23,7 @@ import {
   EuiLoadingSpinner,
   EuiIconTip,
   EuiBadge,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { CodeEditor } from '@kbn/code-editor';
@@ -36,7 +37,7 @@ import {
   useFormContext as useKibanaFormContext,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { HiddenField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { CASES_INTERNAL_URL } from '../../../common/constants';
+import { CASE_EXTENDED_FIELDS, CASES_INTERNAL_URL } from '../../../common/constants';
 import type { CreateTemplateInput, ParsedTemplate, Template } from '../../../common/templates';
 import { CommonFlyout, CommonFlyoutFooter } from '../configure_cases/flyout';
 import { TitleExperimentalBadge } from '../header_page/title';
@@ -52,6 +53,9 @@ const i18n = {
   UPDATE_TEMPLATE: 'Update template',
   CREATE_TEMPLATE: 'Create template',
 };
+
+// TODO:
+// 1. update extended_fields in case view
 
 // Api
 
@@ -312,6 +316,7 @@ export const TemplateFormFields = ({ updating }: { updating?: boolean }) => {
 
   useEffect(() => {
     const _parsed = parseYaml(sample);
+    console.log('TemplateFormFields', _parsed);
   }, []);
 
   return (
@@ -492,6 +497,7 @@ export const CreateCaseTemplateFields = () => {
       return null;
     }
 
+    // TODO: create control registry and use it here
     return template.data.definition.fields.map((field) => {
       if (field.control === 'select') {
         const options = (field.metadata.options as string[]).map((value) => ({
@@ -500,16 +506,21 @@ export const CreateCaseTemplateFields = () => {
         }));
 
         return (
-          <UseField
-            key={field.name}
-            path={`templateFields.${field.name}_as_${field.type}`}
-            component={SelectField}
-            componentProps={{
-              euiFieldProps: {
-                options,
-              },
-            }}
-          />
+          <EuiFormRow
+            label={field.label ?? field.name}
+            title={`${CASE_EXTENDED_FIELDS}.${field.name}_as_${field.type}`}
+          >
+            <UseField
+              key={field.name}
+              path={`${CASE_EXTENDED_FIELDS}.${field.name}_as_${field.type}`}
+              component={SelectField}
+              componentProps={{
+                euiFieldProps: {
+                  options,
+                },
+              }}
+            />
+          </EuiFormRow>
         );
       }
 
@@ -517,12 +528,24 @@ export const CreateCaseTemplateFields = () => {
     });
   }, [template]);
 
+  if (!fieldsFragment) {
+    return (
+      <>
+        <EuiSpacer />
+        <EuiCallOut announceOnMount title="Template not selected">
+          <p>{`Select template in the first step above to edit extended fields.`}</p>
+        </EuiCallOut>
+      </>
+    );
+  }
+
   return (
     <>
       <EuiSpacer />
       <EuiTitle size="s">
-        <h4>{`Template Fields for template ${fields?.template?.id} (version ${fields?.template?.version})`}</h4>
+        <h4>{`Extended Fields`}</h4>
       </EuiTitle>
+      <EuiSpacer />
       {fieldsFragment}
     </>
   );
@@ -533,14 +556,14 @@ const CaseViewTemplateFieldsInner = ({
   template,
   // TODO: needed for updates
   caseId,
-  templateFields,
+  extendedFields,
 }: {
   template: {
     id: string;
     version: number;
   };
   caseId: string;
-  templateFields: unknown;
+  extendedFields: unknown;
 }) => {
   const templateQuery = useTemplate(template.id, template.version);
 
@@ -554,7 +577,7 @@ const CaseViewTemplateFieldsInner = ({
     <>
       <EuiTitle size="xs">
         <h3>
-          {templateQuery.data?.name}{' '}
+          {`Extended Fields (${templateQuery.data?.name})`}{' '}
           {!templateQuery.data?.isLatest && (
             <EuiBadge>
               {`Outdated`}{' '}
@@ -570,11 +593,12 @@ const CaseViewTemplateFieldsInner = ({
           )}
         </h3>
       </EuiTitle>
+      <EuiSpacer size="xs" />
       {fields?.map((field) => {
         return (
           <div key={field.name}>
             <strong>{`${field.name}:`}</strong>{' '}
-            {(templateFields as any)[`${camelCase(`${field.name}_as_${field.type}`)}`]}
+            {(extendedFields as any)?.[`${camelCase(`${field.name}_as_${field.type}`)}`]}
           </div>
         );
       })}
@@ -593,7 +617,7 @@ export const CaseViewTemplateFields = ({ caseData }: { caseData: CaseUI }) => {
     <CaseViewTemplateFieldsInner
       template={caseData.template}
       caseId={caseData.id}
-      templateFields={caseData.templateFields}
+      extendedFields={caseData.extendedFields}
     />
   );
 };

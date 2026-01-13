@@ -309,3 +309,9 @@ export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
 
 export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
   'case_view_attachments_sub_tab_clicked' as const;
+
+/**
+ * Exporting this to make it easier to track the usage across the codebase
+ * via lsp references.
+ */
+export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;

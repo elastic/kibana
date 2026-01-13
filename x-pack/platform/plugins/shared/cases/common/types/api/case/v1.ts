@@ -22,6 +22,7 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  CASE_EXTENDED_FIELDS,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -222,7 +223,7 @@ export const CasePostRequestRt = rt.intersection([
 
       template: rt.union([CaseTemplate, rt.null]),
 
-      templateFields: rt.any,
+      [CASE_EXTENDED_FIELDS]: rt.any,
     })
   ),
 ]);

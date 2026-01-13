@@ -43,7 +43,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
 
   const firstStep = useMemo(
     () => ({
-      title: i18n.TEMPLATE_FIELDS,
+      title: i18n.EXTENDED_FIELDS,
       children: (
         <TemplateFields
           isLoading={isSubmitting}
