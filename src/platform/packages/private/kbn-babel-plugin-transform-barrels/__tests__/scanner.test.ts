@@ -836,4 +836,130 @@ export class MyClass {}`
       expect(exports.MyClass.path).toBe(Path.join(tempDir, 'mixed.ts'));
     });
   });
+
+  describe('double extension handling (.gen.ts, .schema.ts)', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-double-ext-test-'));
+
+      // Create source files with double extensions (common pattern for OpenAPI generated files)
+      await Fsp.writeFile(
+        Path.join(tempDir, 'common_attributes.gen.ts'),
+        `import { z } from 'zod';
+
+export type DefendInsightType = z.infer<typeof DefendInsightType>;
+export const DefendInsightType = z.enum(['incompatible_antivirus', 'noisy_process_tree']);
+
+export type DefendInsight = z.infer<typeof DefendInsight>;
+export const DefendInsight = z.object({ group: z.string() });`
+      );
+
+      await Fsp.writeFile(
+        Path.join(tempDir, 'routes.schema.ts'),
+        `export interface GetRouteParams { id: string; }
+export interface PostRouteBody { name: string; }`
+      );
+
+      // Barrel that re-exports from double-extension files
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `export * from './common_attributes.gen';
+export * from './routes.schema';`
+      );
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('resolves export * from files with double extensions like .gen.ts', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // Exports from .gen.ts file should be detected
+      expect(exports.DefendInsightType).toBeDefined();
+      expect(exports.DefendInsightType.path).toBe(Path.join(tempDir, 'common_attributes.gen.ts'));
+      expect(exports.DefendInsightType.localName).toBe('DefendInsightType');
+
+      expect(exports.DefendInsight).toBeDefined();
+      expect(exports.DefendInsight.path).toBe(Path.join(tempDir, 'common_attributes.gen.ts'));
+    });
+
+    it('resolves export * from files with .schema.ts extension', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // Exports from .schema.ts file should be detected
+      expect(exports.GetRouteParams).toBeDefined();
+      expect(exports.GetRouteParams.path).toBe(Path.join(tempDir, 'routes.schema.ts'));
+
+      expect(exports.PostRouteBody).toBeDefined();
+      expect(exports.PostRouteBody.path).toBe(Path.join(tempDir, 'routes.schema.ts'));
+    });
+  });
+
+  describe('nested export * with double extensions', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-nested-double-ext-test-'));
+
+      // Create nested structure similar to @kbn/elastic-assistant-common
+      await Fsp.mkdir(Path.join(tempDir, 'schemas', 'defend_insights'), { recursive: true });
+
+      // Source file with double extension
+      await Fsp.writeFile(
+        Path.join(tempDir, 'schemas', 'defend_insights', 'common_attributes.gen.ts'),
+        `export const DefendInsightType = { Enum: { incompatible_antivirus: 'incompatible_antivirus' } };
+export const DefendInsightStatus = { Enum: { running: 'running' } };`
+      );
+
+      // Middle barrel with export * from double-extension file
+      await Fsp.writeFile(
+        Path.join(tempDir, 'schemas', 'defend_insights', 'index.ts'),
+        `export * from './common_attributes.gen';`
+      );
+
+      // Top-level schemas barrel
+      await Fsp.writeFile(
+        Path.join(tempDir, 'schemas', 'index.ts'),
+        `export * from './defend_insights';`
+      );
+
+      // Main barrel
+      await Fsp.writeFile(Path.join(tempDir, 'index.ts'), `export * from './schemas';`);
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('follows nested export * chains through double-extension files', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // DefendInsightType should trace all the way to the .gen.ts source file
+      expect(exports.DefendInsightType).toBeDefined();
+      expect(exports.DefendInsightType.path).toBe(
+        Path.join(tempDir, 'schemas', 'defend_insights', 'common_attributes.gen.ts')
+      );
+      expect(exports.DefendInsightType.localName).toBe('DefendInsightType');
+
+      // DefendInsightStatus should also resolve correctly
+      expect(exports.DefendInsightStatus).toBeDefined();
+      expect(exports.DefendInsightStatus.path).toBe(
+        Path.join(tempDir, 'schemas', 'defend_insights', 'common_attributes.gen.ts')
+      );
+    });
+  });
 });

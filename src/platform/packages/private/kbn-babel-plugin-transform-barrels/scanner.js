@@ -955,18 +955,14 @@ function resolveModulePath(modulePath, fromDir) {
   const basePath = path.resolve(fromDir, modulePath);
   const parseableExtensions = ['.ts', '.tsx', '.js', '.jsx'];
 
-  // Check if path already has an extension
+  // Check if path already has a parseable extension that exists
   const existingExt = path.extname(basePath);
-  if (existingExt) {
-    // Path has extension - only resolve if it's parseable and exists
-    if (parseableExtensions.includes(existingExt) && fs.existsSync(basePath)) {
-      return basePath;
-    }
-    // Non-parseable extension (.peggy, .json, etc.) or doesn't exist - skip
-    return null;
+  if (existingExt && parseableExtensions.includes(existingExt) && fs.existsSync(basePath)) {
+    return basePath;
   }
 
-  // No extension - try adding each parseable extension
+  // Try appending parseable extensions
+  // This handles: no extension, double extensions (.gen.ts, .schema.ts), or missing files
   for (const ext of parseableExtensions) {
     const fullPath = basePath + ext;
     if (fs.existsSync(fullPath)) {
