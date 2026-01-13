@@ -991,15 +991,7 @@
               "label": "getPanelSettings",
               "description": [],
               "signature": [
-                "(serializedState?: ",
-                {
-                  "pluginId": "@kbn/presentation-publishing",
-                  "scope": "public",
-                  "docId": "kibKbnPresentationPublishingPluginApi",
-                  "section": "def-public.SerializedPanelState",
-                  "text": "SerializedPanelState"
-                },
-                "<SerializedState> | undefined) => ",
+                "(serializedState?: SerializedState | undefined) => ",
                 {
                   "pluginId": "@kbn/utility-types",
                   "scope": "common",
@@ -1027,19 +1019,12 @@
                 {
                   "parentPluginId": "presentationUtil",
                   "id": "def-public.PresentationUtilPluginStart.registerPanelPlacementSettings.$2.$1",
-                  "type": "Object",
+                  "type": "Uncategorized",
                   "tags": [],
                   "label": "serializedState",
                   "description": [],
                   "signature": [
-                    {
-                      "pluginId": "@kbn/presentation-publishing",
-                      "scope": "public",
-                      "docId": "kibKbnPresentationPublishingPluginApi",
-                      "section": "def-public.SerializedPanelState",
-                      "text": "SerializedPanelState"
-                    },
-                    "<SerializedState> | undefined"
+                    "SerializedState | undefined"
                   ],
                   "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
                   "deprecated": false,
@@ -1057,15 +1042,7 @@
           "label": "getPanelPlacementSettings",
           "description": [],
           "signature": [
-            "<SerializedState extends object = object>(embeddableType: string, serializedState?: ",
-            {
-              "pluginId": "@kbn/presentation-publishing",
-              "scope": "public",
-              "docId": "kibKbnPresentationPublishingPluginApi",
-              "section": "def-public.SerializedPanelState",
-              "text": "SerializedPanelState"
-            },
-            "<SerializedState> | undefined) => Promise<Partial<{ placementSettings: ",
+            "<SerializedState extends object = object>(embeddableType: string, serializedState?: SerializedState | undefined) => Promise<Partial<{ placementSettings: ",
             "PanelPlacementSettings",
             "; resizeSettings: ",
             {
@@ -1096,19 +1073,12 @@
             {
               "parentPluginId": "presentationUtil",
               "id": "def-public.PresentationUtilPluginStart.getPanelPlacementSettings.$2",
-              "type": "Object",
+              "type": "Uncategorized",
               "tags": [],
               "label": "serializedState",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/presentation-publishing",
-                  "scope": "public",
-                  "docId": "kibKbnPresentationPublishingPluginApi",
-                  "section": "def-public.SerializedPanelState",
-                  "text": "SerializedPanelState"
-                },
-                "<SerializedState> | undefined"
+                "SerializedState | undefined"
               ],
               "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/panel_placement_registry.ts",
               "deprecated": false,
