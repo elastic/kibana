@@ -18,8 +18,7 @@
       "updated_by": "user",
       "name": "Policy 1",
       "namespace": "default",
-      "inactivity_timeout": 0,
-      "has_agent_version_conditions": true
+      "inactivity_timeout": 0
     }
   ]
 }
