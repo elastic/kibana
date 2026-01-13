@@ -18,8 +18,9 @@ import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { QueriesTable } from './components/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
+import { InsightsTab } from './components/insights/tab';
 
-const discoveryTabs = ['streams', 'queries'] as const;
+const discoveryTabs = ['streams', 'queries', 'insights'] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
 
 function isValidDiscoveryTab(value: string): value is DiscoveryTab {
@@ -79,6 +80,14 @@ export function SignificantEventsDiscoveryPage() {
       href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
       isSelected: tab === 'queries',
     },
+    {
+      id: 'insights',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.insightsTab', {
+        defaultMessage: 'Insights',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'insights' } }),
+      isSelected: tab === 'insights',
+    },
   ];
 
   return (
@@ -110,6 +119,7 @@ export function SignificantEventsDiscoveryPage() {
       <StreamsAppPageTemplate.Body grow>
         {tab === 'streams' && <StreamsView />}
         {tab === 'queries' && <QueriesTable />}
+        {tab === 'insights' && <InsightsTab />}
       </StreamsAppPageTemplate.Body>
     </>
   );
