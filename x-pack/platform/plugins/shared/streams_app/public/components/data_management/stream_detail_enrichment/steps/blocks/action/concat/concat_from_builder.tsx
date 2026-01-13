@@ -71,7 +71,11 @@ const DraggableConcatTextInput = ({ id, index }: DraggableConcatInputProps) => {
             isInvalid={fieldState.invalid}
             error={fieldState.error?.message}
           >
-            <EuiFieldText value={field.value} onChange={field.onChange} />
+            <EuiFieldText
+              value={field.value}
+              onChange={field.onChange}
+              isInvalid={fieldState.invalid}
+            />
           </EuiFormRow>
         )}
       />
