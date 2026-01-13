@@ -185,7 +185,7 @@ export const executeUpdate = async <T>(
   if (shouldPerformUpsert) {
     // Note: Update does not support accessControl parameters. If applicable and possible (type supports access control
     // and there is an active user profile), the default access control metadata will be set.
-    // To explictly set access control for a new object, the `create` API should be used.
+    // To explicitly set access control for a new object, the `create` API should be used.
     let accessControlToWrite: SavedObjectAccessControl | undefined;
     if (securityExtension) {
       if (registry.supportsAccessControl(type) && updatedBy) {
