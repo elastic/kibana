@@ -294,8 +294,6 @@ export const oauthCallbackRoute = (
           }
 
           // Exchange authorization code for tokens
-          // TODO: couldn't this be either an Opaque token (as below) or a JWT token (requestOAuthJWTToken)?
-          // depending on the 3rd party's implementation of the token endpoint
           const tokenResult = await requestOAuthAuthorizationCodeToken(
             tokenUrl,
             logger,
