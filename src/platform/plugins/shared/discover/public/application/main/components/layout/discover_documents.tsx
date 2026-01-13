@@ -52,7 +52,6 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
-import useUnmount from 'react-use/lib/useUnmount';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
@@ -317,11 +316,16 @@ function DiscoverDocumentsComponent({
     [dispatch, stateContainer.actions.updateESQLQuery]
   );
 
-  const [selectedDocViewerTabId, setSelectedDocViewerTabId] = useState<string | undefined>();
+  const setInitialDocViewerTabIdAction = useCurrentTabAction(
+    internalStateActions.setInitialDocViewerTabId
+  );
 
-  useUnmount(() => {
-    setExpandedDoc(expandedDoc, { initialTabId: selectedDocViewerTabId });
-  });
+  const onUpdateSelectedTabId = useCallback(
+    (tabId: string | undefined) => {
+      dispatch(setInitialDocViewerTabIdAction({ initialDocViewerTabId: tabId }));
+    },
+    [dispatch, setInitialDocViewerTabIdAction]
+  );
 
   const renderDocumentView = useCallback(
     (
@@ -347,7 +351,7 @@ function DiscoverDocumentsComponent({
         initialTabId={initialDocViewerTabId}
         docViewerRef={docViewerRef}
         docViewerExtensionActions={docViewerExtensionActions}
-        onUpdateSelectedTabId={setSelectedDocViewerTabId}
+        onUpdateSelectedTabId={onUpdateSelectedTabId}
       />
     ),
     [
@@ -360,6 +364,7 @@ function DiscoverDocumentsComponent({
       query,
       initialDocViewerTabId,
       docViewerExtensionActions,
+      onUpdateSelectedTabId,
     ]
   );
 
