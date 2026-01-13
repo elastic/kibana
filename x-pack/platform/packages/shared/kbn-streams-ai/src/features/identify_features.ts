@@ -8,7 +8,7 @@
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { type BaseFeature, type Streams } from '@kbn/streams-schema';
+import { type BaseFeature, type Streams, baseFeatureSchema } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { sumTokens } from '../helpers/sum_tokens';
@@ -60,7 +60,12 @@ export async function identifyFeatures({
     })
   );
 
-  const features = response.toolCalls.flatMap((toolCall) => toolCall.function.arguments.features);
+  const features = response.toolCalls
+    .flatMap((toolCall) => toolCall.function.arguments.features)
+    .filter((feature) => {
+      const result = baseFeatureSchema.safeParse(feature);
+      return result.success;
+    });
 
   return {
     features,
