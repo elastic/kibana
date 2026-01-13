@@ -35,17 +35,17 @@ export function FeatureIdentificationControl({
   const [isLoading, setIsLoading] = useState(false);
 
   const {
-    getSystemIdentificationTask,
+    getSystemIdentificationStatus,
     scheduleSystemIdentificationTask,
     cancelSystemIdentificationTask,
     acknowledgeSystemIdentificationTask,
   } = useStreamFeaturesApi(definition);
 
-  const [{ loading, value: task, error }, getTask] = useAsyncFn(getSystemIdentificationTask);
+  const [{ loading, value: task, error }, getTask] = useAsyncFn(getSystemIdentificationStatus);
   useEffect(() => {
     getTask();
   }, [getTask]);
-  useTaskPolling(task, getSystemIdentificationTask, getTask);
+  useTaskPolling(task, getSystemIdentificationStatus, getTask);
 
   const flyout = isFlyoutVisible && (
     <StreamFeaturesFlyout
