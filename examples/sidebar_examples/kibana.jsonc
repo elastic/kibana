@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/sidebar-examples-plugin",
-  "owner": "@elastic/kibana-core",
+  "owner": "@elastic/appex-sharedux",
   "description": "Example plugin demonstrating the sidebar system registration and usage",
   "group": "platform",
   "visibility": "private",
