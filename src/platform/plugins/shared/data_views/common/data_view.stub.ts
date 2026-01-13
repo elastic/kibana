@@ -8,7 +8,11 @@
  */
 
 import { DataViewType } from './types';
-import { stubFieldSpecMap, stubLogstashFieldSpecMap } from './field.stub';
+import {
+  stubFieldSpecMap,
+  stubFieldSpecWithDateNanosMap,
+  stubLogstashFieldSpecMap,
+} from './field.stub';
 import { createStubDataView } from './data_views/data_view.stub';
 export {
   createStubDataView,
@@ -19,6 +23,15 @@ export const stubDataView = createStubDataView({
   spec: {
     id: 'logstash-*',
     fields: stubFieldSpecMap,
+    title: 'logstash-*',
+    timeFieldName: '@timestamp',
+  },
+});
+
+export const stubDataViewWithDateNanos = createStubDataView({
+  spec: {
+    id: 'logstash-*',
+    fields: stubFieldSpecWithDateNanosMap,
     title: 'logstash-*',
     timeFieldName: '@timestamp',
   },
