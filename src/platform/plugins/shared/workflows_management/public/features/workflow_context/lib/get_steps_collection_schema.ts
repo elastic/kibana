@@ -10,10 +10,11 @@
 import type { Document } from 'yaml';
 import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
 import { getStepId } from '@kbn/workflows';
-import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { isEnterForeach } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
-import { getOutputSchemaForStepType } from '../../../../common/schema';
+import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 import {
   extractWorkflowIdFromStep,
@@ -26,17 +27,16 @@ import {
  * Get output schema for a step, with optional child workflow awareness
  */
 function getStepOutputSchema(params: {
-  stepType: string;
-  stepId: string;
+  node: GraphNodeUnion;
   yamlDocument?: Document;
   workflows?: WorkflowsResponse;
 }): z.ZodSchema {
-  const { stepType, stepId, yamlDocument, workflows } = params;
+  const { node, yamlDocument, workflows } = params;
 
   // Try to get child workflow output schema if this is a workflow.execute step
-  if (isWorkflowExecuteStep(stepType) && yamlDocument && workflows) {
+  if (isWorkflowExecuteStep(node.stepType) && yamlDocument && workflows) {
     try {
-      const stepIndex = findStepIndexByStepId(yamlDocument, stepId);
+      const stepIndex = findStepIndexByStepId(yamlDocument, node.stepId);
       if (stepIndex !== null) {
         const workflowId = extractWorkflowIdFromStep(yamlDocument, stepIndex);
         if (workflowId) {
@@ -52,7 +52,7 @@ function getStepOutputSchema(params: {
   }
 
   // Default behavior for all other steps
-  return getOutputSchemaForStepType(stepType);
+  return getOutputSchemaForStepType(node);
 }
 
 export function getStepsCollectionSchema(
@@ -85,8 +85,7 @@ export function getStepsCollectionSchema(
 
     if (!isEnterForeach(node)) {
       const outputSchema = getStepOutputSchema({
-        stepType: node.stepType,
-        stepId: node.stepId,
+        node,
         yamlDocument,
         workflows,
       });

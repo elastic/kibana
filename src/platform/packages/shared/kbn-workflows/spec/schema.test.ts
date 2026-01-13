@@ -388,8 +388,8 @@ describe('ConcurrencySettingsSchema', () => {
 
   describe('strategy', () => {
     it('should accept valid strategy values', () => {
-      // Only 'cancel-in-progress' is currently implemented; 'queue' and 'drop' are TBD
-      const strategies = ['cancel-in-progress'] as const;
+      // 'cancel-in-progress' and 'drop' are implemented; 'queue' is TBD
+      const strategies = ['cancel-in-progress', 'drop'] as const;
       strategies.forEach((strategy) => {
         const result = ConcurrencySettingsSchema.safeParse({
           strategy,
@@ -472,7 +472,7 @@ describe('ConcurrencySettingsSchema', () => {
     // Verify the type can be used and matches the schema inference
     const testSettings: ConcurrencySettings = {
       key: '{{ event.host.name }}',
-      strategy: 'cancel-in-progress',
+      strategy: 'drop',
       max: 3,
     };
     const result = ConcurrencySettingsSchema.safeParse(testSettings);
@@ -537,10 +537,10 @@ describe('WorkflowSettingsSchema', () => {
 
   describe('CollisionStrategySchema', () => {
     it('should accept all valid strategy values', () => {
-      // Only 'cancel-in-progress' is currently implemented; 'queue' and 'drop' are TBD
+      // 'cancel-in-progress' and 'drop' are implemented; 'queue' is TBD
       expect(CollisionStrategySchema.safeParse('cancel-in-progress').success).toBe(true);
+      expect(CollisionStrategySchema.safeParse('drop').success).toBe(true);
       expect(CollisionStrategySchema.safeParse('queue').success).toBe(false);
-      expect(CollisionStrategySchema.safeParse('drop').success).toBe(false);
     });
 
     it('should reject invalid strategy values', () => {
@@ -551,7 +551,7 @@ describe('WorkflowSettingsSchema', () => {
 
     it('should export CollisionStrategy type that matches valid values', () => {
       // Verify the type can be used and matches the schema values
-      const validStrategies: CollisionStrategy[] = ['cancel-in-progress']; // 'queue', 'drop',  TBD
+      const validStrategies: CollisionStrategy[] = ['cancel-in-progress', 'drop']; // 'queue' TBD
       validStrategies.forEach((strategy) => {
         const result = CollisionStrategySchema.safeParse(strategy);
         expect(result.success).toBe(true);

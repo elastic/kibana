@@ -20,7 +20,7 @@ import { SecurityError } from '../streams/errors/security_error';
 import type { QueryLink } from '../../../common/queries';
 
 export async function readSignificantEventsFromAlertsIndices(
-  params: { name: string; from: Date; to: Date; bucketSize: string; query?: string },
+  params: { name?: string; from: Date; to: Date; bucketSize: string; query?: string },
   dependencies: {
     queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
@@ -29,9 +29,9 @@ export async function readSignificantEventsFromAlertsIndices(
   const { queryClient, scopedClusterClient } = dependencies;
   const { name, from, to, bucketSize, query } = params;
 
-  const queryLinks = await (query
+  const queryLinks = await (name && query
     ? queryClient.findQueries(name, query)
-    : queryClient.getQueryLinks([name]).then(({ [name]: links }) => links));
+    : queryClient.getQueryLinks(name));
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };
   }
