@@ -7,7 +7,14 @@
 
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import { SERVICE_SYNTH_GO, SERVICE_SYNTH_GO_2, SERVICE_SYNTH_NODE_1 } from '../constants';
+import {
+  SERVICE_SYNTH_GO,
+  SERVICE_SYNTH_GO_2,
+  SERVICE_SYNTH_NODE_1,
+  SERVICE_CUSTOM_LINK_TEST,
+  CUSTOM_LINK_TEST_ENVIRONMENT,
+  CUSTOM_LINK_TEST_TRANSACTION_NAME,
+} from '../constants';
 
 export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields> {
   const start = Date.now() - 1000 * 60 * 15;
@@ -50,4 +57,33 @@ export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields>
         .success(),
     ];
   });
+}
+
+export function customLinkTestService({
+  from,
+  to,
+}: {
+  from: number;
+  to: number;
+}): SynthtraceGenerator<ApmFields> {
+  const range = timerange(from, to);
+
+  const testService = apm
+    .service({
+      name: SERVICE_CUSTOM_LINK_TEST,
+      environment: CUSTOM_LINK_TEST_ENVIRONMENT,
+      agentName: 'nodejs',
+    })
+    .instance('my-instance');
+
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) => [
+      testService
+        .transaction({ transactionName: CUSTOM_LINK_TEST_TRANSACTION_NAME })
+        .timestamp(timestamp)
+        .duration(100)
+        .success(),
+    ]);
 }

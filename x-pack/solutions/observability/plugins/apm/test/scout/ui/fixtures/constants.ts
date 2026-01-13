@@ -33,6 +33,9 @@ export const SERVICE_MOBILE_IOS = 'synth-ios';
 export const SERVICE_SYNTH_GO = 'synth-go-1';
 export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
 export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
+export const SERVICE_CUSTOM_LINK_TEST = 'myService';
+export const CUSTOM_LINK_TEST_ENVIRONMENT = 'prod';
+export const CUSTOM_LINK_TEST_TRANSACTION_NAME = 'GET /api/test';
 
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 // Error constants - based on opbeans synthtrace data

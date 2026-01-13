@@ -78,4 +78,60 @@ export class CustomLinksPage {
     await editButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await editButton.click();
   }
+
+  async addFilter(key: string, value: string) {
+    // Check if we need to add a new filter row
+    const addFilterButton = this.page.getByTestId(
+      'apmCustomLinkAddFilterButtonAddAnotherFilterButton'
+    );
+    const isDisabled = await addFilterButton.getAttribute('disabled');
+
+    if (isDisabled === null) {
+      await addFilterButton.click();
+    }
+
+    // Find the newly added select (will be empty) - check from the end
+    const updatedSelects = this.page.locator('select[data-test-subj]');
+    const newEmptySelectIndex = await updatedSelects.evaluateAll((selects) => {
+      for (let i = selects.length - 1; i >= 0; i--) {
+        const select = selects[i] as HTMLSelectElement;
+        if (select.value === '' || select.value === 'DEFAULT') {
+          return i;
+        }
+      }
+      return -1;
+    });
+    if (newEmptySelectIndex >= 0) {
+      const selectIds = await updatedSelects.evaluateAll((selects) =>
+        selects.map((s) => s.getAttribute('data-test-subj'))
+      );
+      const newEmptySelectId = selectIds[newEmptySelectIndex];
+      if (newEmptySelectId) {
+        const targetSelect = this.page.getByTestId(newEmptySelectId);
+        await targetSelect.selectOption(key);
+      }
+    }
+
+    // Wait for the value input (EuiComboBox) to appear
+    // The value input uses data-test-subj="{key}.value"
+    const valueInput = this.page.getByTestId(`${key}.value`);
+    await valueInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+
+    // EuiComboBox: click to focus, type the value, wait for suggestions, then press Enter
+    await valueInput.click();
+    await expect(this.page.getByRole('listbox')).toBeVisible();
+
+    const button = this.page.getByTestId('apmCustomLinkFiltersSectionButton');
+    const buttonCount = await button.count();
+
+    if (buttonCount > 1) {
+      await this.page.getByTestId(`${key}.value`).getByTestId('comboBoxSearchInput').fill(value);
+      await this.page.getByTestId(`${key}.value`).getByTestId('comboBoxSearchInput').press('Enter');
+      await this.page.getByTestId(`${key}.value`).getByTestId('comboBoxSearchInput').blur();
+    } else {
+      await this.page.getByTestId('comboBoxSearchInput').fill(value);
+      await this.page.getByTestId('comboBoxSearchInput').press('Enter');
+      await this.page.getByTestId('comboBoxSearchInput').blur();
+    }
+  }
 }
