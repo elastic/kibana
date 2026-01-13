@@ -69,7 +69,7 @@ export const NotesUtilityBar = React.memo(() => {
 
   const resultsCount = useMemo(() => {
     const { perPage, page, total } = pagination;
-    const startOfCurrentPage = perPage * (page - 1) + 1;
+    const startOfCurrentPage = total === 0 ? 0 : perPage * (page - 1) + 1;
     const endOfCurrentPage = Math.min(perPage * page, total);
     return perPage === 0 ? 'All' : `${startOfCurrentPage}-${endOfCurrentPage} of ${total}`;
   }, [pagination]);
