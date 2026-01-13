@@ -37,6 +37,6 @@ export const transformUpdateBody = (
     ...(categoryIds !== undefined ? { categoryIds } : {}),
     ...(scopedQuery !== undefined ? { scopedQuery } : {}),
     ...(schedule !== undefined ? { schedule: { custom: schedule } } : {}),
-    ...(scopedQuery ? { scope: { alerting: scopedQuery } } : {}),
+    ...(scopedQuery !== undefined ? { scope: { alerting: scopedQuery } } : {}),
   };
 };

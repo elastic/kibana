@@ -1,4 +1,11 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
  * Copyright Elasticsearch B. V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements.  Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
@@ -8,7 +15,7 @@
 import { maintenanceWindowModelVersions } from './model_versions';
 import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
 import { transformRRuleToCustomSchedule } from '../routes/schemas/schedule';
-import { SavedObjectsFullModelVersion } from '@kbn/core/packages/saved-objects/server';
+import type { SavedObjectsFullModelVersion } from '@kbn/core/packages/saved-objects/server';
 
 jest.mock('./schema');
 jest.mock('../routes/schemas/schedule');

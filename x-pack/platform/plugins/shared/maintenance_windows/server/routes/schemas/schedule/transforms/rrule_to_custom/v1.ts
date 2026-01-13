@@ -11,6 +11,8 @@ import { Frequency } from '@kbn/rrule';
 import type { RRule } from '../../../../../application/types';
 import type { ScheduleRequest } from '../../types/v1';
 
+const DEFAULT_INTERVAL = 1;
+
 const transformFrequencyToEvery = (frequency: Frequency) => {
   switch (frequency) {
     case Frequency.YEARLY:
@@ -54,9 +56,18 @@ export const transformRRuleToCustomSchedule = (snoozeSchedule: {
   const transformedFrequency = transformFrequencyToEvery(rRule.freq as Frequency);
   const transformedDuration = getDurationInString(duration);
 
+  // Determine default every value if interval is not set and frequency is set
+  const defaultEvery =
+    transformedFrequency && !rRule.interval
+      ? `${DEFAULT_INTERVAL}${transformedFrequency}`
+      : undefined;
+
   const recurring = {
     end: rRule.until ? new Date(rRule.until).toISOString() : undefined,
-    every: rRule.interval ? `${rRule.interval}${transformedFrequency}` : undefined,
+    every:
+      rRule.interval && transformedFrequency
+        ? `${rRule.interval}${transformedFrequency}`
+        : defaultEvery,
     onWeekDay: rRule.byweekday === null ? undefined : (rRule.byweekday as string[]),
     onMonthDay: rRule.bymonthday === null ? undefined : rRule.bymonthday,
     onMonth: rRule.bymonth === null ? undefined : rRule.bymonth,

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
-import type { MaintenanceWindowStatus, MaintenanceWindowUi } from '../../common';
+import type { MaintenanceWindowStatus, MaintenanceWindowUI } from '../../common';
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../common';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../hooks/use_navigation';
@@ -36,7 +36,7 @@ import { useDeleteMaintenanceWindow } from '../hooks/use_delete_maintenance_wind
 
 interface MaintenanceWindowsListProps {
   isLoading: boolean;
-  items: MaintenanceWindowUi[];
+  items: MaintenanceWindowUI[];
   readOnly: boolean;
   refreshData: () => void;
   page: number;
@@ -52,7 +52,7 @@ const getColumns = ({
   dateFormat,
 }: {
   dateFormat: string;
-}): Array<EuiBasicTableColumn<MaintenanceWindowUi>> => [
+}): Array<EuiBasicTableColumn<MaintenanceWindowUI>> => [
   {
     field: 'title',
     name: i18n.NAME,
@@ -73,7 +73,7 @@ const getColumns = ({
     field: 'eventStartTime',
     name: i18n.TABLE_START_TIME,
     dataType: 'date',
-    render: (startDate: string, item: MaintenanceWindowUi) => {
+    render: (startDate: string, item: MaintenanceWindowUI) => {
       return (
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>{formatDate(startDate, dateFormat)}</EuiFlexItem>
@@ -95,7 +95,7 @@ const getColumns = ({
   },
 ];
 
-const rowProps = (item: MaintenanceWindowUi) => ({
+const rowProps = (item: MaintenanceWindowUI) => ({
   className: item.status,
   'data-test-subj': 'list-item',
 });
@@ -169,11 +169,11 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       );
     }, [isLoadingFinish, isLoadingArchive, isLoadingFinishAndArchive, isLoadingDelete, isLoading]);
 
-    const actions: Array<EuiBasicTableColumn<MaintenanceWindowUi>> = useMemo(
+    const actions: Array<EuiBasicTableColumn<MaintenanceWindowUI>> = useMemo(
       () => [
         {
           name: '',
-          render: (item: MaintenanceWindowUi) => {
+          render: (item: MaintenanceWindowUI) => {
             return (
               <TableActionsPopover
                 id={item.id}

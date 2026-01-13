@@ -6,7 +6,7 @@
  */
 import type { HttpSetup } from '@kbn/core/public';
 import type {
-  MaintenanceWindowUi,
+  MaintenanceWindowUI,
   MaintenanceWindowResponse,
   CreateMaintenanceWindowRequestBody,
 } from '../../common';
@@ -15,11 +15,11 @@ import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../common';
 import { transformMaintenanceWindowResponse } from './transform_maintenance_window_response';
 
 export interface CreateParams {
-  title: MaintenanceWindowUi['title'];
-  duration: MaintenanceWindowUi['duration'];
-  rRule: MaintenanceWindowUi['rRule'];
-  categoryIds?: MaintenanceWindowUi['categoryIds'];
-  scopedQuery?: MaintenanceWindowUi['scopedQuery'];
+  title: MaintenanceWindowUI['title'];
+  duration: MaintenanceWindowUI['duration'];
+  rRule: MaintenanceWindowUI['rRule'];
+  categoryIds?: MaintenanceWindowUI['categoryIds'];
+  scopedQuery?: MaintenanceWindowUI['scopedQuery'];
 }
 
 const transformCreateBodySchema = (
@@ -45,7 +45,7 @@ export async function createMaintenanceWindow({
 }: {
   http: HttpSetup;
   createParams: CreateParams;
-}): Promise<MaintenanceWindowUi> {
+}): Promise<MaintenanceWindowUI> {
   const res = await http.post<MaintenanceWindowResponse>(
     `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}`,
     { body: JSON.stringify(transformCreateBodySchema(createParams)) }

@@ -35,7 +35,7 @@ export {
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
 } from './constants';
 
-export type MaintenanceWindowUi = Omit<MaintenanceWindow, 'schedule' | 'scope'>;
+export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule' | 'scope'>;
 
 export {
   getScopedQueryErrorMessage,

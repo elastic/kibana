@@ -6,7 +6,7 @@
  */
 import type { HttpSetup } from '@kbn/core/public';
 import type {
-  MaintenanceWindowUi,
+  MaintenanceWindowUI,
   MaintenanceWindowResponse,
   UpdateMaintenanceWindowRequestBody,
 } from '../../common';
@@ -15,11 +15,11 @@ import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../common';
 import { transformMaintenanceWindowResponse } from './transform_maintenance_window_response';
 
 export interface UpdateParams {
-  title: MaintenanceWindowUi['title'];
-  duration: MaintenanceWindowUi['duration'];
-  rRule: MaintenanceWindowUi['rRule'];
-  categoryIds?: MaintenanceWindowUi['categoryIds'];
-  scopedQuery?: MaintenanceWindowUi['scopedQuery'];
+  title: MaintenanceWindowUI['title'];
+  duration: MaintenanceWindowUI['duration'];
+  rRule: MaintenanceWindowUI['rRule'];
+  categoryIds?: MaintenanceWindowUI['categoryIds'];
+  scopedQuery?: MaintenanceWindowUI['scopedQuery'];
 }
 
 const transformUpdateBodySchema = (
@@ -47,7 +47,7 @@ export async function updateMaintenanceWindow({
   http: HttpSetup;
   maintenanceWindowId: string;
   updateParams: UpdateParams;
-}): Promise<MaintenanceWindowUi> {
+}): Promise<MaintenanceWindowUI> {
   const res = await http.post<MaintenanceWindowResponse>(
     `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/${encodeURIComponent(maintenanceWindowId)}`,
     { body: JSON.stringify(transformUpdateBodySchema(updateParams)) }
