@@ -48,4 +48,8 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     id: 'data.regex_replace',
     handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
   },
+  {
+    id: 'workflows.rerank',
+    handlerHash: '804838fe3386152310597062c6ee6bcf02720d73d8d9955822a2215e9d0c9c94',
+  },
 ];
