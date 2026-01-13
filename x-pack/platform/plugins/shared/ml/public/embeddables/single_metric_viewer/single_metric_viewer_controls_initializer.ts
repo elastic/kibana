@@ -32,16 +32,20 @@ export const singleMetricViewerComparators: StateComparators<SingleMetricViewerC
 };
 
 export const initializeSingleMetricViewerControls = (
-  rawState: SingleMetricViewerEmbeddableState,
+  initialState: SingleMetricViewerEmbeddableState,
   titlesApi: TitlesApi
 ) => {
-  const functionDescription = new BehaviorSubject<string | undefined>(rawState.functionDescription);
-  const jobIds = new BehaviorSubject<JobId[]>(rawState.jobIds);
-  const selectedDetectorIndex = new BehaviorSubject<number>(rawState.selectedDetectorIndex ?? 0);
-  const selectedEntities = new BehaviorSubject<Record<string, any> | undefined>(
-    rawState.selectedEntities
+  const functionDescription = new BehaviorSubject<string | undefined>(
+    initialState.functionDescription
   );
-  const forecastId = new BehaviorSubject<string | undefined>(rawState.forecastId);
+  const jobIds = new BehaviorSubject<JobId[]>(initialState.jobIds);
+  const selectedDetectorIndex = new BehaviorSubject<number>(
+    initialState.selectedDetectorIndex ?? 0
+  );
+  const selectedEntities = new BehaviorSubject<Record<string, any> | undefined>(
+    initialState.selectedEntities
+  );
+  const forecastId = new BehaviorSubject<string | undefined>(initialState.forecastId);
 
   const updateUserInput = (update: SingleMetricViewerEmbeddableUserInput) => {
     jobIds.next(update.jobIds);
