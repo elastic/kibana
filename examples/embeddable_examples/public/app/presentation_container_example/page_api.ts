@@ -19,7 +19,6 @@ import { isEqual, omit } from 'lodash';
 import type {
   PublishesDataLoading,
   PublishingSubject,
-  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import {
@@ -33,7 +32,7 @@ import type { PageApi, PageState } from './types';
 
 function deserializePanels(panels: PageState['panels']) {
   const layout: Array<{ id: string; type: string }> = [];
-  const childState: { [uuid: string]: SerializedPanelState | undefined } = {};
+  const childState: { [uuid: string]: object | undefined } = {};
   panels.forEach(({ id, type, serializedState }) => {
     layout.push({ id, type });
     childState[id] = serializedState;
