@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export const LLM_PROXY_HANDOVER_INTERCEPTOR = 'handover-to-answer';
-export const LLM_PROXY_FINAL_MESSAGE = 'final';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

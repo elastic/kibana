@@ -78,6 +78,15 @@ interface CreateConnectorAndResourcesParams {
   agentBuilder: DataConnectorsServerStartDependencies['agentBuilder'];
 }
 
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFD') // split accented characters
+    .replace(/[\u0300-\u036f]/g, '') // remove accents
+    .replace(/[^a-z0-9]+/g, '-') // replace non-alphanumerics with -
+    .replace(/^-+|-+$/g, ''); // trim leading/trailing -
+}
+
 /**
  * Creates data connector Saved Object, as well as all related resources (stack connectors, tools, workflows)
  */
@@ -133,7 +142,7 @@ export async function createConnectorAndRelatedResources(
 
     if (workflowInfo.shouldGenerateABTool) {
       const tool = await toolRegistry.create({
-        id: `${type}-${workflow.id}`,
+        id: `${type}.${slugify(workflow.name)}`,
         type: ToolType.workflow,
         description: `Workflow tool for ${type} data connector`,
         tags: ['data-connector', type],
