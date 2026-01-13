@@ -35,7 +35,7 @@ export function checkDocuments({
         const messages = [
           `❌ A document of type '${type}' did NOT match any of the fixtures`,
           ...documents.map((fixture, index) => [
-            `document 🆚 fixtures['${version}'][${index}] (${relativePath})`,
+            `document 🆚 fixtures['${version}'][${index}] (${relativePath})\n`,
             diff(fixture, attributes),
           ]),
         ];

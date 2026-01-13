@@ -29,7 +29,7 @@ import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddab
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
-import type { PanelPackage } from '@kbn/presentation-containers';
+import { childrenUnsavedChanges$, type PanelPackage } from '@kbn/presentation-containers';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import {
   apiHasLibraryTransforms,
@@ -38,6 +38,7 @@ import {
   apiPublishesUnsavedChanges,
   getTitle,
   logStateDiff,
+  shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
@@ -60,7 +61,7 @@ import { coreServices, usageCollectionService } from '../../services/kibana_serv
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import { areLayoutsEqual } from './are_layouts_equal';
+import { arePanelLayoutsEqual, arePinnedPanelLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import {
@@ -113,6 +114,16 @@ export function initializeLayoutManager(
       gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));
     }
   );
+
+  const childrenChanges$ = childrenUnsavedChanges$(children$);
+  const childrenChangesSubscription = childrenChanges$.subscribe((childrenChanges) => {
+    for (const { uuid, hasUnsavedChanges } of childrenChanges) {
+      const childApi = children$.value[uuid];
+      if (hasUnsavedChanges && childApi && apiHasSerializableState(childApi)) {
+        currentChildState[uuid] = childApi.serializeState();
+      }
+    }
+  });
 
   /** Observable that publishes `true` when all children APIs are available */
   const childrenLoading$ = combineLatest([children$, layout$, viewModeManager.api.viewMode$]).pipe(
@@ -237,6 +248,9 @@ export function initializeLayoutManager(
     trackPanel.setHighlightPanelId(first.embeddableId);
   }
 
+  // --------------------------------------------------------------------------------------
+  // API definition
+  // --------------------------------------------------------------------------------------
   function getDashboardPanelFromId(panelId: string) {
     const childLayout = layout$.value.panels[panelId];
     const childApi = children$.value[panelId];
@@ -268,9 +282,6 @@ export function initializeLayoutManager(
     return uuid;
   };
 
-  // --------------------------------------------------------------------------------------
-  // API definition
-  // --------------------------------------------------------------------------------------
   const addNewPanel = async <ApiType>(
     panelPackage: PanelPackage,
     options?: {
@@ -481,10 +492,14 @@ export function initializeLayoutManager(
       childrenLoading$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
-      startComparing$: (
+
+      startComparing: (
         lastSavedState$: BehaviorSubject<DashboardState>
-      ): Observable<{ panels?: DashboardState['panels'] }> => {
-        return layout$.pipe(
+      ): Observable<{
+        controlGroupInput?: DashboardState['controlGroupInput'];
+        panels?: DashboardState['panels'];
+      }> => {
+        return combineLatest([layout$, childrenChanges$]).pipe(
           debounceTime(100),
           combineLatestWith(
             lastSavedState$.pipe(
@@ -495,19 +510,44 @@ export function initializeLayoutManager(
               })
             )
           ),
-          map(([currentLayout]) => {
-            if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
-              logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
-              return serializeLayout(currentLayout, currentChildState);
+          map(([[currentLayout, childrenChanges]]) => {
+            const hasPanelChanges =
+              childrenChanges.some(
+                (childChanges) =>
+                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.panels
+              ) || !arePanelLayoutsEqual(lastSavedLayout, currentLayout);
+            const hasPinnedPanelChanges =
+              childrenChanges.some(
+                (childChanges) =>
+                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.controls
+              ) || !arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
+
+            if (!hasPanelChanges && !hasPinnedPanelChanges) {
+              return {};
             }
-            return {};
+
+            const { controlGroupInput, panels } = serializeLayout(currentLayout, currentChildState);
+            if (shouldLogStateDiff()) {
+              const { controlGroupInput: oldPinnedPanels, panels: oldPanels } = serializeLayout(
+                lastSavedLayout,
+                lastSavedChildState
+              );
+              if (hasPanelChanges) {
+                logStateDiff('dashboard panels', oldPanels, panels);
+              }
+              if (hasPinnedPanelChanges) {
+                logStateDiff('dashboard pinned panels', oldPinnedPanels, controlGroupInput);
+              }
+            }
+
+            return {
+              ...(hasPanelChanges ? { panels } : {}),
+              ...(hasPinnedPanelChanges ? { controlGroupInput } : {}),
+            };
           })
         );
       },
 
-      setChildState: (uuid: string, state: object) => {
-        currentChildState[uuid] = state;
-      },
       isSectionCollapsed,
     },
     api: {
@@ -606,7 +646,10 @@ export function initializeLayoutManager(
         });
         trackPanel.scrollToBottom$.next();
       },
-      getPanelSection$: (uuid: string) => {
+      getPanelSection: (uuid: string) => {
+        return layout$.getValue().panels[uuid]?.grid?.sectionId;
+      },
+      panelSection$: (uuid: string) => {
         return layout$.pipe(
           // pinned panels and panels in global section are treated identically; i.e. their section is `undefined`
           map((layout) => layout.panels[uuid]?.grid?.sectionId),
@@ -615,6 +658,7 @@ export function initializeLayoutManager(
       },
     },
     cleanup: () => {
+      childrenChangesSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
     },
   };
