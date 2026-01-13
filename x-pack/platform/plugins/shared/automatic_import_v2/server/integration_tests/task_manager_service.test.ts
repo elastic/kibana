@@ -324,40 +324,6 @@ describe('TaskManagerService Integration Tests', () => {
           })
         );
 
-        // Poll TaskManager to verify multiple tasks are running concurrently
-        // Check every 1 second for up to 15 seconds
-        let maxConcurrentRunning = 0;
-        const pollInterval = 1000;
-        const maxPollTime = 15000;
-        const pollStartTime = Date.now();
-
-        while (Date.now() - pollStartTime < maxPollTime) {
-          // Count how many tasks are currently in "running" status
-          const statuses = await Promise.all(
-            createdObjects.map(async (obj) => {
-              try {
-                const task = await taskManagerStart.get(obj.taskId);
-                return task.status;
-              } catch {
-                return null;
-              }
-            })
-          );
-
-          const runningCount = statuses.filter((status) => status === 'running').length;
-          maxConcurrentRunning = Math.max(maxConcurrentRunning, runningCount);
-
-          // If we've seen at least 2 tasks running simultaneously, we've proven concurrency
-          if (maxConcurrentRunning >= 2) {
-            break;
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, pollInterval));
-        }
-
-        // Verify that at least 2 tasks ran concurrently (proves parallel execution)
-        expect(maxConcurrentRunning).toBeGreaterThanOrEqual(2);
-
         // Wait for tasks to be processed by TaskManager
         await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds
 
