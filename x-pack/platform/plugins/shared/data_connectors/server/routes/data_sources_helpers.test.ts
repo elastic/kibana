@@ -12,7 +12,7 @@ import {
   buildSecretsFromConnectorSpec,
   createDataSourceAndRelatedResources,
   deleteDataSourceAndRelatedResources,
-} from './connectors_helpers';
+} from './data_sources_helpers';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import * as connectorSpecsModule from '@kbn/connector-specs';
 
@@ -228,7 +228,7 @@ describe('createConnectorAndRelatedResources', () => {
       logger: mockLogger,
       workflowManagement: mockWorkflowManagement as any,
       actions: mockActions as any,
-      dataConnectorTypeDef: mockDataConnectorTypeDef as any,
+      dataSource: mockDataConnectorTypeDef as any,
       agentBuilder: mockAgentBuilder as any,
     });
 
@@ -302,7 +302,7 @@ describe('createConnectorAndRelatedResources', () => {
       logger: mockLogger,
       workflowManagement: mockWorkflowManagement as any,
       actions: mockActions as any,
-      dataConnectorTypeDef: mockDataConnectorTypeDef as any,
+      dataSource: mockDataConnectorTypeDef as any,
       agentBuilder: mockAgentBuilder as any,
     });
 
@@ -355,7 +355,7 @@ describe('deleteConnectorAndRelatedResources', () => {
     mockSavedObjectsClient.delete.mockResolvedValue({});
 
     const result = await deleteDataSourceAndRelatedResources({
-      connector: mockConnector as any,
+      dataSource: mockConnector as any,
       savedObjectsClient: mockSavedObjectsClient,
       actionsClient: mockActionsClient as any,
       toolRegistry: mockToolRegistry as any,
@@ -396,7 +396,7 @@ describe('deleteConnectorAndRelatedResources', () => {
     mockSavedObjectsClient.update.mockResolvedValue({} as any);
 
     const result = await deleteDataSourceAndRelatedResources({
-      connector: mockConnector as any,
+      dataSource: mockConnector as any,
       savedObjectsClient: mockSavedObjectsClient,
       actionsClient: mockActionsClient as any,
       toolRegistry: mockToolRegistry as any,
@@ -448,7 +448,7 @@ describe('deleteConnectorAndRelatedResources', () => {
     mockSavedObjectsClient.delete.mockResolvedValue({});
 
     const result = await deleteDataSourceAndRelatedResources({
-      connector: mockConnector as any,
+      dataSource: mockConnector as any,
       savedObjectsClient: mockSavedObjectsClient,
       actionsClient: mockActionsClient as any,
       toolRegistry: mockToolRegistry as any,

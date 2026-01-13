@@ -17,7 +17,7 @@ import { schema } from '@kbn/config-schema';
 import {
   createDataSourceAndRelatedResources,
   deleteDataSourceAndRelatedResources,
-} from './connectors_helpers';
+} from './data_sources_helpers';
 import type { DataSourceAttributes } from '../saved_objects';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
