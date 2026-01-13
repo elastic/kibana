@@ -38,6 +38,7 @@ export const McpConnectionButton = () => {
           iconType="arrowDown"
           iconSide="right"
           onClick={toggleContextOpen}
+          data-test-subj="agentBuilderManageMcpButton"
         >
           <EuiText size="s">
             {i18n.translate('xpack.agentBuilder.tools.mcpServerConnectionButton', {
@@ -70,6 +71,7 @@ export const McpConnectionButton = () => {
             key="bulkImportMcpTools"
             icon="plus"
             href={createAgentBuilderUrl(appPaths.tools.bulkImportMcp)}
+            data-test-subj="agentBuilderBulkImportMcpMenuItem"
           >
             {i18n.translate('xpack.agentBuilder.tools.bulkImportMcpToolsButton', {
               defaultMessage: 'Bulk import MCP tools',
