@@ -21,26 +21,22 @@ import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 
-export interface DashboardShareOptionsInput {
-  objectId?: string;
-  dashboardTitle?: string;
-}
-
-export interface DashboardShareOptions {
-  locatorParams: DashboardLocatorParams;
-  shareableUrl: string;
-  allowShortUrl: boolean;
-  title: string;
-  hasPanelChanges: boolean;
-}
-
 /**
  * Builds common share options used by both the share modal and export items.
  */
 export function buildDashboardShareOptions({
   objectId,
   dashboardTitle,
-}: DashboardShareOptionsInput): DashboardShareOptions {
+}: {
+  objectId?: string;
+  dashboardTitle?: string;
+}): {
+  locatorParams: DashboardLocatorParams;
+  shareableUrl: string;
+  allowShortUrl: boolean;
+  title: string;
+  hasPanelChanges: boolean;
+} {
   const unsavedDashboardState =
     getDashboardBackupService().getState(objectId) ?? ({} as DashboardLocatorParams);
 
