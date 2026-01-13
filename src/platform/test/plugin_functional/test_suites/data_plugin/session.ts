@@ -25,6 +25,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const retry = getService('retry');
   const browser = getService('browser');
 
+  // The __SESSION_NOTIFICATIONS_PLUGIN__ global variable is defined in
+  // src/platform/test/plugin_functional/plugins/session_notifications/public/plugin.tsx
+  // specifically to allow these tests to access the session IDs tracked by the plugin
+
   const getSessionIds = () =>
     browser.execute(() => {
       const windowWithGlobalApi = window as {
