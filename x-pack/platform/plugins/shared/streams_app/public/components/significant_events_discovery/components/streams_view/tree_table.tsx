@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  CriteriaWithPagination,
-  Direction,
-  EuiSearchBarProps,
-  EuiTableSelectionType,
-  Query,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, Direction, EuiTableSelectionType, Query } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -20,7 +14,6 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSearchBar,
   EuiTourStep,
   useEuiTheme,
 } from '@elastic/eui';
@@ -30,7 +23,6 @@ import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/interna
 import { Streams } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
-import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { useStreamsTour } from '../../../streams_tour';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
@@ -43,7 +35,6 @@ import {
   RUN_STREAM_DISCOVERY_BUTTON_LABEL,
   SIGNIFICANT_EVENTS_COLUMN_HEADER,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
-  STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import type { SortableField, TableRow } from './utils';
 import {
@@ -56,28 +47,21 @@ import {
 } from './utils';
 import { FeaturesColumn } from './features_column';
 
-const datePickerStyle = css`
-  .euiFormControlLayout,
-  .euiSuperDatePicker button,
-  .euiButton {
-    height: 40px;
-  }
-`;
-
 export function StreamsTreeTable({
   loading,
   streams = [],
   onSelectionChange,
+  searchQuery,
 }: {
   streams?: ListStreamDetail[];
   loading?: boolean;
+  searchQuery?: Query;
   onSelectionChange?: (selectedStreams: ListStreamDetail[]) => void;
 }) {
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
   const { getStepPropsByStepId } = useStreamsTour();
 
-  const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   // Collapsed state: Set of collapsed node names
@@ -123,10 +107,6 @@ export function StreamsTreeTable({
     () => (shouldComposeTree(sortField) ? flattenTreeWithCollapse(allRows) : allRows),
     [allRows, flattenTreeWithCollapse, sortField]
   );
-
-  const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
-    if (query) setSearchQuery(query);
-  };
 
   const handleTableChange = ({ sort, page }: CriteriaWithPagination<TableRow>) => {
     if (sort) {
@@ -256,24 +236,6 @@ export function StreamsTreeTable({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem>
-            <EuiSearchBar
-              query={searchQuery}
-              onChange={handleQueryChange}
-              box={{
-                incremental: true,
-                'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} className={datePickerStyle}>
-            <StreamsAppSearchBar showDatePicker />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
       <EuiFlexItem>
         <EuiInMemoryTable<TableRow>
           selection={selection}
