@@ -27,7 +27,7 @@ interface AppMenuContextMenuProps {
   primaryActionItem?: AppMenuPrimaryActionItem;
   secondaryActionItem?: AppMenuSecondaryActionItem;
   anchorPosition?: PopoverAnchorPosition;
-  testId?: string;
+  popoverTestId?: string;
   onClose: () => void;
 }
 
@@ -41,12 +41,12 @@ export const AppMenuPopover = ({
   primaryActionItem,
   secondaryActionItem,
   anchorPosition,
-  testId,
+  popoverTestId,
   onClose,
 }: AppMenuContextMenuProps) => {
   const panels = useMemo(
-    () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem }),
-    [items, primaryActionItem, secondaryActionItem]
+    () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem, onClose }),
+    [items, primaryActionItem, secondaryActionItem, onClose]
   );
 
   if (panels.length === 0) {
@@ -66,7 +66,6 @@ export const AppMenuPopover = ({
 
   return (
     <EuiPopover
-      data-test-subj={testId || 'top-nav-menu-popover'}
       button={button}
       isOpen={isOpen}
       closePopover={onClose}
@@ -75,6 +74,9 @@ export const AppMenuPopover = ({
       anchorPosition={anchorPosition || 'upLeft'}
       panelStyle={{
         width: popoverWidth,
+      }}
+      panelProps={{
+        'data-test-subj': popoverTestId || 'app-menu-popover',
       }}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
