@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import type { ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   ToolResultType,
-  ToolType,
 } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
@@ -64,16 +62,6 @@ describe('prepareConversation', () => {
   };
 
   const textRepresentation = (value: string): AttachmentRepresentation => ({ type: 'text', value });
-
-  const boundedTool = (id = 'bounded_tool'): AttachmentBoundedTool => {
-    return {
-      id,
-      type: ToolType.builtin,
-      description: 'test tool',
-      handler: jest.fn(),
-      schema: z.object({}),
-    } as AttachmentBoundedTool;
-  };
 
   beforeEach(() => {
     mockContext = createAgentHandlerContextMock();
