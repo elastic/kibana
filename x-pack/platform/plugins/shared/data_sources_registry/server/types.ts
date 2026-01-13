@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DataCatalog, DataTypeDefinition } from './data_catalog';
+import type { DataCatalog, DataSource } from './data_catalog';
 
 export interface DataSourcesRegistryPluginSetup {
-  register: (dataType: DataTypeDefinition) => void;
+  register: (dataType: DataSource) => void;
 }
 
 export interface DataSourcesRegistryPluginStart {

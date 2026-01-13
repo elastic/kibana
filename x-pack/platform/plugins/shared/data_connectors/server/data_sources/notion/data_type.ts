@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import type { DataSource } from '@kbn/data-sources-registry-plugin/server';
 import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
 import {
   generateGetDataSourceWorkflow,
@@ -15,7 +15,7 @@ import {
   generateSearchWorkflow,
 } from './workflows';
 
-export const notionDataSource: DataTypeDefinition = {
+export const notionDataSource: DataSource = {
   id: 'notion',
   name: 'Notion',
   description: i18n.translate('xpack.dataConnectors.dataSources.notion.description', {

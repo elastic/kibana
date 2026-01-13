@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import type { DataSource } from '@kbn/data-sources-registry-plugin/server';
 import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
 import {
   generateGithubSearchIssuesWorkflow,
@@ -14,7 +14,7 @@ import {
   generateGithubListRepositoriesWorkflow,
 } from './workflows';
 
-export const githubDataSource: DataTypeDefinition = {
+export const githubDataSource: DataSource = {
   id: 'github',
   name: 'Github',
   description: i18n.translate('xpack.dataConnectors.dataSources.github.description', {

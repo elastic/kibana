@@ -57,7 +57,7 @@ export interface StackConnectorConfig {
  * - How to interact with data stored in third-party systems
  *
  */
-export interface DataTypeDefinition {
+export interface DataSource {
   /** Unique identifier for the data type */
   id: string;
   /** Display name for the data type */

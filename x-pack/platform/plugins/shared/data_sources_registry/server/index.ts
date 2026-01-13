@@ -16,4 +16,4 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';
-export type { DataCatalog, DataTypeDefinition } from './data_catalog';
+export type { DataCatalog, DataSource } from './data_catalog';

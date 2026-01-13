@@ -6,5 +6,5 @@
  */
 
 export type { DataCatalog } from './data_catalog';
-export type { DataTypeDefinition } from './data_type';
+export type { DataSource } from './data_type';
 export { createDataCatalog } from './data_catalog';

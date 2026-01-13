@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';
-import type { DataCatalog, DataTypeDefinition } from './data_catalog';
+import type { DataCatalog, DataSource } from './data_catalog';
 import { createDataCatalog } from './data_catalog';
 import { registerRoutes } from './routes';
 
@@ -36,7 +36,7 @@ export class DataSourcesRegistryPlugin
     registerRoutes(router, this.dataCatalog);
 
     return {
-      register: (dataType: DataTypeDefinition) => this.dataCatalog.register(dataType),
+      register: (dataType: DataSource) => this.dataCatalog.register(dataType),
     };
   }
 

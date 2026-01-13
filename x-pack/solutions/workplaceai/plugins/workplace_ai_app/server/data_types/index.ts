@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import type { DataSource } from '@kbn/data-sources-registry-plugin/server';
 import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/server';
 
-export const workplaceAIDataTypes: DataTypeDefinition[] = [];
+export const workplaceAIDataTypes: DataSource[] = [];
 
 export const registerWorkplaceAIDataTypes = ({
   dataSourcesRegistry,
