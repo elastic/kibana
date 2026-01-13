@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type { ActiveSource } from '../../types/connector';
 import {
   DEFAULT_ITEMS_PER_PAGE,
@@ -30,6 +32,7 @@ import {
 } from '../../../common/constants';
 import { AgentAvatarGroup } from './agent_avatar_group';
 import { getConnectorIcon, toStackConnectorType } from '../../utils';
+import { useKibana } from '../hooks/use_kibana';
 
 interface ActiveSourcesTableProps {
   sources: ActiveSource[];
@@ -150,6 +153,9 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const {
+    services: { application, chrome },
+  } = useKibana();
   const [selectedItems, setSelectedItems] = useState<ActiveSource[]>([]);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
@@ -158,6 +164,18 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     setItemsPerPage(newItemsPerPage);
     setActivePage(0); // Reset to first page when changing page size
   };
+
+  const navigateToWorkflows = useCallback(() => {
+    const workflowsUrl = chrome?.navLinks.get(WORKFLOWS_APP_ID)?.url;
+    if (workflowsUrl) {
+      application?.navigateToUrl(workflowsUrl);
+    }
+  }, [application, chrome]);
+
+  const navigateToTools = useCallback(() => {
+    // Navigate to Agent Builder tools section
+    application?.navigateToApp(AGENT_BUILDER_APP_ID, { path: '/tools' });
+  }, [application]);
 
   const paginatedSources = useMemo(() => {
     const start = activePage * itemsPerPage;
@@ -208,14 +226,28 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.workflowsColumn', {
         defaultMessage: 'Workflows',
       }),
-      render: (workflows: string[]) => <EuiText size="s">{workflows.length}</EuiText>,
+      render: (workflows: string[]) =>
+        workflows.length > 0 ? (
+          <EuiLink onClick={navigateToWorkflows} data-test-subj="workflowsLink">
+            <EuiText size="s">{workflows.length}</EuiText>
+          </EuiLink>
+        ) : (
+          <EuiText size="s">0</EuiText>
+        ),
     },
     {
       field: 'agentTools',
       name: i18n.translate('xpack.dataConnectors.activeSources.toolsColumn', {
         defaultMessage: 'Tools',
       }),
-      render: (agentTools: string[]) => <EuiText size="s">{agentTools.length}</EuiText>,
+      render: (agentTools: string[]) =>
+        agentTools.length > 0 ? (
+          <EuiLink onClick={navigateToTools} data-test-subj="toolsLink">
+            <EuiText size="s">{agentTools.length}</EuiText>
+          </EuiLink>
+        ) : (
+          <EuiText size="s">0</EuiText>
+        ),
     },
     {
       field: 'usedBy',
