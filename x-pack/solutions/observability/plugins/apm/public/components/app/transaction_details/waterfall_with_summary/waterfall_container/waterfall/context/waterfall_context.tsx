@@ -9,12 +9,15 @@ import type { Dictionary } from 'lodash';
 import { groupBy } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
-import { getCriticalPath } from '../../../../../../../../common/critical_path/get_critical_path';
+import {
+  getCriticalPath,
+  type CriticalPathSegment,
+} from '../../../../../../shared/trace_waterfall/critical_path';
 import type {
   IWaterfall,
   IWaterfallNode,
   IWaterfallNodeFlatten,
+  IWaterfallSpanOrTransaction,
 } from '../waterfall_helpers/waterfall_helpers';
 import {
   buildTraceTree,
@@ -32,7 +35,7 @@ export interface WaterfallContextProps {
 
 export const WaterfallContext = React.createContext<
   {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
     traceList: IWaterfallNodeFlatten[];
     getErrorCount: (waterfallItemId: string) => number;
@@ -40,7 +43,7 @@ export const WaterfallContext = React.createContext<
     isEmbeddable: boolean;
   } & Pick<WaterfallContextProps, 'showCriticalPath'>
 >({
-  criticalPathSegmentsById: {} as Dictionary<CriticalPathSegment[]>,
+  criticalPathSegmentsById: {} as Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>,
   showCriticalPath: false,
   traceList: [],
   getErrorCount: () => 0,
@@ -62,7 +65,10 @@ export function WaterfallContextProvider({
       return {};
     }
 
-    const criticalPath = getCriticalPath(waterfall);
+    const criticalPath = getCriticalPath(
+      waterfall.entryWaterfallTransaction,
+      waterfall.childrenByParentId
+    );
     return groupBy(criticalPath.segments, (segment) => segment.item.id);
   }, [showCriticalPath, waterfall]);
 

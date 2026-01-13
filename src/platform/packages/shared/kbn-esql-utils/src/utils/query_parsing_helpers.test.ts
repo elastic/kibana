@@ -8,11 +8,10 @@
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
-import type { ESQLColumn } from '@kbn/esql-ast';
-import { Parser, walk } from '@kbn/esql-ast';
+import type { ESQLColumn } from '@kbn/esql-language';
+import { Parser, walk } from '@kbn/esql-language';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
-  getIndexPatternFromESQLQuery,
   getRemoteClustersFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
@@ -32,71 +31,11 @@ import {
   convertTimeseriesCommandToFrom,
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
+  hasDateBreakdown,
+  hasOnlySourceCommand,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
-  describe('getIndexPatternFromESQLQuery', () => {
-    it('should return the index pattern string from esql queries', () => {
-      const idxPattern1 = getIndexPatternFromESQLQuery('FROM foo');
-      expect(idxPattern1).toBe('foo');
-
-      const idxPattern3 = getIndexPatternFromESQLQuery('from foo | project abc, def');
-      expect(idxPattern3).toBe('foo');
-
-      const idxPattern4 = getIndexPatternFromESQLQuery('from foo | project a | limit 2');
-      expect(idxPattern4).toBe('foo');
-
-      const idxPattern5 = getIndexPatternFromESQLQuery('from foo | limit 2');
-      expect(idxPattern5).toBe('foo');
-
-      const idxPattern6 = getIndexPatternFromESQLQuery('from foo-1,foo-2 | limit 2');
-      expect(idxPattern6).toBe('foo-1,foo-2');
-
-      const idxPattern7 = getIndexPatternFromESQLQuery('from foo-1, foo-2 | limit 2');
-      expect(idxPattern7).toBe('foo-1,foo-2');
-
-      const idxPattern8 = getIndexPatternFromESQLQuery('FROM foo-1,  foo-2');
-      expect(idxPattern8).toBe('foo-1,foo-2');
-
-      const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 metadata _id');
-      expect(idxPattern9).toBe('foo-1,foo-2');
-
-      const idxPattern10 = getIndexPatternFromESQLQuery('FROM foo-1, remote_cluster:foo-2, foo-3');
-      expect(idxPattern10).toBe('foo-1,remote_cluster:foo-2,foo-3');
-
-      const idxPattern11 = getIndexPatternFromESQLQuery(
-        'FROM foo-1, foo-2 | where event.reason like "*Disable: changed from [true] to [false]*"'
-      );
-      expect(idxPattern11).toBe('foo-1,foo-2');
-
-      const idxPattern12 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 // from command used');
-      expect(idxPattern12).toBe('foo-1,foo-2');
-
-      const idxPattern13 = getIndexPatternFromESQLQuery('ROW a = 1, b = "two", c = null');
-      expect(idxPattern13).toBe('');
-
-      const idxPattern14 = getIndexPatternFromESQLQuery('TS tsdb');
-      expect(idxPattern14).toBe('tsdb');
-
-      const idxPattern15 = getIndexPatternFromESQLQuery('TS tsdb | STATS max(cpu) BY host');
-      expect(idxPattern15).toBe('tsdb');
-
-      const idxPattern16 = getIndexPatternFromESQLQuery(
-        'TS pods | STATS load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
-      );
-      expect(idxPattern16).toBe('pods');
-
-      const idxPattern17 = getIndexPatternFromESQLQuery('FROM "$foo%"');
-      expect(idxPattern17).toBe('$foo%');
-
-      const idxPattern18 = getIndexPatternFromESQLQuery('FROM """foo-{{mm-dd_yy}}"""');
-      expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
-
-      const idxPattern19 = getIndexPatternFromESQLQuery('FROM foo-1::data');
-      expect(idxPattern19).toBe('foo-1::data');
-    });
-  });
-
   describe('getLimitFromESQLQuery', () => {
     it('should return default limit when ES|QL query is empty', () => {
       const limit = getLimitFromESQLQuery('');
@@ -1113,6 +1052,161 @@ describe('esql query helpers', () => {
     });
     it('should return true if limit is before sort', () => {
       expect(missingSortBeforeLimit('FROM index | LIMIT 10 | SORT field')).toBe(true);
+    });
+  });
+
+  describe('hasDateBreakdown', () => {
+    const countColumn = {
+      id: 'COUNT()',
+      isNull: false,
+      meta: { type: 'number', esType: 'long' },
+      name: 'COUNT()',
+    } as DatatableColumn;
+
+    const mockDateFieldColumn = {
+      id: '@timestamp',
+      isNull: false,
+      meta: { type: 'date', esType: 'date' },
+      name: '@timestamp',
+    } as DatatableColumn;
+
+    const mockBucketColumn = {
+      id: 'BUCKET(@timestamp, 1h)',
+      isNull: false,
+      meta: { type: 'date', esType: 'date' },
+      name: 'BUCKET(@timestamp, 1h)',
+    } as DatatableColumn;
+
+    it('should return false if the query is empty', () => {
+      expect(hasDateBreakdown('')).toBe(false);
+    });
+    it('should return false if date column cannot be identified', () => {
+      expect(hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h)')).toBe(false);
+    });
+    it('should return false if it is not a TS command', () => {
+      expect(hasDateBreakdown('FROM index | STATS COUNT() BY BUCKET(@timestamp, 1h)')).toBe(false);
+    });
+    it('should return false if the STATS BY command does not use a date column', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY agent.name', [
+          countColumn,
+          {
+            id: 'agent.name',
+            isNull: false,
+            meta: { type: 'string', esType: 'keyword' },
+            name: 'agent.name',
+          },
+        ] as DatatableColumn[])
+      ).toBe(false);
+    });
+    it('should return false if the last STATS BY command does use a date column', () => {
+      expect(
+        hasDateBreakdown(
+          `TS index 
+            | STATS count=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
+            | STATS sample = SAMPLE(count, 10) BY category`,
+          [
+            {
+              id: 'count',
+              isNull: false,
+              meta: { type: 'number', esType: 'long' },
+              name: 'count',
+            },
+            {
+              id: 'category',
+              isNull: false,
+              meta: { type: 'string', esType: 'keyword' },
+              name: 'category',
+            },
+            mockDateFieldColumn,
+          ]
+        )
+      ).toBe(false);
+    });
+    it('should return true if the query bucket aggregation, case insensitive and ignoring spaces', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY bucket(@timestamp,    1h)', [
+          countColumn,
+          mockBucketColumn,
+        ])
+      ).toBe(true);
+    });
+    it('should return true if STATS BY command uses a date column', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY @timestamp', [
+          countColumn,
+          mockDateFieldColumn,
+        ])
+      ).toBe(true);
+    });
+    it('should return true if the query contains a STATS BY command with multiple breakdowns, one of which is a date column', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h), agent.name', [
+          countColumn,
+          mockDateFieldColumn,
+          {
+            id: 'agent.name',
+            isNull: false,
+            meta: { type: 'string', esType: 'keyword' },
+            name: 'agent.name',
+          },
+        ])
+      ).toBe(true);
+    });
+    it('should return true if the query contains a STATS BY command with an aliased breakdown field that is a date column', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY t=BUCKET(@timestamp, 1h)', [
+          countColumn,
+          {
+            id: 't',
+            isNull: false,
+            meta: { type: 'date', esType: 'date' },
+            name: 't',
+          },
+        ])
+      ).toBe(true);
+    });
+    it('should return true if the query contains a STATS BY a function that uses a date column', () => {
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY BUCKET(@timestamp, 1h)', [
+          countColumn,
+          mockBucketColumn,
+        ])
+      ).toBe(true);
+
+      expect(
+        hasDateBreakdown('TS index | STATS COUNT() BY DATE_TRUNC(1h, @timestamp)', [
+          countColumn,
+          {
+            id: 'DATE_TRUNC(1h, @timestamp)',
+            isNull: false,
+            meta: { type: 'date', esType: 'date' },
+            name: 'DATE_TRUNC(1h, @timestamp)',
+          },
+        ])
+      ).toBe(true);
+    });
+  });
+
+  describe('hasOnlySourceCommand', () => {
+    it('should return true for queries with only FROM command', () => {
+      expect(hasOnlySourceCommand('FROM index')).toBe(true);
+    });
+
+    it('should return true for queries with only TS command', () => {
+      expect(hasOnlySourceCommand('TS index')).toBe(true);
+    });
+
+    it('should return false for queries with FROM and other commands', () => {
+      expect(hasOnlySourceCommand('FROM index | STATS count()')).toBe(false);
+    });
+
+    it('should return false for queries with TS and other commands', () => {
+      expect(hasOnlySourceCommand('TS index | WHERE field > 0')).toBe(false);
+    });
+
+    it('should return false for empty query', () => {
+      expect(hasOnlySourceCommand('')).toBe(false);
     });
   });
 });

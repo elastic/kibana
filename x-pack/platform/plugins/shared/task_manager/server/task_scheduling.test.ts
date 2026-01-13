@@ -19,6 +19,8 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskManagerMock } from './mocks';
 import { omit } from 'lodash';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { TaskAlreadyRunningError } from './lib/errors';
+import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -60,12 +62,14 @@ describe('TaskScheduling', () => {
 
   const mockTaskStore = taskStoreMock.create({});
   const definitions = new TaskTypeDictionary(mockLogger());
+  const taskPollingLifecycle = taskPollingLifecycleMock.create({});
   const taskSchedulingOpts = {
     taskStore: mockTaskStore,
     logger: mockLogger(),
     middleware: createInitialMiddleware(),
     definitions,
     taskManagerId: '123',
+    taskPollingLifecycle,
   };
 
   definitions.registerTaskDefinitions({
@@ -503,6 +507,37 @@ describe('TaskScheduling', () => {
         5 * 60 * 1000
       );
     });
+    test('should call store bulk update with request when provided', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        enabled: false,
+        schedule: { interval: '3h' },
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      const mockRequest = httpServerMock.createKibanaRequest();
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkEnable([id], false, { request: mockRequest });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [
+          {
+            ...task,
+            enabled: true,
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: undefined,
+          options: { request: mockRequest },
+        },
+      ]);
+    });
   });
 
   describe('bulkDisable', () => {
@@ -582,6 +617,38 @@ describe('TaskScheduling', () => {
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
       expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
+    test('should call store bulk update with request when provided', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        enabled: true,
+        schedule: { interval: '3h' },
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      const mockRequest = httpServerMock.createKibanaRequest();
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkDisable([id], false, { request: mockRequest });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [
+          {
+            ...task,
+            enabled: false,
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: undefined,
+          options: { request: mockRequest },
+        },
+      ]);
     });
   });
 
@@ -985,6 +1052,42 @@ describe('TaskScheduling', () => {
         moment.duration(1, 'days').asMilliseconds()
       );
     });
+
+    test('should call store bulk update with request when provided', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: rruleScheduleExample24h,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest();
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      await taskScheduling.bulkUpdateSchedules(
+        [id],
+        { interval: '12h' },
+        {
+          request: mockRequest,
+        }
+      );
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [
+          {
+            ...task,
+            runAt: expect.any(Date),
+            schedule: { interval: '12h' },
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        },
+      ]);
+    });
   });
 
   describe('runSoon', () => {
@@ -1009,7 +1112,7 @@ describe('TaskScheduling', () => {
         { validate: false }
       );
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
-      expect(result).toEqual({ id });
+      expect(result).toEqual({ id, forced: false });
     });
 
     test('runs failed tasks too', async () => {
@@ -1032,7 +1135,7 @@ describe('TaskScheduling', () => {
         { validate: false }
       );
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
-      expect(result).toEqual({ id });
+      expect(result).toEqual({ id, forced: false });
     });
 
     test('rejects when the task update fails', async () => {
@@ -1061,7 +1164,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
 
       const result = await taskScheduling.runSoon(id);
-      expect(result).toEqual({ id });
+      expect(result).toEqual({ id, forced: false });
       expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
         'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
       );
@@ -1076,15 +1179,17 @@ describe('TaskScheduling', () => {
       );
       mockTaskStore.update.mockRejectedValueOnce(409);
 
-      const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(
-        Error(
+      try {
+        await taskScheduling.runSoon(id);
+      } catch (error) {
+        expect(error).toBeInstanceOf(TaskAlreadyRunningError);
+        expect(error.message).toBe(
           'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running'
-        )
-      );
+        );
+      }
     });
 
-    test('rejects when the task is already running', async () => {
+    test('rejects with TaskAlreadyRunningError when the task status is "running" and force=false', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
@@ -1093,12 +1198,59 @@ describe('TaskScheduling', () => {
       );
       mockTaskStore.update.mockRejectedValueOnce(409);
 
-      const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(
-        Error(
+      try {
+        await taskScheduling.runSoon(id);
+      } catch (error) {
+        expect(error).toBeInstanceOf(TaskAlreadyRunningError);
+        expect(error.message).toBe(
           'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running'
-        )
+        );
+      }
+    });
+
+    test('rejects with TaskAlreadyRunningError when the task status is "running" and force=true but the task is current in task pool', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Running })
       );
+      mockTaskStore.update.mockRejectedValueOnce(409);
+      taskPollingLifecycle.getCurrentTasksInPool.mockReturnValueOnce([id]);
+
+      try {
+        await taskScheduling.runSoon(id, true);
+      } catch (error) {
+        expect(error).toBeInstanceOf(TaskAlreadyRunningError);
+        expect(error.message).toBe(
+          'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running and cannot be forced'
+        );
+      }
+    });
+
+    test('updates task when the task status is "running" and force is true and task is not in task pool', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Running })
+      );
+      mockTaskStore.update.mockResolvedValueOnce(taskManagerMock.createTask({ id }));
+      taskPollingLifecycle.getCurrentTasksInPool.mockReturnValueOnce(['123']);
+
+      const result = await taskScheduling.runSoon(id, true);
+
+      expect(mockTaskStore.update).toHaveBeenCalledWith(
+        taskManagerMock.createTask({
+          id,
+          status: TaskStatus.Idle,
+          runAt: expect.any(Date),
+          scheduledAt: expect.any(Date),
+        }),
+        { validate: false }
+      );
+      expect(mockTaskStore.get).toHaveBeenCalledWith(id);
+      expect(result).toEqual({ id, forced: true });
     });
 
     test('rejects when the task status is Unrecognized', async () => {

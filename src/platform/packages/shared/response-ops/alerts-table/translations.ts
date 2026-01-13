@@ -271,6 +271,10 @@ export const MARK_AS_UNTRACKED = i18n.translate(
   }
 );
 
+export const EDIT_TAGS = i18n.translate('xpack.responseOpsAlertsTable.actions.editTags', {
+  defaultMessage: 'Edit tags',
+});
+
 export const MUTE = i18n.translate('xpack.responseOpsAlertsTable.actions.mute', {
   defaultMessage: 'Mute',
 });
@@ -278,6 +282,17 @@ export const MUTE = i18n.translate('xpack.responseOpsAlertsTable.actions.mute', 
 export const UNMUTE = i18n.translate('xpack.responseOpsAlertsTable.actions.unmute', {
   defaultMessage: 'Unmute',
 });
+
+export const MUTE_SELECTED = i18n.translate('xpack.responseOpsAlertsTable.actions.muteSelected', {
+  defaultMessage: 'Mute selected',
+});
+
+export const UNMUTE_SELECTED = i18n.translate(
+  'xpack.responseOpsAlertsTable.actions.unmuteSelected',
+  {
+    defaultMessage: 'Unmute selected',
+  }
+);
 
 export const ALERT_FLYOUT_DEFAULT_TITLE = i18n.translate(
   'xpack.responseOpsAlertsTable.alertFlyout.ariaLabelDefault',

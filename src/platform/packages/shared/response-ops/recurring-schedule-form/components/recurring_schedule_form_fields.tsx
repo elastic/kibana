@@ -59,6 +59,7 @@ export interface RecurringScheduleFieldsProps {
   showTimeInSummary?: boolean;
   readOnly?: boolean;
   compressed?: boolean;
+  initialRecurringSchedule?: RecurringSchedule;
 }
 
 /**
@@ -76,6 +77,7 @@ export const RecurringScheduleFormFields = memo(
     showTimeInSummary = false,
     readOnly = false,
     compressed = false,
+    initialRecurringSchedule,
   }: RecurringScheduleFieldsProps) => {
     const [formData] = useFormData<{ recurringSchedule: RecurringSchedule }>({
       watch: [
@@ -91,6 +93,14 @@ export const RecurringScheduleFormFields = memo(
     });
 
     const [today] = useState<Moment>(moment());
+
+    const recurringSchedule = useMemo(
+      () => ({
+        ...initialRecurringSchedule,
+        ...formData.recurringSchedule,
+      }),
+      [initialRecurringSchedule, formData.recurringSchedule]
+    );
 
     const { options, presets } = useMemo(() => {
       let _options: Array<EuiSelectOption & { 'data-test-subj'?: string }> =
@@ -146,7 +156,7 @@ export const RecurringScheduleFormFields = memo(
       };
     }, [minFrequency, startDate]);
 
-    const parsedSchedule = useMemo(() => parseSchedule(formData.recurringSchedule), [formData]);
+    const parsedSchedule = useMemo(() => parseSchedule(recurringSchedule), [recurringSchedule]);
 
     return (
       <EuiSplitPanel.Outer hasShadow={false} hasBorder={true} data-test-subj="recurring-form">
@@ -163,7 +173,7 @@ export const RecurringScheduleFormFields = memo(
               },
             }}
           />
-          {(parsedSchedule?.frequency === Frequency.DAILY ||
+          {((parsedSchedule?.frequency === Frequency.DAILY && parsedSchedule?.byweekday) ||
             parsedSchedule?.frequency === 'CUSTOM') && (
             <CustomRecurringSchedule
               startDate={startDate}

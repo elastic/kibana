@@ -7,13 +7,22 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import { OPENAI_TITLE, OPENAI_CONNECTOR_ID } from '../../../../common/openai/constants';
-import { BEDROCK_TITLE, BEDROCK_CONNECTOR_ID } from '../../../../common/bedrock/constants';
-import { GEMINI_TITLE, GEMINI_CONNECTOR_ID } from '../../../../common/gemini/constants';
 import {
-  INFERENCE_CONNECTOR_TITLE,
-  INFERENCE_CONNECTOR_ID,
-} from '../../../../common/inference/constants';
+  CONNECTOR_NAME as BEDROCK_TITLE,
+  CONNECTOR_ID as BEDROCK_CONNECTOR_ID,
+} from '@kbn/connector-schemas/bedrock';
+import {
+  CONNECTOR_NAME as OPENAI_TITLE,
+  CONNECTOR_ID as OPENAI_CONNECTOR_ID,
+} from '@kbn/connector-schemas/openai';
+import {
+  CONNECTOR_NAME as GEMINI_TITLE,
+  CONNECTOR_ID as GEMINI_CONNECTOR_ID,
+} from '@kbn/connector-schemas/gemini';
+import {
+  CONNECTOR_NAME as INFERENCE_CONNECTOR_TITLE,
+  CONNECTOR_ID as INFERENCE_CONNECTOR_ID,
+} from '@kbn/connector-schemas/inference';
 
 export const getDashboardTitle = (title: string) => `${title} Token Usage`;
 

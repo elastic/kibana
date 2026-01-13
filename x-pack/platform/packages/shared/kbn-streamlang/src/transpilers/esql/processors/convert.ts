@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@kbn/esql-language';
+import { isAlwaysCondition } from '../../../..';
 import type { ConvertType } from '../../../../types/formats';
 import type { ConvertProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
@@ -91,12 +90,12 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
    *    ```
    */
 
-  if ('where' in processor) {
+  if ('where' in processor && processor.where && !isAlwaysCondition(processor.where)) {
     const evalCommandWithCondition = Builder.command({
       name: 'eval',
       args: [
         Builder.expression.func.binary('=', [
-          Builder.expression.column(processor.to),
+          Builder.expression.column(processor.to!), // Safe because refinement ensures 'to' exists when 'where' is present
           Builder.expression.func.call('CASE', [
             buildWhereCondition(from, ignore_missing, processor.where, conditionToESQLAst),
             convertAssignment,
@@ -108,7 +107,6 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
     commands.push(evalCommandWithCondition);
     return commands;
   }
-
   /**
    * 2. Default case: No where condition, just convert the field.
    *
@@ -130,9 +128,7 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
    *      // | WHERE NOT(http.status_code IS NULL)  // Only if ignore_missing = false
    *      | EVAL http.status_code_str = TO_STRING(http.status_code)
    *    ```
-   */
-
-  const evalCommand = Builder.command({
+   */ const evalCommand = Builder.command({
     name: 'eval',
     args: [
       Builder.expression.func.binary('=', [

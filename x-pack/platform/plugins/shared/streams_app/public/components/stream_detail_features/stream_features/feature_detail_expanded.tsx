@@ -5,9 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiMarkdownEditor, EuiTitle, EuiSpacer, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiMarkdownEditor,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import type { Condition } from '@kbn/streamlang';
-import type { Feature } from '@kbn/streams-schema';
+import { type System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { EditableConditionPanel } from '../../data_management/shared';
@@ -16,12 +22,12 @@ export const FeatureDetailExpanded = ({
   feature,
   setFeatures,
 }: {
-  feature: Feature;
-  setFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
+  feature: System;
+  setFeatures: React.Dispatch<React.SetStateAction<System[]>>;
 }) => {
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
-  const setFeature = (updated: Feature) => {
+  const setFeature = (updated: System) => {
     setFeatures((prev) => prev.map((s) => (s.name === updated.name ? updated : s)));
   };
 
@@ -34,8 +40,8 @@ export const FeatureDetailExpanded = ({
   };
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiTitle size="xs">
+    <EuiFlexGroup direction="column" gutterSize="xs" css={{ padding: '24px 24px 0 0' }}>
+      <EuiTitle size="xxs">
         <h3>
           {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.description', {
             defaultMessage: 'Description',
@@ -51,14 +57,15 @@ export const FeatureDetailExpanded = ({
         )}
         value={feature.description}
         onChange={handleDescriptionChange}
-        height={400}
         readOnly={false}
         initialViewMode="viewing"
+        height={320}
+        autoExpandPreview={false}
       />
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule />
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
-          <EuiTitle size="xs">
+          <EuiTitle size="xxs">
             <h3>
               {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
                 defaultMessage: 'Filter',
@@ -74,6 +81,11 @@ export const FeatureDetailExpanded = ({
                 defaultMessage: 'Edit filter',
               }
             )}
+            data-test-subj={
+              isEditingCondition
+                ? 'feature_identification_edit_filter_button'
+                : 'feature_identification_save_filter_button'
+            }
           />
         </EuiFlexGroup>
         <EditableConditionPanel
@@ -81,6 +93,7 @@ export const FeatureDetailExpanded = ({
           isEditingCondition={isEditingCondition}
           setCondition={handleConditionChange}
         />
+        <EuiHorizontalRule />
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { generate } = require('@kbn/openapi-generator');
 // eslint-disable-next-line @typescript-eslint/no-var-requires

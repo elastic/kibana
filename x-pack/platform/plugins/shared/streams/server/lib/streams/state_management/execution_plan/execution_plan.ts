@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
-import { groupBy, orderBy } from 'lodash';
+import { groupBy } from 'lodash';
+import { getSegments } from '@kbn/streams-schema';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
@@ -20,6 +20,7 @@ import {
   upsertDataStream,
   updateDefaultIngestPipeline,
   putDataStreamsSettings,
+  updateDataStreamsFailureStore,
 } from '../../data_streams/manage_data_streams';
 import { deleteTemplate, upsertTemplate } from '../../index_templates/manage_index_templates';
 import {
@@ -51,8 +52,9 @@ import type {
   RolloverAction,
   UpdateDefaultIngestPipelineAction,
   UnlinkAssetsAction,
-  UnlinkFeaturesAction,
+  UnlinkSystemsAction,
   UpdateIngestSettingsAction,
+  UpdateFailureStoreAction,
 } from './types';
 
 /**
@@ -75,6 +77,7 @@ export class ExecutionPlan {
       delete_index_template: [],
       upsert_ingest_pipeline: [],
       delete_ingest_pipeline: [],
+      update_failure_store: [],
       append_processor_to_ingest_pipeline: [],
       delete_processor_from_ingest_pipeline: [],
       upsert_datastream: [],
@@ -87,7 +90,7 @@ export class ExecutionPlan {
       update_data_stream_mappings: [],
       delete_queries: [],
       unlink_assets: [],
-      unlink_features: [],
+      unlink_systems: [],
       update_ingest_settings: [],
     };
   }
@@ -175,9 +178,10 @@ export class ExecutionPlan {
         upsert_dot_streams_document,
         delete_dot_streams_document,
         update_data_stream_mappings,
+        update_failure_store,
         delete_queries,
         unlink_assets,
-        unlink_features,
+        unlink_systems,
         update_ingest_settings,
         ...rest
       } = this.actionsByType;
@@ -205,6 +209,7 @@ export class ExecutionPlan {
         this.updateLifecycle(update_lifecycle),
         this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
         this.updateDefaultIngestPipeline(update_default_ingest_pipeline),
+        this.updateFailureStore(update_failure_store),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -218,7 +223,7 @@ export class ExecutionPlan {
         this.deleteIngestPipelines(delete_ingest_pipeline),
         this.deleteQueries(delete_queries),
         this.unlinkAssets(unlink_assets),
-        this.unlinkFeatures(unlink_features),
+        this.unlinkSystems(unlink_systems),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -249,21 +254,20 @@ export class ExecutionPlan {
 
     return Promise.all(
       actions.flatMap((action) => [
-        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'dashboard'),
-        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'rule'),
-        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'slo'),
+        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'dashboard'),
+        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'rule'),
       ])
     );
   }
 
-  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
+  private async unlinkSystems(actions: UnlinkSystemsAction[]) {
     if (actions.length === 0) {
       return;
     }
 
     return Promise.all(
       actions.map((action) =>
-        this.dependencies.featureClient.syncFeatureList(action.request.name, [])
+        this.dependencies.systemClient.syncSystemList(action.request.name, [])
       )
     );
   }
@@ -358,17 +362,26 @@ export class ExecutionPlan {
   private async upsertIngestPipelines(actions: UpsertIngestPipelineAction[]) {
     const actionWithStreamsDepth = actions.map((action) => ({
       ...action,
-      depth: action.stream.match(/\./g)?.length ?? 0,
+      depth: getSegments(action.stream).length - 1,
     }));
-    return Promise.all(
-      orderBy(actionWithStreamsDepth, 'depth', 'desc').map((action) =>
-        upsertIngestPipeline({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-          logger: this.dependencies.logger,
-          pipeline: action.request,
-        })
-      )
-    );
+
+    const actionsByDepth = groupBy(actionWithStreamsDepth, 'depth');
+    const depths = Object.keys(actionsByDepth)
+      .map(Number)
+      .sort((a, b) => b - a); // Sort descending: deepest (children) first
+
+    // Process each depth level sequentially, with pipelines at the same depth in parallel
+    for (const depth of depths) {
+      await Promise.all(
+        actionsByDepth[depth].map((action) =>
+          upsertIngestPipeline({
+            esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+            logger: this.dependencies.logger,
+            pipeline: action.request,
+          })
+        )
+      );
+    }
   }
 
   private async deleteDatastreams(actions: DeleteDatastreamAction[]) {
@@ -390,6 +403,20 @@ export class ExecutionPlan {
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           name: action.request.name,
+        })
+      )
+    );
+  }
+
+  private async updateFailureStore(actions: UpdateFailureStoreAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateDataStreamsFailureStore({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          failureStore: action.request.failure_store,
+          stream: action.request.definition,
+          isServerless: this.dependencies.isServerless,
         })
       )
     );
@@ -425,6 +452,7 @@ export class ExecutionPlan {
     return this.dependencies.storageClient.bulk({
       operations: actions.map(dotDocumentActionToBulkOperation),
       refresh: true,
+      throwOnFail: true,
     });
   }
 

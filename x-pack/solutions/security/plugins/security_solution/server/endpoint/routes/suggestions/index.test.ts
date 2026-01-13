@@ -40,6 +40,7 @@ import {
   DEVICE_EVENTS_INDEX_PATTERN,
   SUGGESTIONS_INTERNAL_ROUTE,
   METADATA_UNITED_INDEX,
+  alertsIndexPattern,
 } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
@@ -61,9 +62,15 @@ jest.mock('../../../../common/endpoint/utils/index_name_utilities', () => ({
   buildIndexNameWithNamespace: jest.fn(),
 }));
 
-const termsEnumSuggestionsMock = termsEnumSuggestions as jest.Mock;
-const termsAggSuggestionsMock = termsAggSuggestions as jest.Mock;
-const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as jest.Mock;
+const termsEnumSuggestionsMock = termsEnumSuggestions as jest.MockedFunction<
+  typeof termsEnumSuggestions
+>;
+const termsAggSuggestionsMock = termsAggSuggestions as jest.MockedFunction<
+  typeof termsAggSuggestions
+>;
+const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as jest.MockedFunction<
+  typeof buildIndexNameWithNamespace
+>;
 
 interface CallRouteInterface {
   params: TypeOf<typeof EndpointSuggestionsSchema.params>;
@@ -100,7 +107,7 @@ describe('when calling the Suggestions route handler', () => {
       .create();
 
     // Reset mocks
-    termsEnumSuggestionsMock.mockClear().mockResolvedValue({});
+    termsEnumSuggestionsMock.mockClear().mockResolvedValue([]);
     termsAggSuggestionsMock.mockClear().mockResolvedValue(['suggestion1', 'suggestion2']);
     buildIndexNameWithNamespaceMock.mockClear();
   });
@@ -108,9 +115,6 @@ describe('when calling the Suggestions route handler', () => {
   describe('having right privileges', () => {
     describe('when space awareness feature is enabled', () => {
       beforeEach(() => {
-        mockEndpointContext.experimentalFeatures = {
-          ...mockEndpointContext.experimentalFeatures,
-        };
         suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
           config$,
           mockEndpointContext
@@ -171,7 +175,7 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          expect.any(Object),
+          mockScopedEsClient.asInternalUser,
           mockIndexPattern,
           fieldName,
           'test-query',
@@ -205,7 +209,7 @@ describe('when calling the Suggestions route handler', () => {
           .mockReturnValue(mockFleetServices);
 
         // Mock the buildIndexNameWithNamespace function to return null (indicating failure)
-        buildIndexNameWithNamespaceMock.mockReturnValue(null);
+        buildIndexNameWithNamespaceMock.mockReturnValue(null as unknown as string);
 
         const mockRequest = httpServerMock.createKibanaRequest<
           TypeOf<typeof EndpointSuggestionsSchema.params>,
@@ -690,7 +694,7 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          expect.any(Object),
+          mockScopedEsClient.asInternalUser,
           mockIndexPattern,
           fieldName,
           'test-query',
@@ -700,6 +704,178 @@ describe('when calling the Suggestions route handler', () => {
         );
 
         expect(mockResponse.ok).toHaveBeenCalled();
+      });
+    });
+
+    describe('when suggestion_type is endpointExceptions', () => {
+      beforeEach(() => {
+        mockEndpointContext.experimentalFeatures = {
+          ...mockEndpointContext.experimentalFeatures,
+          endpointExceptionsMovedUnderManagement: true,
+        };
+        suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
+          config$,
+          mockEndpointContext
+        );
+      });
+
+      it('should use space-aware alerts index pattern for endpoint exceptions, through current user es client', async () => {
+        const spaceId = 'custom-space';
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
+        const mockIndexPattern = 'logs-endpoint.alerts.*-custom-namespace';
+
+        const mockContext = requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
+        );
+
+        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+
+        const mockFleetServices = {
+          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+        };
+        mockEndpointContext.service.getInternalFleetServices = jest
+          .fn()
+          .mockReturnValue(mockFleetServices);
+
+        buildIndexNameWithNamespaceMock.mockReturnValue(mockIndexPattern);
+
+        const fieldName = 'process.id';
+        const mockRequest = httpServerMock.createKibanaRequest<
+          TypeOf<typeof EndpointSuggestionsSchema.params>,
+          never,
+          never
+        >({
+          params: { suggestion_type: 'endpointExceptions' },
+          body: {
+            field: fieldName,
+            query: 'test-query',
+            filters: [{ term: { 'test.field': 'test-value' } }],
+            fieldMeta: 'test-field-meta',
+          },
+        });
+
+        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
+
+        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
+        expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
+          alertsIndexPattern,
+          'custom-namespace',
+          { preserveWildcard: true }
+        );
+        expect(termsEnumSuggestionsMock).toHaveBeenNthCalledWith(
+          1,
+          expect.any(Object),
+          expect.any(Object),
+          mockScopedEsClient.asCurrentUser, // called with current user esClient
+          mockIndexPattern,
+          fieldName,
+          'test-query',
+          [{ term: { 'test.field': 'test-value' } }],
+          'test-field-meta',
+          expect.any(Object)
+        );
+
+        expect(mockResponse.ok).toHaveBeenCalled();
+      });
+
+      it('should return bad request when space-aware index pattern retrieval fails for endpoint exceptions', async () => {
+        const spaceId = 'custom-space';
+        const mockIntegrationNamespaces = { endpoint: [] };
+
+        const mockContext = requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
+        );
+
+        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+
+        const mockFleetServices = {
+          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+        };
+        mockEndpointContext.service.getInternalFleetServices = jest
+          .fn()
+          .mockReturnValue(mockFleetServices);
+
+        // Mock the buildIndexNameWithNamespace function to return null (indicating failure)
+        buildIndexNameWithNamespaceMock.mockReturnValue(null as unknown as string);
+
+        const mockRequest = httpServerMock.createKibanaRequest<
+          TypeOf<typeof EndpointSuggestionsSchema.params>,
+          never,
+          never
+        >({
+          params: { suggestion_type: 'endpointExceptions' },
+          body: {
+            field: 'process.executable',
+            query: 'test-query',
+            filters: [{ term: { 'test.field': 'test-value' } }],
+            fieldMeta: 'test-field-meta',
+          },
+        });
+
+        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
+
+        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
+        expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
+        expect(buildIndexNameWithNamespaceMock).not.toHaveBeenCalled();
+        expect(mockResponse.badRequest).toHaveBeenCalledWith({
+          body: 'Failed to retrieve current space index patterns',
+        });
+      });
+
+      it('should handle errors during space-aware processing for endpoint exceptions gracefully', async () => {
+        const spaceId = 'custom-space';
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
+        const mockIndexPattern = 'logs-endpoint.alerts.*-custom-namespace';
+
+        const mockContext = requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
+        );
+
+        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+
+        const mockFleetServices = {
+          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+        };
+        mockEndpointContext.service.getInternalFleetServices = jest
+          .fn()
+          .mockReturnValue(mockFleetServices);
+
+        buildIndexNameWithNamespaceMock.mockReturnValue(mockIndexPattern);
+
+        termsEnumSuggestionsMock.mockRejectedValue(new Error('Search service error'));
+
+        const mockRequest = httpServerMock.createKibanaRequest<
+          TypeOf<typeof EndpointSuggestionsSchema.params>,
+          never,
+          never
+        >({
+          params: { suggestion_type: 'endpointExceptions' },
+          body: {
+            field: 'process.executable',
+            query: 'test-query',
+            filters: [{ term: { 'test.field': 'test-value' } }],
+            fieldMeta: 'test-field-meta',
+          },
+        });
+
+        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
+
+        expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
+        expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
+          alertsIndexPattern,
+          'custom-namespace',
+          { preserveWildcard: true }
+        );
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          statusCode: 500,
+          body: expect.objectContaining({
+            message: expect.stringContaining('Search service error'),
+          }),
+        });
       });
     });
 
@@ -754,11 +930,14 @@ describe('when calling the Suggestions route handler', () => {
             canReadTrustedApplications: true,
             canWriteTrustedApplications: false,
             canWriteTrustedDevices: false,
+            canReadEndpointExceptions: true,
+            canWriteEndpointExceptions: false,
           },
         });
 
         expect(mockResponse.forbidden).toBeCalled();
       });
+
       it('should respond with forbidden for trusted apps', async () => {
         await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
           params: { suggestion_type: 'trustedApps' },
@@ -768,11 +947,14 @@ describe('when calling the Suggestions route handler', () => {
             canReadTrustedApplications: true,
             canWriteTrustedApplications: false,
             canWriteTrustedDevices: false,
+            canReadEndpointExceptions: true,
+            canWriteEndpointExceptions: false,
           },
         });
 
         expect(mockResponse.forbidden).toBeCalled();
       });
+
       it('should respond with forbidden for trusted devices', async () => {
         await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
           params: { suggestion_type: 'trustedDevices' },
@@ -783,6 +965,26 @@ describe('when calling the Suggestions route handler', () => {
             canWriteTrustedApplications: false,
             canReadTrustedDevices: true,
             canWriteTrustedDevices: false,
+            canReadEndpointExceptions: true,
+            canWriteEndpointExceptions: false,
+          },
+        });
+
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+
+      it('should respond with forbidden for endpoint exceptions', async () => {
+        await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
+          params: { suggestion_type: 'endpointExceptions' },
+          authz: {
+            canReadEventFilters: true,
+            canWriteEventFilters: false,
+            canReadTrustedApplications: true,
+            canWriteTrustedApplications: false,
+            canReadTrustedDevices: true,
+            canWriteTrustedDevices: false,
+            canReadEndpointExceptions: true,
+            canWriteEndpointExceptions: false,
           },
         });
 

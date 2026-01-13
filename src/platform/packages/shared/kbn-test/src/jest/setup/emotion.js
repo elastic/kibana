@@ -42,5 +42,19 @@ console.error = (message, ...rest) => {
   ) {
     return;
   }
+  // @see https://github.com/jsdom/jsdom/issues/3597
+  // @see https://github.com/jsdom/jsdom/issues/3858
+  // jsdom 20.0.1 (our current version) fails to parse @container queries, causing console errors.
+  // Parsing was fixed in jsdom 24.1.0+ (May 2024), but actual container query evaluation
+  // is still not implemented (issue #3858 remains open). For tests, this is acceptable since
+  // container queries are progressive enhancement and don't affect test functionality.
+  // TODO: Remove this suppression after upgrading jsdom to 24.1.0+ (eliminates parse errors)
+  if (
+    typeof message === 'string' &&
+    message.includes('There was a problem inserting the following rule') &&
+    message.includes('@container')
+  ) {
+    return;
+  }
   consoleError(message, ...rest);
 };

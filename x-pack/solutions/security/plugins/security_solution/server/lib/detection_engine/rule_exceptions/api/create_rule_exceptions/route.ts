@@ -22,6 +22,7 @@ import {
   CreateRuleExceptionListItemsResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 
+import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 import { CREATE_RULE_EXCEPTIONS_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { readRules } from '../../../rule_management/logic/detection_rules_client/read_rules';
@@ -38,7 +39,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [EXCEPTIONS_API_ALL],
         },
       },
     })

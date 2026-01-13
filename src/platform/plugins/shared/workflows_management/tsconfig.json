@@ -10,7 +10,8 @@
     "server/**/*",
     "../../../../../typings/**/*",
     ".storybook/**/*.ts",
-    ".storybook/**/*.tsx"
+    ".storybook/**/*.tsx",
+    "server/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -47,7 +48,6 @@
     "@kbn/react-field",
     "@kbn/storage-adapter",
     "@kbn/core-i18n-browser-mocks",
-    "@kbn/stack-connectors-plugin",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/serverless",
     "@kbn/field-types",
@@ -68,7 +68,16 @@
     "@kbn/core-http-server",
     "@kbn/test-jest-helpers",
     "@kbn/es-errors",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/connector-specs",
+    "@kbn/workflows-extensions",
+    "@kbn/alerts-ui-shared",
+    "@kbn/ai-assistant-icon",
+    "@kbn/licensing-plugin",
+    "@kbn/securitysolution-rules",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/shared-ux-utility",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*"]
 }

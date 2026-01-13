@@ -192,97 +192,105 @@ describe('deleteESAsset', () => {
     );
   });
 
-  describe('cleanupAssets', () => {
-    let soClientMock: any;
-    const esClientMock = {} as any;
-    beforeEach(() => {
-      soClientMock = {
-        get: jest
-          .fn()
-          .mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
-        update: jest.fn().mockImplementation(async (type, id, data) => {
-          return {
-            id,
-            type,
-            attributes: {},
-            references: [],
-          };
-        }),
-        delete: jest.fn(),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
-      } as any;
-    });
+  it('should delete esql views', async () => {
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    await deleteESAsset(
+      {
+        id: 'view-1',
+        type: ElasticsearchAssetType.esqlView,
+      },
+      esClient
+    );
 
-    it('should remove assets marked for deletion', async () => {
-      const installation = {
-        name: 'test',
-        version: '1.0.0',
-        installed_kibana: [],
-        installed_es: [
-          {
-            id: 'logs@custom',
-            type: 'component_template',
-          },
-          {
-            id: 'udp@custom',
-            type: 'component_template',
-          },
-          {
-            id: 'logs-udp.generic',
-            type: 'index_template',
-          },
-          {
-            id: 'logs-udp.generic@package',
-            type: 'component_template',
-          },
-        ],
-        es_index_patterns: {
-          generic: 'logs-generic-*',
-          'udp.generic': 'logs-udp.generic-*',
-          'udp.test': 'logs-udp.test-*',
-        },
-      } as any;
-      const installationToDelete = {
-        name: 'test',
-        version: '1.0.0',
-        installed_kibana: [],
-        installed_es: [
-          {
-            id: 'logs-udp.generic',
-            type: 'index_template',
-          },
-          {
-            id: 'logs-udp.generic@package',
-            type: 'component_template',
-          },
-        ],
-      } as any;
-      await cleanupAssets(
-        'generic',
-        installationToDelete,
-        installation,
-        esClientMock,
-        soClientMock
-      );
+    expect(esClient.transport.request).toBeCalledWith(
+      { method: 'DELETE', path: '/_query/view/view-1' },
+      { ignore: [404, 400] }
+    );
+  });
+});
 
-      expect(soClientMock.update).toBeCalledWith('epm-packages', 'test', {
-        installed_es: [
-          {
-            id: 'logs@custom',
-            type: 'component_template',
-          },
-          {
-            id: 'udp@custom',
-            type: 'component_template',
-          },
-        ],
-        installed_kibana: [],
-        es_index_patterns: {
-          'udp.generic': 'logs-udp.generic-*',
-          'udp.test': 'logs-udp.test-*',
+describe('cleanupAssets', () => {
+  let soClientMock: any;
+  const esClientMock = {} as any;
+  beforeEach(() => {
+    soClientMock = {
+      get: jest.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
+      update: jest.fn().mockImplementation(async (type, id, data) => {
+        return {
+          id,
+          type,
+          attributes: {},
+          references: [],
+        };
+      }),
+      delete: jest.fn(),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+    } as any;
+  });
+
+  it('should remove assets marked for deletion', async () => {
+    const installation = {
+      name: 'test',
+      version: '1.0.0',
+      installed_kibana: [],
+      installed_es: [
+        {
+          id: 'logs@custom',
+          type: 'component_template',
         },
-      });
+        {
+          id: 'udp@custom',
+          type: 'component_template',
+        },
+        {
+          id: 'logs-udp.generic',
+          type: 'index_template',
+        },
+        {
+          id: 'logs-udp.generic@package',
+          type: 'component_template',
+        },
+      ],
+      es_index_patterns: {
+        generic: 'logs-generic-*',
+        'udp.generic': 'logs-udp.generic-*',
+        'udp.test': 'logs-udp.test-*',
+      },
+    } as any;
+    const installationToDelete = {
+      name: 'test',
+      version: '1.0.0',
+      installed_kibana: [],
+      installed_es: [
+        {
+          id: 'logs-udp.generic',
+          type: 'index_template',
+        },
+        {
+          id: 'logs-udp.generic@package',
+          type: 'component_template',
+        },
+      ],
+    } as any;
+    await cleanupAssets('generic', installationToDelete, installation, esClientMock, soClientMock);
+
+    expect(soClientMock.update).toBeCalledWith('epm-packages', 'test', {
+      installed_es: [
+        {
+          id: 'logs@custom',
+          type: 'component_template',
+        },
+        {
+          id: 'udp@custom',
+          type: 'component_template',
+        },
+      ],
+      installed_kibana: [],
+      es_index_patterns: {
+        'udp.generic': 'logs-udp.generic-*',
+        'udp.test': 'logs-udp.test-*',
+      },
     });
   });
 });

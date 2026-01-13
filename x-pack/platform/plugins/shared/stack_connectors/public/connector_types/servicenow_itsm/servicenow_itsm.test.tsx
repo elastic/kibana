@@ -36,7 +36,7 @@ describe('servicenow action params validation', () => {
       subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['subActionParams.incident.correlation_id']: [],
         ['subActionParams.incident.short_description']: [],
@@ -52,7 +52,7 @@ describe('servicenow action params validation', () => {
       subActionParams: { incident: { correlation_id: '{{test}}{{rule_id}}' } },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['subActionParams.incident.correlation_id']: [],
         ['subActionParams.incident.short_description']: [],
@@ -67,7 +67,7 @@ describe('servicenow action params validation', () => {
       subActionParams: { incident: { short_description: '' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['subActionParams.incident.correlation_id']: [],
         ['subActionParams.incident.short_description']: ['Short description is required.'],
@@ -83,7 +83,7 @@ describe('servicenow action params validation', () => {
       subActionParams: { incident: { correlation_id: '' } },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['subActionParams.incident.correlation_id']: ['Correlation id is required.'],
         ['subActionParams.incident.short_description']: [],
@@ -101,7 +101,7 @@ describe('servicenow action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.correlation_id': [],
         'subActionParams.incident.short_description': [],
@@ -126,7 +126,7 @@ describe('servicenow action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.correlation_id': [],
         'subActionParams.incident.short_description': [],

@@ -196,6 +196,12 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
                     },
                   }}
                   columns={columns}
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.genericDashboard.tableCaption',
+                    {
+                      defaultMessage: 'Generic dashboard results table',
+                    }
+                  )}
                 />
               </div>
             </InspectButtonContainer>

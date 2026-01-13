@@ -109,6 +109,8 @@ export {
   SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY,
   /** The start of the date range of alerts, sent as context to the LLM */
   START_LOCAL_STORAGE_KEY,
+  /** The local storage key that controls visibility of the callout about moving Attack discovery to Attacks page */
+  MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
 export type { AIConnector } from './impl/connectorland/connector_selector';
@@ -205,4 +207,10 @@ export interface UseAssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  // When true, user has privilege to access Agent Builder feature
+  hasAgentBuilderPrivilege?: boolean;
+  // When true, use has privilege to manage Agent Builder feature
+  hasAgentBuilderManagePrivilege?: boolean;
+  // When true, AI Agents feature is enabled via feature flag
+  isAiAgentsEnabled?: boolean;
 }

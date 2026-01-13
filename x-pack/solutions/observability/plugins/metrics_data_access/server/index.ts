@@ -7,8 +7,8 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
+export type { MetricsDataPluginSetup, MetricsDataPluginStart } from './plugin';
 export type {
-  MetricsDataPluginSetup,
   GetMetricIndicesOptions,
   UpdateMetricIndicesOptions,
   DefaultMetricIndicesHandler,

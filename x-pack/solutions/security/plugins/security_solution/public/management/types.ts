@@ -34,6 +34,7 @@ export enum AdministrationSubTab {
   hostIsolationExceptions = 'host_isolation_exceptions',
   blocklist = 'blocklist',
   responseActionsHistory = 'response_actions_history',
+  scriptsLibrary = 'scripts_library',
   protectionUpdates = 'protection_updates',
   notes = 'notes',
 }

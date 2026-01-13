@@ -24,6 +24,7 @@ import {
 import { css, Global } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { useExecutionInput } from './use_execution_input/use_execution_input';
@@ -51,11 +52,12 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
 interface WorkflowExecuteModalProps {
   definition: WorkflowYaml | null;
   workflowId?: string;
+  isTestRun: boolean;
   onClose: () => void;
   onSubmit: (data: Record<string, unknown>) => void;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
-  ({ definition, workflowId, onClose, onSubmit }) => {
+  ({ definition, workflowId, onClose, onSubmit, isTestRun }) => {
     const modalTitleId = useGeneratedHtmlId();
     const enabledTriggers = ['alert', 'index', 'manual'];
     const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
@@ -115,16 +117,40 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       return null;
     }
 
+    const modalTitle = isTestRun
+      ? {
+          id: 'workflows.workflowExecuteModal.testTitle',
+          defaultMessage: 'Test Workflow',
+        }
+      : {
+          id: 'workflows.workflowExecuteModal.runTitle',
+          defaultMessage: 'Run Workflow',
+        };
+
     return (
       <>
         {/*
         The following Global CSS is needed to ensure that modal will not overlay SearchBar's
-        autocomplete popup
+        autocomplete popup. The autocomplete popup has z-index 4001, so we need to ensure
+        the modal and its overlay don't block it.
       */}
         <Global
           styles={css`
             .euiOverlayMask:has(.workflowExecuteModal) {
               z-index: 4000;
+            }
+            /* Ensure query input container allows autocomplete to overflow */
+            .workflowExecuteModal [data-test-subj='workflow-query-input'] {
+              position: relative;
+              z-index: 1;
+            }
+            /* Allow autocomplete popup to render above modal */
+            .workflowExecuteModal .kbnQueryBar__textareaWrapOuter {
+              overflow: visible;
+            }
+            .workflowExecuteModal .kbnTypeahead,
+            .workflowExecuteModal .kbnTypeahead__popover {
+              z-index: 4002 !important;
             }
           `}
         />
@@ -136,7 +162,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           style={{ width: '1200px', height: '100vh' }}
         >
           <EuiModalHeader>
-            <EuiModalHeaderTitle id={modalTitleId}>{'Run Workflow'}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>
+              {i18n.translate(modalTitle.id, { defaultMessage: modalTitle.defaultMessage })}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiFlexGroup direction="row" gutterSize="l">

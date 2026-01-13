@@ -7,13 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiLink,
+  EuiFlyout,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiTitle,
+  EuiButton,
+  EuiFlexItem,
+} from '@elastic/eui';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { capitalize } from 'lodash';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
+import { ChartWithCustomButtons } from './components';
 import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
@@ -76,8 +87,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     getDocViewer:
       (prev, { context }) =>
       (params) => {
+        const { openInNewTab, updateESQLQuery } = params.actions;
         const recordId = params.record.id;
         const prevValue = prev(params);
+
         return {
           title: `Record #${recordId}`,
           docViewsRegistry: (registry) => {
@@ -86,12 +99,61 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               title: 'Example',
               order: 0,
               component: () => (
-                <EuiPanel color="transparent" hasShadow={false}>
-                  <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
-                  <pre data-test-subj="exampleDataSourceProfileDocViewRecord">
-                    {context.formatRecord(params.record.flattened)}
-                  </pre>
-                </EuiPanel>
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+                    <EuiFlexGroup
+                      direction="row"
+                      gutterSize="s"
+                      justifyContent="spaceBetween"
+                      alignItems="flexEnd"
+                      responsive={false}
+                    >
+                      <EuiTitle size="xs">
+                        <h3 data-test-subj="exampleDataSourceProfileDocView">Example doc view</h3>
+                      </EuiTitle>
+                      {(openInNewTab || updateESQLQuery) && (
+                        <EuiFlexItem grow={false}>
+                          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                            {updateESQLQuery && (
+                              <EuiButton
+                                color="text"
+                                size="s"
+                                onClick={() => {
+                                  updateESQLQuery('FROM my-example-logs | LIMIT 5');
+                                }}
+                                data-test-subj="exampleDataSourceProfileDocViewUpdateEsqlQuery"
+                              >
+                                Update ES|QL query
+                              </EuiButton>
+                            )}
+                            {openInNewTab && (
+                              <EuiButton
+                                color="text"
+                                size="s"
+                                onClick={() => {
+                                  openInNewTab({
+                                    tabLabel: 'My new tab',
+                                    query: { esql: 'FROM my-example-logs | LIMIT 5' },
+                                  });
+                                }}
+                                data-test-subj="exampleDataSourceProfileDocViewOpenNewTab"
+                              >
+                                Open new tab
+                              </EuiButton>
+                            )}
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                    <EuiCodeBlock
+                      language="json"
+                      data-test-subj="exampleDataSourceProfileDocViewRecord"
+                    >
+                      {context.formatRecord(params.record.flattened)}
+                    </EuiCodeBlock>
+                  </EuiFlexGroup>
+                </>
               ),
             });
 
@@ -264,8 +326,6 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
      * @param prev
      */
     getRecommendedFields: (prev) => () => {
-      const prevValue = prev ? prev() : {};
-
       // Define example recommended field names for the example logs data source
       const exampleRecommendedFieldNames: Array<DataViewField['name']> = [
         'log.level',
@@ -275,8 +335,18 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ];
 
       return {
-        ...prevValue,
+        ...prev(),
         recommendedFields: exampleRecommendedFieldNames,
+      };
+    },
+    getChartSectionConfiguration: (prev) => (params) => {
+      return {
+        ...prev(params),
+        renderChartSection: (props) => (
+          <ChartWithCustomButtons {...props} actions={params.actions} />
+        ),
+        localStorageKeyPrefix: 'discover:exampleDataSource',
+        replaceDefaultChart: true,
       };
     },
   },

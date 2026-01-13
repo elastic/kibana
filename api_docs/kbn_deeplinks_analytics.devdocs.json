@@ -24,6 +24,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.AI_VALUE_REPORT_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "AI_VALUE_REPORT_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"AI_VALUE_REPORT_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
         "id": "def-common.AppId",
         "type": "Type",
         "tags": [],

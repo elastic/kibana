@@ -5,20 +5,8 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  termQuery,
-  rangeQuery,
-  wildcardQuery,
-  termsQuery,
-} from '@kbn/observability-plugin/server';
-import {
-  ALERT_RULE_PRODUCER,
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
-import { APM_ALERTING_CONSUMERS } from '../../../../common/alerting/config/apm_alerting_feature_ids';
+import { kqlQuery, termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_UUID } from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { ServiceGroup } from '../../../../common/service_groups';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
@@ -58,7 +46,6 @@ export async function getServicesAlerts({
     query: {
       bool: {
         filter: [
-          ...termsQuery(ALERT_RULE_PRODUCER, ...APM_ALERTING_CONSUMERS),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),

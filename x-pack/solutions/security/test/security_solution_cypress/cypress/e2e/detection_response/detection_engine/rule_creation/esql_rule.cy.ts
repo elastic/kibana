@@ -55,7 +55,8 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/240136
+describe.skip(
   'Detection ES|QL rules - Rule Creation',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],

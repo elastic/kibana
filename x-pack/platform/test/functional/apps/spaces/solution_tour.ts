@@ -19,8 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/204082
-  describe.skip('space solution tour', () => {
+  describe('space solution tour', () => {
     let version: string | undefined;
 
     const getGlobalSettings = async () => {
@@ -112,6 +111,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 }); // The tour does not appear after refresh
       });
 
+      it('should navigate to space settings when clicking the Space settings button', async () => {
+        await updateSolutionDefaultSpace('es');
+        await PageObjects.common.sleep(500);
+        await removeGlobalSettings();
+        await browser.refresh();
+
+        await testSubjects.existOrFail('spaceSolutionTour', { timeout: 3000 });
+        await testSubjects.existOrFail('spaceSettingsTourBtn', { timeout: 3000 });
+
+        await testSubjects.click('spaceSettingsTourBtn');
+
+        // Verify navigation to space settings
+        await retry.waitFor('navigation to space settings', async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          return currentUrl.includes('/management/kibana/spaces');
+        });
+
+        // Tour should be closed after clicking
+        await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+      });
+
       it('does not show the solution tour after updating the default space from classic to solution', async () => {
         await updateSolutionDefaultSpace('es'); // set a solution
         await PageObjects.common.sleep(500);
@@ -138,6 +158,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await browser.refresh();
 
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+
+        await retry.waitFor('global setting to indicate tour was shown', async () => {
+          const globalSettings = await getGlobalSettings();
+          log.debug(`Global settings: ${JSON.stringify(globalSettings)}`);
+          return globalSettings?.showSpaceSolutionTour === false;
+        });
 
         await spacesService.delete('foo-space');
         await browser.refresh();

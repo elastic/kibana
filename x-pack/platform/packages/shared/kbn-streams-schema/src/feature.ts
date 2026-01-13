@@ -5,18 +5,38 @@
  * 2.0.
  */
 
-import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
 import { streamObjectNameSchema } from './shared/stream_object_name';
 
-export interface Feature {
+const featureTypes = ['infrastructure'] as const;
+export type FeatureType = (typeof featureTypes)[number];
+
+export const featureTypeSchema = z.enum(featureTypes);
+
+export interface BaseFeature<T extends FeatureType = FeatureType> {
+  type: T;
   name: string;
   description: string;
-  filter: Condition;
 }
 
-export const featureSchema: z.Schema<Feature> = z.object({
+export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
+  type: featureTypeSchema,
   name: streamObjectNameSchema,
   description: z.string(),
-  filter: conditionSchema,
 });
+
+export type InfrastructureFeature = BaseFeature<'infrastructure'>;
+
+export const infrastructureFeatureSchema: z.Schema<InfrastructureFeature> = baseFeatureSchema.and(
+  z.object({
+    type: z.literal('infrastructure'),
+  })
+);
+
+export type Feature = InfrastructureFeature;
+
+export const featureSchema: z.Schema<Feature> = infrastructureFeatureSchema;
+
+export function isFeature(feature: any): feature is Feature {
+  return featureSchema.safeParse(feature).success;
+}

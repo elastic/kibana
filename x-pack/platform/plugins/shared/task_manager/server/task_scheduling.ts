@@ -13,6 +13,7 @@ import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import type {
+  ApiKeyOptions,
   ConcreteTaskInstance,
   IntervalSchedule,
   RruleSchedule,
@@ -26,6 +27,9 @@ import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fie
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
+import { TaskAlreadyRunningError } from './lib/errors';
+import type { TaskPollingLifecycle } from './polling_lifecycle';
+import { getExecutionId } from './lib/get_execution_id';
 
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
@@ -35,6 +39,7 @@ export interface TaskSchedulingOpts {
   taskStore: TaskStore;
   middleware: Middleware;
   taskManagerId: string;
+  taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
 }
 
 /**
@@ -53,6 +58,7 @@ export interface BulkUpdateTaskResult {
 }
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
+  forced: boolean;
 }
 
 export interface RunNowResult {
@@ -64,6 +70,7 @@ export class TaskScheduling {
   private store: TaskStore;
   private logger: Logger;
   private middleware: Middleware;
+  private readonly taskPolling: TaskPollingLifecycle | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -74,6 +81,7 @@ export class TaskScheduling {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
+    this.taskPolling = opts.taskPollingLifecycle;
   }
 
   /**
@@ -148,7 +156,11 @@ export class TaskScheduling {
     );
   }
 
-  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
+  public async bulkDisable(
+    taskIds: string[],
+    clearStateIdsOrBoolean?: string[] | boolean,
+    options?: ApiKeyOptions
+  ) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
@@ -163,10 +175,11 @@ export class TaskScheduling {
           : {}),
       }),
       validate: false,
+      options,
     });
   }
 
-  public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
+  public async bulkEnable(taskIds: string[], runSoon: boolean = true, options?: ApiKeyOptions) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
@@ -185,6 +198,7 @@ export class TaskScheduling {
         return { ...task, enabled: true };
       },
       validate: false,
+      options,
     });
   }
 
@@ -216,7 +230,8 @@ export class TaskScheduling {
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
-    schedule: IntervalSchedule | RruleSchedule
+    schedule: IntervalSchedule | RruleSchedule,
+    options?: ApiKeyOptions
   ): Promise<BulkUpdateTaskResult> {
     return retryableBulkUpdate({
       taskIds,
@@ -237,6 +252,7 @@ export class TaskScheduling {
        * where both are defined by passing mergeAttributes: false here.
        */
       mergeAttributes: false,
+      options,
     });
   }
 
@@ -255,8 +271,34 @@ export class TaskScheduling {
    * @param taskId - The task being scheduled.
    * @returns {Promise<RunSoonResult>}
    */
-  public async runSoon(taskId: string): Promise<RunSoonResult> {
-    const task = await this.getNonRunningTask(taskId);
+  public async runSoon(taskId: string, force: boolean = false): Promise<RunSoonResult> {
+    let forced: boolean = false;
+    const task = await this.store.get(taskId);
+
+    if (task.status === TaskStatus.Unrecognized) {
+      throw new Error(`Failed to run task "${taskId}" with status ${task.status}`);
+    }
+
+    if (task.status === TaskStatus.Claiming) {
+      throw new TaskAlreadyRunningError(taskId);
+    }
+
+    if (task.status === TaskStatus.Running) {
+      if (!force) {
+        throw new TaskAlreadyRunningError(taskId);
+      }
+
+      // check if task is currently running
+      const currentTaskIds = this.taskPolling?.getCurrentTasksInPool() || [];
+      const currentExecutionIds = currentTaskIds.map((executionId) => getExecutionId(executionId));
+
+      if (currentExecutionIds.includes(taskId)) {
+        throw new TaskAlreadyRunningError(taskId, true);
+      } else {
+        forced = true;
+      }
+    }
+
     try {
       await this.store.update(
         {
@@ -277,7 +319,7 @@ export class TaskScheduling {
         throw e;
       }
     }
-    return { id: task.id };
+    return { id: task.id, forced };
   }
 
   /**
@@ -312,20 +354,6 @@ export class TaskScheduling {
         return taskInstance;
       }
       throw err;
-    }
-  }
-
-  private async getNonRunningTask(taskId: string) {
-    const task = await this.store.get(taskId);
-    switch (task.status) {
-      case TaskStatus.Claiming:
-      case TaskStatus.Running:
-        throw Error(`Failed to run task "${taskId}" as it is currently running`);
-      case TaskStatus.Unrecognized:
-        throw Error(`Failed to run task "${taskId}" with status ${task.status}`);
-      case TaskStatus.Failed:
-      default:
-        return task;
     }
   }
 }

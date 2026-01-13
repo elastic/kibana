@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps, IconType } from '@elastic/eui';
 import { EuiBeacon, EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
-import { getStackConnectorLogoLazy } from '@kbn/stack-connectors-plugin/public/common/logos';
+import React, { Suspense } from 'react';
+import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ExecutionStatus } from '@kbn/workflows';
 import { getStepIconType } from './get_step_icon_type';
-import { getExecutionStatusColors } from '../status_badge';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
 
 interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   stepType: string;
@@ -22,63 +24,98 @@ interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   onClick?: React.MouseEventHandler;
 }
 
-export function StepIcon({ stepType, executionStatus, onClick, ...rest }: StepIconProps) {
-  const { euiTheme } = useEuiTheme();
-  const shouldApplyColorToIcon = executionStatus !== undefined;
-  if (executionStatus === ExecutionStatus.RUNNING) {
-    return <EuiLoadingSpinner size="m" />;
-  }
-  if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
-    return <EuiBeacon size={14} color="warning" />;
-  }
-  const stackConnectorIconComponent = getStackConnectorIcon(stepType);
-  if (stackConnectorIconComponent) {
-    return <EuiIcon type={stackConnectorIconComponent} size="m" />;
-  }
-  const iconType = getStepIconType(stepType);
-  if (iconType.startsWith('token')) {
+export const StepIcon = React.memo(
+  ({ stepType, executionStatus, onClick, ...rest }: StepIconProps) => {
+    const { euiTheme } = useEuiTheme();
+    const { triggersActionsUi, workflowsExtensions } = useKibana().services;
+    const { actionTypeRegistry } = triggersActionsUi;
+
+    // For Overview pseudo-step, show the execution status icon
+    if (stepType === '__overview' && executionStatus) {
+      return getExecutionStatusIcon(euiTheme, executionStatus);
+    }
+
+    const shouldApplyColorToIcon = executionStatus !== undefined;
+    if (executionStatus === ExecutionStatus.RUNNING) {
+      return <EuiLoadingSpinner size="m" />;
+    }
+    if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
+      return <EuiBeacon size={14} color="warning" />;
+    }
+
+    const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
+    if (actionTypeIcon) {
+      return (
+        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+          <EuiIcon type={actionTypeIcon} size="m" />
+        </Suspense>
+      );
+    }
+
+    const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
+    if (stepDefinition?.icon) {
+      return (
+        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+          <EuiIcon type={stepDefinition.icon} size="m" />
+        </Suspense>
+      );
+    }
+
+    const iconType = getStepIconType(stepType);
+    if (iconType.startsWith('token')) {
+      return (
+        <EuiToken
+          iconType={iconType}
+          size="s"
+          color={
+            shouldApplyColorToIcon
+              ? getExecutionStatusColors(euiTheme, executionStatus).tokenColor
+              : undefined
+          }
+          fill="light"
+          onClick={onClick}
+        />
+      );
+    }
+
     return (
-      <EuiToken
-        iconType={iconType}
-        size="s"
+      <EuiIcon
+        type={iconType}
+        size="m"
         color={
           shouldApplyColorToIcon
-            ? getExecutionStatusColors(euiTheme, executionStatus).tokenColor
+            ? getExecutionStatusColors(euiTheme, executionStatus).color
             : undefined
         }
-        fill="light"
+        css={
+          // change fill and color of the icon for non-completed statuses, for multi-color logos
+          shouldApplyColorToIcon &&
+          executionStatus !== ExecutionStatus.COMPLETED &&
+          css`
+            & * {
+              fill: ${getExecutionStatusColors(euiTheme, executionStatus).color};
+              color: ${getExecutionStatusColors(euiTheme, executionStatus).color};
+            }
+          `
+        }
         onClick={onClick}
+        {...rest}
       />
     );
   }
-  return (
-    <EuiIcon
-      type={iconType}
-      size="m"
-      color={
-        shouldApplyColorToIcon
-          ? getExecutionStatusColors(euiTheme, executionStatus).color
-          : undefined
-      }
-      css={
-        // change fill and color of the icon for non-completed statuses, for multi-color logos
-        shouldApplyColorToIcon &&
-        executionStatus !== ExecutionStatus.COMPLETED &&
-        css`
-          & * {
-            fill: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-            color: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-          }
-        `
-      }
-      onClick={onClick}
-      {...rest}
-    />
-  );
-}
+);
+StepIcon.displayName = 'StepIcon';
 
-function getStackConnectorIcon(connectorType: string) {
-  const dotConnectorType = `.${connectorType}`;
-
-  return getStackConnectorLogoLazy(dotConnectorType);
+// stepType is in the format of `.actionTypeId.actionTypeSubtype`
+function getActionTypeIcon(
+  stepType: string,
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>
+): IconType | undefined {
+  const action = stepType.startsWith('.') ? stepType.slice(1) : stepType;
+  const [actionTypeId] = action.split('.');
+  if (actionTypeRegistry.has(`.${actionTypeId}`)) {
+    const actionType = actionTypeRegistry.get(`.${actionTypeId}`);
+    return actionType.iconClass;
+  }
+  return undefined;
 }

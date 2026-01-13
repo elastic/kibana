@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 
-import type { MappingsEditorTestBed } from '../helpers';
-import { componentHelpers } from '../helpers';
-
-const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
+import { WithAppDependencies } from '../helpers/setup_environment';
+import { MappingsEditor } from '../../../mappings_editor';
 
 // Parameters automatically added to the scaled float datatype when saved (with the default values)
 export const defaultScaledFloatParameters = {
@@ -22,30 +23,18 @@ export const defaultScaledFloatParameters = {
   store: false,
 };
 
+const onChangeHandler = jest.fn();
 describe('Mappings editor: scaled float datatype', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
-  let data: any;
-  let onChangeHandler: jest.Mock = jest.fn();
-  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-  let testBed: MappingsEditorTestBed;
-
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
-    onChangeHandler = jest.fn();
-    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
+    jest.clearAllMocks();
   });
+
+  interface Mappings {
+    properties: Record<string, Record<string, unknown>>;
+  }
 
   test('should require a scaling factor to be provided', async () => {
-    const defaultMappings = {
+    const defaultMappings: Mappings = {
       properties: {
         myField: {
           type: 'byte',
@@ -53,57 +42,80 @@ describe('Mappings editor: scaled float datatype', () => {
       },
     };
 
-    const updatedMappings = { ...defaultMappings };
+    const updatedMappings: Mappings = {
+      ...defaultMappings,
+      properties: { ...defaultMappings.properties },
+    };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
-    testBed.component.update();
+    const Component = WithAppDependencies(MappingsEditor, {});
+    render(
+      <I18nProvider>
+        <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
+      </I18nProvider>
+    );
 
-    const {
-      component,
-      find,
-      exists,
-      form,
-      actions: { startEditField, updateFieldAndCloseFlyout },
-    } = testBed;
+    await screen.findByTestId('mappingsEditor');
 
     // Open the flyout to edit the field
-    await startEditField('myField');
+    const editButton = screen.getByTestId('editFieldButton');
+    fireEvent.click(editButton);
 
-    // Change the type to "scaled_float"
-    await act(async () => {
-      find('mappingsEditorFieldEdit.fieldSubType').simulate('change', [
-        {
-          label: 'Scaled float',
-          value: 'scaled_float',
-        },
-      ]);
+    const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
+
+    // Change the type to "scaled_float" using EuiComboBox harness
+    // The label is "Scaled float" (from TYPE_DEFINITION)
+    const fieldSubTypeComboBox = new EuiComboBoxTestHarness('fieldSubType');
+    await fieldSubTypeComboBox.select('Scaled float');
+
+    // Close the combobox popover (portal) before continuing.
+    await fieldSubTypeComboBox.close();
+
+    await within(flyout).findByTestId('scalingFactor');
+
+    // Try to save without providing scaling factor - should show error
+    let updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+    fireEvent.click(updateButton);
+
+    // Flyout should still be open (form validation prevented save)
+    await waitFor(() => {
+      expect(screen.getByTestId('mappingsEditorFieldEdit')).toBeInTheDocument();
     });
-    component.update();
 
-    // It should **not** allow to save as the "scaling factor" parameter has not been set
-    await updateFieldAndCloseFlyout();
-    expect(exists('mappingsEditorFieldEdit')).toBe(true);
-    expect(form.getErrorsMessages()).toEqual(['A scaling factor is required.']);
+    // Error message should be visible
+    const errorMessage = await within(flyout).findByText('A scaling factor is required.');
+    expect(errorMessage).toBeInTheDocument();
 
-    await act(async () => {
-      form.setInputValue('scalingFactor.input', '123');
+    // Now provide the scaling factor - find the input within the scalingFactor field
+    const scalingFactorField = within(flyout).getByTestId('scalingFactor');
+    const scalingFactorInput = within(scalingFactorField).getByRole('spinbutton');
+    fireEvent.change(scalingFactorInput, { target: { value: '123' } });
+
+    await waitFor(() => {
+      const button = within(flyout).getByTestId('editFieldUpdateButton');
+      expect(button).not.toBeDisabled();
     });
 
-    component.update();
+    // Now save should work
+    updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+    fireEvent.click(updateButton);
 
-    await updateFieldAndCloseFlyout();
+    // Flyout should close
+    await waitFor(() => {
+      expect(screen.queryByTestId('mappingsEditorFieldEdit')).not.toBeInTheDocument();
+    });
 
-    expect(exists('mappingsEditorFieldEdit')).toBe(false);
+    await waitFor(() => {
+      expect(onChangeHandler).toHaveBeenCalled();
+    });
 
     // It should have the default parameters values added, plus the scaling factor
     updatedMappings.properties.myField = {
       ...defaultScaledFloatParameters,
       scaling_factor: 123,
-    } as any;
+    };
 
-    ({ data } = await getMappingsEditorData(component));
-    expect(data).toEqual(updatedMappings);
-  });
+    const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+    const actualMappings = callData.getData();
+    expect(actualMappings).toEqual(updatedMappings);
+  }, 20000);
 });

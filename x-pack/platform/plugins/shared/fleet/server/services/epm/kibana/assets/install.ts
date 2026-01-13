@@ -7,6 +7,8 @@
 
 import { setTimeout } from 'timers/promises';
 
+import { v5 } from 'uuid';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
@@ -17,6 +19,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
+
 import { partition, chunk, once } from 'lodash';
 
 import { getPathParts } from '../../archive';
@@ -46,7 +49,9 @@ const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
   );
 const validKibanaAssetTypes = new Set(Object.values(KibanaAssetType));
-type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
+type SavedObjectToBe = Required<
+  Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset | 'originId'>
+> & {
   type: KibanaSavedObjectType;
 };
 export type ArchiveAsset = Pick<
@@ -76,6 +81,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
   [KibanaAssetType.alertingRuleTemplate]: KibanaSavedObjectType.alertingRuleTemplate,
+  [KibanaAssetType.sloTemplate]: KibanaSavedObjectType.sloTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
@@ -85,11 +91,20 @@ const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsse
   [KibanaAssetType.indexPattern]: removeReservedIndexPatterns,
 };
 
-export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectToBe {
+export function createSavedObjectKibanaAsset(
+  asset: ArchiveAsset,
+  options?: {
+    installAsAdditionalSpace?: boolean;
+    spaceId?: string;
+  }
+): SavedObjectToBe {
+  const rewriteId =
+    options?.installAsAdditionalSpace && asset.type === KibanaSavedObjectType.dashboard;
   // convert that to an object
   const so: Partial<SavedObjectToBe> = {
     type: asset.type,
-    id: asset.id,
+    id: rewriteId ? v5(`$${options?.spaceId ?? DEFAULT_SPACE_ID}:${asset.id}`, v5.DNS) : asset.id,
+    ...(rewriteId ? { originId: asset.id } : {}),
     attributes: asset.attributes,
     references: asset.references || [],
   };
@@ -107,14 +122,19 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
   return so as SavedObjectToBe;
 }
 
-export async function installKibanaAssets(options: {
+export async function installKibanaAssets({
+  kibanaAssetsArchiveIterator,
+  savedObjectsClient,
+  savedObjectsImporter,
+  logger,
+  options,
+}: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   kibanaAssetsArchiveIterator: ReturnType<typeof getKibanaAssetsArchiveIterator>;
+  options: { installAsAdditionalSpace?: boolean; spaceId?: string };
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssetsArchiveIterator, savedObjectsClient, savedObjectsImporter, logger } = options;
-
   let assetsToInstall: ArchiveAsset[] = [];
   let res: SavedObjectsImportSuccess[] = [];
 
@@ -133,6 +153,7 @@ export async function installKibanaAssets(options: {
       savedObjectsImporter,
       kibanaAssets: assetsToInstall,
       assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
+      options,
     });
     assetsToInstall = [];
     res = [...res, ...installedAssets];
@@ -288,6 +309,7 @@ export async function installKibanaAssetsAndReferences({
     logger,
     savedObjectsImporter,
     kibanaAssetsArchiveIterator,
+    options: { installAsAdditionalSpace, spaceId },
   });
   const assets = importedAssets.map(
     ({ id, type, destinationId }) =>
@@ -297,6 +319,16 @@ export async function installKibanaAssetsAndReferences({
         type,
       } as KibanaAssetReference)
   );
+
+  await replaceInMarkdown({
+    assets,
+    savedObjectsClient,
+    logger,
+    savedObjectsImporter,
+    kibanaAssetsArchiveIterator,
+    options: { installAsAdditionalSpace, spaceId },
+  });
+
   installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
     savedObjectsClient,
     pkgName,
@@ -382,6 +414,13 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
         return;
       }
 
+      if (
+        soType === KibanaSavedObjectType.sloTemplate &&
+        !appContextService.getExperimentalFeatures().enableSloTemplates
+      ) {
+        return;
+      }
+
       if (asset.type === soType) {
         await onEntry({ path: entry.path, assetType, asset });
       }
@@ -428,11 +467,13 @@ export async function installKibanaSavedObjects({
   kibanaAssets,
   assetsChunkSize,
   logger,
+  options,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   assetsChunkSize?: number;
+  options?: { installAsAdditionalSpace?: boolean; spaceId?: string };
 }): Promise<SavedObjectsImportSuccess[]> {
   if (!assetsChunkSize || kibanaAssets.length <= assetsChunkSize || hasReferences(kibanaAssets)) {
     return await installKibanaSavedObjectsChunk({
@@ -440,6 +481,7 @@ export async function installKibanaSavedObjects({
       savedObjectsImporter,
       kibanaAssets,
       refresh: 'wait_for',
+      options,
     });
   }
 
@@ -461,6 +503,7 @@ export async function installKibanaSavedObjects({
       savedObjectsImporter,
       kibanaAssets: assetChunk,
       refresh: false,
+      options,
     });
 
     installedAssets.push(...result);
@@ -471,6 +514,7 @@ export async function installKibanaSavedObjects({
     savedObjectsImporter,
     kibanaAssets: lastAssetChunk,
     refresh: 'wait_for',
+    options,
   });
 
   installedAssets.push(...result);
@@ -484,17 +528,21 @@ async function installKibanaSavedObjectsChunk({
   kibanaAssets,
   logger,
   refresh,
+  options,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   refresh?: boolean | 'wait_for';
+  options?: { installAsAdditionalSpace?: boolean; spaceId?: string };
 }) {
   if (!kibanaAssets.length) {
     return [];
   }
 
-  const toBeSavedObjects = kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset));
+  const toBeSavedObjects = kibanaAssets.map((asset) =>
+    createSavedObjectKibanaAsset(asset, options)
+  );
 
   let allSuccessResults: SavedObjectsImportSuccess[] = [];
 
@@ -502,15 +550,28 @@ async function installKibanaSavedObjectsChunk({
     successResults: importSuccessResults = [],
     errors: importErrors = [],
     success,
-  } = await retryImportOnConflictError(() => {
+  } = await retryImportOnConflictError(async () => {
     const readStream = createListStream(toBeSavedObjects);
-    return savedObjectsImporter.import({
+
+    const res = await savedObjectsImporter.import({
       overwrite: true,
       readStream,
       createNewCopies: false,
       managed: true,
       refresh,
     });
+
+    for (const r of res?.successResults || []) {
+      const originId = toBeSavedObjects.find(
+        (so) => so.id === r.id && so.type === r.type
+      )?.originId;
+      if (originId) {
+        r.destinationId = r.id;
+        r.id = originId;
+      }
+    }
+
+    return res;
   });
 
   if (success) {
@@ -595,4 +656,107 @@ export function toAssetReference({ id, type }: SavedObject) {
 
 function hasReferences(assetsToInstall: ArchiveAsset[]) {
   return assetsToInstall.some((asset) => asset.references?.length);
+}
+async function replaceInMarkdown({
+  assets,
+  savedObjectsClient,
+  logger,
+  savedObjectsImporter,
+  kibanaAssetsArchiveIterator,
+  options,
+}: {
+  assets: KibanaAssetReference[];
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  savedObjectsImporter: ISavedObjectsImporter;
+  kibanaAssetsArchiveIterator: (
+    onEntry: (entry: {
+      path: string;
+      asset: ArchiveAsset;
+      assetType: KibanaAssetType;
+    }) => Promise<void>
+  ) => Promise<void>;
+  options?: { installAsAdditionalSpace?: boolean; spaceId?: string };
+}) {
+  const assetsWithDifferentIds = assets.filter(
+    (asset) => asset.originId && asset.originId !== asset.id
+  );
+
+  if (assetsWithDifferentIds.length === 0) {
+    return;
+  }
+
+  let assetsToInstall = [] as ArchiveAsset[];
+
+  async function flushAssetsToInstall() {
+    if (assetsToInstall.length === 0) {
+      return;
+    }
+
+    await installKibanaSavedObjectsChunk({
+      logger,
+      savedObjectsImporter,
+      kibanaAssets: assetsToInstall,
+      refresh: false, // No need to wait for here as it's already been imported once
+    });
+
+    assetsToInstall = [];
+  }
+
+  await kibanaAssetsArchiveIterator(async ({ assetType, asset }) => {
+    const kibanaAsset = createSavedObjectKibanaAsset(asset, options);
+    if (assetType !== KibanaAssetType.dashboard && assetType !== KibanaAssetType.visualization) {
+      return;
+    }
+
+    const idsReplacements = getIdsReplacements(assetsWithDifferentIds);
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(kibanaAsset, idsReplacements);
+
+    if (updated) {
+      logger.debug(
+        `Updating references in ${assetType} [id=${updatedAsset.id}, originId=${updatedAsset.originId}]`
+      );
+
+      assetsToInstall.push(updatedAsset);
+
+      if (assetsToInstall.length >= MAX_ASSETS_TO_INSTALL_IN_PARALLEL) {
+        await flushAssetsToInstall();
+      }
+    }
+  });
+
+  await flushAssetsToInstall();
+}
+
+function getIdsReplacements(assets: KibanaAssetReference[]) {
+  const idReplacements: Record<string, string> = {};
+  for (const asset of assets) {
+    const assetType = asset.type as unknown as KibanaAssetType;
+    if (assetType !== KibanaAssetType.dashboard && assetType !== KibanaAssetType.visualization) {
+      continue;
+    }
+    if (asset.originId && asset.originId !== asset.id) {
+      idReplacements[asset.originId] = asset.id;
+    }
+  }
+  return idReplacements;
+}
+
+/**
+ * Exported only for testing
+ */
+export function replaceIdsInKibanaAsset(
+  kibanaAsset: SavedObjectToBe,
+  idReplacements: Record<string, string>
+): { updated: boolean; updatedAsset: SavedObjectToBe } {
+  let assetStr = JSON.stringify(kibanaAsset);
+  const originalAssetStr = assetStr;
+
+  for (const [originId, newId] of Object.entries(idReplacements)) {
+    const regex = new RegExp(`${originId}`, 'g');
+    assetStr = assetStr.replace(regex, newId);
+  }
+
+  const updatedAsset = JSON.parse(assetStr);
+  return { updated: originalAssetStr !== assetStr, updatedAsset };
 }

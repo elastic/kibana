@@ -35,42 +35,6 @@ export const sampleData: CasePostRequest = {
 
 export const sampleConnectorData = { isLoading: false, data: [] };
 
-export const useGetIncidentTypesResponse = {
-  isLoading: false,
-  data: {
-    data: [
-      {
-        id: 19,
-        name: 'Malware',
-      },
-      {
-        id: 21,
-        name: 'Denial of Service',
-      },
-    ],
-  },
-};
-
-export const useGetSeverityResponse = {
-  isLoading: false,
-  data: {
-    data: [
-      {
-        id: 4,
-        name: 'Low',
-      },
-      {
-        id: 5,
-        name: 'Medium',
-      },
-      {
-        id: 6,
-        name: 'High',
-      },
-    ],
-  },
-};
-
 export const useGetIssueTypesResponse = {
   isLoading: false,
   data: {

@@ -7,33 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps } from 'react';
 import React, { useState } from 'react';
-import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { css, Global } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+import type { ComponentProps } from 'react';
 import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
+import { css, Global } from '@emotion/react';
 
-import { Navigation } from '../components/navigation';
 import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
-import { usePreventLinkNavigation } from '../hooks/prevent_link_navigation';
+import { Navigation } from '../components/navigation';
+import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
+import { NAVIGATION_ROOT_SELECTOR, NAVIGATION_SELECTOR_PREFIX } from '../constants';
 
-const styles = ({ euiTheme }: UseEuiTheme) => css`
-  body {
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-  }
+const styles = ({ euiTheme }: UseEuiTheme) => {
+  const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
 
-  #storybook-root {
-    display: flex;
-  }
+  return css`
+    body {
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    }
 
-  div.side-nav,
-  div.side-nav-panel {
-    height: 100vh;
-  }
-`;
+    #storybook-root {
+      display: flex;
+    }
+
+    div.${NAVIGATION_ROOT_SELECTOR}, div.${sidePanelClassName} {
+      height: 100vh;
+    }
+  `;
+};
 
 type PropsAndArgs = ComponentProps<typeof Navigation>;
 
@@ -79,24 +83,6 @@ export const Default: StoryObj<PropsAndArgs> = {
       );
     },
   ],
-  render: (args) => <ControlledNavigation {...args} />,
-};
-
-export const Collapsed: StoryObj<PropsAndArgs> = {
-  name: 'Collapsed Navigation',
-  decorators: [
-    (Story) => {
-      return (
-        <>
-          <Global styles={styles} />
-          <Story />
-        </>
-      );
-    },
-  ],
-  args: {
-    isCollapsed: true,
-  },
   render: (args) => <ControlledNavigation {...args} />,
 };
 
@@ -169,12 +155,15 @@ export const WithinLayout: StoryObj<PropsAndArgs> = {
 
 const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
   const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+  const [isCollapsed, setIsCollapsed] = useState(props.isCollapsed ?? false);
 
   return (
     <Navigation
       {...props}
+      isCollapsed={isCollapsed}
       activeItemId={activeItemId}
       onItemClick={(item) => setActiveItemId(item.id)}
+      onToggleCollapsed={setIsCollapsed}
     />
   );
 };
@@ -182,6 +171,8 @@ const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
 const Layout = ({ ...props }: PropsAndArgs) => {
   const { euiTheme } = useEuiTheme();
   const [navigationWidth, setNavigationWidth] = useState(0);
+  const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+  const [isCollapsed, setIsCollapsed] = useState(props.isCollapsed ?? false);
 
   const headerHeight = 48;
 
@@ -221,7 +212,16 @@ const Layout = ({ ...props }: PropsAndArgs) => {
               backgroundColor={euiTheme.colors.backgroundFilledText}
             />
           }
-          navigation={<ControlledNavigation {...props} setWidth={setNavigationWidth} />}
+          navigation={
+            <Navigation
+              {...props}
+              setWidth={setNavigationWidth}
+              isCollapsed={isCollapsed}
+              activeItemId={activeItemId}
+              onItemClick={(item) => setActiveItemId(item.id)}
+              onToggleCollapsed={setIsCollapsed}
+            />
+          }
           sidebar={
             <Box
               label="Global Sidebar"

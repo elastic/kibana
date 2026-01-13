@@ -393,14 +393,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 id="xpack.securitySolution.dataViewSelectorText1"
                 defaultMessage="Use Kibana "
               />
-              <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
+              <DocLink
+                docPath="explore-analyze/find-and-organize/data-views"
+                linkText="Data Views"
+              />
               <FormattedMessage
                 id="xpack.securitySolution.dataViewSelectorText2"
                 defaultMessage=" or specify individual "
               />
               <DocLink
-                guidePath="kibana"
-                docPath="index-patterns-api-create.html"
+                docPath="api/doc/kibana/group/endpoint-data-views"
                 linkText="index patterns"
               />
               <FormattedMessage

@@ -10,7 +10,6 @@
 import React from 'react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { DiscoverSetup, DiscoverStart } from '.';
-import { getDiscoverStateMock } from './__mocks__/discover_state.mock';
 
 export type Setup = jest.Mocked<DiscoverSetup>;
 export type Start = jest.Mocked<DiscoverStart>;
@@ -33,5 +32,4 @@ const createStartContract = (): Start => {
 export const discoverPluginMock = {
   createSetupContract,
   createStartContract,
-  getDiscoverStateMock,
 };

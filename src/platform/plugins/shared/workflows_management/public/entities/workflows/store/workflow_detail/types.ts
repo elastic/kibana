@@ -12,6 +12,7 @@ import type { LineCounter } from 'yaml';
 import type { WorkflowDetailDto, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
+import type { LoadingStates } from './utils/loading_states';
 import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
 
@@ -38,6 +39,8 @@ export interface WorkflowDetailState {
   connectors?: ConnectorsResponse;
   /** The schema for the workflow, depends on the connectors available */
   schema: WorkflowZodSchemaType;
+  /** Loading states for async operations */
+  loading: LoadingStates;
 }
 
 export type ActiveTab = 'workflow' | 'executions';

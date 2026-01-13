@@ -8,7 +8,7 @@
 import type { Datum, FlameLayerValue, FlameSpec, PartialTheme } from '@elastic/charts';
 import { Chart, Flame, Settings, Tooltip } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Maybe } from '@kbn/observability-plugin/common/typings';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -45,6 +45,16 @@ export function FlameGraph({
   isEmbedded = false,
 }: Props) {
   const [showInformationWindow, setShowInformationWindow] = useState(false);
+
+  const isWebGLAvailable = useMemo(() => {
+    try {
+      const canvas = document.createElement('canvas');
+      return !!canvas.getContext('webgl2');
+    } catch {
+      return false;
+    }
+  }, []);
+
   function toggleShowInformationWindow() {
     setShowInformationWindow((prev) => !prev);
   }
@@ -134,13 +144,37 @@ export function FlameGraph({
     setHighlightedVmIndex(undefined);
   }, [columnarData.key]);
 
+  if (!isWebGLAvailable) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.profiling.flamegraph.webglNotAvailable.title', {
+          defaultMessage: 'WebGL is required to display the flamegraph',
+        })}
+        color="warning"
+        iconType="warning"
+        data-test-subj="profilingFlamegraphWebGLWarning"
+      >
+        <p>
+          {i18n.translate('xpack.profiling.flamegraph.webglNotAvailable.description', {
+            defaultMessage:
+              'WebGL is not available or disabled in your browser. Please enable hardware acceleration in your browser settings or try using a different browser.',
+          })}
+        </p>
+      </EuiCallOut>
+    );
+  }
+
   return (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">
             {columnarData.viewModel.label.length > 0 && (
-              <EuiFlexItem grow style={{ minHeight: '400px' }}>
+              <EuiFlexItem
+                grow
+                style={{ minHeight: '400px' }}
+                data-test-subj="profilingFlamegraphChart"
+              >
                 <Chart key={columnarData.key}>
                   <Settings
                     theme={chartTheme}

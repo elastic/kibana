@@ -11,9 +11,7 @@ import { css } from '@emotion/css';
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
-  const gridContainer = css`
-    min-height: 400px;
-  `;
+  const gridContainer = css``;
 
   const gridStyle = css`
     & .euiDataGridHeaderCell__icon {

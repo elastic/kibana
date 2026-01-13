@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 const { generate } = require('@kbn/openapi-generator');
 // eslint-disable-next-line import/no-nodejs-modules
 const { resolve } = require('path');

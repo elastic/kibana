@@ -223,6 +223,7 @@ export class PerAlertActionScheduler<
         actionParams: action.params,
         flapping: alert.getFlapping(),
         ruleUrl: ruleUrl?.absoluteUrl,
+        consecutiveMatches: alert.getActiveCount(),
       };
 
       if (alert.isAlertAsData()) {

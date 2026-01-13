@@ -12,15 +12,15 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  MICROSOFT_DEFENDER_ENDPOINT_TITLE,
-  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-} from '../../../common/microsoft_defender_endpoint/constants';
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  SUB_ACTION,
+} from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import type {
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointActionParams,
   MicrosoftDefenderEndpointSecrets,
-} from '../../../common/microsoft_defender_endpoint/types';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 
 interface ValidationErrors {
   subAction: string[];
@@ -32,8 +32,8 @@ export function getConnectorType(): ConnectorTypeModel<
   MicrosoftDefenderEndpointActionParams
 > {
   return {
-    id: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-    actionTypeTitle: MICROSOFT_DEFENDER_ENDPOINT_TITLE,
+    id: CONNECTOR_ID,
+    actionTypeTitle: CONNECTOR_NAME,
     iconClass: lazy(() => import('./logo')),
     isExperimental: false,
     selectMessage: i18n.translate(
@@ -54,7 +54,7 @@ export function getConnectorType(): ConnectorTypeModel<
       // The internal "subAction" param should always be valid, ensure it is only if "subActionParams" are valid
       if (!subAction) {
         errors.subAction.push(translations.ACTION_REQUIRED);
-      } else if (!Object.values(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION).includes(subAction)) {
+      } else if (!Object.values(SUB_ACTION).includes(subAction)) {
         errors.subAction.push(translations.INVALID_ACTION);
       }
       return { errors };

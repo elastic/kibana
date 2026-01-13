@@ -9,7 +9,7 @@
     "scripts/**/*",
     "server/**/*",
     "public/**/*",
-    "types/**/*"
+    "types/**/*",
   ],
   "exclude": [
     "target/**/*"
@@ -57,6 +57,7 @@
     "@kbn/ai-tools",
     "@kbn/logging-mocks",
     "@kbn/grok-heuristics",
+    "@kbn/dissect-heuristics",
     "@kbn/streamlang",
     "@kbn/licensing-types",
     "@kbn/core-elasticsearch-server-utils",
@@ -71,5 +72,7 @@
     "@kbn/utility-types",
     "@kbn/console-plugin",
     "@kbn/actions-plugin",
+    "@kbn/apm-utils",
+    "@kbn/alerting-types",
   ]
 }

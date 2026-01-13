@@ -9,7 +9,7 @@ import { isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -18,6 +18,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import {
@@ -45,6 +46,7 @@ export type PagerDutyConnectorType = ConnectorType<
   ActionParamsType,
   unknown
 >;
+
 export type PagerDutyConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -61,6 +63,7 @@ export function getConnectorType(): PagerDutyConnectorType {
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

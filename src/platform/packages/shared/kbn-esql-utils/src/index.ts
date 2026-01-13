@@ -11,7 +11,6 @@ export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adh
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
-  getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
@@ -29,13 +28,16 @@ export {
   getKqlSearchQueries,
   getRemoteClustersFromESQLQuery,
   convertTimeseriesCommandToFrom,
+  hasDateBreakdown,
+  hasOnlySourceCommand,
 } from './utils/query_parsing_helpers';
+export { getIndexPatternFromESQLQuery } from './utils/get_index_pattern_from_query';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
-export {
-  appendToESQLQuery,
-  appendWhereClauseToESQLQuery,
-  appendStatsByToQuery,
-} from './utils/append_to_query';
+export { appendToESQLQuery } from './utils/append_to_query/utils';
+export { appendStatsByToQuery } from './utils/append_to_query/append_stats_by';
+export { appendWhereClauseToESQLQuery } from './utils/append_to_query/append_where';
+export { appendLimitToQuery } from './utils/append_to_query/append_limit';
+
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
@@ -60,3 +62,7 @@ export {
   mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
+export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
+
+// Callback functions
+export * from './utils/callbacks';

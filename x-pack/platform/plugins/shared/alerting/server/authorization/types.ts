@@ -23,6 +23,8 @@ export enum ReadOperations {
   GetBackfill = 'getBackfill',
   FindBackfill = 'findBackfill',
   FindGaps = 'findGaps',
+  GetGapAutoFillScheduler = 'getGapAutoFillScheduler',
+  FindGapAutoFillSchedulerLogs = 'findGapAutoFillSchedulerLogs',
   BulkEditParams = 'bulkEditParams', // special operation for bulk editing rule params
 }
 
@@ -47,4 +49,7 @@ export enum WriteOperations {
   ScheduleBackfill = 'scheduleBackfill',
   DeleteBackfill = 'deleteBackfill',
   FillGaps = 'fillGaps',
+  CreateGapAutoFillScheduler = 'createGapAutoFillScheduler',
+  UpdateGapAutoFillScheduler = 'updateGapAutoFillScheduler',
+  DeleteGapAutoFillScheduler = 'deleteGapAutoFillScheduler',
 }

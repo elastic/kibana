@@ -8,6 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -37,12 +39,15 @@
     "@kbn/search-shared-ui",
     "@kbn/search-code-examples",
     "@kbn/try-in-console",
-    "@kbn/management-settings-ids",
     "@kbn/deeplinks-search",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/react-query",
-    "@kbn/core-feature-flags-browser"
+    "@kbn/index-management-shared-types",
+    "@kbn/data-views-plugin",
+    "@kbn/cloud",
+    "@kbn/agent-builder-plugin",
+    "@kbn/scout-search",
   ],
   "exclude": [
     "target/**/*",

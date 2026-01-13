@@ -19,6 +19,7 @@ export const EndpointSuggestionsSchema = {
     suggestion_type: schema.oneOf([
       schema.literal('eventFilters'),
       schema.literal('endpoints'),
+      schema.literal('endpointExceptions'),
       schema.literal('trustedApps'),
       schema.literal('trustedDevices'),
     ]),
@@ -26,3 +27,4 @@ export const EndpointSuggestionsSchema = {
 };
 
 export type EndpointSuggestionsBody = TypeOf<typeof EndpointSuggestionsSchema.body>;
+export type EndpointSuggestionsParams = TypeOf<typeof EndpointSuggestionsSchema.params>;

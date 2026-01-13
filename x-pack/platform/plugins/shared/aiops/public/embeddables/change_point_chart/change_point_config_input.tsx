@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
-import type { ChangePointEmbeddableState } from './types';
+import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
 
 export function EmbeddableChangePointUserInput({
   coreStart,

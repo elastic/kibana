@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { CoverageOverviewResponse } from '../../../../../../../common/api/detection_engine';
 import {
   CoverageOverviewRequestBody,
@@ -24,7 +25,7 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
       path: RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })

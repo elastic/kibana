@@ -7,8 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
-import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { Streams } from '@kbn/streams-schema';
 import type { TimeState } from '@kbn/es-query';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
@@ -16,6 +15,7 @@ import { IngestionCard } from './cards/ingestion_card';
 import { FailureStoreIngestionRate } from './ingestion_rate';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
+import type { useFailureStoreConfig } from '../hooks/use_failure_store_config';
 
 export const FailureStoreInfo = ({
   openModal,
@@ -23,18 +23,18 @@ export const FailureStoreInfo = ({
   statsError,
   isLoadingStats,
   stats,
-  config,
   timeState,
   aggregations,
+  failureStoreConfig,
 }: {
   openModal: (show: boolean) => void;
   definition: Streams.ingest.all.GetResponse;
   statsError: Error | undefined;
   isLoadingStats: boolean;
   stats?: EnhancedFailureStoreStats;
-  config?: FailureStore;
   timeState: TimeState;
   aggregations?: StreamAggregations;
+  failureStoreConfig: ReturnType<typeof useFailureStoreConfig>;
 }) => {
   return (
     <>
@@ -52,24 +52,23 @@ export const FailureStoreInfo = ({
           />
         </h4>
       </EuiTitle>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
           <RetentionCard
             openModal={openModal}
             canManageFailureStore={definition.privileges?.manage_failure_store}
-            isWired={Streams.WiredStream.GetResponse.is(definition)}
             streamName={definition.stream.name}
-            failureStore={config}
+            failureStoreConfig={failureStoreConfig}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem>
           <StorageSizeCard
             stats={stats}
             hasPrivileges={definition.privileges?.manage_failure_store}
             statsError={statsError}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem>
           <IngestionCard
             stats={stats}
             hasPrivileges={definition.privileges?.manage_failure_store}

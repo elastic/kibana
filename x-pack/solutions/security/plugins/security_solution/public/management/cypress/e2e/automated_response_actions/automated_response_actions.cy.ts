@@ -20,8 +20,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// FLAKY: https://github.com/elastic/kibana/issues/241197
-describe.skip(
+describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
@@ -84,7 +83,7 @@ describe.skip(
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
-      changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
+      changeAlertsFilter(`process.name: "sshd" and agent.id: "${createdHost.agentId}"`);
       waitForAlertsToPopulate();
 
       cy.getByTestSubj('expand-event').first().click();

@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { generateLongId, log, timerange } from '@kbn/apm-synthtrace-client';
+import { generateLongId, log, timerange } from '@kbn/synthtrace-client';
 import moment from 'moment';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

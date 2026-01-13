@@ -9,13 +9,12 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
+import type { Dimension } from '../../types';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
-import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   onPageChange: (value: number) => void;
-  onDimensionsChange: (value: string[]) => void;
-  onValuesChange: (value: string[]) => void;
+  onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
 }
@@ -25,32 +24,16 @@ export const MetricsExperienceStateContext =
 
 export function MetricsExperienceStateProvider({ children }: { children: React.ReactNode }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
-  const [dimensions, setDimensions] = useRestorableState('dimensions', []);
-  const [valueFilters, setValueFilters] = useRestorableState('valueFilters', []);
+  const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
 
   const onDimensionsChange = useCallback(
-    (nextDimensions: string[]) => {
+    (nextDimensions: Dimension[]) => {
       setCurrentPage(0);
-      setDimensions(nextDimensions);
-      setValueFilters((prevValueFilters) => {
-        if (nextDimensions.length === 0) {
-          return [];
-        }
-        return prevValueFilters.filter((v) =>
-          nextDimensions.includes(v.split(FIELD_VALUE_SEPARATOR)[0])
-        );
-      });
+      setSelectedDimensions(nextDimensions);
     },
-    [setValueFilters, setCurrentPage, setDimensions]
-  );
-
-  const onValuesChange = useCallback(
-    (values: string[]) => {
-      setValueFilters(values);
-    },
-    [setValueFilters]
+    [setCurrentPage, setSelectedDimensions]
   );
 
   const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
@@ -71,13 +54,11 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     <MetricsExperienceStateContext.Provider
       value={{
         currentPage,
-        dimensions,
         isFullscreen,
         searchTerm,
-        valueFilters,
+        selectedDimensions,
         onPageChange,
         onDimensionsChange,
-        onValuesChange,
         onSearchTermChange,
         onToggleFullscreen,
       }}

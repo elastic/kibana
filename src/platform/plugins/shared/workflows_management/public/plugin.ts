@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
 import {
+  type AppDeepLinkLocations,
   type AppMountParameters,
+  AppStatus,
+  type AppUpdater,
   type CoreSetup,
   type CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -25,7 +29,9 @@ import type {
   WorkflowsServices,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-// Lazy import to avoid bundling connector dependencies in main plugin
+import { stepSchemas } from '../common/step_schemas';
+
+const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
 
 export class WorkflowsPlugin
   implements
@@ -36,6 +42,12 @@ export class WorkflowsPlugin
       WorkflowsPublicPluginStartDependencies
     >
 {
+  private appUpdater$: Subject<AppUpdater>;
+
+  constructor() {
+    this.appUpdater$ = new Subject<AppUpdater>();
+  }
+
   public setup(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>,
     plugins: WorkflowsPublicPluginSetupDependencies
@@ -64,22 +76,14 @@ export class WorkflowsPlugin
       title: PLUGIN_NAME,
       appRoute: '/app/workflows',
       euiIconType: 'workflowsApp',
-      visibleIn: ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+      visibleIn: VisibleIn,
       category: DEFAULT_APP_CATEGORIES.management,
       order: 9015,
+      updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
         const services = await this.createWorkflowsStartServices(core);
-
-        // Set badge for classic navbar
-        services.chrome.setBadge({
-          text: 'Technical preview',
-          tooltip:
-            'This functionality is in technical preview. It may change or be removed in a future release.',
-          iconType: 'beaker',
-        });
-
         return renderApp(services, params);
       },
     });
@@ -87,7 +91,22 @@ export class WorkflowsPlugin
     return {};
   }
 
-  public start(core: CoreStart): WorkflowsPublicPluginStart {
+  public start(
+    _core: CoreStart,
+    plugins: WorkflowsPublicPluginStartDependencies
+  ): WorkflowsPublicPluginStart {
+    // Initialize StepSchemas singleton with workflowExtensions
+    stepSchemas.initialize(plugins.workflowsExtensions);
+
+    // License check to set app status
+    plugins.licensing.license$.subscribe((license) => {
+      if (license.isActive && license.hasAtLeast('enterprise')) {
+        this.appUpdater$.next(() => ({ status: AppStatus.accessible, visibleIn: VisibleIn }));
+      } else {
+        this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
+      }
+    });
+
     return {};
   }
 

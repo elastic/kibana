@@ -30,7 +30,7 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsqlQuery } from '@kbn/esql-ast';
+import { EsqlQuery } from '@kbn/esql-language';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
@@ -264,7 +264,11 @@ export const EsqlQueryExpression: React.FC<
     async (q: AggregateQuery) => {
       const fetchTimeFieldsData = async (queryObj: AggregateQuery) => {
         try {
-          const esqlDataView = await getESQLAdHocDataview(queryObj.esql, dataViews);
+          const esqlDataView = await getESQLAdHocDataview({
+            dataViewsService: dataViews,
+            query: queryObj.esql,
+            http,
+          });
           const indexPattern: string = esqlDataView.getIndexPattern();
           const currentEsFields = await getFields(http, [indexPattern]);
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);

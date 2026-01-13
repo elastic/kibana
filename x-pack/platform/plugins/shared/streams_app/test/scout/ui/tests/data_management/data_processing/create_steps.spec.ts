@@ -10,8 +10,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
   });
 
@@ -24,21 +23,22 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await apiServices.streams.clearStreamProcessors('logs-generic-default');
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should create a new processor successfully', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
 
     await pageObjects.streams.fillProcessorFieldInput('message');
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternDefinitionsInput('{"CUSTOM_WORD": "%{WORD}"}');
     await pageObjects.streams.clickSaveProcessor();
     await pageObjects.streams.saveStepsListChanges();
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
   });
 
-  test('should create a new condition successfully', async ({ page, pageObjects }) => {
+  test('should create a new condition successfully', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddCondition();
     await pageObjects.streams.fillCondition('test_field', 'contains', 'logs');
     await pageObjects.streams.clickSaveCondition();
@@ -46,7 +46,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
   });
 
-  test('should be able to nest steps under conditions', async ({ page, pageObjects }) => {
+  test('should be able to nest steps under conditions', async ({ pageObjects }) => {
     // Create a condition first
     await pageObjects.streams.clickAddCondition();
     await pageObjects.streams.fillCondition('test_field', 'contains', 'logs');
@@ -58,7 +58,8 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await addStepButton.click();
     await pageObjects.streams.clickAddProcessor(false);
     await pageObjects.streams.fillProcessorFieldInput('message');
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternDefinitionsInput('{"CUSTOM_WORD": "%{WORD}"}');
     await pageObjects.streams.clickSaveProcessor();
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
 
@@ -73,9 +74,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
   }) => {
     await pageObjects.streams.clickAddProcessor();
 
-    await expect(
-      page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')
-    ).toBeDisabled();
+    await expect(page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')).toBeHidden();
 
     // Cancel the operation
     await pageObjects.streams.clickCancelProcessorChanges();
@@ -93,7 +92,8 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     // Create a new processor ready to be saved
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.fillProcessorFieldInput('message');
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternDefinitionsInput('{"CUSTOM_WORD": "%{WORD}"}');
     await pageObjects.streams.clickSaveProcessor();
 
     // Verify save button is enabled
@@ -113,7 +113,8 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
 
     // Fill in some data
     await pageObjects.streams.fillProcessorFieldInput('message');
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternDefinitionsInput('{"CUSTOM_WORD": "%{WORD}"}');
 
     // Cancel the changes and confirm discard
     await pageObjects.streams.clickCancelProcessorChanges();
@@ -135,7 +136,8 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await pageObjects.streams.clickSaveProcessor();
     await expect(page.getByText('Empty patterns are not allowed.')).toBeVisible();
 
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternDefinitionsInput('{"CUSTOM_WORD": "%{WORD}"}');
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.saveStepsListChanges();
@@ -159,11 +161,12 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
   test('should duplicate a processor', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.fillProcessorFieldInput('message');
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternDefinitionsInput('{"CUSTOM_WORD": "%{WORD}"}');
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.clickDuplicateProcessor(0);
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method2}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.method2}');
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.saveStepsListChanges();
@@ -182,12 +185,13 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await addStepButton.click();
     await pageObjects.streams.clickAddProcessor(false);
     await pageObjects.streams.fillProcessorFieldInput('message');
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.method}');
+    await pageObjects.streams.fillGrokPatternDefinitionsInput('{"CUSTOM_WORD": "%{WORD}"}');
     await pageObjects.streams.clickSaveProcessor();
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
 
     await pageObjects.streams.clickDuplicateProcessor(0);
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method2}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.method2}');
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.saveStepsListChanges();

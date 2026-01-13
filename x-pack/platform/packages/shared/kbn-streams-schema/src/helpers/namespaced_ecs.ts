@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-export const keepFields: string[] = [
-  '@timestamp',
-  'observed_timestamp',
-  'trace_id',
-  'span_id',
-  'severity_text',
-  'body',
-  'severity_number',
-  'event_name',
-  'dropped_attributes_count',
-  'scope',
-  'body.text',
-  'body.structured',
-  'resource.schema_url',
-  'resource.dropped_attributes_count',
-];
+import { KEEP_FIELDS, NAMESPACE_PREFIXES } from '@kbn/streamlang';
+
+// Re-export for backwards compatibility
+export const keepFields: readonly string[] = KEEP_FIELDS;
+export const namespacePrefixes: readonly string[] = NAMESPACE_PREFIXES;
 
 export const aliases: Record<string, string> = {
   trace_id: 'trace.id',
@@ -29,16 +18,9 @@ export const aliases: Record<string, string> = {
   'body.text': 'message',
 };
 
-export const namespacePrefixes = [
-  'body.structured.',
-  'attributes.',
-  'scope.attributes.',
-  'resource.attributes.',
-];
-
 export function getRegularEcsField(field: string): string {
   // check whether it starts with a namespace prefix
-  for (const prefix of namespacePrefixes) {
+  for (const prefix of NAMESPACE_PREFIXES) {
     if (field.startsWith(prefix)) {
       return field.slice(prefix.length);
     }
@@ -51,5 +33,8 @@ export function getRegularEcsField(field: string): string {
 }
 
 export function isNamespacedEcsField(field: string): boolean {
-  return namespacePrefixes.some((prefix) => field.startsWith(prefix)) || keepFields.includes(field);
+  return (
+    NAMESPACE_PREFIXES.some((prefix) => field.startsWith(prefix)) ||
+    KEEP_FIELDS.includes(field as any)
+  );
 }

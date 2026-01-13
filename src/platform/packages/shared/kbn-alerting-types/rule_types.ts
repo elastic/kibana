@@ -211,6 +211,7 @@ export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
 };
 
 export interface Flapping extends SavedObjectAttributes {
+  enabled?: boolean;
   lookBackWindow: number;
   statusChangeThreshold: number;
 }

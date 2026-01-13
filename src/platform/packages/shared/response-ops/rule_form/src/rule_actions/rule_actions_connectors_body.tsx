@@ -109,6 +109,7 @@ export const RuleActionsConnectorsBody = ({
       const uuid = uuidv4();
       const group = selectedRuleType.defaultActionGroupId;
       const actionTypeModel = actionTypeRegistry.get(actionTypeId);
+      const connectorConfig = 'config' in connector ? connector.config : undefined;
 
       const params =
         getDefaultParams({
@@ -131,7 +132,7 @@ export const RuleActionsConnectorsBody = ({
 
       const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
         .get(actionTypeId)
-        ?.validateParams(params);
+        ?.validateParams(params, connectorConfig);
 
       dispatch({
         type: 'setActionParamsError',
@@ -396,11 +397,14 @@ export const RuleActionsConnectorsBody = ({
           );
 
           const isSystemActionsSelected = Boolean(
-            actionTypeModel.isSystemActionType &&
+            actionType.isSystemActionType &&
               actions.find((action) => action.actionTypeId === actionTypeModel.id)
           );
 
-          const isDisabled = !checkEnabledResult.isEnabled || isSystemActionsSelected;
+          const shouldDisableSystemAction =
+            isSystemActionsSelected && !Boolean(actionType.allowMultipleSystemActions);
+
+          const isDisabled = !checkEnabledResult.isEnabled || shouldDisableSystemAction;
 
           const connectorCard = (
             <EuiCard

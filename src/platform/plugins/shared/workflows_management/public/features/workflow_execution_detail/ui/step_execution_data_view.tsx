@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { JSONDataView } from '../../../shared/ui/json_data_view';
+import { ExecutionDataViewer } from '../../../shared/ui/execution_data_viewer';
 
 const Titles = {
   output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {
@@ -39,18 +39,43 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
         return { data: stepExecution.input, title: Titles.input };
       } else {
         if (stepExecution.error) {
-          return { data: { error: stepExecution.error }, title: Titles.error };
+          return {
+            data: { error: stepExecution.error as unknown as JsonValue },
+            title: Titles.error,
+          };
         }
         return { data: stepExecution.output, title: Titles.output };
       }
     }, [mode, stepExecution]);
 
     const fieldPathActionsPrefix: string | undefined = useMemo(() => {
-      if (mode !== 'output' || stepExecution.error) {
-        return undefined; // Make field path actions available only for output data and not error.
+      const isOverviewStep = stepExecution.stepType === '__overview';
+      const isTriggerStep = stepExecution.stepType?.startsWith('trigger_');
+      const triggerType = isTriggerStep
+        ? stepExecution.stepType?.replace('trigger_', '')
+        : undefined;
+
+      if (isOverviewStep) {
+        return ''; // overview context: paths like "<fieldPath>"
       }
-      return `steps.${stepExecution.stepId}.${mode}`;
-    }, [mode, stepExecution.stepId, stepExecution.error]);
+
+      if (!isTriggerStep) {
+        if (mode !== 'output' || stepExecution.error) {
+          return undefined; // Make field path actions available only for non-error output data.
+        }
+        return `steps.${stepExecution.stepId}.${mode}`;
+      }
+
+      if (mode === 'output') {
+        return ''; // trigger context: paths like "<fieldPath>"
+      }
+
+      if (triggerType === 'manual') {
+        return 'inputs'; // manual input: "inputs.<fieldPath>"
+      }
+
+      return 'event'; // alert/scheduled input: "event.<fieldPath>"
+    }, [mode, stepExecution.stepId, stepExecution.error, stepExecution.stepType]);
 
     if (data === undefined) {
       return (
@@ -65,7 +90,11 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
     }
 
     return (
-      <JSONDataView data={data} title={title} fieldPathActionsPrefix={fieldPathActionsPrefix} />
+      <ExecutionDataViewer
+        data={data}
+        title={title}
+        fieldPathActionsPrefix={fieldPathActionsPrefix}
+      />
     );
   }
 );

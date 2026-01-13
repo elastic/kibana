@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
@@ -14,7 +15,6 @@ import {
   installPrebuiltRules,
   importRulesWithSuccess,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

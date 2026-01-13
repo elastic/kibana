@@ -22,10 +22,14 @@ export interface StreamQueryKql extends StreamQueryBase {
   feature?: {
     name: string;
     filter: Condition;
+    type: 'system';
   };
   kql: {
     query: string;
   };
+  // from 0 to 100. aligned with anomaly detection scoring
+  severity_score?: number;
+  evidence?: string[];
 }
 
 export type StreamQuery = StreamQueryKql;
@@ -42,11 +46,14 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
       .object({
         name: NonEmptyString,
         filter: conditionSchema,
+        type: z.literal('system'),
       })
       .optional(),
     kql: z.object({
       query: z.string(),
     }),
+    severity_score: z.number().optional(),
+    evidence: z.array(z.string()).optional(),
   })
 );
 
@@ -62,11 +69,14 @@ export const upsertStreamQueryRequestSchema = z.object({
     .object({
       name: NonEmptyString,
       filter: conditionSchema,
+      type: z.literal('system'),
     })
     .optional(),
   kql: z.object({
     query: z.string(),
   }),
+  severity_score: z.number().optional(),
+  evidence: z.array(z.string()).optional(),
 });
 
 export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);

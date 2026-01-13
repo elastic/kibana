@@ -7,6 +7,7 @@
 
 import { find } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import {
   ADD_PACK_HEADER_BUTTON,
   EDIT_PACK_HEADER_BUTTON,
@@ -16,7 +17,6 @@ import {
   UPDATE_PACK_BUTTON,
   formFieldInputSelector,
 } from '../../screens/packs';
-import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,

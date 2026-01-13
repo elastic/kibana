@@ -10,7 +10,7 @@ import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import type { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
+import type { PhaseEvent, ProjectRoutingOverrides, ViewMode } from '@kbn/presentation-publishing';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common';
@@ -109,6 +109,9 @@ function getDefaultLensApiMock() {
     setDisabledActionIds: jest.fn(),
     rendered$: new BehaviorSubject<boolean>(false),
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
+    hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+    resetUnsavedChanges: jest.fn(),
+    projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
   };
   return LensApiMock;
 }
@@ -320,12 +323,14 @@ export function createUnifiedSearchApi(
     language: 'kuery',
   },
   filters: Filter[] = [],
-  timeRange: TimeRange = { from: 'now-7d', to: 'now' }
+  timeRange: TimeRange = { from: 'now-7d', to: 'now' },
+  projectRouting?: string
 ) {
   return {
     filters$: new BehaviorSubject<Filter[] | undefined>(filters),
     query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
     timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
+    projectRouting$: new BehaviorSubject<string | undefined>(projectRouting),
   };
 }
 

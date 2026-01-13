@@ -10,7 +10,7 @@
 // We must disable prototype hardening to test the pollution
 process.env.KBN_UNSAFE_DISABLE_PROTOTYPE_HARDENING = 'true';
 
-require('../../../setup_node_env');
+require('@kbn/setup-node-env');
 const _ = require('lodash');
 // eslint-disable-next-line no-restricted-modules
 const template = require('lodash/template');

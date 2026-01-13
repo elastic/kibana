@@ -23,7 +23,7 @@ export interface AlertInfo {
   index: string;
 }
 
-type FindOptions = Pick<
+export type FindOptions = Pick<
   SavedObjectsFindOptions,
   | 'defaultSearchOperator'
   | 'hasReferenceOperator'

@@ -1,0 +1,13 @@
+{
+  "person-so-type": {
+    "dynamic": false,
+    "properties": {
+      "firstName": {
+        "type": "text"
+      },
+      "lastName": {
+        "type": "text"
+      }
+    }
+  }
+}

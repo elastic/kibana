@@ -8,7 +8,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import * as api from '../apis/bulk_get_maintenance_windows';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useBulkGetMaintenanceWindowsQuery } from './use_bulk_get_maintenance_windows';

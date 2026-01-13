@@ -138,7 +138,9 @@ const getPreviewDataObservable = (
   tabState: TabState,
   savedDataViews: DataViewListItem[]
 ) => {
-  return selectTabRuntimeState(runtimeStateManager, tabState.id).stateContainer$.pipe(
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
+
+  return tabRuntimeState.stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
         const derivedDataViewName = getDataViewNameFromInitialInternalState(
@@ -154,11 +156,11 @@ const getPreviewDataObservable = (
 
       return combineLatest([
         tabStateContainer.dataState.data$.main$,
-        tabStateContainer.savedSearchState.getCurrent$(),
+        tabRuntimeState.currentDataView$,
       ]).pipe(
-        map(([{ fetchStatus }, { searchSource }]) => ({
+        map(([{ fetchStatus }, dataView]) => ({
           fetchStatus,
-          dataViewName: searchSource?.getField('index')?.name,
+          dataViewName: dataView?.name,
         })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         map(({ fetchStatus, dataViewName }) => {
@@ -172,7 +174,7 @@ const getPreviewDataObservable = (
           }
 
           return {
-            status: getPreviewStatus(fetchStatus),
+            status: tabState.forceFetchOnSelect ? TabStatus.DEFAULT : getPreviewStatus(fetchStatus),
             query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
             title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
           };

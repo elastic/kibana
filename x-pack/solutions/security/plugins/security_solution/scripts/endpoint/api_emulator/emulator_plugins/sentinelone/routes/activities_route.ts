@@ -8,7 +8,7 @@
 import type {
   SentinelOneActivityRecord,
   SentinelOneGetActivitiesParams,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 import type { DeepPartial, Mutable } from 'utility-types';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
 import { buildSentinelOneRoutePath } from './utils';

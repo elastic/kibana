@@ -1,5 +1,9 @@
 # @kbn-doc-linker partial
-
+title: Synthetics TLS certificate
+description: >
+  The parameters for the synthetics TLS certificate rule.
+  These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.tls`.
+type: object
 properties:
   search:
     type: string

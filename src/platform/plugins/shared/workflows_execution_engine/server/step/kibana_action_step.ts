@@ -12,13 +12,13 @@
 
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequestFromAction } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import { getKibanaUrl } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 // Extend BaseStep for kibana-specific properties
 export interface KibanaActionStep extends BaseStep {
@@ -210,10 +210,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       const { Agent } = await import('undici');
 
       const {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        skip_ssl_verification, // eslint-disable-next-line @typescript-eslint/naming-convention
-        follow_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
-        max_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
+        skip_ssl_verification,
+        follow_redirects,
+        max_redirects,
         keep_alive,
         ...otherOptions
       } = fetcherOptions;

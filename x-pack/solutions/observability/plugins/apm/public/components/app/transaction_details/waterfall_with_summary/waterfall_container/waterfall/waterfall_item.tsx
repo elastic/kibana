@@ -20,7 +20,6 @@ import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { ColdStartBadge } from './badge/cold_start_badge';
-import { SpanLinksBadge } from './badge/span_links_badge';
 import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
@@ -29,6 +28,7 @@ import type {
   IWaterfallSpan,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
+import { SpanLinksBadge } from '../../../../../shared/trace_waterfall/badges/span_links_badge';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -347,8 +347,8 @@ export function WaterfallItem({
           <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
         )}
         <SpanLinksBadge
-          linkedParents={item.spanLinksCount.linkedParents}
-          linkedChildren={item.spanLinksCount.linkedChildren}
+          outgoingCount={item.spanLinksCount.linkedParents}
+          incomingCount={item.spanLinksCount.linkedChildren}
           id={item.id}
           onClick={onClick}
         />

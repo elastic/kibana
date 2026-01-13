@@ -32,7 +32,7 @@ exports[`HeaderPage it renders 1`] = `
   data-test-subj="header-page"
 >
   <header
-    class="euiPageHeader emotion-euiPageHeader"
+    class="euiPageHeader emotion-euiPageHeader-transparent"
   >
     <div
       class="emotion-euiPageHeaderContent"
@@ -52,6 +52,7 @@ exports[`HeaderPage it renders 1`] = `
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <span
                   class="c0"
@@ -62,6 +63,7 @@ exports[`HeaderPage it renders 1`] = `
             </span>
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
               <span
                 class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline"

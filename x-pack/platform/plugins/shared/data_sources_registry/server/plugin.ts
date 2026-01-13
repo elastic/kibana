@@ -14,7 +14,10 @@ import type {
 } from '@kbn/core/server';
 
 import type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';
-import { type DataCatalog, createDataCatalog } from './data_catalog';
+import type { DataCatalog } from './data_catalog';
+import type { DataTypeDefinition } from '../common/data_types';
+import { createDataCatalog } from './data_catalog';
+import { registerRoutes } from './routes';
 
 export class DataSourcesRegistryPlugin
   implements Plugin<DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart>
@@ -30,8 +33,11 @@ export class DataSourcesRegistryPlugin
   public setup(core: CoreSetup): DataSourcesRegistryPluginSetup {
     this.logger.debug('dataSourcesRegistry: Setup');
 
+    const router = core.http.createRouter();
+    registerRoutes(router, this.dataCatalog);
+
     return {
-      register: (dataType) => this.dataCatalog.register(dataType),
+      register: (dataType: DataTypeDefinition) => this.dataCatalog.register(dataType),
     };
   }
 
@@ -41,7 +47,9 @@ export class DataSourcesRegistryPlugin
     const registeredTypes = this.dataCatalog.list();
     this.logger.debug(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);
 
-    return {};
+    return {
+      getCatalog: () => this.dataCatalog,
+    };
   }
 
   public stop() {}

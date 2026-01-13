@@ -39,10 +39,10 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 
 // Mock the thunks
 jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
-  loadConnectorsThunk: jest.fn(),
+  loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
 }));
 jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk', () => ({
-  loadWorkflowThunk: jest.fn(),
+  loadWorkflowThunk: (...args: unknown[]) => mockLoadWorkflow(...args),
 }));
 
 // Mock child components to avoid rendering deep component trees
@@ -79,8 +79,7 @@ jest.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_
 
 // Mock useAsyncThunk hooks - needs to be dynamic
 jest.mock('../../../hooks/use_async_thunk', () => ({
-  useAsyncThunk: () => mockLoadConnectors,
-  useAsyncThunkState: () => [mockLoadWorkflow, mockAsyncThunkState],
+  useAsyncThunkState: (mockedThunk: Function) => [mockedThunk, mockAsyncThunkState],
 }));
 
 describe('WorkflowDetailPage', () => {

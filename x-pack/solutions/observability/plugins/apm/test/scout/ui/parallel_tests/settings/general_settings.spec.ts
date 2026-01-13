@@ -10,7 +10,6 @@ import { test } from '../../fixtures';
 
 test.describe('General Settings', { tag: ['@ess', '@svlOblt'] }, () => {
   test('Viewer should not be able to modify settings', async ({
-    page,
     pageObjects: { generalSettingsPage },
     browserAuth,
   }) => {

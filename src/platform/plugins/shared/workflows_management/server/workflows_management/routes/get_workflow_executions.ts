@@ -13,8 +13,9 @@ import { ExecutionStatusValues, ExecutionTypeValues } from '@kbn/workflows';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
-import { MAX_PAGE_SIZE, parseExecutionStatuses } from './types';
+import { MAX_PAGE_SIZE, parseExecutionStatuses, parseExecutionTypes } from './types';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 import type { SearchWorkflowExecutionsParams } from '../workflows_management_service';
 
 export function registerGetWorkflowExecutionsRoute({
@@ -71,20 +72,19 @@ export function registerGetWorkflowExecutionsRoute({
             )
           ),
           page: schema.maybe(schema.number({ min: 1 })),
-          perPage: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
+          size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
         }),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const spaceId = spaces.getSpaceId(request);
         const params: SearchWorkflowExecutionsParams = {
           workflowId: request.query.workflowId,
           statuses: parseExecutionStatuses(request.query.statuses),
-          // Execution type filter is not supported yet
-          // executionTypes: parseExecutionTypes(request.query.executionTypes),
+          executionTypes: parseExecutionTypes(request.query.executionTypes),
           page: request.query.page,
-          perPage: request.query.perPage,
+          size: request.query.size,
         };
         return response.ok({
           body: await api.getWorkflowExecutions(params, spaceId),
@@ -92,6 +92,6 @@ export function registerGetWorkflowExecutionsRoute({
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }

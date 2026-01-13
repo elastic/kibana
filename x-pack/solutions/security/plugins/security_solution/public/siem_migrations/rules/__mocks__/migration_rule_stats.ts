@@ -8,6 +8,7 @@
 import type { RuleMigrationTranslationStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { RuleMigrationStats } from '../types';
+import { MigrationSource } from '../../common/types';
 
 export const getRuleMigrationStatsMock = (
   overrides?: Partial<RuleMigrationStats>
@@ -24,6 +25,7 @@ export const getRuleMigrationStatsMock = (
   },
   created_at: '2021-01-01T00:00:00.000Z',
   last_updated_at: '2021-01-01T00:00:00.000Z',
+  vendor: MigrationSource.SPLUNK,
   ...overrides,
 });
 

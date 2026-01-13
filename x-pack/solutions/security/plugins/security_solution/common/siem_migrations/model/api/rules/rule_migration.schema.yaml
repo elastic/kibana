@@ -384,6 +384,45 @@ paths:
         404:
           description: Indicates the migration id was not found.
 
+  /internal/siem_migrations/rules/{migration_id}/rules/enhance:
+    post:
+      summary: Enhance Rules in a rule migrations with any additional data.
+      operationId: RuleMigrationEnhanceRule
+      x-codegen-enabled: true
+      x-internal: true
+      description: Enhances existing migration rules with additional vendor-specific data such as MITRE mappings
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              ## When more vendors/enhancement types are added, oneOf should be used here
+              ## as we want request to be the union of all possible vendor/enhancement types
+              $ref: '../../vendor/rules/qradar.schema.yaml#/components/schemas/EnhanceQRadarRule'
+      responses:
+        200:
+          description: Indicates rules have been enhanced successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Response from rule enhancement operation
+                required:
+                  - updated
+                properties:
+                  updated:
+                    type: boolean
+                    description: whether the update was applied successfully
+
   /internal/siem_migrations/rules/{migration_id}/install:
     post:
       summary: Installs translated migration rules
@@ -795,3 +834,4 @@ paths:
                       items:
                         type: string
                       description: The index privileges level missing
+

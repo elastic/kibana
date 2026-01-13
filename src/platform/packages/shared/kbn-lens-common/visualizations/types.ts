@@ -345,6 +345,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
   isSubtypeCompatible?: (subtype1?: string, subtype2?: string) => boolean;
 
+  isSubtypeSupported?: (subtype: string) => boolean;
+
   /**
    * Header rendered as layer title. This can be used for both static and dynamic content like
    * for extra configurability, such as for switch chart type
@@ -533,6 +535,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
 export interface VisualizationState {
   activeId: string | null;
+  selectedLayerId: string | null;
   state: unknown;
 }
 

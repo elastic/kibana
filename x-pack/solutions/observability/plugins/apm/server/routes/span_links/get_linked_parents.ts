@@ -6,7 +6,7 @@
  */
 import { existsQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SPAN_ID,
@@ -73,7 +73,16 @@ export async function getLinkedParentsOfSpan({
   );
 
   const source = response.hits.hits?.[0]?._source as Pick<TransactionRaw | SpanRaw, 'span'>;
-  const fields = unflattenKnownApmEventFields(response.hits.hits?.[0]?.fields);
+  const fields = response.hits.hits?.[0]?.fields;
+  const event = fields && accessKnownApmEventFields(fields);
 
-  return source?.span?.links ?? mapOtelToSpanLink(fields?.links);
+  return (
+    source?.span?.links ??
+    mapOtelToSpanLink(
+      event && {
+        trace_id: event[OTEL_SPAN_LINKS_TRACE_ID],
+        span_id: event[OTEL_SPAN_LINKS_SPAN_ID],
+      }
+    )
+  );
 }

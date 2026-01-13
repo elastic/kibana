@@ -10,7 +10,10 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { AggregateQuery, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { isOfQueryType } from '@kbn/es-query';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import {
+  apiPublishesProjectRouting,
+  apiPublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import type {
   DynamicActionsSerializedState,
   EmbeddableDynamicActionsManager,
@@ -157,12 +160,17 @@ function loadViewUnderlyingDataArgs(
     ? parentApi
     : { filters$: undefined, query$: undefined, timeRange$: undefined };
 
+  const { projectRouting$ } = apiPublishesProjectRouting(parentApi)
+    ? parentApi
+    : { projectRouting$: undefined };
+
   const mergedSearchContext = getMergedSearchContext(
     state,
     {
       filters: filters$?.getValue(),
       query: query$?.getValue(),
       timeRange: timeRange$?.getValue(),
+      projectRouting: projectRouting$?.getValue(),
     },
     searchContextApi.timeRange$,
     parentApi,

@@ -13,7 +13,7 @@ import {
   type AttackDiscoveryApiAlert,
   type AttackDiscoveryGenerationConfig,
 } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_anonymized_alerts';
 import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';
@@ -31,6 +31,12 @@ jest.mock('./generate_discoveries', () => ({
 jest.mock('./report_attack_discovery_success_telemetry', () => ({
   ...jest.requireActual('./report_attack_discovery_success_telemetry'),
   reportAttackDiscoverySuccessTelemetry: jest.fn(),
+}));
+jest.mock('./filter_hallucinated_alerts', () => ({
+  filterHallucinatedAlerts: jest.fn().mockImplementation(({ attackDiscoveries }) => {
+    // By default, pass through all discoveries (no filtering)
+    return Promise.resolve(attackDiscoveries);
+  }),
 }));
 jest.mock('../../../lib/attack_discovery/persistence/deduplication', () => ({
   deduplicateAttackDiscoveries: jest
@@ -296,6 +302,32 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         );
       }
     );
+
+    it('calls filterHallucinatedAlerts with the expected parameters', async () => {
+      const { filterHallucinatedAlerts } = jest.requireMock('./filter_hallucinated_alerts');
+      const executionUuid = 'test-1';
+
+      await generateAndUpdateAttackDiscoveries({
+        actionsClient: mockActionsClient,
+        authenticatedUser: mockAuthenticatedUser,
+        config: mockConfig,
+        dataClient: mockDataClient,
+        enableFieldRendering: true,
+        esClient: mockEsClient,
+        executionUuid,
+        logger: mockLogger,
+        savedObjectsClient: mockSavedObjectsClient,
+        telemetry: mockTelemetry,
+        withReplacements: false,
+      });
+
+      expect(filterHallucinatedAlerts).toHaveBeenCalledWith({
+        alertsIndexPattern: mockConfig.alertsIndexPattern,
+        attackDiscoveries: mockAttackDiscoveries,
+        esClient: mockEsClient,
+        logger: mockLogger,
+      });
+    });
   });
 
   describe('when `generateAttackDiscoveries` throws an error', () => {

@@ -40,7 +40,9 @@ export const podMemoryUsage: TSVBMetricModelCreator = (
             { id: 'memory_with', name: 'with_limit', field: 'avg-memory-with' },
             { id: 'memory_without', name: 'without_limit', field: 'avg-memory-without' },
           ],
-          script: 'params.with_limit > 0.0 ? params.with_limit : params.without_limit',
+          script:
+            '(params.with_limit != null && params.with_limit > 0.0) ? params.with_limit : params.without_limit',
+          gap_policy: 'insert_zeros',
         },
       ],
     },

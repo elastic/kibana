@@ -9,11 +9,26 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
-import type { DashboardState } from './content_management';
+import type { DashboardState } from './api';
+import type { create, read, update, deleteDashboard } from './api';
+
+/**
+ * Client interface for dashboard CRUD operations
+ */
+export interface DashboardServerClient {
+  create: typeof create;
+  read: typeof read;
+  update: typeof update;
+  delete: typeof deleteDashboard;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
 export interface DashboardPluginStart {
+  client: DashboardServerClient;
+  /**
+   * @deprecated This method is deprecated and should be replaced by client.read
+   */
   getDashboard: (
     ctx: RequestHandlerContext,
     id: string
