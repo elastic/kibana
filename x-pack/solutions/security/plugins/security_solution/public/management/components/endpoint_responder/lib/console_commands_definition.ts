@@ -498,7 +498,7 @@ export const getEndpointConsoleCommands = ({
   // Adjust `runscript` for use with Endpoint
   if (agentType === 'endpoint' && !responseActionsEndpointRunScript) {
     consoleCommands = consoleCommands.filter((command) => command.name !== 'runscript');
-  } else {
+  } else if (agentType === 'endpoint') {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const runscriptCommand = consoleCommands.find((command) => command.name === 'runscript')!;
 
