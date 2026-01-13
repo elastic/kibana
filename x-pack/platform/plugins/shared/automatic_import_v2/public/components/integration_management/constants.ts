@@ -4,6 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export const LLM_PROXY_HANDOVER_INTERCEPTOR = 'handover-to-answer';
-export const LLM_PROXY_FINAL_MESSAGE = 'final';
+export const PAGE_RESTRICT_WIDTH = 880;
