@@ -59,6 +59,9 @@ export const globalSetupHook = baseGlobalSetupHook.extend({
         log,
         config,
       },
+      // Metrics system indexes are TSDS and thus, time bound.
+      // In order to have fixed dates in the tests, we need to skip the system package installation so that the TSDS configuration doesn't get applied.
+      // Otherwise, time-bound indexes will reject documents outside their time range, which depends on the time the test is being ran, making them less deterministic.
       { skipInstallation: true }
     );
 
