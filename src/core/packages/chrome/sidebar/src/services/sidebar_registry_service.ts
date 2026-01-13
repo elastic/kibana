@@ -177,6 +177,7 @@ export class SidebarRegistryService implements SidebarRegistryServiceApi {
     this.changed$.next();
   }
 
+  @memoize
   getAvailable$(appId: string): Observable<boolean> {
     if (!this.registeredApps.has(appId)) {
       throw new Error(`[Sidebar Registry] Cannot get availability. App not registered: ${appId}`);
