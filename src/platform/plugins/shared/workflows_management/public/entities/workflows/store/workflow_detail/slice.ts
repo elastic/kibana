@@ -66,7 +66,10 @@ const workflowDetailSlice = createSlice({
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
     },
-    setInferenceEndpoints: (state, action: { payload: WorkflowDetailState['inferenceEndpoints'] }) => {
+    setInferenceEndpoints: (
+      state,
+      action: { payload: WorkflowDetailState['inferenceEndpoints'] }
+    ) => {
       state.inferenceEndpoints = action.payload;
     },
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {

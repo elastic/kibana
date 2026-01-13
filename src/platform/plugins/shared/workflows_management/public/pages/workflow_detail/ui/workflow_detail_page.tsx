@@ -37,8 +37,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
   const [loadConnectors, { isLoading: isLoadingConnectors }] =
     useAsyncThunkState(loadConnectorsThunk);
-  const [loadInferenceEndpoints, { isLoading: isLoadingInferenceEndpoints }] =
-    useAsyncThunkState(loadInferenceEndpointsThunk);
+  const [loadInferenceEndpoints, { isLoading: isLoadingInferenceEndpoints }] = useAsyncThunkState(
+    loadInferenceEndpointsThunk
+  );
   const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
     useAsyncThunkState(loadWorkflowThunk);
 

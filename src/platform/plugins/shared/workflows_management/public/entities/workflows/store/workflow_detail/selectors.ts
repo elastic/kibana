@@ -72,7 +72,10 @@ export const selectIsSavingYaml = createSelector(
 );
 
 export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
-export const selectInferenceEndpoints = createSelector(selectDetail, (detail) => detail.inferenceEndpoints);
+export const selectInferenceEndpoints = createSelector(
+  selectDetail,
+  (detail) => detail.inferenceEndpoints
+);
 export const selectSchema = createSelector(selectDetail, (detail) => detail.schema);
 
 export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);

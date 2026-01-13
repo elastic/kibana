@@ -52,7 +52,12 @@ export function collectAllInferenceIds(
           const items = (ancestor as any).items; // eslint-disable-line @typescript-eslint/no-explicit-any
           if (Array.isArray(items)) {
             for (const item of items) {
-              if (isPair(item) && isScalar(item.key) && item.key.value === 'type' && isScalar(item.value)) {
+              if (
+                isPair(item) &&
+                isScalar(item.key) &&
+                item.key.value === 'type' &&
+                isScalar(item.value)
+              ) {
                 if (item.value.value === 'workflows.rerank') {
                   isRerankStep = true;
                   break;
