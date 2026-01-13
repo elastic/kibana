@@ -43,6 +43,7 @@ import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
+import { buildConnectorIdFilter } from './filtering_configs';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
@@ -73,13 +74,25 @@ export interface TableSectionProps {
    * Callback to open the schedules flyout
    */
   openSchedulesFlyout: () => void;
+
+  /**
+   * The list of selected connectors ID to filter the table
+   */
+  selectedConnectorNames: string[];
 }
 
 /**
  * Renders the alerts table with grouping functionality in the attacks page.
  */
 export const TableSection = React.memo(
-  ({ dataView, statusFilter, pageFilters, assignees, openSchedulesFlyout }: TableSectionProps) => {
+  ({
+    dataView,
+    statusFilter,
+    pageFilters,
+    assignees,
+    openSchedulesFlyout,
+    selectedConnectorNames,
+  }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -147,8 +160,15 @@ export const TableSection = React.memo(
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
+        ...buildConnectorIdFilter(selectedConnectorNames),
       ],
-      [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, pageFilters, assignees]
+      [
+        showBuildingBlockAlerts,
+        showOnlyThreatIndicatorAlerts,
+        pageFilters,
+        assignees,
+        selectedConnectorNames,
+      ]
     );
 
     const isLoading = useMemo(

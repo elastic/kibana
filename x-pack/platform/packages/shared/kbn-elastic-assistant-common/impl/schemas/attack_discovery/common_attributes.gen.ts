@@ -272,6 +272,10 @@ export const FindAttackDiscoveryAlertsParams = z.object({
    * `undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.
    */
   shared: z.boolean().optional(),
+  /**
+   * `undefined`: show both scheduled, and ad-hoc Attack discoveries. `true`: show only scheduled Attack discoveries. `false`: show only ad-hoc Attack discoveries.
+   */
+  scheduled: z.boolean().optional(),
   sortField: z.string().optional().default('@timestamp'),
   sortOrder: z.string().optional(),
   /**

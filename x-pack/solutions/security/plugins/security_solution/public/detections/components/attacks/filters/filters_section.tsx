@@ -9,10 +9,16 @@ import React, { type Dispatch, memo, type SetStateAction, useCallback, useMemo }
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { PageFilters } from './page_filters';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
+import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
+import {
+  buildShowBuildingBlockFilter,
+  buildThreatMatchFilter,
+} from '../../alerts_table/default_config';
 import type { Status } from '../../../../../common/api/detection_engine';
 
 export interface FiltersSectionProps {
@@ -24,7 +30,6 @@ export interface FiltersSectionProps {
    * Page filters for the alerts page
    */
   pageFilters: Filter[] | undefined;
-  /**
   /**
    * Callback to set the page filter handler for the alerts page to allow a refresh after the table has reloaded
    */
@@ -57,11 +62,18 @@ export const FiltersSection = memo(
     const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
     const query = useDeepEqualSelector(getGlobalQuerySelector);
     const topLevelFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-
-    const filters = useMemo(
-      () => [...topLevelFilters, ...(pageFilters ?? [])],
-      [topLevelFilters, pageFilters]
+    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
+      TableId.alertsOnAttacksPage
     );
+
+    const filters = useMemo(() => {
+      return [
+        ...topLevelFilters,
+        ...(pageFilters ?? []),
+        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+        ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ];
+    }, [topLevelFilters, pageFilters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]);
 
     const { to, from } = useGlobalTime();
 
