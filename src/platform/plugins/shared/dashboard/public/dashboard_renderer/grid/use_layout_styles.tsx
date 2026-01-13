@@ -58,7 +58,7 @@ export const useLayoutStyles = () => {
         background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
       }
 
-      .kbnGridPanel--resizeHandle {
+      .kbnGridPanel:hover .kbnGridPanel--resizeHandle {
         z-index: ${euiTheme.levels.maskBelowHeader};
 
         // applying mask via ::after allows for focus borders to show
