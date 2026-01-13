@@ -73,6 +73,13 @@ export async function getSynthtraceClient<
     skipInstallation: overrides.skipInstallation ?? false,
   });
 
+  if (overrides.skipInstallation) {
+    log.serviceMessage(
+      synthClient,
+      'Skipped fleet package installation because "overrides.skipInstallation" is true'
+    );
+  }
+
   log.serviceLoaded(synthClient);
 
   instantiatedClients[synthClient] = clients[synthClient];
