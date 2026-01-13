@@ -136,6 +136,7 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   /** @type {import('@babel/types').ImportDeclaration[]} */
   const newNodes = [];
 
+  const isRelativeImport = importSource.startsWith('.') || importSource.startsWith('/');
   for (const [targetPath, { specifiers, publicSubpath }] of newImports) {
     // Convert absolute path to importable path
     const outputPath = toImportPath(
@@ -143,7 +144,8 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
       currentFileDir,
       packageName,
       packageRoot,
-      publicSubpath
+      publicSubpath,
+      isRelativeImport
     );
     newNodes.push(createImportDeclaration(t, specifiers, outputPath));
   }
@@ -234,6 +236,18 @@ function resolveToBarrelEntry(importSource, fromDir, barrelIndex) {
 }
 
 /**
+ * Check if a file path is within a given package root.
+ *
+ * @param {string} filePath - Absolute path to a file
+ * @param {string} packageRoot - Absolute path to package root
+ * @returns {boolean} - True if filePath is within packageRoot
+ */
+function isWithinPackage(filePath, packageRoot) {
+  const relative = path.relative(packageRoot, filePath);
+  return !relative.startsWith('..') && !path.isAbsolute(relative);
+}
+
+/**
  * Convert an absolute file path to an importable path.
  *
  * @param {string} absolutePath - Absolute path to the target file
@@ -241,9 +255,23 @@ function resolveToBarrelEntry(importSource, fromDir, barrelIndex) {
  * @param {string} [packageName] - Package name if this is a node_modules import
  * @param {string} [packageRoot] - Package root path if this is a node_modules import
  * @param {string} [publicSubpath] - Pre-computed public subpath from package exports field
+ * @param {boolean} [isRelativeImport] - If true and file is within the same package, use relative paths
  * @returns {string} - Importable path
  */
-function toImportPath(absolutePath, fromDir, packageName, packageRoot, publicSubpath) {
+function toImportPath(absolutePath, fromDir, packageName, packageRoot, publicSubpath, isRelativeImport) {
+  // For relative imports within the same package: use relative paths
+  // This preserves the original import style for internal package imports
+  // Only apply when: the import was relative AND the importing file is within the same package
+  if (isRelativeImport && packageRoot && isWithinPackage(fromDir, packageRoot)) {
+    let relativePath = path.relative(fromDir, absolutePath);
+    relativePath = relativePath.replace(/\.(ts|tsx|js|jsx|mjs|cjs)$/, '');
+    relativePath = relativePath.replace(/\/index$/, '');
+    if (!relativePath.startsWith('.')) {
+      relativePath = './' + relativePath;
+    }
+    return relativePath;
+  }
+
   // For package imports with public subpath from exports field
   if (packageName && publicSubpath !== undefined) {
     // publicSubpath is already the correct subpath (e.g., "internal/Observable")
@@ -262,7 +290,7 @@ function toImportPath(absolutePath, fromDir, packageName, packageRoot, publicSub
     return `${packageName}/${subPath}`;
   }
 
-  // For relative imports: convert to relative path
+  // Fallback: relative path
   let relativePath = path.relative(fromDir, absolutePath);
   relativePath = relativePath.replace(/\.(ts|tsx|js|jsx)$/, '');
   if (!relativePath.startsWith('.')) {
@@ -358,13 +386,15 @@ function transformExportNamedDeclaration(nodePath, state, t, barrelIndex) {
   /** @type {import('@babel/types').ExportNamedDeclaration[]} */
   const newNodes = [];
 
+  const isRelativeExport = exportSource.startsWith('.') || exportSource.startsWith('/');
   for (const [targetPath, { specifiers, publicSubpath }] of newExports) {
     const outputPath = toImportPath(
       targetPath,
       currentFileDir,
       packageName,
       packageRoot,
-      publicSubpath
+      publicSubpath,
+      isRelativeExport
     );
     newNodes.push(createExportNamedDeclaration(t, specifiers, outputPath));
   }
@@ -548,13 +578,15 @@ function transformExportAllDeclaration(nodePath, state, t, barrelIndex) {
   }
 
   // Then add transformed exports for re-exports (pointing to direct paths)
+  const isRelativeExport = exportSource.startsWith('.') || exportSource.startsWith('/');
   for (const [targetPath, { specifiers, publicSubpath }] of newExports) {
     const outputPath = toImportPath(
       targetPath,
       currentFileDir,
       packageName,
       packageRoot,
-      publicSubpath
+      publicSubpath,
+      isRelativeExport
     );
     newNodes.push(createExportNamedDeclaration(t, specifiers, outputPath));
   }

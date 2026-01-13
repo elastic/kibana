@@ -115,6 +115,38 @@ function hasSubpathExports(exportsField) {
 }
 
 /**
+ * Find the containing @kbn/* package for a file path.
+ * Walks up the directory tree to find the nearest package.json with an @kbn/* name.
+ *
+ * @param {string} filePath - Absolute path to a file
+ * @returns {{ name: string, root: string } | null}
+ */
+function findContainingKbnPackage(filePath) {
+  let currentDir = path.dirname(filePath);
+  const root = path.parse(currentDir).root;
+
+  while (currentDir !== root) {
+    const pkgJsonPath = path.join(currentDir, 'package.json');
+    try {
+      if (fs.existsSync(pkgJsonPath)) {
+        const content = fs.readFileSync(pkgJsonPath, 'utf-8');
+        const pkgJson = JSON.parse(content);
+        if (pkgJson.name && pkgJson.name.startsWith('@kbn/')) {
+          return {
+            name: pkgJson.name,
+            root: fs.realpathSync(currentDir),
+          };
+        }
+      }
+    } catch {
+      // Continue walking up
+    }
+    currentDir = path.dirname(currentDir);
+  }
+  return null;
+}
+
+/**
  * Build the barrel index by scanning all barrel files.
  * This runs ONCE before the Piscina worker pool is created.
  *
@@ -281,6 +313,14 @@ async function buildBarrelIndex(repoRoot) {
           if (localExportNames.length > 0) {
             entry.localExports = localExportNames;
           }
+
+          // Add package context for internal barrels within @kbn/* packages
+          const kbnPackage = findContainingKbnPackage(barrelPath);
+          if (kbnPackage) {
+            entry.packageName = kbnPackage.name;
+            entry.packageRoot = kbnPackage.root;
+          }
+
           index[barrelPath] = entry;
         }
       } catch (err) {

@@ -1250,4 +1250,69 @@ describe('barrel transform plugin', () => {
       expect(result?.code).not.toMatch(/['"]\.\/search_strategy['"]/);
     });
   });
+
+  describe('internal barrel with packageName preserves relative imports', () => {
+    const INTERNAL_BARREL_PATH = '/test/src/kbn-es-query/src/filters/build_filters/index.ts';
+    const INTERNAL_BARREL_ROOT = '/test/src/kbn-es-query';
+
+    const internalBarrelIndex: TestBarrelIndex = {
+      [INTERNAL_BARREL_PATH]: {
+        packageName: '@kbn/es-query',
+        packageRoot: INTERNAL_BARREL_ROOT,
+        exports: {
+          buildFilter: {
+            path: `${INTERNAL_BARREL_ROOT}/src/filters/build_filters/build_filter.ts`,
+            type: 'named',
+            localName: 'buildFilter',
+            importedName: 'buildFilter',
+          },
+        },
+      },
+    };
+
+    it('uses relative path for relative imports even when packageName is set', () => {
+      // Simulates: import { buildFilter } from '../build_filters';
+      // from within @kbn/es-query/src/filters/helpers/some_file.ts
+      const result = transform({
+        code: `import { buildFilter } from '../build_filters';`,
+        barrelIndex: internalBarrelIndex,
+        filename: '/test/src/kbn-es-query/src/filters/helpers/some_file.ts',
+      });
+
+      // Should use relative path, NOT package path
+      expect(result?.code).toContain('../build_filters/build_filter');
+      expect(result?.code).not.toContain('@kbn/es-query');
+    });
+
+    it('uses relative path for relative exports even when packageName is set', () => {
+      // Simulates: export { buildFilter } from '../build_filters';
+      // from within @kbn/es-query/src/filters/helpers/index.ts
+      const result = transform({
+        code: `export { buildFilter } from '../build_filters';`,
+        barrelIndex: internalBarrelIndex,
+        filename: '/test/src/kbn-es-query/src/filters/helpers/index.ts',
+      });
+
+      // Should use relative path, NOT package path
+      expect(result?.code).toContain('../build_filters/build_filter');
+      expect(result?.code).not.toContain('@kbn/es-query');
+    });
+
+    it('uses package path for relative imports from OUTSIDE the package', () => {
+      // Simulates: import { buildFilter } from './kbn-es-query/src/filters/build_filters';
+      // from a file OUTSIDE the @kbn/es-query package
+      const result = transform({
+        code: `import { buildFilter } from './kbn-es-query/src/filters/build_filters';`,
+        barrelIndex: internalBarrelIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // Should use package path because the importing file is outside the package
+      expect(result?.code).toContain('@kbn/es-query/src/filters/build_filters/build_filter');
+      expect(result?.code).not.toContain('./kbn-es-query');
+    });
+
+    // Note: @kbn/* subpath imports (e.g., from '@kbn/es-query/src/filters/build_filters')
+    // require actual node_modules resolution and are tested in the build integration test.
+  });
 });
