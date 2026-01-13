@@ -15,6 +15,7 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  JoinProcessor,
   LowercaseProcessor,
   MathProcessor,
   ProcessorType,
@@ -177,6 +178,12 @@ const actionStepValidators: {
     checkFieldName(step.from);
     if ('to' in step && step.to) {
       checkFieldName(step.to);
+    }
+  },
+  join: (step: JoinProcessor) => {
+    checkFieldName(step.to);
+    for (const field of step.from) {
+      checkFieldName(field);
     }
   },
   // fields referenced in manual ingest pipelines are not validated here because

@@ -20,6 +20,7 @@ import type {
   UppercaseProcessor,
   LowercaseProcessor,
   TrimProcessor,
+  JoinProcessor,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
@@ -43,6 +44,7 @@ export type MathFormState = MathProcessor;
 export type UppercaseFormState = UppercaseProcessor;
 export type LowercaseFormState = LowercaseProcessor;
 export type TrimFormState = TrimProcessor;
+export type JoinFormState = JoinProcessor;
 
 export type SpecialisedFormState =
   | GrokFormState
@@ -56,7 +58,8 @@ export type SpecialisedFormState =
   | MathFormState
   | UppercaseFormState
   | LowercaseFormState
-  | TrimFormState;
+  | TrimFormState
+  | JoinFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;

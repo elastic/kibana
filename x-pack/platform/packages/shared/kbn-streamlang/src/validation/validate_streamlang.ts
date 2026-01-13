@@ -239,10 +239,15 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       }
       break;
 
+    case 'join':
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
-    case 'join':
     case 'manual_ingest_pipeline':
       // These processors don't create new fields, they remove or drop
       break;
@@ -380,10 +385,12 @@ function getProcessorOutputType(
       // All other expressions return number
       return inferMathExpressionReturnType(processor.expression);
 
+    case 'join':
+      return 'string';
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
-    case 'join':
     case 'manual_ingest_pipeline':
       // These processors don't produce typed output or type is unknown
       return 'unknown';
@@ -452,13 +459,18 @@ function getExpectedInputType(
       }
       return null;
 
+    case 'join':
+      if (processor.from.some((from) => from === fieldName)) {
+        return ['string'];
+      }
+      return null;
+
     case 'rename':
     case 'set':
     case 'append':
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
-    case 'join':
     case 'manual_ingest_pipeline':
       // These processors don't have strict type requirements for their inputs
       return null;
@@ -528,9 +540,11 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
         // Math expressions expect numeric inputs for all field references
         fieldsUsed.push(...extractFieldsFromMathExpression(step.expression));
         break;
+      case 'join':
+        fieldsUsed.push(...step.from);
+        break;
       case 'append':
       case 'drop_document':
-      case 'join':
       case 'manual_ingest_pipeline':
       case 'remove_by_prefix':
         // These processors don't use specific fields in a way that requires type validation
