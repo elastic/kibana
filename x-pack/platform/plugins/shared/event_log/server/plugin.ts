@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
 import type {
   IEventLogConfig,
   IEventLogService,
@@ -131,11 +131,8 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       message: 'eventLog starting',
     });
 
-    this.savedObjectProviderRegistry.registerDefaultProvider((request, options) => {
-      const baseClient = core.savedObjects.getScopedClient(request);
-      const client = options?.useDefaultSpace
-        ? baseClient.asScopedToNamespace(DEFAULT_SPACE_ID)
-        : baseClient;
+    this.savedObjectProviderRegistry.registerDefaultProvider((request) => {
+      const client = core.savedObjects.getScopedClient(request);
       return client.bulkGet.bind(client);
     });
 

@@ -40,35 +40,6 @@ describe('EventLogClientService', () => {
       expect(savedObjectProviderRegistry.getProvidersClient).toHaveBeenCalledWith(request);
     });
   });
-
-  describe('getClientForDefaultSpace', () => {
-    test('creates a client with default-space override', () => {
-      const savedObjectProviderRegistry = savedObjectProviderRegistryMock.create();
-      const request = fakeRequest();
-
-      const eventLogStartService = new EventLogClientService({
-        esContext,
-        savedObjectProviderRegistry,
-      });
-
-      eventLogStartService.getClientForDefaultSpace(request);
-
-      const savedObjectGetter = savedObjectProviderRegistry.getProvidersClient(request, {
-        useDefaultSpace: true,
-      });
-      expect(jest.requireMock('./event_log_client').EventLogClient).toHaveBeenCalledWith({
-        esContext,
-        request,
-        savedObjectGetter,
-        spacesService: undefined,
-        useDefaultSpace: true,
-      });
-
-      expect(savedObjectProviderRegistry.getProvidersClient).toHaveBeenCalledWith(request, {
-        useDefaultSpace: true,
-      });
-    });
-  });
 });
 
 function fakeRequest(): KibanaRequest {

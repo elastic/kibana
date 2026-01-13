@@ -44,8 +44,6 @@ import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugi
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ActionsConfig, EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -82,7 +80,6 @@ import {
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
-import type { ActionExecutionSource } from './lib/action_execution_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -160,8 +157,16 @@ export interface PluginStartContract {
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
-  getActionsClientWithRequestForDefaultSpace(
-    request: KibanaRequest
+  /**
+   * Returns an ActionsClient that is bound to the provided spaceId (namespace) while preserving
+   * the original request (and its auth context).
+   *
+   * This enables space-agnostic consumers to manage/execute connectors in a fixed space
+   * without forging fake requests (which can break auth under UIAM).
+   */
+  getActionsClientWithRequestInSpace(
+    request: KibanaRequest,
+    spaceId: string
   ): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
@@ -475,32 +480,15 @@ export class ActionsPlugin
      */
     this.setSystemActions();
 
-    const getActionsClientWithRequest = async (
-      request: KibanaRequest,
-      authorizationContext?: ActionExecutionSource<unknown>,
-      useDefaultSpace?: boolean
-    ) => {
-      if (isESOCanEncrypt !== true) {
-        throw new Error(
-          `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-        );
-      }
-
-      const baseUnsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
-        core.savedObjects,
-        request
-      );
-      const namespaceString =
-        useDefaultSpace !== true
-          ? undefined
-          : SavedObjectsUtils.namespaceIdToString(
-              spaceIdToNamespace(plugins.spaces, DEFAULT_SPACE_ID)
-            );
-      const unsecuredSavedObjectsClient =
-        namespaceString == null
-          ? baseUnsecuredSavedObjectsClient
-          : baseUnsecuredSavedObjectsClient.asScopedToNamespace(namespaceString);
-
+    const createActionsClient = async ({
+      request,
+      unsecuredSavedObjectsClient,
+      spaceId,
+    }: {
+      request: KibanaRequest;
+      unsecuredSavedObjectsClient: SavedObjectsClientContract;
+      spaceId?: string;
+    }) => {
       return new ActionsClient({
         logger,
         unsecuredSavedObjectsClient,
@@ -509,7 +497,7 @@ export class ActionsPlugin
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
         request,
-        useDefaultSpace,
+        spaceId,
         authorization: instantiateAuthorization(request),
         actionExecutor: actionExecutor!,
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
@@ -535,6 +523,35 @@ export class ActionsPlugin
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
       });
+    };
+
+    const throwIfCannotEncrypt = () => {
+      if (isESOCanEncrypt !== true) {
+        throw new Error(
+          `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        );
+      }
+    };
+
+    const getActionsClientWithRequest = async (request: KibanaRequest) => {
+      throwIfCannotEncrypt();
+
+      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
+        core.savedObjects,
+        request
+      );
+      return await createActionsClient({ request, unsecuredSavedObjectsClient });
+    };
+
+    const getActionsClientWithRequestInSpace = async (request: KibanaRequest, spaceId: string) => {
+      throwIfCannotEncrypt();
+
+      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
+        core.savedObjects,
+        request
+      ).asScopedToNamespace(spaceId);
+
+      return await createActionsClient({ request, unsecuredSavedObjectsClient, spaceId });
     };
 
     const getUnsecuredActionsClient = () => {
@@ -563,14 +580,8 @@ export class ActionsPlugin
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
-    const secureGetActionsClientWithRequestForDefaultSpace = (request: KibanaRequest) =>
-      getActionsClientWithRequest(request, undefined, true);
-
-    this.eventLogService!.registerSavedObjectProvider('action', (request, options) => {
-      const client =
-        options?.useDefaultSpace !== true
-          ? secureGetActionsClientWithRequest(request)
-          : secureGetActionsClientWithRequestForDefaultSpace(request);
+    this.eventLogService!.registerSavedObjectProvider('action', (request) => {
+      const client = secureGetActionsClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
           ? Promise.all(
@@ -664,7 +675,7 @@ export class ActionsPlugin
         return instantiateAuthorization(request);
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
-      getActionsClientWithRequestForDefaultSpace: secureGetActionsClientWithRequestForDefaultSpace,
+      getActionsClientWithRequestInSpace,
       getUnsecuredActionsClient,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>

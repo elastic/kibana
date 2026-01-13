@@ -21,18 +21,7 @@ export type SavedObjectBulkGetter = (
 
 export type SavedObjectBulkGetterResult = (type: string, ids: string[]) => Promise<unknown>;
 
-export interface SavedObjectProviderOptions {
-  /**
-   * If true, forces Saved Objects lookups to be scoped to the default space instead of
-   * the space derived from the request.
-   */
-  useDefaultSpace?: boolean;
-}
-
-export type SavedObjectProvider = (
-  request: KibanaRequest,
-  options?: SavedObjectProviderOptions
-) => SavedObjectBulkGetter;
+export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectBulkGetter;
 
 export class SavedObjectProviderRegistry {
   private providers = new Map<string, SavedObjectProvider>();
@@ -53,10 +42,7 @@ export class SavedObjectProviderRegistry {
     this.providers.set(type, provider);
   }
 
-  public getProvidersClient(
-    request: KibanaRequest,
-    options?: SavedObjectProviderOptions
-  ): SavedObjectBulkGetterResult {
+  public getProvidersClient(request: KibanaRequest): SavedObjectBulkGetterResult {
     if (!this.defaultProvider) {
       throw new Error(
         i18n.translate(
@@ -75,14 +61,14 @@ export class SavedObjectProviderRegistry {
     // would be nice to have a simple version support in API:
     // curl -X GET "localhost:9200/my-index-000001/_mget?pretty" -H 'Content-Type: application/json' -d' { "ids" : ["1", "2"] } '
     const scopedProviders = new Map<string, SavedObjectBulkGetter>();
-    const defaultGetter = this.defaultProvider(request, options);
+    const defaultGetter = this.defaultProvider(request);
     return (type: string, ids: string[]) => {
       const objects = ids.map((id: string) => ({ type, id }));
       const getter = pipe(
         fromNullable(scopedProviders.get(type)),
         getOrElse(() => {
           const client = this.providers.has(type)
-            ? this.providers.get(type)!(request, options)
+            ? this.providers.get(type)!(request)
             : defaultGetter;
           scopedProviders.set(type, client);
           return client;

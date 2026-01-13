@@ -18,13 +18,11 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
-import type { AlertingAuthorization } from './authorization/alerting_authorization';
+import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import type { AlertingRulesConfig } from './config';
 import type { GetAlertIndicesAlias } from './lib';
 import type { AlertsService } from './alerts_service/alerts_service';
@@ -37,15 +35,6 @@ import {
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-interface AlertingAuthorizationClientFactoryContract {
-  create(request: KibanaRequest): Promise<AlertingAuthorization>;
-  createForDefaultSpace?: (request: KibanaRequest) => Promise<AlertingAuthorization>;
-}
-
-interface EventLogClientServiceContract {
-  getClient: (request: KibanaRequest) => IEventLogClient;
-  getClientForDefaultSpace?: (request: KibanaRequest) => IEventLogClient;
-}
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -57,9 +46,9 @@ export interface RulesClientFactoryOpts {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   actions: ActionsPluginStartContract;
-  eventLog: EventLogClientServiceContract;
+  eventLog: IEventLogClientService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
-  authorization: AlertingAuthorizationClientFactoryContract;
+  authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
@@ -83,9 +72,9 @@ export class RulesClientFactory {
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
   private actions!: ActionsPluginStartContract;
-  private eventLog!: EventLogClientServiceContract;
+  private eventLog!: IEventLogClientService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
-  private authorization!: AlertingAuthorizationClientFactoryContract;
+  private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
   private maxScheduledPerMinute!: AlertingRulesConfig['maxScheduledPerMinute'];
@@ -125,24 +114,61 @@ export class RulesClientFactory {
     this.securityService = options.securityService;
   }
 
+  /**
+   * Creates a RulesClient bound to the space derived from the provided request (default behavior).
+   */
   public async create(
     request: KibanaRequest,
-    savedObjects: SavedObjectsServiceStart,
-    options?: { useDefaultSpace?: boolean }
+    savedObjects: SavedObjectsServiceStart
   ): Promise<RulesClient> {
+    return await this.createInternal({
+      request,
+      savedObjects,
+      spaceId: this.getSpaceId(request),
+    });
+  }
+
+  /**
+   * Creates a RulesClient bound to an explicit spaceId while preserving the original request
+   * (and its auth context). This avoids forging fake requests, which can break auth under UIAM.
+   */
+  public async createWithSpaceId(
+    request: KibanaRequest,
+    savedObjects: SavedObjectsServiceStart,
+    spaceId: string
+  ): Promise<RulesClient> {
+    return await this.createInternal({ request, savedObjects, spaceId });
+  }
+
+  private async createInternal({
+    request,
+    savedObjects,
+    spaceId,
+  }: {
+    request: KibanaRequest;
+    savedObjects: SavedObjectsServiceStart;
+    spaceId: string;
+  }): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
-    const spaceId = options?.useDefaultSpace === true ? DEFAULT_SPACE_ID : this.getSpaceId(request);
-    const namespaceId = this.spaceIdToNamespace(spaceId);
-    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespaceId);
 
     if (!this.authorization) {
       throw new Error('AlertingAuthorizationClientFactory is not defined');
     }
 
-    const authorization =
-      options?.useDefaultSpace !== true || this.authorization.createForDefaultSpace == null
-        ? await this.authorization.create(request)
-        : await this.authorization.createForDefaultSpace(request);
+    const authorization = await this.authorization.createForSpace(request, spaceId);
+
+    const unsecuredSavedObjectsClient = savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [
+          RULE_SAVED_OBJECT_TYPE,
+          RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          API_KEY_PENDING_INVALIDATION_TYPE,
+          AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+        ],
+      })
+      .asScopedToNamespace(spaceId);
 
     return new RulesClient({
       spaceId,
@@ -152,21 +178,10 @@ export class RulesClientFactory {
       ruleTypeRegistry: this.ruleTypeRegistry,
       minimumScheduleInterval: this.minimumScheduleInterval,
       maxScheduledPerMinute: this.maxScheduledPerMinute,
-      unsecuredSavedObjectsClient: savedObjects
-        .getScopedClient(request, {
-          excludedExtensions: [SECURITY_EXTENSION_ID],
-          includedHiddenTypes: [
-            RULE_SAVED_OBJECT_TYPE,
-            RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-            API_KEY_PENDING_INVALIDATION_TYPE,
-            AD_HOC_RUN_SAVED_OBJECT_TYPE,
-            GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-          ],
-        })
-        .asScopedToNamespace(namespaceString),
+      unsecuredSavedObjectsClient,
       authorization,
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
-      namespace: namespaceId,
+      namespace: this.spaceIdToNamespace(spaceId),
       internalSavedObjectsRepository: this.internalSavedObjectsRepository,
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
@@ -205,14 +220,10 @@ export class RulesClientFactory {
         };
       },
       async getActionsClient() {
-        return options?.useDefaultSpace !== true
-          ? actions.getActionsClientWithRequest(request)
-          : actions.getActionsClientWithRequestForDefaultSpace(request);
+        return actions.getActionsClientWithRequestInSpace(request, spaceId);
       },
       async getEventLogClient() {
-        return options?.useDefaultSpace !== true || eventLog.getClientForDefaultSpace == null
-          ? eventLog.getClient(request)
-          : eventLog.getClientForDefaultSpace(request);
+        return eventLog.getClient(request);
       },
       eventLogger: this.eventLogger,
       isAuthenticationTypeAPIKey() {

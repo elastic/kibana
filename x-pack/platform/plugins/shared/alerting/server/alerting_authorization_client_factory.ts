@@ -9,7 +9,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
 import type { RuleTypeRegistry } from './types';
 
@@ -17,7 +16,12 @@ export interface AlertingAuthorizationClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginStart?: SecurityPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
-  getDefaultSpace: (request: KibanaRequest) => Promise<Space | undefined>;
+  /**
+   * Retrieves a specific space by id using the provided request context.
+   * When available, this enables creating an AlertingAuthorization instance that is scoped to an explicit space
+   * (instead of the request's active space).
+   */
+  getSpaceById?: (request: KibanaRequest, spaceId: string) => Promise<Space | undefined>;
   getSpaceId: (request: KibanaRequest) => string;
   features: FeaturesPluginStart;
 }
@@ -50,14 +54,26 @@ export class AlertingAuthorizationClientFactory {
     });
   }
 
-  public async createForDefaultSpace(request: KibanaRequest): Promise<AlertingAuthorization> {
+  /**
+   * Creates an AlertingAuthorization object scoped to a specific spaceId while preserving the original request
+   * (and its auth context).
+   */
+  public async createForSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<AlertingAuthorization> {
     this.validateInitialization();
+
+    // If we cannot resolve a space by id (e.g. spaces disabled), fall back to request-derived behavior.
+    if (!this.options.getSpaceById) {
+      return await this.create(request);
+    }
 
     return AlertingAuthorization.create({
       authorization: this.options.securityPluginStart?.authz,
       request,
-      getSpace: async () => await this.options.getDefaultSpace(request),
-      getSpaceId: () => DEFAULT_SPACE_ID,
+      getSpace: (req) => this.options.getSpaceById!(req, spaceId),
+      getSpaceId: () => spaceId,
       ruleTypeRegistry: this.options.ruleTypeRegistry,
       features: this.options.features,
     });

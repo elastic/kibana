@@ -21,7 +21,6 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -89,7 +88,10 @@ export interface ExecuteOptions<Source = unknown> {
   params: Record<string, unknown>;
   relatedSavedObjects?: RelatedSavedObjects;
   request: KibanaRequest;
-  useDefaultSpace?: boolean;
+  /**
+   * Optional space override. When provided, Action execution will be scoped to this spaceId.
+   */
+  spaceId?: string;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
   connectorTokenClient?: ConnectorTokenClientContract;
@@ -150,7 +152,7 @@ export class ActionExecutor {
     request,
     params,
     relatedSavedObjects,
-    useDefaultSpace,
+    spaceId: spaceIdOverride,
     source,
     taskInfo,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
@@ -162,21 +164,9 @@ export class ActionExecutor {
       spaces,
     } = this.actionExecutorContext!;
 
-    const requestSpaceId = spaces && spaces.getSpaceId(request);
-    const effectiveSpaceId = useDefaultSpace ? DEFAULT_SPACE_ID : requestSpaceId;
-
-    const baseServices = getServices(request);
-    const services = useDefaultSpace
-      ? {
-          ...baseServices,
-          savedObjectsClient: baseServices.savedObjectsClient.asScopedToNamespace(DEFAULT_SPACE_ID),
-        }
-      : baseServices;
-
-    const namespace =
-      effectiveSpaceId && effectiveSpaceId !== DEFAULT_SPACE_ID
-        ? { namespace: effectiveSpaceId }
-        : {};
+    const services = getServices(request);
+    const spaceId = spaceIdOverride ?? (spaces && spaces.getSpaceId(request));
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     const authorization = getActionsAuthorizationWithRequest(request);
     const currentUser = security?.authc.getCurrentUser(request);
 
@@ -209,7 +199,7 @@ export class ActionExecutor {
       request,
       services,
       source,
-      spaceId: effectiveSpaceId,
+      spaceId,
       taskInfo,
     });
   }
@@ -270,6 +260,7 @@ export class ActionExecutor {
     taskInfo,
     consumer,
     actionExecutionId,
+    spaceId: spaceIdOverride,
   }: {
     actionId: string;
     actionExecutionId: string;
@@ -279,10 +270,11 @@ export class ActionExecutor {
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
     consumer?: string;
+    spaceId?: string;
   }) {
     const { spaces, eventLogger } = this.actionExecutorContext!;
 
-    const spaceId = spaces && spaces.getSpaceId(request);
+    const spaceId = spaceIdOverride ?? (spaces && spaces.getSpaceId(request));
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {

@@ -58,7 +58,7 @@ export async function execute(
     params,
     source,
     request: context.request,
-    useDefaultSpace: context.useDefaultSpace,
+    spaceId: context.spaceId,
     relatedSavedObjects,
     actionExecutionId: uuidv4(),
     connectorTokenClient: context.connectorTokenClient,

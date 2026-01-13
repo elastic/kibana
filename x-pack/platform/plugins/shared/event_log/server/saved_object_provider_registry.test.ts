@@ -48,7 +48,7 @@ describe('SavedObjectProviderRegistry', () => {
 
       expect(await registry.getProvidersClient(request)('alert', [alert.id])).toMatchObject(alert);
 
-      expect(provider).toHaveBeenCalledWith(request, undefined);
+      expect(provider).toHaveBeenCalledWith(request);
       expect(getter).toHaveBeenCalledWith([{ id: alert.id, type: 'alert' }]);
     });
 
@@ -76,7 +76,7 @@ describe('SavedObjectProviderRegistry', () => {
       );
 
       expect(getter).toHaveBeenCalledWith([{ id: action.id, type: 'action' }]);
-      expect(defaultProvider).toHaveBeenCalledWith(request, undefined);
+      expect(defaultProvider).toHaveBeenCalledWith(request);
     });
   });
 });

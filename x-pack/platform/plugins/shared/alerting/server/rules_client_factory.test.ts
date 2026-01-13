@@ -127,7 +127,7 @@ test('creates a rules client with proper constructor arguments when security is 
   const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.create.mockResolvedValue(
+  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
     alertingAuthorization as unknown as AlertingAuthorization
   );
 
@@ -144,7 +144,10 @@ test('creates a rules client with proper constructor arguments when security is 
     ],
   });
 
-  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
+  expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
+    request,
+    'default'
+  );
 
   expect(rulesClientFactoryParams.actions.getActionsAuthorizationWithRequest).toHaveBeenCalledWith(
     request
@@ -190,7 +193,7 @@ test('creates a rules client with proper constructor arguments', async () => {
   const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.create.mockResolvedValue(
+  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
     alertingAuthorization as unknown as AlertingAuthorization
   );
 
@@ -207,7 +210,10 @@ test('creates a rules client with proper constructor arguments', async () => {
     ],
   });
 
-  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
+  expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
+    request,
+    'default'
+  );
 
   expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,

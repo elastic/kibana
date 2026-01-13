@@ -6,7 +6,6 @@
  */
 
 import type { AxiosInstance } from 'axios';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ActionType } from '../../../../../common';
 import type { RawAction } from '../../../../types';
 import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
@@ -96,9 +95,7 @@ export async function getAxiosInstance(
       );
     }
 
-    const spaceId = context.useDefaultSpace
-      ? DEFAULT_SPACE_ID
-      : spaces && spaces.getSpaceId(request);
+    const spaceId = context.spaceId ?? (spaces && spaces.getSpaceId(request));
     const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
       'action',
       connectorId,
