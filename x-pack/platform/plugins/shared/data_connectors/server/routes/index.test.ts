@@ -10,20 +10,20 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerRoutes, type RouteDependencies } from '.';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import * as helpers from './connectors_helpers';
+import * as helpers from './data_sources_helpers';
 
 // Mock the helper functions
-jest.mock('./connectors_helpers', () => ({
-  ...jest.requireActual('./connectors_helpers'),
-  createConnectorAndRelatedResources: jest.fn(),
-  deleteConnectorAndRelatedResources: jest.fn(),
+jest.mock('./data_sources_helpers', () => ({
+  ...jest.requireActual('./data_sources_helpers'),
+  createDataSourceAndRelatedResources: jest.fn(),
+  deleteDataSourceAndRelatedResources: jest.fn(),
 }));
 
-const mockCreateConnectorAndRelatedResources =
+const mockCreateDataSourceAndRelatedResources =
   helpers.createDataSourceAndRelatedResources as jest.MockedFunction<
     typeof helpers.createDataSourceAndRelatedResources
   >;
-const mockDeleteConnectorAndRelatedResources =
+const mockDeleteDataSourceAndRelatedResources =
   helpers.deleteDataSourceAndRelatedResources as jest.MockedFunction<
     typeof helpers.deleteDataSourceAndRelatedResources
   >;
@@ -86,14 +86,14 @@ describe('registerRoutes', () => {
     mockSavedObjectsClient.getCurrentNamespace.mockReturnValue('default');
   });
 
-  describe('GET /api/data_connectors', () => {
-    it('should list all data connectors', async () => {
-      const mockConnectors = [
+  describe('GET /api/data_sources', () => {
+    it('should list all data sources', async () => {
+      const mockDataSources = [
         {
-          id: 'connector-1',
+          id: 'data-source-1',
           type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           attributes: {
-            name: 'Test Connector 1',
+            name: 'Test Data Source 1',
             type: 'notion',
             workflowIds: ['workflow-1'],
             toolIds: ['tool-1'],
@@ -104,10 +104,10 @@ describe('registerRoutes', () => {
           references: [],
         },
         {
-          id: 'connector-2',
+          id: 'data-source-2',
           type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           attributes: {
-            name: 'Test Connector 2',
+            name: 'Test Data Source 2',
             type: 'notion',
             workflowIds: ['workflow-2'],
             toolIds: ['tool-2'],
@@ -120,7 +120,7 @@ describe('registerRoutes', () => {
       ];
 
       mockSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: mockConnectors as any,
+        saved_objects: mockDataSources as any,
         total: 2,
         per_page: 100,
         page: 1,
@@ -140,16 +140,16 @@ describe('registerRoutes', () => {
       });
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
-          connectors: expect.arrayContaining([
-            expect.objectContaining({ id: 'connector-1' }),
-            expect.objectContaining({ id: 'connector-2' }),
+          dataSources: expect.arrayContaining([
+            expect.objectContaining({ id: 'data-source-1' }),
+            expect.objectContaining({ id: 'data-source-2' }),
           ]),
           total: 2,
         },
       });
     });
 
-    it('should handle errors when listing connectors fails', async () => {
+    it('should handle errors when listing data sources fails', async () => {
       mockSavedObjectsClient.find.mockRejectedValue(new Error('Database error'));
 
       registerRoutes(dependencies);
@@ -163,19 +163,19 @@ describe('registerRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
-          message: 'Failed to list connectors: Database error',
+          message: 'Failed to list data sources: Database error',
         },
       });
     });
   });
 
-  describe('GET /api/data_connectors/:id', () => {
-    it('should get a single data connector by ID', async () => {
-      const mockConnector = {
-        id: 'connector-1',
+  describe('GET /api/data_sources/:id', () => {
+    it('should get a single data source by ID', async () => {
+      const mockDataSource = {
+        id: 'data-source-1',
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         attributes: {
-          name: 'Test Connector',
+          name: 'Test Data Source',
           type: 'notion',
           workflowIds: ['workflow-1'],
           toolIds: ['tool-1'],
@@ -186,13 +186,13 @@ describe('registerRoutes', () => {
         references: [],
       };
 
-      mockSavedObjectsClient.get.mockResolvedValue(mockConnector);
+      mockSavedObjectsClient.get.mockResolvedValue(mockDataSource);
 
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.get.mock.calls[1][1];
       const mockRequest = httpServerMock.createKibanaRequest({
-        params: { id: 'connector-1' },
+        params: { id: 'data-source-1' },
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -200,17 +200,17 @@ describe('registerRoutes', () => {
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
         DATA_SOURCE_SAVED_OBJECT_TYPE,
-        'connector-1'
+        'data-source-1'
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: expect.objectContaining({
-          id: 'connector-1',
-          name: 'Test Connector',
+          id: 'data-source-1',
+          name: 'Test Data Source',
         }),
       });
     });
 
-    it('should handle errors when getting a connector fails', async () => {
+    it('should handle errors when getting a data source fails', async () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
 
       registerRoutes(dependencies);
@@ -226,31 +226,31 @@ describe('registerRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
-          message: 'Failed to fetch data connector: Not found',
+          message: 'Failed to fetch data source: Not found',
         },
       });
     });
   });
 
-  describe('POST /api/data_connectors', () => {
-    it('should create a new data connector and call the helper with correct params', async () => {
-      const mockDataConnectorTypeDef = {
+  describe('POST /api/data_sources', () => {
+    it('should create a new data source and call the helper with correct params', async () => {
+      const mockDataSource = {
         stackConnector: { type: '.bearer_connector' },
         generateWorkflows: jest.fn(),
       };
 
       mockDataSourcesRegistry.getCatalog.mockReturnValue({
-        get: jest.fn().mockReturnValue(mockDataConnectorTypeDef),
+        get: jest.fn().mockReturnValue(mockDataSource),
       });
 
-      mockCreateConnectorAndRelatedResources.mockResolvedValue('connector-1');
+      mockCreateDataSourceAndRelatedResources.mockResolvedValue('data-source-1');
 
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.post.mock.calls[0][1];
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
-          name: 'My Notion Connector',
+          name: 'My Notion Data Source',
           type: 'notion',
           token: 'secret-token-123',
         },
@@ -259,23 +259,23 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockCreateConnectorAndRelatedResources).toHaveBeenCalledWith(
+      expect(mockCreateDataSourceAndRelatedResources).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'My Notion Connector',
+          name: 'My Notion Data Source',
           type: 'notion',
           token: 'secret-token-123',
-          dataConnectorTypeDef: mockDataConnectorTypeDef,
+          dataSource: mockDataSource,
         })
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
-          message: 'Data connector created successfully!',
-          dataConnectorId: 'connector-1',
+          message: 'Data source created successfully!',
+          dataSourceId: 'data-source-1',
         },
       });
     });
 
-    it('should return 400 if connector type not found', async () => {
+    it('should return 400 if data source type not found', async () => {
       mockDataSourcesRegistry.getCatalog.mockReturnValue({
         get: jest.fn().mockReturnValue(undefined),
       });
@@ -285,7 +285,7 @@ describe('registerRoutes', () => {
       const routeHandler = mockRouter.post.mock.calls[0][1];
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
-          name: 'Invalid Connector',
+          name: 'Invalid Data Source',
           type: 'invalid-type',
           token: 'token',
         },
@@ -297,23 +297,23 @@ describe('registerRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 400,
         body: {
-          message: 'Data connector type "invalid-type" not found',
+          message: 'Data source type "invalid-type" not found',
         },
       });
-      expect(mockCreateConnectorAndRelatedResources).not.toHaveBeenCalled();
+      expect(mockCreateDataSourceAndRelatedResources).not.toHaveBeenCalled();
     });
 
     it('should handle errors during creation', async () => {
-      const mockDataConnectorTypeDef = {
+      const mockDataSource = {
         stackConnector: { type: '.bearer_connector' },
         generateWorkflows: jest.fn(),
       };
 
       mockDataSourcesRegistry.getCatalog.mockReturnValue({
-        get: jest.fn().mockReturnValue(mockDataConnectorTypeDef),
+        get: jest.fn().mockReturnValue(mockDataSource),
       });
 
-      mockCreateConnectorAndRelatedResources.mockRejectedValue(
+      mockCreateDataSourceAndRelatedResources.mockRejectedValue(
         new Error('Failed to create action')
       );
 
@@ -322,7 +322,7 @@ describe('registerRoutes', () => {
       const routeHandler = mockRouter.post.mock.calls[0][1];
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
-          name: 'Test Connector',
+          name: 'Test Data Source',
           type: 'notion',
           token: 'token',
         },
@@ -334,20 +334,20 @@ describe('registerRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
-          message: 'Failed to create data connector: Failed to create action',
+          message: 'Failed to create data source: Failed to create action',
         },
       });
     });
   });
 
-  describe('DELETE /api/data_connectors', () => {
-    it('should delete all connectors and return aggregated results', async () => {
-      const mockConnectors = [
+  describe('DELETE /api/data_sources', () => {
+    it('should delete all data sources and return aggregated results', async () => {
+      const mockDataSources = [
         {
-          id: 'connector-1',
+          id: 'data-source-1',
           type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           attributes: {
-            name: 'Connector 1',
+            name: 'Data Source 1',
             type: 'notion',
             workflowIds: ['workflow-1'],
             toolIds: ['tool-1'],
@@ -355,10 +355,10 @@ describe('registerRoutes', () => {
           },
         },
         {
-          id: 'connector-2',
+          id: 'data-source-2',
           type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           attributes: {
-            name: 'Connector 2',
+            name: 'Data Source 2',
             type: 'notion',
             workflowIds: ['workflow-2'],
             toolIds: ['tool-2'],
@@ -368,14 +368,14 @@ describe('registerRoutes', () => {
       ];
 
       mockSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: mockConnectors as any,
+        saved_objects: mockDataSources as any,
         total: 2,
         per_page: 1000,
         page: 1,
       });
 
-      // First connector fully deleted, second partially deleted
-      mockDeleteConnectorAndRelatedResources
+      // First data source fully deleted, second partially deleted
+      mockDeleteDataSourceAndRelatedResources
         .mockResolvedValueOnce({
           success: true,
           fullyDeleted: true,
@@ -398,7 +398,7 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockDeleteConnectorAndRelatedResources).toHaveBeenCalledTimes(2);
+      expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledTimes(2);
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           success: true,
@@ -409,7 +409,7 @@ describe('registerRoutes', () => {
       });
     });
 
-    it('should handle empty connector list', async () => {
+    it('should handle empty data sources list', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
@@ -433,10 +433,10 @@ describe('registerRoutes', () => {
           partiallyDeletedCount: 0,
         },
       });
-      expect(mockDeleteConnectorAndRelatedResources).not.toHaveBeenCalled();
+      expect(mockDeleteDataSourceAndRelatedResources).not.toHaveBeenCalled();
     });
 
-    it('should handle errors when finding connectors fails', async () => {
+    it('should handle errors when finding data sources fails', async () => {
       mockSavedObjectsClient.find.mockRejectedValue(new Error('Find failed'));
 
       registerRoutes(dependencies);
@@ -450,19 +450,19 @@ describe('registerRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
-          message: 'Failed to delete all connectors: Find failed',
+          message: 'Failed to delete all data sources: Find failed',
         },
       });
     });
   });
 
-  describe('DELETE /api/data_connectors/:id', () => {
-    it('should delete a single connector and return the result', async () => {
-      const mockConnector = {
-        id: 'connector-1',
+  describe('DELETE /api/data_sources/:id', () => {
+    it('should delete a single data source and return the result', async () => {
+      const mockDataSource = {
+        id: 'data-source-1',
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         attributes: {
-          name: 'Test Connector',
+          name: 'Test Data Source',
           type: 'notion',
           workflowIds: ['workflow-1'],
           toolIds: ['tool-1'],
@@ -471,8 +471,8 @@ describe('registerRoutes', () => {
         references: [],
       };
 
-      mockSavedObjectsClient.get.mockResolvedValue(mockConnector);
-      mockDeleteConnectorAndRelatedResources.mockResolvedValue({
+      mockSavedObjectsClient.get.mockResolvedValue(mockDataSource);
+      mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
         success: true,
         fullyDeleted: true,
       });
@@ -481,7 +481,7 @@ describe('registerRoutes', () => {
 
       const routeHandler = mockRouter.delete.mock.calls[1][1];
       const mockRequest = httpServerMock.createKibanaRequest({
-        params: { id: 'connector-1' },
+        params: { id: 'data-source-1' },
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -489,11 +489,11 @@ describe('registerRoutes', () => {
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
         DATA_SOURCE_SAVED_OBJECT_TYPE,
-        'connector-1'
+        'data-source-1'
       );
-      expect(mockDeleteConnectorAndRelatedResources).toHaveBeenCalledWith(
+      expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledWith(
         expect.objectContaining({
-          connector: mockConnector,
+          dataSource: mockDataSource,
         })
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({
@@ -505,8 +505,8 @@ describe('registerRoutes', () => {
     });
 
     it('should return partial deletion result', async () => {
-      const mockConnector = {
-        id: 'connector-1',
+      const mockDataSource = {
+        id: 'data-source-1',
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         attributes: {
           workflowIds: ['workflow-1'],
@@ -516,8 +516,8 @@ describe('registerRoutes', () => {
         references: [],
       };
 
-      mockSavedObjectsClient.get.mockResolvedValue(mockConnector);
-      mockDeleteConnectorAndRelatedResources.mockResolvedValue({
+      mockSavedObjectsClient.get.mockResolvedValue(mockDataSource);
+      mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
         success: true,
         fullyDeleted: false,
         remaining: {
@@ -531,7 +531,7 @@ describe('registerRoutes', () => {
 
       const routeHandler = mockRouter.delete.mock.calls[1][1];
       const mockRequest = httpServerMock.createKibanaRequest({
-        params: { id: 'connector-1' },
+        params: { id: 'data-source-1' },
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -550,8 +550,8 @@ describe('registerRoutes', () => {
       });
     });
 
-    it('should handle errors when getting a connector fails', async () => {
-      mockSavedObjectsClient.get.mockRejectedValue(new Error('Connector not found'));
+    it('should handle errors when getting a data source fails', async () => {
+      mockSavedObjectsClient.get.mockRejectedValue(new Error('Data source not found'));
 
       registerRoutes(dependencies);
 
@@ -566,10 +566,10 @@ describe('registerRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
-          message: 'Failed to delete connector: Connector not found',
+          message: 'Failed to delete data source: Data source not found',
         },
       });
-      expect(mockDeleteConnectorAndRelatedResources).not.toHaveBeenCalled();
+      expect(mockDeleteDataSourceAndRelatedResources).not.toHaveBeenCalled();
     });
   });
 });

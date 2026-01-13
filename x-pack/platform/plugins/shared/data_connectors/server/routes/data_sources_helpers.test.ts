@@ -204,7 +204,7 @@ describe('createConnectorAndRelatedResources', () => {
         kscIds: ['ksc-1'],
       },
     };
-    const mockDataConnectorTypeDef = {
+    const mockDataSource = {
       stackConnector: { type: actionTypeId },
       generateWorkflows: jest.fn().mockReturnValue([
         {
@@ -228,7 +228,7 @@ describe('createConnectorAndRelatedResources', () => {
       logger: mockLogger,
       workflowManagement: mockWorkflowManagement as any,
       actions: mockActions as any,
-      dataSource: mockDataConnectorTypeDef as any,
+      dataSource: mockDataSource as any,
       agentBuilder: mockAgentBuilder as any,
     });
 
@@ -279,7 +279,7 @@ describe('createConnectorAndRelatedResources', () => {
       id: 'connector-1',
       attributes: { workflowIds: ['workflow-1'], toolIds: [], kscIds: ['ksc-1'] },
     };
-    const mockDataConnectorTypeDef = {
+    const mockDataSource = {
       stackConnector: { type: actionTypeId },
       generateWorkflows: jest.fn().mockReturnValue([
         {
@@ -302,7 +302,7 @@ describe('createConnectorAndRelatedResources', () => {
       logger: mockLogger,
       workflowManagement: mockWorkflowManagement as any,
       actions: mockActions as any,
-      dataSource: mockDataConnectorTypeDef as any,
+      dataSource: mockDataSource as any,
       agentBuilder: mockAgentBuilder as any,
     });
 
