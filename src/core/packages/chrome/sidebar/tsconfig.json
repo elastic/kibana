@@ -12,6 +12,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/i18n",
     "@kbn/react-context-registry",
     "@kbn/use-observable",
     "@kbn/zod",

@@ -10,6 +10,7 @@
 import type { FC, MouseEvent, TouchEvent, KeyboardEvent } from 'react';
 import React, { useCallback, useRef } from 'react';
 import { EuiResizableButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useSidebarWidth, useSidebar } from '../hooks';
 
@@ -105,7 +106,9 @@ export const PanelResizeHandle: FC<{}> = () => {
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
       onKeyDown={handleKeyDown}
-      aria-label={'Resize panel'}
+      aria-label={i18n.translate('core.ui.chrome.sidebar.resizePanelAriaLabel', {
+        defaultMessage: 'Resize panel',
+      })}
     />
   );
 };

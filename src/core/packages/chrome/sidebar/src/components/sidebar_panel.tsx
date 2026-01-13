@@ -10,6 +10,7 @@
 import type { FC, ReactNode } from 'react';
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -88,7 +89,9 @@ export const SidebarPanel: FC<SidebarPanelProps> = ({ children, title, onClose }
                 <EuiButtonIcon
                   iconType="cross"
                   onClick={onClose}
-                  aria-label="Close Sidebar"
+                  aria-label={i18n.translate('core.ui.chrome.sidebar.closeSidebarAriaLabel', {
+                  defaultMessage: 'Close Sidebar',
+                })}
                   color="text"
                 />
               </EuiFlexItem>
