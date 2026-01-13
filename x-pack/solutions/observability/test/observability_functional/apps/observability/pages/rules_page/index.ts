@@ -7,27 +7,16 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { createRulesPageHelpers } from './helpers';
 
 const RULE_ALERT_INDEX_PATTERN = '.alerts-stack.alerts-*';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const supertest = getService('supertest');
   const retry = getService('retry');
   const rulesService = getService('rules');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
-  const RULE_ENDPOINT = '/api/alerting/rule';
-
-  const { deleteRuleById } = createRulesPageHelpers(getService);
-
-  async function createRule(rule: any): Promise<string> {
-    const ruleResponse = await supertest.post(RULE_ENDPOINT).set('kbn-xsrf', 'foo').send(rule);
-    expect(ruleResponse.status).to.eql(200);
-    return ruleResponse.body.id;
-  }
 
   describe('Observability Rules page', function () {
     this.tags('includeFirefox');
