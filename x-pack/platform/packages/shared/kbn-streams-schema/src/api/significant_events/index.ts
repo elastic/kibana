@@ -36,6 +36,7 @@ interface SignificantEventOccurrence {
 }
 
 type SignificantEventsResponse = StreamQueryKql & {
+  stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
@@ -44,15 +45,6 @@ type SignificantEventsResponse = StreamQueryKql & {
 
 interface SignificantEventsGetResponse {
   significant_events: SignificantEventsResponse[];
-  aggregated_occurrences: SignificantEventOccurrence[];
-}
-
-type SignificantEventsResponseWithStreamName = SignificantEventsResponse & {
-  stream_name: string;
-};
-
-interface SignificantEventsGetResponseWithStreamName {
-  significant_events: SignificantEventsResponseWithStreamName[];
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
@@ -82,9 +74,7 @@ type SignificantEventsGenerateResponse = Observable<
 
 export type {
   SignificantEventsResponse,
-  SignificantEventsResponseWithStreamName,
   SignificantEventsGetResponse,
-  SignificantEventsGetResponseWithStreamName,
   SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,

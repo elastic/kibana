@@ -12,10 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
-import type {
-  SignificantEventsGetResponseWithStreamName,
-  StreamQueryKql,
-} from '@kbn/streams-schema';
+import type { StreamQueryKql, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
 import type { QueryClient } from '../streams/assets/query/query_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
@@ -28,7 +25,7 @@ export async function readSignificantEventsFromAlertsIndices(
     queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
-): Promise<SignificantEventsGetResponseWithStreamName> {
+): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
   const { name, from, to, bucketSize, query } = params;
 
