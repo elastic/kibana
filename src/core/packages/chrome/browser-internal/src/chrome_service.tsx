@@ -609,13 +609,12 @@ export class ChromeService {
       },
 
       getSidebarComponent: () => {
-        return <></>;
+        return <Sidebar />;
       },
 
       wrapInChromeProvider: (children: ReactNode) => {
         // TODO: we can have more chrome context values here in the future
-        return children;
-        // return this.sidebar.wrapInProvider(children);
+        return this.sidebar.wrapInProvider(children);
       },
 
       // chrome APIs
