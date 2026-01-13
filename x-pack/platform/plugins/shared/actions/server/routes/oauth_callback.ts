@@ -341,8 +341,9 @@ export const oauthCallbackRoute = (
           // Clean up state
           await oauthStateClient.delete(oauthState.id);
 
-          // Redirect to Kibana
+          // Redirect to Kibana with success indicator
           const returnUrl = new URL(oauthState.kibanaReturnUrl);
+          returnUrl.searchParams.set('oauth_authorization', 'success');
           return res.redirected({
             headers: {
               location: returnUrl.toString(),
