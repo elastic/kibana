@@ -52,7 +52,7 @@ describe('ESQLControlApi', () => {
       controlType: 'STATIC_VALUES',
     } as ESQLControlState;
     const { api } = await factory.buildEmbeddable({
-      initialState: { rawState: initialState },
+      initialState,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
@@ -77,23 +77,20 @@ describe('ESQLControlApi', () => {
       controlType: 'STATIC_VALUES',
     } as ESQLControlState;
     const { api } = await factory.buildEmbeddable({
-      initialState: { rawState: initialState },
+      initialState,
       finalizeApi,
       uuid,
       parentApi: dashboardApi,
     });
     expect(api.serializeState()).toStrictEqual({
-      rawState: {
-        availableOptions: ['option1', 'option2'],
-        controlType: 'STATIC_VALUES',
-        esqlQuery: 'FROM foo | WHERE column = ?variable1',
-        selectedOptions: ['option1'],
-        title: '',
-        variableName: 'variable1',
-        variableType: 'values',
-        singleSelect: true,
-      },
-      references: [],
+      availableOptions: ['option1', 'option2'],
+      controlType: 'STATIC_VALUES',
+      esqlQuery: 'FROM foo | WHERE column = ?variable1',
+      selectedOptions: ['option1'],
+      title: '',
+      variableName: 'variable1',
+      variableType: 'values',
+      singleSelect: true,
     });
   });
 
@@ -108,7 +105,7 @@ describe('ESQLControlApi', () => {
         controlType: EsqlControlType.VALUES_FROM_QUERY,
       } as ESQLControlState;
       await factory.buildEmbeddable({
-        initialState: { rawState: initialState },
+        initialState,
         finalizeApi,
         uuid,
         parentApi: dashboardApi,
@@ -129,7 +126,7 @@ describe('ESQLControlApi', () => {
         controlType: EsqlControlType.VALUES_FROM_QUERY,
       } as ESQLControlState;
       await factory.buildEmbeddable({
-        initialState: { rawState: initialState },
+        initialState,
         finalizeApi,
         uuid,
         parentApi: dashboardApi,
@@ -167,7 +164,7 @@ describe('ESQLControlApi', () => {
         controlType: 'STATIC_VALUES',
       } as ESQLControlState;
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: initialState },
+        initialState,
         finalizeApi,
         uuid,
         parentApi: dashboardApi,

@@ -26,7 +26,8 @@ const mcpActionLinkStyles = (euiThemeContext: UseEuiTheme) => css`
 
 export const SourceSection = () => {
   const euiThemeContext = useEuiTheme();
-  const { control, formState, setValue } = useFormContext<BulkImportMcpToolsFormData>();
+  const { control, formState, setValue, trigger, getFieldState } =
+    useFormContext<BulkImportMcpToolsFormData>();
   const { errors } = formState;
 
   const handleConnectorCreated = useCallback(
@@ -101,6 +102,9 @@ export const SourceSection = () => {
                   onBlur();
                   // Clear tool selection when connector changes
                   setValue('tools', []);
+                  if (getFieldState('namespace').isDirty) {
+                    trigger('namespace');
+                  }
                 }}
                 isLoading={isLoadingConnectors}
                 inputRef={ref}

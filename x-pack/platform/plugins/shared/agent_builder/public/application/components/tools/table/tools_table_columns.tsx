@@ -9,8 +9,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import type { ToolDefinition } from '@kbn/agent-builder-common/tools';
 import React, { useMemo } from 'react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { labels } from '../../../utils/i18n';
 import { AgentBuilderToolTags } from '../tags/tool_tags';
@@ -42,9 +40,8 @@ const healthStatusMessages: Record<McpToolUnhealthyStatus, { title: string; desc
   };
 
 export const useToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition>> => {
-  const isMcpEnabled = useUiSetting(AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID, false);
   const { manageTools } = useUiPrivileges();
-  const { mcpHealthStates } = useMcpToolsHealth({ enabled: isMcpEnabled });
+  const { mcpHealthStates } = useMcpToolsHealth();
 
   return useMemo(
     () => [
@@ -54,10 +51,6 @@ export const useToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
         render: (tool: ToolDefinition) => {
           if (tool.readonly) {
             return <EuiIconTip type="lock" content={labels.tools.readOnly} />;
-          }
-
-          if (!isMcpEnabled) {
-            return null;
           }
 
           const mcpHealthState = mcpHealthStates.find((state) => state.toolId === tool.id);
@@ -101,6 +94,6 @@ export const useToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
         ),
       },
     ],
-    [manageTools, isMcpEnabled, mcpHealthStates]
+    [manageTools, mcpHealthStates]
   );
 };
