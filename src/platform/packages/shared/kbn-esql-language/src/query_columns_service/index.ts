@@ -206,6 +206,15 @@ export class QueryColumns {
       getPolicies
     );
 
+    const unmappedFieldsTreatment = this.options?.unmappedFieldsTreatment;
+    if (
+      unmappedFieldsTreatment === UnmappedFieldsTreatment.NULLIFY ||
+      unmappedFieldsTreatment === UnmappedFieldsTreatment.LOAD
+    ) {
+      const unmappedFields = getUnmappedFields(query.commands, fieldsAvailableAfterPreviousCommand);
+      fieldsAvailableAfterPreviousCommand.push(...unmappedFields);
+    }
+
     const availableFields = await getCurrentQueryAvailableColumns(
       query.commands,
       fieldsAvailableAfterPreviousCommand,
@@ -213,15 +222,6 @@ export class QueryColumns {
       getPolicies,
       this.originalQueryText
     );
-
-    const unmappedFieldsTreatment = this.options?.unmappedFieldsTreatment;
-    if (
-      unmappedFieldsTreatment === UnmappedFieldsTreatment.NULLIFY ||
-      unmappedFieldsTreatment === UnmappedFieldsTreatment.LOAD
-    ) {
-      const unmappedFields = getUnmappedFields(query.commands, availableFields);
-      availableFields.push(...unmappedFields);
-    }
 
     return availableFields;
   }

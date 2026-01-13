@@ -1111,5 +1111,11 @@ describe('autocomplete', () => {
         ...getFieldNamesByType('any'),
       ]);
     });
+    describe('should not suggest unmaped field after droping it', () => {
+      testSuggestions(
+        'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  DROP unmappedField | KEEP /',
+        [...getFieldNamesByType('any')]
+      );
+    });
   });
 });
