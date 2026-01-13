@@ -23,6 +23,8 @@ export interface Rule {
   query: string;
   lookbackWindow: string;
   groupingFields: string[];
+  breachCount: number;
+  recoverCount: number;
 }
 
 export const rules: Rule[] = [
@@ -32,6 +34,8 @@ export const rules: Rule[] = [
     query: `FROM ${DATA_SIMULATOR_INDEX} METADATA _id, _index | WHERE message IS NOT NULL`,
     lookbackWindow: '5s',
     groupingFields: ['_id', '_index'],
+    breachCount: 1,
+    recoverCount: 1,
   },
   {
     id: 'ef9f2d76-e045-4c10-b133-8c3bd0e894d2',
@@ -39,6 +43,8 @@ export const rules: Rule[] = [
     query: `FROM ${DATA_SIMULATOR_INDEX} | WHERE message IS NULL | STATS avg_cpu = AVG(host.cpu.usage) BY host.name | WHERE avg_cpu > 0`,
     lookbackWindow: '5s',
     groupingFields: ['host.name'],
+    breachCount: 1,
+    recoverCount: 1,
   },
 ];
 
@@ -91,6 +97,8 @@ async function createAlertEvents(
       rule: {
         id: rule.id,
         tags: [],
+        breach_count: rule.breachCount,
+        recover_count: rule.recoverCount,
       },
       grouping: rule.groupingFields.map((field) => ({
         key: field,

@@ -32,6 +32,8 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
           properties: {
             id: { type: 'keyword' },
             tags: { type: 'keyword' },
+            breach_count: { type: 'long' },
+            recover_count: { type: 'long' },
           },
         },
         grouping: {
