@@ -34,6 +34,7 @@ export const getDiscoverLocatorParams = (
     Partial<PublishesSavedObjectId & PublishesUnifiedSearch & HasParentApi>
 ) => {
   const savedSearch = api.savedSearch$.getValue();
+  const query = savedSearch?.searchSource.getField('query');
 
   const dataView = savedSearch?.searchSource.getField('index');
   const savedObjectId = api.savedObjectId$?.getValue();
@@ -47,12 +48,12 @@ export const getDiscoverLocatorParams = (
         dataViewId: dataView?.id,
         dataViewSpec: dataView?.toMinimalSpec(),
         esqlControls: presentationContainer
-          ? getEsqlControls(presentationContainer, api.query$?.getValue())
+          ? getEsqlControls(presentationContainer, query)
           : undefined,
         timeRange: savedSearch?.timeRange,
         refreshInterval: savedSearch?.refreshInterval,
         filters: savedSearch?.searchSource.getField('filter') as Filter[],
-        query: savedSearch?.searchSource.getField('query'),
+        query,
         columns: savedSearch?.columns,
         sort: savedSearch?.sort,
         viewMode: savedSearch?.viewMode,
@@ -86,7 +87,7 @@ function getEsqlControls(
         return acc;
       }
 
-      const controlState = api.serializeState().rawState as ESQLControlState;
+      const controlState = api.serializeState() as ESQLControlState;
       const variableName = 'variableName' in controlState && (controlState.variableName as string);
       if (!variableName) return acc;
       const isUsed = usedVariables.includes(variableName);
