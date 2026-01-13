@@ -14,6 +14,7 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { DATA_SOURCES_ROUTE } from '../../common';
 import {
   createDataSourceAndRelatedResources,
   deleteDataSourceAndRelatedResources,
@@ -29,7 +30,6 @@ import { convertSOtoAPIResponse, createDataSourceRequestSchema } from './schema'
 // Constants
 const DEFAULT_PAGE_SIZE = 100;
 const MAX_PAGE_SIZE = 1000;
-const APP_BASE_PATH = '/app/data_sources';
 
 function createErrorResponse(
   response: KibanaResponseFactory,
@@ -60,7 +60,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // List all data sources
   router.get(
     {
-      path: APP_BASE_PATH,
+      path: DATA_SOURCES_ROUTE,
       validate: false,
       security: {
         authz: {
@@ -100,7 +100,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Get one data source by ID
   router.get(
     {
-      path: `${APP_BASE_PATH}/{id}`,
+      path: `${DATA_SOURCES_ROUTE}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
@@ -132,7 +132,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Create data source
   router.post(
     {
-      path: APP_BASE_PATH,
+      path: DATA_SOURCES_ROUTE,
       validate: {
         body: createDataSourceRequestSchema,
       },
@@ -192,7 +192,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Delete all data sources
   router.delete(
     {
-      path: APP_BASE_PATH,
+      path: DATA_SOURCES_ROUTE,
       validate: false,
       security: {
         authz: {
@@ -271,7 +271,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Delete data source by ID
   router.delete(
     {
-      path: `${APP_BASE_PATH}/{id}`,
+      path: `${DATA_SOURCES_ROUTE}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {

@@ -10,14 +10,14 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { DATA_CONNECTORS_FULL_TITLE } from '../../common/constants';
+import { DATA_SOURCES_FULL_TITLE } from '../../common/constants';
 
 export const DataConnectorsLandingPage = () => {
   const { euiTheme } = useEuiTheme();
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header
-        pageTitle={DATA_CONNECTORS_FULL_TITLE}
+        pageTitle={DATA_SOURCES_FULL_TITLE}
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
         `}

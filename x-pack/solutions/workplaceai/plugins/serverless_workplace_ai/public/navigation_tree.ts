@@ -7,7 +7,7 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { DATA_CONNECTORS_SHORT_TITLE } from '@kbn/data-connectors-plugin/common';
+import { DATA_SOURCES_SHORT_TITLE } from '@kbn/data-connectors-plugin/common';
 import agentsIcon from './assets/robot.svg';
 
 export const createNavigationTree = (): NavigationTreeDefinition => {
@@ -25,7 +25,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
       },
       {
         link: 'data_connectors',
-        title: DATA_CONNECTORS_SHORT_TITLE,
+        title: DATA_SOURCES_SHORT_TITLE,
         icon: 'plugs',
         badgeType: 'techPreview',
       },

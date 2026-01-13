@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const DATA_CONNECTORS_ROUTE = '/app/data_connectors';
+export const DATA_SOURCES_ROUTE = '/app/data_sources';

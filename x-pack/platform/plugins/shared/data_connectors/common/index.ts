@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { DATA_CONNECTORS_ROUTE } from './routes';
-export { DATA_CONNECTORS_FULL_TITLE, DATA_CONNECTORS_SHORT_TITLE } from './constants';
+export { DATA_SOURCES_ROUTE } from './routes';
+export { DATA_SOURCES_FULL_TITLE, DATA_SOURCES_SHORT_TITLE } from './constants';
