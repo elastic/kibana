@@ -66,12 +66,7 @@ const createFormatContext = (agentContext: AgentHandlerContext): AttachmentForma
 
 /**
  * Promote legacy per-round attachments into conversation-level versioned attachments.
- *
- * This is intentionally idempotent:
- * - If an incoming attachment id already exists, we update it (creates new version only if data changed).
- * - If an incoming attachment has the same (type + name/title), we treat it as a new version of that attachment.
- * - Otherwise we dedupe by (type + content_hash) to avoid duplicating the same attachment across rounds.
- */
+ **/
 const mergeInputAttachmentsIntoAttachmentState = (
   attachmentStateManager: AttachmentStateManager,
   inputs: AttachmentInput[]

@@ -219,10 +219,7 @@ export interface RoundCompleteEventData {
   conversation_state?: ConversationInternalState;
   /**
    * Updated conversation-level attachments after this round.
-   *
-   * Optional for backward compatibility; when present, persistence layers should
-   * update the conversation's `attachments` field accordingly.
-   */
+   **/
   attachments?: VersionedAttachment[];
 }
 
