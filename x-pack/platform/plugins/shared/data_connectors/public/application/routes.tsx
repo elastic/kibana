@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { DataConnectorsLandingPage } from '../pages/data_connectors_landing';
+import { DataSourcesLandingPage } from '../pages/data_sources_landing';
 
-export const DataConnectorsRoutes = () => {
+export const DataSourcesRoutes = () => {
   return (
     <Routes>
       <Route path="/">
-        <DataConnectorsLandingPage />
+        <DataSourcesLandingPage />
       </Route>
     </Routes>
   );

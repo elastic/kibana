@@ -12,7 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { DATA_SOURCES_FULL_TITLE } from '../../common/constants';
 
-export const DataConnectorsLandingPage = () => {
+export const DataSourcesLandingPage = () => {
   const { euiTheme } = useEuiTheme();
   return (
     <KibanaPageTemplate>
@@ -23,7 +23,7 @@ export const DataConnectorsLandingPage = () => {
         `}
       >
         <EuiText>
-          {i18n.translate('xpack.dataConnectors.landingPage.description', {
+          {i18n.translate('xpack.dataSources.landingPage.description', {
             defaultMessage: 'Connect to external data sources to power your agents and indices.',
           })}
         </EuiText>
