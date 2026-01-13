@@ -19,10 +19,9 @@ export const registerUISettings = (
 ) => {
   let licenseText = '';
 
-  // Only show license text in non-serverless projects
-  if (plugins.serverless == null) {
+  if (!plugins.serverless) {
     licenseText = i18n.translate('workflowsManagement.uiSettings.ui.licenseText', {
-      defaultMessage: 'License required: {license}.',
+      defaultMessage: 'Requires {license} license.',
       values: { license: '<b>enterprise</b>' },
     });
   }
@@ -33,8 +32,11 @@ export const registerUISettings = (
         defaultMessage:
           'Enables Elastic Workflows and related experiences. {licenseText} {learnMoreLink}',
         values: {
+          learnMoreLink: `<a href="https://ela.st/workflows-docs" target="_blank">${i18n.translate(
+            'workflowsManagement.uiSettings.ui.learnMore',
+            { defaultMessage: 'Learn more' }
+          )}</a>.`,
           licenseText,
-          learnMoreLink: '<a href="https://ela.st/workflows-docs" target="_blank">Learn more</a>.',
         },
       }),
       name: i18n.translate('workflowsManagement.uiSettings.ui.name', {
@@ -47,6 +49,4 @@ export const registerUISettings = (
       category: ['general'],
     },
   });
-
-  uiSettings.setAllowlist([WORKFLOWS_UI_SETTING_ID]);
 };
