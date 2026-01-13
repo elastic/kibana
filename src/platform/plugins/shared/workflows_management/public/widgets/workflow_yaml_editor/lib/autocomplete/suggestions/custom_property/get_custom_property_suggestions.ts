@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { StepPropertyHandler } from '@kbn/workflows';
+import { isBuiltInStepProperty, isBuiltInStepType, type StepPropertyHandler } from '@kbn/workflows';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 export type GetCustomPropertySuggestionsContext = Pick<
@@ -31,7 +31,12 @@ export async function getCustomPropertySuggestions(
     !focusedStepInfo.stepType ||
     !focusedYamlPair ||
     !focusedYamlPair.valueNode?.range ||
-    !yamlLineCounter
+    typeof focusedYamlPair.keyNode.value !== 'string' ||
+    !yamlLineCounter ||
+    // skip built-in step types like foreach, if, data.set, http, wait, etc.
+    isBuiltInStepType(focusedStepInfo.stepType) ||
+    // skip built-in step properties like name, type, with, etc.
+    isBuiltInStepProperty(focusedYamlPair.keyNode.value)
   ) {
     return [];
   }
