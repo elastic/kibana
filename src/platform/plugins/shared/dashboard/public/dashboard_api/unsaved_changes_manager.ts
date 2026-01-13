@@ -65,14 +65,14 @@ export function initializeUnsavedChangesManager({
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
 
   const { hasPanelUnsavedChanges$, hasPinnedPanelUnsavedChanges$ } =
-    layoutManager.internalApi.startComparing$(lastSavedState$);
+    layoutManager.internalApi.startComparing(lastSavedState$);
 
   const dashboardStateChanges$ = combineLatest([
-    settingsManager.internalApi.startComparing$(lastSavedState$),
-    unifiedSearchManager.internalApi.startComparing$(lastSavedState$),
+    settingsManager.internalApi.startComparing(lastSavedState$),
+    unifiedSearchManager.internalApi.startComparing(lastSavedState$),
     hasPanelUnsavedChanges$,
     hasPinnedPanelUnsavedChanges$,
-    projectRoutingManager?.internalApi.startComparing$(lastSavedState$) ?? of({}),
+    projectRoutingManager?.internalApi.startComparing(lastSavedState$) ?? of({}),
   ]).pipe(
     map(([settings, unifiedSearch, panels, pinnedPanels, projectRouting]) => {
       return { ...settings, ...unifiedSearch, ...panels, ...pinnedPanels, ...projectRouting };
