@@ -60,8 +60,9 @@ export const SecondaryMenuSectionComponent = ({
    */
   const labelStyles = css`
     font-size: ${euiTheme.size.m};
-    color: ${euiTheme.colors.subduedText};
-    padding: 6px ${euiTheme.size.s};
+    color: ${euiTheme.colors.textSubdued};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+    display: block;
   `;
 
   const listStyles = css`
