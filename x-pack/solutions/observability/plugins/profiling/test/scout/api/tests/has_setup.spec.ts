@@ -10,6 +10,7 @@ import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
+/* eslint-disable @kbn/eslint/scout_max_one_describe */
 apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
