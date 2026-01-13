@@ -8,13 +8,15 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type {
   StreamEndpointLatencyProps,
-  StreamsFeatureIdentificationIdentifiedProps,
+  StreamsSignificantEventsQueriesGeneratedProps,
   StreamsStateErrorProps,
+  StreamsSystemIdentificationIdentifiedProps,
 } from './types';
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
-  STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
   STREAMS_STATE_ERROR_EVENT,
+  STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
 } from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
@@ -62,7 +64,13 @@ export class EbtTelemetryClient {
     this.analytics.reportEvent(STREAMS_STATE_ERROR_EVENT, errorData);
   }
 
-  public trackFeaturesIdentified(params: StreamsFeatureIdentificationIdentifiedProps) {
-    this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_IDENTIFIED_EVENT_TYPE, params);
+  public trackSystemsIdentified(params: StreamsSystemIdentificationIdentifiedProps) {
+    this.analytics.reportEvent(STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE, params);
+  }
+
+  public trackSignificantEventsQueriesGenerated(
+    params: StreamsSignificantEventsQueriesGeneratedProps
+  ) {
+    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE, params);
   }
 }

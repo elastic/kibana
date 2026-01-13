@@ -32,7 +32,7 @@ export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamCon
     features: existingFeatures,
     refreshFeatures,
     featuresLoading,
-  } = useStreamFeatures(definition);
+  } = useStreamFeatures(definition.name);
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
