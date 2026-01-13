@@ -34,7 +34,7 @@ export const registerUISettings = (
           'Enables Elastic Workflows and related experiences. {licenseText} {learnMoreLink}',
         values: {
           licenseText,
-          learnMoreLink: '<a href="https://ela.st/workflows-docs">Learn more</a>.',
+          learnMoreLink: '<a href="https://ela.st/workflows-docs" target="_blank">Learn more</a>.',
         },
       }),
       name: i18n.translate('workflowsManagement.uiSettings.ui.name', {
