@@ -28,6 +28,7 @@ import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
 import type { ApiExecutionContext } from './types';
+import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformUpdateParams<T = unknown> {
   type: string;
@@ -188,9 +189,11 @@ export const executeUpdate = async <T>(
     // To explicitly set access control for a new object, the `create` API should be used.
     let accessControlToWrite: SavedObjectAccessControl | undefined;
     if (securityExtension) {
-      if (registry.supportsAccessControl(type) && updatedBy) {
-        accessControlToWrite = { accessMode: 'default', owner: updatedBy };
-      }
+      accessControlToWrite = setAccessControl({
+        typeSupportsAccessControl: registry.supportsAccessControl(type),
+        createdBy: updatedBy,
+        accessMode: 'default',
+      });
     }
 
     // ignore attributes if creating a new doc: only use the upsert attributes
