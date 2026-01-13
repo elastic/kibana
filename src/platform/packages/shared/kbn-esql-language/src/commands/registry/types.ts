@@ -124,6 +124,23 @@ export interface ESQLUserDefinedColumn {
 
 export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
 
+export interface ESQLCommandSummary {
+  /**
+   * A list of columns names which were newly created by
+   * each command.
+   */
+  newColumns: Set<string>;
+  /**
+   * A list of metadata columns created by the FROM and TS commands
+   * We are separating them here to be able to treat them differently in some contexts
+   */
+  metadataColumns?: Set<string>;
+  /**
+   * A set of renamed columns pairs [oldName, newName]
+   */
+  renamedColumnsPairs?: Set<[string, string]>;
+}
+
 export interface ESQLPolicy {
   name: string;
   sourceIndices: string[];

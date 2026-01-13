@@ -13,11 +13,16 @@ import type {
   ScoutWorkerFixtures,
 } from '@kbn/scout';
 import type { SecurityPageObjects, SecurityBrowserAuthFixture } from './test';
-import type { DetectionRuleApiService, EntityAnalyticsApiService } from './worker';
+import type {
+  DetectionRuleApiService,
+  EntityAnalyticsApiService,
+  CloudConnectorApiService,
+} from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
   detectionRule: DetectionRuleApiService;
   entityAnalytics: EntityAnalyticsApiService;
+  cloudConnectorApi: CloudConnectorApiService;
 }
 
 export interface SecurityTestFixtures extends ScoutTestFixtures {
@@ -36,6 +41,7 @@ export interface SecurityParallelTestFixtures extends ScoutParallelTestFixtures 
 
 export interface SecurityParallelApiServicesFixture extends ApiServicesFixture {
   detectionRule: DetectionRuleApiService;
+  cloudConnectorApi: CloudConnectorApiService;
 }
 
 export interface SecurityParallelWorkerFixtures extends ScoutParallelWorkerFixtures {

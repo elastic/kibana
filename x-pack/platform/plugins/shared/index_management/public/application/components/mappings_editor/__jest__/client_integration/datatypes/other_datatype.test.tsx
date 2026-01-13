@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 
-import type { MappingsEditorTestBed } from '../helpers';
-import { componentHelpers } from '../helpers';
-
-const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
+import { WithAppDependencies } from '../helpers/setup_environment';
+import { MappingsEditor } from '../../../mappings_editor';
 
 jest.mock('../../../../component_templates/component_templates_context', () => ({
   useComponentTemplatesContext: jest.fn().mockReturnValue({
@@ -21,40 +22,51 @@ jest.mock('../../../../component_templates/component_templates_context', () => (
   }),
 }));
 
+const onChangeHandler = jest.fn();
 describe('Mappings editor: other datatype', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
-  let data: any;
-  let onChangeHandler: jest.Mock = jest.fn();
-  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-  let testBed: MappingsEditorTestBed;
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
-    onChangeHandler = jest.fn();
-    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
+    jest.clearAllMocks();
   });
 
   test('allow to add custom field type', async () => {
-    await act(async () => {
-      testBed = setup({ onChange: onChangeHandler });
+    const Component = WithAppDependencies(MappingsEditor, {});
+    render(
+      <I18nProvider>
+        <Component onChange={onChangeHandler} indexSettings={{}} />
+      </I18nProvider>
+    );
+
+    await screen.findByTestId('mappingsEditor');
+
+    // Click "Add field" button to show the create field form
+    const addFieldButton = screen.getByTestId('addFieldButton');
+    fireEvent.click(addFieldButton);
+
+    const createForm = await screen.findByTestId('createFieldForm');
+
+    // Set field name
+    const nameInput = within(createForm).getByTestId('nameParameterInput');
+    fireEvent.change(nameInput, { target: { value: 'myField' } });
+
+    // Select "other" field type using EuiComboBox harness
+    const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
+    await fieldTypeComboBox.select('other');
+    await fieldTypeComboBox.close();
+
+    await waitFor(() => {
+      expect(within(createForm).queryByTestId('fieldSubType')).toBeInTheDocument();
     });
-    testBed.component.update();
 
-    const {
-      component,
-      actions: { addField },
-    } = testBed;
+    const customTypeInput = within(createForm).getByTestId('fieldSubType');
+    fireEvent.change(customTypeInput, { target: { value: 'customType' } });
 
-    await addField('myField', 'other', 'customType');
+    // Click "Add" button to submit the field
+    const addButton = within(createForm).getByTestId('addButton');
+    fireEvent.click(addButton);
+
+    await waitFor(() => {
+      expect(onChangeHandler).toHaveBeenCalled();
+    });
 
     const mappings = {
       properties: {
@@ -64,8 +76,9 @@ describe('Mappings editor: other datatype', () => {
       },
     };
 
-    ({ data } = await getMappingsEditorData(component));
-    expect(data).toEqual(mappings);
+    const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+    const actualMappings = callData.getData();
+    expect(actualMappings).toEqual(mappings);
   });
 
   test('allow to change a field type to a custom type', async () => {
@@ -77,40 +90,7 @@ describe('Mappings editor: other datatype', () => {
       },
     };
 
-    let updatedMappings = { ...defaultMappings };
-
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
-    testBed.component.update();
-
-    const {
-      component,
-      find,
-      form,
-      actions: { startEditField, updateFieldAndCloseFlyout },
-    } = testBed;
-
-    // Open the flyout to edit the field
-    await startEditField('myField');
-
-    // Change the field type
-    await act(async () => {
-      find('mappingsEditorFieldEdit.fieldType').simulate('change', [
-        {
-          label: 'other',
-          value: 'other',
-        },
-      ]);
-    });
-    component.update();
-
-    form.setInputValue('mappingsEditorFieldEdit.fieldSubType', 'customType');
-
-    // Save the field and close the flyout
-    await updateFieldAndCloseFlyout();
-
-    updatedMappings = {
+    const updatedMappings = {
       properties: {
         myField: {
           type: 'customType',
@@ -118,7 +98,39 @@ describe('Mappings editor: other datatype', () => {
       },
     };
 
-    ({ data } = await getMappingsEditorData(component));
-    expect(data).toEqual(updatedMappings);
+    const Component = WithAppDependencies(MappingsEditor, {});
+    render(
+      <I18nProvider>
+        <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
+      </I18nProvider>
+    );
+
+    await screen.findByTestId('mappingsEditor');
+
+    // Open the flyout to edit the field
+    const editButton = screen.getByTestId('editFieldButton');
+    fireEvent.click(editButton);
+
+    const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
+
+    // Change the field type to "other" using EuiComboBox harness
+    const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
+    await fieldTypeComboBox.select('other');
+    await fieldTypeComboBox.close();
+
+    const customTypeInput = await within(flyout).findByTestId('fieldSubType');
+    fireEvent.change(customTypeInput, { target: { value: 'customType' } });
+
+    // Save the field and close the flyout
+    const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+    fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(onChangeHandler).toHaveBeenCalled();
+    });
+
+    const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+    const actualMappings = callData.getData();
+    expect(actualMappings).toEqual(updatedMappings);
   });
 });

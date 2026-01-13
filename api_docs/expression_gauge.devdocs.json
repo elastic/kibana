@@ -700,7 +700,7 @@
             "label": "ticksPosition",
             "description": [],
             "signature": [
-              "\"hidden\" | \"auto\" | \"bands\""
+              "\"auto\" | \"hidden\" | \"bands\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -714,7 +714,7 @@
             "label": "labelMajorMode",
             "description": [],
             "signature": [
-              "\"none\" | \"custom\" | \"auto\""
+              "\"none\" | \"auto\" | \"custom\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -1176,7 +1176,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1328,7 +1328,7 @@
         "label": "GaugeTicksPosition",
         "description": [],
         "signature": [
-          "\"hidden\" | \"auto\" | \"bands\""
+          "\"auto\" | \"hidden\" | \"bands\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,

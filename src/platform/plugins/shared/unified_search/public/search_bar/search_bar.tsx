@@ -167,6 +167,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
 
+  hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
   /**
    * Enable indices browser suggestion in ESQL editor (for Discover context)
@@ -330,7 +331,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     return (
       (this.state.query && this.props.query && !isEqual(this.state.query, this.props.query)) ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
-      this.state.dateRangeTo !== this.props.dateRangeTo
+      this.state.dateRangeTo !== this.props.dateRangeTo ||
+      Boolean(this.props.hasDirtyState)
     );
   };
 
