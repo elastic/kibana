@@ -205,10 +205,26 @@
             "tags": [],
             "label": "#containerEl",
             "description": [
-              "\nReturns combobox container or throws"
+              "\nReturns the combobox container element or throws if not found."
             ],
             "signature": [
               "HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.toggleButtonEl",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "#toggleButtonEl",
+            "description": [
+              "\nReturns the toggle button element (data-test-subj=\"comboBoxToggleListButton\") if present.\n\nNOTE: This test subject is not unique, so we always scope the query\nto the combobox container (or its parent as a fallback)."
+            ],
+            "signature": [
+              "HTMLElement | null"
             ],
             "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
             "deprecated": false,
@@ -221,7 +237,7 @@
             "tags": [],
             "label": "#inputEl",
             "description": [
-              "\nReturns the input element (role=\"combobox\")\nFinds it within or near the container"
+              "\nReturns the input element (role=\"combobox\")\nFinds it within or near the container."
             ],
             "signature": [
               "HTMLElement"
@@ -269,7 +285,7 @@
             "tags": [],
             "label": "testId",
             "description": [
-              "\nReturns `data-test-subj` of combobox"
+              "\nReturns `data-test-subj` of the combobox container."
             ],
             "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
             "deprecated": false,
@@ -300,7 +316,7 @@
             "tags": [],
             "label": "getSelected",
             "description": [
-              "\nReturns selected values as array of strings.\n\nReads from pills with `data-test-subj=\"euiComboBoxPill\"`.\nReturns empty array if combobox is not found."
+              "\nReturns selected values as array of strings.\n\nUse when:\n- You need to assert what the combobox currently has selected.\n\nBehavior:\n- Returns pill labels from `data-test-subj=\"euiComboBoxPill\"` when pills exist.\n- For `singleSelection: { asPlainText: true }`, returns the input value (EUI does not render pills).\n- Returns `[]` if the combobox is not found."
             ],
             "signature": [
               "() => string[]"
@@ -318,10 +334,10 @@
             "tags": [],
             "label": "select",
             "description": [
-              "\nSelect an option by typing its label and pressing Enter\n\nIMPORTANT: Must use the exact display label, not the internal value\nExample: Use 'Semantic text' not 'semantic_text'\n"
+              "\nSelect an option by searching and clicking its option.\n\nUse when:\n- The combo box shows an options list (suggestions) and you want to pick an existing option.\n- The options may be populated asynchronously (via `onSearchChange`).\n\nBehavior:\n- Opens the popover (prefers the scoped toggle button for deterministic opening).\n- Waits for `aria-expanded=\"true\"` before typing (prevents late popover updates/act warnings).\n- Types the search text, then selects an option (prefers exact match, falls back to fuzzy).\n- Clicks the option via `user.click()` so EUI popover updates are wrapped in RTL `act()`.\n- Falls back to `Enter` only when no options list renders / no option is found.\n- For pill-based combos, waits until selection propagates into pills.\n\nNotes:\n- Prefer passing the display label (not internal value) when applicable\n  (e.g. use 'Semantic text' not 'semantic_text').\n- For createable/free-form fields (index patterns, seed nodes), prefer `addCustomValue()`."
             ],
             "signature": [
-              "(label: string) => void"
+              "(searchText: string, { timeout }?: { timeout?: number | undefined; }) => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
             "deprecated": false,
@@ -332,10 +348,8 @@
                 "id": "def-common.EuiComboBoxTestHarness.select.$1",
                 "type": "string",
                 "tags": [],
-                "label": "label",
-                "description": [
-                  "- The display label of the option to select"
-                ],
+                "label": "searchText",
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -343,19 +357,48 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiComboBoxTestHarness.select.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ timeout = 5000 }",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiComboBoxTestHarness.select.$2.timeout",
+                    "type": "number",
+                    "tags": [],
+                    "label": "timeout",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.EuiComboBoxTestHarness.selectAsync",
+            "id": "def-common.EuiComboBoxTestHarness.addCustomValue",
             "type": "Function",
             "tags": [],
-            "label": "selectAsync",
-            "description": [],
+            "label": "addCustomValue",
+            "description": [
+              "\nAdd a custom value to a \"createable\" combo box (free-form input + Enter).\n\nUse when:\n- The combo box is createable/free-form (e.g. uses `onCreateOption` / `noSuggestions`).\n- You are entering user-provided values (index patterns, remote cluster seeds, etc).\n\nBehavior:\n- Focuses the input, sets the input value, presses Enter to commit.\n- Does not open/wait for an options list or attempt option matching.\n\nNotes:\n- This does not verify that the value was accepted/created. Createable comboboxes vary:\n  some render pills, some write selection into the input (asPlainText), and some clear the\n  input after creation. Prefer asserting via a downstream UI boundary (e.g. Next enabled,\n  validation cleared) or via `getSelected()` when pills exist.\n- Some combos still render a popover as you type; call `close()` when you need deterministic\n  portal cleanup before the next interaction."
+            ],
             "signature": [
-              "(searchText: string) => Promise<void>"
+              "(value: string) => void"
             ],
             "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
             "deprecated": false,
@@ -363,10 +406,10 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-eui-helpers",
-                "id": "def-common.EuiComboBoxTestHarness.selectAsync.$1",
+                "id": "def-common.EuiComboBoxTestHarness.addCustomValue.$1",
                 "type": "string",
                 "tags": [],
-                "label": "searchText",
+                "label": "value",
                 "description": [],
                 "signature": [
                   "string"
@@ -386,15 +429,186 @@
             "tags": [],
             "label": "clear",
             "description": [
-              "\nClear all selected options by clicking the clear button"
+              "\nClear all selected options and wait for the UI to settle.\n\nUse when:\n- You need to remove all selected values deterministically before the next step/assertion.\n\nBehavior:\n- Clicks `comboBoxClearButton` if present (searches both the container and its parent).\n- Otherwise falls back to removing selections via Backspace (guarded to avoid infinite loops).\n- Waits until both selections AND any pending input text are cleared.\n\nNotes:\n- Some EUI usages render `comboBoxClearButton` outside the element with the consumer-provided\n  `data-test-subj` (e.g. on a wrapper), hence the broader search."
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.isOpen",
+            "type": "Function",
+            "tags": [],
+            "label": "isOpen",
+            "description": [
+              "\nReturns true if the combobox popover is currently open.\n\nUse when:\n- You need a quick check in a test/cleanup path.\n\nBehavior:\n- Returns `aria-expanded === 'true'` from the combobox input.\n\nNOTE: Some EUI variants can temporarily desync `aria-expanded` from the portal-mounted\noptions list. For cleanup, prefer `close()` / `waitForClosed()` which also checks\nfor options list unmounting."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "\nBest-effort close of the combo box popover.\n\nUse when:\n- You need deterministic cleanup of the portal/popup (prevent cross-test interference).\n- The combo box does not auto-close after selection (common for multi-select).\n\nBehavior:\n- Tries to close via the scoped toggle button; falls back to Escape + outside click.\n- Waits for `aria-expanded !== 'true'` AND for the portal-mounted options list to unmount.\n\nNotes:\n- Prefer `waitForClosed()` for single-selection combos that should auto-close on selection."
+            ],
+            "signature": [
+              "({ timeout }?: { timeout?: number | undefined; }) => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiComboBoxTestHarness.close.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ timeout = 5000 }",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiComboBoxTestHarness.close.$1.timeout",
+                    "type": "number",
+                    "tags": [],
+                    "label": "timeout",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.waitForClosed",
+            "type": "Function",
+            "tags": [],
+            "label": "waitForClosed",
+            "description": [
+              "\nPassive wait until the combobox popover is closed/unmounted.\n\nUse when:\n- The popover should close automatically (common for singleSelection), and you just need to\n  wait for it to settle before continuing.\n\nBehavior:\n- Waits for `aria-expanded !== 'true'` and for the options list to be unmounted.\n\nNotes:\n- Prefer this over `close()` when you want to avoid “toggle-clicking” a popover that is\n  already in the process of closing."
+            ],
+            "signature": [
+              "({ timeout }?: { timeout?: number | undefined; }) => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiComboBoxTestHarness.waitForClosed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ timeout = 5000 }",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiComboBoxTestHarness.waitForClosed.$1.timeout",
+                    "type": "number",
+                    "tags": [],
+                    "label": "timeout",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiComboBoxTestHarness.selectAndClose",
+            "type": "Function",
+            "tags": [],
+            "label": "selectAndClose",
+            "description": [
+              "\nSelect an option and then close the popover.\n\nUse when:\n- You select from an options list and want deterministic portal cleanup after the selection.\n- The popover is expected to remain open after selection (common for multi-select).\n\nBehavior:\n- Calls `select()` then `close()`."
+            ],
+            "signature": [
+              "(label: string, { timeout }?: { timeout?: number | undefined; }) => Promise<void>"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiComboBoxTestHarness.selectAndClose.$1",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiComboBoxTestHarness.selectAndClose.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ timeout = 5000 }",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiComboBoxTestHarness.selectAndClose.$2.timeout",
+                    "type": "number",
+                    "tags": [],
+                    "label": "timeout",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl/eui_combo_box_test_harness.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           }
         ],

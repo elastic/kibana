@@ -6,21 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
-import { isOtherResult } from '@kbn/agent-builder-common/tools';
-import type { ToolResult, OtherResult } from '@kbn/agent-builder-common';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
-import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/server/agent/register_observability_agent';
+import { timerange } from '@kbn/synthtrace-client';
+import { type ApmSynthtraceEsClient, generateDependenciesData } from '@kbn/synthtrace';
+import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
-import {
-  createLlmProxyActionConnector,
-  deleteActionConnector,
-} from '../utils/llm_proxy/action_connectors';
-import { createSyntheticApmDataWithDependency } from '../utils/synthtrace_scenarios';
 
 const SERVICE_NAME = 'service-a';
 const ENVIRONMENT = 'production';
@@ -28,94 +19,79 @@ const START = 'now-15m';
 const END = 'now';
 const DEPENDENCY_RESOURCE = 'elasticsearch/my-backend';
 
-const LLM_EXPOSED_TOOL_NAME_FOR_GET_DOWNSTREAM_DEPENDENCIES =
-  'observability_get_downstream_dependencies';
-const USER_PROMPT = `What are the downstream dependencies for the service ${SERVICE_NAME} in the last 15 minutes?`;
+interface GetDownstreamDependenciesToolResult extends OtherResult {
+  data: {
+    dependencies: Array<Record<string, unknown>>;
+  };
+}
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
-
-  let llmProxy: LlmProxy;
-  let connectorId: string;
-  let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID}`, function () {
-    // LLM Proxy is not yet supported in cloud environments
-    this.tags(['skipCloud']);
+    let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
-    describe('POST /api/agent_builder/converse', () => {
-      let toolResponseContent: { results: ToolResult[] };
-      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    before(async () => {
+      const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
+      agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-      before(async () => {
-        llmProxy = await createLlmProxy(log);
-        connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+      await apmSynthtraceEsClient.clean();
 
-        const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
-        agentBuilderApiClient = createAgentBuilderApiClient(scoped);
-
-        ({ apmSynthtraceEsClient } = await createSyntheticApmDataWithDependency({
-          getService,
-          serviceName: SERVICE_NAME,
-          environment: ENVIRONMENT,
-          dependencyResource: DEPENDENCY_RESOURCE,
-        }));
-
-        setupToolCallThenAnswer({
-          llmProxy,
-          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_DOWNSTREAM_DEPENDENCIES,
-          toolArg: {
-            serviceName: SERVICE_NAME,
-            serviceEnvironment: ENVIRONMENT,
-            start: START,
-            end: END,
+      const { client, generator } = generateDependenciesData({
+        range: timerange(START, END),
+        apmEsClient: apmSynthtraceEsClient,
+        serviceName: SERVICE_NAME,
+        environment: ENVIRONMENT,
+        agentName: 'nodejs',
+        transactionName: 'POST /api/checkout',
+        dependencies: [
+          {
+            spanName: 'GET /dep',
+            spanType: 'db',
+            spanSubtype: 'elasticsearch',
+            destination: DEPENDENCY_RESOURCE,
+            duration: 100,
           },
-        });
-
-        const body = await agentBuilderApiClient.converse({
-          input: USER_PROMPT,
-          connector_id: connectorId,
-          agent_id: OBSERVABILITY_AGENT_ID,
-        });
-
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        const responseMessage = body.response.message;
-        expect(responseMessage).to.be('final');
-
-        const handoverRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === 'handover-to-answer'
-        )!.requestBody;
-
-        const toolResponseMessage = handoverRequest.messages[handoverRequest.messages.length - 1]!;
-        toolResponseContent = JSON.parse(toolResponseMessage.content as string) as {
-          results: ToolResult[];
-        };
+        ],
       });
 
-      after(async () => {
-        await apmSynthtraceEsClient.clean();
-        await deleteActionConnector(getService, { actionId: connectorId });
-        llmProxy.close();
+      await client.index(generator);
+    });
+
+    after(async () => {
+      await apmSynthtraceEsClient.clean();
+    });
+
+    describe('when fetching downstream dependencies', () => {
+      let resultData: GetDownstreamDependenciesToolResult['data'];
+
+      before(async () => {
+        const results =
+          await agentBuilderApiClient.executeTool<GetDownstreamDependenciesToolResult>({
+            id: OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
+            params: {
+              serviceName: SERVICE_NAME,
+              serviceEnvironment: ENVIRONMENT,
+              start: START,
+              end: END,
+            },
+          });
+
+        expect(results).to.have.length(1);
+        resultData = results[0].data;
       });
 
       it('returns the correct tool results structure', () => {
-        expect(toolResponseContent).to.have.property('results');
-        expect(Array.isArray(toolResponseContent.results)).to.be(true);
-
-        const toolResult = toolResponseContent.results[0] as OtherResult;
-        expect(isOtherResult(toolResult)).to.be(true);
-
-        const { data } = toolResult as OtherResult;
-        expect(data).to.have.property('dependencies');
+        expect(resultData).to.have.property('dependencies');
+        expect(Array.isArray(resultData.dependencies)).to.be(true);
       });
 
       it('returns downstream dependencies for the given service and time range', () => {
-        const toolResult = toolResponseContent.results[0] as OtherResult;
-        const { data } = toolResult as OtherResult;
-        const dependencies = data.dependencies as Array<Record<string, unknown>>;
+        const dependencies = resultData.dependencies;
 
-        expect(Array.isArray(dependencies)).to.be(true);
         expect(dependencies.length > 0).to.be(true);
 
         const hasExpectedBackend = dependencies.some(

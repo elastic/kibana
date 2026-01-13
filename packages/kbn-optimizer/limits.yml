@@ -37,7 +37,7 @@ pageLoadAssetSize:
   dataConnectors: 6605
   dataQuality: 11469
   datasetQuality: 49315
-  dataSourcesRegistry: 4162
+  dataSourcesRegistry: 4803
   dataUsage: 8743
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -46,7 +46,7 @@ pageLoadAssetSize:
   dataVisualizer: 32797
   developerToolbar: 4467
   devTools: 8109
-  discover: 26000
+  discover: 28752
   discoverEnhanced: 5660
   discoverShared: 2322
   elasticAssistant: 338870
