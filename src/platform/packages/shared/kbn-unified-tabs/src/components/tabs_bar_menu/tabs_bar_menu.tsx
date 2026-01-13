@@ -127,7 +127,8 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       (option: EuiSelectableOption<OptionData>) => {
         const itemContents = (
           <>
-            <EuiTextTruncate truncation="middle" text={option.label} />
+            {/* title set to undefined to disable default tooltip */}
+            <EuiTextTruncate truncation="middle" text={option.label} title={undefined} />
             {option.formattedtime && (
               <EuiText size="xs" color="subdued" className="eui-displayBlock">
                 {option.formattedtime}
