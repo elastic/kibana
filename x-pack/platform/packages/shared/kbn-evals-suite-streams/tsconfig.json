@@ -24,5 +24,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/core",
     "@kbn/dissect-heuristics",
+    "@kbn/es-query",
   ]
 }
