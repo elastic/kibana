@@ -15,9 +15,8 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import { map } from 'rxjs';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { SEARCH_SESSION_ID } from '../../../common/page_bundle_constants';
-import type { DashboardLocatorParams, DashboardState } from '../../../common/types';
+import type { DashboardLocatorParams } from '../../../common/types';
 import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
 
@@ -79,9 +78,9 @@ function getLocatorParams({
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
 
-  const { panels, controlGroupInput, references } = dashboardInternalApi.serializeLayout() as Pick<
+  const { panels, controlGroupInput } = dashboardInternalApi.serializeLayout() as Pick<
     DashboardLocatorParams,
-    'panels' | 'controlGroupInput' | 'references'
+    'panels' | 'controlGroupInput'
   >;
 
   return {
@@ -105,6 +104,5 @@ function getLocatorParams({
       : undefined,
     controlGroupInput,
     panels,
-    references: (references ?? []) as unknown as DashboardState['references'] & SerializableRecord,
   };
 }
