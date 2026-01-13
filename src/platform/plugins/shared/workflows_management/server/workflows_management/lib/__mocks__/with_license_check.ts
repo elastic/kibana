@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function isMac() {
-  return ((navigator as any)?.userAgentData?.platform || navigator.userAgent) // eslint-disable-line @typescript-eslint/no-explicit-any
-    .toLowerCase()
-    .includes('mac');
-}
+export const withLicenseCheck = jest.fn((handler) => handler);
