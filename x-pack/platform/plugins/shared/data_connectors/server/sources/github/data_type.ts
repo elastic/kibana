@@ -17,7 +17,7 @@ import {
 export const githubDataSource: DataSource = {
   id: 'github',
   name: 'Github',
-  description: i18n.translate('xpack.dataConnectors.dataSources.github.description', {
+  description: i18n.translate('xpack.dataSources.github.description', {
     defaultMessage: 'Connect to Github to pull data from your repository.',
   }),
 

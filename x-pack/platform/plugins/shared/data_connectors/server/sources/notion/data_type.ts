@@ -18,7 +18,7 @@ import {
 export const notionDataSource: DataSource = {
   id: 'notion',
   name: 'Notion',
-  description: i18n.translate('xpack.dataConnectors.dataSources.notion.description', {
+  description: i18n.translate('xpack.dataSources.notion.description', {
     defaultMessage: 'Connect to Notion to pull data from your workspace.',
   }),
 

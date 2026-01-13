@@ -13,11 +13,11 @@ import { DATA_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
     [DATA_CONNECTORS_ENABLED_SETTING_ID]: {
-      description: i18n.translate('xpack.dataConnectors.uiSettings.description', {
-        defaultMessage: 'Enable Data Connectors',
+      description: i18n.translate('xpack.dataSources.uiSettings.description', {
+        defaultMessage: 'Enable Data Sources',
       }),
-      name: i18n.translate('xpack.dataConnectors.uiSettings.name', {
-        defaultMessage: 'Data Connectors',
+      name: i18n.translate('xpack.dataSources.uiSettings.name', {
+        defaultMessage: 'Data Sources',
       }),
       schema: schema.boolean(),
       value: false,
