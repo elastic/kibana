@@ -95,7 +95,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
 
   .kbnBody {
     // adjust position of all the right flyouts relative to the application area, except the ones that are "above the header"
-    .euiFlyout[class*='right']:not(.euiOverlayMask[class*='aboveHeader'] .euiFlyout) {
+    .euiOverlayMask:not([data-relative-to-header='above']) ~ * .euiFlyout[class*='right'] {
       ${logicalCSS('top', layoutVar('application.top', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
