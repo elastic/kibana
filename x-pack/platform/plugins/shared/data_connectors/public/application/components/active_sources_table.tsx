@@ -226,6 +226,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.workflowsColumn', {
         defaultMessage: 'Workflows',
       }),
+      align: 'center',
       render: (workflows: string[]) =>
         workflows.length > 0 ? (
           <EuiLink onClick={navigateToWorkflows} data-test-subj="workflowsLink">
@@ -240,6 +241,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.toolsColumn', {
         defaultMessage: 'Tools',
       }),
+      align: 'center',
       render: (agentTools: string[]) =>
         agentTools.length > 0 ? (
           <EuiLink onClick={navigateToTools} data-test-subj="toolsLink">
