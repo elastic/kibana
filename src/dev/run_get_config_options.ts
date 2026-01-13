@@ -15,11 +15,6 @@ import * as yaml from 'js-yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 
-interface SchemaStructureEntry {
-  path: string[];
-  type: string;
-}
-
 interface ConfigEntry {
   type: string;
   path: string;
