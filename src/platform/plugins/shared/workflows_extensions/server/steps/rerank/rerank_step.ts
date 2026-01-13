@@ -108,8 +108,7 @@ export const rerankStepDefinition = createServerStepDefinition({
     try {
       const esClient = context.contextManager.getScopedEsClient();
 
-      context.logger.info('Rerank step started', {
-        rerankQuery: context.input.rerank_text,
+      context.logger.debug('Rerank step started', {
         dataLength: Array.isArray(context.input.data) ? context.input.data.length : 0,
         inferenceId: context.input.inference_id,
         hasFieldExtraction: !!context.input.fields,
@@ -159,11 +158,11 @@ export const rerankStepDefinition = createServerStepDefinition({
         if (!inferenceId) {
           throw new Error(
             'No inference_id provided and no rerank inference endpoints found in Elasticsearch. ' +
-              'Please create a rerank inference endpoint or specify an inference_id explicitly.'
+              'Please create a rerank inference endpoint.'
           );
         }
 
-        context.logger.info(
+        context.logger.debug(
           `No inference endpoint ID passed for rerank step - defaulting to discovered endpoint: ${inferenceId}`
         );
       }

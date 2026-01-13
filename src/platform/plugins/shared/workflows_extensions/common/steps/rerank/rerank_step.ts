@@ -60,10 +60,6 @@ const RerankInputSchema = z.object({
     ),
 });
 
-/**
- * Output schema for the rerank step
- * Returns an array of reranked documents
- */
 const RerankOutputSchema = z
   .array(z.any())
   .describe('Array of reranked documents in descending relevance order');

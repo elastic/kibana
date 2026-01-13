@@ -53,11 +53,11 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
   useEffect(() => {
-    loadConnectors(); // dispatch load connectors on mount
+    loadConnectors();
   }, [loadConnectors]);
 
   useEffect(() => {
-    loadInferenceEndpoints(); // dispatch load inference endpoints on mount
+    loadInferenceEndpoints();
   }, [loadInferenceEndpoints]);
 
   // Load workflow when id changes
