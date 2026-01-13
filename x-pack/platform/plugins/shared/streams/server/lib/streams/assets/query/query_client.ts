@@ -293,7 +293,15 @@ export class QueryClient {
    * Returns all query links for a given stream or
    * all query links if no stream is provided.
    */
-  async getQueryLinks(name?: string): Promise<QueryLink[]> {
+  async getQueryLinks(
+    name?: string,
+    options?: { includeStreamName: true }
+  ): Promise<Array<QueryLink & { streamName: string }>>;
+  async getQueryLinks(name?: string, options?: { includeStreamName?: false }): Promise<QueryLink[]>;
+  async getQueryLinks(
+    name?: string,
+    options?: { includeStreamName?: boolean }
+  ): Promise<QueryLink[] | Array<QueryLink & { streamName: string }>> {
     const filter = name
       ? [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')]
       : [...termQuery(ASSET_TYPE, 'query')];
@@ -307,6 +315,13 @@ export class QueryClient {
         },
       },
     });
+
+    if (options?.includeStreamName) {
+      return queriesResponse.hits.hits.map((hit) => ({
+        ...fromStorage(hit._source),
+        streamName: hit._source[STREAM_NAME],
+      }));
+    }
 
     return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
@@ -332,7 +347,21 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
-  async findQueries(name: string, query: string) {
+  async findQueries(
+    name: string,
+    query: string,
+    options?: { includeStreamName: true }
+  ): Promise<Array<QueryLink & { streamName: string }>>;
+  async findQueries(
+    name: string,
+    query: string,
+    options?: { includeStreamName?: false }
+  ): Promise<QueryLink[]>;
+  async findQueries(
+    name: string,
+    query: string,
+    options?: { includeStreamName?: boolean }
+  ): Promise<QueryLink[] | Array<QueryLink & { streamName: string }>> {
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
       track_total_hits: false,
@@ -353,6 +382,13 @@ export class QueryClient {
         },
       },
     });
+
+    if (options?.includeStreamName) {
+      return assetsResponse.hits.hits.map((hit) => ({
+        ...fromStorage(hit._source),
+        streamName: hit._source[STREAM_NAME],
+      }));
+    }
 
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }

@@ -14,7 +14,7 @@ import { useTimefilter } from './use_timefilter';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 
 export interface SignificantEventItem {
-  query: StreamQuery;
+  query: StreamQuery & { streamName?: string };
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
 }

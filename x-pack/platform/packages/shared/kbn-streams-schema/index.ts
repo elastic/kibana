@@ -130,7 +130,9 @@ export {
 
 export type {
   SignificantEventsResponse,
+  SignificantEventsResponseWithStreamName,
   SignificantEventsGetResponse,
+  SignificantEventsGetResponseWithStreamName,
   SignificantEventsPreviewResponse,
   SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,

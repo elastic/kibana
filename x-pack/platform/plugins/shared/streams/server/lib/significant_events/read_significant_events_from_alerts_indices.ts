@@ -12,7 +12,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
-import type { SignificantEventsGetResponse, StreamQueryKql } from '@kbn/streams-schema';
+import type {
+  SignificantEventsGetResponseWithStreamName,
+  StreamQueryKql,
+} from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
 import type { QueryClient } from '../streams/assets/query/query_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
@@ -25,13 +28,15 @@ export async function readSignificantEventsFromAlertsIndices(
     queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
-): Promise<SignificantEventsGetResponse> {
+): Promise<SignificantEventsGetResponseWithStreamName> {
   const { queryClient, scopedClusterClient } = dependencies;
   const { name, from, to, bucketSize, query } = params;
 
-  const queryLinks = await (name && query
-    ? queryClient.findQueries(name, query)
-    : queryClient.getQueryLinks(name));
+  const queryLinks =
+    name && query
+      ? await queryClient.findQueries(name, query, { includeStreamName: true })
+      : await queryClient.getQueryLinks(name, { includeStreamName: true });
+
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };
   }
@@ -136,6 +141,7 @@ export async function readSignificantEventsFromAlertsIndices(
     return {
       significant_events: queryLinks.map((queryLink) => ({
         ...toStreamQueryKql(queryLink),
+        streamName: queryLink.streamName,
         occurrences: [],
         change_points: {
           type: {
@@ -160,6 +166,7 @@ export async function readSignificantEventsFromAlertsIndices(
 
     return {
       ...toStreamQueryKql(queryLink),
+      streamName: queryLink.streamName,
       occurrences: isArray(occurrences)
         ? occurrences.map((occurrence) => ({
             date: occurrence.key_as_string,
@@ -175,6 +182,7 @@ export async function readSignificantEventsFromAlertsIndices(
     .filter((queryLink) => !foundSignificantEventsIds.includes(queryLink.query.id))
     .map((queryLink) => ({
       ...toStreamQueryKql(queryLink),
+      streamName: queryLink.streamName,
       occurrences: [],
       change_points: {
         type: {

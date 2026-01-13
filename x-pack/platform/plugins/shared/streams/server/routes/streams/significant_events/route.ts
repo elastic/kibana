@@ -142,7 +142,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize, query } = params.query;
 
-    return await readSignificantEventsFromAlertsIndices(
+    const response = await readSignificantEventsFromAlertsIndices(
       {
         name,
         from,
@@ -152,6 +152,12 @@ const readStreamSignificantEventsRoute = createServerRoute({
       },
       { queryClient, scopedClusterClient }
     );
+
+    // Strip streamName from response to match public API schema
+    return {
+      significant_events: response.significant_events.map(({ streamName, ...event }) => event),
+      aggregated_occurrences: response.aggregated_occurrences,
+    };
   },
 });
 

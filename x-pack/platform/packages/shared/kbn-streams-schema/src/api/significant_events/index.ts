@@ -47,6 +47,15 @@ interface SignificantEventsGetResponse {
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
+type SignificantEventsResponseWithStreamName = SignificantEventsResponse & {
+  streamName: string;
+};
+
+interface SignificantEventsGetResponseWithStreamName {
+  significant_events: SignificantEventsResponseWithStreamName[];
+  aggregated_occurrences: SignificantEventOccurrence[];
+}
+
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
   'occurrences' | 'change_points' | 'kql'
@@ -73,7 +82,9 @@ type SignificantEventsGenerateResponse = Observable<
 
 export type {
   SignificantEventsResponse,
+  SignificantEventsResponseWithStreamName,
   SignificantEventsGetResponse,
+  SignificantEventsGetResponseWithStreamName,
   SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,

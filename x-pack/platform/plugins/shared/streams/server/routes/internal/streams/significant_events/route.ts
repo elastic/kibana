@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type SignificantEventsGetResponse } from '@kbn/streams-schema';
+import type { SignificantEventsGetResponseWithStreamName } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
@@ -39,7 +39,7 @@ const readAllSignificantEventsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<SignificantEventsGetResponse> => {
+  }): Promise<SignificantEventsGetResponseWithStreamName> => {
     const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
@@ -48,7 +48,7 @@ const readAllSignificantEventsRoute = createServerRoute({
 
     const { from, to, bucketSize } = params.query;
 
-    return await readSignificantEventsFromAlertsIndices(
+    return readSignificantEventsFromAlertsIndices(
       {
         from,
         to,
