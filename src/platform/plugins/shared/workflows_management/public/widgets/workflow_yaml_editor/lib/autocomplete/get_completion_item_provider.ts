@@ -11,6 +11,7 @@ import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions } from './suggestions/get_suggestions';
+import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -71,7 +72,7 @@ export function getCompletionItemProvider(
       }
 
       // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
-      const workflowSuggestions = getSuggestions({
+      const workflowSuggestions = await getSuggestions({
         ...autocompleteContext,
         model,
         position,
@@ -81,28 +82,43 @@ export function getCompletionItemProvider(
       const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
       mapSuggestions(deduplicatedMap, workflowSuggestions);
 
-      // Get suggestions from all stored YAML providers (excluding workflow provider)
-      const allYamlProviders = getAllYamlProviders();
+      // Check if we're in a context where we should have exclusive suggestions
+      // (e.g., workflow.output's with: block where only declared outputs are valid)
+      const shouldUseExclusiveSuggestions = isInWorkflowOutputWithBlock(
+        autocompleteContext.path,
+        autocompleteContext.focusedStepInfo,
+        autocompleteContext.yamlDocument,
+        autocompleteContext.absoluteOffset
+      );
+
       let isIncomplete = false;
 
-      // Call all stored providers and add their suggestions incrementally
-      for (const yamlProvider of allYamlProviders) {
-        if (yamlProvider.provideCompletionItems) {
-          try {
-            const result = await yamlProvider.provideCompletionItems(
-              model,
-              position,
-              completionContext,
-              {} as monaco.CancellationToken
-            );
-            if (result) {
-              mapSuggestions(deduplicatedMap, result.suggestions || []);
-              if (result.incomplete) {
-                isIncomplete = true;
+      // Only call YAML providers if we're not in an exclusive context
+      // When we're in workflow.output's with block, skip YAML provider regardless of suggestion count
+      // (even if all outputs are provided, we don't want YAML suggesting arbitrary keys)
+      if (!shouldUseExclusiveSuggestions) {
+        // Get suggestions from all stored YAML providers (excluding workflow provider)
+        const allYamlProviders = getAllYamlProviders();
+
+        // Call all stored providers and add their suggestions incrementally
+        for (const yamlProvider of allYamlProviders) {
+          if (yamlProvider.provideCompletionItems) {
+            try {
+              const result = await yamlProvider.provideCompletionItems(
+                model,
+                position,
+                completionContext,
+                {} as monaco.CancellationToken
+              );
+              if (result) {
+                mapSuggestions(deduplicatedMap, result.suggestions || []);
+                if (result.incomplete) {
+                  isIncomplete = true;
+                }
               }
+            } catch (error) {
+              // Continue with other providers if one fails
             }
-          } catch (error) {
-            // Continue with other providers if one fails
           }
         }
       }

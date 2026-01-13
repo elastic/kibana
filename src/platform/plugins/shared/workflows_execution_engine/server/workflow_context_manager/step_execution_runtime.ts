@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
@@ -66,6 +67,10 @@ export class StepExecutionRuntime {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId);
   }
 
+  public get workflowExecution() {
+    return this.workflowExecutionState.getWorkflowExecution();
+  }
+
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
   }
@@ -80,10 +85,6 @@ export class StepExecutionRuntime {
     this.node = stepExecutionRuntimeInit.node;
     this.stepExecutionId = stepExecutionRuntimeInit.stepExecutionId;
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
-  }
-
-  private get workflowExecution() {
-    return this.workflowExecutionState.getWorkflowExecution();
   }
 
   public stepExecutionExists(): boolean {
@@ -137,16 +138,14 @@ export class StepExecutionRuntime {
     this.logStepStart(stepId, stepExecution.id!);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public setInput(input: Record<string, any>): void {
+  public setInput(input: Record<string, unknown>): void {
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
-      input,
+      input: input as JsonValue,
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public finishStep(stepOutput?: Record<string, any>): void {
+  public finishStep(stepOutput?: Record<string, unknown>): void {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
@@ -173,6 +172,8 @@ export class StepExecutionRuntime {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
+      stepId: this.node.stepId,
+      stepType: this.node.stepType,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
       finishedAt: new Date().toISOString(),

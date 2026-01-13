@@ -88,4 +88,57 @@ export class WorkflowRepository {
       return false;
     }
   }
+
+  /**
+   * Find a workflow by name and space ID
+   */
+  async findWorkflowByName(name: string, spaceId: string): Promise<EsWorkflow | null> {
+    try {
+      const response = await this.options.esClient.search({
+        index: this.options.indexName,
+        query: {
+          bool: {
+            must: [{ term: { 'name.keyword': name } }, { term: { spaceId } }],
+            must_not: {
+              exists: { field: 'deleted_at' },
+            },
+          },
+        },
+        size: 1,
+        track_total_hits: false,
+      });
+
+      if (response.hits.hits.length === 0) {
+        return null;
+      }
+
+      const document = response.hits.hits[0];
+      if (!document._source) {
+        return null;
+      }
+
+      const source = document._source as EsWorkflow;
+      return {
+        id: document._id as string,
+        name: source.name,
+        description: source.description,
+        enabled: source.enabled,
+        tags: source.tags || [],
+        valid: source.valid,
+        createdAt: new Date(source.createdAt),
+        createdBy: source.createdBy,
+        lastUpdatedAt: new Date(source.lastUpdatedAt),
+        lastUpdatedBy: source.lastUpdatedBy,
+        definition: source.definition,
+        deleted_at: source.deleted_at ? new Date(source.deleted_at) : null,
+        yaml: source.yaml,
+      };
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return null;
+      }
+      this.options.logger.error(`Failed to find workflow by name ${name}: ${error}`);
+      throw error;
+    }
+  }
 }

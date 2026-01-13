@@ -8,6 +8,7 @@
  */
 
 import _ from 'lodash';
+import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
@@ -17,13 +18,16 @@ import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
 import { getVariablesSchema } from './get_variables_schema';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
+import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 
 // Implementation should be the same as in the 'WorkflowContextManager.getContext' function
 // src/platform/plugins/shared/workflows_execution_engine/server/workflow_context_manager/workflow_context_manager.ts
 export function getContextSchemaForPath(
   definition: WorkflowYaml,
   workflowGraph: WorkflowGraph,
-  path: Array<string | number>
+  path: Array<string | number>,
+  yamlDocument?: Document,
+  workflows?: WorkflowsResponse
 ): typeof DynamicStepContextSchema {
   let schema = DynamicStepContextSchema.merge(getWorkflowContextSchema(definition));
 
@@ -36,7 +40,13 @@ export function getContextSchemaForPath(
     return schema;
   }
 
-  const stepsCollectionSchema = getStepsCollectionSchema(schema, workflowGraph, nearestStep.name);
+  const stepsCollectionSchema = getStepsCollectionSchema(
+    schema,
+    workflowGraph,
+    nearestStep.name,
+    yamlDocument,
+    workflows
+  );
 
   if (Object.keys(stepsCollectionSchema.shape).length > 0) {
     schema = schema.extend({ steps: stepsCollectionSchema });

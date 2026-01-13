@@ -7,18 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DynamicStepContextSchema } from '@kbn/workflows';
+import type { Document } from 'yaml';
+import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
 import { getStepId } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { isEnterForeach } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
+import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
+import {
+  extractWorkflowIdFromStep,
+  findStepIndexByStepId,
+  getChildWorkflowOutputSchema,
+  isWorkflowExecuteStep,
+} from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/variable/get_child_workflow_output_schema';
+
+/**
+ * Get output schema for a step, with optional child workflow awareness
+ */
+function getStepOutputSchema(params: {
+  node: GraphNodeUnion;
+  yamlDocument?: Document;
+  workflows?: WorkflowsResponse;
+}): z.ZodSchema {
+  const { node, yamlDocument, workflows } = params;
+
+  // Try to get child workflow output schema if this is a workflow.execute step
+  if (isWorkflowExecuteStep(node.stepType) && yamlDocument && workflows) {
+    try {
+      const stepIndex = findStepIndexByStepId(yamlDocument, node.stepId);
+      if (stepIndex !== null) {
+        const workflowId = extractWorkflowIdFromStep(yamlDocument, stepIndex);
+        if (workflowId) {
+          const childWorkflow = workflows.workflows[workflowId];
+          if (childWorkflow) {
+            return getChildWorkflowOutputSchema(childWorkflow as unknown as WorkflowYaml);
+          }
+        }
+      }
+    } catch (error) {
+      // Fall back to default schema
+    }
+  }
+
+  // Default behavior for all other steps
+  return getOutputSchemaForStepType(node);
+}
 
 export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
-  stepName: string
+  stepName: string,
+  yamlDocument?: Document,
+  workflows?: WorkflowsResponse
 ) {
   const stepId = getStepId(stepName);
   const stepNode = workflowExecutionGraph.getStepNode(stepId);
@@ -42,9 +84,15 @@ export function getStepsCollectionSchema(
     }
 
     if (!isEnterForeach(node)) {
+      const outputSchema = getStepOutputSchema({
+        node,
+        yamlDocument,
+        workflows,
+      });
+
       stepsSchema = stepsSchema.extend({
         [node.stepId]: z.object({
-          output: getOutputSchemaForStepType(node).optional(),
+          output: outputSchema.optional(),
           error: z.any().optional(),
         }),
       });

@@ -40,6 +40,7 @@ export function buildAutocompleteContext({
 }: BuildAutocompleteContextParams): AutocompleteContext | null {
   // derived from workflow state
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
+  const workflows = editorState?.workflows;
   const workflowGraph = editorState?.computed?.workflowGraph;
   const yamlDocument = editorState?.computed?.yamlDocument;
   const workflowLookup = editorState?.computed?.workflowLookup;
@@ -91,7 +92,13 @@ export function buildAutocompleteContext({
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path);
+    contextSchema = getContextSchemaForPath(
+      workflowDefinition,
+      workflowGraph,
+      path,
+      yamlDocument,
+      editorState.workflows
+    );
   }
 
   if (parseResult?.fullKey) {
@@ -145,5 +152,10 @@ export function buildAutocompleteContext({
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
+    workflows: workflows ?? {
+      workflows: {},
+      totalWorkflows: 0,
+    },
+    workflowDefinition: workflowDefinition ?? null,
   };
 }

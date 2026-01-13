@@ -159,14 +159,32 @@ export class WorkflowExecutionState {
   }
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
-    this.stepExecutions.set(step.id!, {
-      ...this.stepExecutions.get(step.id!),
+    const existingStep = this.stepExecutions.get(step.id!);
+    const updatedStep = {
+      ...existingStep,
       ...step,
-    } as EsWorkflowStepExecution);
-    this.stepDocumentsChanges.set(step.id as string, {
-      ...(this.stepDocumentsChanges.get(step.id as string) || {}),
-      ...step,
-    });
+    } as EsWorkflowStepExecution;
+    this.stepExecutions.set(step.id!, updatedStep);
+    // Merge changes: use existing changes if available, otherwise start fresh with just the update
+    // But ensure stepId and stepType are preserved if they exist in existingStep (for frontend rendering)
+    const existingChanges = this.stepDocumentsChanges.get(step.id as string);
+    if (existingChanges) {
+      // Merge with existing changes (accumulate changes)
+      this.stepDocumentsChanges.set(step.id as string, {
+        ...existingChanges,
+        ...step,
+      });
+    } else {
+      // No existing changes - start with update, but preserve stepId/stepType if missing
+      const changes: Partial<EsWorkflowStepExecution> = { ...step };
+      if (!changes.stepId && existingStep?.stepId) {
+        changes.stepId = existingStep.stepId;
+      }
+      if (!changes.stepType && existingStep?.stepType) {
+        changes.stepType = existingStep.stepType;
+      }
+      this.stepDocumentsChanges.set(step.id as string, changes);
+    }
   }
 
   private buildStepIdExecutionIdIndex(): void {

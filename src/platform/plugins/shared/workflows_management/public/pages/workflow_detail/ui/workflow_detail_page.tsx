@@ -26,6 +26,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
+import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
@@ -36,10 +37,11 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
   const [loadConnectors, { isLoading: isLoadingConnectors }] =
     useAsyncThunkState(loadConnectorsThunk);
+  const [loadWorkflows, { isLoading: isLoadingWorkflows }] = useAsyncThunkState(loadWorkflowsThunk);
   const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
     useAsyncThunkState(loadWorkflowThunk);
 
-  const isReady = !isLoadingWorkflow && !isLoadingConnectors;
+  const isReady = !isLoadingWorkflow && !isLoadingConnectors && !isLoadingWorkflows;
 
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowName = useSelector(selectWorkflowName);
@@ -50,7 +52,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   useEffect(() => {
     loadConnectors(); // dispatch load connectors on mount
-  }, [loadConnectors]);
+    loadWorkflows(); // dispatch load workflows on mount
+  }, [loadConnectors, loadWorkflows]);
 
   // Load workflow when id changes
   useEffect(() => {

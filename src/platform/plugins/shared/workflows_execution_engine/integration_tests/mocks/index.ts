@@ -10,3 +10,4 @@
 export { WorkflowExecutionRepositoryMock } from './workflow_execution_repository.mock';
 export { StepExecutionRepositoryMock } from './step_execution_repository.mock';
 export { LogsRepositoryMock } from './logs_repository.mock';
+export { WorkflowRepositoryMock } from './workflow_repository.mock';

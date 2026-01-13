@@ -27,6 +27,7 @@ describe('getWorkflowContextSchema', () => {
       schema,
       WorkflowContextSchema.extend({
         inputs: z.object({}),
+        output: z.object({}),
         consts: z.object({}),
       })
     );
@@ -69,6 +70,7 @@ describe('getWorkflowContextSchema', () => {
             z.array(z.boolean()).max(2),
           ]),
         }),
+        output: z.object({}),
         consts: z.object({}),
       })
     );
@@ -95,6 +97,7 @@ describe('getWorkflowContextSchema', () => {
       schema,
       WorkflowContextSchema.extend({
         inputs: z.object({}),
+        output: z.object({}),
         consts: z.object({
           test: z.literal('test'),
           test2: z.literal(1),

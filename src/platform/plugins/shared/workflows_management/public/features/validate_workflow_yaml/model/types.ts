@@ -39,6 +39,18 @@ export interface StepNameInfo {
   endColumn: number;
 }
 
+export interface WorkflowInputsItem {
+  id: string;
+  workflowId: string | null;
+  inputs: Record<string, unknown> | undefined;
+  inputsNode: import('yaml').YAMLMap | null;
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+  yamlPath: (string | number)[];
+}
+
 export type YamlValidationErrorSeverity = 'error' | 'warning' | 'info';
 
 interface YamlValidationResultBase {
@@ -95,6 +107,18 @@ interface YamlValidationResultConnectorIdError extends YamlValidationResultBase 
   owner: 'connector-id-validation';
 }
 
+interface YamlValidationResultWorkflowInputsError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'workflow-inputs-validation';
+}
+
+interface YamlValidationResultWorkflowOutputsError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'workflow-output-validation';
+}
+
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
   return [
     'step-name-validation',
@@ -102,6 +126,8 @@ export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidat
     'liquid-template-validation',
     'yaml',
     'connector-id-validation',
+    'workflow-inputs-validation',
+    'workflow-output-validation',
   ].includes(owner);
 }
 
@@ -112,4 +138,6 @@ export type YamlValidationResult =
   | YamlValidationResultMonacoYaml
   | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
-  | YamlValidationResultConnectorIdValid;
+  | YamlValidationResultConnectorIdValid
+  | YamlValidationResultWorkflowInputsError
+  | YamlValidationResultWorkflowOutputsError;

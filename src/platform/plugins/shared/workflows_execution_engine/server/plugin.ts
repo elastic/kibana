@@ -68,6 +68,10 @@ export class WorkflowsExecutionEnginePlugin
   private readonly config: WorkflowsExecutionEngineConfig;
   private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
+  private coreSetup?: CoreSetup<
+    WorkflowsExecutionEnginePluginStartDeps,
+    WorkflowsExecutionEnginePluginStart
+  >;
   private initializePromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -83,6 +87,8 @@ export class WorkflowsExecutionEnginePlugin
 
     const logger = this.logger;
     const config = this.config;
+
+    this.coreSetup = core;
 
     initializeLogsRepositoryDataStream(core.dataStreams);
 
@@ -107,7 +113,8 @@ export class WorkflowsExecutionEnginePlugin
             run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
-              const [coreStart, pluginsStart] = await core.getStartServices();
+              const [coreStart, pluginsStart, workflowsExecutionEngine] =
+                await core.getStartServices();
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -125,6 +132,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest,
                 dependencies,
+                workflowsExecutionEngine,
               });
             },
             cancel: async () => {
@@ -152,7 +160,8 @@ export class WorkflowsExecutionEnginePlugin
             run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
-              const [coreStart, pluginsStart] = await core.getStartServices();
+              const [coreStart, pluginsStart, workflowsExecutionEngine] =
+                await core.getStartServices();
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -170,6 +179,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 fakeRequest,
                 dependencies,
+                workflowsExecutionEngine,
               });
             },
             cancel: async () => {
@@ -291,6 +301,8 @@ export class WorkflowsExecutionEnginePlugin
                 throw new Error('Workflow execution must have id and spaceId');
               }
 
+              const [, , workflowsExecutionEngine] = await core.getStartServices();
+
               await runWorkflow({
                 workflowRunId: workflowExecution.id,
                 spaceId: workflowExecution.spaceId,
@@ -299,6 +311,7 @@ export class WorkflowsExecutionEnginePlugin
                 config,
                 fakeRequest,
                 dependencies,
+                workflowsExecutionEngine,
               });
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
@@ -440,6 +453,12 @@ export class WorkflowsExecutionEnginePlugin
           `Executing workflow directly (already in Task Manager context): ${workflow.id}`
         );
 
+        // Get workflowsExecutionEngine from getStartServices (third element is this plugin's start contract)
+        if (!this.coreSetup) {
+          throw new Error('Core setup not available');
+        }
+        const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
+
         await runWorkflow({
           workflowRunId: workflowExecution.id as string,
           spaceId: workflowExecution.spaceId || 'default',
@@ -448,6 +467,7 @@ export class WorkflowsExecutionEnginePlugin
           config: this.config,
           fakeRequest: request,
           dependencies,
+          workflowsExecutionEngine,
         });
       } else {
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);

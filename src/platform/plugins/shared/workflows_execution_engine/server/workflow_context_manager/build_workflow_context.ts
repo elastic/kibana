@@ -48,6 +48,12 @@ export function buildWorkflowContext(
     workflowExecution.id
   );
 
+  // Extract parent workflow information from context if available
+  const parentWorkflowId = workflowExecution.context?.parentWorkflowId as string | undefined;
+  const parentWorkflowExecutionId = workflowExecution.context?.parentWorkflowExecutionId as
+    | string
+    | undefined;
+
   const inputsWithDefaults = applyInputDefaults(
     workflowExecution.workflowDefinition?.inputs,
     workflowExecution.context?.inputs
@@ -70,6 +76,14 @@ export function buildWorkflowContext(
     consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
     inputs: inputsWithDefaults,
+    output: workflowExecution.context?.output,
     now: new Date(),
+    parent:
+      parentWorkflowId && parentWorkflowExecutionId
+        ? {
+            workflowId: parentWorkflowId,
+            executionId: parentWorkflowExecutionId,
+          }
+        : undefined,
   };
 }

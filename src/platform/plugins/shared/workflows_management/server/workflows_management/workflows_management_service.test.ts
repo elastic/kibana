@@ -1424,6 +1424,51 @@ steps:
         track_total_hits: true,
       });
     });
+
+    it('should return empty object when there are no workflows', async () => {
+      const mockAggsResponse = {
+        hits: {
+          hits: [],
+          total: { value: 0 },
+        },
+        // No aggregations when there are no documents
+      };
+
+      mockEsClient.search.mockResolvedValue(mockAggsResponse as any);
+
+      const result = await service.getWorkflowAggs(['enabled', 'createdBy'], 'default');
+
+      expect(result).toEqual({});
+
+      expect(mockEsClient.search).toHaveBeenCalledWith({
+        size: 0,
+        index: '.workflows-workflows',
+        allow_no_indices: true,
+        query: {
+          bool: {
+            must: [{ term: { spaceId: 'default' } }],
+            must_not: {
+              exists: { field: 'deleted_at' },
+            },
+          },
+        },
+        aggs: {
+          enabled: {
+            terms: {
+              field: 'enabled',
+              size: 100,
+            },
+          },
+          createdBy: {
+            terms: {
+              field: 'createdBy',
+              size: 100,
+            },
+          },
+        },
+        track_total_hits: true,
+      });
+    });
   });
 
   describe('getWorkflowExecutions', () => {

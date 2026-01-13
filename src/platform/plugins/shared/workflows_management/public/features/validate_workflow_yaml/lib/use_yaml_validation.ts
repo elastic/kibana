@@ -12,15 +12,19 @@ import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllVariables } from './collect_all_variables';
+import { collectAllWorkflowInputs } from './collect_all_workflow_inputs';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
+import { validateWorkflowInputsInYaml } from './validate_workflow_inputs_in_yaml';
+import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
   selectConnectors,
   selectIsWorkflowTab,
   selectWorkflowDefinition,
+  selectWorkflows,
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -50,6 +54,7 @@ export function useYamlValidation(
   const lineCounter = useSelector(selectYamlLineCounter);
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
+  const workflows = useSelector(selectWorkflows);
   const { application } = useKibana().services;
 
   // eslint-disable-next-line complexity
@@ -72,6 +77,8 @@ export function useYamlValidation(
       monaco.editor.setModelMarkers(model, 'step-name-validation', []);
       monaco.editor.setModelMarkers(model, 'liquid-template-validation', []);
       monaco.editor.setModelMarkers(model, 'connector-id-validation', []);
+      monaco.editor.setModelMarkers(model, 'workflow-inputs-validation', []);
+      monaco.editor.setModelMarkers(model, 'workflow-output-validation', []);
       setIsLoading(false);
       setError(null);
       return;
@@ -98,6 +105,7 @@ export function useYamlValidation(
 
     const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
     const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
+    const workflowInputsItems = collectAllWorkflowInputs(yamlDocument, lineCounter);
     const dynamicConnectorTypes = connectors?.connectorTypes ?? null;
 
     // Generate the connectors management URL
@@ -108,9 +116,17 @@ export function useYamlValidation(
 
     const validationResults: YamlValidationResult[] = [
       validateStepNameUniqueness(yamlDocument),
-      validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
+      validateVariablesInternal(
+        variableItems,
+        workflowGraph,
+        workflowDefinition,
+        yamlDocument,
+        workflows
+      ),
       validateLiquidTemplate(model.getValue()),
       validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
+      validateWorkflowInputsInYaml(workflowInputsItems, workflows, lineCounter),
+      validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
     ].flat();
 
     for (const validationResult of validationResults) {
@@ -142,6 +158,19 @@ export function useYamlValidation(
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
           },
         });
+      } else if (validationResult.owner === 'workflow-output-validation') {
+        // Handle workflow.output validation errors
+        if (validationResult.severity) {
+          markers.push({
+            severity: SEVERITY_MAP[validationResult.severity],
+            message: validationResult.message,
+            startLineNumber: validationResult.startLineNumber,
+            startColumn: validationResult.startColumn,
+            endLineNumber: validationResult.endLineNumber,
+            endColumn: validationResult.endColumn,
+            source: 'workflow-output-validation',
+          });
+        }
       } else if (validationResult.owner === 'liquid-template-validation') {
         markers.push({
           severity: SEVERITY_MAP[validationResult.severity],
@@ -225,6 +254,31 @@ export function useYamlValidation(
               : null,
           },
         });
+      } else if (validationResult.owner === 'workflow-inputs-validation') {
+        markers.push({
+          severity: SEVERITY_MAP[validationResult.severity],
+          message: validationResult.message,
+          startLineNumber: validationResult.startLineNumber,
+          startColumn: validationResult.startColumn,
+          endLineNumber: validationResult.endLineNumber,
+          endColumn: validationResult.endColumn,
+          source: 'workflow-inputs-validation',
+        });
+        decorations.push({
+          range: new monaco.Range(
+            validationResult.startLineNumber,
+            validationResult.startColumn,
+            validationResult.endLineNumber,
+            validationResult.endColumn
+          ),
+          options: {
+            inlineClassName: `template-variable-${validationResult.severity ?? 'valid'}`,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            hoverMessage: validationResult.hoverMessage
+              ? createMarkdownContent(validationResult.hoverMessage)
+              : null,
+          },
+        });
       }
     }
 
@@ -255,6 +309,16 @@ export function useYamlValidation(
       'connector-id-validation',
       markers.filter((m) => m.source === 'connector-id-validation')
     );
+    monaco.editor.setModelMarkers(
+      model,
+      'workflow-inputs-validation',
+      markers.filter((m) => m.source === 'workflow-inputs-validation')
+    );
+    monaco.editor.setModelMarkers(
+      model,
+      'workflow-output-validation',
+      markers.filter((m) => m.source === 'workflow-output-validation')
+    );
     setError(null);
   }, [
     editor,
@@ -265,6 +329,7 @@ export function useYamlValidation(
     application,
     isWorkflowTab,
     connectors?.connectorTypes,
+    workflows,
   ]);
 
   return {

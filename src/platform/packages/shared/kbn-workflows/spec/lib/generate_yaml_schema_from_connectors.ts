@@ -20,6 +20,10 @@ import {
   getParallelStepSchema,
   getWorkflowSettingsSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
+  WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSettingsSchema,
 } from '../schema';
@@ -81,6 +85,10 @@ function createRecursiveStepSchema(
       WaitStepSchema,
       DataSetStepSchema,
       httpSchema,
+      WorkflowExecuteStepSchema,
+      WorkflowExecuteAsyncStepSchema,
+      WorkflowOutputStepSchema,
+      WorkflowFailStepSchema,
       ...connectorSchemas,
     ]);
   });

@@ -54,7 +54,16 @@ steps:
 `.trim();
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.label)).toEqual(
-      expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution', 'inputs'])
+      expect.arrayContaining([
+        'consts',
+        'event',
+        'now',
+        'workflow',
+        'steps',
+        'execution',
+        'inputs',
+        'parent',
+      ])
     );
   });
 
@@ -81,6 +90,8 @@ steps:
         'steps',
         'execution',
         'inputs',
+        'output',
+        'parent',
         'variables',
       ].sort()
     );
@@ -93,7 +104,9 @@ steps:
         '"{{ inputs$0 }}"',
         '"{{ consts$0 }}"',
         '"{{ now$0 }}"',
+        '"{{ parent$0 }}"',
         '"{{ steps$0 }}"',
+        '"{{ output$0 }}"',
         '"{{ variables$0 }}"',
       ].sort()
     );
@@ -121,7 +134,9 @@ steps:
         '{{ inputs$0 }}',
         '{{ consts$0 }}',
         '{{ now$0 }}',
+        '{{ parent$0 }}',
         '{{ steps$0 }}',
+        '{{ output$0 }}',
         '{{ variables$0 }}',
       ].sort()
     );
@@ -142,7 +157,16 @@ steps:
 
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.label)).toEqual(
-      expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution', 'inputs'])
+      expect.arrayContaining([
+        'consts',
+        'event',
+        'now',
+        'workflow',
+        'steps',
+        'execution',
+        'inputs',
+        'parent',
+      ])
     );
     expect(suggestions.map((s) => s.insertText)).toEqual(
       expect.arrayContaining([expect.not.stringMatching(/^"[^"]*$/)])
@@ -438,6 +462,7 @@ steps:
           'steps',
           'execution',
           'inputs',
+          'parent',
         ])
       );
       // Verify that suggestions include curly braces when not already inside braces
@@ -469,6 +494,7 @@ steps:
           'steps',
           'execution',
           'inputs',
+          'parent',
         ])
       );
     });

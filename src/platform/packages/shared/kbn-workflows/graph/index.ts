@@ -44,6 +44,12 @@ export type {
   EnterTimeoutZoneNode,
   ExitTimeoutZoneNode,
   GraphNodeUnion,
+  WorkflowExecuteGraphNode,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNode,
+  WorkflowOutputGraphNodeSchema,
 } from './types';
 
 export {

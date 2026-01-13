@@ -19,7 +19,7 @@ import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import { ExecutionError } from '../utils';
+import { buildStepExecutionId, ExecutionError } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
@@ -204,8 +204,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public setWorkflowError(error: Error | undefined): void {
     const executionError = error ? ExecutionError.fromError(error) : undefined;
+    const serializedError = executionError ? executionError.toSerializableObject() : undefined;
+
     this.workflowExecutionState.updateWorkflowExecution({
-      error: executionError ? executionError.toSerializableObject() : undefined,
+      error: serializedError,
     });
   }
 
@@ -217,6 +219,85 @@ export class WorkflowExecutionRuntimeManager {
       duration:
         new Date(finishedAt).getTime() - new Date(this.workflowExecution.startedAt).getTime(),
     });
+  }
+
+  public setWorkflowStatus(status: ExecutionStatus): void {
+    const finishedAt = new Date().toISOString();
+
+    // Clear nextNodeId to signal that workflow is terminal
+    this.nextNodeId = undefined;
+
+    const update: Partial<EsWorkflowExecution> = {
+      status,
+      currentNodeId: undefined, // Clear the current node to stop execution
+      finishedAt,
+      duration:
+        new Date(finishedAt).getTime() - new Date(this.workflowExecution.startedAt).getTime(),
+    };
+
+    // Preserve the error field if it exists (e.g., from workflow.fail)
+    const currentExecution = this.workflowExecutionState.getWorkflowExecution();
+    if (currentExecution.error) {
+      update.error = currentExecution.error;
+    }
+
+    this.workflowExecutionState.updateWorkflowExecution(update);
+  }
+
+  /**
+   * Completes all ancestor steps in the provided scope stack with the specified status.
+   * This method is used when workflow execution terminates early (e.g., via workflow.output)
+   * while inside nested scopes like foreach loops or if branches.
+   *
+   * @param scopeStack - The scope stack from the step execution runtime
+   * @param executionStatus - The status to set for ancestor steps
+   * @param workflowExecutionId - The workflow execution ID
+   */
+  public completeAncestorSteps(
+    scopeStack: WorkflowScopeStack,
+    executionStatus: ExecutionStatus,
+    workflowExecutionId: string
+  ): void {
+    let currentStack = scopeStack;
+
+    // Walk through the scope stack and mark each ancestor step with the execution status
+    while (!currentStack.isEmpty()) {
+      const scopeData = currentStack.getCurrentScope();
+      if (!scopeData) {
+        break;
+      }
+
+      currentStack = currentStack.exitScope();
+
+      // Build the step execution ID for the ancestor step
+      const ancestorStepExecutionId = buildStepExecutionId(
+        workflowExecutionId,
+        scopeData.stepId,
+        currentStack.stackFrames
+      );
+
+      // Get the existing step execution
+      const existingStepExecution =
+        this.workflowExecutionState.getStepExecution(ancestorStepExecutionId);
+
+      // Only update if the step execution exists and is still running
+      if (existingStepExecution && existingStepExecution.status === ExecutionStatus.RUNNING) {
+        // Update the step execution with the final status
+        this.workflowExecutionState.upsertStep({
+          id: ancestorStepExecutionId,
+          status: executionStatus,
+          finishedAt: new Date().toISOString(),
+        });
+
+        this.workflowLogger?.logInfo(
+          `Completed ancestor step ${scopeData.stepId} with status ${executionStatus}`,
+          {
+            event: { action: 'ancestor-step-completed', outcome: 'success' },
+            tags: ['workflow-output', 'scope-completion'],
+          }
+        );
+      }
+    }
   }
 
   public async start(): Promise<void> {
@@ -384,12 +465,14 @@ export class WorkflowExecutionRuntimeManager {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       currentNodeId: this.nextNodeId,
     };
-    if (!this.nextNodeId) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
-    }
 
-    if (workflowExecution.error) {
+    if (isTerminalStatus(workflowExecution.status)) {
+      workflowExecutionUpdate.status = workflowExecution.status;
+    } else if (workflowExecution.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
+      workflowExecutionUpdate.error = workflowExecution.error;
+    } else if (!this.nextNodeId) {
+      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 
     if (

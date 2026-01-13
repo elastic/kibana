@@ -52,6 +52,24 @@ export interface ConnectorIdLineParseResult extends BaseLineParseResult {
   valueStartIndex: number;
 }
 
+export interface WorkflowLineParseResult extends BaseLineParseResult {
+  matchType: 'workflow-id';
+  match: RegExpMatchArray;
+  valueStartIndex: number;
+}
+
+export interface WorkflowInputsLineParseResult extends BaseLineParseResult {
+  matchType: 'workflow-inputs';
+  match: RegExpMatchArray | null;
+  valueStartIndex?: number;
+}
+
+export interface WorkflowOutputsLineParseResult extends BaseLineParseResult {
+  matchType: 'workflow-outputs';
+  match: RegExpMatchArray | null;
+  valueStartIndex?: number;
+}
+
 export interface TypeLineParseResult extends BaseLineParseResult {
   matchType: 'type';
   match: RegExpMatchArray;
@@ -70,6 +88,9 @@ export type LineParseResult =
   | LiquidLineParseResult
   | LiquidSyntaxLineParseResult
   | ConnectorIdLineParseResult
+  | WorkflowLineParseResult
+  | WorkflowInputsLineParseResult
+  | WorkflowOutputsLineParseResult
   | TypeLineParseResult
   | TimezoneLineParseResult;
 
@@ -111,6 +132,30 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       valueStartIndex: connectorIdMatch.groups.prefix.length + 1,
     };
   }
+
+  const workflowIdMatch = lineUpToCursor.match(/^(?<prefix>\s*workflow-id:)\s*(?<value>.*)$/);
+  if (workflowIdMatch && workflowIdMatch.groups) {
+    const workflowValue = workflowIdMatch.groups?.value.trim() ?? '';
+    return {
+      matchType: 'workflow-id',
+      fullKey: workflowValue,
+      match: workflowIdMatch,
+      valueStartIndex: workflowIdMatch.groups.prefix.length + 1,
+    };
+  }
+
+  // Check for inputs: field in workflow.execute or workflow.executeAsync step
+  const workflowInputsMatch = lineUpToCursor.match(/^(?<prefix>\s*inputs:)\s*(?<value>.*)$/);
+  if (workflowInputsMatch && workflowInputsMatch.groups) {
+    const inputsValue = workflowInputsMatch.groups?.value.trim() ?? '';
+    return {
+      matchType: 'workflow-inputs',
+      fullKey: inputsValue,
+      match: workflowInputsMatch,
+      valueStartIndex: workflowInputsMatch.groups.prefix.length + 1,
+    };
+  }
+
   // Try @ trigger first (e.g., "@const" or "@steps.step1")
   // If we're inside {{ }} braces, extract the path before @ and use it as the context
   const isInsideBraces =
@@ -232,6 +277,31 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       lastPathSegment: getLastPathSegment(lineUpToCursor, pathSegments),
       match: null,
     };
+  }
+
+  // Check for input key-value pairs in inputs section
+  // This must come AFTER other checks like @, foreach-variable, type, etc.
+  // to avoid false matches
+  const workflowInputKeyMatch = lineUpToCursor.match(
+    /^(?<prefix>\s+)(?<key>[a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(?<value>.*)$/
+  );
+  if (workflowInputKeyMatch && workflowInputKeyMatch.groups) {
+    const key = workflowInputKeyMatch.groups.key;
+    // Don't match known keywords that should be handled by other parsers
+    // Use case-insensitive comparison to catch mixed-case variants
+    const knownKeywords = ['foreach', 'type', 'connector-id', 'workflow-id', 'inputs'];
+    if (!knownKeywords.includes(key.toLowerCase())) {
+      const inputValue = workflowInputKeyMatch.groups?.value.trim() ?? '';
+      return {
+        matchType: 'workflow-inputs',
+        fullKey: inputValue || key,
+        match: workflowInputKeyMatch,
+        valueStartIndex:
+          (workflowInputKeyMatch.groups.prefix?.length || 0) +
+          (workflowInputKeyMatch.groups.key?.length || 0) +
+          2, // +2 for ": "
+      };
+    }
   }
 
   // Check for Liquid syntax completion (e.g., "{% ")

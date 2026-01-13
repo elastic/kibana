@@ -823,16 +823,18 @@ export class WorkflowsService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const responseAggs = aggsResponse.aggregations as any;
 
-    fields.forEach((field) => {
-      if (responseAggs[field]) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        result[field] = responseAggs[field].buckets.map((bucket: any) => ({
-          label: bucket.key_as_string,
-          key: bucket.key,
-          doc_count: bucket.doc_count,
-        }));
-      }
-    });
+    if (responseAggs) {
+      fields.forEach((field) => {
+        if (responseAggs[field]) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          result[field] = responseAggs[field].buckets.map((bucket: any) => ({
+            label: bucket.key_as_string,
+            key: bucket.key,
+            doc_count: bucket.doc_count,
+          }));
+        }
+      });
+    }
 
     return result;
   }
