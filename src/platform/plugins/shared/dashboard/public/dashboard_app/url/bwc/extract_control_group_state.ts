@@ -20,20 +20,20 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   pinned_panels?: DashboardState['pinned_panels'];
   autoApplyFilters?: boolean;
 } {
-  let pathToState = 'pinned_panels'; // >=9.3 controls exported under pinned_panels
-  let pathToControls = 'pinned_panels';
+  let pathToState; // >9.3 controls do not have any other state
+  let pathToControls = 'pinned_panels'; // >9.3 controls exported directly under pinned_panels
   if (state.controlGroupState && typeof state.controlGroupState === 'object') {
     // >8.16 to <=8.18 passed control group runtime state in with controlGroupState key
     pathToState = 'controlGroupState';
     pathToControls = 'controlGroupState.initialChildControlState';
   } else if (state.controlGroupInput && typeof state.controlGroupInput === 'object') {
-    // <9.4 controls exported as controlGroupInput
+    // <=9.3 controls exported as controlGroupInput
     pathToState = 'controlGroupInput';
     if ('panels' in state.controlGroupInput) {
       // <8.16 controls exported as panels
       pathToControls = 'controlGroupInput.panels';
     } else if ('controls' in state.controlGroupInput) {
-      // >8.18 to <=9.4 controls exported as controls
+      // >8.18 to <=9.3 controls exported as controls
       pathToControls = 'controlGroupInput.controls';
     }
   }
@@ -79,7 +79,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
       }) as ControlsGroupState;
   }
 
-  const controlState = get(state, pathToState);
+  const controlState = pathToState ? get(state, pathToState) : null;
   let autoApplySelections: boolean | undefined;
   if (controlState !== null && typeof controlState === 'object') {
     let useGlobalFilters = DEFAULT_USE_GLOBAL_FILTERS;

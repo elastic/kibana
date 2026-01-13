@@ -347,8 +347,8 @@ export function initializeLayoutManager(
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
     const existingGridData = layout$.value.panels[idToRemove]?.grid;
-    const existingControlData = layout$.value.pinnedPanels[idToRemove];
-    if (!existingGridData && !existingControlData) throw new PanelNotFoundError();
+    const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
+    if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
 
     removePanel(idToRemove);
     if (existingGridData) {
@@ -359,7 +359,7 @@ export function initializeLayoutManager(
       );
       return newPanel.uuid;
     } else {
-      const prevLayoutState = pick(existingControlData, 'grow', 'width', 'order');
+      const prevLayoutState = pick(existingPinnedPanelData, 'grow', 'width', 'order');
       const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
       return newPanel.uuid;
     }
@@ -575,15 +575,15 @@ export function initializeLayoutManager(
         return Object.keys(layout$.getValue().pinnedPanels).includes(uuid);
       },
       unpinPanel: (uuid: string) => {
-        const controlToUnpin = layout$.getValue().pinnedPanels[uuid];
-        if (!controlToUnpin) return;
+        const panelToUnpin = layout$.getValue().pinnedPanels[uuid];
+        if (!panelToUnpin) return;
 
         const newPinnedPanels = { ...layout$.getValue().pinnedPanels };
         const originalOrder = newPinnedPanels[uuid].order;
         delete newPinnedPanels[uuid];
         // adjust the order of the remaining pinned panels
-        for (const controlId of Object.keys(newPinnedPanels)) {
-          if (newPinnedPanels[controlId].order > originalOrder) newPinnedPanels[controlId].order--;
+        for (const panelId of Object.keys(newPinnedPanels)) {
+          if (newPinnedPanels[panelId].order > originalOrder) newPinnedPanels[panelId].order--;
         }
 
         // place the new control panel in the top left corner, bumping other panels down as necessary
@@ -602,7 +602,7 @@ export function initializeLayoutManager(
           panels: {
             ...otherPanels,
             [uuid]: {
-              type: controlToUnpin.type,
+              type: panelToUnpin.type,
               grid: { ...newPanelPlacement },
             },
           },
