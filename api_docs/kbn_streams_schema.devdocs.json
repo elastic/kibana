@@ -3458,7 +3458,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.TaskStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "TaskStatus",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/tasks/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/streams-schema",
