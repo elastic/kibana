@@ -9,7 +9,12 @@
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '../../types';
-import type { ISuggestionItem, ICommandCallbacks, ESQLColumnData } from './types';
+import type {
+  ISuggestionItem,
+  ICommandCallbacks,
+  ESQLColumnData,
+  ESQLCommandSummary,
+} from './types';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -55,6 +60,7 @@ export interface ICommandMethods<TContext = any> {
    * This is crucial for chaining commands and ensuring type compatibility.
    * @param command The parsed Abstract Syntax Tree.
    * @param previousColumns An array of columns inherited from the preceding command.
+   * @param query The ESQL query string.
    * @param context Additional context (e.g., schema information).
    * @returns An array of column names or more detailed column definitions.
    */
@@ -64,6 +70,14 @@ export interface ICommandMethods<TContext = any> {
     query: string,
     newFields: IAdditionalFields
   ) => Promise<ESQLColumnData[]> | ESQLColumnData[];
+
+  /**
+   * Returns useful information about the command.
+   * @param command The parsed Abstract Syntax Tree.
+   * @param query The ESQL query string.
+   * @returns A summary object containing details about the command.
+   */
+  summary?: (command: ESQLCommand, query: string) => ESQLCommandSummary;
 }
 
 export interface ICommandMetadata {
