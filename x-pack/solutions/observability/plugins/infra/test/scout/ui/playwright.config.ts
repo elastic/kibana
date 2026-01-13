@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export const ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID = '.elser-2-elasticsearch';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
-export const ELSER_ON_EIS_INFERENCE_ENDPOINT_ID = '.elser-2-elastic';
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
