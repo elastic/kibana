@@ -13,7 +13,7 @@ import type {
   Plugin,
 } from '@kbn/core/server';
 import { registerRoutes } from './routes';
-import { registerDataSources } from './data_sources';
+import { registerDataSources } from './sources';
 import type {
   DataConnectorsServerSetup,
   DataConnectorsServerSetupDependencies,
