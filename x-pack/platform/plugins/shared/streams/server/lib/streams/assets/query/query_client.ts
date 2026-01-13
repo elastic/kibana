@@ -157,7 +157,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
 
 function toStorage(name: string, request: QueryLinkRequest): StoredQueryLink {
   const link = toQueryLink(name, request);
-  const { query, ...rest } = link;
+  const { query, stream_name, ...rest } = link;
   return {
     ...rest,
     [STREAM_NAME]: name,

@@ -97,10 +97,9 @@ export const useFetchSignificantEvents = (
       }) => {
         return {
           significant_events: significantEvents.map((series) => {
-            const { occurrences, change_points: changePoints, ...rest } = series;
+            const { occurrences, change_points: changePoints, stream_name, ...rest } = series;
             return {
-              title: rest.title,
-              query: rest,
+              query: name ? rest : { ...rest, stream_name },
               change_points: changePoints,
               occurrences: occurrences.map((occurrence) => ({
                 x: new Date(occurrence.date).getTime(),
