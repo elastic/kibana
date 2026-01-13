@@ -17,6 +17,7 @@ import type {
   CloudConnectedPluginSetup,
   CloudConnectedPluginStart,
   CloudConnectedSetupDeps,
+  CloudConnectedStartDeps,
   CloudConnectConfig,
 } from './types';
 import { CloudConnectTelemetryService } from './telemetry/service';
@@ -25,7 +26,13 @@ import { CloudConnectApiService } from './lib/api';
 export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 
 export class CloudConnectedPlugin
-  implements Plugin<CloudConnectedPluginSetup, CloudConnectedPluginStart, CloudConnectedSetupDeps>
+  implements
+    Plugin<
+      CloudConnectedPluginSetup,
+      CloudConnectedPluginStart,
+      CloudConnectedSetupDeps,
+      CloudConnectedStartDeps
+    >
 {
   private readonly config: CloudConnectConfig;
   private readonly telemetry = new CloudConnectTelemetryService();
@@ -34,7 +41,10 @@ export class CloudConnectedPlugin
     this.config = initializerContext.config.get<CloudConnectConfig>();
   }
 
-  public setup(core: CoreSetup, plugins: CloudConnectedSetupDeps): CloudConnectedPluginSetup {
+  public setup(
+    core: CoreSetup<CloudConnectedStartDeps>,
+    plugins: CloudConnectedSetupDeps
+  ): CloudConnectedPluginSetup {
     // Skip plugin registration if running on Elastic Cloud.
     // This plugin is only for self-managed clusters connecting to Cloud services
     if (plugins.cloud?.isCloudEnabled) {
@@ -57,10 +67,17 @@ export class CloudConnectedPlugin
       euiIconType: 'logoCloud',
       category: DEFAULT_APP_CATEGORIES.management,
       async mount(params: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const apiService = new CloudConnectApiService(coreStart.http);
         const { CloudConnectedApp } = await import('./application/mount_plugin');
-        return CloudConnectedApp(coreStart, params, cloudUrl, telemetryService, apiService);
+        return CloudConnectedApp(
+          coreStart,
+          depsStart,
+          params,
+          cloudUrl,
+          telemetryService,
+          apiService
+        );
       },
     });
 
