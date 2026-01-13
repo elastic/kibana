@@ -34,7 +34,7 @@ const fullNameBackfill: SavedObjectModelDataBackfillFn<PersonV1, PersonV2> = (do
   };
 };
 
-const PERSON_SO_TYPE = createSavedObjectType({
+export const PERSON_SO_TYPE: Partial<SavedObjectsType> = {
   name: 'person-so-type',
   mappings: {
     dynamic: false,
@@ -79,22 +79,4 @@ const PERSON_SO_TYPE = createSavedObjectType({
       },
     },
   },
-});
-
-function createSavedObjectType<T>(properties: Partial<SavedObjectsType<T>>): SavedObjectsType<T> {
-  return {
-    name: 'unnamed',
-    hidden: false,
-    namespaceType: 'agnostic',
-    mappings: {
-      dynamic: false,
-      properties: {
-        foo: { type: 'keyword' },
-        bar: { type: 'boolean' },
-      },
-    },
-    ...properties,
-  };
-}
-
-export const TEST_TYPES: SavedObjectsType<any>[] = [PERSON_SO_TYPE];
+};
