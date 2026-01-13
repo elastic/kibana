@@ -8,5 +8,3 @@
 export { HooksService } from './hooks_service';
 export type { HooksServiceSetup, HooksServiceStart, HookRegistration } from './types';
 export { HookEvent, HookExecutionMode } from './types';
-
-
