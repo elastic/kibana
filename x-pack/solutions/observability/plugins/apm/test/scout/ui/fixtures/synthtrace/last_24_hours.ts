@@ -11,9 +11,7 @@ import {
   SERVICE_SYNTH_GO,
   SERVICE_SYNTH_GO_2,
   SERVICE_SYNTH_NODE_1,
-  SERVICE_CUSTOM_LINK_TEST,
-  CUSTOM_LINK_TEST_ENVIRONMENT,
-  CUSTOM_LINK_TEST_TRANSACTION_NAME,
+  PRODUCTION_ENVIRONMENT,
 } from '../constants';
 
 export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields> {
@@ -23,17 +21,21 @@ export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields>
   const synthGo1 = apm
     .service({
       name: SERVICE_SYNTH_GO,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'go',
     })
     .instance('my-instance');
   const synthGo2 = apm
-    .service({ name: SERVICE_SYNTH_GO_2, environment: 'production', agentName: 'go' })
+    .service({
+      name: SERVICE_SYNTH_GO_2,
+      environment: PRODUCTION_ENVIRONMENT,
+      agentName: 'go',
+    })
     .instance('my-instance');
   const synthNode = apm
     .service({
       name: SERVICE_SYNTH_NODE_1,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'nodejs',
     })
     .instance('my-instance');
@@ -57,33 +59,4 @@ export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields>
         .success(),
     ];
   });
-}
-
-export function customLinkTestService({
-  from,
-  to,
-}: {
-  from: number;
-  to: number;
-}): SynthtraceGenerator<ApmFields> {
-  const range = timerange(from, to);
-
-  const testService = apm
-    .service({
-      name: SERVICE_CUSTOM_LINK_TEST,
-      environment: CUSTOM_LINK_TEST_ENVIRONMENT,
-      agentName: 'nodejs',
-    })
-    .instance('my-instance');
-
-  return range
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp) => [
-      testService
-        .transaction({ transactionName: CUSTOM_LINK_TEST_TRANSACTION_NAME })
-        .timestamp(timestamp)
-        .duration(100)
-        .success(),
-    ]);
 }

@@ -120,8 +120,7 @@ export class TransactionDetailsPage {
    * Get the href attribute of a custom link by its label
    */
   async getCustomLinkHref(label: string): Promise<string | null> {
-    // Find the link by its label text within the popup first 28 chars
-    const link = this.page.getByRole('link', { name: label.substring(0, 28) });
+    const link = this.page.getByRole('link', { name: label });
     await link.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     return await link.getAttribute('href');
   }

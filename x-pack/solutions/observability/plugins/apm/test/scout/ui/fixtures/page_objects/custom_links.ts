@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect, EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
 
@@ -90,48 +90,26 @@ export class CustomLinksPage {
       await addFilterButton.click();
     }
 
-    // Find the newly added select (will be empty) - check from the end
-    const updatedSelects = this.page.locator('select[data-test-subj]');
-    const newEmptySelectIndex = await updatedSelects.evaluateAll((selects) => {
+    // Find the newly added empty select (value is empty or DEFAULT)
+    const allSelects = this.page.locator('select[data-test-subj]');
+    const emptySelectTestSubj = await allSelects.evaluateAll((selects) => {
       for (let i = selects.length - 1; i >= 0; i--) {
         const select = selects[i] as HTMLSelectElement;
         if (select.value === '' || select.value === 'DEFAULT') {
-          return i;
+          return select.getAttribute('data-test-subj');
         }
       }
-      return -1;
+      return null;
     });
-    if (newEmptySelectIndex >= 0) {
-      const selectIds = await updatedSelects.evaluateAll((selects) =>
-        selects.map((s) => s.getAttribute('data-test-subj'))
-      );
-      const newEmptySelectId = selectIds[newEmptySelectIndex];
-      if (newEmptySelectId) {
-        const targetSelect = this.page.getByTestId(newEmptySelectId);
-        await targetSelect.selectOption(key);
-      }
+
+    if (emptySelectTestSubj) {
+      await this.page.getByTestId(emptySelectTestSubj).selectOption(key);
     }
 
-    // Wait for the value input (EuiComboBox) to appear
-    // The value input uses data-test-subj="{key}.value"
     const valueInput = this.page.getByTestId(`${key}.value`);
     await valueInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
-    // EuiComboBox: click to focus, type the value, wait for suggestions, then press Enter
-    await valueInput.click();
-    await expect(this.page.getByRole('listbox')).toBeVisible();
-
-    const button = this.page.getByTestId('apmCustomLinkFiltersSectionButton');
-    const buttonCount = await button.count();
-
-    if (buttonCount > 1) {
-      await this.page.getByTestId(`${key}.value`).getByTestId('comboBoxSearchInput').fill(value);
-      await this.page.getByTestId(`${key}.value`).getByTestId('comboBoxSearchInput').press('Enter');
-      await this.page.getByTestId(`${key}.value`).getByTestId('comboBoxSearchInput').blur();
-    } else {
-      await this.page.getByTestId('comboBoxSearchInput').fill(value);
-      await this.page.getByTestId('comboBoxSearchInput').press('Enter');
-      await this.page.getByTestId('comboBoxSearchInput').blur();
-    }
+    const valueComboBox = new EuiComboBoxWrapper(this.page, { dataTestSubj: `${key}.value` });
+    await valueComboBox.selectSingleOption(value);
   }
 }

@@ -6,12 +6,13 @@
  */
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
+import { PRODUCTION_ENVIRONMENT } from '../constants';
 
 export function generateSpanStacktraceData(): SynthtraceGenerator<ApmFields> {
   const apmGenerated = apm
     .service({
       name: 'apm-generated',
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'java',
     })
     .instance('instance a');
@@ -19,7 +20,7 @@ export function generateSpanStacktraceData(): SynthtraceGenerator<ApmFields> {
   const otelGenerated = apm
     .service({
       name: 'otel-generated',
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'java',
     })
     .instance('instance a');

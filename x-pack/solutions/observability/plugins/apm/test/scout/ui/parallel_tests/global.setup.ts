@@ -16,7 +16,6 @@ import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
-import { customLinkTestService } from '../fixtures/synthtrace/last_24_hours';
 
 globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
 
@@ -72,14 +71,6 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(mobileData);
     log.info('Mobile services data indexed');
-
-    // Generate custom link test service data
-    const customLinkTestData = customLinkTestService({
-      from: new Date(testData.START_DATE).getTime(),
-      to: new Date(testData.END_DATE).getTime(),
-    });
-    await apmSynthtraceEsClient.index(customLinkTestData);
-    log.info('Custom link test service data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();
