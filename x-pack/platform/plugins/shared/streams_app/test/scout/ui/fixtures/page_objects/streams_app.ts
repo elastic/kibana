@@ -568,6 +568,19 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
   }
 
+  async fillGrokPatternDefinitionsInput(value: string) {
+    await this.page.getByRole('button', { name: 'Advanced settings' }).click();
+    // Clean previous content
+    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page
+      .getByTestId('streamsAppPatternDefinitionsEditor')
+      .getByRole('textbox')
+      .fill(value);
+  }
+
   async fillDateProcessorSourceFieldInput(value: string) {
     await this.page.getByLabel('Source Field').fill(value);
   }
