@@ -43,9 +43,8 @@ const timeZone = {
 };
 
 const unmappedFields = {
-  // HD
   name: 'unmapped_fields',
-  type: 'keyword',
+  type: ['keyword'],
   serverlessOnly: false,
   preview: true,
   snapshotOnly: true,
