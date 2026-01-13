@@ -42,8 +42,8 @@ HTTP headers (under Additional settings)
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../images/mcp-params-test.png
-:alt: MCP params test
+:::{image} ../images/mcp-test-connector.png
+:alt: MCP test connector
 :screenshot:
 :::
 
