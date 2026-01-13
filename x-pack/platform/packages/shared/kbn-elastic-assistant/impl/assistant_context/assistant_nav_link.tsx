@@ -27,13 +27,8 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 });
 
 export const AssistantNavLink: FC = () => {
-  const {
-    chrome,
-    showAssistantOverlay,
-    assistantAvailability,
-    openChatTrigger$,
-    completeOpenChat,
-  } = useAssistantContext();
+  const { chrome, showAssistantOverlay, openChatTrigger$, completeOpenChat } =
+    useAssistantContext();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
   // useObserverable would change the order of re-renders that are tested against closely.
@@ -58,7 +53,10 @@ export const AssistantNavLink: FC = () => {
     return () => sub.unsubscribe();
   }, [completeOpenChat, openChatTrigger$, showOverlay]);
 
-  if (!assistantAvailability.hasAssistantPrivilege || !chromeStyle) {
+  // Visibility based on assistantAvailability.hasAssistantPrivilege is now handled
+  // by the enabled$ observable at the nav control registration level.
+  // We still need to wait for chromeStyle to load to determine which button component to use.
+  if (!chromeStyle) {
     return null;
   }
 
