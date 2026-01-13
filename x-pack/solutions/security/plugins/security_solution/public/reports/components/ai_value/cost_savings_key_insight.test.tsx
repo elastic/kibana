@@ -86,35 +86,35 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('CostSavingsKeyInsight', () => {
   const createMockKibanaServices = (overrides: Partial<StartServices> = {}) =>
-  ({
-    services: {
-      http: {
-        fetch: jest.fn(),
-      },
-      notifications: {
-        toasts: {
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
-          addWarning: jest.fn(),
+    ({
+      services: {
+        http: {
+          fetch: jest.fn(),
         },
-      },
-      inference: {
-        chatComplete: jest.fn(),
-      },
-      uiSettings: {
-        get: jest.fn().mockReturnValue('test-connector-id'),
-      },
-      settings: {
-        client: {
-          get: jest.fn(),
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
+          },
         },
+        inference: {
+          chatComplete: jest.fn(),
+        },
+        uiSettings: {
+          get: jest.fn().mockReturnValue('test-connector-id'),
+        },
+        settings: {
+          client: {
+            get: jest.fn(),
+          },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(false),
+        },
+        ...overrides,
       },
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(false),
-      },
-      ...overrides,
-    },
-  } as Partial<StartServices>);
+    } as Partial<StartServices>);
   const chatCompleteResult = 'Test result';
 
   const mockChatComplete = jest.fn().mockResolvedValue({
