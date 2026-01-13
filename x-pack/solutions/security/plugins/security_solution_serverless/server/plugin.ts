@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -85,6 +86,12 @@ export class SecuritySolutionServerlessPlugin
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
     const projectSettings = SECURITY_PROJECT_SETTINGS;
+
+    // This setting is not registered in essentials tier. Adding it to the project settings in essentials tier causes the server to crash.
+    // This is a temporary UI setting to enable workflows, it's planned to be removed on 9.4.0 release.
+    if (this.config.productTypes.some((productType) => productType.product_tier !== 'essentials')) {
+      projectSettings.push(WORKFLOWS_UI_SETTING_ID);
+    }
 
     // Setup project uiSettings whitelisting
     pluginsSetup.serverless.setupProjectSettings(projectSettings);

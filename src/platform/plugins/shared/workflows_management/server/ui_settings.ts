@@ -8,15 +8,34 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
+import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import type { WorkflowsServerPluginSetupDeps } from './types';
 
-export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
+export const registerUISettings = (
+  { uiSettings }: CoreSetup,
+  plugins: WorkflowsServerPluginSetupDeps
+) => {
+  let licenseText = '';
+
+  // Only show license text in non-serverless projects
+  if (plugins.serverless == null) {
+    licenseText = i18n.translate('workflowsManagement.uiSettings.ui.licenseText', {
+      defaultMessage: 'License required: {license}.',
+      values: { license: '<b>enterprise</b>' },
+    });
+  }
+
   uiSettings.register({
     [WORKFLOWS_UI_SETTING_ID]: {
       description: i18n.translate('workflowsManagement.uiSettings.ui.description', {
-        defaultMessage: 'Enables Elastic Workflows and related experiences.',
+        defaultMessage:
+          'Enables Elastic Workflows and related experiences. {licenseText} {learnMoreLink}',
+        values: {
+          licenseText,
+          learnMoreLink: '<a href="https://ela.st/workflows-docs">Learn more</a>.',
+        },
       }),
       name: i18n.translate('workflowsManagement.uiSettings.ui.name', {
         defaultMessage: 'Elastic Workflows',
@@ -24,9 +43,10 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       schema: schema.boolean(),
       value: false,
       readonly: false,
-      technicalPreview: true,
       requiresPageReload: true,
       category: ['general'],
     },
   });
+
+  uiSettings.setAllowlist([WORKFLOWS_UI_SETTING_ID]);
 };
