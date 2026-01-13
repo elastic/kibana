@@ -13,13 +13,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSpacer,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import { FieldNameWithIcon } from '@kbn/react-field';
+import { useEnrichmentFieldSuggestions } from '../../../../../../../hooks/use_field_suggestions';
 import { SortableList } from '../../../../sortable_list';
 import type { ConcatFormState } from '../../../../types';
-import { ProcessorFieldSelector } from '../processor_field_selector';
 
 interface DraggableConcatInputProps {
   id: string;
@@ -27,13 +30,45 @@ interface DraggableConcatInputProps {
 }
 
 const DraggableConcatFieldInput = ({ id, index }: DraggableConcatInputProps) => {
+  const { control } = useFormContext();
+  const fieldSuggestions = useEnrichmentFieldSuggestions();
+  const options = fieldSuggestions.map((suggestion) => ({
+    value: suggestion.name,
+    inputDisplay: <FieldNameWithIcon name={suggestion.name} type={suggestion.type} />,
+  }));
+
   return (
     <EuiDraggable draggableId={id} index={index}>
-      <ProcessorFieldSelector
-        fieldKey={`from.${index}.value`}
-        label={i18n.translate('xpack.streams.draggableConcatFieldInput.fieldLabel', {
-          defaultMessage: 'Field',
-        })}
+      <Controller
+        control={control}
+        name={`from.${index}.value`}
+        rules={{
+          required: {
+            value: true,
+            message: i18n.translate('xpack.streams.draggableConcatFieldInput.fieldRequiredError', {
+              defaultMessage: 'Field is required.',
+            }),
+          },
+        }}
+        render={({ field, fieldState }) => (
+          <EuiFormRow
+            aria-label={i18n.translate('xpack.streams.draggableConcatFieldInput.fieldLabel', {
+              defaultMessage: 'Field',
+            })}
+            isInvalid={fieldState.invalid}
+            error={fieldState.error?.message}
+          >
+            <EuiSuperSelect
+              options={options}
+              valueOfSelected={field.value}
+              onChange={field.onChange}
+              prepend={i18n.translate('xpack.streams.draggableConcatFieldInput.fieldLabel', {
+                defaultMessage: 'Field',
+              })}
+              isInvalid={fieldState.invalid}
+            />
+          </EuiFormRow>
+        )}
       />
     </EuiDraggable>
   );
@@ -64,17 +99,14 @@ const DraggableConcatTextInput = ({ id, index }: DraggableConcatInputProps) => {
           },
         }}
         render={({ field, fieldState }) => (
-          <EuiFormRow
-            label={i18n.translate('xpack.streams.draggableConcatTextInput.textLabel', {
-              defaultMessage: 'Text',
-            })}
-            isInvalid={fieldState.invalid}
-            error={fieldState.error?.message}
-          >
+          <EuiFormRow isInvalid={fieldState.invalid} error={fieldState.error?.message}>
             <EuiFieldText
               value={field.value}
               onChange={field.onChange}
               isInvalid={fieldState.invalid}
+              prepend={i18n.translate('xpack.streams.draggableConcatTextInput.textLabel', {
+                defaultMessage: 'Text',
+              })}
             />
           </EuiFormRow>
         )}
@@ -93,7 +125,7 @@ export const ConcatFromBuilder = () => {
   };
 
   const handleAddText = () => {
-    append({ type: 'literal', value: ' ' });
+    append({ type: 'literal', value: '' });
   };
 
   const handleFromBuilderDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
@@ -111,15 +143,20 @@ export const ConcatFromBuilder = () => {
         )}
       >
         <SortableList onDragItem={handleFromBuilderDrag}>
-          {fields.map((field, index) =>
-            field.type === 'field' ? (
-              <DraggableConcatFieldInput key={field.id} id={field.id} index={index} />
-            ) : (
-              <DraggableConcatTextInput key={field.id} id={field.id} index={index} />
-            )
-          )}
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {fields.map((field, index) => (
+              <EuiFlexItem key={field.id}>
+                {field.type === 'field' ? (
+                  <DraggableConcatFieldInput id={field.id} index={index} />
+                ) : (
+                  <DraggableConcatTextInput id={field.id} index={index} />
+                )}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         </SortableList>
       </EuiFormRow>
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton color="text" iconType="plus" size="s" onClick={handleAddField}>
