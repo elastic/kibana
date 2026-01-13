@@ -1092,6 +1092,7 @@ components:
         - scan
         - runscript
         - cancel
+        - memory-dump
       minLength: 1
       type: string
     Commands:
@@ -1956,7 +1957,7 @@ components:
               oneOf:
                 - properties:
                     type:
-                      description: Kernel level memory dump
+                      description: Kernel-level memory dump
                       enum:
                         - kernel
                       type: string
@@ -1969,7 +1970,7 @@ components:
                       description: The process ID (PID)
                       type: number
                     type:
-                      description: Process level memory dump using a process ID
+                      description: Process-level memory dump using a process ID
                       enum:
                         - process
                       type: string
@@ -1983,7 +1984,7 @@ components:
                       description: The process entity ID
                       type: string
                     type:
-                      description: Process level memory dump using an entity ID
+                      description: Process-level memory dump using an entity ID
                       enum:
                         - process
                       type: string
