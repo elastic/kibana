@@ -242,10 +242,8 @@ export class ReportingAPIClient implements IReportingAPI {
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param
     // to the export API.
-    const browserTimezone: string =
-      this.uiSettings.get('dateFormat:tz') === 'Browser'
-        ? moment.tz.guess()
-        : this.uiSettings.get('dateFormat:tz');
+    const timeZone = this.uiSettings.get('dateFormat:tz');
+    const browserTimezone = moment.tz.zone(timeZone)?.name ?? moment.tz.guess(true);
 
     return {
       browserTimezone,
