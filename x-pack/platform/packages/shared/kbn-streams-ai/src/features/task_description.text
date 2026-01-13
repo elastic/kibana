@@ -20,7 +20,8 @@ Features are stable facts about real system entities (environment, deployment, a
 
 ## Consolidation Strategy
 - **Consolidate** when properties belong to the same entity and appear together in logs
-  - Example: `{name: "cloud_deployment", value: {provider: "aws", region: "eu-west-1"}}` if both appear together
+  - Example: Consolidate cloud provider with other stable deployment identifiers in one feature (see Value vs Meta rules for what belongs in `value` vs `meta`)
+  - Example: `{name: "cloud_deployment", value: {provider: "aws"}, meta: {regions: ["eu-west-1"]}}`
 - **Separate** distinct technologies even if related
   - Example: Separate features for nginx, postgresql, redis (not one combined feature)
 
@@ -40,23 +41,34 @@ The `value` field should contain **stable, low-cardinality properties** that ena
 - Database type (postgresql, mysql)
 - Service names in dependencies
 
+**Heuristics**:
+- Prefer `value` for categorical properties that are expected to have a small set of possible values across many deployments (e.g., provider, runtime, db type).
+- Prefer `meta` for identifiers and “instance-like” values (IDs, hostnames, pod/container names, IPs, URLs/paths, trace/request IDs).
+
 **Use `meta` for**:
 - Availability zones/regions (high cardinality across deployments)
 - Specific API endpoints or HTTP operations (many possible values)
 - Instance IDs, pod names, container IDs
-- Detailed version patches that change frequently
+- Non-semver labels and build metadata attached to versions (e.g., distro codenames, edition labels, build hashes)
 
 **Example**: For a REST API dependency:
 - `value: {source: "api-service", target: "user-service"}` (stable, dedupable)
 - `meta: {endpoints: ["/users", "/users/:id", "/users/:id/profile"]}` (high cardinality)
 
+**Conflict & cardinality rules**:
+- If multiple values are observed for the same property (e.g., multiple versions), prefer the most frequently supported value in `value` and record alternates in `meta.observed_*` along with evidence.
+- Avoid emitting separate features that differ only by high-cardinality metadata. Merge them into one feature and store the varying details in `meta`.
+
 ## Inference Rules
 - Allow **one-level inference** from strong patterns with lower confidence
   - Example: "NullPointerException" in logs → infer `programming_language: java` with confidence 40-60
-  - Must tag inferred features with "inferred" tag
+  - Must tag inferred features with "inferred" tag and explain the inference briefly in `meta.notes`
 - Accept features with confidence ≥ 30 if evidence supports them
 - Extract version numbers when available (important for CVE/vulnerability analysis)
-- **Version formatting**: Record only semantic version numbers, strip codenames and extra labels
+- **Version formatting**:
+  - Prefer normalized numeric versions in `value.version` (e.g., `"11"`, `"11.0"`, `"11.0.2"`)
+  - Strip leading `v` and surrounding text; keep only the numeric portion when possible
+  - If the version contains extra labels (LTS, Enterprise, codenames, build metadata), store the normalized numeric part in `value.version` and store the original in `meta.raw_version`
   - Example: `attributes.host.os.version: 20.04.6 LTS (Focal Fossa)` → record as `version: "20.04.6"`
   - Remove codenames, release names, edition labels (LTS, Enterprise, etc.) from version values
 
@@ -67,9 +79,13 @@ The `value` field should contain **stable, low-cardinality properties** that ena
 - 30-49: Weak inference from patterns (tag as "inferred")
 
 ## Evidence Requirements
-- Provide specific examples from logs (direct quotes or field:value pairs)
+- Provide specific examples from logs (prefer `field.path=value` style; otherwise short direct quotes)
 - Multiple pieces of evidence strengthen confidence
 - Evidence must support the feature claim
+
+**Evidence formatting rules**:
+- Keep each evidence string short and specific; prefer stable field paths and values when present.
+- Provide 2–5 evidence strings per feature (merge/aggregate instead of duplicating many similar lines).
 
 ## Purpose & Downstream Use
 These features will be used as input for another LLM workflow that generates:
@@ -84,6 +100,15 @@ The LLM receives:
 
 ## Output Format
 Return features following the BaseFeature schema structure using the finalize_features tool.
+
+**Output quality requirements**:
+- Deduplicate: do not output multiple features with the same (`type`, `name`, `value`) tuple; merge evidence/tags/meta instead.
+- Prefer fewer, higher-confidence features over many speculative ones.
+- Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `name`).
+
+**Dependency feature anti-spam rules**:
+- Only emit a dependency feature when the logs contain explicit evidence of a relationship (e.g., clear client→server/service or service→database connection).
+- Aggregate many endpoints/operations under a single dependency feature using `meta.endpoints` and cap the list (e.g., max 10; summarize additional entries).
 
 ## Example Format Requirements
 
@@ -101,10 +126,10 @@ Use **full JSON format in code blocks** for examples (not inline shorthand). Eac
 
 ## Examples to Include
 1. Infrastructure feature with clean semantic version (e.g., OS version stripped of codenames)
-2. Infrastructure feature showing value vs meta (e.g., cloud provider in value, availability zones in meta)
+2. Infrastructure feature showing value vs meta (e.g., cloud provider in value, region/availability zones in meta)
 3. Technology feature with version (e.g., log4j with version number, include security note in meta)
-4. Inferred feature with lower confidence (e.g., Java inferred from exceptions, explain inference in meta)
-5. Dependency feature showing value vs meta (e.g., stable service names in value, API endpoints in meta)
+4. Inferred feature with lower confidence (e.g., Java inferred from exceptions, explain inference in meta.notes)
+5. Dependency feature showing value vs meta + aggregation/capping (e.g., stable service names in value, many API endpoints in meta.endpoints)
 
 ## Prompt Structure
 The prompt should follow this structure:
