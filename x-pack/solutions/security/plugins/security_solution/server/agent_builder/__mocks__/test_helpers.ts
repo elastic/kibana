@@ -11,6 +11,16 @@ import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/agent-builder-server/tools';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import type {
+  ModelProvider,
+  ToolProvider,
+  ScopedRunner,
+  ToolResultStore,
+  ToolEventEmitter,
+  ToolPromptManager,
+  ToolStateManager,
+} from '@kbn/agent-builder-server';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 
 /**
  * Creates common mocks for tool tests
@@ -47,6 +57,70 @@ export const setupMockCoreStartServices = (
 };
 
 /**
+ * Creates minimal mocks for ToolHandlerContext fields
+ */
+const createMockModelProvider = (): ModelProvider =>
+  ({
+    getDefaultModel: jest.fn(),
+    getModel: jest.fn(),
+    getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
+  } as unknown as ModelProvider);
+
+const createMockToolProvider = (): ToolProvider =>
+  ({
+    has: jest.fn(),
+    get: jest.fn(),
+    list: jest.fn(),
+  } as unknown as ToolProvider);
+
+const createMockScopedRunner = (): ScopedRunner =>
+  ({
+    runTools: jest.fn(),
+  } as unknown as ScopedRunner);
+
+const createMockToolResultStore = (): ToolResultStore =>
+  ({
+    get: jest.fn(),
+  } as unknown as ToolResultStore);
+
+const createMockToolEventEmitter = (): ToolEventEmitter =>
+  ({
+    reportProgress: jest.fn(),
+  } as unknown as ToolEventEmitter);
+
+const createMockToolPromptManager = (): ToolPromptManager =>
+  ({
+    checkConfirmationStatus: jest.fn(),
+    askForConfirmation: jest.fn(),
+  } as unknown as ToolPromptManager);
+
+const createMockToolStateManager = (): ToolStateManager =>
+  ({
+    getState: jest.fn(),
+    setState: jest.fn(),
+  } as unknown as ToolStateManager);
+
+const createMockAttachmentStateManager = (): AttachmentStateManager =>
+  ({
+    get: jest.fn(),
+    getLatest: jest.fn(),
+    getVersion: jest.fn(),
+    getActive: jest.fn().mockReturnValue([]),
+    getAll: jest.fn().mockReturnValue([]),
+    getDiff: jest.fn(),
+    add: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    restore: jest.fn(),
+    permanentDelete: jest.fn(),
+    rename: jest.fn(),
+    resolveRefs: jest.fn().mockReturnValue([]),
+    getTotalTokenEstimate: jest.fn().mockReturnValue(0),
+    hasChanges: jest.fn().mockReturnValue(false),
+    markClean: jest.fn(),
+  } as unknown as AttachmentStateManager);
+
+/**
  * Creates a tool handler context object
  */
 export const createToolHandlerContext = (
@@ -62,6 +136,14 @@ export const createToolHandlerContext = (
     esClient: mockEsClient,
     logger: mockLogger,
     spaceId: 'default',
+    modelProvider: additionalContext.modelProvider ?? createMockModelProvider(),
+    toolProvider: additionalContext.toolProvider ?? createMockToolProvider(),
+    runner: additionalContext.runner ?? createMockScopedRunner(),
+    resultStore: additionalContext.resultStore ?? createMockToolResultStore(),
+    events: additionalContext.events ?? createMockToolEventEmitter(),
+    prompts: additionalContext.prompts ?? createMockToolPromptManager(),
+    stateManager: additionalContext.stateManager ?? createMockToolStateManager(),
+    attachments: additionalContext.attachments ?? createMockAttachmentStateManager(),
     ...additionalContext,
   };
 };
