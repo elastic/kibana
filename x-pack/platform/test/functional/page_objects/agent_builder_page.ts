@@ -445,6 +445,14 @@ export class AgentBuilderPageObject extends FtrService {
     await this.testSubjects.click('toastCloseButton');
   }
 
+  toolsSearch() {
+    return {
+      type: async (term: string) => {
+        await this.testSubjects.setValue('agentBuilderToolsSearchInput', term);
+      },
+    };
+  }
+
   /*
    * ==========================
    * Agents: creation
