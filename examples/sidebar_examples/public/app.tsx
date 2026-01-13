@@ -31,6 +31,8 @@ export interface Props {}
 export function App({}: Props) {
   const { close, setWidth, open, setParams } = useSidebar();
 
+  // App handlers just for simple demo controls,
+  // For real apps, these handlers would be exposed on plugins contracts or as hooks.
   // Text Input App handlers
   const handleOpenTextApp = () => open(textInputAppId);
   const handleResetTextInput = () =>

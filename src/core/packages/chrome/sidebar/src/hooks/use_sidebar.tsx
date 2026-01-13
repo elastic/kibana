@@ -14,7 +14,7 @@ import { useSidebarService } from '../providers';
 /**
  * Hook based API for interacting with the sidebar state
  */
-export interface UseSidebarResult {
+export interface UseSidebarApi {
   isOpen: boolean;
   open: <TParams = {}>(appId: string, params?: Partial<TParams>) => void;
   close: () => void;
@@ -26,7 +26,7 @@ export interface UseSidebarResult {
 /**
  * React hook for accessing the sidebar state and actions
  */
-export function useSidebar(): UseSidebarResult {
+export function useSidebar(): UseSidebarApi {
   const sidebarService = useSidebarService();
   const sidebar = sidebarService.state;
 
@@ -64,4 +64,31 @@ export function useSidebar(): UseSidebarResult {
 export function useSidebarWidth(): number {
   const sidebar = useSidebarService().state;
   return useObservable(sidebar.width$, sidebar.getWidth());
+}
+
+/**
+ * Hook based API for interacting with a specific sidebar app
+ */
+export interface UseSidebarAppApi<TParams = {}> {
+  open: (params?: Partial<TParams>) => void;
+  setParams: (params: Partial<TParams>) => void;
+}
+
+/**
+ * React hook for accessing actions for a specific sidebar app
+ * @param appId
+ */
+export function useSidebarApp<TParams = {}>(appId: string): UseSidebarAppApi<TParams> {
+  const sidebarService = useSidebarService();
+
+  const open = useCallback(
+    (params?: Partial<TParams>) => sidebarService.state.open<TParams>(appId, params),
+    [sidebarService, appId]
+  );
+  const setParams = useCallback(
+    (params: Partial<TParams>) => sidebarService.appState.setParams<TParams>(appId, params),
+    [sidebarService, appId]
+  );
+
+  return useMemo(() => ({ open, setParams }), [open, setParams]);
 }
