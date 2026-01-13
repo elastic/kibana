@@ -265,6 +265,106 @@ export function reorderSteps(
   }
 }
 
+/**
+ * Reorders steps for drag-and-drop operations by moving a step block directly before, after, or inside a target step.
+ * Supports cross-level moves and nesting items inside condition blocks.
+ * @param stepRefs The flat array of StepActorRef
+ * @param sourceStepId The customIdentifier of the step to move
+ * @param targetStepId The customIdentifier of the target step
+ * @param operation Whether to insert 'before', 'after', or 'inside' the target
+ * @returns A new reordered array of StepActorRef
+ */
+export function reorderStepsByDragDrop(
+  stepRefs: StepActorRef[],
+  sourceStepId: string,
+  targetStepId: string,
+  operation: 'before' | 'after' | 'inside'
+): StepActorRef[] {
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+
+  // Find source and target steps
+  const sourceIndex = stepRefs.findIndex((ref) => ref.id === sourceStepId);
+  const targetIndex = stepRefs.findIndex((ref) => ref.id === targetStepId);
+
+  if (sourceIndex === -1 || targetIndex === -1) {
+    return stepRefs;
+  }
+
+  const sourceStep = steps[sourceIndex];
+  const targetStep = steps[targetIndex];
+
+  // Prevent dropping a step onto itself or its descendants
+  const sourceDescendants = collectDescendantStepIds(steps, sourceStepId);
+  if (sourceDescendants.has(targetStepId)) {
+    return stepRefs;
+  }
+
+  // Collect all descendant IDs for the source block
+  const allSourceBlockIds = new Set([sourceStepId, ...sourceDescendants]);
+
+  // Find the boundaries of the source block
+  const sourceBlockStart = sourceIndex;
+  const lastSourceDescendantId = Array.from(sourceDescendants).pop();
+  const sourceBlockEnd = lastSourceDescendantId
+    ? stepRefs.findIndex((ref) => ref.id === lastSourceDescendantId) + 1
+    : sourceIndex + 1;
+  const sourceBlock = stepRefs.slice(sourceBlockStart, sourceBlockEnd);
+
+  // Remove source block from array
+  const withoutSource = [...stepRefs.slice(0, sourceBlockStart), ...stepRefs.slice(sourceBlockEnd)];
+
+  // Determine new parentId for the source step based on operation
+  let newParentId: string | null;
+  if (operation === 'inside') {
+    // Moving inside the target - target becomes the parent
+    newParentId = targetStepId;
+  } else {
+    // Moving before/after the target - adopt target's parent
+    newParentId = targetStep.parentId ?? null;
+  }
+
+  // We need to update the parentId of the moved step
+  // Note: The step machine will handle the actual update when it processes the change
+  // For now, we just reorder the refs; the parentId update happens via step.change event
+  const updatedSourceBlock = sourceBlock;
+
+  // Find target position in the filtered array
+  const targetIndexInFiltered = withoutSource.findIndex((ref) => ref.id === targetStepId);
+  if (targetIndexInFiltered === -1) {
+    return stepRefs; // Target not found
+  }
+
+  // Calculate insert position
+  let insertIndex: number;
+
+  if (operation === 'inside') {
+    // Insert as first child of target
+    // Find where target's children start (right after target)
+    insertIndex = targetIndexInFiltered + 1;
+  } else if (operation === 'before') {
+    // Insert before target
+    insertIndex = targetIndexInFiltered;
+  } else {
+    // 'after' - insert after target and all its descendants
+    const targetDescendants = collectDescendantStepIds(
+      withoutSource.map((ref) => ref.getSnapshot().context.step),
+      targetStepId
+    );
+    const lastTargetDescendantId = Array.from(targetDescendants).pop();
+    const targetBlockEnd = lastTargetDescendantId
+      ? withoutSource.findIndex((ref) => ref.id === lastTargetDescendantId) + 1
+      : targetIndexInFiltered + 1;
+    insertIndex = targetBlockEnd;
+  }
+
+  // Insert source block at the calculated position
+  return [
+    ...withoutSource.slice(0, insertIndex),
+    ...updatedSourceBlock,
+    ...withoutSource.slice(insertIndex),
+  ];
+}
+
 export type RootLevelMap = Map<string, string>;
 // Maps every step to their corresponding root level step
 export function getRootLevelStepsMap(stepRefs: StepActorRef[]): Map<string, string> {
