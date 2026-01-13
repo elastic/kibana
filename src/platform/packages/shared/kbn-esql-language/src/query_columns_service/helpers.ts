@@ -16,7 +16,11 @@ import {
   Walker,
   type ESQLAstCommand,
 } from '../..';
-import type { ESQLColumnData, ESQLPolicy } from '../commands/registry/types';
+import {
+  UnmappedFieldsTreatment,
+  type ESQLColumnData,
+  type ESQLPolicy,
+} from '../commands/registry/types';
 import type { ESQLAstQueryExpression } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
@@ -88,15 +92,35 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
   return fieldsWithMetadata;
 }
 
-export function getUnmappedFields(
-  commands: ESQLAstCommand[],
-  previousPipeFields: ESQLColumnData[]
-): ESQLColumnData[] {
-  const unmappedFields: ESQLColumnData[] = [];
+/**
+ * After KEEP or STATS, no new unmapped fields are added as they were erased by those destructive commands.
+ */
+export function areNewUnmappedFieldsAllowed(previousCommands: ESQLAstCommand[]): boolean {
+  const allFieldsDestructiveCommands = ['KEEP', 'STATS'];
+  return !previousCommands.find((cmd) =>
+    allFieldsDestructiveCommands.includes(cmd.name.toUpperCase())
+  );
+}
 
+export function getUnmappedFields(
+  command: ESQLAstCommand,
+  previousCommands: ESQLAstCommand[],
+  previousPipeFields: ESQLColumnData[],
+  unmappedFieldsTreatment?: UnmappedFieldsTreatment
+): ESQLColumnData[] {
+  // Not collect unmmaped fields if the treatment is FAIL or undefined
+  if (!unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
+    return [];
+  }
+
+  if (!areNewUnmappedFieldsAllowed(previousCommands)) {
+    return [];
+  }
+
+  const unmappedFields: ESQLColumnData[] = [];
   const columsSet = new Set(previousPipeFields.map((col) => col.name));
 
-  Walker.walk(commands, {
+  Walker.walk(command, {
     visitColumn: (node) => {
       if (
         !columnIsPresent(node, columsSet) &&
@@ -127,7 +151,8 @@ export async function getCurrentQueryAvailableColumns(
   previousPipeFields: ESQLColumnData[],
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
-  originalQueryText: string
+  originalQueryText: string,
+  unmappedFieldsTreatment?: UnmappedFieldsTreatment
 ) {
   if (commands.length === 0) {
     return previousPipeFields;
@@ -145,13 +170,23 @@ export async function getCurrentQueryAvailableColumns(
     fromFrom: getFromFields,
   };
 
+  const previousCommands = commands.slice(0, -1);
+  const unmappedFields = getUnmappedFields(
+    lastCommand,
+    previousCommands,
+    previousPipeFields,
+    unmappedFieldsTreatment
+  );
+
+  const fields = [...previousPipeFields, ...unmappedFields];
+
   if (commandDef?.methods.columnsAfter) {
     return commandDef.methods.columnsAfter(
       lastCommand,
-      previousPipeFields,
+      fields,
       originalQueryText,
       additionalFields
     );
   }
-  return previousPipeFields;
+  return fields;
 }

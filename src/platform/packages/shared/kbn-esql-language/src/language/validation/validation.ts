@@ -12,7 +12,8 @@ import type { ESQLCommand, ESQLMessage } from '../../types';
 import { EsqlQuery } from '../../composer';
 import { esqlCommandRegistry } from '../../commands/registry';
 import { walk } from '../../ast';
-import type { ICommandCallbacks, UnmappedFieldsTreatment } from '../../commands/registry/types';
+import type { ICommandCallbacks } from '../../commands/registry/types';
+import { UnmappedFieldsTreatment } from '../../commands/registry/types';
 import { getMessageFromId } from '../../commands/definitions/utils';
 import type { ESQLAstAllCommands } from '../../types';
 import { QueryColumns } from '../../query_columns_service';
@@ -20,6 +21,7 @@ import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './subqueries';
 import { getUnmappedFieldsTreatment } from '../../commands/definitions/utils/settings';
+import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
 
 /**
  * ES|QL validation public API
@@ -116,7 +118,7 @@ async function validateAst(
     messages.push(...commandMessages);
   }
 
-  const unmappedFieldsTreatment = getUnmappedFieldsTreatment(headerCommands);
+  const unmappedFieldsTreatmentFromHeader = getUnmappedFieldsTreatment(headerCommands);
 
   /**
    * Even though we are validating single commands, we work with subqueries.
@@ -135,7 +137,7 @@ async function validateAst(
 
     const queryColumnsOptions = {
       ...options,
-      unmappedFieldsTreatment,
+      unmappedFieldsTreatment: unmappedFieldsTreatmentFromHeader,
     };
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
       ? await new QueryColumns(
@@ -153,6 +155,10 @@ async function validateAst(
       query: queryString,
       joinIndices: joinIndices?.indices || [],
     };
+
+    const unmappedFieldsTreatment = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
+      ? unmappedFieldsTreatmentFromHeader
+      : UnmappedFieldsTreatment.FAIL;
 
     const commandMessages = validateCommand(
       currentCommand,

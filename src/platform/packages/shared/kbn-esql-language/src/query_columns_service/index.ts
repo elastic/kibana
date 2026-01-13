@@ -9,12 +9,9 @@
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstQueryExpression } from '../..';
 import { BasicPrettyPrinter, SOURCE_COMMANDS } from '../..';
-import {
-  UnmappedFieldsTreatment,
-  type ESQLColumnData,
-  type ESQLPolicy,
-} from '../commands/registry/types';
-import { getCurrentQueryAvailableColumns, getFieldsFromES, getUnmappedFields } from './helpers';
+import type { UnmappedFieldsTreatment } from '../commands/registry/types';
+import { type ESQLColumnData, type ESQLPolicy } from '../commands/registry/types';
+import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -182,7 +179,8 @@ export class QueryColumns {
         fields,
         fetchFields,
         getPolicies,
-        this.originalQueryText
+        this.originalQueryText,
+        this.options?.unmappedFieldsTreatment
       );
     }
 
@@ -206,21 +204,13 @@ export class QueryColumns {
       getPolicies
     );
 
-    const unmappedFieldsTreatment = this.options?.unmappedFieldsTreatment;
-    if (
-      unmappedFieldsTreatment === UnmappedFieldsTreatment.NULLIFY ||
-      unmappedFieldsTreatment === UnmappedFieldsTreatment.LOAD
-    ) {
-      const unmappedFields = getUnmappedFields(query.commands, fieldsAvailableAfterPreviousCommand);
-      fieldsAvailableAfterPreviousCommand.push(...unmappedFields);
-    }
-
     const availableFields = await getCurrentQueryAvailableColumns(
       query.commands,
       fieldsAvailableAfterPreviousCommand,
       fetchFields,
       getPolicies,
-      this.originalQueryText
+      this.originalQueryText,
+      this.options?.unmappedFieldsTreatment
     );
 
     return availableFields;

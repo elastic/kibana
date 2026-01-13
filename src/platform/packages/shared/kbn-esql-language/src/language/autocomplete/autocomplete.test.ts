@@ -1111,10 +1111,21 @@ describe('autocomplete', () => {
         ...getFieldNamesByType('any'),
       ]);
     });
-    describe('should not suggest unmaped field after droping it', () => {
+    describe('unmapped fields should be considered in columnsAfter methods', () => {
+      // Don't suggest unmappedField because it was dropped
       testSuggestions(
         'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  DROP unmappedField | KEEP /',
         [...getFieldNamesByType('any')]
+      );
+      // Suggest only the unmappedField because it was kept
+      testSuggestions(
+        'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  KEEP unmappedField | KEEP /',
+        [{ text: 'unmappedField' }]
+      );
+      // Don't suggest unmappedField because STATS destroyed all fields
+      testSuggestions(
+        'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | STATS col0 = AVG(3) | KEEP /',
+        [{ text: 'col0' }]
       );
     });
   });

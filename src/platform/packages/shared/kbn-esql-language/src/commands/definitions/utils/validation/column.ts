@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types';
+import type { ESQLAstCommand, ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types';
 import { UnmappedFieldsTreatment, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getColumnExists } from '../columns';
@@ -15,25 +15,26 @@ import { isParametrized } from '../../../../ast/is';
 export function validateColumnForCommand(
   column: ESQLColumn | ESQLIdentifier,
   commandName: string,
-  context: ICommandContext
+  context: ICommandContext,
+  ast: ESQLAstCommand[]
 ): ESQLMessage[] {
-  return new ColumnValidator(column, context, commandName).validate();
+  return new ColumnValidator(column, context, commandName, ast).validate();
 }
 
 export class ColumnValidator {
   constructor(
     private readonly column: ESQLColumn | ESQLIdentifier,
     private readonly context: ICommandContext,
-    private readonly commandName: string
+    private readonly commandName: string,
+    private readonly ast: ESQLAstCommand[]
   ) {}
 
   validate(): ESQLMessage[] {
-    const unmappedFieldsTreatment = this.context.unmappedFieldsTreatment;
     if (!this.exists) {
-      if (!unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
-        return [errors.unknownColumn(this.column)];
-      } else {
+      if (this.treatMissingColumnAsUnmapped) {
         return [errors.unmappedColumnWarning(this.column)];
+      } else {
+        return [errors.unknownColumn(this.column)];
       }
     }
 
@@ -49,5 +50,18 @@ export class ColumnValidator {
     }
 
     return true;
+  }
+
+  private get treatMissingColumnAsUnmapped(): boolean {
+    const unmappedFieldsTreatment = this.context.unmappedFieldsTreatment;
+
+    if (!unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
+      return false;
+    }
+    return true;
+    // const parentCommand = this.ast.find((cmd) => within(this.column, cmd));
+    // if (parentCommand) {
+    //   const previousCommands = this.ast.slice(0, this.ast.indexOf(parentCommand));
+    // }
   }
 }

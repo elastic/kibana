@@ -42,7 +42,7 @@ export const validateCommandArguments = (
         if (command.name === 'stats' || command.name === 'inline stats') {
           messages.push(errors.unknownAggFunction(arg));
         } else {
-          messages.push(...validateColumnForCommand(arg, command.name, context));
+          messages.push(...validateColumnForCommand(arg, command.name, context, ast));
         }
       }
     }
