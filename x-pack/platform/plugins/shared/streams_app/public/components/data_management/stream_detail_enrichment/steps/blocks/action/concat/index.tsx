@@ -8,10 +8,20 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { IgnoreFailureToggle } from '../ignore_toggles';
+import { ConcatTargetField } from './concat_target_field';
+import { ConcatFromBuilder } from './concat_from_builder';
+import { ProcessorConditionEditor } from '../processor_condition_editor';
+import { FieldsAccordion } from '../optional_fields_accordion';
 
 export const ConcatProcessorForm = () => {
   return (
     <>
+      <ConcatTargetField />
+      <ConcatFromBuilder />
+      <EuiSpacer size="m" />
+      <FieldsAccordion>
+        <ProcessorConditionEditor />
+      </FieldsAccordion>
       <EuiSpacer size="m" />
       <IgnoreFailureToggle />
     </>
