@@ -890,15 +890,7 @@
         "signature": [
           "<StateType extends object = object>({ uuid, onReset, parentApi, getComparators, defaultState, serializeState, anyStateChange$, checkRefEquality, }: { uuid: string; parentApi: unknown; anyStateChange$: ",
           "Observable",
-          "<void>; serializeState: () => ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<StateType>; getComparators: () => ",
+          "<void>; serializeState: () => StateType; getComparators: () => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -906,15 +898,7 @@
             "section": "def-public.StateComparators",
             "text": "StateComparators"
           },
-          "<StateType>; defaultState?: Partial<StateType> | undefined; onReset: (lastSavedPanelState?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<StateType> | undefined) => ",
+          "<StateType>; defaultState?: Partial<StateType> | undefined; onReset: (lastSavedPanelState?: StateType | undefined) => ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -994,15 +978,7 @@
                 "label": "serializeState",
                 "description": [],
                 "signature": [
-                  "() => ",
-                  {
-                    "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
-                    "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.SerializedPanelState",
-                    "text": "SerializedPanelState"
-                  },
-                  "<StateType>"
+                  "() => StateType"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
                 "deprecated": false,
@@ -1056,15 +1032,7 @@
                 "label": "onReset",
                 "description": [],
                 "signature": [
-                  "(lastSavedPanelState?: ",
-                  {
-                    "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
-                    "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.SerializedPanelState",
-                    "text": "SerializedPanelState"
-                  },
-                  "<StateType> | undefined) => ",
+                  "(lastSavedPanelState?: StateType | undefined) => ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1081,19 +1049,12 @@
                   {
                     "parentPluginId": "@kbn/presentation-containers",
                     "id": "def-public.initializeUnsavedChanges.$1.onReset.$1",
-                    "type": "Object",
+                    "type": "Uncategorized",
                     "tags": [],
                     "label": "lastSavedPanelState",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/presentation-publishing",
-                        "scope": "public",
-                        "docId": "kibKbnPresentationPublishingPluginApi",
-                        "section": "def-public.SerializedPanelState",
-                        "text": "SerializedPanelState"
-                      },
-                      "<StateType> | undefined"
+                      "StateType | undefined"
                     ],
                     "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
                     "deprecated": false,
@@ -1828,15 +1789,7 @@
             "signature": [
               "(childId: string) => ",
               "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<SerializedState> | undefined>"
+              "<SerializedState | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
             "deprecated": false,
@@ -1868,15 +1821,7 @@
             "label": "getLastSavedStateForChild",
             "description": [],
             "signature": [
-              "(childId: string) => ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<SerializedState> | undefined"
+              "(childId: string) => SerializedState | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/last_saved_child_state.ts",
             "deprecated": false,
@@ -1997,15 +1942,7 @@
             "label": "getSerializedStateForChild",
             "description": [],
             "signature": [
-              "(childId: string) => ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<SerializedState> | undefined"
+              "(childId: string) => SerializedState | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
             "deprecated": false,
@@ -2147,7 +2084,7 @@
             "section": "def-public.PanelPackage",
             "text": "PanelPackage"
           },
-          "<SerializedStateType>"
+          "<SerializedState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
@@ -2181,21 +2118,14 @@
           {
             "parentPluginId": "@kbn/presentation-containers",
             "id": "def-public.PanelPackage.serializedState",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "serializedState",
             "description": [
               "\nThe serialized state of this panel."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<SerializedStateType> | undefined"
+              "SerializedState | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
