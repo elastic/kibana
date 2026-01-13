@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { coreServices } from '../../../services/kibana_services';
 import {
   executeCreateTimeSliderControlPanelAction,
@@ -28,23 +29,22 @@ interface Props {
 }
 
 export const useDashboardAddItems = ({ dashboardApi }: Props): AppMenuPopoverItem[] => {
+  const children = useStateFromPublishingSubject(dashboardApi.children$);
   const [canCreateTimeSlider, setCanCreateTimeSlider] = useState(false);
 
   useEffect(() => {
-    const checkCompatibility = () => {
-      isTimeSliderControlCreationCompatible(dashboardApi).then(setCanCreateTimeSlider);
-    };
+    let canceled = false;
 
-    // Check initially
-    checkCompatibility();
-
-    // Re-check when children change
-    const subscription = dashboardApi.children$.subscribe(() => {
-      checkCompatibility();
+    isTimeSliderControlCreationCompatible(dashboardApi).then((next) => {
+      if (!canceled) {
+        setCanCreateTimeSlider(next);
+      }
     });
 
-    return () => subscription.unsubscribe();
-  }, [dashboardApi]);
+    return () => {
+      canceled = true;
+    };
+  }, [children, dashboardApi]);
 
   const openAddPanelFlyout = useCallback(() => {
     openLazyFlyout({
