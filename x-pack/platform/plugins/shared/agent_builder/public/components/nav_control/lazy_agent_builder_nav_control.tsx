@@ -6,10 +6,8 @@
  */
 
 import { dynamic } from '@kbn/shared-ux-utility';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderStartDependencies } from '../../types';
 import type { AgentBuilderPluginStart } from '../../types';
 
@@ -29,29 +27,10 @@ export const AgentBuilderNavControlInitiator = ({
   coreStart,
   pluginsStart,
   agentBuilderService,
-}: AgentBuilderNavControlInitiatorProps) => {
-  const [isAgentsExperience, setIsAgentsExperience] = useState(false);
-
-  useEffect(() => {
-    const sub = coreStart.settings.client
-      .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE)
-      .subscribe((chatExperience) => {
-        setIsAgentsExperience(chatExperience === AIChatExperience.Agent);
-      });
-
-    return () => {
-      sub.unsubscribe();
-    };
-  }, [coreStart.settings.client]);
-
-  if (!isAgentsExperience) {
-    return null;
-  }
-  return (
-    <LazyAgentBuilderNavControlWithProvider
-      coreStart={coreStart}
-      pluginsStart={pluginsStart}
-      agentBuilderService={agentBuilderService}
-    />
-  );
-};
+}: AgentBuilderNavControlInitiatorProps) => (
+  <LazyAgentBuilderNavControlWithProvider
+    coreStart={coreStart}
+    pluginsStart={pluginsStart}
+    agentBuilderService={agentBuilderService}
+  />
+);

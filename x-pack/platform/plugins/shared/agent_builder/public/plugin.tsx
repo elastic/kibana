@@ -17,6 +17,7 @@ import ReactDOM from 'react-dom';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
+import { getIsNavControlVisible$ } from './utils/get_is_nav_control_visible';
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -200,6 +201,8 @@ export class AgentBuilderPlugin
     if (hasAgentBuilder) {
       core.chrome.navControls.registerRight({
         id: 'agentBuilderNavControl',
+        // Only visible when chat experience is set to Agent mode
+        enabled: getIsNavControlVisible$(core),
         mount: (element) => {
           ReactDOM.render(
             <AgentBuilderNavControlInitiator
