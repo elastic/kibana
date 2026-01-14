@@ -23,7 +23,6 @@ import {
   pageChanged,
   pageSizeChanged,
   sortChanged,
-  loadIndices,
   toggleChanged,
   performExtensionAction,
 } from '../../../../store/actions';
@@ -60,9 +59,6 @@ const mapDispatchToProps = (dispatch) => {
     },
     toggleChanged: (toggleName, toggleValue) => {
       dispatch(toggleChanged({ toggleName, toggleValue }));
-    },
-    loadIndices: () => {
-      dispatch(loadIndices());
     },
     performExtensionAction: (requestMethod, successMessage, indexNames) => {
       dispatch(performExtensionAction({ requestMethod, successMessage, indexNames }));

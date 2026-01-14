@@ -11,6 +11,7 @@ import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types'
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
+import { from, Subject, mergeMap } from 'rxjs';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -140,10 +141,19 @@ export async function updateDSFailureStore(
   });
 }
 
-export async function loadIndices() {
+async function internalLoadIndices() {
   const response = await httpService.httpClient.get<any>(`${API_BASE_PATH}/indices`);
-  return response.data ? response.data : response;
+  return (response.data ? response.data : response) as Index[];
 }
+
+export function loadIndices() {
+  internalLoadIndicesSubject.next({});
+}
+
+const internalLoadIndicesSubject = new Subject<{}>();
+export const loadIndices$ = internalLoadIndicesSubject.pipe(
+  mergeMap(() => from(internalLoadIndices()))
+);
 
 export async function reloadIndices(
   indexNames: string[],

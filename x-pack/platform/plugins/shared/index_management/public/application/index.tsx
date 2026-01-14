@@ -20,12 +20,14 @@ import {
   useKibana as useKibanaReactPlugin,
   KibanaRenderContextProvider,
 } from '../shared_imports';
+import { loadIndices$ } from './services/api';
 
 import type { AppDependencies } from './app_context';
 import { AppContextProvider } from './app_context';
 import { App } from './app';
 import { indexManagementStore } from './store';
 import { ComponentTemplatesProvider, MappingsEditorProvider } from './components';
+import { loadIndicesSuccess } from './store/actions/load_indices';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
@@ -80,11 +82,16 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     startServices,
   };
 
+  const store = indexManagementStore(services);
+  loadIndices$.subscribe((indices) => {
+    store.dispatch(loadIndicesSuccess({ indices }));
+  });
+
   return (
     <KibanaRenderContextProvider {...core}>
       <KibanaReactContextProvider>
         <RedirectAppLinks coreStart={core}>
-          <Provider store={indexManagementStore(services)}>
+          <Provider store={store}>
             <AppContextProvider value={{ ...dependencies, overlays }}>
               <MappingsEditorProvider>
                 <ComponentTemplatesProvider value={componentTemplateProviderValues}>

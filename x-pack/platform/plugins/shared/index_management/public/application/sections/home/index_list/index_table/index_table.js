@@ -51,6 +51,7 @@ import { CreateIndexButton } from '../create_index/create_index_button';
 import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_pagination';
 import { DocCountCell } from './doc_count';
 import { docCountApi } from './get_doc_count';
+import { loadIndices } from '../../../../services/api';
 
 const getColumnConfigs = ({
   showIndexStats,
@@ -207,7 +208,7 @@ export class IndexTable extends Component {
   }
 
   componentDidMount() {
-    this.props.loadIndices();
+    loadIndices();
 
     const { filterChanged, pageSizeChanged, pageChanged, toggleNameToVisibleMap, toggleChanged } =
       this.props;

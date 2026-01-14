@@ -30,6 +30,7 @@ import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common
 import { indexModeDescriptions, indexModeLabels } from '../../../../lib/index_mode_labels';
 import { createIndex } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
+import { loadIndices } from '../../../../services/api';
 
 import { isValidIndexName } from './utils';
 
@@ -40,10 +41,9 @@ const INVALID_INDEX_NAME_ERROR = i18n.translate(
 
 export interface CreateIndexModalProps {
   closeModal: () => void;
-  loadIndices: () => void;
 }
 
-export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalProps) => {
+export const CreateIndexModal = ({ closeModal }: CreateIndexModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const [indexName, setIndexName] = useState<string>('');
@@ -65,6 +65,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
           })
         );
         closeModal();
+
         loadIndices();
         return;
       }
@@ -73,7 +74,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
       setIsSaving(false);
       setCreateError(e.message);
     }
-  }, [closeModal, indexMode, indexName, loadIndices]);
+  }, [closeModal, indexMode, indexName]);
 
   const onSave = () => {
     if (isValidIndexName(indexName)) {

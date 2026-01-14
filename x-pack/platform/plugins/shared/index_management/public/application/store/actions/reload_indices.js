@@ -8,8 +8,8 @@
 import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { reloadIndices as request } from '../../services';
-import { loadIndices } from './load_indices';
 import { notificationService } from '../../services/notification';
+import { loadIndices } from '../../services/api';
 
 export const reloadIndicesSuccess = createAction('INDEX_MANAGEMENT_RELOAD_INDICES_SUCCESS');
 export const reloadIndices = (indexNames, options) => async (dispatch) => {
@@ -21,7 +21,7 @@ export const reloadIndices = (indexNames, options) => async (dispatch) => {
     // or the user does not have privileges for one of the indices on the current page,
     // reload the full list
     if (error.status === 404 || error.status === 403) {
-      return dispatch(loadIndices());
+      loadIndices();
     }
     return notificationService.showDangerToast(error.body.message);
   }
