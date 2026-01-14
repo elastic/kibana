@@ -499,6 +499,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       // Validate the Streamlang DSL
       const validationResult = validateStreamlang(this._definition.ingest.processing, {
         reservedFields,
+        streamType: 'wired',
       });
 
       if (!validationResult.isValid) {

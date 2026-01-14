@@ -122,6 +122,7 @@ export const simulateProcessing = async ({
   // Validate the Streamlang DSL before attempting simulation
   const validationResult = validateStreamlang(params.body.processing, {
     reservedFields,
+    streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
   });
 
   if (!validationResult.isValid) {
