@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/connector-schemas'
 tags:
   - plugin
   - prod
