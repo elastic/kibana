@@ -170,6 +170,11 @@ export const internalStateSlice = createSlice({
       }>
     ) => {
       withTab(state, action.payload, (tab) => {
+        if (tab.expandedDoc?.id !== action.payload.expandedDoc?.id) {
+          // Reset the initialDocViewerTabId when changing expandedDoc to a different document
+          tab.initialDocViewerTabId = undefined;
+        }
+
         tab.expandedDoc = action.payload.expandedDoc;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
       });
