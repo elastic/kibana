@@ -27,10 +27,7 @@ export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) 
   */
   if (
     (taskType === 'rerank' && modelId.startsWith('.')) ||
-    ((modelId === 'multilingual-embed-v1' ||
-      modelId === 'rerank-v1' ||
-      modelId === 'jina-embeddings-v3' ||
-      modelId === 'jina-reranker-v2') &&
+    ((modelId === 'multilingual-embed-v1' || modelId === 'rerank-v1') &&
       inferenceId.startsWith('.') &&
       service === ServiceProviderKeys.elastic)
   ) {
