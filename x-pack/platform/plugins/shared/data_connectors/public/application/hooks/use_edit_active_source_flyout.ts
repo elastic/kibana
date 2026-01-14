@@ -63,6 +63,9 @@ export const useEditActiveSourceFlyout = ({
     },
     {
       enabled: isOpen && !!stackConnectorId, // Only fetch when flyout is open and we have an ID
+      staleTime: 0, // Ensure fresh fetch
+      cacheTime: 0, // Clean cache after unmount
+      refetchOnMount: 'always', // Always refetch when component mounts
       onError: (error: Error) => {
         toasts.addError(error, {
           title: i18n.translate('xpack.dataConnectors.hooks.useEditActiveSourceFlyout.loadError', {
@@ -74,8 +77,12 @@ export const useEditActiveSourceFlyout = ({
   );
 
   const openFlyout = useCallback(() => {
+    // Invalidate stack connector cache before opening to ensure fresh data
+    if (stackConnectorId) {
+      queryClient.invalidateQueries(queryKeys.stackConnectors.byId(stackConnectorId));
+    }
     setIsOpen(true);
-  }, []);
+  }, [stackConnectorId, queryClient]);
 
   const closeFlyout = useCallback(() => {
     setIsOpen(false);
@@ -89,8 +96,11 @@ export const useEditActiveSourceFlyout = ({
       });
     },
     onSuccess: (data, variables) => {
-      // Invalidate cache to refresh the table
+      // Invalidate both caches to refresh the table and edit flyout
       queryClient.invalidateQueries(queryKeys.dataConnectors.list());
+      if (stackConnectorId) {
+        queryClient.invalidateQueries(queryKeys.stackConnectors.byId(stackConnectorId));
+      }
 
       toasts.addSuccess(
         i18n.translate('xpack.dataConnectors.hooks.useEditActiveSourceFlyout.updateSuccessText', {
@@ -101,9 +111,8 @@ export const useEditActiveSourceFlyout = ({
         })
       );
 
-      // Success! Call callback and close flyout
+      // Call user callback
       onConnectorUpdated?.();
-      closeFlyout();
     },
     onError: (error: Error) => {
       toasts.addError(error, {
@@ -124,16 +133,18 @@ export const useEditActiveSourceFlyout = ({
         return;
       }
 
-      // If connector name changed, update data connector name
+      // Close flyout immediately to avoid flicker
+      closeFlyout();
+
+      // If connector name changed, update data connector name in background
       if (updatedConnector.name !== activeSource.name) {
         updateDataConnectorMutation.mutate({
           id: activeSource.id,
           name: updatedConnector.name,
         });
       } else {
-        // No name change, just close and call callback
+        // No name change, just call callback
         onConnectorUpdated?.();
-        closeFlyout();
       }
     },
     [activeSource, onConnectorUpdated, closeFlyout, updateDataConnectorMutation]
