@@ -41,6 +41,8 @@ import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_
 import { AgentDetailsJsonFlyout } from '../agent_details_page/components/agent_details_json_flyout';
 import { AgentRollbackModal } from '../components/agent_rollback_modal';
 
+import { AgentPolicyYamlFlyout } from '../../agent_policy/components';
+
 import type { SelectionMode } from './components/types';
 
 import {
@@ -96,6 +98,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   );
   const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
   const [agentToRollback, setAgentToRollback] = useState<Agent | undefined>(undefined);
+  const [agentToViewVersionedPolicyFlyoutOpen, setAgentToViewVersionedPolicyFlyoutOpen] = useState<
+    Agent | undefined
+  >(undefined);
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
 
@@ -226,6 +231,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
         onViewAgentJsonClick={() => setAgentToViewJson(agent)}
         onRollbackClick={() => setAgentToRollback(agent)}
+        onViewVersionedPolicyClick={() => setAgentToViewVersionedPolicyFlyoutOpen(agent)}
       />
     );
   };
@@ -480,6 +486,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <AgentDetailsJsonFlyout
             agent={agentToViewJson}
             onClose={() => setAgentToViewJson(undefined)}
+          />
+        </EuiPortal>
+      )}
+      {agentToViewVersionedPolicyFlyoutOpen && (
+        <EuiPortal>
+          <AgentPolicyYamlFlyout
+            policyId={agentToViewVersionedPolicyFlyoutOpen.policy_id!}
+            onClose={() => setAgentToViewVersionedPolicyFlyoutOpen(undefined)}
           />
         </EuiPortal>
       )}

@@ -709,6 +709,8 @@ export const getFullAgentPolicy: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   if (request.query.kubernetes === true) {
     const agentVersion =
@@ -733,6 +735,19 @@ export const getFullAgentPolicy: FleetRequestHandler<
       });
     }
   } else {
+    if (request.params.agentPolicyId.includes('#')) {
+      // TODO current policy revision that the agent uses
+      const fullAgentConfig = await agentPolicyService.getLatestFleetPolicy(
+        esClient,
+        request.params.agentPolicyId
+      );
+      const body = {
+        item: fullAgentConfig?.data,
+      };
+      return response.ok({
+        body,
+      });
+    }
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
       soClient,
       request.params.agentPolicyId,

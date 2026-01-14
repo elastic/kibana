@@ -43,6 +43,7 @@ export interface SingleAgentMenuCallbacks {
   onUnenrollClick: () => void;
   onUninstallClick: () => void;
   onRollbackClick: () => void;
+  onViewVersionedPolicyClick: () => void;
 }
 
 export interface UseSingleAgentMenuItemsOptions {
@@ -223,6 +224,24 @@ export function useSingleAgentMenuItems({
           },
           'data-test-subj': 'viewAgentDetailsJsonBtn',
         },
+        ...(agent.policy_id?.includes('#')
+          ? [
+              {
+                id: 'view-versioned-policy',
+                name: (
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.viewVersionedPolicyText"
+                    defaultMessage="View version specific policy"
+                  />
+                ),
+                icon: 'code',
+                onClick: () => {
+                  callbacks.onViewVersionedPolicyClick();
+                },
+                'data-test-subj': 'viewVersionedPolicyBtn',
+              },
+            ]
+          : []),
       ],
     };
 

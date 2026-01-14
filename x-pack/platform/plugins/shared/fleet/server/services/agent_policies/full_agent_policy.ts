@@ -77,7 +77,7 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+  options?: { standalone?: boolean; agentPolicy?: AgentPolicy; agentVersion?: string }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
 
@@ -155,7 +155,8 @@ export async function getFullAgentPolicy(
     packageInfoCache,
     getOutputIdForAgentPolicy(dataOutput),
     agentPolicy.namespace,
-    agentPolicy.global_data_tags
+    agentPolicy.global_data_tags,
+    options?.agentVersion
   );
 
   let otelcolConfig;

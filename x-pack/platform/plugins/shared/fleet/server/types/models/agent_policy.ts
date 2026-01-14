@@ -221,6 +221,7 @@ export const AgentPolicyBaseSchema = {
       ),
     ])
   ),
+  has_agent_version_conditions: schema.maybe(schema.boolean()),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {

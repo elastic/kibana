@@ -28,6 +28,8 @@ import {
 import { UninstallCommandFlyout } from '../../../../components';
 import { AgentRollbackModal } from '../../components/agent_rollback_modal';
 
+import { AgentPolicyYamlFlyout } from '../../../agent_policy/components';
+
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
@@ -56,6 +58,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     const [isChangePrivilegeLevelFlyoutOpen, setIsChangePrivilegeLevelFlyoutOpen] = useState(false);
     const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
     const [isRollbackModalOpen, setIsRollbackModalOpen] = useState(false);
+    const [isViewVersionedPolicyFlyoutOpen, setIsViewVersionedPolicyFlyoutOpen] = useState(false);
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const onMenuToggle = useCallback((open: boolean) => {
@@ -87,6 +90,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onUnenrollClick: () => setIsUnenrollModalOpen(true),
         onUninstallClick: () => setIsUninstallCommandFlyoutOpen(true),
         onRollbackClick: () => setIsRollbackModalOpen(true),
+        onViewVersionedPolicyClick: () => setIsViewVersionedPolicyFlyoutOpen(true),
       }),
       [onAddRemoveTagsClick]
     );
@@ -147,6 +151,14 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             <AgentDetailsJsonFlyout
               agent={agent}
               onClose={() => setIsAgentDetailsJsonFlyoutOpen(false)}
+            />
+          </EuiPortal>
+        )}
+        {isViewVersionedPolicyFlyoutOpen && (
+          <EuiPortal>
+            <AgentPolicyYamlFlyout
+              policyId={agent.policy_id!}
+              onClose={() => setIsViewVersionedPolicyFlyoutOpen(false)}
             />
           </EuiPortal>
         )}
