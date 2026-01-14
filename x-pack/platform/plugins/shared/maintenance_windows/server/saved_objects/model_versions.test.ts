@@ -15,7 +15,7 @@
 import { maintenanceWindowModelVersions } from './model_versions';
 import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
 import { transformRRuleToCustomSchedule } from '../routes/schemas/schedule';
-import type { SavedObjectsFullModelVersion } from '@kbn/core/packages/saved-objects/server';
+import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 
 jest.mock('./schema');
 jest.mock('../routes/schemas/schedule');
