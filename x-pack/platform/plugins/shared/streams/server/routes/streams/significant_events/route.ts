@@ -144,7 +144,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
 
     return readSignificantEventsFromAlertsIndices(
       {
-        name,
+        streamNames: [name],
         from,
         to,
         bucketSize,

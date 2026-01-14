@@ -291,7 +291,7 @@ The Elasticsearch test server: http://elastic:changeme@localhost:9220
 To run the API tests for a tool:
 
 ```
-node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.ai_agent.stateful.config.ts --grep="<tool_name>"
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts --grep="<tool_name>"
 ```
 
 The API tests for tools must be added to: `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder/tools/`
