@@ -12,10 +12,10 @@
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
-import { ExecutionError } from '../utils/execution_error/execution_error';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';

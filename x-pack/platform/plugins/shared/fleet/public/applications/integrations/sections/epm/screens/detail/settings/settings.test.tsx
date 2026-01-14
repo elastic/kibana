@@ -29,6 +29,10 @@ jest.mock('../../../../../hooks', () => {
     useUpdatePackageMutation: jest.fn().mockReturnValue({ mutate: jest.fn() }),
     useAuthz: jest.fn(),
     useConfirmForceInstall: jest.fn().mockReturnValue(jest.fn()),
+    useInstallPackage: jest.fn().mockReturnValue(jest.fn()),
+    useRollbackPackage: jest.fn().mockReturnValue(jest.fn()),
+    useGetRollbackAvailableCheck: jest.fn().mockReturnValue({ isAvailable: true, reason: null }),
+    useLicense: jest.fn().mockReturnValue({ isEnterprise: () => true }),
   };
 });
 
@@ -43,8 +47,16 @@ jest.mock('../hooks', () => ({
 
 jest.mock('../../../../../services', () => ({
   ExperimentalFeaturesService: {
-    get: jest.fn().mockReturnValue({ enablePackageRollback: false }),
+    get: jest.fn().mockReturnValue({ enablePackageRollback: true }),
   },
+}));
+
+jest.mock('../../installed_integrations/hooks/use_installed_integrations_actions', () => ({
+  useInstalledIntegrationsActions: jest.fn().mockReturnValue({
+    actions: {
+      bulkRollbackIntegrationsWithConfirmModal: jest.fn(),
+    },
+  }),
 }));
 
 // Import after mocks are defined
@@ -179,6 +191,97 @@ describe('SettingsPage', () => {
       // Should show version info instead of install section
       expect(result.getByText('Installed version')).toBeInTheDocument();
       expect(result.queryByTestId('installPermissionCallout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Reinstall and Rollback button state management', () => {
+    const installedPackageInfo: PackageInfo = {
+      ...basePackageInfo,
+      status: 'installed',
+      installationInfo: {
+        version: '1.3.0',
+        previous_version: '1.2.0',
+        install_source: 'registry',
+        install_status: 'installed',
+        verification_status: 'verified',
+        verification_key_id: null,
+        installed_kibana: [],
+        installed_es: [],
+        type: 'epm-package',
+        name: 'nginx',
+      },
+    } as PackageInfo;
+
+    beforeEach(() => {
+      mockUseAuthz.mockReturnValue({
+        integrations: {
+          installPackages: true,
+          writePackageSettings: true,
+        },
+      });
+    });
+
+    it('should disable Reinstall button when rollback is in progress', () => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.rollingBack,
+        version: '1.3.0',
+      }));
+
+      const result = renderComponent(installedPackageInfo);
+
+      const reinstallButton = result.getByTestId('reinstallButton');
+      expect(reinstallButton).toBeDisabled();
+    });
+
+    it('should disable Rollback button when reinstall is in progress', () => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.reinstalling,
+        version: '1.3.0',
+      }));
+
+      const result = renderComponent(installedPackageInfo);
+
+      const rollbackButton = result.getByTestId('rollbackButton');
+      expect(rollbackButton).toBeDisabled();
+    });
+
+    it('should enable both buttons when no operation is in progress', () => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.installed,
+        version: '1.3.0',
+      }));
+
+      const result = renderComponent(installedPackageInfo);
+
+      const reinstallButton = result.getByTestId('reinstallButton');
+      const rollbackButton = result.getByTestId('rollbackButton');
+
+      expect(reinstallButton).not.toBeDisabled();
+      expect(rollbackButton).not.toBeDisabled();
+    });
+
+    it('should disable Reinstall button when uninstalling is in progress', () => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.uninstalling,
+        version: '1.3.0',
+      }));
+
+      const result = renderComponent(installedPackageInfo);
+
+      const reinstallButton = result.getByTestId('reinstallButton');
+      expect(reinstallButton).toBeDisabled();
+    });
+
+    it('should disable Rollback button when uninstalling is in progress', () => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.uninstalling,
+        version: '1.3.0',
+      }));
+
+      const result = renderComponent(installedPackageInfo);
+
+      const rollbackButton = result.getByTestId('rollbackButton');
+      expect(rollbackButton).toBeDisabled();
     });
   });
 });
