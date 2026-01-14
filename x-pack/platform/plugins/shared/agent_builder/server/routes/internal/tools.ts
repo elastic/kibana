@@ -153,6 +153,7 @@ export function registerInternalToolsRoutes({
       validate: {
         query: schema.object({
           namespace: schema.string(),
+          connector_id: schema.maybe(schema.string()),
         }),
       },
       options: { access: 'internal' },
@@ -161,33 +162,54 @@ export function registerInternalToolsRoutes({
       },
     },
     wrapHandler(async (ctx, request, response) => {
-      const { namespace } = request.query;
+      const { namespace, connector_id: connectorId } = request.query;
       const { tools: toolService } = getInternalServices();
       const registry = await toolService.getRegistry({ request });
 
       const allTools = await registry.list({});
 
-      // Extract namespaces from tool IDs
-      // A tool ID like "mcp.github.tool_name" has namespace "mcp.github"
-      // A tool ID like "mcp.tool_name" has namespace "mcp"
-      // A tool ID like "tool_name" has no namespace
-      const existingNamespaces = new Set<string>();
-      allTools.forEach((tool) => {
+      const toolsInNamespace = allTools.filter((tool) => {
         const lastDotIndex = tool.id.lastIndexOf('.');
         if (lastDotIndex > 0) {
           const toolNamespace = tool.id.substring(0, lastDotIndex);
-          existingNamespaces.add(toolNamespace);
+          return toolNamespace === namespace;
         }
+        return false;
       });
 
-      const conflictingNamespaces = Array.from(existingNamespaces).filter(
-        (existingNamespace) => existingNamespace === namespace
-      );
+      if (toolsInNamespace.length === 0) {
+        return response.ok<ValidateNamespaceResponse>({
+          body: {
+            isValid: true,
+            conflictingNamespaces: [],
+          },
+        });
+      }
+
+      // If connectorId is provided, check if all tools in the namespace belong to the same connector
+      // This allows reusing a namespace for the same MCP server
+      if (connectorId) {
+        const allToolsBelongToSameConnector = toolsInNamespace.every((tool) => {
+          if (isMcpTool(tool)) {
+            return tool.configuration.connector_id === connectorId;
+          }
+          return false;
+        });
+
+        if (allToolsBelongToSameConnector) {
+          return response.ok<ValidateNamespaceResponse>({
+            body: {
+              isValid: true,
+              conflictingNamespaces: [],
+            },
+          });
+        }
+      }
 
       return response.ok<ValidateNamespaceResponse>({
         body: {
-          isValid: conflictingNamespaces.length === 0,
-          conflictingNamespaces,
+          isValid: false,
+          conflictingNamespaces: [namespace],
         },
       });
     })

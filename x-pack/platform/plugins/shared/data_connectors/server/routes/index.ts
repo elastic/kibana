@@ -25,6 +25,7 @@ import type {
   DataConnectorsServerStartDependencies,
 } from '../types';
 import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
+import { API_BASE_PATH } from '../../common/constants';
 
 // Constants
 const DEFAULT_PAGE_SIZE = 100;
@@ -56,15 +57,16 @@ export interface RouteDependencies {
  */
 export function registerRoutes(dependencies: RouteDependencies) {
   const { router, logger, getStartServices, workflowManagement } = dependencies;
+
   // List all data connectors
   router.get(
     {
-      path: '/api/data_connectors',
+      path: API_BASE_PATH,
       validate: false,
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -99,12 +101,12 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Get one data connector by ID
   router.get(
     {
-      path: '/api/data_connectors/{id}',
+      path: `${API_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -131,14 +133,14 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Create data connector
   router.post(
     {
-      path: '/api/data_connectors',
+      path: API_BASE_PATH,
       validate: {
         body: createDataConnectorRequestSchema,
       },
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -146,7 +148,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       const coreContext = await context.core;
 
       try {
-        const { name, type, credentials } = request.body;
+        const { name, type, credentials, stack_connector_id } = request.body;
         const [, { actions, dataSourcesRegistry, agentBuilder }] = await getStartServices();
         const savedObjectsClient = coreContext.savedObjects.client;
 
@@ -157,15 +159,25 @@ export function registerRoutes(dependencies: RouteDependencies) {
           return response.customError({
             statusCode: 400,
             body: {
-              message: `Data connector type "${request.body.type}" not found`,
+              message: `Data connector type "${type}" not found`,
+            },
+          });
+        }
+
+        // Validate required fields based on pattern
+        if (!stack_connector_id && (!name || !credentials)) {
+          return response.badRequest({
+            body: {
+              message: 'name and token are required when stack_connector_id is not provided',
             },
           });
         }
 
         const dataConnectorId = await createConnectorAndRelatedResources({
-          name,
+          name: name || `Data connector for ${type}`,
           type,
-          credentials,
+          credentials: credentials || '',
+          stackConnectorId: stack_connector_id,
           savedObjectsClient,
           request,
           logger,
@@ -188,15 +200,83 @@ export function registerRoutes(dependencies: RouteDependencies) {
     }
   );
 
+  // Update data connector by ID
+  router.put(
+    {
+      path: `${API_BASE_PATH}/{id}`,
+      validate: {
+        params: schema.object({ id: schema.string() }),
+        body: schema.object({
+          name: schema.maybe(schema.string()),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization is delegated to underlying service plugins',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+
+      try {
+        const { name } = request.body;
+        const savedObjectsClient = coreContext.savedObjects.client;
+
+        // Get existing data connector
+        const savedObject: SavedObject<DataConnectorAttributes> = await savedObjectsClient.get(
+          DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          request.params.id
+        );
+
+        // Update only if name is provided
+        if (name !== undefined) {
+          await savedObjectsClient.update<DataConnectorAttributes>(
+            DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+            request.params.id,
+            {
+              ...savedObject.attributes,
+              name,
+              updatedAt: new Date().toISOString(),
+            }
+          );
+
+          // Fetch the updated saved object
+          const updatedSavedObject: SavedObject<DataConnectorAttributes> =
+            await savedObjectsClient.get(DATA_CONNECTOR_SAVED_OBJECT_TYPE, request.params.id);
+
+          logger.info(`Successfully updated data connector ${request.params.id}`);
+          return response.ok({
+            body: convertSOtoAPIResponse(updatedSavedObject),
+          });
+        }
+
+        // If no updates provided, return current state
+        return response.ok({
+          body: convertSOtoAPIResponse(savedObject),
+        });
+      } catch (error) {
+        logger.error(`Failed to update data connector: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to update data connector: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
   // Delete all data connectors
   router.delete(
     {
-      path: '/api/data_connectors',
+      path: API_BASE_PATH,
       validate: false,
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -270,12 +350,12 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Delete data connector by ID
   router.delete(
     {
-      path: '/api/data_connectors/{id}',
+      path: `${API_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },

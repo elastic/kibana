@@ -528,7 +528,7 @@ describe('createStackConnector', () => {
       expect(bulkCreateMcpToolsModule.bulkCreateMcpTools).not.toHaveBeenCalled();
     });
 
-    it('should handle undefined return from getNamedMcpTools', async () => {
+    it('should handle empty array return from getNamedMcpTools', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-10',
         name: '.mcp stack connector',
@@ -541,7 +541,7 @@ describe('createStackConnector', () => {
       };
 
       mockActionsClient.create.mockResolvedValue(mockStackConnector);
-      jest.spyOn(getMcpToolsModule, 'getNamedMcpTools').mockResolvedValue(undefined);
+      jest.spyOn(getMcpToolsModule, 'getNamedMcpTools').mockResolvedValue([]);
 
       const result = await createStackConnector(
         mockRegistry,

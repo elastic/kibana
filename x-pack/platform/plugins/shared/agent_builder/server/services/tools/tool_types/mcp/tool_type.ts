@@ -83,7 +83,7 @@ export async function getNamedMcpTools({
   request: KibanaRequest;
   connectorId: string;
   toolNames: string[];
-}): Promise<Array<{ name: string; description?: string }>> {
+}): Promise<Array<{ name: string; description?: string }> | undefined> {
   try {
     const { tools } = await listMcpTools({ actions, request, connectorId });
     return tools
@@ -91,7 +91,7 @@ export async function getNamedMcpTools({
       .map((tool) => ({ name: tool.name, description: tool.description }));
   } catch (error) {
     // Connector not found or other error - return undefined
-    throw new Error('Error getting MCP tools: ', error);
+    return undefined;
   }
 }
 

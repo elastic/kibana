@@ -117,6 +117,10 @@ async function importMcpTools(
     connectorId,
     toolNames,
   });
+
+  if (mcpTools === undefined) {
+    throw new Error(`No imported connector tools found for ${name}`);
+  }
   try {
     if (mcpTools && mcpTools.length > 0) {
       const { results } = await bulkCreateMcpTools({

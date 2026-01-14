@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type {
   DataConnectorsServerSetupDependencies,
@@ -24,6 +24,7 @@ interface CreateConnectorAndResourcesParams {
   name: string;
   type: string;
   credentials: string;
+  stackConnectorId?: string;
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
   logger: Logger;
@@ -33,8 +34,21 @@ interface CreateConnectorAndResourcesParams {
   agentBuilder: DataConnectorsServerStartDependencies['agentBuilder'];
 }
 
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFD') // split accented characters
+    .replace(/[\u0300-\u036f]/g, '') // remove accents
+    .replace(/[^a-z0-9]+/g, '-') // replace non-alphanumerics with -
+    .replace(/^-+|-+$/g, ''); // trim leading/trailing -
+}
+
 /**
  * Creates data connector Saved Object, as well as all related resources (stack connectors, tools, workflows)
+ *
+ * Supports two patterns:
+ * 1. Reuse existing stack connector: Pass stackConnectorId (e.g., from UI flyout)
+ * 2. Create new stack connector: Omit stackConnectorId, provide name and token
  */
 export async function createConnectorAndRelatedResources(
   params: CreateConnectorAndResourcesParams
@@ -43,6 +57,7 @@ export async function createConnectorAndRelatedResources(
     name,
     type,
     credentials,
+    stackConnectorId,
     savedObjectsClient,
     request,
     logger,
@@ -54,24 +69,37 @@ export async function createConnectorAndRelatedResources(
 
   const workflowIds: string[] = [];
   const toolIds: string[] = [];
-  const toolRegistry = await agentBuilder.tools.getRegistry({ request });
-  const stackConnectorConfig = dataConnectorTypeDef.stackConnector;
-  const stackConnector: ActionResult = await createStackConnector(
-    toolRegistry,
-    actions,
-    request,
-    stackConnectorConfig,
-    name,
-    toolIds,
-    credentials,
-    logger
-  );
 
-  logger.info(`Imported tools in createConnectorAndRelatedResources: ${JSON.stringify(toolIds)}`);
+  let finalStackConnectorId: string;
+
+  // Pattern 1: Reuse existing stack connector (from flyout)
+  if (stackConnectorId) {
+    logger.info(`Reusing existing stack connector: ${stackConnectorId}`);
+    finalStackConnectorId = stackConnectorId;
+  }
+  // Pattern 2: Create new stack connector (direct API call)
+  else {
+    const toolRegistry = await agentBuilder.tools.getRegistry({ request });
+    const stackConnectorConfig = dataConnectorTypeDef.stackConnector;
+    const stackConnector: ActionResult = await createStackConnector(
+      toolRegistry,
+      actions,
+      request,
+      stackConnectorConfig,
+      name,
+      toolIds,
+      credentials,
+      logger
+    );
+
+    logger.info(`Imported tools in createConnectorAndRelatedResources: ${JSON.stringify(toolIds)}`);
+    finalStackConnectorId = stackConnector.id;
+  }
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
-  const workflowInfos = dataConnectorTypeDef.generateWorkflows(stackConnector.id);
+  const workflowInfos = dataConnectorTypeDef.generateWorkflows(finalStackConnectorId, name);
+  const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data connector '${name}'`);
 
@@ -86,7 +114,7 @@ export async function createConnectorAndRelatedResources(
 
     if (workflowInfo.shouldGenerateABTool) {
       const tool = await toolRegistry.create({
-        id: `${type}-${workflow.id}`,
+        id: `${type}.${slugify(workflow.name)}`,
         type: ToolType.workflow,
         description: `Workflow tool for ${type} data connector`,
         tags: ['data-connector', type],
@@ -101,15 +129,15 @@ export async function createConnectorAndRelatedResources(
 
   // Create the data connector saved object
   const now = new Date().toISOString();
-  logger.info(`Creating ${DATA_CONNECTOR_SAVED_OBJECT_TYPE} SO at ${now}`);
   const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
     name,
     type,
+    config: {},
     createdAt: now,
     updatedAt: now,
     workflowIds,
     toolIds,
-    kscIds: [stackConnector.id],
+    kscIds: [finalStackConnectorId],
   });
 
   return savedObject.id;

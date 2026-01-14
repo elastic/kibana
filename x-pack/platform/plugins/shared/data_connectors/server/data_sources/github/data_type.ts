@@ -6,9 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
-import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
 import { MCPAuthType } from '@kbn/connector-schemas/mcp';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
+import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin';
+import {
+  generateGithubSearchIssuesWorkflow,
+  generateGithubSearchCodeWorkflow,
+  generateGithubSearchPullRequestsWorkflow,
+  generateGithubSearchRepositoriesWorkflow,
+  generateGithubSearchUsersWorkflow,
+} from './workflows';
 
 export const githubDataSource: DataTypeDefinition = {
   id: 'github',
@@ -51,8 +58,28 @@ export const githubDataSource: DataTypeDefinition = {
     ],
   },
 
-  // TODO: Implement searching workflows once we have a way to call a mcp connector tool in a workflow
-  generateWorkflows(stackConnectorId: string) {
-    return [];
+  generateWorkflows(stackConnectorId: string, stackConnectorName: string) {
+    return [
+      {
+        content: generateGithubSearchIssuesWorkflow(stackConnectorId, stackConnectorName),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubSearchCodeWorkflow(stackConnectorId, stackConnectorName),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubSearchPullRequestsWorkflow(stackConnectorId, stackConnectorName),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubSearchRepositoriesWorkflow(stackConnectorId, stackConnectorName),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGithubSearchUsersWorkflow(stackConnectorId, stackConnectorName),
+        shouldGenerateABTool: true,
+      },
+    ];
   },
 };

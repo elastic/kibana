@@ -42,6 +42,7 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
+  ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
@@ -75,6 +76,7 @@ import { AppMenuBar } from './ui/project/app_menu';
 import { GridLayoutProjectSideNav } from './ui/project/sidenav/grid_layout_sidenav';
 import { FixedLayoutProjectSideNav } from './ui/project/sidenav/fixed_layout_sidenav';
 import type { NavigationProps } from './ui/project/sidenav/types';
+import { HeaderBreadcrumbsBadges } from './ui/header/header_breadcrumbs_badges';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -210,6 +212,7 @@ export class ChromeService {
     const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
       []
     );
+    const breadcrumbsBadges$ = new BehaviorSubject<ChromeBreadcrumbsBadge[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
@@ -280,6 +283,7 @@ export class ChromeService {
       breadcrumbs$.next([]);
       badge$.next(undefined);
       appMenu$.next(undefined);
+      breadcrumbsBadges$.next([]);
       docTitle.reset();
     });
 
@@ -383,7 +387,7 @@ export class ChromeService {
         badge$={badge$.pipe(takeUntil(this.stop$))}
         basePath={http.basePath}
         breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
+        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensionsWithBadges$}
         customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
         kibanaDocLink={docLinks.links.kibana.guide}
         docLinks={docLinks}
@@ -404,6 +408,24 @@ export class ChromeService {
         appMenu$={appMenu$.pipe(takeUntil(this.stop$))}
       />
     );
+
+    const breadcrumbsAppendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]> =
+      combineLatest([breadcrumbsAppendExtensions$, breadcrumbsBadges$]).pipe(
+        map(([extensions, badges]) => {
+          if (badges.length === 0) {
+            return extensions;
+          }
+          return [
+            ...extensions,
+            {
+              content: mountReactNode(
+                <HeaderBreadcrumbsBadges badges={badges} isFirst={extensions.length === 0} />
+              ),
+            },
+          ];
+        }),
+        takeUntil(this.stop$)
+      );
 
     // create observables once here to avoid re-renders, TODO: do it for everything else
     const navLinks$ = navLinks.getNavLinks$();
@@ -464,7 +486,7 @@ export class ChromeService {
         actionMenu$={includeAppMenu ? application.currentActionMenu$ : null}
         appMenu$={includeAppMenu ? appMenu$.pipe(takeUntil(this.stop$)) : null}
         breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
-        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
+        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensionsWithBadges$}
         customBranding$={customBranding$}
         helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
         helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
@@ -630,6 +652,10 @@ export class ChromeService {
               .filter((ext) => ext !== breadcrumbsAppendExtension)
           );
         };
+      },
+
+      setBreadcrumbsBadges: (badges: ChromeBreadcrumbsBadge[]) => {
+        breadcrumbsBadges$.next(badges);
       },
 
       getGlobalHelpExtensionMenuLinks$: () => globalHelpExtensionMenuLinks$.asObservable(),
