@@ -16,6 +16,7 @@
 // Case Management:
 // * Create case (operationId: createCaseDefaultSpace)
 // * Update case (operationId: updateCaseDefaultSpace)
+// This sample steps is used to test validation in generateYamlSchemaFromConnectors.kibana.test.ts and getWorkflowJsonSchema.kibana.test.ts
 export const KIBANA_SAMPLE_STEPS = [
   {
     name: 'set_alerts_status_by_ids',
@@ -98,6 +99,39 @@ export const KIBANA_SAMPLE_STEPS = [
           description: 'New Description',
         },
       ],
+    },
+  },
+  {
+    name: 'get_case',
+    type: 'kibana.getCaseDefaultSpace',
+    with: {
+      caseId: '123',
+      includeComments: true,
+    },
+  },
+  {
+    name: 'add_case_comment_alert',
+    type: 'kibana.addCaseCommentDefaultSpace',
+    with: {
+      caseId: '123',
+      alertId: 'alert-123',
+      index: '.alerts-security.alerts-default',
+      owner: 'securitySolution',
+      rule: {
+        id: 'rule-123',
+        name: 'Test Rule',
+      },
+      type: 'alert',
+    },
+  },
+  {
+    name: 'add_case_comment_user',
+    type: 'kibana.addCaseCommentDefaultSpace',
+    with: {
+      caseId: '123',
+      comment: 'This is a user comment on the case',
+      owner: 'securitySolution',
+      type: 'user',
     },
   },
 ];

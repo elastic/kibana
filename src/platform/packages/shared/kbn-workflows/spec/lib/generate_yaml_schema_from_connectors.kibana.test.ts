@@ -12,10 +12,18 @@ import { KIBANA_SAMPLE_STEPS } from './samples';
 import { generateYamlSchemaFromConnectors, getKibanaConnectors } from '../..';
 
 describe('generateYamlSchemaFromConnectors / kibana connectors', () => {
+  let availableKibanaTypes: string[];
   let workflowSchema: z.ZodType;
 
   beforeAll(() => {
-    workflowSchema = generateYamlSchemaFromConnectors(getKibanaConnectors());
+    const connectors = getKibanaConnectors();
+    availableKibanaTypes = connectors.map((connector) => connector.type);
+    workflowSchema = generateYamlSchemaFromConnectors(connectors);
+  });
+
+  it('there should be a sample for each available kibana type', () => {
+    const allReferencedTypes = Array.from(new Set(KIBANA_SAMPLE_STEPS.map((step) => step.type)));
+    expect(allReferencedTypes.sort()).toEqual(availableKibanaTypes.sort());
   });
 
   it('should generate a valid YAML schema from connectors', () => {
