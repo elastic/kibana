@@ -33,21 +33,11 @@ export const generateDoc = async ({
 }) => {
   const filesToWrite: FileToWrite[] = [];
 
-  // Reduce concurrency to avoid hitting rate limits (429 errors)
-  // Lower concurrency = fewer simultaneous requests = less chance of rate limits
-  const limiter = pLimit(3);
+  const limiter = pLimit(10);
 
-  // Configure retry logic to handle 429 (Too Many Requests) errors
-  // 429 errors are retryable and will be handled with exponential backoff
   const callOutput = bindOutput({
     connectorId: inferenceClient.getConnectorId(),
     output: inferenceClient.output,
-    maxRetries: 5, // Retry up to 5 times for rate limit errors
-    retryConfiguration: {
-      retryOn: 'auto', // Will retry 429 errors (not in STATUS_NO_RETRY list)
-      initialDelay: 2000, // Start with 2 second delay
-      backoffMultiplier: 2, // Double the delay on each retry
-    },
   });
 
   const documentation = documentationForFunctionRewrite(extraction);

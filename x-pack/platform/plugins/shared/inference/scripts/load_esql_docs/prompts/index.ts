@@ -8,4 +8,3 @@
 export { createDocumentationPagePrompt } from './create_documentation_page';
 export { rewriteFunctionPagePrompt } from './rewrite_function_page';
 export { convertToMarkdownPrompt } from './convert_to_markdown';
-export { enrichDocumentationPrompt } from './enrich_documentation';

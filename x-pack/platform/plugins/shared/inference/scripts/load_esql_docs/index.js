@@ -7,4 +7,4 @@
 
 require('@kbn/babel-register').install();
 
-require('./generate_esql_docs');
+require('./load_esql_docs');
