@@ -10,6 +10,8 @@
 import type { InferenceIdItem, YamlValidationResult } from '../model/types';
 import type { InferenceEndpoint } from '../../../entities/workflows/store/workflow_detail/types';
 
+const VALIDATION_OWNER = 'inference-id-validation';
+
 export function validateInferenceIds(
   inferenceIdItems: InferenceIdItem[],
   inferenceEndpoints: InferenceEndpoint[] | null
@@ -38,7 +40,7 @@ export function validateInferenceIds(
         id: inferenceIdItem.id,
         severity: 'error',
         message: errorMessage,
-        owner: 'inference-id-validation',
+        owner: VALIDATION_OWNER,
         startLineNumber: inferenceIdItem.startLineNumber,
         startColumn: inferenceIdItem.startColumn,
         endLineNumber: inferenceIdItem.endLineNumber,
@@ -51,7 +53,7 @@ export function validateInferenceIds(
         id: inferenceIdItem.id,
         severity: null,
         message: null,
-        owner: 'inference-id-validation',
+        owner: VALIDATION_OWNER,
         startLineNumber: inferenceIdItem.startLineNumber,
         startColumn: inferenceIdItem.startColumn,
         endLineNumber: inferenceIdItem.endLineNumber,
