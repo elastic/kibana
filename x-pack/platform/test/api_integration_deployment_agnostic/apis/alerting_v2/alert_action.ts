@@ -23,13 +23,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Alert Action API', function () {
     let roleAuthc: RoleCredentials;
     let alertEvent: ReturnType<typeof createAlertEvent>;
-    let alertTransition: ReturnType<typeof createAlertTransition>;
+    let alertTransitions: ReturnType<typeof createAlertTransition>[];
+
+    function getLatestTransition() {
+      return alertTransitions[alertTransitions.length - 1];
+    }
 
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
       alertEvent = createAlertEvent();
-      alertTransition = createAlertTransition();
+      alertTransitions = [
+        createAlertTransition({
+          episode_id: 'episode-1',
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+        }),
+        createAlertTransition({
+          episode_id: 'episode-2',
+          '@timestamp': '2024-01-02T00:00:00.000Z',
+        }),
+        createAlertTransition({
+          episode_id: 'episode-3',
+          '@timestamp': '2024-01-03T00:00:00.000Z',
+        }),
+      ];
 
       await Promise.all([
         esClient.index({
@@ -37,11 +54,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           document: alertEvent,
           refresh: 'wait_for',
         }),
-        esClient.index({
-          index: ALERTS_TRANSITIONS_INDEX,
-          document: alertTransition,
-          refresh: 'wait_for',
-        }),
+        ...alertTransitions.map((transition) =>
+          esClient.index({
+            index: ALERTS_TRANSITIONS_INDEX,
+            document: transition,
+            refresh: 'wait_for',
+          })
+        ),
       ]);
     });
 
@@ -102,7 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(action).to.be.ok();
       expect(action!.alert_series_id).to.be('test-alert-series-id');
       expect(action!.action_type).to.be('ack');
-      expect(action!.episode_id).to.be(alertTransition.episode_id);
+      expect(action!.episode_id).to.be(getLatestTransition().episode_id);
       expect(action!.rule_id).to.be(alertEvent['rule.id']);
       expect(action!.last_series_event_timestamp).to.be(alertEvent['@timestamp']);
     });
@@ -120,7 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(action).to.be.ok();
       expect(action!.alert_series_id).to.be('test-alert-series-id');
       expect(action!.action_type).to.be('unack');
-      expect(action!.episode_id).to.be(alertTransition.episode_id);
+      expect(action!.episode_id).to.be(getLatestTransition().episode_id);
     });
 
     it('should return 204 for tag action with tags and write action document', async () => {
@@ -258,19 +277,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should filter by episode_id when provided in request body', async () => {
-      const secondTransition = createAlertTransition({ episode_id: 'second-episode-id' });
-      await esClient.index({
-        index: ALERTS_TRANSITIONS_INDEX,
-        document: secondTransition,
-        refresh: 'wait_for',
-      });
-
-      // Send action with specific episode_id (from the first transition)
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ action_type: 'ack', episode_id: 'test-episode-id' });
+        .send({ action_type: 'ack', episode_id: 'episode-1' });
 
       expect(response.status).to.be(204);
 
@@ -278,8 +289,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(action).to.be.ok();
       expect(action!.alert_series_id).to.be('test-alert-series-id');
       expect(action!.action_type).to.be('ack');
-      // Verify the action uses the episode_id from the first transition, not the second latest one
-      expect(action!.episode_id).to.be('test-episode-id');
+      // Verify the action uses episode_id from the specified (oldest) transition, not the latest
+      expect(action!.episode_id).to.be('episode-1');
     });
   });
 }
