@@ -633,6 +633,6 @@ export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
 export const BaseSerializedErrorSchema = z.object({
   type: z.string(),
   message: z.string(),
-  details: z.any().optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
