@@ -49,13 +49,15 @@ You can test connectors as you’re creating or editing the connector in {{kib}}
 
 MCP connectors offer three actions:
 
-test
+`test`
 :   Test the connection to the remote MCP server with any auth that was provided.
 
-listTools
-:   Call the MCP server's listTools endpoint. Returns a list of tools and their input and output schemas.
+`listTools`
+:   Call the MCP server's `listTools` endpoint. Returns a list of tools and their input and output schemas.
 
-callTool
+`callTool`
 :   Call a specific MCP server tool.
 
-Be sure to call listTools first to understand how to correctly call an MCP server's tools before using the callTool action. 
+:::{tip)
+Call `listTools` first to understand how to correctly call an MCP server's tools, before using the `callTool` action. 
+:::
