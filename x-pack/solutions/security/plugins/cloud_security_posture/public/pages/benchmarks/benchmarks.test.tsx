@@ -142,7 +142,7 @@ describe('<Benchmarks />', () => {
         fleet: {
           authz: {
             integrations: {
-              read: false,
+              canInstallPackages: false,
             },
           },
         },

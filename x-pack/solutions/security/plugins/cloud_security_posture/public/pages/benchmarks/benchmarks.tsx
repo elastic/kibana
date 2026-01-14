@@ -44,7 +44,8 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 const AddCisIntegrationButton = () => {
   const { http, fleet } = useKibana().services;
-  const canReadFleet = fleet?.authz?.integrations.all || fleet?.authz?.integrations.read;
+  const canInstallPackages =
+    fleet?.authz?.integrations.all || fleet?.authz?.integrations.installPackages;
 
   const integrationsPath = pagePathGetters
     .integrations_all({
@@ -52,7 +53,7 @@ const AddCisIntegrationButton = () => {
     })
     .join('');
 
-  return canReadFleet ? (
+  return canInstallPackages ? (
     <EuiButton
       data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
       fill
