@@ -12,18 +12,26 @@ import type { ResourceManager } from '../lib/services/resource_service/resource_
 import type { ResourceDefinition } from './types';
 import { getAlertTransitionsResourceDefinition } from './alert_transitions';
 import { getAlertActionsResourceDefinition } from './alert_actions';
+import type { LoggerService } from '../lib/services/logger_service/logger_service';
 
 export interface RegisterResourcesOptions {
   resourceManager: ResourceManager;
   esClient: ElasticsearchClient;
+  logger: LoggerService;
 }
 
-export function registerResources({ resourceManager, esClient }: RegisterResourcesOptions): void {
+export function initializeResources({
+  resourceManager,
+  esClient,
+  logger,
+}: RegisterResourcesOptions): void {
   for (const resourceDefinition of getDataStreamResourceDefinitions()) {
-    const initializer = new ResourceInitializer(esClient, resourceDefinition);
+    const initializer = new ResourceInitializer(logger, esClient, resourceDefinition);
 
     resourceManager.registerResource(resourceDefinition.key, initializer);
   }
+
+  resourceManager.startInitialization();
 }
 
 function getDataStreamResourceDefinitions(): ResourceDefinition[] {

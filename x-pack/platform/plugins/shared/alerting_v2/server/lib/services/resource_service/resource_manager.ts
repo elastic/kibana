@@ -14,7 +14,7 @@ import { RetryServiceToken } from '../retry_service/tokens';
 
 interface ResourceState {
   initializer?: IResourceInitializer;
-  promise?: Promise<void>;
+  initializationPromise?: Promise<void>;
   error?: Error;
   status: 'not_started' | 'pending' | 'ready' | 'failed';
 }
@@ -67,7 +67,7 @@ export class ResourceManager {
       // Fire-and-forget: initialization errors must NOT become unhandled rejections
       // (which would crash Kibana). The error is still stored on the resource state,
       // and consumers will fail fast when calling `waitUntilReady()` / `ensureResourceReady()`.
-      void this.startResource(key).catch(() => {
+      void this.initResource(key).catch(() => {
         this.logger.debug({
           message: `ResourceManager: Initialization for resource [${key}] failed`,
         });
@@ -97,10 +97,10 @@ export class ResourceManager {
    * If the resource permanently fails (even after retries), this rejects quickly for all callers.
    */
   public async ensureResourceReady(key: string): Promise<void> {
-    await this.startResource(key);
+    await this.initResource(key);
   }
 
-  private async startResource(key: string): Promise<void> {
+  private async initResource(key: string): Promise<void> {
     const state = this.resources.get(key);
 
     if (!state?.initializer) {
@@ -117,14 +117,14 @@ export class ResourceManager {
       throw err;
     }
 
-    if (state.status === 'pending' && state.promise) {
-      await state.promise;
+    if (state.status === 'pending' && state.initializationPromise) {
+      await state.initializationPromise;
       return;
     }
 
     state.status = 'pending';
 
-    state.promise = this.retryService
+    state.initializationPromise = this.retryService
       .retry(() => state.initializer!.initialize())
       .then(() => {
         state.status = 'ready';
@@ -143,6 +143,6 @@ export class ResourceManager {
         throw state.error;
       });
 
-    await state.promise;
+    await state.initializationPromise;
   }
 }

@@ -20,6 +20,7 @@ import {
 } from '../lib/services/storage_service/tokens';
 import type { AlertingServerStartDependencies } from '../types';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
+import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
@@ -28,6 +29,21 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(ResourceManager).toSelf().inSingletonScope();
+
+  bind(EsServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const elasticsearch = get(CoreStart('elasticsearch'));
+      return elasticsearch.client.asInternalUser;
+    })
+    .inSingletonScope();
+
+  bind(EsServiceScopedToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const elasticsearch = get(CoreStart('elasticsearch'));
+      return elasticsearch.client.asScoped(request).asCurrentUser;
+    })
+    .inRequestScope();
 
   bind(QueryService)
     .toDynamicValue(({ get }) => {
@@ -41,19 +57,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(StorageServiceScopedToken)
     .toDynamicValue(({ get }) => {
-      const request = get(Request);
-      const elasticsearch = get(CoreStart('elasticsearch'));
       const loggerService = get(LoggerService);
-      const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
+      const esClient = get(EsServiceScopedToken);
       return new StorageService(esClient, loggerService);
     })
     .inRequestScope();
 
   bind(StorageServiceInternalToken)
     .toDynamicValue(({ get }) => {
-      const elasticsearch = get(CoreStart('elasticsearch'));
       const loggerService = get(LoggerService);
-      const esClient = elasticsearch.client.asInternalUser;
+      const esClient = get(EsServiceInternalToken);
       return new StorageService(esClient, loggerService);
     })
     .inSingletonScope();
