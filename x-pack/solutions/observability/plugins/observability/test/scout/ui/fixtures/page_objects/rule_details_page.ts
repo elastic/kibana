@@ -177,18 +177,16 @@ export class RuleDetailsPage {
     // Click the dashboard selector to open the dropdown
     await this.dashboardsSelector.click();
 
-    // Wait for the loading spinner to disappear
-    await this.dashboardsSelector
-      .locator('.euiLoadingSpinner')
-      .waitFor({
-        state: 'hidden',
-        timeout: SHORTER_TIMEOUT,
-      })
-      .catch(() => {
-        // Loading spinner might not appear for cached results, ignore error
-      });
+    // Wait for the dropdown portal to be created
+    await expect(this.comboboxOptionsList).toBeAttached({ timeout: BIGGER_TIMEOUT });
 
-    // Find the combobox options list using test subject contains matcher
+    // Wait for the loading spinner to disappear if present
+    const spinner = this.comboboxOptionsList.locator('.euiLoadingSpinner');
+    await spinner.waitFor({ state: 'hidden', timeout: SHORTER_TIMEOUT }).catch(() => {
+      // Spinner might not appear if data is cached or loads very quickly
+    });
+
+    // Wait for the options list to be visible with content loaded
     await expect(this.comboboxOptionsList).toBeVisible({ timeout: BIGGER_TIMEOUT });
 
     // Get the visible text from all options
