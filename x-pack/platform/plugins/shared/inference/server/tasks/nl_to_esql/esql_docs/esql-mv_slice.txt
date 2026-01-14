@@ -1,6 +1,6 @@
 # MV_SLICE
 
-The `MV_SLICE` function extracts a subset of a multivalued field based on specified start and end index values. It is particularly useful when working with functions that produce multivalued columns in a known order, such as `SPLIT` or `MV_SORT`.
+The `MV_SLICE` function extracts a subset of a multivalued field based on specified start and end index values. It is particularly useful when working with functions that produce multivalued columns in a known order, such as `SPLIT` or `MV_SORT`. It allows access of specific elements in the multivalue field array..
 
 ## Syntax
 
