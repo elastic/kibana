@@ -119,7 +119,6 @@ describe(
         // to run these tests locally in dev mode, you need to add these feature flags in the Cypress ftr config
         // x-pack/solutions/security/test/security_solution_cypress/config.ts and x-pack/solutions/security/test/security_solution_cypress/serverless_config.ts
         kbnServerArgs: [
-          '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'aiAssistedRuleCreationEnabled',
           ])}`,

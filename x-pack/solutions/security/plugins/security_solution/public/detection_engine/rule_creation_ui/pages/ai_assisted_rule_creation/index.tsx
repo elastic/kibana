@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
-import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -145,8 +144,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     [styles.linkBack, submittedPromptValue]
   );
 
-  const isAiRuleCreationAvailable =
-    aiAssistedRuleCreationEnabled && isAgentBuilderEnabled && getIsAiAgentsEnabled(featureFlags);
+  const isAiRuleCreationAvailable = aiAssistedRuleCreationEnabled && isAgentBuilderEnabled;
 
   if (
     redirectToDetections(
