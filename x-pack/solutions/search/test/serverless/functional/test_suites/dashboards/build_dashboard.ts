@@ -88,10 +88,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can save the Dashboard successfully', async () => {
-      await PageObjects.dashboard.expectUnsavedChangesBadge();
+      await PageObjects.dashboard.ensureHasUnsavedChangesNotification({ retry: true });
       await PageObjects.dashboard.saveDashboard('Super Serverless');
       await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.dashboard.expectMissingUnsavedChangesBadge();
+      await PageObjects.dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
     });
 
     it('loads the saved Dashboard', async () => {
@@ -101,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.dashboard.loadSavedDashboard('Super Serverless');
       await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.dashboard.expectMissingUnsavedChangesBadge();
+      await PageObjects.dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
       // Test that the panel loads and the filter is properly applied
       await pieChart.expectPieSliceCount(1);
     });
