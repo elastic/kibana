@@ -14,8 +14,8 @@ const root = css`
   grid-area: sidebar;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: ${layoutVar('sidebar.width')};
+  height: calc(100% - ${layoutVar('application.marginBottom')});
+  width: calc(100% - ${layoutVar('application.marginRight')});
   z-index: ${layoutLevels.sidebar};
 `;
 

@@ -11,6 +11,7 @@ import type { FC, ReactNode } from 'react';
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -23,40 +24,43 @@ import {
 import { css } from '@emotion/react';
 import { PanelResizeHandle } from './panel_resize_handle';
 
-const sidebarWrapperStyles = css`
+const sidebarWrapperStyles = (theme: UseEuiTheme) => css`
   display: flex;
   flex-direction: row;
   height: 100%;
   width: 100%;
 `;
 
-const panelContainerStyles = ({ euiTheme }: UseEuiTheme) =>
+const panelContainerStyles = (theme: UseEuiTheme) =>
   css`
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    margin-right: ${euiTheme.size.s};
-    margin-bottom: ${euiTheme.size.s};
     min-width: 0; // Allow panel to shrink
+
+    border: ${getHighContrastBorder(theme)};
+    ${euiShadow(theme, 'xs', { border: 'none' })};
   `;
 
 const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
-  margin: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
   height: ${euiTheme.size.xl};
+  padding: ${euiTheme.size.s};
+  padding-left: ${euiTheme.size.m};
+  box-sizing: content-box;
+  border-bottom: ${euiTheme.border.thin};
+
   flex-grow: 0;
   align-items: center;
 `;
 
 const scrollableContentStyles = (theme: UseEuiTheme) => {
-  const { euiTheme } = theme;
   const scrolling = euiScrollBarStyles(theme);
-  const shadow = euiShadow(theme, 's');
+  const { euiTheme } = theme;
 
   return css`
     ${scrolling};
-    flex-grow: 1;
     padding: ${euiTheme.size.m};
-    ${shadow}
+    flex-grow: 1;
   `;
 };
 
@@ -70,13 +74,7 @@ export const SidebarPanel: FC<SidebarPanelProps> = ({ children, title, onClose }
   return (
     <div css={sidebarWrapperStyles}>
       <PanelResizeHandle />
-      <EuiPanel
-        paddingSize="none"
-        color="transparent"
-        css={panelContainerStyles}
-        hasBorder={false}
-        hasShadow={false}
-      >
+      <EuiPanel paddingSize="none" css={panelContainerStyles} hasBorder={false}>
         <EuiFlexGroup css={headerStyles}>
           <EuiFlexItem>
             <EuiTitle size="xs">
@@ -98,7 +96,7 @@ export const SidebarPanel: FC<SidebarPanelProps> = ({ children, title, onClose }
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiPanel css={scrollableContentStyles} borderRadius="m">
+        <EuiPanel css={scrollableContentStyles} hasShadow={false} paddingSize={'none'}>
           {children}
         </EuiPanel>
       </EuiPanel>
