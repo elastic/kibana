@@ -8,9 +8,11 @@
 import type { ObltPageObjects, ScoutPage } from '@kbn/scout-oblt';
 import { createLazyPageObject } from '@kbn/scout-oblt';
 import { RulesPage } from './rules_page';
+import { CustomThresholdRulePage } from './custom_threshold_rule_page';
 
 export interface TriggersActionsPageObjects extends ObltPageObjects {
   rulesPage: RulesPage;
+  customThresholdRulePage: CustomThresholdRulePage;
 }
 
 export function extendPageObjects(
@@ -20,5 +22,6 @@ export function extendPageObjects(
   return {
     ...pageObjects,
     rulesPage: createLazyPageObject(RulesPage, page),
+    customThresholdRulePage: createLazyPageObject(CustomThresholdRulePage, page),
   };
 }

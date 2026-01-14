@@ -28,8 +28,8 @@ globalSetupHook(
 
     log.info('Creating dummy data view for ad-hoc data view tests...');
     await createDataView(kbnClient, {
-      name: 'test-data-view-name_1',
       id: 'test-data-view-id_1',
+      name: 'test-data-view-name_1',
       title: 'logs-*',
     });
 

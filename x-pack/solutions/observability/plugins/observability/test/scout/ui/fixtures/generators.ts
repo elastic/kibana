@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { ApiServicesFixture, KbnClient } from '@kbn/scout-oblt';
 import type { ApmFields, LogDocument } from '@kbn/synthtrace-client';
 import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
@@ -125,13 +126,13 @@ export async function generateRulesData(apiServices: ApiServicesFixture) {
 }
 
 /**
- * Creates a data view in Kibana
+ * Creates a data view in Kibana via API
  */
 export const createDataView = async (
   kbnClient: KbnClient,
   dataViewParams: { id: string; name: string; title: string }
 ) => {
-  const { id, title, name } = dataViewParams;
+  const { id, name, title } = dataViewParams;
 
   try {
     await kbnClient.request({
@@ -158,6 +159,7 @@ export const createDataView = async (
     if (error instanceof AxiosError && error.response?.status === 409) {
       return;
     }
+    // Data view might already exist, which is fine
     throw error;
   }
 };
