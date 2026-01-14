@@ -113,6 +113,7 @@ export function getUnmappedFields(
     return [];
   }
 
+  // No unmaped fields can be collected after certain commands
   if (!areNewUnmappedFieldsAllowed(previousCommands)) {
     return [];
   }
@@ -120,9 +121,9 @@ export function getUnmappedFields(
   // Unmapped fields are treated as keyword type if the treatment is LOAD
   // If the treatment is NULLIFY, the type is unknown becuase it will come with a type if found in one index,
   // but with null type if not found in any, we can't know without executing the query.
-  let unmappedFieldsType = 'unknown';
-  if (unmappedFieldsTreatment === UnmappedFieldsTreatment.LOAD) {
-    unmappedFieldsType = 'keyword';
+  let unmappedFieldsType = 'keyword';
+  if (unmappedFieldsTreatment === UnmappedFieldsTreatment.NULLIFY) {
+    unmappedFieldsType = 'null';
   }
 
   const unmappedFields: ESQLColumnData[] = [];
