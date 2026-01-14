@@ -236,6 +236,7 @@ export class Session {
    * Creates new session document in the session index encrypting sensitive state.
    * @param request Request instance to create session value for.
    * @param sessionValue Session value parameters.
+   * @param isIntermediateSession flag to indicate whether to create intermediate session with different cookie settings.
    */
   async create(
     request: KibanaRequest,
@@ -244,7 +245,8 @@ export class Session {
         SessionValue,
         'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'createdAt' | 'metadata'
       >
-    >
+    >,
+    isIntermediateSession: boolean = false
   ) {
     const [sid, aad] = await Promise.all([
       this.randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64')),
@@ -268,7 +270,15 @@ export class Session {
       content: await this.crypto.encrypt(JSON.stringify({ username, userProfileId, state }), aad),
     });
 
-    await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
+    if (isIntermediateSession) {
+      await this.options.sessionCookie.set(
+        request,
+        { ...sessionExpirationInfo, sid, aad },
+        { isSecure: true, sameSite: 'None' }
+      );
+    } else {
+      await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
+    }
 
     sessionLogger.debug('Successfully created a new session.');
 

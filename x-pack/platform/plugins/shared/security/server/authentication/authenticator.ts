@@ -908,12 +908,27 @@ export class Authenticator {
     if (!existingSessionValue) {
       const startTime = performance.now();
 
-      newSessionValue = await this.session.create(request, {
-        username: authenticationResult.user?.username,
-        userProfileId,
-        provider,
-        state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
-      });
+      if (isNewSessionAuthenticated) {
+        console.log('Creating regular session KURTTTTTT');
+
+        newSessionValue = await this.session.create(request, {
+          username: authenticationResult.user?.username,
+          userProfileId,
+          provider,
+          state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+        });
+      } else {
+        console.log('Creating an intermediate session KURTTTTTT');
+        newSessionValue = await this.session.create(
+          request,
+          {
+            userProfileId,
+            provider,
+            state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+          },
+          true
+        );
+      }
 
       const duration = performance.now() - startTime;
 
