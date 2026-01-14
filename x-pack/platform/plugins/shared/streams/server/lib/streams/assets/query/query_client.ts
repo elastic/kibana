@@ -293,13 +293,14 @@ export class QueryClient {
   }
 
   /**
-   * Returns all query links for a given stream or
-   * all query links if no stream is provided.
+   * Returns all query links for given streams or
+   * all query links if no stream names are provided.
    */
-  async getQueryLinks(name?: string): Promise<QueryLink[]> {
-    const filter = name
-      ? [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')]
-      : [...termQuery(ASSET_TYPE, 'query')];
+  async getQueryLinks(streamNames?: string[]): Promise<QueryLink[]> {
+    const filter =
+      streamNames && streamNames.length > 0
+        ? [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')]
+        : [...termQuery(ASSET_TYPE, 'query')];
 
     const queriesResponse = await this.dependencies.storageClient.search({
       size: 10_000,
@@ -335,10 +336,11 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
-  async findQueries(name: string | undefined, query: string): Promise<QueryLink[]> {
-    const filter = name
-      ? [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')]
-      : [...termQuery(ASSET_TYPE, 'query')];
+  async findQueries(streamNames: string[] | undefined, query: string): Promise<QueryLink[]> {
+    const filter =
+      streamNames && streamNames.length > 0
+        ? [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')]
+        : [...termQuery(ASSET_TYPE, 'query')];
 
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
