@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 
 describe('parseSimpleRuleTypeBucket', () => {
@@ -27,7 +29,6 @@ describe('parseSimpleRuleTypeBucket', () => {
     ).toEqual({
       '__index-threshold': 78,
       document__test__: 42,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       logs__alert__document__count: 28,
     });
   });
@@ -51,7 +52,6 @@ describe('parseSimpleRuleTypeBucket', () => {
     ).toEqual({
       '__index-threshold': 0,
       document__test__: 42,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       logs__alert__document__count: 28,
     });
   });
