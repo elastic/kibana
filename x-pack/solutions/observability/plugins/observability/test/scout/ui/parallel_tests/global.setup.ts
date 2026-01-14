@@ -39,11 +39,11 @@ globalSetupHook(
       refresh: true,
     });
 
-    log.info('Creating dummy data view for ad-hoc data view tests...');
+    log.info('Creating default data view for .alerts-* pattern...');
     await createDataView(kbnClient, {
-      name: 'test-data-view-name_1',
-      id: 'test-data-view-id_1',
-      title: 'logs-*',
+      name: 'Default Alerts Data View',
+      id: 'default-alerts-data-view',
+      title: '.alerts-*',
     });
 
     await generateLogsData({
