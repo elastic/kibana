@@ -1694,7 +1694,7 @@
                 "section": "def-common.ProjectRouting",
                 "text": "ProjectRouting"
               },
-              "; parent?: ",
+              "; timezone?: string | undefined; parent?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
