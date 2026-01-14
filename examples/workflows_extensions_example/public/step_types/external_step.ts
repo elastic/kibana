@@ -89,7 +89,7 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
                   hoverMessage: 'Manage your proxies [here](https://example.com/proxies)',
                 };
               }
-              return { severity: null, afterMessage: '✓ Proxy connected' };
+              return { severity: null, afterMessage: `✓ Proxy connected (${proxy.url})` };
             },
           },
         },
@@ -98,7 +98,7 @@ export const getExternalStepDefinition = (deps: { externalService: IExampleExter
         input: {
           completion: {
             getOptions: async (currentValue) => {
-              if (currentValue.length === 0) {
+              if (!currentValue || currentValue.length === 0) {
                 return [
                   {
                     label: 'Hello World',
