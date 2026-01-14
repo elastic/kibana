@@ -70,6 +70,7 @@ import { validateUnitOfTime } from './utils';
 import {
   CONSOLE_COMMANDS,
   CROWDSTRIKE_CONSOLE_COMMANDS,
+  ENDPOINT_EXECUTION_TIMEOUT,
   MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS,
 } from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
@@ -553,6 +554,13 @@ export const getEndpointConsoleCommands = ({
         ),
         mustHaveValue: 'non-empty-string',
         SelectorComponent: EndpointScriptInputParams,
+      },
+      timeout: {
+        required: false,
+        allowMultiples: false,
+        about: ENDPOINT_EXECUTION_TIMEOUT,
+        mustHaveValue: 'non-empty-string',
+        validate: executeTimeoutValidator,
       },
       ...commandCommentArgument(),
     };
