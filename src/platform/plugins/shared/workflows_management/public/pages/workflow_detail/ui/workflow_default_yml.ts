@@ -13,9 +13,14 @@ description: This is a new workflow
 triggers:
   - type: manual
 
+inputs:
+  - name: message
+    type: string
+    default: "hello world"
+
 steps:
-  - name: log
+  - name: hello_world_step
     type: console
     with:
-      message: Hello World!
+      message: "{{ inputs.message }}"
 `;
