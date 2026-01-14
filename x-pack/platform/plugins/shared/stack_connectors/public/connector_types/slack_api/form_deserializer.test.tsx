@@ -46,7 +46,7 @@ describe('deserializer', () => {
       ...data,
       config: {
         ...data.config,
-        allowedChannels: ['#general', '#random'],
+        allowedChannels: [{ name: '#general' }, { name: '#random' }],
       },
     });
   });

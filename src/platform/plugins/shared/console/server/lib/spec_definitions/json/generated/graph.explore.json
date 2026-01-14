@@ -5,7 +5,7 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "routing": "",
+      "routing": [],
       "timeout": [
         "-1",
         "0"

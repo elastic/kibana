@@ -21,9 +21,10 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export interface AlertAiInsightProps {
   alertId: string;
+  alertTitle?: string;
 }
 
-export function AlertAiInsight({ alertId }: AlertAiInsightProps) {
+export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
   const {
     services: { http },
   } = useKibana();
@@ -57,12 +58,22 @@ export function AlertAiInsight({ alertId }: AlertAiInsightProps) {
       data: {
         summary,
         context,
+        attachmentLabel: i18n.translate(
+          'xpack.observabilityAgentBuilder.alertAiInsight.attachmentLabel',
+          { defaultMessage: 'Alert summary' }
+        ),
       },
     },
     {
       type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
       data: {
         alertId,
+        ...(alertTitle && {
+          attachmentLabel: i18n.translate('xpack.observabilityAgentBuilder.alert.attachmentLabel', {
+            defaultMessage: '{alertTitle} alert',
+            values: { alertTitle },
+          }),
+        }),
       },
     },
   ];

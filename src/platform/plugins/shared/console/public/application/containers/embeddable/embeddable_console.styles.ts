@@ -10,7 +10,7 @@
 import { css } from '@emotion/react';
 import { useEuiTheme, useEuiBreakpoint } from '@elastic/eui';
 
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 import { useEmbeddableConsoleContentStyles, useEmbeddableConsoleStyleVariables } from './styles';
 
 export const useStyles = () => {
@@ -83,7 +83,7 @@ export const useStyles = () => {
 
     embeddableConsoleFixed: css`
       position: fixed;
-      z-index: calc(${euiTheme.levels.header} - 2);
+      z-index: ${layoutLevels.footer - 1};
     `,
 
     embeddableConsoleControls: css`

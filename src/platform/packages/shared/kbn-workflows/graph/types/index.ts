@@ -10,6 +10,8 @@
 export type {
   AtomicGraphNode,
   AtomicGraphNodeSchema,
+  DataSetGraphNode,
+  DataSetGraphNodeSchema,
   HttpGraphNode,
   HttpGraphNodeSchema,
   WaitGraphNode,
@@ -66,6 +68,7 @@ export type { WorkflowGraphType } from './graph';
 
 export {
   isAtomic,
+  isDataSet,
   isElasticsearch,
   isKibana,
   isHttp,

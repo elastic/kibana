@@ -264,4 +264,184 @@ describe('BarDetails', () => {
       });
     });
   });
+
+  describe('in case of sync badge', () => {
+    it('renders "blocking" badge for nodejs agent with sync=true', () => {
+      const mockItemWithSync = {
+        ...mockItem,
+        sync: true,
+        agentName: 'nodejs',
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithSync} left={10} />);
+      expect(getByText('blocking')).toBeInTheDocument();
+    });
+
+    it('renders "blocking" badge for rum-js agent with sync=true', () => {
+      const mockItemWithSync = {
+        ...mockItem,
+        sync: true,
+        agentName: 'rum-js',
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithSync} left={10} />);
+      expect(getByText('blocking')).toBeInTheDocument();
+    });
+
+    it('renders "blocking" badge for js-base agent with sync=true', () => {
+      const mockItemWithSync = {
+        ...mockItem,
+        sync: true,
+        agentName: 'js-base',
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithSync} left={10} />);
+      expect(getByText('blocking')).toBeInTheDocument();
+    });
+
+    it('renders "async" badge for go agent with sync=false', () => {
+      const mockItemWithSync = {
+        ...mockItem,
+        sync: false,
+        agentName: 'go',
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithSync} left={10} />);
+      expect(getByText('async')).toBeInTheDocument();
+    });
+
+    it('renders "async" badge for python agent with sync=false', () => {
+      const mockItemWithSync = {
+        ...mockItem,
+        sync: false,
+        agentName: 'python',
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithSync} left={10} />);
+      expect(getByText('async')).toBeInTheDocument();
+    });
+
+    it('renders "async" badge for php agent with sync=false', () => {
+      const mockItemWithSync = {
+        ...mockItem,
+        sync: false,
+        agentName: 'php',
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithSync} left={10} />);
+      expect(getByText('async')).toBeInTheDocument();
+    });
+
+    it('does not render badge when sync is undefined', () => {
+      const mockItemWithoutSync = {
+        ...mockItem,
+        sync: undefined,
+        agentName: 'nodejs',
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithoutSync} left={10} />);
+      expect(queryByText('blocking')).not.toBeInTheDocument();
+      expect(queryByText('async')).not.toBeInTheDocument();
+    });
+
+    it('does not render badge when agentName is missing', () => {
+      const mockItemWithoutAgent = {
+        ...mockItem,
+        sync: true,
+        agentName: undefined,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithoutAgent} left={10} />);
+      expect(queryByText('blocking')).not.toBeInTheDocument();
+      expect(queryByText('async')).not.toBeInTheDocument();
+    });
+
+    it('does not render badge for nodejs with sync=false (mismatched condition)', () => {
+      const mockItemWithMismatch = {
+        ...mockItem,
+        sync: false,
+        agentName: 'nodejs',
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithMismatch} left={10} />);
+      expect(queryByText('blocking')).not.toBeInTheDocument();
+      expect(queryByText('async')).not.toBeInTheDocument();
+    });
+
+    it('does not render badge for python with sync=true (mismatched condition)', () => {
+      const mockItemWithMismatch = {
+        ...mockItem,
+        sync: true,
+        agentName: 'python',
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithMismatch} left={10} />);
+      expect(queryByText('blocking')).not.toBeInTheDocument();
+      expect(queryByText('async')).not.toBeInTheDocument();
+    });
+
+    it('does not render badge when both sync and agentName are undefined (OTEL without metadata)', () => {
+      const mockOtelItem = {
+        ...mockItem,
+        sync: undefined,
+        agentName: undefined,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockOtelItem} left={10} />);
+      expect(queryByText('blocking')).not.toBeInTheDocument();
+      expect(queryByText('async')).not.toBeInTheDocument();
+    });
+
+    it('shows tooltip on hover for sync badge', async () => {
+      const user = userEvent.setup();
+      const mockItemWithSync = {
+        ...mockItem,
+        sync: true,
+        agentName: 'nodejs',
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithSync} left={10} />);
+      const badge = getByText('blocking');
+
+      await user.hover(badge);
+
+      await waitFor(() => {
+        expect(
+          getByText('Indicates whether the span was executed synchronously or asynchronously.')
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('in case of cold start', () => {
+    it('renders cold start badge when coldstart is true', () => {
+      const mockItemWithColdStart = {
+        ...mockItem,
+        coldstart: true,
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
+      expect(getByText('cold start')).toBeInTheDocument();
+    });
+
+    it('does not render cold start badge when coldstart is false', () => {
+      const mockItemWithColdStart = {
+        ...mockItem,
+        coldstart: false,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
+      expect(queryByText('cold start')).not.toBeInTheDocument();
+    });
+
+    it('does not render cold start badge when coldstart is undefined', () => {
+      const mockItemWithColdStart = {
+        ...mockItem,
+        coldstart: undefined,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
+      expect(queryByText('cold start')).not.toBeInTheDocument();
+    });
+  });
 });
