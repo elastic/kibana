@@ -89,7 +89,6 @@ export function getLatencyChart({
 }): TraceChart | null {
   try {
     const whereClauses = getWhereClauses(dataSource, filters);
-
     const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
@@ -128,7 +127,6 @@ export function getThroughputChart({
 }): TraceChart | null {
   try {
     const whereClauses = getWhereClauses(dataSource, filters);
-
     const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
