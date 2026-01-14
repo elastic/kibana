@@ -28,7 +28,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { getInitialESQLQuery, getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { FilterStateStore, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { isEqual, isFunction } from 'lodash';
@@ -228,6 +228,11 @@ export interface DiscoverStateContainer {
      * Updates the ES|QL query string
      */
     updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+
+    /**
+     * Triggered when the user changes the grouping of the cascade layout
+     */
+    onCascadeGroupingChange: (payload: { cascadeGrouping: string[] }) => void;
   };
 }
 
@@ -543,6 +548,26 @@ export function getDiscoverStateContainer({
       );
     }
 
+    if (
+      isOfAggregateQueryType(appState.query) &&
+      services.discoverFeatureFlags.getCascadeLayoutEnabled()
+    ) {
+      // on first load if the data cascade layout feature flag is enabled,
+      // we need to set the available cascade groups from the user's query and selected cascade groups
+      const availableCascadeGroups = getESQLStatsQueryMeta(
+        (appState.query as AggregateQuery).esql
+      ).groupByFields.map((group) => group.field);
+
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+          cascadedDocumentsState: {
+            availableCascadeGroups,
+            selectedCascadeGroups: [availableCascadeGroups[0]].filter(Boolean),
+          },
+        })
+      );
+    }
+
     // syncs `_a` portion of url with query services
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       data.query,
@@ -764,6 +789,22 @@ export function getDiscoverStateContainer({
   };
 
   /**
+   * Triggered when user changes grouping in the cascade experience
+   */
+  const onCascadeGroupingChange = (({ cascadeGrouping }) => {
+    const currentTabState = getCurrentTab();
+
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+        cascadedDocumentsState: {
+          ...currentTabState.cascadedDocumentsState,
+          selectedCascadeGroups: cascadeGrouping,
+        },
+      })
+    );
+  }) satisfies DiscoverStateContainer['actions']['onCascadeGroupingChange'];
+
+  /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
   const onChangeDataView = async (dataViewId: string | DataView) => {
@@ -784,7 +825,7 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
+  const updateESQLQuery = ((queryOrUpdater) => {
     addLog('updateESQLQuery');
     const { query: currentQuery } = getCurrentTab().appState;
 
@@ -800,7 +841,7 @@ export function getDiscoverStateContainer({
     internalState.dispatch(
       injectCurrentTab(internalStateActions.updateAppState)({ appState: { query } })
     );
-  };
+  }) satisfies DiscoverStateContainer['actions']['updateESQLQuery'];
 
   return {
     appState$,
@@ -829,6 +870,7 @@ export function getDiscoverStateContainer({
       setDataView,
       updateAdHocDataViewId,
       updateESQLQuery,
+      onCascadeGroupingChange,
     },
   };
 }

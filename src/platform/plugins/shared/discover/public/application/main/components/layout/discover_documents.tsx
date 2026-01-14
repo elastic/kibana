@@ -52,6 +52,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
@@ -63,7 +64,6 @@ import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -87,8 +87,12 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-
-const DiscoverGridMemoized = React.memo(DiscoverGrid);
+import {
+  DiscoverGridFlyout,
+  type DiscoverGridFlyoutProps,
+} from '../../../../components/discover_grid_flyout';
+import type { CascadedDocumentsContext } from './cascaded_documents';
+import { CascadedDocumentsProvider, isCascadedDocumentsVisible } from './cascaded_documents';
 
 // export needs for testing
 export const onResize = (
@@ -319,23 +323,24 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
+      expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc'],
       customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <DiscoverGridFlyout
         dataView={dataView}
         hit={hit}
         hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+        // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
-        savedSearchId={persistedDiscoverSession?.id}
+        savedSearchId={persistedDiscoverSession?.id!}
+        query={query}
+        initialTabId={initialDocViewerTabId}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumnWithTracking}
         onAddColumn={onAddColumnWithTracking}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
-        query={query}
-        initialTabId={initialDocViewerTabId}
+        setExpandedDoc={expandedDocSetter}
+        onClose={expandedDocSetter.bind(null, undefined)}
         docViewerRef={docViewerRef}
         docViewerExtensionActions={docViewerExtensionActions}
       />
@@ -343,12 +348,11 @@ function DiscoverDocumentsComponent({
     [
       dataView,
       persistedDiscoverSession?.id,
+      query,
+      initialDocViewerTabId,
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
-      setExpandedDoc,
-      query,
-      initialDocViewerTabId,
       docViewerExtensionActions,
     ]
   );
@@ -440,6 +444,42 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
   );
 
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const cascadedDocumentsState = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
+  const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
+    if (
+      !isCascadedDocumentsVisible(cascadedDocumentsState, query) ||
+      !isOfAggregateQueryType(query)
+    ) {
+      return undefined;
+    }
+
+    return {
+      cascadedDocumentsState,
+      esqlQuery: query,
+      esqlVariables,
+      timeRange: requestParams.timeRangeAbsolute,
+      viewModeToggle,
+      cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => {
+        stateContainer.actions.onCascadeGroupingChange({ cascadeGrouping });
+      },
+      onUpdateESQLQuery: stateContainer.actions.updateESQLQuery,
+      openInNewTab: (params) => dispatch(internalStateActions.openInNewTab(params)),
+      registerCascadeRequestsInspectorAdapter: (requestAdapter) => {
+        stateContainer.dataState.inspectorAdapters.cascadeRequests = requestAdapter;
+      },
+    };
+  }, [
+    cascadedDocumentsState,
+    dispatch,
+    esqlVariables,
+    query,
+    requestParams.timeRangeAbsolute,
+    stateContainer.actions,
+    stateContainer.dataState.inspectorAdapters,
+    viewModeToggle,
+  ]);
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -463,65 +503,67 @@ function DiscoverDocumentsComponent({
       </EuiScreenReaderOnly>
       <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-          <DiscoverGridMemoized
-            ariaLabelledBy="documentsAriaLabel"
-            columns={currentColumns}
-            columnsMeta={columnsMeta}
-            expandedDoc={expandedDoc}
-            dataView={dataView}
-            loadingState={
-              isDataLoading
-                ? DataLoadingState.loading
-                : isMoreDataLoading
-                ? DataLoadingState.loadingMore
-                : DataLoadingState.loaded
-            }
-            rows={rows}
-            sort={(sort as SortOrder[]) || []}
-            searchDescription={persistedDiscoverSession?.description}
-            searchTitle={persistedDiscoverSession?.title} // TODO: should it be rather a tab label?
-            setExpandedDoc={setExpandedDoc}
-            showTimeCol={showTimeCol}
-            settings={grid}
-            onFilter={onAddFilter as DocViewFilterFn}
-            onSetColumns={onSetColumns}
-            onSort={onSort}
-            onResize={onResizeDataGrid}
-            configHeaderRowHeight={3}
-            headerRowHeightState={headerRowHeight}
-            onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
-            rowHeightState={rowHeight}
-            onUpdateRowHeight={onUpdateRowHeight}
-            isSortEnabled={true}
-            isPlainRecord={isEsqlMode}
-            isPaginationEnabled={!isEsqlMode}
-            rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
-            onUpdateRowsPerPage={onUpdateRowsPerPage}
-            maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
-            sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
-            onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
-            onFieldEdited={onFieldEdited}
-            configRowHeight={configRowHeight}
-            showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
-            maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-            renderDocumentView={renderDocumentView}
-            renderCustomToolbar={renderCustomToolbarWithElements}
-            services={services}
-            totalHits={totalHits}
-            onFetchMoreRecords={onFetchMoreRecords}
-            externalCustomRenderers={cellRenderers}
-            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-            dataGridDensityState={density}
-            onUpdateDataGridDensity={onUpdateDensity}
-            onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
-            query={query}
-            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
-            cellActionsMetadata={cellActionsMetadata}
-            cellActionsHandling="append"
-            initialState={dataGridUiState}
-            onInitialStateChange={onInitialStateChange}
-            onFullScreenChange={setIsDataGridFullScreen}
-          />
+          <CascadedDocumentsProvider value={cascadedDocumentsContext}>
+            <DiscoverGrid
+              ariaLabelledBy="documentsAriaLabel"
+              columns={currentColumns}
+              columnsMeta={columnsMeta}
+              expandedDoc={expandedDoc}
+              dataView={dataView}
+              loadingState={
+                isDataLoading
+                  ? DataLoadingState.loading
+                  : isMoreDataLoading
+                  ? DataLoadingState.loadingMore
+                  : DataLoadingState.loaded
+              }
+              rows={rows}
+              sort={(sort as SortOrder[]) || []}
+              searchDescription={persistedDiscoverSession?.description}
+              searchTitle={persistedDiscoverSession?.title} // TODO: should it be rather a tab label?
+              setExpandedDoc={setExpandedDoc}
+              showTimeCol={showTimeCol}
+              settings={grid}
+              onFilter={onAddFilter as DocViewFilterFn}
+              onSetColumns={onSetColumns}
+              onSort={onSort}
+              onResize={onResizeDataGrid}
+              configHeaderRowHeight={3}
+              headerRowHeightState={headerRowHeight}
+              onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
+              rowHeightState={rowHeight}
+              onUpdateRowHeight={onUpdateRowHeight}
+              isSortEnabled={true}
+              isPlainRecord={isEsqlMode}
+              isPaginationEnabled={!isEsqlMode}
+              rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
+              onUpdateRowsPerPage={onUpdateRowsPerPage}
+              maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
+              sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
+              onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
+              onFieldEdited={onFieldEdited}
+              configRowHeight={configRowHeight}
+              showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
+              maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+              renderDocumentView={renderDocumentView}
+              renderCustomToolbar={renderCustomToolbarWithElements}
+              services={services}
+              totalHits={totalHits}
+              onFetchMoreRecords={onFetchMoreRecords}
+              externalCustomRenderers={cellRenderers}
+              rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+              dataGridDensityState={density}
+              onUpdateDataGridDensity={onUpdateDensity}
+              onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
+              query={query}
+              cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+              cellActionsMetadata={cellActionsMetadata}
+              cellActionsHandling="append"
+              initialState={dataGridUiState}
+              onInitialStateChange={onInitialStateChange}
+              onFullScreenChange={setIsDataGridFullScreen}
+            />
+          </CascadedDocumentsProvider>
         </CellActionsProvider>
       </div>
     </EuiFlexItem>

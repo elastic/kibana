@@ -130,7 +130,11 @@ export interface DiscoverDataStateContainer {
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */
-  inspectorAdapters: { requests: RequestAdapter; lensRequests?: RequestAdapter };
+  inspectorAdapters: {
+    requests: RequestAdapter;
+    lensRequests?: RequestAdapter;
+    cascadeRequests?: RequestAdapter;
+  };
   /**
    * Return the initial fetch status
    *  UNINITIALIZED: data is not fetched initially, without user triggering it

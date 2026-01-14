@@ -1,3 +1,4 @@
+
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
@@ -119,6 +120,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/control-group-renderer",
     "@kbn/react-query",
+    "@kbn/shared-ux-document-data-cascade",
     "@kbn/controls-schemas",
     "@kbn/zod",
     "@kbn/cps"

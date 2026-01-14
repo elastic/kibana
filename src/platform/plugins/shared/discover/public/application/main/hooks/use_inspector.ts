@@ -12,6 +12,7 @@ import type {
   InspectorSession,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import {
@@ -44,9 +45,11 @@ export function useInspector({
 
     const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
-    const requestAdapters = inspectorAdapters.lensRequests
-      ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
-      : [inspectorAdapters.requests];
+    const requestAdapters = [
+      inspectorAdapters.requests,
+      inspectorAdapters.lensRequests,
+      inspectorAdapters.cascadeRequests,
+    ].filter(Boolean) as RequestAdapter[];
 
     const session = inspector.open(
       {

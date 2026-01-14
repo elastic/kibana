@@ -21,7 +21,11 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import {
+  appendWhereClauseToESQLQuery,
+  hasTransformationalCommand,
+  appendFilteringWhereClauseForCascadeLayout,
+} from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
@@ -68,6 +72,7 @@ import {
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import { isCascadedDocumentsVisible } from './cascaded_documents';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -125,6 +130,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
+  const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
+  const isCascadeLayoutSelected = useCurrentTabSelector((tab) =>
+    isCascadedDocumentsVisible(tab.cascadedDocumentsState, tab.appState.query)
+  );
 
   const fetchCounter = useRef<number>(0);
 
@@ -235,13 +244,24 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       // weird existence logic from Discover components
       // in the field it comes the operator _exists_ and in the value the field
       // I need to take care of it here but I think it should be handled on the fieldlist instead
-      const updatedQuery = appendWhereClauseToESQLQuery(
-        query.esql,
-        fieldName === '_exists_' ? String(values) : fieldName,
-        fieldName === '_exists_' || values == null ? undefined : values,
-        getOperator(fieldName, values, operation),
-        fieldType
-      );
+      const updatedQuery = isCascadeLayoutSelected
+        ? appendFilteringWhereClauseForCascadeLayout(
+            query.esql,
+            esqlVariables,
+            dataView,
+            fieldName === '_exists_' ? String(values) : fieldName,
+            fieldName === '_exists_' || values == null ? undefined : values,
+            getOperator(fieldName, values, operation),
+            fieldType
+          )
+        : appendWhereClauseToESQLQuery(
+            query.esql,
+            fieldName === '_exists_' ? String(values) : fieldName,
+            fieldName === '_exists_' || values == null ? undefined : values,
+            getOperator(fieldName, values, operation),
+            fieldType
+          );
+
       if (!updatedQuery) {
         return;
       }
@@ -257,7 +277,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         fieldsMetadata,
       });
     },
-    [query, data.query.queryString, trackUiMetric, scopedEBTManager, fieldsMetadata]
+    [
+      query,
+      isCascadeLayoutSelected,
+      esqlVariables,
+      dataView,
+      data.query.queryString,
+      trackUiMetric,
+      scopedEBTManager,
+      fieldsMetadata,
+    ]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
@@ -546,7 +575,9 @@ const componentStyles = {
   }),
   sidebarContainer: css({
     width: '100%',
-    height: '100%',
+    height: 'inherit',
+    display: 'flex',
+    flex: '1 1 auto',
   }),
   mainPanel: ({ euiTheme }: UseEuiTheme) =>
     css({

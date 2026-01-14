@@ -39,8 +39,6 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   enableDocumentViewer: boolean;
 }
 
-export const DiscoverGridMemoized = React.memo(DiscoverGrid);
-
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
 
@@ -64,6 +62,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
+      expandedDocSetter: NonNullable<UnifiedDataTableProps['setExpandedDoc']>,
       customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <DiscoverGridFlyout
@@ -77,8 +76,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
         onAddColumn={props.onAddColumn}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDocWithInitialTab}
+        onClose={() => expandedDocSetter(undefined)}
+        setExpandedDoc={expandedDocSetter}
         initialTabId={initialTabId}
         query={props.query}
         filters={props.filters}
@@ -93,7 +92,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onAddColumn,
       props.query,
       props.filters,
-      setExpandedDocWithInitialTab,
       initialTabId,
     ]
   );
@@ -141,7 +139,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
     >
-      <DiscoverGridMemoized
+      <DiscoverGrid
         {...gridProps}
         isPaginationEnabled={!gridProps.isPlainRecord}
         totalHits={props.totalHitCount}
