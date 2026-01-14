@@ -16,6 +16,7 @@ import { createIdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { sumTokens } from '../helpers/sum_tokens';
+import { isValidFilter } from './utils';
 
 export interface IdentifySystemsOptions {
   stream: Streams.all.Definition;
@@ -146,14 +147,16 @@ export async function identifySystems({
   );
 
   const identifiedSystems = response.toolCalls.flatMap((toolCall) =>
-    toolCall.function.arguments.systems.map((args) => {
-      const system = {
-        ...args,
-        filter: args.filter as Condition,
-        type: 'system' as const,
-      };
-      return { ...system, description: '' };
-    })
+    toolCall.function.arguments.systems
+      .filter((args) => isValidFilter(args.filter))
+      .map((args) => {
+        const system = {
+          ...args,
+          filter: args.filter as Condition,
+          type: 'system' as const,
+        };
+        return { ...system, description: '' };
+      })
   );
 
   logger.debug(`Identified ${identifiedSystems.length} system features for stream ${stream.name}`);
