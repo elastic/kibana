@@ -137,6 +137,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'typings/**/*',
   'x-pack/dev-tools',
   'x-pack/packages/ai-infra/*',
+  'x-pack/solutions/**',
 ];
 
 /**

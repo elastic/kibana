@@ -7220,6 +7220,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kubernetes-poc-plugin@link:x-pack/solutions/observability/plugins/kubernetes-poc":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
   version "0.0.0"
   uid ""

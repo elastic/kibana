@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kubernetes-poc-plugin",
+  "owner": ["@elastic/obs-ux-management-team"],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "kubernetesPoc",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "kubernetes_poc"],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "dataViews",
+      "lens",
+      "observability",
+      "observabilityShared",
+      "unifiedSearch"
+    ],
+    "optionalPlugins": []
+  }
+}
+
+

@@ -1,0 +1,20 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/server-route-repository",
+    "@kbn/server-route-repository-utils",
+    "@kbn/observability-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/react-kibana-context-render"
+  ]
+}
+
+
