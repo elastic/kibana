@@ -1,0 +1,101 @@
+rules:
+  - id: failed_logins_then_success
+    match:
+      name_contains_any:
+        - "failed"
+        - "success"
+        - "login"
+
+  - id: excessive_auth_failures
+    match:
+      name_contains_any:
+        - "excessive"
+        - "authentication"
+        - "failed"
+
+  - id: suspicious_powershell_execution
+    match:
+      name_contains_any:
+        - "powershell"
+        - "suspicious"
+
+  - id: encoded_or_obfuscated_powershell
+    match:
+      name_contains_any:
+        - "powershell"
+        - "encoded"
+        - "obfus"
+
+  - id: credential_dumping_behavior
+    match:
+      name_contains_any:
+        - "credential"
+        - "dump"
+
+  - id: lsass_access
+    match:
+      name_contains_any:
+        - "lsass"
+
+  - id: pass_the_hash_or_ticket
+    match:
+      name_contains_any:
+        - "pass the"
+        - "hash"
+        - "ticket"
+
+  - id: suspicious_service_creation
+    match:
+      name_contains_any:
+        - "service"
+        - "creation"
+        - "suspicious"
+
+  - id: scheduled_task_persistence
+    match:
+      name_contains_any:
+        - "scheduled"
+        - "task"
+        - "persistence"
+
+  - id: registry_run_key_persistence
+    match:
+      name_contains_any:
+        - "registry"
+        - "run key"
+        - "persistence"
+
+  - id: malware_detected_by_endpoint
+    match:
+      name_contains_any:
+        - "malware"
+        - "elastic defend"
+        - "endpoint"
+
+  - id: suspicious_process_injection
+    match:
+      name_contains_any:
+        - "process"
+        - "injection"
+
+  - id: remote_execution_psexec_or_wmi
+    match:
+      name_contains_any:
+        - "psexec"
+        - "wmi"
+        - "remote"
+
+  - id: suspicious_parent_child_process_relationships
+    match:
+      name_contains_any:
+        - "parent"
+        - "child"
+        - "process"
+        - "suspicious"
+
+  - id: known_ransomware_behavior_patterns
+    match:
+      name_contains_any:
+        - "ransomware"
+        - "behavior"
+

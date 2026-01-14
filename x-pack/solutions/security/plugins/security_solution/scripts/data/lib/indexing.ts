@@ -1,0 +1,99 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import fs from 'fs';
+import path from 'path';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { Readable } from 'stream';
+
+const INDEX_FIELDS_LIMIT = 6000;
+
+export interface EnsureIndexOptions {
+  esClient: Client;
+  index: string;
+  mappingPath: string;
+  log: ToolingLog;
+}
+
+export const ensureIndex = async ({ esClient, index, mappingPath, log }: EnsureIndexOptions) => {
+  const exists = await esClient.indices.exists({ index });
+  if (exists) return;
+
+  log.info(`Creating index ${index}`);
+  const mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
+  await esClient.indices.create({
+    index,
+    settings: {
+      'index.mapping.total_fields.limit': String(INDEX_FIELDS_LIMIT),
+    },
+    mappings: mapping,
+  });
+};
+
+export interface BulkIndexOptions {
+  esClient: Client;
+  index: string;
+  docs: Array<Record<string, unknown>>;
+  log: ToolingLog;
+  /**
+   * Approx max docs per bulk request.
+   */
+  batchSize?: number;
+}
+
+export const bulkIndex = async ({
+  esClient,
+  index,
+  docs,
+  log,
+  batchSize = 1000,
+}: BulkIndexOptions) => {
+  if (docs.length === 0) return;
+
+  for (let i = 0; i < docs.length; i += batchSize) {
+    const slice = docs.slice(i, i + batchSize);
+    const body = slice.flatMap((doc) => [{ index: { _index: index } }, doc]);
+    const resp = await esClient.bulk({ refresh: false, body });
+    if (resp.errors) {
+      const firstError = resp.items?.find((it) => {
+        const action = it.index ?? it.create ?? it.update ?? it.delete;
+        return action && 'error' in action;
+      });
+      log.error(`Bulk indexing into ${index} had errors. First error: ${JSON.stringify(firstError)}`);
+      throw new Error(`Bulk indexing errors for ${index}`);
+    }
+  }
+};
+
+export const dateSuffix = (ms: number): string => {
+  const d = new Date(ms);
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${yyyy}.${mm}.${dd}`;
+};
+
+export const episodeIndexNames = ({
+  episodeId,
+  endMs,
+}: {
+  episodeId: string; // ep1
+  endMs: number;
+}) => {
+  const suffix = dateSuffix(endMs);
+  const epNum = episodeId.replace(/^ep/, '');
+  return {
+    endpointEvents: `logs-endpoint.events.insights.ep${epNum}.${suffix}`,
+    endpointAlerts: `logs-endpoint.alerts-ep${epNum}.${suffix}`,
+    insightsAlerts: `insights-alerts-ep${epNum}-${suffix}`,
+  };
+};
+
+export const scriptsDataDir = (...parts: string[]) =>
+  path.resolve(__dirname, '..', ...parts);
+
