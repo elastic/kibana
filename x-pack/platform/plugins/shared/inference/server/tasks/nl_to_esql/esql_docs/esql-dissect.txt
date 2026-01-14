@@ -22,9 +22,7 @@ A string used as the separator between appended values, when using the append mo
 
 ## Examples
 
-The following example parses a string that contains a timestamp, some text, and an IP address:
-
-This query creates a row with a single string containing a timestamp, some text, and an IP address. It then uses the DISSECT command to split the string into three separate columns: `date`, `msg`, and `ip`. Finally, it keeps only these extracted columns in the output.
+Extracts the date, message, and IP address from a string and keeps only those columns.
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
@@ -32,9 +30,7 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 ```
 
-Parse a string and then convert the extracted date to a datetime type:
-
-This query performs the same string parsing as the previous example, extracting `date`, `msg`, and `ip` from the input string. Additionally, it converts the extracted `date` field from a string to a datetime type for further processing or analysis.
+Parses a string to extract the date, message, and IP address, then converts the extracted date to a datetime type.
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"

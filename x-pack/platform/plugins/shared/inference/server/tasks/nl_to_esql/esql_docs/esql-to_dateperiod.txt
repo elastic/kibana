@@ -1,6 +1,6 @@
 # TO_DATEPERIOD
 
-The TO_DATEPERIOD function converts an input value into a `date_period` value. The input must be a valid constant date period expression.
+The TO_DATEPERIOD function converts an input value into a `date_period` value.
 
 ## Syntax
 
@@ -10,11 +10,11 @@ The TO_DATEPERIOD function converts an input value into a `date_period` value. T
 
 #### field
 
-The input value to convert. The input must be a valid constant date period expression.
+Input value. The input must be a valid constant date period expression.
 
 ## Examples
 
-This query demonstrates how to work with date periods in ES|QL. It creates a row with a datetime value (`x`), then calculates two new fields: `y`, which adds three days to `x` using a date period, and `z`, which subtracts three days from `x` using the TO_DATEPERIOD function to convert the string "3 days" into a date period.
+Adds 3 days to a datetime value and subtracts 3 days using the TO_DATEPERIOD function to demonstrate date period arithmetic.
 
 ```esql
 ROW x = "2024-01-01"::datetime

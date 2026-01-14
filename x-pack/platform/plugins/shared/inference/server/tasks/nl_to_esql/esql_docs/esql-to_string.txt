@@ -14,18 +14,14 @@ The value to convert to a string. This can be a single- or multi-valued column, 
 
 ## Examples
 
-Convert a single integer value to a string:
-
-This query creates a row with a single integer value `a` set to 10, then uses the `TO_STRING` function to convert the integer value to a string and assigns it to a new column `j`.
+Converts the integer value in column `a` to a string and stores it in column `j`.
 
 ```esql
 ROW a=10
 | EVAL j = TO_STRING(a)
 ```
 
-Convert a list of integer values to a string:
-
-This query creates a row with a list of integer values `[10, 9, 8]` in column `a`, then converts the entire list to its string representation and stores it in a new column `j`.
+Converts the array of integers in column `a` to a string representation and stores it in column `j`.
 
 ```esql
 ROW a=[10, 9, 8]

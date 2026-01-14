@@ -416,7 +416,6 @@ async function generateDoc({
               command: isCommand,
             })
           );
-          log.info(`Rewritten content: ${rewrittenContent}`);
           filesToWrite.push({
             name: docFile.name,
             content: rewrittenContent,

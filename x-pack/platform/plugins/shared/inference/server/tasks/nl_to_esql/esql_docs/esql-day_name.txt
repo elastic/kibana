@@ -16,7 +16,7 @@ Date expression to extract the weekday name from. If `null`, the function return
 
 Extract the weekday name from a specific date:
 
-This query creates a row with a datetime value set to "1953-09-02T00:00:00.000Z" and then calculates the name of the weekday for that date, storing it in a new column called `weekday`.
+Returns the name of the weekday for the date "1953-09-02T00:00:00.000Z" and stores it in the `weekday` field.
 
 ```esql
 ROW dt = to_datetime("1953-09-02T00:00:00.000Z")

@@ -27,19 +27,15 @@ End of the range. Can be a number, a date, or a date expressed as a string.
 ## Examples
 
 Generate monthly buckets for a year by specifying a target number of buckets and a date range:
-
-This query selects employees hired in 1985, sorts their hire dates, and groups them into 20 monthly buckets within the year.
-
+This query groups employee hire dates from 1985 into 20 monthly buckets and sorts the dates within each bucket.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 ```
 
-Combine BUCKET with an aggregation to create a histogram of hires per month:
-
-This query counts the number of employees hired in each month of 1985 by grouping hire dates into 20 monthly buckets and sorting the results by month.
-
+Create a histogram of hires per month using BUCKET with aggregation:
+Counts the number of employees hired in each of 20 monthly buckets for the year 1985 and sorts the results by month.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
@@ -47,20 +43,16 @@ FROM employees
 | SORT month
 ```
 
-Generate weekly buckets by asking for more buckets in the same range:
-
-This query counts the number of employees hired each week in 1985 by dividing the year into 100 weekly buckets.
-
+Generate weekly buckets for a year by requesting more buckets:
+Counts the number of employees hired in each of 100 weekly buckets for the year 1985.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 ```
 
-Specify the bucket size directly when known, such as weekly buckets:
-
-This query counts the number of employees hired each week in 1985 by explicitly setting the bucket size to one week.
-
+Specify the bucket size directly to create weekly buckets:
+Counts the number of employees hired in each week of 1985 by directly specifying a weekly bucket size and sorts the results by week.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
@@ -69,19 +61,15 @@ FROM employees
 ```
 
 Create a salary histogram by bucketing numeric values:
-
-This query groups employee salaries into 20 buckets ranging from 25,324 to 74,999 and counts the number of employees in each bucket.
-
+Counts the number of employees whose salaries fall into each of 20 buckets between 25,324 and 74,999, and sorts the buckets.
 ```esql
 FROM employees
 | STATS COUNT(*) by bs = BUCKET(salary, 20, 25324, 74999)
 | SORT bs
 ```
 
-Specify a numeric bucket size directly:
-
-This query counts the number of employees in each salary bucket of 5,000 for those hired in 1985.
-
+Bucket numeric values by a fixed size:
+Counts the number of employees in each salary bucket of size 5,000 for hires in 1985, and sorts the buckets.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
@@ -90,19 +78,15 @@ FROM employees
 ```
 
 Create hourly buckets for the last 24 hours and count events per hour:
-
-This query counts the number of events that occurred in each hour over the last 24 hours by dividing the time range into 25 hourly buckets.
-
+Counts the number of events in each hourly bucket over the last 24 hours.
 ```esql
 FROM sample_data
 | WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
 | STATS COUNT(*) BY bucket = BUCKET(@timestamp, 25, NOW() - 1 day, NOW())
 ```
 
-Calculate average salary by hiring month using monthly buckets:
-
-This query calculates the average salary of employees hired in each month of 1985 by grouping hire dates into 20 monthly buckets.
-
+Calculate the average salary by hiring month using monthly buckets:
+Calculates the average salary of employees hired in each of 20 monthly buckets for the year 1985.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
@@ -110,9 +94,7 @@ FROM employees
 ```
 
 Use BUCKET in both the aggregating and grouping part of the STATS command:
-
-This query performs aggregations and grouping using bucketed salary values, allowing for complex analysis of salary distributions.
-
+Performs calculations and bucketing on salary values, grouping and aggregating by two different bucketed salary ranges, then sorts and keeps selected columns.
 ```esql
 FROM employees
 | STATS s1 = b1 + 1, s2 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)
@@ -121,9 +103,7 @@ FROM employees
 ```
 
 Adjust the start value of each bucket by a given duration, such as offsetting buckets by one hour:
-
-This query creates yearly buckets for employee birth dates, offsetting each bucket by one hour, and counts the number of birth dates in each bucket.
-
+Groups birth dates into yearly buckets offset by one hour, sorts the dates within each bucket, and counts the number of dates per bucket.
 ```esql
 FROM employees
 | STATS dates = MV_SORT(VALUES(birth_date)) BY b = BUCKET(birth_date + 1 HOUR, 1 YEAR) - 1 HOUR
@@ -134,5 +114,5 @@ FROM employees
 
 - BUCKET does not create buckets that do not match any documents; only buckets with matching data are returned.
 - BUCKET does not filter rows outside the provided range; it returns bucket values for all rows, including those outside the range. Use WHERE to filter rows as needed.
-- When specifying the bucket size directly, it must be a time duration or date period, and the reference is epoch (`0001-01-01T00:00:00Z`).
-- For numeric fields, you must determine the minimum and maximum values separately, as automatic range detection is not available.
+- When specifying the bucket size directly, the value must be a time duration or date period, and the reference is the epoch starting at `0001-01-01T00:00:00Z`.
+- For numeric bucketing, you must manually determine the minimum and maximum values for the range, as there is no automatic way to do this.

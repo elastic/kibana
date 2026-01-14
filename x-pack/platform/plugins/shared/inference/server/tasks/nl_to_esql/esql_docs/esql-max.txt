@@ -10,19 +10,17 @@ The MAX function returns the maximum value of a field.
 
 #### field
 
-The column for which you want to find the maximum value.
+The field for which to find the maximum value.
 
 ## Examples
 
-This query retrieves the highest value found in the `languages` field from the `employees` data.
-
+Finds the highest value present in the `languages` field across all employees.
 ```esql
 FROM employees
 | STATS MAX(languages)
 ```
 
-This query first calculates the average of multiple `salary_change` values per row using `MV_AVG`, then finds the maximum of those averages across all employees, assigning the result to `max_avg_salary_change`.
-
+Calculates the largest average salary change by first averaging multiple salary change values per employee and then finding the maximum of those averages.
 ```esql
 FROM employees
 | STATS max_avg_salary_change = MAX(MV_AVG(salary_change))

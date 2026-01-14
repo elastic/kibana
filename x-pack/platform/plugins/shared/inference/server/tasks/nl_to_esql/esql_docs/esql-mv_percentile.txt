@@ -1,24 +1,4 @@
-# MV_PERCENTILE
-
-The MV_PERCENTILE function converts a multivalued field into a single valued field containing the value at which a specified percentage of observed values occur.
-
-## Syntax
-
-`MV_PERCENTILE(number, percentile)`
-
-### Parameters
-
-#### number
-
-A multivalue expression containing the values to analyze.
-
-#### percentile
-
-The percentile to calculate. Must be a number between 0 and 100. If the value is out of range, the function returns null.
-
-## Examples
-
-This query creates a row with a multivalued field called `values`, then calculates the 50th percentile (median) using `MV_PERCENTILE` and compares it to the result of `MV_MEDIAN` for the same data.
+Calculates the 50th percentile (median) of the array `[5, 5, 10, 12, 5000]` using `MV_PERCENTILE` and compares it to the result from `MV_MEDIAN`.
 
 ```esql
 ROW values = [5, 5, 10, 12, 5000]

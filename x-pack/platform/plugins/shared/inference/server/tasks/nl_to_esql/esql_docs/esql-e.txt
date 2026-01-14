@@ -8,11 +8,11 @@ The E function returns Euler’s number, which is approximately 2.71828182845904
 
 ### Parameters
 
-This function does not take any parameters.
+This function does not require any parameters.
 
 ## Examples
 
-The following query returns Euler’s number as a single row result.
+Returns a single row containing Euler's number as a column value.
 
 ```esql
 ROW E()

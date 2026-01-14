@@ -27,13 +27,13 @@ An expression that outputs the values to group by. If its name matches an existi
 
 #### boolean_expressionX
 
-The condition that determines which rows are included when evaluating expressionX.
+The condition that determines which rows are included when evaluating expressionX. This parameter is optional.
 
 ## Examples
 
 Calculate the maximum salary for each language group:
 
-This query retrieves the employee number, languages, and salary for each employee, then calculates the maximum salary within each language group. The result adds a new column, `max_salary`, showing the highest salary for each language.
+Returns the maximum salary for each language, keeping employee number, language, and salary columns.
 
 ```esql
 FROM employees
@@ -43,7 +43,7 @@ FROM employees
 
 Calculate the maximum salary over the entire dataset, adding the result as a new column:
 
-This query selects the employee number, languages, and salary for all employees, then calculates the maximum salary across the entire dataset. The result includes a new column, `max_salary`, which contains the highest salary value for all employees.
+Adds a column with the maximum salary found in the dataset to every row, while keeping employee number, language, and salary columns.
 
 ```esql
 FROM employees
@@ -51,9 +51,9 @@ FROM employees
 | INLINE STATS max_salary = MAX(salary)
 ```
 
-Calculate average salary and count, grouped by languages and tenure:
+Calculate average salary and count, grouped by both language and tenure:
 
-This query filters for employees who are still hired, keeps relevant columns, calculates each employee's tenure in years, and removes the hire date. It then computes the average salary and the count of employees, grouped by both language and tenure, adding `avg_salary` and `count` columns to the result.
+Groups employees by language and tenure, then calculates the average salary and the count of employees for each group.
 
 ```esql
 FROM employees
@@ -66,7 +66,7 @@ FROM employees
 
 Calculate rounded average salaries for different salary ranges using WHERE clauses:
 
-This query keeps the employee number and salary, then calculates the rounded average salary for three different salary ranges: less than $50,000, between $50,000 and $60,000, and greater than or equal to $60,000. Each range's average is added as a separate column: `avg_lt_50`, `avg_lt_60`, and `avg_gt_60`.
+Adds columns for the rounded average salary in three salary ranges: less than $50,000, between $50,000 and $60,000, and greater than or equal to $60,000.
 
 ```esql
 FROM employees

@@ -1,6 +1,6 @@
 # LOOKUP-JOIN
 
-The LOOKUP JOIN command adds new columns to your query results by finding documents in a lookup index that share the same join field value as your result rows. For each row that matches a document in the lookup index based on the join fields, all fields from the matching document are added as new columns. If multiple documents in the lookup index match a single row, the output will contain one row for each matching combination. This command enables you to enrich your results with data from another index, simplifying data enrichment and analysis workflows.
+The LOOKUP JOIN command adds new columns to your query results by finding documents in a lookup index that share the same join field value as your result rows. For each row in your results that matches a document in the lookup index based on the join fields, all fields from the matching document are added as new columns to that row. If multiple documents in the lookup index match a single row, the output will contain one row for each matching combination. This command enables you to enrich your data by adding information from another index, simplifying data analysis workflows.
 
 ## Syntax
 
@@ -17,54 +17,48 @@ The name of the lookup index. This must be a specific index name; wildcards, ali
 Can be one of the following:
 - A single field name.
 - A comma-separated list of field names, for example `<field1>, <field2>, <field3>`.
-- An expression with one or more predicates linked by `AND`, for example `<left_field1> >= <lookup_field1> AND <left_field2> == <lookup_field2>`. Each predicate compares a field from the left index with a field from the lookup index using binary operators (`==`, `>=`, `<=`, `>`, `<`, `!=`). Each field name in the join condition must exist in only one of the indexes. Use RENAME to resolve naming conflicts.
+- An expression with one or more predicates linked by `AND`, such as `<left_field1> >= <lookup_field1> AND <left_field2> == <lookup_field2>`. Each predicate compares a field from the left index with a field from the lookup index using binary operators (`==`, `>=`, `<=`, `>`, `<`, `!=`). Each field name in the join condition must exist in only one of the indexes. Use RENAME to resolve naming conflicts.
 - An expression that includes full text functions and other Lucene-pushable functions, for example `MATCH(<lookup_field>, "search term") AND <left_field> == <lookup_field>`. These functions can be combined with binary operators and logical operators (`AND`, `OR`, `NOT`) to create complex join conditions. At least one condition that relates the lookup index fields to the left side of the join fields is still required.
 
 If using join on a single field or a field list, the fields used must exist in both your current query results and in the lookup index. If the fields contain multi-valued entries, those entries will not match anything (the added fields will contain null for those rows).
 
 ## Examples
 
-Correlate source IPs with known malicious addresses:
-
-This query enriches firewall log data by joining it with a threat list based on the source IP address. For each log entry, if the source IP matches an entry in the threat list, threat information is added to the result.
+Correlate source IPs in firewall logs with known malicious addresses:
 
 ```esql
 FROM firewall_logs
 | LOOKUP JOIN threat_list ON source.IP
 ```
+Adds threat information to each firewall log entry by matching the source IP with entries in the threat list.
 
-Filter only rows with a matching threat entry:
-
-This query first joins firewall logs with the threat list on source IP, then filters the results to only include rows where a threat level is present, effectively showing only logs that match a known threat.
+Filter only for rows that have a matching threat entry:
 
 ```esql
 FROM firewall_logs
 | LOOKUP JOIN threat_list ON source.IP
 | WHERE threat_level IS NOT NULL
 ```
+Displays only firewall log entries where the source IP matches a known threat in the threat list.
 
-Correlate host metrics with environment or ownership details:
-
-This query enriches system metrics by joining with host inventory and ownership information based on the host name. The result includes additional details about each host from both lookup sources.
+Pull in environment or ownership details for each host to correlate with metrics data:
 
 ```esql
 FROM system_metrics
 | LOOKUP JOIN host_inventory ON host.name
 | LOOKUP JOIN ownerships ON host.name
 ```
+Enriches system metrics by adding host inventory and ownership details for each host.
 
-Map service logs to owning teams or escalation contacts:
-
-This query joins application logs with service ownership information using the service ID, adding details about the owning team or escalation contacts to each log entry.
+Show logs with the owning team or escalation information for faster triage and incident response:
 
 ```esql
 FROM app_logs
 | LOOKUP JOIN service_owners ON service_id
 ```
+Appends service ownership or escalation information to each application log entry.
 
-Demonstrate optimizer behavior for WHERE clauses before and after LOOKUP JOIN:
-
-This query creates a language code from the employee's languages, filters employees by employee number, and then performs a lookup join to enrich with language details. The filter is applied before the join.
+Demonstrate that WHERE clauses are optimized to run before LOOKUP JOIN when possible:
 
 ```esql
 FROM employees
@@ -72,8 +66,7 @@ FROM employees
 | WHERE emp_no >= 10091 AND emp_no < 10094
 | LOOKUP JOIN languages_lookup ON language_code
 ```
-
-This query performs the lookup join before filtering by employee number. The optimizer may move the filter before the join for efficiency.
+Filters employees by employee number before joining with language lookup data for efficiency.
 
 ```esql
 FROM employees
@@ -81,10 +74,11 @@ FROM employees
 | LOOKUP JOIN languages_lookup ON language_code
 | WHERE emp_no >= 10091 AND emp_no < 10094
 ```
+Joins employee data with language lookup information and then filters by employee number, but the optimizer will move the filter before the join for better performance.
 
 ## Limitations
 
-- The lookup index must be a specific index name; wildcards, aliases, and remote cluster references are not supported.
+- The lookup index must be specified by name; wildcards, aliases, and remote cluster references are not supported.
 - Indices used for lookups must be configured with the `lookup` index mode.
 - Fields used in the join condition must exist in only one of the indexes; use RENAME to resolve naming conflicts.
-- If the join fields contain multi-valued entries, those entries will not match anything, and the added fields will contain null for those rows.
+- Multi-valued fields in the join condition will not match anything, resulting in null values for those rows.

@@ -1,6 +1,6 @@
 # LOG10
 
-The LOG10 command calculates the base 10 logarithm of a numeric value. The result is always a double. If the input is 0 or a negative number, the function returns `null` and issues a warning.
+The LOG10 command calculates the base-10 logarithm of a numeric value. The result is always a double. If the input is 0 or a negative number, the function returns `null` and issues a warning.
 
 ## Syntax
 
@@ -14,9 +14,13 @@ Numeric expression. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-This query creates a row with a column `d` set to 1000.0, then calculates the base 10 logarithm of `d` and stores the result in a new column `s`.
+Calculates the base-10 logarithm of the value 1000.0 and stores the result in the field `s`.
 
 ```esql
 ROW d = 1000.0
 | EVAL s = LOG10(d)
 ```
+
+## Limitations
+
+Logs of 0 and negative numbers return `null` and a warning.

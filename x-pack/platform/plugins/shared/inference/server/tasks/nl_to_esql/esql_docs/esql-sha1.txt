@@ -1,20 +1,4 @@
-# SHA1
-
-The SHA1 command computes the SHA1 hash of the provided input.
-
-## Syntax
-
-`SHA1(input)`
-
-### Parameters
-
-#### input
-
-The value to be hashed.
-
-## Examples
-
-This query selects all rows from the `sample_data` index where the `message` column does not equal "Connection error". For each of these rows, it computes the SHA1 hash of the `message` column, stores the result in a new column called `sha1`, and then keeps only the `message` and `sha1` columns in the output.
+Compute the SHA1 hash of the `message` column for all rows where the message is not "Connection error", and display both the original message and its hash.
 
 ```esql
 FROM sample_data

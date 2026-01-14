@@ -1,26 +1,4 @@
-# COALESCE
-
-Returns the first argument that is not null. If all arguments are null, it returns `null`.
-
-## Syntax
-
-`COALESCE(first, rest)`
-
-### Parameters
-
-#### first
-
-Expression to evaluate.
-
-#### rest
-
-Other expression to evaluate.
-
-## Examples
-
-Calculate the first non-null value between columns `a` and `b`:
-
-This query creates a row with two columns, `a` (set to null) and `b` (set to "b"), and then uses the `COALESCE` function to return the first non-null value between `a` and `b`. In this case, since `a` is null, the result will be the value of `b`, which is "b".
+Calculates the first non-null value between columns `a` and `b` for each row.
 
 ```esql
 ROW a=null, b="b"

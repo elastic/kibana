@@ -18,14 +18,14 @@ Numeric expression for the exponent. If the value is null, the function returns 
 
 ## Examples
 
-The following query calculates 2.0 raised to the power of 2, resulting in 4.0:
+Calculates the result of 2 raised to the power of 2 and stores it in the `result` field.
 
 ```esql
 ROW base = 2.0, exponent = 2
 | EVAL result = POW(base, exponent)
 ```
 
-This query calculates the square root of 4 by raising it to the power of 0.5, resulting in 2.0:
+Calculates the square root of 4 by raising 4 to the power of 0.5 and stores it in the `s` field.
 
 ```esql
 ROW base = 4, exponent = 0.5

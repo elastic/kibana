@@ -1,6 +1,6 @@
 # KQL
 
-The KQL function performs a query using the KQL query string format and returns true if the provided query matches the row.
+The KQL function performs a KQL query and returns true if the provided KQL query string matches the row.
 
 ## Syntax
 
@@ -34,18 +34,14 @@ Default field to search if no field is provided in the query string. Supports wi
 
 ## Examples
 
-Use KQL to filter by a specific field value:
-
-This query selects rows from the `books` table where the `author` field is exactly "Faulkner".
+Filters the `books` dataset to include only rows where the `author` field is "Faulkner".
 
 ```esql
 FROM books
 | WHERE KQL("author: Faulkner")
 ```
 
-Use KQL with additional options for case-insensitive matching and custom settings:
-
-This query selects rows from the `employees` table where the `first_name` field matches "mary", ignoring case sensitivity and applying a boost to the relevance score.
+Filters the `employees` dataset to include only rows where the `first_name` field matches "mary", using case-insensitive matching and a custom boost value.
 
 ```esql
 FROM employees

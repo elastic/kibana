@@ -18,40 +18,35 @@ Multivalue expression. Null values are treated as empty sets.
 
 ## Examples
 
-The following query creates two arrays of integers and combines them, returning a single array containing all unique values from both arrays.
-
+Combine two integer arrays and return all unique values.
 ```esql
 ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
 | EVAL finalValue = MV_UNION(a, b)
 | KEEP finalValue
 ```
 
-This query creates two arrays of long integers, merges them, and outputs an array with all unique long integer values from both arrays.
-
+Perform a set union on two long integer arrays.
 ```esql
 ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
 | EVAL finalValue = MV_UNION(a, b)
 | KEEP finalValue
 ```
 
-This query combines two arrays of boolean values and returns an array containing all unique boolean values present in either array.
-
+Combine two boolean arrays and return the unique values.
 ```esql
 ROW a = [true, false], b = [false]
 | EVAL finalValue = MV_UNION(a, b)
 | KEEP finalValue
 ```
 
-This query merges two arrays of floating-point numbers and returns an array with all unique floating-point values from both arrays.
-
+Return the unique values from two float arrays.
 ```esql
 ROW a = [5.2, 10.5, 1.12345], b = [10.5, 2.6928]
 | EVAL finalValue = MV_UNION(a, b)
 | KEEP finalValue
 ```
 
-This query combines two arrays of strings and returns an array containing all unique string values from both arrays.
-
+Combine two string arrays and return all unique values.
 ```esql
 ROW a = ["one", "two", "three"], b = ["two", "four"]
 | EVAL finalValue = MV_UNION(a, b)

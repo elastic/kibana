@@ -20,9 +20,8 @@ Optional. Specifies the sort order. Valid options are `ASC` for ascending and `D
 
 Sort the values in a multivalued field in ascending and descending order:
 
-This query creates a row with a multivalued field `a` containing the array `[4, 2, -3, 2]`. It then sorts the array in ascending order and stores the result in the field `sa`, and sorts the array in descending order and stores the result in the field `sd`.
-
 ```esql
 ROW a = [4, 2, -3, 2]
 | EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
 ```
+Sorts the array `[4, 2, -3, 2]` into ascending order (`sa`) and descending order (`sd`).

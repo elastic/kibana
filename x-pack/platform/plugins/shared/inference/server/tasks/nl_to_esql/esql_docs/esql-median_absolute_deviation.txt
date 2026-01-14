@@ -1,6 +1,6 @@
 # MEDIAN_ABSOLUTE_DEVIATION
 
-The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation, a robust measure of variability. It is particularly useful for describing data with outliers or data that is not normally distributed, and can be more informative than standard deviation in such cases. The value is computed as the median of the absolute deviations from the median of the entire sample: `median(|median(X) - X|)`. The result is usually approximate and may vary slightly between runs.
+Returns the median absolute deviation, a robust measure of variability that is useful for describing data with outliers or non-normal distributions. It is calculated as the median of the absolute deviations from the median of the entire sample: `median(|median(X) - X|)`. This function is usually approximate and non-deterministic, so results may vary slightly for the same data.
 
 ## Syntax
 
@@ -14,14 +14,14 @@ The numeric column or expression for which to calculate the median absolute devi
 
 ## Examples
 
-This query retrieves data from the `employees` index and calculates both the median and the median absolute deviation of the `salary` column, providing insights into the central tendency and variability of employee salaries.
+Calculates both the median and the median absolute deviation for the `salary` column in the `employees` dataset.
 
 ```esql
 FROM employees
 | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
 ```
 
-This query calculates the median absolute deviation of the maximum values found in the multivalued `salary_change` column for each document in the `employees` index. The result, labeled as `m_a_d_max_salary_change`, helps measure the variability of the largest salary changes among employees.
+Computes the median absolute deviation of the maximum value in the multivalued `salary_change` column, assigning the result to `m_a_d_max_salary_change`.
 
 ```esql
 FROM employees
@@ -30,5 +30,5 @@ FROM employees
 
 ## Limitations
 
-- The result of MEDIAN_ABSOLUTE_DEVIATION is usually approximate.
-- The function is non-deterministic, so results may vary slightly even with the same data.
+- The result is usually approximate.
+- The function is non-deterministic, so repeated runs on the same data may yield slightly different results.

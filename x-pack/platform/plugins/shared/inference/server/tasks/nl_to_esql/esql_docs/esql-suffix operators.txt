@@ -1,29 +1,29 @@
 # SUFFIX OPERATORS
 
-The `IS NULL` and `IS NOT NULL` operators are used to check whether a column contains NULL values or not.
+The `IS NULL` and `IS NOT NULL` predicates are used to check whether a value is NULL or not.
 
 ## Syntax
 
-`<column> IS NULL`
+`<expression> IS NULL`
 
-`<column> IS NOT NULL`
+`<expression> IS NOT NULL`
 
 ### Parameters
 
-#### column
+#### expression
 
-The column to be checked for NULL values.
+The value or column to check for NULL or non-NULL values.
 
 ## Examples
 
-This query retrieves all employees whose `birth_date` field is NULL, meaning their birth date information is missing.
+Finds all employees whose birth date is missing (NULL):
 
 ```esql
 FROM employees
 | WHERE birth_date IS NULL
 ```
 
-This query finds all employees where the `is_rehired` field has a value (is not NULL), and then counts the total number of employee numbers that meet this condition.
+Counts the number of employees who have a non-NULL value in the `is_rehired` field:
 
 ```esql
 FROM employees

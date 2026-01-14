@@ -1,6 +1,6 @@
 # SORT
 
-The SORT command arranges the rows of a table based on one or more columns. By default, sorting is in ascending order, but you can specify ascending (ASC) or descending (DESC) order explicitly. If multiple rows have the same value for the primary sort column, you can add additional columns as tie breakers. When sorting on columns with multiple values, the lowest value is used for ascending order and the highest for descending. By default, null values are considered larger than any other value, so they appear last in ascending order and first in descending order. You can override this behavior using NULLS FIRST or NULLS LAST.
+The SORT command arranges the rows of a table based on one or more columns. By default, sorting is in ascending order, but you can specify `ASC` for ascending or `DESC` for descending order. If multiple rows have the same value for the primary sort column, you can add additional columns as tie breakers. When sorting on multivalued columns, the lowest value is used for ascending order and the highest for descending. By default, `null` values are considered larger than any other value, appearing last in ascending order and first in descending order. You can override this behavior with `NULLS FIRST` or `NULLS LAST`.
 
 ## Syntax
 
@@ -14,40 +14,28 @@ The column to sort on.
 
 ## Examples
 
-Sort employees by height in ascending order:
-
-This query retrieves the first name, last name, and height of all employees, and then sorts the results so that employees with the smallest height appear first.
-
+Sorts the employees table by the `height` column in ascending order.
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | SORT height
 ```
 
-Sort employees by height in descending order:
-
-This query fetches the first name, last name, and height of all employees, and sorts the results so that employees with the greatest height appear first.
-
+Sorts the employees table by the `height` column in descending order.
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | SORT height DESC
 ```
 
-Sort employees by height in descending order, using first name as a tie breaker in ascending order:
-
-This query lists employees with their first name, last name, and height, sorting them by height from tallest to shortest. If two employees have the same height, it further sorts them by first name in alphabetical order.
-
+Sorts the employees table by `height` in descending order, and uses `first_name` in ascending order to break ties.
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | SORT height DESC, first_name ASC
 ```
 
-Sort employees by first name in ascending order, placing null values first:
-
-This query displays employees' first name, last name, and height, sorting the results alphabetically by first name. Any employees with a missing (null) first name will appear at the top of the list.
-
+Sorts the employees table by `first_name` in ascending order, placing rows with `null` values in `first_name` at the top.
 ```esql
 FROM employees
 | KEEP first_name, last_name, height

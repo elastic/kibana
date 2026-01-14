@@ -18,7 +18,7 @@ The percentile to calculate, expressed as a number (for example, 50 for the medi
 
 ## Examples
 
-The following query calculates the 0th, 50th, and 99th percentiles for the `salary` column in the `employees` dataset. This means it finds the minimum salary (0th percentile), the median salary (50th percentile), and the salary value that is greater than 99% of all salaries (99th percentile).
+Calculates the 0th, 50th (median), and 99th percentiles of the `salary` column for all employees.
 
 ```esql
 FROM employees
@@ -27,7 +27,7 @@ FROM employees
      , p99 = PERCENTILE(salary, 99)
 ```
 
-This query calculates the 80th percentile of the maximum salary change for each employee. It first determines the maximum salary change per employee and then finds the value that is greater than 80% of these maximum changes.
+Calculates the 80th percentile of the maximum salary change for each employee.
 
 ```esql
 FROM employees

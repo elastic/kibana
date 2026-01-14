@@ -1,24 +1,20 @@
 # GRID ENCODING FUNCTIONS
 
-These functions calculate the grid encoding of a given geo_point at a specified precision. The result is long encoded. You can use TO_STRING to convert the result to a string, TO_LONG to convert it to a long, or TO_GEOSHAPE to calculate the geo_shape bounding geometry. These functions are related to the geo_grid query and the corresponding grid aggregations.
+The GRID ENCODING FUNCTIONS calculate the geotile, geohex (H3 cell-id), or geohash of a given geo_point at a specified precision. The result is long encoded. You can use TO_STRING to convert the result to a string, TO_LONG to convert it to a long, or TO_GEOSHAPE to calculate the geo_shape bounding geometry. These functions are related to the geo_grid query and the corresponding grid aggregations.
 
 ## Syntax
 
-`ST_GEOTILE(geometry, precision [, bounds])`
-
-`ST_GEOHEX(geometry, precision [, bounds])`
-
-`ST_GEOHASH(geometry, precision [, bounds])`
+`GRID ENCODING FUNCTIONS(geometry, precision, bounds)`
 
 ### Parameters
 
 #### geometry
 
-An expression of type geo_point. If null, the function returns null.
+Expression of type geo_point. If null, the function returns null.
 
 #### precision
 
-An expression of type integer. If null, the function returns null. The valid range depends on the function:
+Expression of type integer. If null, the function returns null. Valid values depend on the function:
 - ST_GEOTILE: 0 to 29
 - ST_GEOHEX: 0 to 15
 - ST_GEOHASH: 1 to 12
@@ -29,7 +25,7 @@ Optional. Bounds to filter the grid tiles, specified as a geo_shape of type BBOX
 
 ## Examples
 
-The following query calculates the geotile grid cell for each airport's location at precision 2, then aggregates the results by geotile, computing the count and centroid for each tile. The results are then converted to string format, sorted by count (descending) and geotile string (ascending), and only the relevant columns are kept.
+Aggregates airport locations into geotile grid cells at precision 2, calculates the count and centroid for each cell, converts the geotile to a string, sorts by count and geotile, and keeps relevant fields.
 
 ```esql
 FROM airports
@@ -43,7 +39,7 @@ FROM airports
 | KEEP count, centroid, geotileString
 ```
 
-This query calculates the H3 geohex cell ID for each airport's location at precision 1, aggregates the results by geohex, and computes the count and centroid for each cell. It then filters to include only cells with at least 10 airports, converts the geohex to a string, keeps the relevant columns, and sorts the results by count (descending) and geohex string (ascending).
+Aggregates airport locations into geohex (H3) grid cells at precision 1, calculates the count and centroid for each cell, filters cells with at least 10 airports, converts the geohex to a string, sorts, and keeps relevant fields.
 
 ```esql
 FROM airports
@@ -58,7 +54,7 @@ FROM airports
 | SORT count DESC, geohexString ASC
 ```
 
-This query calculates the geohash for each airport's location at precision 1, aggregates the results by geohash, and computes the count and centroid for each geohash. It filters to include only geohashes with at least 10 airports, converts the geohash to a string, keeps the relevant columns, and sorts the results by count (descending) and geohash string (ascending).
+Aggregates airport locations into geohash grid cells at precision 1, calculates the count and centroid for each cell, filters cells with at least 10 airports, converts the geohash to a string, sorts, and keeps relevant fields.
 
 ```esql
 FROM airports

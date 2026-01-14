@@ -18,14 +18,14 @@ Numeric expression to compute the logarithm for. If `null`, the function returns
 
 ## Examples
 
-This query creates a row with the values `base = 2.0` and `value = 8.0`, then calculates the logarithm of 8 to base 2 and stores the result in the column `s`.
+Calculates the logarithm of 8 using base 2 and stores the result in the column `s`.
 
 ```esql
 ROW base = 2.0, value = 8.0
 | EVAL s = LOG(base, value)
 ```
 
-This query creates a row with the value `value = 100`, then calculates the natural logarithm (base e) of 100 and stores the result in the column `s`.
+Calculates the natural logarithm (base e) of 100 and stores the result in the column `s`.
 
 ```esql
 ROW value = 100

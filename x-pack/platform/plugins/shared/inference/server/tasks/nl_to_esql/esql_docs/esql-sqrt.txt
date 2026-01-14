@@ -1,20 +1,4 @@
-# SQRT
-
-Returns the square root of a number. The input can be any numeric value, and the return value is always a double. If the input is a negative number or infinity, the result is null.
-
-## Syntax
-
-`SQRT(number)`
-
-### Parameters
-
-#### number
-
-Numeric expression. If the value is null, the function returns null.
-
-## Examples
-
-This query creates a row with a column `d` set to 100.0, then calculates the square root of `d` and stores the result in a new column `s`.
+Calculate the square root of 100.0 and store the result in a new column named `s`.
 
 ```esql
 ROW d = 100.0

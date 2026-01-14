@@ -1,6 +1,6 @@
 # STATS-BY
 
-The STATS command groups rows based on common values and calculates one or more aggregated values over these groups. Each aggregated value can be filtered using a WHERE clause. If BY is omitted, the output contains a single row with aggregations over the entire dataset. Supported aggregation functions include ABSENT, AVG, COUNT, COUNT_DISTINCT, MAX, MEDIAN, MEDIAN_ABSOLUTE_DEVIATION, MIN, PERCENTILE, PRESENT, SAMPLE, ST_CENTROID_AGG, ST_EXTENT_AGG, STD_DEV, SUM, TOP, VALUES, VARIANCE, and WEIGHTED_AVG. When used with the TS source command, time series aggregation functions are also available. Supported grouping functions are BUCKET, TBUCKET, and CATEGORIZE.
+The STATS command groups rows based on a common value and calculates one or more aggregated values over those groups. Each aggregated value can be filtered using a WHERE clause. If BY is omitted, the output contains a single row with aggregations over the entire dataset. Supported aggregation functions include ABSENT, AVG, COUNT, COUNT_DISTINCT, MAX, MEDIAN, MEDIAN_ABSOLUTE_DEVIATION, MIN, PERCENTILE, PRESENT, SAMPLE, ST_CENTROID_AGG, ST_EXTENT_AGG, STD_DEV, SUM, TOP, VALUES, VARIANCE, and WEIGHTED_AVG. When used with the TS source command, time series aggregation functions are also available. Supported grouping functions are BUCKET, TBUCKET, and CATEGORIZE.
 
 ## Syntax
 
@@ -22,13 +22,12 @@ An expression that determines the values to group by. If its name matches a comp
 
 #### boolean_expressionX
 
-The condition that must be met for a row to be included in the evaluation of expressionX.
+A condition that must be met for a row to be included in the evaluation of expressionX.
 
 ## Examples
 
 Calculate the count of employees grouped by language:
-This query retrieves employee records, counts the number of employees for each language, and sorts the results by language.
-
+Returns the number of employees for each language, sorted by language.
 ```esql
 FROM employees
 | STATS count = COUNT(emp_no) BY languages
@@ -36,24 +35,21 @@ FROM employees
 ```
 
 Calculate the average language value over the entire dataset:
-This query calculates the average value of the 'languages' field across all employees, returning a single aggregated result.
-
+Computes the average value of the 'languages' field across all employees.
 ```esql
 FROM employees
 | STATS avg_lang = AVG(languages)
 ```
 
 Calculate both the average and maximum language values:
-This query computes both the average and the maximum value of the 'languages' field for all employees, returning both metrics in the result.
-
+Finds both the average and the maximum value of the 'languages' field for all employees.
 ```esql
 FROM employees
 | STATS avg_lang = AVG(languages), max_lang = MAX(languages)
 ```
 
 Calculate average salaries for employees born before and after 1960, grouped by gender:
-This query calculates the average salary for employees born before 1960 and those born in or after 1960, grouping the results by gender. The averages are cast to long integers, and the results are sorted by gender.
-
+Shows the average salary for employees born before 1960 and those born in or after 1960, grouped by gender and sorted by gender.
 ```esql
 FROM employees
 | STATS avg50s = AVG(salary)::LONG WHERE birth_date < "1960-01-01",
@@ -62,9 +58,8 @@ FROM employees
 | SORT gender
 ```
 
-Count employees in different salary ranges and calculate the total count:
-This query divides employees into three salary ranges (under 40K, between 40K and 60K, and over 60K) and counts the number of employees in each range, as well as the total number of employees.
-
+Count employees in different salary ranges and total, without grouping:
+Displays the number of employees in three salary ranges (under 40K, between 40K and 60K, over 60K) and the total count, without grouping.
 ```esql
 FROM employees
 | EVAL Ks = salary / 1000
@@ -75,8 +70,7 @@ FROM employees
 ```
 
 Calculate average salary grouped by year hired and language:
-This query extracts the year from each employee's hire date, then calculates the average salary for each combination of hire year and language. The average salary is rounded, and the results are sorted by year and language.
-
+Shows the rounded average salary for each combination of hire year and language, sorted by year and language.
 ```esql
 FROM employees
 | EVAL hired = DATE_FORMAT("yyyy", hire_date)
@@ -85,33 +79,29 @@ FROM employees
 | SORT hired, languages.long
 ```
 
-Sum the price for each color when the grouping key is multivalued:
-This query creates a row with a price and a list of colors, then calculates the total price for each color, handling the case where the color field contains multiple values.
-
+Sum price grouped by color when color is a multivalued field:
+Calculates the total price for each color when the color field contains multiple values.
 ```esql
 ROW price = 10, color = ["blue", "pink", "yellow"]
 | STATS SUM(price) BY color
 ```
 
-Sum the price for each combination of color and size when both grouping keys are multivalued:
-This query creates a row with a price, a list of colors, and a list of sizes, then calculates the total price for each possible combination of color and size.
-
+Sum price grouped by both color and size, both multivalued:
+Computes the total price for each combination of color and size when both fields have multiple values.
 ```esql
 ROW price = 10, color = ["blue", "pink", "yellow"], size = ["s", "m", "l"]
 | STATS SUM(price) BY color, size
 ```
 
-Show all values of the group key when the grouping key is multivalued:
-This query creates a row with a list of colors and then displays all unique color values for each color group.
-
+Show all values of a multivalued group key:
+Lists all unique color values present in the multivalued color field.
 ```esql
 ROW color = ["blue", "pink", "yellow"]
 | STATS VALUES(color) BY color
 ```
 
-Send the group key to the function using MV_EXPAND:
-This query expands the multivalued color field into individual rows, then shows all unique color values for each color group.
-
+Expand multivalued group key before aggregation:
+Expands the color field into individual values and then lists all unique colors.
 ```esql
 ROW color = ["blue", "pink", "yellow"]
 | MV_EXPAND color
@@ -119,33 +109,29 @@ ROW color = ["blue", "pink", "yellow"]
 ```
 
 Calculate the average salary change using MV_AVG and AVG:
-This query calculates the average of the average salary changes (using MV_AVG for multivalued fields), rounds the result to 10 decimal places, and returns it as avg_salary_change.
-
+Rounds the average of the average salary changes (for multivalued fields) to 10 decimal places.
 ```esql
 FROM employees
 | STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)
 ```
 
 Group employees by the first letter of their last name:
-This query groups employees by the first letter of their last name and counts the number of employees in each group, then sorts the results by the letter.
-
+Counts the number of employees for each initial letter of their last name, sorted by the initial.
 ```esql
 FROM employees
 | STATS my_count = COUNT() BY LEFT(last_name, 1)
 | SORT `LEFT(last_name, 1)`
 ```
 
-Return a column named AVG(salary) when the output column name is not specified:
-This query calculates the average salary for all employees and returns the result in a column named AVG(salary).
-
+Return a column named AVG(salary) by omitting the output column name:
+Displays the average salary for all employees, using the default column name.
 ```esql
 FROM employees
 | STATS AVG(salary)
 ```
 
-Quote the column name with backticks when using it in subsequent commands:
-This query calculates the average salary, then rounds the result and stores it in a new column named avg_salary_rounded, referencing the original column name with backticks.
-
+Use a quoted column name with special characters in subsequent commands:
+Calculates the average salary and then rounds it, referencing the column by its quoted name.
 ```esql
 FROM employees
 | STATS AVG(salary)

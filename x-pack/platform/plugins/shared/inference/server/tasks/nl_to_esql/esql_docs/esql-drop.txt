@@ -1,6 +1,6 @@
 # DROP
 
-The DROP command removes one or more columns from the result set.
+The DROP command removes one or more columns from the result set. You can specify columns by name or use wildcards to match multiple columns.
 
 ## Syntax
 
@@ -14,18 +14,14 @@ A comma-separated list of columns to remove. Wildcards are supported to match mu
 
 ## Examples
 
-Remove the column named `height`:
-
-This query retrieves data from the `employees` index and removes the `height` column from the results.
+Removes the column named `height` from the employees dataset.
 
 ```esql
 FROM employees
 | DROP height
 ```
 
-Remove all columns with names that start with `height` using a wildcard:
-
-This query retrieves data from the `employees` index and removes all columns whose names begin with `height`, such as `height_cm` or `height_in`, from the results.
+Removes all columns from the employees dataset whose names start with `height` by using a wildcard.
 
 ```esql
 FROM employees

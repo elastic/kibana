@@ -1,6 +1,6 @@
 # GEOMETRY FUNCTIONS
 
-Geometry functions provide tools to extract coordinates, count points, and simplify geometries. These functions work with various geometry types, including `geo_point`, `geo_shape`, `cartesian_point`, and `cartesian_shape`.
+Geometry functions provide tools to extract coordinates, count points, and simplify geometries. These functions work with geographic and cartesian point and shape types.
 
 ## Syntax
 
@@ -21,22 +21,19 @@ Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_sh
 
 #### tolerance
 
-Optional. Tolerance for the geometry simplification, in the units of the input SRS.
+(Optional) Tolerance for geometry simplification, in the units of the input spatial reference system (SRS).
 
 ## Examples
 
 Extract the x and y coordinates from a geo point:
 
-This query creates a row with a geo point and then extracts its longitude (x) and latitude (y) coordinates into separate columns.
-
 ```esql
 ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
 | EVAL x = ST_X(point), y = ST_Y(point)
 ```
+Extracts the longitude and latitude values from a geo point and assigns them to the fields `x` and `y`.
 
 Count the number of points in a city boundary geometry:
-
-This query retrieves records from the `airport_city_boundaries` index where the airport abbreviation is "CPH", calculates the number of points that make up the city boundary geometry, and keeps only the abbreviation, airport name, and point count in the output.
 
 ```esql
 FROM airport_city_boundaries
@@ -44,15 +41,15 @@ FROM airport_city_boundaries
 | EVAL points = ST_NPOINTS(city_boundary)
 | KEEP abbrev, airport, points
 ```
+Retrieves the airport city boundary for "CPH", counts the number of points in its geometry, and displays the abbreviation, airport name, and point count.
 
 Simplify a polygon geometry using a specified tolerance:
-
-This query creates a row with a polygon geometry in WKT format, converts it to a geo shape, and then simplifies the geometry using a tolerance value of 0.7 to reduce its complexity.
 
 ```esql
 ROW wkt = "POLYGON ((7.998 53.827, 9.470 53.068, 15.754 53.801, 16.523 57.160, 11.162 57.868, 8.064 57.445, 6.219 55.317, 7.998 53.827))"
 | EVAL simplified = ST_SIMPLIFY(TO_GEOSHAPE(wkt), 0.7)
 ```
+Converts a WKT polygon to a geo shape and simplifies its geometry using a tolerance of 0.7.
 
 ## Limitations
 

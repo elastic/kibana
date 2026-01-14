@@ -1,20 +1,4 @@
-# TAN
-
-Returns the tangent of an angle, where the angle is specified in radians.
-
-## Syntax
-
-`TAN(angle)`
-
-### Parameters
-
-#### angle
-
-An angle in radians. If the value is `null`, the function returns `null`.
-
-## Examples
-
-This query creates a single row with a column `a` set to 1.8, then calculates the tangent of `a` (interpreted as radians) and stores the result in a new column called `tan`.
+Calculates the tangent of the value in column `a` and stores the result in a new column `tan`.
 
 ```esql
 ROW a=1.8

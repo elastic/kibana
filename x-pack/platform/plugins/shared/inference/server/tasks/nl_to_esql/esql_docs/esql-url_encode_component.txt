@@ -1,6 +1,6 @@
 # URL_ENCODE_COMPONENT
 
-Encodes the input string for safe use in URLs by percent-encoding all characters except alphanumerics, `.`, `-`, `_`, and `~`. Spaces are encoded as `%20`.
+Encodes a string for safe use in a URL by percent-encoding all characters except alphanumerics, `.`, `-`, `_`, and `~`. Spaces are encoded as `%20`.
 
 ## Syntax
 
@@ -14,12 +14,10 @@ The URL or string to encode.
 
 ## Examples
 
-Encode a URL containing spaces and special characters:
-
-This query creates a row with a URL containing spaces and special characters, then encodes the URL so that spaces are replaced with `%20` and other special characters are percent-encoded for safe use in URLs.
+Encodes the value of the `u` field, which contains a URL with spaces and special characters, into a percent-encoded format suitable for use in a URL.
 
 ```esql
 ROW u = "https://example.com/?x=foo bar&y=baz"
 | EVAL u = URL_ENCODE_COMPONENT(u)
 ```
-This example encodes the URL, converting spaces to `%20` and percent-encoding other special characters.
+This example encodes the URL, converting spaces and special characters to their percent-encoded representations.

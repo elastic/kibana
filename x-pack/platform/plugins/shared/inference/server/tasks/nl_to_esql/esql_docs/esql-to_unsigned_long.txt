@@ -1,6 +1,6 @@
 # TO_UNSIGNED_LONG
 
-Converts an input value to an unsigned long. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to unsigned long. Boolean `true` is converted to `1`, and `false` to `0`.
+Converts an input value to an unsigned long value. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to unsigned long. Boolean `true` is converted to `1`, and `false` to `0`.
 
 ## Syntax
 
@@ -10,13 +10,15 @@ Converts an input value to an unsigned long. If the input is a date type, its va
 
 #### field
 
-The input value to convert. This can be a single- or multi-valued column, or an expression.
+The input value to convert. This can be a single- or multi-valued column or an expression.
 
 ## Examples
 
-This example converts string representations of numbers to unsigned long values. If the conversion is not possible (as with `"foo"`), the result is `null` and a warning header is added to the response with details about the failure.
+Converts three string values to unsigned long, where valid numeric strings are converted successfully and a non-numeric string results in a null value with a warning.
 
 ```esql
 ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
 | EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)
 ```
+
+Convert string values to unsigned long. The last conversion (`str3 = "foo"`) is not possible and results in a `null` value, with a warning header in the response indicating the failure and its reason.

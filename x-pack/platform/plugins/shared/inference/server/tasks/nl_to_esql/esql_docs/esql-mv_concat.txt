@@ -14,18 +14,18 @@ A multivalue expression containing the values to concatenate.
 
 #### delim
 
-The delimiter used to separate the concatenated values.
+The delimiter used to separate each value in the resulting string.
 
 ## Examples
 
-This query creates a row with a multivalued column `a` containing the strings "foo", "zoo", and "bar". It then concatenates these values into a single string, separated by a comma and space, and stores the result in column `j`.
+Concatenates the values in the array `a` into a single string separated by a comma and space.
 
 ```esql
 ROW a=["foo", "zoo", "bar"]
 | EVAL j = MV_CONCAT(a, ", ")
 ```
 
-This query creates a row with a multivalued column `a` containing the numbers 10, 9, and 8. It first converts these numbers to strings, then concatenates them into a single string separated by a comma and space, and stores the result in column `j`.
+Concatenates the numeric values in the array `a` into a single string, first converting them to strings, and separates them with a comma and space.
 
 ```esql
 ROW a=[10, 9, 8]

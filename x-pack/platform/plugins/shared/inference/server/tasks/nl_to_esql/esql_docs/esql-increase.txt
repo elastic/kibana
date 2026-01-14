@@ -10,7 +10,7 @@ Calculates the absolute increase of a counter field within a specified time wind
 
 #### field
 
-The metric field for which to calculate the increase.
+The metric field to calculate the increase for.
 
 #### window
 
@@ -18,12 +18,10 @@ The time window over which to compute the increase.
 
 ## Examples
 
-The following query calculates the increase in network bytes in for each cluster and 10-minute time bucket:
+Calculates the total increase in `network.total_bytes_in` for pods named "one", grouped by cluster and 10-minute time buckets.
 
 ```esql
 TS k8s
 | WHERE pod == "one"
 | STATS increase_bytes_in = SUM(INCREASE(network.total_bytes_in)) BY cluster, time_bucket = TBUCKET(10minute)
 ```
-
-This query retrieves time series data from the `k8s` source, filters for records where the pod name is "one", and then, for each cluster and 10-minute time bucket, calculates the total increase in the `network.total_bytes_in` counter. The result shows the sum of increases in network bytes in for each cluster within each 10-minute interval.

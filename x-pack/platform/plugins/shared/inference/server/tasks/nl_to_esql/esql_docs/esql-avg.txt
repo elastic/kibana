@@ -14,18 +14,14 @@ Expression that outputs the values to be averaged.
 
 ## Examples
 
-Calculate the average height of employees:
-
-This query retrieves all records from the `employees` index and calculates the average value of the `height` field across all employees.
+Calculates the average height across all employees.
 
 ```esql
 FROM employees
 | STATS AVG(height)
 ```
 
-Calculate the average salary change, first averaging multiple values per row with `MV_AVG` and then using the result with `AVG`:
-
-This query first computes the average salary change for each employee using `MV_AVG` (which averages multiple values per row), then calculates the overall average of these per-employee averages, rounding the result to 10 decimal places.
+Computes the average salary change by first averaging multiple salary change values per employee and then calculating the overall average, rounding the result to 10 decimal places.
 
 ```esql
 FROM employees

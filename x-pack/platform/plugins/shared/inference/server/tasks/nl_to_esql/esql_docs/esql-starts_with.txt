@@ -10,16 +10,15 @@ Returns a boolean value indicating whether a keyword string starts with a specif
 
 #### str
 
-The string expression to evaluate. If this value is `null`, the function returns `null`.
+String expression to evaluate. If `null`, the function returns `null`.
 
 #### prefix
 
-The prefix string to check for at the start of `str`. If this value is `null`, the function returns `null`.
+String expression representing the prefix to check for. If `null`, the function returns `null`.
 
 ## Examples
 
-The following query checks whether each employee's last name starts with the letter "B". It keeps only the `last_name` column and adds a new column `ln_S` that contains `true` if the last name starts with "B", and `false` otherwise.
-
+Checks if the `last_name` column starts with the letter "B" and stores the result in the `ln_S` column.
 ```esql
 FROM employees
 | KEEP last_name

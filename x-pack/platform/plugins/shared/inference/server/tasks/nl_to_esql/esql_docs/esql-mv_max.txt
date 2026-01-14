@@ -14,15 +14,13 @@ The multivalue expression to evaluate.
 
 ## Examples
 
-This query creates a row with a field `a` containing the list `[3, 5, 1]`, then calculates the maximum value in that list and stores it in a new field called `max_a`.
-
+Calculates the maximum value from the array `[3, 5, 1]` and stores it in the column `max_a`.
 ```esql
 ROW a=[3, 5, 1]
 | EVAL max_a = MV_MAX(a)
 ```
 
-This query creates a row with a field `a` containing the list of strings `["foo", "zoo", "bar"]`, then finds the maximum string value based on their UTF-8 byte representation and stores it in a new field called `max_a`.
-
+Finds the maximum string value in the array `["foo", "zoo", "bar"]` based on UTF-8 comparison and stores it in `max_a`.
 ```esql
 ROW a=["foo", "zoo", "bar"]
 | EVAL max_a = MV_MAX(a)

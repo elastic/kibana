@@ -14,15 +14,15 @@ Numeric expression to be clamped. If the value is `null`, the function returns `
 
 #### min
 
-The minimum value to clamp the data to.
+The minimum value to clamp data to.
 
 #### max
 
-The maximum value to clamp the data to.
+The maximum value to clamp data to.
 
 ## Examples
 
-The following query clamps the `network.cost` value so that it is not less than the result of `clamp_max(network.bytes_in, 5)` and not greater than `network.bytes_in / 100`. The resulting clamped value is stored in a new field called `full_clamped_cost`, and only this field along with the timestamp is kept in the output.
+Calculates a new field `full_clamped_cost` by clamping the `network.cost` value between a dynamic minimum and maximum, then keeps only the clamped value and timestamp in the results.
 
 ```esql
 TS k8s

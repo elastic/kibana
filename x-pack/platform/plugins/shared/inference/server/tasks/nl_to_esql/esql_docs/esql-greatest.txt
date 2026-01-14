@@ -18,7 +18,7 @@ The remaining columns to evaluate.
 
 ## Examples
 
-The following query creates a row with two columns, `a` and `b`, having values 10 and 20 respectively. It then calculates the greatest value between these two columns and stores the result in a new column `g`.
+Calculates the maximum value between columns `a` and `b` and stores it in column `g`.
 
 ```esql
 ROW a = 10, b = 20

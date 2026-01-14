@@ -18,7 +18,7 @@ The time window over which to compute the absence.
 
 ## Examples
 
-The following query calculates the maximum absence of the `events_received` field for each pod and 2-minute time bucket. It filters for records where the cluster is "prod" and the pod is "two", then groups the results by pod and 2-minute intervals, computing the maximum absence of `events_received` in each group.
+Calculates the maximum absence of the `events_received` field for each pod in 2-minute time buckets, filtered for the "prod" cluster and "two" pod.
 
 ```esql
 TS k8s

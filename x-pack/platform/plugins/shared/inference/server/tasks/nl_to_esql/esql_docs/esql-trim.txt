@@ -1,20 +1,4 @@
-# TRIM
-
-Removes leading and trailing whitespaces from a string.
-
-## Syntax
-
-`TRIM(string)`
-
-### Parameters
-
-#### string
-
-String expression to be trimmed. If the value is `null`, the function returns `null`.
-
-## Examples
-
-The following query demonstrates how to remove leading and trailing spaces from the `message` and `color` columns. It first creates a row with extra spaces in both fields, then uses the `TRIM` function to clean up the values.
+Removes leading and trailing spaces from the `message` and `color` columns in a single row.
 
 ```esql
 ROW message = "   some text  ",  color = " red "

@@ -1,22 +1,4 @@
-# MV_MEDIAN_ABSOLUTE_DEVIATION
-
-The MV_MEDIAN_ABSOLUTE_DEVIATION function converts a multivalued field into a single value representing the median absolute deviation. This is calculated as the median of the absolute differences between each value and the median of the entire set. For a variable `X`, it computes `median(|median(X) - X|)`. If the field contains an even number of values, the median is the average of the two middle values, rounded towards zero if not a floating point number.
-
-## Syntax
-
-`MV_MEDIAN_ABSOLUTE_DEVIATION(number)`
-
-### Parameters
-
-#### number
-
-A multivalue expression containing the values to calculate the median absolute deviation from.
-
-## Examples
-
-Calculate the median absolute deviation and the median for a list of values:
-
-This query creates a row with a field called `values` containing the list `[0, 2, 5, 6]`. It then calculates two new fields: `median_absolute_deviation`, which is the median absolute deviation of the values, and `median`, which is the median of the values.
+Calculates the median absolute deviation and the median for the array `[0, 2, 5, 6]`, storing the results in new columns.
 
 ```esql
 ROW values = [0, 2, 5, 6]

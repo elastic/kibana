@@ -14,13 +14,10 @@ Input value to be converted. The input can be a single- or multi-valued column o
 
 ## Examples
 
-Convert a list of WKT Point strings to cartesian_point values:
-
-This query takes a row containing a list of WKT Point strings, expands the list so each point is processed individually, and then converts each WKT string into a `cartesian_point` value.
+Converts each WKT Point string in the list to a cartesian_point value by expanding the list and applying the conversion.
 
 ```esql
 ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
 | MV_EXPAND wkt
 | EVAL pt = TO_CARTESIANPOINT(wkt)
 ```
-This example expands a list of WKT Point strings and converts each to a cartesian_point value.

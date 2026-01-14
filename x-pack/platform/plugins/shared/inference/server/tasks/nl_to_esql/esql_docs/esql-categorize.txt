@@ -1,6 +1,6 @@
 # CATEGORIZE
 
-The CATEGORIZE function groups text messages into categories based on similar formatting and content.
+The CATEGORIZE function groups text messages into categories based on similarly formatted text values. It is useful for identifying patterns and grouping similar log messages or textual data.
 
 ## Syntax
 
@@ -18,26 +18,26 @@ Expression to categorize.
 
 #### output_format
 
-The output format of the categories. This is a keyword parameter and defaults to regex.
+(keyword) Specifies the output format of the categories. Defaults to regex.
 
 #### similarity_threshold
 
-The minimum percentage of token weight that must match for text to be added to a category bucket. Must be an integer between 1 and 100. Higher values create narrower categories and increase memory usage. Defaults to 70.
+(integer) Sets the minimum percentage of token weight that must match for text to be added to a category bucket. Must be between 1 and 100. Higher values create narrower categories and increase memory usage. Defaults to 70.
 
 #### analyzer
 
-Analyzer used to convert the field into tokens for text categorization.
+(keyword) Analyzer used to convert the field into tokens for text categorization.
 
 ## Examples
 
-The following query groups log messages from the `sample_data` source into categories based on their content, and then counts how many messages fall into each category. This helps to identify common patterns or types of log messages in your data.
+Categorize server log messages and aggregate their counts:
+
+Groups log messages from the `sample_data` source into categories based on message similarity, then counts how many messages fall into each category.
 
 ```esql
 FROM sample_data
 | STATS count=COUNT() BY category=CATEGORIZE(message)
 ```
-
-This example groups log messages into categories and counts the number of messages in each category.
 
 ## Limitations
 

@@ -1,6 +1,6 @@
 # IRATE
 
-Calculates the irate (instantaneous rate) of a counter field. The irate is the per-second rate of increase between the last two data points, making it more responsive to recent changes compared to the standard rate function.
+Calculates the irate (instantaneous rate) of a counter field. The irate is the per-second rate of increase between the last two data points, making it more responsive to recent changes compared to the rate function.
 
 ## Syntax
 
@@ -18,7 +18,7 @@ The time window over which to compute the irate.
 
 ## Examples
 
-The following query calculates the irate of the `network.total_bytes_in` field for each Kubernetes pod named "one", grouping the results by cluster and by 10-minute time buckets. It sums the instantaneous rate of incoming network bytes for each group, providing a view of recent network activity per cluster over time.
+Calculates the sum of the instantaneous rate of increase for the `network.total_bytes_in` field for pods named "one", grouped by cluster and 10-minute time buckets.
 
 ```esql
 TS k8s | WHERE pod == "one"

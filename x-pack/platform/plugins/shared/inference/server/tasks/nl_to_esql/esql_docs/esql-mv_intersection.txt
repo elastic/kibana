@@ -18,40 +18,35 @@ Multivalue expression. If null, the function returns null.
 
 ## Examples
 
-The following query finds the intersection of two arrays of integers, returning the values that are present in both arrays:
-
+Calculates the common values shared between two arrays of integers.
 ```esql
 ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
 | EVAL finalValue = MV_INTERSECTION(a, b)
 | KEEP finalValue
 ```
 
-This query finds the intersection of two arrays of long integers, showing which long values are shared between the two arrays:
-
+Finds the intersection of two arrays of long integers, returning the values present in both.
 ```esql
 ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
 | EVAL finalValue = MV_INTERSECTION(a, b)
 | KEEP finalValue
 ```
 
-This query finds the intersection of two boolean arrays, returning the boolean values that are present in both arrays:
-
+Identifies the boolean values that are present in both arrays.
 ```esql
 ROW a = [true, false, false, false], b = [false]
 | EVAL finalValue = MV_INTERSECTION(a, b)
 | KEEP finalValue
 ```
 
-This query finds the intersection of two arrays of floating-point numbers, returning the float values that exist in both arrays:
-
+Returns the floating-point numbers that exist in both input arrays.
 ```esql
 ROW a = [5.2, 10.5, 1.12345, 2.6928], b = [10.5, 2.6928]
 | EVAL finalValue = MV_INTERSECTION(a, b)
 | KEEP finalValue
 ```
 
-This query finds the intersection of two arrays of strings, returning the string values that are present in both arrays:
-
+Finds the string values that are common to both arrays.
 ```esql
 ROW a = ["one", "two", "three", "four", "five"], b = ["one", "four"]
 | EVAL finalValue = MV_INTERSECTION(a, b)

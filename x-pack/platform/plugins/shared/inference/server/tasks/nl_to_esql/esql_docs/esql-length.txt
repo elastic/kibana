@@ -10,12 +10,11 @@ Returns the character length of a string. All strings are in UTF-8, so a single 
 
 #### string
 
-String expression to measure the length of. If the value is `null`, the function returns `null`.
+String expression. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-This query retrieves all airports in India, keeps only the city name, and then calculates the number of characters in each city name, storing the result in a new column called `fn_length`:
-
+Calculates the character length of each city name for airports located in India and displays the result in a new column.
 ```esql
 FROM airports
 | WHERE country == "India"

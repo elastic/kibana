@@ -14,9 +14,7 @@ A boolean expression that determines which rows are included in the output.
 
 ## Examples
 
-Filter employees who are still hired:
-
-This query selects the first name, last name, and hiring status of employees, and then filters the results to include only those employees who are currently hired.
+Filters the employees table to show only those who are still hired, displaying their first and last names.
 
 ```esql
 FROM employees
@@ -24,9 +22,7 @@ FROM employees
 | WHERE still_hired == true
 ```
 
-Filter employees where `still_hired` is true (using simplified boolean expression):
-
-This query retrieves the first name, last name, and hiring status of employees, and filters the results to include only those where the `still_hired` field is true.
+Filters the employees table to show only rows where the still_hired field is true, displaying first and last names.
 
 ```esql
 FROM employees
@@ -34,18 +30,14 @@ FROM employees
 | WHERE still_hired
 ```
 
-Retrieve logs from the last hour using date math:
-
-This query returns log entries from the `sample_data` source where the timestamp is within the last hour.
+Retrieves log entries from the sample_data table where the timestamp is within the last hour.
 
 ```esql
 FROM sample_data
 | WHERE @timestamp > NOW() - 1 hour
 ```
 
-Filter employees whose first name has fewer than 4 characters using the LENGTH function:
-
-This query selects the first name, last name, and height of employees, and filters the results to include only those whose first name is shorter than 4 characters.
+Displays employees whose first name is shorter than 4 characters, along with their last name and height.
 
 ```esql
 FROM employees
@@ -53,18 +45,14 @@ FROM employees
 | WHERE LENGTH(first_name) < 4
 ```
 
-Check for null values in the `birth_date` field:
-
-This query returns employees whose `birth_date` field is null or missing.
+Returns employees whose birth_date field is null.
 
 ```esql
 FROM employees
 | WHERE birth_date IS NULL
 ```
 
-Filter employees where `is_rehired` is not null and count them:
-
-This query filters employees to include only those with a non-null `is_rehired` field, and then counts the number of such employees.
+Counts the number of employees where the is_rehired field is not null.
 
 ```esql
 FROM employees
@@ -72,18 +60,14 @@ FROM employees
 | STATS COUNT(emp_no)
 ```
 
-Match books where the author field contains "Faulkner" using the MATCH function:
-
-This query returns books where the author's name contains the word "Faulkner".
+Finds books where the author field contains the word "Faulkner".
 
 ```esql
 FROM books
 | WHERE MATCH(author, "Faulkner")
 ```
 
-Match books where the title contains all words "Hobbit Back Again" using the AND operator in MATCH:
-
-This query filters books to include only those whose title contains all the words "Hobbit", "Back", and "Again", and then keeps only the title field in the output.
+Finds books whose title contains all the words "Hobbit Back Again" and displays their titles.
 
 ```esql
 FROM books
@@ -91,9 +75,7 @@ FROM books
 | KEEP title;
 ```
 
-Use the LIKE operator to filter first names matching the pattern "?b*":
-
-This query returns employees whose first name matches the pattern "?b*", and displays their first and last names.
+Displays employees whose first name matches the pattern "?b*", showing their first and last names.
 
 ```esql
 FROM employees
@@ -101,36 +83,28 @@ FROM employees
 | KEEP first_name, last_name
 ```
 
-Match the exact string "foo * bar" using LIKE with escaped characters:
-
-This query creates a row with the message "foo * bar" and filters it to include only those where the message matches the exact string "foo * bar", using escaped characters.
+Filters a single row to match messages containing the exact characters "foo * bar" using LIKE with escaping.
 
 ```esql
 ROW message = "foo * bar"
 | WHERE message LIKE "foo \\* bar"
 ```
 
-Reduce escaping overhead by using triple-quoted strings with LIKE:
-
-This query creates a row with the message "foo * bar" and filters it to include only those where the message matches the exact string "foo * bar", using triple-quoted strings to simplify escaping.
+Filters a single row to match messages containing "foo * bar" using triple quotes to simplify escaping.
 
 ```esql
 ROW message = "foo * bar"
 | WHERE message LIKE """foo \* bar"""
 ```
 
-Filter messages matching any of the patterns "foo*" or "bar?" using LIKE with a list:
-
-This query creates a row with the message "foobar" and filters it to include only those where the message matches either the pattern "foo*" or "bar?".
+Filters a single row to match messages that fit either the "foo*" or "bar?" pattern.
 
 ```esql
 ROW message = "foobar"
 | WHERE message like ("foo*", "bar?")
 ```
 
-Use a REST query placeholder for the LIKE pattern:
-
-This query retrieves employees whose first name matches a pattern provided as a REST query parameter, and displays their first and last names.
+Filters employees whose first name matches a pattern provided as a REST query placeholder, displaying first and last names.
 
 ```esql
 FROM employees
@@ -138,9 +112,7 @@ FROM employees
 | KEEP first_name, last_name
 ```
 
-Filter first names matching the regular expression ".leja.*" using RLIKE:
-
-This query returns employees whose first name matches the regular expression ".leja.*", and displays their first and last names.
+Displays employees whose first name matches the regular expression ".leja.*", showing their first and last names.
 
 ```esql
 FROM employees
@@ -148,36 +120,28 @@ FROM employees
 | KEEP first_name, last_name
 ```
 
-Match the exact string "foo ( bar" using RLIKE with escaped characters:
-
-This query creates a row with the message "foo ( bar" and filters it to include only those where the message matches the exact string "foo ( bar", using escaped characters.
+Filters a single row to match messages containing the exact characters "foo ( bar" using RLIKE with escaping.
 
 ```esql
 ROW message = "foo ( bar"
 | WHERE message RLIKE "foo \\( bar"
 ```
 
-Reduce escaping overhead by using triple-quoted strings with RLIKE:
-
-This query creates a row with the message "foo ( bar" and filters it to include only those where the message matches the exact string "foo ( bar", using triple-quoted strings to simplify escaping.
+Filters a single row to match messages containing "foo ( bar" using triple quotes to simplify escaping in RLIKE.
 
 ```esql
 ROW message = "foo ( bar"
 | WHERE message RLIKE """foo \( bar"""
 ```
 
-Filter messages matching any of the regular expressions "foo.*" or "bar." using RLIKE with a list:
-
-This query creates a row with the message "foobar" and filters it to include only those where the message matches either the regular expression "foo.*" or "bar.".
+Filters a single row to match messages that fit either the "foo.*" or "bar." regular expression.
 
 ```esql
 ROW message = "foobar"
 | WHERE message RLIKE ("foo.*", "bar.")
 ```
 
-Use a REST query placeholder for the RLIKE pattern:
-
-This query retrieves employees whose first name matches a regular expression provided as a REST query parameter, and displays their first and last names.
+Filters employees whose first name matches a regular expression provided as a REST query placeholder, displaying first and last names.
 
 ```esql
 FROM employees
@@ -185,9 +149,7 @@ FROM employees
 | KEEP first_name, last_name
 ```
 
-Test if an expression is in a list of values using the IN operator:
-
-This query creates a row with values for `a`, `b`, and `c`, and filters it to include only those where the value of `c-a` is in the list (3, b / 2, a).
+Filters a single row to include only those where the value of c-a is in the list (3, b / 2, a).
 
 ```esql
 ROW a = 1, b = 4, c = 3

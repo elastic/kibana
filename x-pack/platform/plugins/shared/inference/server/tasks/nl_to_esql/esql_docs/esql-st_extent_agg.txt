@@ -1,26 +1,7 @@
-# ST_EXTENT_AGG
-
-Calculates the spatial extent over a field containing geometry data, returning a bounding box that encompasses all values in the field.
-
-## Syntax
-
-`ST_EXTENT_AGG(field)`
-
-### Parameters
-
-#### field
-
-The column containing geometry values to aggregate into a bounding box.
-
-## Examples
-
-Calculate the bounding box for all airport locations in India:
-
-This query selects all records from the `airports` dataset where the `country` is "India", and then calculates the bounding box that contains all airport locations in India using the `ST_EXTENT_AGG` function.
+Calculates the bounding box that contains all airport locations in India.
 
 ```esql
 FROM airports
 | WHERE country == "India"
 | STATS extent = ST_EXTENT_AGG(location)
 ```
-This example computes the spatial extent of the `location` field for airports in India, returning a bounding box that covers all matching locations.

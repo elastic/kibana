@@ -1,24 +1,4 @@
-# SUM_OVER_TIME
-
-Calculates the sum of a field's values over a specified time window.
-
-## Syntax
-
-`SUM_OVER_TIME(field, window)`
-
-### Parameters
-
-#### field
-
-The metric field to calculate the sum for.
-
-#### window
-
-The time window over which to compute the sum.
-
-## Examples
-
-The following query calculates the sum of the `network.cost` field over time, grouping the results by cluster and by 1-minute time buckets. It uses the `SUM_OVER_TIME` function to aggregate the cost within each time window, then further sums these values and organizes the output by cluster and time interval.
+Calculates the sum of network cost over each 1-minute time bucket, grouped by cluster.
 
 ```esql
 TS k8s

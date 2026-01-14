@@ -14,7 +14,7 @@ The numeric field for which to calculate the population variance.
 
 ## Examples
 
-This query retrieves data from the `employees` index and calculates the population variance of the `height` field across all employees. The result is returned in a column named `var_height`.
+Calculates the population variance of the `height` field for all employees.
 
 ```esql
 FROM employees

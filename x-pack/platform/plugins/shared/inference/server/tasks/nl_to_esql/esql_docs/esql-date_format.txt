@@ -18,7 +18,7 @@ The date expression to format. If this parameter is `null`, the function returns
 
 ## Examples
 
-The following query retrieves the `first_name`, `last_name`, and `hire_date` columns from the `employees` data source, and then creates a new column called `hired` that contains the `hire_date` formatted as a string in the `yyyy-MM-dd` format.
+Formats the `hire_date` field for each employee into the "yyyy-MM-dd" string format and adds it as a new column called `hired`.
 
 ```esql
 FROM employees

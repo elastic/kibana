@@ -1,29 +1,7 @@
-# CONCAT
-
-The CONCAT function joins two or more strings together.
-
-## Syntax
-
-`CONCAT(string1, string2)`
-
-### Parameters
-
-#### string1
-
-The first string to concatenate.
-
-#### string2
-
-The second string to concatenate.
-
-## Examples
-
-This query selects the `first_name` and `last_name` columns from the `employees` data, then creates a new column called `fullname` by joining the `first_name` and `last_name` values with a space in between.
+Combines the first and last names of employees into a single 'fullname' field, separated by a space.
 
 ```esql
 FROM employees
 | KEEP first_name, last_name
 | EVAL fullname = CONCAT(first_name, " ", last_name)
 ```
-
-This example creates a `fullname` column by joining the `first_name` and `last_name` columns with a space in between.

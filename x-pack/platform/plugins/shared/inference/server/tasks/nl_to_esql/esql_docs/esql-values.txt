@@ -1,6 +1,6 @@
 # VALUES
 
-The VALUES function returns the unique values from a field as a multivalued field. The order of the returned values is not guaranteed. If you need the values in a specific order, use the `MV_SORT` function.
+The VALUES function returns the unique values from a field as a multivalued field. The order of the returned values is not guaranteed. To get values in a specific order, use the `MV_SORT` function.
 
 ## Syntax
 
@@ -10,13 +10,11 @@ The VALUES function returns the unique values from a field as a multivalued fiel
 
 #### field
 
-The field from which to extract unique values.
+The field from which to collect unique values.
 
 ## Examples
 
-Get the unique first names for each first letter, sorted alphabetically by first letter:
-
-This query extracts the first letter from each employee's first name, groups the employees by this first letter, collects all unique first names for each group, sorts these names alphabetically, and finally sorts the groups by the first letter.
+Calculates the unique first names for each initial letter, sorts the names alphabetically within each group, and then sorts the groups by the first letter.
 
 ```esql
 FROM employees
@@ -27,5 +25,4 @@ FROM employees
 
 ## Limitations
 
-- This function can use a significant amount of memory. Aggregations do not grow beyond available memory, so if too many values are collected, the query will fail with a Circuit Breaker Error.
-- Use the `TOP` function if you need to keep repeated values.
+This function can use a significant amount of memory. Aggregations do not grow beyond available memory, so if the number of collected values exceeds memory limits, the query will fail with a Circuit Breaker Error. If you need to keep repeated values, use the `TOP` function instead.

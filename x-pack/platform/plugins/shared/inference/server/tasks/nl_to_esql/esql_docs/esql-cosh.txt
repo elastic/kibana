@@ -1,20 +1,4 @@
-# COSH
-
-Returns the hyperbolic cosine of a number.
-
-## Syntax
-
-`COSH(number)`
-
-### Parameters
-
-#### number
-
-Numeric expression. If `null`, the function returns `null`.
-
-## Examples
-
-The following query creates a single row with the value `1.8` in column `a`, then calculates the hyperbolic cosine of `a` and stores the result in a new column called `cosh`:
+Calculates the hyperbolic cosine of the value in column `a` (which is 1.8) and stores the result in a new column called `cosh`.
 
 ```esql
 ROW a=1.8

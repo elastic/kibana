@@ -14,14 +14,14 @@ The column for which you want to find the minimum value.
 
 ## Examples
 
-The following query retrieves the minimum value found in the `languages` column from the `employees` dataset.
+Finds the smallest value present in the `languages` column across all employees.
 
 ```esql
 FROM employees
 | STATS MIN(languages)
 ```
 
-This query calculates the minimum of the average salary change per employee. It first computes the average salary change for each employee (using `MV_AVG(salary_change)`), and then finds the smallest of these average values.
+Finds the lowest average salary change among all employees.
 
 ```esql
 FROM employees

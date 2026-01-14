@@ -14,23 +14,13 @@ The field whose values you want to clamp.
 
 #### max
 
-The maximum value to clamp data to.
+The upper bound to which values are clamped.
 
 ## Examples
 
-Clamp the `network.cost` field to a maximum value of 1, then sum the results grouped by 1-minute time buckets:
-
-This query retrieves data from the `k8s` source, then calculates three different sums for each 1-minute time bucket:  
-- `full_clamped_cost` is the sum of the `network.cost` field clamped between 1 and 2 using the `clamp` function.  
-- `clamped_cost` is the sum of the `network.cost` field with values capped at a maximum of 1 using the `clamp_max` function.  
-- `clamped_min_cost` is the sum of the `network.cost` field with values floored at a minimum of 10 using the `clamp_min` function.  
-The results are grouped by 1-minute intervals based on the `@timestamp` field.
+Calculates the sum of network costs per minute, applying different clamping functions to restrict values within specified bounds.
 
 ```esql
 TS k8s
 | STATS full_clamped_cost=sum(clamp(network.cost, 1, 2)), clamped_cost=sum(clamp_max(network.cost, 1)), clamped_min_cost=sum(clamp_min(network.cost, 10)) BY time_bucket = bucket(@timestamp,1minute)
 ```
-
-Limitations
-
-No limitations are mentioned for this function.

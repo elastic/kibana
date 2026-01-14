@@ -14,7 +14,7 @@ Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_sh
 
 ## Examples
 
-The following query calculates the minimum bounding box (envelope) for the city boundary of Copenhagen Airport and returns the abbreviation, airport name, and the computed envelope:
+Calculates the minimum bounding box for the city boundary of Copenhagen Airport and displays the abbreviation, airport name, and the bounding box geometry.
 
 ```esql
 FROM airport_city_boundaries
@@ -39,7 +39,7 @@ Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_sh
 
 ## Examples
 
-This query extracts the minimum and maximum x (longitude) and y (latitude) coordinates from the bounding box of Copenhagen Airport's city boundary. It first computes the envelope, then calculates the xmin, xmax, ymin, and ymax values, and finally returns the abbreviation, airport name, and these coordinate values:
+Retrieves the minimum and maximum x and y coordinates from the bounding box of Copenhagen Airport's city boundary and displays them along with the abbreviation and airport name.
 
 ```esql
 FROM airport_city_boundaries
@@ -65,7 +65,7 @@ Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_sh
 
 ## Examples
 
-This query extracts the minimum and maximum x (longitude) and y (latitude) coordinates from the bounding box of Copenhagen Airport's city boundary. It first computes the envelope, then calculates the xmin, xmax, ymin, and ymax values, and finally returns the abbreviation, airport name, and these coordinate values:
+Retrieves the minimum and maximum x and y coordinates from the bounding box of Copenhagen Airport's city boundary and displays them along with the abbreviation and airport name.
 
 ```esql
 FROM airport_city_boundaries
@@ -91,7 +91,7 @@ Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_sh
 
 ## Examples
 
-This query extracts the minimum and maximum y (latitude) and x (longitude) coordinates from the bounding box of Copenhagen Airport's city boundary. It first computes the envelope, then calculates the xmin, xmax, ymin, and ymax values, and finally returns the abbreviation, airport name, and these coordinate values:
+Retrieves the minimum and maximum x and y coordinates from the bounding box of Copenhagen Airport's city boundary and displays them along with the abbreviation and airport name.
 
 ```esql
 FROM airport_city_boundaries
@@ -117,7 +117,7 @@ Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_sh
 
 ## Examples
 
-This query extracts the minimum and maximum y (latitude) and x (longitude) coordinates from the bounding box of Copenhagen Airport's city boundary. It first computes the envelope, then calculates the xmin, xmax, ymin, and ymax values, and finally returns the abbreviation, airport name, and these coordinate values:
+Retrieves the minimum and maximum x and y coordinates from the bounding box of Copenhagen Airport's city boundary and displays them along with the abbreviation and airport name.
 
 ```esql
 FROM airport_city_boundaries

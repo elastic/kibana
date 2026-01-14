@@ -14,7 +14,7 @@ String expression. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-This query retrieves all airports located in India, keeps only the city field, and then calculates both the character length and the bit length (in bits) of each city name.
+Calculates the number of characters and the bit length of each city name for airports located in India.
 
 ```esql
 FROM airports
@@ -22,5 +22,3 @@ FROM airports
 | KEEP city
 | EVAL fn_length = LENGTH(city), fn_bit_length = BIT_LENGTH(city)
 ```
-
-Calculate the bit length and character length of city names for airports in India.

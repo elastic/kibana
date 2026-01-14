@@ -20,17 +20,21 @@ Defaults to `RRF`. Can be either `RRF` (Reciprocal Rank Fusion) or `LINEAR` (lin
 
 Options for the selected `fuse_method`.
 
-- For `RRF`:
-  - `rank_constant`: Defaults to `60`. Represents the rank constant used in the RRF formula.
-  - `weights`: Defaults to `{}`. Allows setting different weights for RRF scores based on group column values.
+- When `fuse_method` is `RRF`:
+  - **rank_constant**  
+    Defaults to `60`. Represents the constant used in the RRF formula.
+  - **weights**  
+    Defaults to `{}`. Allows you to set different weights for RRF scores based on `group_column` values.
 
-- For `LINEAR`:
-  - `normalizer`: Defaults to `none`. Can be `none` or `minmax`. Specifies the score normalization method.
-  - `weights`: Defaults to `{}`. Allows setting different weights for scores based on group column values.
+- When `fuse_method` is `LINEAR`:
+  - **normalizer**  
+    Defaults to `none`. Can be `none` or `minmax`. Specifies the score normalization method to apply.
+  - **weights**  
+    Defaults to `{}`. Allows you to set different weights for scores based on `group_column` values.
 
 #### score_column
 
-Defaults to `_score`. Specifies which column to use for retrieving the relevance scores of the input rows and where to output the new relevance scores of the merged rows.
+Defaults to `_score`. Specifies which column to use for retrieving the relevance scores of the input row and where to output the new relevance scores of the merged rows.
 
 #### group_column
 
@@ -42,7 +46,8 @@ Defaults to `_id, _index`. Rows with matching key column values are merged.
 
 ## Examples
 
-This query runs two searches on the `books` index: one for documents where the title contains "Shakespeare" and another for documents where the semantic title contains "Shakespeare". It then merges the results using the default Reciprocal Rank Fusion (RRF) method to calculate new relevance scores for each document.
+Calculates fused relevance scores for books matching "Shakespeare" in either the title or semantic_title fields using Reciprocal Rank Fusion (RRF) by default:
+
 ```esql
 FROM books METADATA _id, _index, _score 
 | FORK (WHERE title:"Shakespeare" | SORT _score DESC) 
@@ -50,7 +55,8 @@ FROM books METADATA _id, _index, _score
 | FUSE 
 ```
 
-This query performs the same two searches as above, but combines the scores using the linear method instead of RRF. The linear method calculates new relevance scores by linearly combining the scores from each query branch.
+Combines relevance scores for books matching "Shakespeare" in title or semantic_title using a linear combination method:
+
 ```esql
 FROM books METADATA _id, _index, _score 
 | FORK (WHERE title:"Shakespeare" | SORT _score DESC) 
@@ -58,7 +64,8 @@ FROM books METADATA _id, _index, _score
 | FUSE LINEAR 
 ```
 
-This query also combines the results of the two searches using the linear method, but first normalizes the scores from each branch using minmax normalization. This ensures that the scores are scaled between the minimum and maximum values before they are combined.
+Normalizes scores with the minmax method before linearly combining relevance scores for books matching "Shakespeare" in title or semantic_title:
+
 ```esql
 FROM books METADATA _id, _index, _score
 | FORK (WHERE title:"Shakespeare" | SORT _score DESC) 
@@ -66,7 +73,8 @@ FROM books METADATA _id, _index, _score
 | FUSE LINEAR WITH { "normalizer": "minmax" } 
 ```
 
-This query assigns custom weights to each query branch when combining the results using the linear method with minmax normalization. The first branch is weighted at 0.7 and the second branch at 0.3, allowing you to control the influence of each query on the final relevance score.
+Applies custom weights to scores from different query branches and normalizes them with minmax when combining relevance scores for books matching "Shakespeare":
+
 ```esql
 FROM books METADATA _id, _index, _score
 | FORK (WHERE title:"Shakespeare" | SORT _score DESC) 
@@ -76,7 +84,7 @@ FROM books METADATA _id, _index, _score
 
 ## Limitations
 
-- FUSE assumes that key columns are single valued. If key columns are multivalued, FUSE can produce unreliable relevance scores.
-- FUSE assigns a score value of NULL if the score column or group column are multivalued.
-- FUSE assumes that the combination of key columns and group column is unique. If not, FUSE can produce unreliable relevance scores.
-- Limitations can occur if FUSE is not combined with FORK or if FUSE does not use the default metadata columns `_id`, `_index`, `_score`, and `_fork`.
+- FUSE assumes that `key_columns` are single valued. If `key_columns` are multivalued, FUSE can produce unreliable relevance scores.
+- FUSE automatically assigns a score value of `NULL` if the `score_column` or `group_column` are multivalued.
+- FUSE assumes that the combination of `key_columns` and `group_column` is unique. If not, FUSE can produce unreliable relevance scores.
+- These limitations can occur if FUSE is not combined with FORK or if FUSE does not use the default metadata columns `_id`, `_index`, `_score`, and `_fork`.

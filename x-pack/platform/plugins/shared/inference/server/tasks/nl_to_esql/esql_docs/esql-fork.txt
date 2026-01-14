@@ -1,6 +1,6 @@
 # FORK
 
-The FORK command creates multiple execution branches that operate on the same input data and combines their results into a single output table. A discriminator column named `_fork` is added to indicate which branch each row originated from. This command is useful for hybrid search scenarios, especially when used together with the FUSE command to combine and score results from multiple queries.
+The FORK command creates multiple execution branches that operate on the same input data and combines their results into a single output table. A discriminator column called `_fork` is added to identify the branch each row originated from. This command is useful for running different processing pipelines in parallel and merging their results.
 
 ## Syntax
 
@@ -10,13 +10,13 @@ The FORK command creates multiple execution branches that operate on the same in
 
 #### <processing_commands>
 
-A sequence of processing commands to execute in each branch. Each set of commands is enclosed in parentheses and operates independently on the same input data.
+A sequence of processing commands to be executed as a branch. Each set of commands is enclosed in parentheses and operates on the same input data.
 
 ## Examples
 
-In this example, each FORK branch returns one row. The `_fork` column indicates which branch each row comes from:
+In this example, each FORK branch returns one row. The `_fork` column indicates the originating branch for each row:
 
-This query retrieves data from the `employees` index and creates two branches: one that selects the employee with `emp_no` 10001 and another that selects the employee with `emp_no` 10002. The results from both branches are combined into a single output, with the `_fork` column indicating the originating branch for each row. Only the `emp_no` and `_fork` columns are kept, and the results are sorted by `emp_no`.
+Selects employees with employee numbers 10001 and 10002 in separate branches, merges the results, and displays the employee number along with the branch identifier.
 
 ```esql
 FROM employees
@@ -30,5 +30,5 @@ FROM employees
 
 - FORK supports a maximum of 8 execution branches.
 - In versions older than 9.3.0, using remote cluster references with FORK is not supported.
-- Using more than one FORK command in a query is not supported.
-- FORK branches default to `LIMIT 1000` if no LIMIT is provided.
+- Using more than one FORK command in a single query is not supported.
+- If no `LIMIT` is provided in a branch, FORK defaults to `LIMIT 1000` per branch.

@@ -14,21 +14,21 @@ Expression that outputs values to be checked for presence.
 
 ## Examples
 
-This query checks if there are any non-null values in the `languages` field across all employees, and returns the result as `is_present`.
+Checks whether there are any non-null values in the `languages` field among all employees and outputs the result as `is_present`:
 
 ```esql
 FROM employees
 | STATS is_present = PRESENT(languages)
 ```
 
-This query checks, for each group of employees sharing the same `languages` value, whether there are any non-null `salary` values present in that group. The result is returned as `is_present` for each language group.
+Determines for each language group if there are any non-null `salary` values and outputs the result as `is_present` per group:
 
 ```esql
 FROM employees
 | STATS is_present = PRESENT(salary) BY languages
 ```
 
-This query filters for the employee with employee number 10020, then checks if there are any non-null values in the `languages` field for that employee. The result is converted to an integer: 1 if present, 0 if not.
+Filters for employee number 10020 and returns 1 if any non-null `languages` values are present, otherwise returns 0:
 
 ```esql
 FROM employees

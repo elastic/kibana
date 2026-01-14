@@ -18,15 +18,15 @@ Optional. The column used to order the values. If not specified, `@timestamp` is
 
 #### type_name
 
-Optional. The name of the output column for the change point type. Defaults to `type`.
+Optional. The name of the output column for the change point type. Defaults to `type` if not specified.
 
 #### pvalue_name
 
-Optional. The name of the output column for the p-value indicating the extremity of the change point. Defaults to `pvalue`.
+Optional. The name of the output column for the p-value indicating the extremity of the change point. Defaults to `pvalue` if not specified.
 
 ## Examples
 
-Detect a step change in a metric:
+Detects a step change in the `value` metric across a sequence of keys, and filters the results to show only rows where a change point was detected.
 
 ```esql
 ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
@@ -35,10 +35,8 @@ ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
 | CHANGE_POINT value ON key
 | WHERE type IS NOT NULL
 ```
-This query creates a sequence of keys from 1 to 25, expands them into individual rows, and assigns a value of 0 for keys less than 13 and 42 for keys 13 and above. It then detects statistically significant change points in the `value` column, ordered by `key`, and filters the results to show only the rows where a change point was detected.
 
 ## Limitations
 
-- At least 22 values are required for change point detection.
-- Fewer than 1,000 values is preferred for optimal performance.
+- There must be at least 22 values for change point detection. Fewer than 1,000 values is preferred.
 - The CHANGE_POINT command requires a platinum license.

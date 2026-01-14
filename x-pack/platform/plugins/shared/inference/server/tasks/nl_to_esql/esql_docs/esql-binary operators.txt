@@ -1,6 +1,6 @@
 # BINARY OPERATORS
 
-Binary operators perform comparisons and arithmetic operations between two fields or values. These include equality, inequality, relational comparisons, and mathematical calculations. If either field is multivalued, the result is `null`. For comparison operators, if one side is a constant and the other is a field with both a mapping-index and doc-values, the operation is pushed to the underlying search index.
+Binary operators perform comparisons and arithmetic operations between two fields or values. These include equality, inequality, less than, less than or equal to, greater than, greater than or equal to, addition, subtraction, multiplication, division, and modulus. If either field is multivalued, the result is `null`. For comparison operators, if one side is a constant and the other is a field with both a mapping-index and doc-values, the operation is pushed to the underlying search index.
 
 ## Syntax
 
@@ -8,95 +8,89 @@ Binary operators perform comparisons and arithmetic operations between two field
 
 ### Parameters
 
-#### field_or_value
+#### <field_or_value>
 
-Represents the left or right operand in the binary operation. This can be a field from your data or a constant value.
+Represents the left or right operand for the binary operation. This can be a field or a constant value.
 
-#### operator
+#### <operator>
 
-The binary operator to apply. Supported operators include:
-- Equality (`==`)
-- Inequality (`!=`)
-- Less than (`<`)
-- Less than or equal to (`<=`)
-- Greater than (`>`)
-- Greater than or equal to (`>=`)
-- Add (`+`)
-- Subtract (`-`)
-- Multiply (`*`)
-- Divide (`/`)
-- Modulus (`%`)
+The binary operator to apply. Supported operators are:
+- `==` (equality)
+- `!=` (inequality)
+- `<` (less than)
+- `<=` (less than or equal to)
+- `>` (greater than)
+- `>=` (greater than or equal to)
+- `+` (addition)
+- `-` (subtraction)
+- `*` (multiplication)
+- `/` (division)
+- `%` (modulus)
 
 ## Examples
 
-Filter employees whose department is "Engineering".
+Checks whether the values of `a` and `b` are equal and stores the result in `is_equal`.
 ```esql
-FROM employees
-| WHERE department == "Engineering"
+ROW a = 5, b = 5
+| EVAL is_equal = a == b
 ```
 
-Filter employees whose status is not "inactive".
+Checks whether the values of `a` and `b` are not equal and stores the result in `is_not_equal`.
 ```esql
-FROM employees
-| WHERE status != "inactive"
+ROW a = 5, b = 3
+| EVAL is_not_equal = a != b
 ```
 
-Filter employees younger than 30.
+Checks if the value of `a` is less than the value of `b` and stores the result in `is_less`.
 ```esql
-FROM employees
-| WHERE age < 30
+ROW a = 2, b = 5
+| EVAL is_less = a < b
 ```
 
-Filter employees with 5 or fewer years of experience.
+Checks if the value of `a` is greater than or equal to the value of `b` and stores the result in `is_greater_or_equal`.
 ```esql
-FROM employees
-| WHERE years_experience <= 5
+ROW a = 7, b = 7
+| EVAL is_greater_or_equal = a >= b
 ```
 
-Filter employees with a salary greater than 50,000.
+Adds the values of `a` and `b` and stores the result in `sum`.
 ```esql
-FROM employees
-| WHERE salary > 50000
+ROW a = 2, b = 3
+| EVAL sum = a + b
 ```
 
-Filter employees who have completed at least 10 projects.
+Subtracts the value of `b` from `a` and stores the result in `difference`.
 ```esql
-FROM employees
-| WHERE projects_completed >= 10
+ROW a = 5, b = 2
+| EVAL difference = a - b
 ```
 
-Calculate total compensation by adding salary and bonus.
+Multiplies the values of `a` and `b` and stores the result in `product`.
 ```esql
-FROM employees
-| EVAL total_compensation = salary + bonus
+ROW a = 4, b = 3
+| EVAL product = a * b
 ```
 
-Calculate remaining vacation days.
+Divides the value of `a` by `b` and stores the result in `quotient`.
 ```esql
-FROM employees
-| EVAL remaining_vacation = vacation_days - vacation_taken
+ROW a = 10, b = 2
+| EVAL quotient = a / b
 ```
 
-Calculate annual bonus by multiplying monthly bonus by 12.
+Divides the value of `a` by `b`, casts the result to a floating point value, and stores it in `quotient`.
 ```esql
-FROM employees
-| EVAL annual_bonus = monthly_bonus * 12
+ROW a = 10, b = 3
+| EVAL quotient = a / b::DOUBLE
 ```
 
-Calculate average monthly salary.
+Calculates the remainder when `a` is divided by `b` and stores the result in `remainder`.
 ```esql
-FROM employees
-| EVAL average_monthly_salary = salary / 12
-```
-
-Determine if employee ID is odd or even.
-```esql
-FROM employees
-| EVAL odd_even = employee_id % 2
+ROW a = 10, b = 3
+| EVAL remainder = a % b
 ```
 
 ## Limitations
 
-- If either operand is multivalued, the result is `null`.
-- For division (`/`), dividing two integer types yields an integer result, rounding towards 0. For floating point division, cast one of the arguments to `DOUBLE`.
-- Comparison operators are pushed to the underlying search index only if one side is a constant and the other is a field with both a mapping-index and doc-values.
+- If either operand is multivalued, the result of the binary operation is `null`.
+- For division, dividing two integer types yields an integer result, rounded towards zero. To obtain a floating point result, cast one of the operands to `DOUBLE`.
+- For comparison operators, the operation is pushed to the underlying search index only if one side is a constant and the other is a field with both a mapping-index and doc-values.

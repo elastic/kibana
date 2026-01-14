@@ -1,6 +1,6 @@
 # COUNT
 
-The COUNT function returns the total number of input values. If no field is specified, it counts the number of rows.
+The COUNT function returns the total number of input values. If no field is specified, it returns the number of rows.
 
 ## Syntax
 
@@ -14,14 +14,14 @@ Expression that outputs values to be counted. If omitted, COUNT returns the numb
 
 ## Examples
 
-This query counts the number of non-null values in the `height` field from the `employees` data source.
+Counts the number of non-null values in the `height` field from the `employees` dataset.
 
 ```esql
 FROM employees
 | STATS COUNT(height)
 ```
 
-This query counts the number of rows for each language in the `employees` data source, assigns the result to the `count` field, and sorts the output by language in descending order.
+Counts the total number of rows for each language in the `employees` dataset and sorts the results by language in descending order.
 
 ```esql
 FROM employees
@@ -29,14 +29,14 @@ FROM employees
 | SORT languages DESC
 ```
 
-This query splits the string in the `words` field using the semicolon (`;`) as a delimiter, then counts the number of resulting values and assigns it to the `word_count` field.
+Counts how many words are present in the `words` string by splitting it using the semicolon as a delimiter.
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS word_count = COUNT(SPLIT(words, ";"))
 ```
 
-This query creates a single row with the value `n=1`, filters for rows where `n` is less than 0 (which will result in no rows), and then counts the number of rows that meet this condition.
+Counts the number of times the value of `n` is less than 0 by filtering rows before counting.
 
 ```esql
 ROW n=1
@@ -44,7 +44,7 @@ ROW n=1
 | STATS COUNT(n)
 ```
 
-This query creates a single row with `n=1` and then counts, using three-valued logic, how many times the expression `n > 0 OR NULL` and `n < 0 OR NULL` are true, respectively.
+Counts how many times `n` is greater than 0 and how many times `n` is less than 0 in the same data stream.
 
 ```esql
 ROW n=1

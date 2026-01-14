@@ -1,6 +1,6 @@
 # TO_CARTESIANSHAPE
 
-Converts an input value to a `cartesian_shape` value. Strings are only converted successfully if they follow the WKT (Well-Known Text) format.
+Converts an input value to a `cartesian_shape` value. A string will only be successfully converted if it follows the WKT (Well-Known Text) format.
 
 ## Syntax
 
@@ -10,17 +10,16 @@ Converts an input value to a `cartesian_shape` value. Strings are only converted
 
 #### field
 
-Input value to convert. This can be a single- or multi-valued column, or an expression.
+The input value to convert. This can be a single- or multi-valued column, or an expression.
 
 ## Examples
 
 Convert WKT strings to cartesian shapes:
 
-This query takes a row containing an array of WKT (Well-Known Text) strings, expands the array so each WKT string becomes its own row, and then converts each WKT string into a `cartesian_shape` value.
+This query takes a list of WKT strings, expands them into individual rows, and converts each string into a cartesian shape.
 
 ```esql
 ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]
 | MV_EXPAND wkt
 | EVAL geom = TO_CARTESIANSHAPE(wkt)
 ```
-This example expands a list of WKT strings and converts each to a `cartesian_shape` value.

@@ -14,14 +14,14 @@ The numeric field or expression for which to calculate the population standard d
 
 ## Examples
 
-The following query calculates the population standard deviation of the `height` field for all employees. This helps you understand how much employee heights vary from the average.
+Calculates the population standard deviation of the `height` field for all employees.
 
 ```esql
 FROM employees
 | STATS std_dev_height = STD_DEV(height)
 ```
 
-This query calculates the population standard deviation of the maximum salary change for each employee. It first finds the maximum value in the `salary_change` field (if it contains multiple values) for each employee, and then computes how much these maximum salary changes vary across all employees.
+Calculates the population standard deviation of the maximum salary change for each employee.
 
 ```esql
 FROM employees

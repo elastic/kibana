@@ -14,7 +14,7 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-This query creates a single row with the value `1.8` in column `a`, then calculates the hyperbolic tangent of `a` and stores the result in a new column called `tanh`.
+Calculates the hyperbolic tangent of the value in column `a` and stores the result in a new column called `tanh`:
 
 ```esql
 ROW a=1.8

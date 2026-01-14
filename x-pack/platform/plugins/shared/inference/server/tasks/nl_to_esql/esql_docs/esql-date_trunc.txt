@@ -10,7 +10,7 @@ The DATE_TRUNC function rounds down a date to the closest interval since the epo
 
 #### interval
 
-Interval, expressed using the timespan literal syntax.
+Interval expressed using the timespan literal syntax.
 
 #### date
 
@@ -18,9 +18,7 @@ Date expression.
 
 ## Examples
 
-Round the hire date of each employee down to the closest year:
-
-This query selects the first name, last name, and hire date of each employee, and then adds a new column called `year_hired` that contains the hire date rounded down to the start of the year.
+Rounds each employee's hire date down to the start of the year and displays their first name, last name, and original hire date.
 
 ```esql
 FROM employees
@@ -28,9 +26,7 @@ FROM employees
 | EVAL year_hired = DATE_TRUNC(1 year, hire_date)
 ```
 
-Calculate the number of hires per year by combining DATE_TRUNC with STATS:
-
-This query creates a new column with the hire date truncated to the year, then counts the number of employees hired in each year, and sorts the results by year.
+Counts how many employees were hired in each year by truncating hire dates to the year and grouping by year.
 
 ```esql
 FROM employees
@@ -39,9 +35,7 @@ FROM employees
 | SORT year
 ```
 
-Compute the average error rate per hour:
-
-This query checks each message for the word "error" and assigns a value of 1 if found, otherwise 0. It then truncates the timestamp to the hour, calculates the average error rate for each hour, and sorts the results by hour.
+Calculates the average error rate for each hour by flagging error messages, truncating timestamps to the hour, and aggregating the results.
 
 ```esql
 FROM sample_data
