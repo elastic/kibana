@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { castArray } from 'lodash';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import dedent from 'dedent';
@@ -39,10 +38,11 @@ const getIndexInfoSchema = z.object({
       'Index pattern (e.g., "logs-*", "metrics-*"). Required for "list-fields" and "get-field-values".'
     ),
   fields: z
-    .union([z.string(), z.array(z.string()).max(10)])
+    .array(z.string())
+    .max(10)
     .optional()
     .describe(
-      'Field name(s) or wildcard patterns to get values for (e.g., "host.name", "attributes.app.*"). Required for "get-field-values".'
+      'Array of field names or wildcard patterns to get values for (e.g., ["host.name"], ["attributes.app.*"]). Required for "get-field-values".'
     ),
   ...timeRangeSchemaOptional({ start: 'now-24h', end: 'now' }),
   kqlFilter: z
@@ -140,7 +140,7 @@ export function createGetIndexInfoTool({
             result = await getFieldValuesHandler({
               esClient,
               index: params.index,
-              fields: castArray(params.fields),
+              fields: params.fields,
               start: params.start,
               end: params.end,
               kqlFilter: params.kqlFilter,

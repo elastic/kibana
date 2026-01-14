@@ -6,23 +6,13 @@ Discovers available index patterns, data streams, fields, and field values in th
 
 ### 1. `get-index-patterns` — Index Patterns and Data Streams
 
-```typescript
-get_index_info({ operation: "get-index-patterns" })
-
-// Returns index patterns AND discovered data streams:
+```
+POST kbn://api/agent_builder/tools/_execute
 {
-  indexPatterns: {
-    apm: { transaction: "traces-apm*", span: "traces-apm*", error: "logs-apm*", metric: "metrics-apm*" },
-    logs: ["logs-*-*", "logs-*", "filebeat-*"],
-    metrics: ["metrics-*", "metricbeat-*"],
-    alerts: [".alerts-observability.*"]
-  },
-  dataStreams: [
-    { name: "logs-apm.error-default", dataset: "apm.error" },
-    { name: "metrics-system.cpu-default", dataset: "system.cpu" },
-    { name: "metrics-system.memory-default", dataset: "system.memory" },
-    { name: "traces-apm-default", dataset: "apm" }
-  ]
+  "tool_id": "observability.get_index_info",
+  "tool_params": {
+    "operation": "get-index-patterns"
+  }
 }
 ```
 
@@ -30,44 +20,78 @@ Use data streams for targeted field discovery (e.g., `metrics-system.memory-*` f
 
 ### 2. `list-fields` — Fields in an Index
 
-```typescript
-// Use specific data stream for better results:
-get_index_info({ operation: "list-fields", index: "metrics-system.memory-*" })
+Use specific data stream for better results:
 
-// Returns fields grouped by Elasticsearch type:
+```
+POST kbn://api/agent_builder/tools/_execute
 {
-  fieldsByType: {
-    float: ["system.memory.used.pct", "system.memory.actual.used.pct"],
-    long: ["system.memory.total", "system.memory.actual.free", "system.memory.used.bytes"],
-    keyword: ["host.name", "cloud.region"],
-    date: ["@timestamp"]
+  "tool_id": "observability.get_index_info",
+  "tool_params": {
+    "operation": "list-fields",
+    "index": "metrics-system.memory-*"
   }
 }
+```
 
-// With intent and >100 fields, LLM filters to relevant ones:
-get_index_info({ operation: "list-fields", index: "logs-*", intent: "high latency" })
+With intent and >100 fields, LLM filters to relevant ones:
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_index_info",
+  "tool_params": {
+    "operation": "list-fields",
+    "index": "logs-*",
+    "intent": "high latency"
+  }
+}
 ```
 
 ### 3. `get-field-values` — Field Values
 
-```typescript
-get_index_info({ operation: "get-field-values", index: "traces-apm*", fields: "service.name" })
+Single field:
 
-// Keyword → distinct values
-{ fields: { "service.name": { type: "keyword", values: ["payment", "order"], hasMoreValues: false } } }
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_index_info",
+  "tool_params": {
+    "operation": "get-field-values",
+    "index": "traces-apm*",
+    "fields": ["service.name"]
+  }
+}
+```
 
-// Numeric → min/max
-{ fields: { "transaction.duration.us": { type: "numeric", min: 100000, max: 500000 } } }
+Wildcard patterns — discover values for all matching fields at once:
 
-// Multiple fields
-get_index_info({ operation: "get-field-values", index: "traces-apm*", fields: ["service.name", "host.name"] })
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_index_info",
+  "tool_params": {
+    "operation": "get-field-values",
+    "index": "traces-*",
+    "fields": ["attributes.app.*"]
+  }
+}
+```
 
-// Wildcard patterns — discover values for all matching fields at once
-get_index_info({ operation: "get-field-values", index: "traces-*", fields: "attributes.app.*" })
-// Returns all 33 fields matching the pattern: attributes.app.product.id, attributes.app.order.amount, etc.
+With time range and KQL filter:
 
-// Multiple wildcards
-get_index_info({ operation: "get-field-values", index: "traces-*", fields: ["resource.service.*", "attributes.http.*"] })
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_index_info",
+  "tool_params": {
+    "operation": "get-field-values",
+    "index": "logs-*",
+    "fields": ["host.name"],
+    "start": "now-1h",
+    "end": "now",
+    "kqlFilter": "service.name: checkout"
+  }
+}
 ```
 
 ## Example Workflow
