@@ -55,7 +55,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
   enterpriseSearch: 40244
-  entityStore: 4075
+  entityStore: 1755
   esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -81,7 +81,7 @@ pageLoadAssetSize:
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
-  graph: 9946
+  graph: 9924
   grokdebugger: 5484
   home: 13560
   imageEmbeddable: 6000
@@ -99,6 +99,7 @@ pageLoadAssetSize:
   kibanaReact: 22503
   kibanaUsageCollection: 1736
   kibanaUtils: 54848
+  kql: 15485
   kubernetesSecurity: 6807
   lens: 71718
   licenseManagement: 8265
@@ -130,7 +131,7 @@ pageLoadAssetSize:
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
-  presentationUtil: 9948
+  presentationUtil: 9285
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
@@ -181,11 +182,11 @@ pageLoadAssetSize:
   telemetryManagementSection: 5522
   timelines: 192134
   transform: 16515
-  triggersActionsUi: 110000
+  triggersActionsUi: 111000
   uiActions: 24670
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513
-  unifiedSearch: 25000
+  unifiedSearch: 19500
   upgradeAssistant: 6898
   uptime: 48171
   urlDrilldown: 18939
