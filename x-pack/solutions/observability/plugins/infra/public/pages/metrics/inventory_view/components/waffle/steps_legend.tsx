@@ -30,8 +30,7 @@ interface Props {
 }
 
 const createStep = (formatter: InfraFormatter) => (rule: InfraWaffleMapStepRule, index: number) => {
-  const label =
-    rule.label != null ? rule.label : `${OPERATORS[rule.operator]} ${formatter(rule.value)}`;
+  const label = rule.label != null ? rule.label : `${OPERATORS.eq} ${formatter(rule.value)}`;
   const squareStyle = { backgroundColor: darken(0.4, rule.color) };
   const squareInnerStyle = { backgroundColor: rule.color };
   return (
@@ -65,6 +64,7 @@ const StepSquare = styled.div`
   height: 24px;
   flex: 0 0 auto;
   margin-right: 5px;
+  margin-left: 5px;
   border-radius: 3px;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
