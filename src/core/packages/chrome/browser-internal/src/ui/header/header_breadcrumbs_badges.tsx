@@ -22,10 +22,10 @@ export type HeaderBreadcrumbsBadgeProps = EuiBadgeProps & {
 
 export const HeaderBreadcrumbsBadges = ({
   badges,
-  hasLeftMargin,
+  isFirst,
 }: {
   badges: HeaderBreadcrumbsBadgeProps[] | undefined;
-  hasLeftMargin: boolean;
+  isFirst: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   if (!badges || badges.length === 0) return null;
@@ -33,7 +33,7 @@ export const HeaderBreadcrumbsBadges = ({
     <EuiBadgeGroup
       data-test-subj="header-breadcrumbs-badge-group"
       css={css`
-        margin-left: ${hasLeftMargin ? euiTheme.size.xs : 0};
+        margin-left: ${isFirst ? euiTheme.size.xs : 0};
       `}
     >
       {badges.map(createBadge)}
