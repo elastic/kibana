@@ -65,6 +65,7 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
   const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
   const { applyFilterQuery } = useWaffleFiltersContext();
   const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
+  const legendRules = legend?.rules ?? DEFAULT_LEGEND.rules;
   const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
   const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
 
@@ -73,7 +74,7 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
   const options = {
     formatter: InfraFormatterType.percent,
     formatTemplate: '{{value}}',
-    legend: createLegend(legendPalette, legendSteps, legendReverseColors),
+    legend: createLegend(legendPalette, legendSteps, legendReverseColors, legendRules),
     metric,
     sort,
     groupBy,

@@ -7,21 +7,28 @@
 
 import type {
   InventoryColorPalette,
-  InfraWaffleMapSteppedGradientLegend,
+  InfraWaffleMapLegend,
+  InfraWaffleMapStepRule,
 } from '../../../../common/inventory/types';
 import { getColorPalette } from './get_color_palette';
 
 export const createLegend = (
   name: InventoryColorPalette,
   steps: number = 10,
-  reverse: boolean = false
-): InfraWaffleMapSteppedGradientLegend => {
+  reverse: boolean = false,
+  rules: InfraWaffleMapStepRule[] = []
+): InfraWaffleMapLegend => {
   const paletteColors = getColorPalette(name, steps, reverse);
-  return {
-    type: 'steppedGradient',
-    rules: paletteColors.map((color, index) => ({
-      color,
-      value: (index + 1) / steps,
-    })),
-  };
+  return rules.length > 0
+    ? {
+        type: 'steps',
+        rules,
+      }
+    : {
+        type: 'steppedGradient',
+        rules: paletteColors.map((color, index) => ({
+          color,
+          value: (index + 1) / steps,
+        })),
+      };
 };
