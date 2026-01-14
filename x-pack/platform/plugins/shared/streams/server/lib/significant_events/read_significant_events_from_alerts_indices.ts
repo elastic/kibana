@@ -27,7 +27,7 @@ export async function readSignificantEventsFromAlertsIndices(
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { streamNames, from, to, bucketSize, query } = params;
+  const { streamNames = [], from, to, bucketSize, query } = params;
 
   const queryLinks = query
     ? await queryClient.findQueries(streamNames, query)
