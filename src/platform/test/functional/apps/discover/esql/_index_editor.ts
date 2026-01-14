@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const monacoEditor = getService('monacoEditor');
   const esql = getService('esql');
   const es = getService('es');
   const retry = getService('retry');
