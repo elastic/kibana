@@ -1064,6 +1064,94 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.body).to.have.property('message');
         expect(updateResponse.body.message).to.contain(`Unable to update ${ACCESS_CONTROL_TYPE}`);
       });
+
+      it('should apply defaults when upserting a supported type', async () => {
+        const { cookie: objectOwnerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
+          'test_user',
+          'changeme'
+        );
+
+        const objectId = 'upserted-object-1';
+        const updateResponse = await supertestWithoutAuth
+          .put('/access_control_objects/update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ objectId, type: ACCESS_CONTROL_TYPE, upsert: true })
+          .expect(200);
+
+        expect(updateResponse.body.id).to.eql(objectId);
+        expect(updateResponse.body.attributes).to.have.property(
+          'description',
+          'updated description'
+        );
+        // get the object to verify access control metadata
+        const getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('owner', ownerProfileUid);
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
+      });
+
+      it('should not write access control metadata when upserting unsupported types', async () => {
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+
+        const objectId = 'upserted-object-2';
+        const updateResponse = await supertestWithoutAuth
+          .put('/access_control_objects/update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ objectId, type: NON_ACCESS_CONTROL_TYPE, upsert: true })
+          .expect(200);
+
+        expect(updateResponse.body.id).to.eql(objectId);
+        expect(updateResponse.body.attributes).to.have.property(
+          'description',
+          'updated description'
+        );
+        // get the object to verify access control metadata
+        const getResponse = await supertestWithoutAuth
+          .get(`/non_access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).not.to.have.property('accessControl');
+      });
+
+      it('should not write access control metadata when upserting a supported type if there is no active user profile ID', async () => {
+        const objectId = 'upserted-object-3';
+        const updateResponse = await supertestWithoutAuth
+          .put('/access_control_objects/update')
+          .set('kbn-xsrf', 'true')
+          .set(
+            'Authorization',
+            `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+              'base64'
+            )}`
+          )
+          .send({ objectId, type: ACCESS_CONTROL_TYPE, upsert: true })
+          .expect(200);
+
+        expect(updateResponse.body.id).to.eql(objectId);
+        expect(updateResponse.body.attributes).to.have.property(
+          'description',
+          'updated description'
+        );
+        // get the object to verify access control metadata
+        const getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set(
+            'Authorization',
+            `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+              'base64'
+            )}`
+          )
+          .expect(200);
+        expect(getResponse.body).not.to.have.property('accessControl');
+      });
     });
 
     describe('#bulk_update', () => {
