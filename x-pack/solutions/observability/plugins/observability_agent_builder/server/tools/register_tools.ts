@@ -103,7 +103,7 @@ export async function registerTools({
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
-    createGetTraceMetricsTool({ core, dataRegistry, logger }),
+    createGetTraceMetricsTool({ core, plugins, logger }),
     createGetLogChangePointsTool({ core, plugins, logger }),
     createGetMetricChangePointsTool({ core, plugins, logger }),
   ];
