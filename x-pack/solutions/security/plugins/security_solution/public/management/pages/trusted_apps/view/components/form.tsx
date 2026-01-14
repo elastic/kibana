@@ -692,7 +692,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           setHasFormChanged(true);
         }
       },
-      [conditionsState.hasDuplicateFields, item, hasFormChanged, isProcessDescendantsSelected, processChanged]
+      [
+        conditionsState.hasDuplicateFields,
+        item,
+        hasFormChanged,
+        isProcessDescendantsSelected,
+        processChanged,
+      ]
     );
 
     // Stabilized memoization with minimal dependencies
