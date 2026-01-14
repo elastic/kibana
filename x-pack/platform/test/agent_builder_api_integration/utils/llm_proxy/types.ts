@@ -14,3 +14,14 @@ export type HttpResponse = http.ServerResponse<http.IncomingMessage>;
 export type LLMMessage = string[] | ToolMessage | string | undefined;
 
 export type ToolMessage = Omit<ChatCompletionMessage, 'refusal'>;
+export interface LLmError {
+  type: 'error';
+  statusCode?: number;
+  errorMsg: string;
+}
+
+export const isLlmError = (output: LLMMessage | LLmError): output is LLmError => {
+  return Boolean(
+    output && typeof output === 'object' && 'type' in output && output.type === 'error'
+  );
+};
