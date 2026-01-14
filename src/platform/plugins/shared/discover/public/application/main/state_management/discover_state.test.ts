@@ -1275,17 +1275,6 @@ describe('Discover state', () => {
       expect(state.getCurrentTab().appState.filters).toStrictEqual([]);
     });
 
-    test('transitionFromESQLToDataView', async () => {
-      const savedSearchWithQuery = copySavedSearch(savedSearchMock);
-      const query = {
-        esql: 'FROM the-data-view-title',
-      };
-      savedSearchWithQuery.searchSource.setField('query', query);
-      const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
-      await state.actions.transitionFromESQLToDataView('the-data-view-id');
-      expect(state.getCurrentTab().appState.query).toStrictEqual({ query: '', language: 'kuery' });
-    });
-
     test('onChangeDataView', async () => {
       const { state, customizationService, getCurrentUrl } = await getState('/', {
         savedSearch: savedSearchMock,

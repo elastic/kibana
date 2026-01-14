@@ -10,6 +10,7 @@
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
@@ -130,4 +131,30 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
     ]);
+  };
+
+/**
+ * Triggered when transitioning from ESQL to Dataview
+ * Clean ups the ES|QL query and moves to the dataview mode
+ */
+export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataViewId: string }>]
+> = ({ tabId, dataViewId }) =>
+  async function transitionFromESQLToDataViewThunkFn(dispatch) {
+    return dispatch(
+      updateAppState({
+        tabId,
+        appState: {
+          query: {
+            language: 'kuery',
+            query: '',
+          },
+          columns: [],
+          dataSource: {
+            type: DataSourceType.DataView,
+            dataViewId,
+          },
+        },
+      })
+    );
   };

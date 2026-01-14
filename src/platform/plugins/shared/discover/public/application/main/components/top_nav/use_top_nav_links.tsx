@@ -43,6 +43,7 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
@@ -234,6 +235,10 @@ export const useTopNavLinks = ({
     return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
+  const transitionFromESQLToDataView = useCurrentTabAction(
+    internalStateActions.transitionFromESQLToDataView
+  );
+
   return useMemo(() => {
     const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
       convertAppMenuItemToTopNavItem({
@@ -280,7 +285,7 @@ export const useTopNavLinks = ({
               ) {
                 dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
               } else {
-                state.actions.transitionFromESQLToDataView(dataView.id ?? '');
+                dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
               }
             } else {
               state.actions.transitionFromDataViewToESQL(dataView);
@@ -328,5 +333,6 @@ export const useTopNavLinks = ({
     shouldShowESQLToDataViewTransitionModal,
     dispatch,
     state,
+    transitionFromESQLToDataView,
   ]);
 };

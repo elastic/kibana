@@ -185,6 +185,9 @@ export const DiscoverTopNav = ({
     [dispatch, setAppState, stateContainer, updateAppState]
   );
 
+  const transitionFromESQLToDataView = useCurrentTabAction(
+    internalStateActions.transitionFromESQLToDataView
+  );
   const onESQLToDataViewTransitionModalClose = useCallback(
     (shouldDismissModal?: boolean, needsSave?: boolean) => {
       if (shouldDismissModal) {
@@ -202,14 +205,14 @@ export const DiscoverTopNav = ({
           onClose: () =>
             dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false)),
           onSaveCb: () => {
-            stateContainer.actions.transitionFromESQLToDataView(dataView.id ?? '');
+            dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
           },
         });
       } else {
-        stateContainer.actions.transitionFromESQLToDataView(dataView.id ?? '');
+        dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
       }
     },
-    [dataView.id, dispatch, services, stateContainer]
+    [dataView.id, dispatch, services, stateContainer, transitionFromESQLToDataView]
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({

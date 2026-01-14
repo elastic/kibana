@@ -189,11 +189,6 @@ export interface DiscoverStateContainer {
      * Triggered when transitioning from ESQL to Dataview
      * Clean ups the ES|QL query and moves to the dataview mode
      */
-    transitionFromESQLToDataView: (dataViewId: string) => void;
-    /**
-     * Triggered when transitioning from ESQL to Dataview
-     * Clean ups the ES|QL query and moves to the dataview mode
-     */
     transitionFromDataViewToESQL: (dataView: DataView) => void;
     /**
      * Triggered when a saved search is opened in the savedObject finder
@@ -355,24 +350,6 @@ export function getDiscoverStateContainer({
         savedSearchId: newSavedSearchId,
       });
     }
-  };
-
-  const transitionFromESQLToDataView = (dataViewId: string) => {
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.updateAppState)({
-        appState: {
-          query: {
-            language: 'kuery',
-            query: '',
-          },
-          columns: [],
-          dataSource: {
-            type: DataSourceType.DataView,
-            dataViewId,
-          },
-        },
-      })
-    );
   };
 
   const clearTimeFieldFromSort = (
@@ -823,7 +800,6 @@ export function getDiscoverStateContainer({
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
-      transitionFromESQLToDataView,
       transitionFromDataViewToESQL,
       onUpdateQuery,
       setDataView,
