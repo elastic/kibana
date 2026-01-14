@@ -230,6 +230,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflow,
                 spaceId,
                 workflowExecutionRepository,
+                taskInstance,
                 logger
               );
               if (wasSkipped) {
@@ -267,6 +268,10 @@ export class WorkflowsExecutionEnginePlugin
                 yaml: workflow.yaml,
                 context: executionContext,
                 status: ExecutionStatus.PENDING,
+                // Store task's runAt to link execution to specific scheduled run
+                // runAt is stable across retries (retries use the same runAt but get a new startedAt)
+                // This allows us to detect stale executions from previous scheduled runs
+                taskRunAt: taskInstance.runAt?.toISOString() || null,
                 createdAt: workflowCreatedAt.toISOString(),
                 createdBy: '',
                 triggeredBy: 'scheduled',

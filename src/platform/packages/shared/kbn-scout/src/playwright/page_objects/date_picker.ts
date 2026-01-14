@@ -50,7 +50,11 @@ export class DatePicker {
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
     await this.showStartEndTimes();
     // we start with end date
-    await this.page.testSubj.click('superDatePickerendDatePopoverButton');
+    // Note: Playwright fails to click 'superDatePickerendDatePopoverButton' because <span class="...">Now</span>
+    // element inside <div data-euiportal="true"> subtree repeatedly intercepts pointer events, preventing
+    // the click despite the target element is visible, enabled, and stable. Using { force: true } to bypass these checks.
+    // eslint-disable-next-line playwright/no-force-option
+    await this.page.testSubj.locator('superDatePickerendDatePopoverButton').click({ force: true });
     await this.page.testSubj.click('superDatePickerAbsoluteTab');
     const inputFrom = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputFrom.clear();
