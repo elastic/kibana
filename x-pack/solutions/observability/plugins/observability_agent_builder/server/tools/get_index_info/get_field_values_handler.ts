@@ -11,7 +11,7 @@ import { groupBy, keyBy, mapValues } from 'lodash';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter, kqlFilter as toKqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
-import { getFieldType } from './utils';
+import { getFieldType } from './get_field_type';
 
 const MAX_KEYWORD_VALUES = 50;
 const MAX_TEXT_SAMPLES = 5;
