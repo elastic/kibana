@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLCommand } from '@kbn/esql-language';
 import { BasicPrettyPrinter, isProperNode, Parser } from '@kbn/esql-language';
 
-export const extractWhereCommand = (srcQuery?: Query | AggregateQuery): string[] => {
-  if (!srcQuery || !isOfAggregateQueryType(srcQuery)) {
+export const extractWhereCommand = (esql?: string): string[] => {
+  if (!esql) {
     return [];
   }
 
-  const { root } = Parser.parse(srcQuery.esql);
+  const { root } = Parser.parse(esql);
   const whereConditions = root.commands.filter(
     (command): command is ESQLCommand => command.type === 'command' && command.name === 'where'
   );

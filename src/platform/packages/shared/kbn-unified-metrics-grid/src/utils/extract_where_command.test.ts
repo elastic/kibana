@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Query } from '@kbn/es-query';
 import { extractWhereCommand } from './extract_where_command';
 
 describe('extractWhereCommand', () => {
-  it('returns empty array for non-aggregate queries', () => {
-    const query: Query = { query: 'host.name: "host-01"', language: 'kuery' };
-    expect(extractWhereCommand(query)).toEqual([]);
+  it('returns empty array for empty input', () => {
+    expect(extractWhereCommand(undefined)).toEqual([]);
   });
 
   it('extracts WHERE after a source command', () => {
-    const query = {
-      esql: 'TS metrics-* | WHERE host.name == "host-01" AND system.cpu.user.pct IS NOT NULL',
-    };
+    const query = 'TS metrics-* | WHERE host.name == "host-01" AND system.cpu.user.pct IS NOT NULL';
 
     expect(extractWhereCommand(query)).toEqual([
       'host.name == "host-01" AND system.cpu.user.pct IS NOT NULL',
@@ -27,9 +23,7 @@ describe('extractWhereCommand', () => {
   });
 
   it('extracts top-level WHERE commands even when not after source', () => {
-    const query = {
-      esql: 'FROM logs | EVAL x = 1 | WHERE x > 0',
-    };
+    const query = 'FROM logs | EVAL x = 1 | WHERE x > 0';
 
     expect(extractWhereCommand(query)).toEqual(['x > 0']);
   });
