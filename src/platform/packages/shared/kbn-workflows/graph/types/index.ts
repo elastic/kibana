@@ -69,7 +69,6 @@ export {
   isDataSet,
   isElasticsearch,
   isKibana,
-  isHttp,
   isWait,
   isEnterForeach,
   isEnterIf,

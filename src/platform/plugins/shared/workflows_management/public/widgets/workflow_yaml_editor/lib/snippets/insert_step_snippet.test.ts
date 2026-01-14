@@ -34,13 +34,13 @@ describe('insertStepSnippet', () => {
     const inputYaml = `name: one_step_workflow`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'wait');
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('wait', {
       full: true,
       withStepsSection: true,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('wait', {
       full: true,
       withStepsSection: true,
     });
@@ -59,19 +59,19 @@ describe('insertStepSnippet', () => {
   it('should insert a step snippet after the last step', () => {
     const inputYaml = `name: one_step_workflow
 steps:
-  - name: get_google
-    type: http
+  - name: wait_step
+    type: wait
     with:
-      url: https://google.com`;
+      duration: 5s`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'wait');
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('wait', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('wait', {
       full: true,
       withStepsSection: false,
     });
@@ -94,19 +94,19 @@ steps:
     type: foreach
     foreach: "{{ context.items }}"
     steps:
-      - name: get_google
-        type: http
+      - name: wait_step
+        type: wait
         with:
-          url: https://google.com # <- cursor is here`;
+          duration: 5s # <- cursor is here`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'wait');
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('wait', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('wait', {
       full: true,
       withStepsSection: false,
     });
@@ -129,10 +129,10 @@ steps:
     type: foreach
     foreach: "{{ context.items }}"
     steps:
-      - name: get_google
-        type: http
+      - name: wait_step
+        type: wait
         with:
-          url: https://google.com # <- cursor is here
+          duration: 5s # <- cursor is here
       - name: log_result
         type: console
         with:
@@ -143,15 +143,15 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'wait',
       new monaco.Position(10, 33)
     );
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('wait', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('wait', {
       full: true,
       withStepsSection: false,
     });
@@ -170,10 +170,10 @@ steps:
   it('should insert connector snippet if step type is not a built-in', () => {
     const inputYaml = `name: one_step_workflow
 steps:
-  - name: get_google
-    type: http
+  - name: wait_step
+    type: wait
     with:
-      url: https://google.com`;
+      duration: 5s`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     insertStepSnippet(
