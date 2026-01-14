@@ -13,9 +13,10 @@ import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { isEqual } from 'lodash';
-import type { KqlPluginStart } from '@kbn/kql/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourcesDropdown } from './sources_dropdown';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
+import type { ESQLEditorDeps } from '../types';
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -26,8 +27,6 @@ export interface QuickSearchVisorProps {
   isVisible: boolean;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
-  // Kql autocomplete service
-  kql: KqlPluginStart;
 }
 
 const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
@@ -38,9 +37,10 @@ export function QuickSearchVisor({
   query,
   isSpaceReduced,
   isVisible,
-  kql,
   onUpdateAndSubmitQuery,
 }: QuickSearchVisorProps) {
+  const kibana = useKibana<ESQLEditorDeps>();
+  const { kql } = kibana.services;
   const isDarkMode = useKibanaIsDarkMode();
   const { euiTheme } = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
