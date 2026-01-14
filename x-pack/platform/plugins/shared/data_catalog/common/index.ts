@@ -15,6 +15,6 @@ export type {
   EARSOAuthConfiguration,
   CustomOAuthConfiguration,
   WorkflowInfo,
-} from './data_types';
+} from './data_sources_spec';
 
-export { EARSSupportedOAuthProvider } from './data_types';
+export { EARSSupportedOAuthProvider } from './data_sources_spec';

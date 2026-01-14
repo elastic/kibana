@@ -1,17 +1,17 @@
 {
   "type": "plugin",
-  "id": "@kbn/data-sources-registry-plugin",
+  "id": "@kbn/data-catalog-plugin",
   "owner": [
     "@elastic/workchat-eng"
   ],
   "group": "platform",
   "visibility": "shared",
-  "description": "Data Sources Registry for Workplace AI",
+  "description": "Data Catalog for Workplace AI",
   "plugin": {
-    "id": "dataSourcesRegistry",
+    "id": "dataCatalog",
     "server": true,
     "browser": false,
-    "configPath": ["xpack", "dataSourcesRegistry"],
+    "configPath": ["xpack", "dataCatalog"],
     "requiredPlugins": [],
     "optionalPlugins": [],
     "requiredBundles": [],

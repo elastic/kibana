@@ -13,15 +13,13 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';
+import type { DataCatalogPluginSetup, DataCatalogPluginStart } from './types';
 import type { DataCatalog } from './data_catalog';
-import type { DataSource } from '../common/data_types';
+import type { DataSource } from '../common/data_source_spec';
 import { createDataCatalog } from './data_catalog';
 import { registerRoutes } from './routes';
 
-export class DataSourcesRegistryPlugin
-  implements Plugin<DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart>
-{
+export class DataCatalogPlugin implements Plugin<DataCatalogPluginSetup, DataCatalogPluginStart> {
   private readonly logger: Logger;
   private dataCatalog: DataCatalog;
 
@@ -30,7 +28,7 @@ export class DataSourcesRegistryPlugin
     this.dataCatalog = createDataCatalog();
   }
 
-  public setup(core: CoreSetup): DataSourcesRegistryPluginSetup {
+  public setup(core: CoreSetup): DataCatalogPluginSetup {
     this.logger.debug('dataSourcesRegistry: Setup');
 
     const router = core.http.createRouter();
@@ -41,7 +39,7 @@ export class DataSourcesRegistryPlugin
     };
   }
 
-  public start(core: CoreStart): DataSourcesRegistryPluginStart {
+  public start(core: CoreStart): DataCatalogPluginStart {
     const availableDataSources = this.dataCatalog.list();
     this.logger.debug(`DataCatalog contents: ${JSON.stringify(availableDataSources, null, 2)}`);
 

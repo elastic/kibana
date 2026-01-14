@@ -11,9 +11,9 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { DataSourcesRegistryPlugin } = await import('./plugin');
-  return new DataSourcesRegistryPlugin(initializerContext);
+  const { DataCatalogPlugin } = await import('./plugin');
+  return new DataCatalogPlugin(initializerContext);
 }
 
-export type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';
-export type { DataCatalog, DataSource } from './data_catalog';
+export type { DataCatalogPluginSetup, DataCatalogPluginStart } from './types';
+export type { DataCatalog } from './data_catalog';

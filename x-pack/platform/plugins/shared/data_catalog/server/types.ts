@@ -6,12 +6,12 @@
  */
 
 import type { DataCatalog } from './data_catalog';
-import type { DataSource } from '../common/data_types';
+import type { DataSource } from '../common/data_source_spec';
 
-export interface DataSourcesRegistryPluginSetup {
+export interface DataCatalogPluginSetup {
   register: (dataType: DataSource) => void;
 }
 
-export interface DataSourcesRegistryPluginStart {
+export interface DataCatalogPluginStart {
   getCatalog: () => DataCatalog;
 }
