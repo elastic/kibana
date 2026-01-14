@@ -15,7 +15,6 @@
     ],
     "requiredPlugins": [
       "data",
-      "expressions",
       "dataViews",
       "uiActions",
       "contentManagement",

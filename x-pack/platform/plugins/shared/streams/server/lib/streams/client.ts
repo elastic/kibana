@@ -169,7 +169,7 @@ export class StreamsClient {
    * Disabling streams means deleting the logs root stream
    * AND its descendants, including any Elasticsearch objects,
    * such as data streams. That means it deletes all data
-   * belonging to wired and group streams.
+   * belonging to wired streams.
    *
    * It does NOT delete classic streams.
    */
@@ -190,21 +190,13 @@ export class StreamsClient {
     const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
     if (rootStreamExists) {
-      const streams = await this.getManagedStreams();
-      const groupStreams = streams.filter((stream) => Streams.GroupStream.Definition.is(stream));
-
       await State.attemptChanges(
         [
           {
             type: 'delete' as const,
             name: LOGS_ROOT_STREAM_NAME,
           },
-        ].concat(
-          groupStreams.map((stream) => ({
-            type: 'delete' as const,
-            name: stream.name,
-          }))
-        ),
+        ],
         {
           ...this.dependencies,
           streamsClient: this,
@@ -413,7 +405,6 @@ export class StreamsClient {
    * - if a wired stream definition exists
    * - if an ingest stream definition exists
    * - if a data stream exists (creates an ingest definition on the fly)
-   * - if a group stream definition exists
    *
    * Throws when:
    * - no definition is found
@@ -698,21 +689,18 @@ export class StreamsClient {
       query,
     });
 
-    const streams = streamsSearchResponse.hits.hits.flatMap((hit) =>
-      this.getStreamDefinitionFromSource(hit._source)
-    );
+    const streams = streamsSearchResponse.hits.hits
+      .filter(
+        ({ _source: definition }) => !('group' in definition) // Filter out old Group streams
+      )
+      .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
 
     const privileges = await checkAccessBulk({
-      names: streams
-        .filter((stream) => !Streams.GroupStream.Definition.is(stream))
-        .map((stream) => stream.name),
+      names: streams.map((stream) => stream.name),
       scopedClusterClient,
     });
 
-    return streams.filter((stream) => {
-      if (Streams.GroupStream.Definition.is(stream)) return true;
-      return privileges[stream.name]?.read === true;
-    });
+    return streams.filter((stream) => privileges[stream.name]?.read);
   }
 
   private async checkElasticsearchStreamStatus(): Promise<boolean> {

@@ -21,7 +21,11 @@ import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledgin
 import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
 import { isStale } from '../../../../lib/tasks/is_stale';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
-import type { SystemIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/system_identification';
+import {
+  SYSTEMS_IDENTIFICATION_TASK_TYPE,
+  getSystemsIdentificationTaskId,
+  type SystemIdentificationTaskParams,
+} from '../../../../lib/tasks/task_definitions/system_identification';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
@@ -328,7 +332,7 @@ export const systemsStatusRoute = createServerRoute({
     }
 
     const task = await taskClient.get<SystemIdentificationTaskParams, IdentifySystemsResult>(
-      `streams_feature_identification_${name}`
+      getSystemsIdentificationTaskId(name)
     );
 
     if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
@@ -414,6 +418,7 @@ export const systemsTaskRoute = createServerRoute({
     }
 
     const { action } = body;
+    const taskId = getSystemsIdentificationTaskId(name);
 
     if (action === 'schedule') {
       const { from: start, to: end, connectorId: connectorIdParam } = body;
@@ -427,8 +432,8 @@ export const systemsTaskRoute = createServerRoute({
       try {
         await taskClient.schedule<SystemIdentificationTaskParams>({
           task: {
-            type: 'streams_feature_identification',
-            id: `streams_feature_identification_${name}`,
+            type: SYSTEMS_IDENTIFICATION_TASK_TYPE,
+            id: taskId,
             space: '*',
             stream: name,
           },
@@ -451,7 +456,7 @@ export const systemsTaskRoute = createServerRoute({
         throw error;
       }
     } else if (action === 'cancel') {
-      await taskClient.cancel(`streams_feature_identification_${name}`);
+      await taskClient.cancel(taskId);
 
       return {
         status: TaskStatus.BeingCanceled,
@@ -462,7 +467,7 @@ export const systemsTaskRoute = createServerRoute({
       const task = await taskClient.acknowledge<
         SystemIdentificationTaskParams,
         IdentifySystemsResult
-      >(`streams_feature_identification_${name}`);
+      >(taskId);
 
       return {
         status: TaskStatus.Acknowledged,
