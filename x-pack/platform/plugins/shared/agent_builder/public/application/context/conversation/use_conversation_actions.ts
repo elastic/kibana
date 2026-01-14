@@ -16,7 +16,8 @@ import type {
   ToolCallStep,
   Conversation,
 } from '@kbn/agent-builder-common';
-import { isToolCallStep } from '@kbn/agent-builder-common';
+import { isToolCallStep, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentInput, Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
@@ -59,6 +60,8 @@ export interface ConversationActions {
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
   setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
+  setPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
+  clearPendingPrompt: () => void;
   onConversationCreated: ({
     conversationId,
     title,
@@ -213,6 +216,18 @@ const createConversationActions = ({
     setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => {
       setCurrentRound((round) => {
         round.time_to_first_token = timeToFirstToken;
+      });
+    },
+    setPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => {
+      setCurrentRound((round) => {
+        round.pending_prompt = prompt;
+        round.status = ConversationRoundStatus.awaitingPrompt;
+      });
+    },
+    clearPendingPrompt: () => {
+      setCurrentRound((round) => {
+        round.pending_prompt = undefined;
+        round.status = ConversationRoundStatus.inProgress;
       });
     },
     onConversationCreated: ({

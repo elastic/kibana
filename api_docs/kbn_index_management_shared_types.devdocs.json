@@ -2218,20 +2218,6 @@
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/index-management-shared-types",
-            "id": "def-common.IndexMappingProps.hasUpdateMappingsPrivilege",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hasUpdateMappingsPrivilege",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2634,6 +2620,65 @@
                   {
                     "parentPluginId": "@kbn/index-management-shared-types",
                     "id": "def-common.PublicApiServiceSetup.getIndexTemplates.$1.signal",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "signal",
+                    "description": [],
+                    "signature": [
+                      "AbortSignal | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.PublicApiServiceSetup.simulateIndexTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "simulateIndexTemplate",
+            "description": [
+              "\nSimulates an index template by name using the\n`POST /api/index_management/index_templates/simulate/{templateName}` endpoint.\nReturns the resolved template configuration that would be applied to matching indices."
+            ],
+            "signature": [
+              "(options: { templateName: string; signal?: AbortSignal | undefined; }) => Promise<",
+              "IndicesSimulateTemplateResponse",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.PublicApiServiceSetup.simulateIndexTemplate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.PublicApiServiceSetup.simulateIndexTemplate.$1.templateName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "templateName",
+                    "description": [],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.PublicApiServiceSetup.simulateIndexTemplate.$1.signal",
                     "type": "Object",
                     "tags": [],
                     "label": "signal",
@@ -3218,6 +3263,21 @@
           "\"standard\" | \"time_series\" | \"logsdb\" | \"lookup\""
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/index_templates.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.SimulateIndexTemplateResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SimulateIndexTemplateResponse",
+        "description": [],
+        "signature": [
+          "IndicesSimulateTemplateResponse"
+        ],
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

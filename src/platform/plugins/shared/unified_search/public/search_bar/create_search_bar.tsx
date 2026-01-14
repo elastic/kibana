@@ -42,6 +42,7 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = 
 > & {
   appName: string;
   useDefaultBehaviors?: boolean;
+  disableSubscribingToGlobalDataServices?: boolean;
   savedQueryId?: string;
   /**
    * Determines if saving queries is allowed within the saved query management popover (still requires privileges).
@@ -98,8 +99,13 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
   const { timefilter } = queryService.timefilter;
 
   return (payload: { dateRange: TimeRange; query?: QT | Query }) => {
+    const currentTime = timefilter.getTime();
     const isUpdate =
-      !isEqual(timefilter.getTime(), payload.dateRange) || !isEqual(payload.query, currentQuery);
+      !isEqual(currentTime, payload.dateRange) || !isEqual(payload.query, currentQuery);
+
+    let submittedTime = currentTime;
+    let submittedQuery = currentQuery;
+
     if (isUpdate) {
       timefilter.setTime(payload.dateRange);
       if (payload.query) {
@@ -107,16 +113,19 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
       } else {
         queryService.queryString.clearQuery();
       }
-    } else {
+      submittedTime = timefilter.getTime();
+      submittedQuery = queryService.queryString.getQuery() as QT | Query;
+    }
+
+    if ((!isUpdate || props.disableSubscribingToGlobalDataServices) && props.onQuerySubmit) {
       // Refresh button triggered for an update
-      if (props.onQuerySubmit)
-        props.onQuerySubmit(
-          {
-            dateRange: timefilter.getTime(),
-            query: currentQuery,
-          },
-          false
-        );
+      props.onQuerySubmit(
+        {
+          dateRange: submittedTime,
+          query: submittedQuery,
+        },
+        isUpdate
+      );
     }
   };
 };
@@ -163,7 +172,8 @@ export function createSearchBar({
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return <QT extends AggregateQuery | Query = Query>(props: StatefulSearchBarProps<QT>) => {
-    const { useDefaultBehaviors, allowSavingQueries } = props;
+    const { useDefaultBehaviors, allowSavingQueries, disableSubscribingToGlobalDataServices } =
+      props;
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 
@@ -173,14 +183,17 @@ export function createSearchBar({
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
     const { filters } = useFilterManager({
+      disabled: disableSubscribingToGlobalDataServices,
       filters: props.filters,
       filterManager: data.query.filterManager,
     });
     const { query } = useQueryStringManager({
+      disabled: disableSubscribingToGlobalDataServices,
       query: props.query,
       queryStringManager: data.query.queryString,
     }) as { query: QT };
     const { timeRange, refreshInterval, minRefreshInterval } = useTimefilter({
+      disabled: disableSubscribingToGlobalDataServices,
       dateRangeFrom: props.dateRangeFrom,
       dateRangeTo: props.dateRangeTo,
       refreshInterval: props.refreshInterval,
@@ -197,7 +210,13 @@ export function createSearchBar({
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
-      if (!useDefaultBehaviors || !onQuerySubmitRef.current) return;
+      if (
+        !useDefaultBehaviors ||
+        disableSubscribingToGlobalDataServices ||
+        !onQuerySubmitRef.current
+      ) {
+        return;
+      }
       onQuerySubmitRef.current(
         {
           dateRange: timeRange,
@@ -205,7 +224,7 @@ export function createSearchBar({
         },
         true
       );
-    }, [query, timeRange, useDefaultBehaviors]);
+    }, [query, timeRange, useDefaultBehaviors, disableSubscribingToGlobalDataServices]);
 
     const showSaveQuery = canShowSavedQuery({
       allowSavingQueries,
@@ -282,6 +301,7 @@ export function createSearchBar({
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
+            hasDirtyState={props.hasDirtyState}
             esqlVariablesConfig={props.esqlVariablesConfig}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             useBackgroundSearchButton={props.useBackgroundSearchButton}

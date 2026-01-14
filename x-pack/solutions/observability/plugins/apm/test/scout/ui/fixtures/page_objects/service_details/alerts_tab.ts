@@ -8,6 +8,7 @@
 import { EuiDataGridWrapper, type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 export class AlertsTab extends ServiceDetailsTab {
   public readonly tabName: ServiceDetailsPageTabName = 'alerts';
@@ -30,7 +31,6 @@ export class AlertsTab extends ServiceDetailsTab {
   }
 
   protected async waitForTabLoad() {
-    // Wait for alerts table to load (either empty state or with data)
-    await Promise.any([this.alertsTableEmptyState.waitFor(), this.alertsTable.ensureGridVisible()]);
+    await this.page.testSubj.locator('showQueryBarMenu').waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 }

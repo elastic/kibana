@@ -123,7 +123,6 @@ import type {
 import type { ExternalCallback } from '..';
 
 import {
-  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
   MAX_CONCURRENT_PACKAGE_ASSETS,
@@ -211,10 +210,13 @@ import {
 } from './package_policies/upgrade';
 
 import { getInputsWithIds } from './package_policies/get_input_with_ids';
+import { runWithCache } from './epm/packages/cache';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
 };
+
+const ASYNC_DEPLOY_POLICIES_THRESHOLD = 100;
 
 async function getPkgInfoAssetsMap({
   savedObjectsClient,
@@ -348,13 +350,13 @@ const extractPackagePolicyVars = (
       };
 
       logger.debug(
-        `Extracted Azure cloud connector vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=${!!azureCredentials}`
+        `Extracted Azure cloud connector vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=[REDACTED]`
       );
 
       return azureCloudConnectorVars;
     } else {
       logger.error(
-        `Missing required Azure vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=${!!azureCredentials}`
+        `Missing required Azure vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=[REDACTED]`
       );
     }
   }
@@ -646,11 +648,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     if (options?.bumpRevision ?? true) {
-      for (const policyId of enrichedPackagePolicy.policy_ids) {
-        await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+      await this.bumpAgentPoliciesRevision(
+        { soClient, esClient },
+        enrichedPackagePolicy.policy_ids,
+        {
           user: options?.user,
-        });
-      }
+        }
+      );
     }
 
     const createdPackagePolicy = mapPackagePolicySavedObjectToPackagePolicy(newSo);
@@ -661,6 +665,33 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       createdPackagePolicy,
       soClient,
       esClient
+    );
+  }
+
+  private async bumpAgentPoliciesRevision(
+    deps: { soClient: SavedObjectsClientContract; esClient: ElasticsearchClient },
+    policyIds: string[],
+    options: {
+      user?: AuthenticatedUser;
+      removeProtectionFn?: (policyId: string) => undefined | boolean;
+      asyncDeploy?: boolean;
+    } = {}
+  ) {
+    return runWithCache(() =>
+      pMap(
+        policyIds,
+        (policyId) =>
+          agentPolicyService.bumpRevision(deps.soClient, deps.esClient, policyId, {
+            user: options?.user,
+            asyncDeploy: options.asyncDeploy || policyIds.length > ASYNC_DEPLOY_POLICIES_THRESHOLD,
+            removeProtection: options.removeProtectionFn
+              ? options.removeProtectionFn(policyId)
+              : undefined,
+          }),
+        {
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
+        }
+      )
     );
   }
 
@@ -871,12 +902,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Assign it to the given agent policy
 
     if (options?.bumpRevision ?? true) {
-      for (const agentPolicyId of agentPolicyIds) {
-        await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
-          user: options?.user,
-          asyncDeploy: options?.asyncDeploy,
-        });
-      }
+      await this.bumpAgentPoliciesRevision({ soClient, esClient }, [...agentPolicyIds], {
+        user: options?.user,
+        asyncDeploy: options?.asyncDeploy,
+      });
     }
     logger.debug(`Created new package policies`);
     return {
@@ -1525,27 +1554,28 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Bump revision of all associated agent policies (old and new)
     const associatedPolicyIds = new Set([...oldPackagePolicy.policy_ids, ...newPolicy.policy_ids]);
     logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
-    const bumpPromise = pMap(
-      associatedPolicyIds,
-      (policyId) => {
-        const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
-        // Check if the agent policy is in both old and updated package policies
-        const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
-        const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
-        // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
-        const removeProtection =
-          isEndpointPolicy &&
-          ((assignedInOldPolicy && !assignedInNewPolicy) ||
-            (!assignedInOldPolicy && assignedInNewPolicy));
-        if (options?.bumpRevision !== false) {
-          return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-            user: options?.user,
-            removeProtection,
-          });
-        }
-      },
-      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
+    const bumpPromise = this.bumpAgentPoliciesRevision(
+      { soClient, esClient },
+      [...associatedPolicyIds],
+      {
+        user: options?.user,
+        removeProtectionFn: (policyId) => {
+          const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
+
+          if (!isEndpointPolicy) {
+            return undefined;
+          }
+
+          const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
+          const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
+
+          return (
+            (assignedInOldPolicy && !assignedInNewPolicy) ||
+            (!assignedInOldPolicy && assignedInNewPolicy)
+          );
+        },
+      }
     );
 
     const assetRemovePromise = removeOldAssets({
@@ -1918,24 +1948,26 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
     });
 
-    const bumpPromise = pMap(associatedPolicyIds, async (agentPolicyId) => {
-      // Check if the agent policy is in both old and updated package policies
-      const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
-      const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
-
-      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
-      const removeProtection =
-        (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
-        (!assignedInOldPolicies && assignedInUpdatedPolicies);
-
-      logger.debug(`bumping revision for agent policy id [${agentPolicyId}]`);
-
-      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
+    const bumpPromise = this.bumpAgentPoliciesRevision(
+      { soClient, esClient },
+      [...associatedPolicyIds],
+      {
         user: options?.user,
-        removeProtection,
         asyncDeploy: options?.asyncDeploy,
-      });
-    }).finally(() => {
+        removeProtectionFn: (agentPolicyId) => {
+          // Check if the agent policy is in both old and updated package policies
+          const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
+          const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
+
+          // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+          const removeProtection =
+            (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
+            (!assignedInOldPolicies && assignedInUpdatedPolicies);
+
+          return removeProtection;
+        },
+      }
+    ).finally(() => {
       logger.debug(`bumping of revision for associated agent policies done`);
     });
 
@@ -2169,8 +2201,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             policy_id: packagePolicy.policy_id,
             policy_ids: packagePolicy.policy_ids,
           });
+          // Only delete secrets that belong to the package policy itself,
+          // not to cloud connectors (which manage their own secret lifecycle)
           if (packagePolicy?.secret_references?.length) {
-            secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+            if (!packagePolicy.cloud_connector_id) {
+              // Regular package policy secrets - safe to delete
+              secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+            } else {
+              // Cloud connector secrets - managed by cloud connector lifecycle
+              logger.debug(
+                `Skipping secret deletion for package policy ${packagePolicy.id} - secrets are managed by cloud connector ${packagePolicy.cloud_connector_id}`
+              );
+            }
           }
         } else if (!success && error) {
           result.push({
@@ -2206,16 +2248,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
 
-      for (const policyId of uniquePolicyIdsR) {
-        const agentPolicy = agentPolicies.find((p) => p.id === policyId);
-        if (agentPolicy) {
-          // is the agent policy attached to package policy with endpoint
-          await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-            user: options?.user,
-            removeProtection: agentPoliciesWithEndpointPackagePolicies.has(policyId),
-          });
+      await this.bumpAgentPoliciesRevision(
+        { soClient, esClient },
+        agentPolicies.map((p) => p.id),
+        {
+          user: options?.user,
+          removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
         }
-      }
+      );
     }
 
     if (secretsToDelete.length > 0) {
@@ -3026,10 +3066,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
       if (enrichedPackagePolicy?.cloud_connector_id) {
-        const existingCloudConnector = await soClient.get<CloudConnector>(
-          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-          enrichedPackagePolicy.cloud_connector_id
-        );
+        // Update the existing cloud connector with new vars
         logger.info(`Updating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
           const cloudConnector = await cloudConnectorService.update(
@@ -3037,7 +3074,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             enrichedPackagePolicy.cloud_connector_id,
             {
               vars: cloudConnectorVars,
-              packagePolicyCount: existingCloudConnector.attributes.packagePolicyCount + 1,
             }
           );
           logger.info(`Successfully updated cloud connector: ${cloudConnector.id}`);

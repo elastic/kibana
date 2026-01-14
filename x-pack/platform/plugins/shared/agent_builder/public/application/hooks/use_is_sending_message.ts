@@ -9,6 +9,7 @@ import { useIsMutating } from '@kbn/react-query';
 import { mutationKeys } from '../mutation_keys';
 
 export const useIsSendingMessage = () => {
-  const numMutating = useIsMutating({ mutationKey: mutationKeys.sendMessage, fetching: true });
-  return numMutating > 0;
+  const numSending = useIsMutating({ mutationKey: mutationKeys.sendMessage, fetching: true });
+  const numResuming = useIsMutating({ mutationKey: mutationKeys.resumeRound, fetching: true });
+  return numSending > 0 || numResuming > 0;
 };

@@ -167,6 +167,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
 
+  hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
 }
 
@@ -326,8 +327,15 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     return (
       (this.state.query && this.props.query && !isEqual(this.state.query, this.props.query)) ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
-      this.state.dateRangeTo !== this.props.dateRangeTo
+      this.state.dateRangeTo !== this.props.dateRangeTo ||
+      Boolean(this.props.hasDirtyState)
     );
+  };
+
+  private onDraftChange = (draft: UnifiedSearchDraft | undefined) => {
+    if (this.props.onDraftChange && !isEqual(this.props.draft, draft)) {
+      this.props.onDraftChange(draft);
+    }
   };
 
   componentWillUnmount() {
@@ -760,7 +768,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
-          onDraftChange={this.props.onDraftChange}
+          onDraftChange={this.onDraftChange}
           onSendToBackground={this.onBackgroundSearch}
           isDirty={this.isDirty()}
           customSubmitButton={

@@ -6,9 +6,9 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { getRollupIntervalForTimeRange } from '@kbn/apm-data-access-plugin/server/utils';
 import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
 import { parseDatemath } from '../utils/time';
-import { getRollupIntervalForTimeRange } from '../utils/get_rollup_interval_for_time_range';
 import { getApmServiceSummary } from '../../routes/assistant_functions/get_apm_service_summary';
 import { getApmDownstreamDependencies } from '../../routes/assistant_functions/get_apm_downstream_dependencies';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';

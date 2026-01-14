@@ -111,7 +111,7 @@ export const BasicMetricBadges = () => {
       metric: [
         agents !== undefined && agents !== null
           ? i18n.translate('xpack.searchHomepage.metricPanel.basic.agentBuilder.agents', {
-              defaultMessage: '{agents} agents',
+              defaultMessage: '{agents, plural, one {# agent} other {# agents}}',
               values: {
                 agents,
               },
@@ -119,7 +119,7 @@ export const BasicMetricBadges = () => {
           : undefined,
         tools !== undefined && tools !== null
           ? i18n.translate('xpack.searchHomepage.metricPanel.basic.agentBuilder.tools', {
-              defaultMessage: '{tools} tools',
+              defaultMessage: '{tools, plural, one {# tool} other {# tools}}',
               values: {
                 tools,
               },
