@@ -38,7 +38,10 @@ const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   margin-bottom: ${layoutVar('application.marginBottom', '0px')};
   background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
   border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
-  border: ${getHighContrastBorder(euiThemeContext)};
+
+  // use outline for consistency with the application layout style
+  outline: ${getHighContrastBorder(euiThemeContext)};
+
   ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
 `;
 
