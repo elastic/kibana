@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosInstance, AxiosError } from 'axios';
+import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ApiClientConfig, PrivateLocation, AgentPolicy, Space, Monitor } from './types';
@@ -51,7 +51,7 @@ export class SyntheticsApiClient {
 
         if (isRetryable && attempt < this.maxRetries) {
           const delay = this.retryDelayMs * Math.pow(2, attempt - 1);
-          this.log.warning(`Retry ${attempt}/${this.maxRetries} for ${context} after ${delay}ms`);
+          this.log.debug(`Retry ${attempt}/${this.maxRetries} for ${context} after ${delay}ms`);
           await new Promise((resolve) => setTimeout(resolve, delay));
         } else {
           throw lastError;
@@ -59,17 +59,6 @@ export class SyntheticsApiClient {
       }
     }
     throw lastError;
-  }
-
-  private handleError(error: unknown, context: string): never {
-    if (axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError;
-      const message = axiosError.response?.data
-        ? JSON.stringify(axiosError.response.data)
-        : axiosError.message;
-      throw new Error(`${context}: ${message}`);
-    }
-    throw error;
   }
 
   async setupFleet(): Promise<void> {
