@@ -30,6 +30,12 @@ import {
   getAssetIndexMapping,
   getAssetIngestPipeline,
   getAssetIngestPipelineId,
+  getDriftEventsIndexPattern,
+  getDriftEventsIndexMapping,
+  getDriftEventsPipeline,
+  getDriftEventsPipelineId,
+  getDriftEventsTransformId,
+  getDriftEventsTransformConfig,
 } from './transforms';
 import {
   createTransform,
@@ -317,6 +323,66 @@ export class EndpointAssetsService {
     });
 
     this.logger.info(`Transform ${this.transformId} created successfully`);
+  }
+
+  async initializeDriftInfrastructure(): Promise<void> {
+    this.logger.info('Initializing drift detection infrastructure');
+
+    const driftIndexPattern = getDriftEventsIndexPattern(this.namespace);
+    const driftPipelineId = getDriftEventsPipelineId(this.namespace);
+    const driftTransformId = getDriftEventsTransformId(this.namespace);
+
+    // 1. Create drift events index
+    this.logger.info(`Creating drift events index: ${driftIndexPattern}`);
+    const indexMapping = getDriftEventsIndexMapping();
+
+    try {
+      await this.esClient.indices.create({
+        index: driftIndexPattern,
+        ...indexMapping,
+      });
+      this.logger.info(`Drift events index ${driftIndexPattern} created successfully`);
+    } catch (error) {
+      if ((error as { meta?: { body?: { error?: { type?: string } } } }).meta?.body?.error?.type === 'resource_already_exists_exception') {
+        this.logger.info(`Drift events index ${driftIndexPattern} already exists`);
+      } else {
+        throw error;
+      }
+    }
+
+    // 2. Create drift events ingest pipeline
+    this.logger.info(`Creating drift events ingest pipeline: ${driftPipelineId}`);
+    const pipelineConfig = getDriftEventsPipeline(this.namespace);
+
+    await this.esClient.ingest.putPipeline({
+      id: pipelineConfig.id,
+      description: pipelineConfig.description,
+      processors: pipelineConfig.processors,
+    });
+
+    this.logger.info(`Drift events ingest pipeline ${driftPipelineId} created successfully`);
+
+    // 3. Create drift events transform
+    this.logger.info(`Creating drift events transform: ${driftTransformId}`);
+    const transformConfig = getDriftEventsTransformConfig(this.namespace);
+
+    await createTransform({
+      esClient: this.esClient,
+      transform: transformConfig,
+      logger: this.logger,
+    });
+
+    this.logger.info(`Drift events transform ${driftTransformId} created successfully`);
+  }
+
+  async startDriftTransform(): Promise<void> {
+    const driftTransformId = getDriftEventsTransformId(this.namespace);
+
+    this.logger.info(`Starting drift events transform: ${driftTransformId}`);
+    await this.esClient.transform.startTransform({
+      transform_id: driftTransformId,
+    });
+    this.logger.info(`Drift events transform ${driftTransformId} started successfully`);
   }
 
   async startTransform(): Promise<void> {

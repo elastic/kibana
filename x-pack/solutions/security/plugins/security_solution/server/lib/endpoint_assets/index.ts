@@ -9,3 +9,4 @@ export { EndpointAssetsService, createEndpointAssetsService } from './endpoint_a
 export type { EndpointAssetsServiceOptions } from './endpoint_assets_service';
 export * from './transforms';
 export { registerEndpointAssetsRoutes } from './routes';
+export * from './tasks';

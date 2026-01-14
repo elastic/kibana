@@ -1049,6 +1049,37 @@ export const getAssetIndexMapping = () => ({
               last_change: { type: 'date' },
               change_types: { type: 'keyword' },
               recently_changed: { type: 'boolean' },
+              events_24h: {
+                properties: {
+                  total: { type: 'integer' },
+                  by_category: {
+                    properties: {
+                      privileges: { type: 'integer' },
+                      persistence: { type: 'integer' },
+                      network: { type: 'integer' },
+                      software: { type: 'integer' },
+                      posture: { type: 'integer' },
+                    },
+                  },
+                  by_severity: {
+                    properties: {
+                      critical: { type: 'integer' },
+                      high: { type: 'integer' },
+                      medium: { type: 'integer' },
+                      low: { type: 'integer' },
+                    },
+                  },
+                },
+              },
+              recent_changes: {
+                type: 'nested',
+                properties: {
+                  timestamp: { type: 'date' },
+                  category: { type: 'keyword' },
+                  action: { type: 'keyword' },
+                  item_name: { type: 'keyword' },
+                },
+              },
             },
           },
           // =================================================================

@@ -181,3 +181,136 @@ export const ELASTIC_AGENT = i18n.translate(
     defaultMessage: 'Elastic Agent',
   }
 );
+
+export const DRIFT_EVENTS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftEvents',
+  {
+    defaultMessage: 'Events',
+  }
+);
+
+export const DRIFT_EVENTS_24H = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftEvents24h',
+  {
+    defaultMessage: 'Events (24h)',
+  }
+);
+
+export const DRIFT_CRITICAL = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCritical',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+
+export const DRIFT_HIGH = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftHigh',
+  {
+    defaultMessage: 'High',
+  }
+);
+
+export const DRIFT_ASSETS_CHANGED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftAssetsChanged',
+  {
+    defaultMessage: 'Assets Changed',
+  }
+);
+
+export const DRIFT_EVENTS_BY_CATEGORY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftEventsByCategory',
+  {
+    defaultMessage: 'Events by Category',
+  }
+);
+
+export const DRIFT_RECENT_CHANGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftRecentChanges',
+  {
+    defaultMessage: 'Recent Changes',
+  }
+);
+
+export const DRIFT_CATEGORY_PERSISTENCE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategoryPersistence',
+  {
+    defaultMessage: 'Persistence',
+  }
+);
+
+export const DRIFT_CATEGORY_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategoryPrivileges',
+  {
+    defaultMessage: 'Privileges',
+  }
+);
+
+export const DRIFT_CATEGORY_NETWORK = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategoryNetwork',
+  {
+    defaultMessage: 'Network',
+  }
+);
+
+export const DRIFT_CATEGORY_SOFTWARE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategorySoftware',
+  {
+    defaultMessage: 'Software',
+  }
+);
+
+export const DRIFT_CATEGORY_POSTURE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftCategoryPosture',
+  {
+    defaultMessage: 'Posture',
+  }
+);
+
+export const DRIFT_COLUMN_TIME = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnTime',
+  {
+    defaultMessage: 'Time',
+  }
+);
+
+export const DRIFT_COLUMN_HOST = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnHost',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const DRIFT_COLUMN_CATEGORY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnCategory',
+  {
+    defaultMessage: 'Category',
+  }
+);
+
+export const DRIFT_COLUMN_CHANGE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnChange',
+  {
+    defaultMessage: 'Change',
+  }
+);
+
+export const DRIFT_COLUMN_SEVERITY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftColumnSeverity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const DRIFT_ERROR_LOADING = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftErrorLoading',
+  {
+    defaultMessage: 'Error loading drift summary',
+  }
+);
+
+export const DRIFT_NO_CHANGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftNoChanges',
+  {
+    defaultMessage: 'No drift events detected in the selected time range',
+  }
+);

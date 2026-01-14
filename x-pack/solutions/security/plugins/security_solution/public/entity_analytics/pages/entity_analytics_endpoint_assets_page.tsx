@@ -55,6 +55,7 @@ import { PrivilegesContent } from './privileges_content';
 import { usePrivileges } from '../hooks/use_privileges';
 import type { FindingType } from '../../../common/endpoint_assets';
 import { SecurityFindingsDetailFlyout } from '../components/security_findings_detail_flyout';
+import { DriftOverview } from '../../endpoint_assets/components/drift_overview';
 
 const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.endpointAssets.pageTitle',
@@ -2421,13 +2422,7 @@ const EndpointAssetsPageComponent: React.FC = () => {
     {
       id: 'drift',
       name: TAB_DRIFT,
-      content: (
-        <EuiEmptyPrompt
-          iconType="timeline"
-          title={<h2>Drift Detection - Coming Soon</h2>}
-          body={<p>Track configuration changes across your endpoint fleet.</p>}
-        />
-      ),
+      content: <DriftOverview />,
     },
   ];
 

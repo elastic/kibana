@@ -12,3 +12,21 @@ export {
   getAssetIngestPipeline,
   getAssetIngestPipelineId,
 } from './asset_facts_transform';
+
+export {
+  getDriftEventsIndexPattern,
+  getDriftEventsIndexMapping,
+  DRIFT_EVENTS_INDEX_PREFIX,
+} from './drift_events_index';
+
+export {
+  getDriftEventsPipeline,
+  getDriftEventsPipelineId,
+  DRIFT_EVENTS_PIPELINE_PREFIX,
+} from './drift_events_pipeline';
+
+export {
+  getDriftEventsTransformId,
+  getDriftEventsTransformConfig,
+  DRIFT_EVENTS_TRANSFORM_PREFIX,
+} from './drift_events_transform';

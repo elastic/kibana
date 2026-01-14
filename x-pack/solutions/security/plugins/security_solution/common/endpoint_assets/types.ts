@@ -222,7 +222,7 @@ export interface EndpointPrivileges {
 }
 
 /**
- * Drift detection
+ * Drift detection - comprehensive tracking
  */
 export interface EndpointDrift {
   /** Last configuration change timestamp */
@@ -231,6 +231,84 @@ export interface EndpointDrift {
   change_types: string[];
   /** Whether recently changed (within threshold) */
   recently_changed: boolean;
+
+  /** Events in last 24 hours */
+  events_24h?: {
+    /** Total event count */
+    total: number;
+    /** Events by category breakdown */
+    by_category: {
+      privileges: number;
+      persistence: number;
+      network: number;
+      software: number;
+      posture: number;
+    };
+    /** Events by severity breakdown */
+    by_severity: {
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+    };
+  };
+
+  /** Most recent significant changes (top 10) */
+  recent_changes?: Array<{
+    timestamp: string;
+    category: string;
+    action: string;
+    item_name: string;
+  }>;
+}
+
+/**
+ * Drift event categories and actions
+ */
+export type DriftCategory = 'privileges' | 'persistence' | 'network' | 'software' | 'posture';
+export type DriftAction = 'added' | 'removed' | 'changed';
+export type DriftSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+/**
+ * Individual drift event document
+ */
+export interface DriftEvent {
+  '@timestamp': string;
+
+  host: {
+    id: string;
+    name: string;
+    os: {
+      platform: string;
+    };
+  };
+
+  agent: {
+    id: string;
+  };
+
+  drift: {
+    category: DriftCategory;
+    action: DriftAction;
+    severity: DriftSeverity;
+    item: {
+      type: string;
+      name: string;
+      value?: string;
+      previous_value?: string;
+    };
+    query_id: string;
+    query_name: string;
+  };
+
+  osquery: Record<string, unknown>;
+
+  event: {
+    kind: 'event';
+    category: ['configuration'];
+    type: ['change'];
+    action: string;
+  };
 }
 
 /**
@@ -331,9 +409,51 @@ export interface PrivilegesSummaryResponse {
 }
 
 export interface DriftSummaryResponse {
-  total_assets: number;
-  recently_changed_assets: number;
-  change_types_distribution: Record<string, number>;
+  total_events: number;
+  events_by_category: {
+    privileges: number;
+    persistence: number;
+    network: number;
+    software: number;
+    posture: number;
+  };
+  events_by_severity: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+  assets_with_changes: number;
+  top_changed_assets: Array<{
+    host_id: string;
+    host_name: string;
+    event_count: number;
+  }>;
+  recent_changes: Array<{
+    timestamp: string;
+    host_id: string;
+    host_name: string;
+    category: string;
+    action: string;
+    item_name: string;
+    severity: string;
+  }>;
+  time_range: string;
+}
+
+export interface DriftEventsRequest {
+  time_range?: string;
+  categories?: DriftCategory[];
+  severities?: DriftSeverity[];
+  page?: number;
+  page_size?: number;
+}
+
+export interface DriftEventsResponse {
+  events: DriftEvent[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 export interface TransformStatusResponse {

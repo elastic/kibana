@@ -26,6 +26,7 @@ import { EndpointAssetsHeader } from '../components/endpoint_assets_header';
 import { EndpointAssetsTable } from '../components/endpoint_assets_table';
 import { PostureOverview } from '../components/posture_overview';
 import { PrivilegesOverview } from '../components/privileges_overview';
+import { DriftOverview } from '../components/drift_overview';
 import { useEndpointAssets } from '../hooks/use_endpoint_assets';
 import * as i18n from './translations';
 import { TEST_SUBJECTS } from '../../../common/endpoint_assets';
@@ -57,7 +58,7 @@ const EndpointAssetsPageComponent: React.FC = () => {
     {
       id: 'drift',
       name: i18n.TAB_DRIFT,
-      content: <div>Drift detection coming soon...</div>,
+      content: <DriftOverview />,
     },
   ];
 
