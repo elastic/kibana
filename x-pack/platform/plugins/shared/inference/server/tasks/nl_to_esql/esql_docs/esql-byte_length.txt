@@ -1,6 +1,6 @@
 # BYTE_LENGTH
 
-Returns the byte length of a string. Since all strings are in UTF-8, a single character may use multiple bytes.
+Returns the byte length of a string. All strings are in UTF-8, so a single character can use multiple bytes.
 
 ## Syntax
 
@@ -8,11 +8,13 @@ Returns the byte length of a string. Since all strings are in UTF-8, a single ch
 
 ### Parameters
 
-#### `string`
+#### string
 
-String expression. If `null`, the function returns `null`.
+String expression to measure. If `null`, the function returns `null`.
 
 ## Examples
+
+This query retrieves all airports located in India, keeps only the `city` field, and then calculates two new fields: `fn_length`, which is the number of characters in the city name, and `fn_byte_length`, which is the number of bytes used by the city name in UTF-8 encoding.
 
 ```esql
 FROM airports
@@ -21,4 +23,4 @@ FROM airports
 | EVAL fn_length = LENGTH(city), fn_byte_length = BYTE_LENGTH(city)
 ```
 
-This example calculates both the character length and the byte length of city names in airports located in India.
+Calculate both the character length and byte length of city names for airports in India.

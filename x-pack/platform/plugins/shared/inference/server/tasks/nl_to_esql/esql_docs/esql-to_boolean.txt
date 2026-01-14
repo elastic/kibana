@@ -1,6 +1,6 @@
 # TO_BOOLEAN
 
-Converts an input value to a boolean value. A string value of `true` will be case-insensitively converted to the Boolean `true`. For anything else, including the empty string, the function will return `false`. The numerical value of `0` will be converted to `false`, and anything else will be converted to `true`.
+Converts an input value to a boolean value. A string value of `true` (case-insensitive) is converted to the Boolean `true`. All other string values, including the empty string, return `false`. The numerical value `0` is converted to `false`, while any other number is converted to `true`.
 
 ## Syntax
 
@@ -8,28 +8,16 @@ Converts an input value to a boolean value. A string value of `true` will be cas
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value to be converted. This can be a single- or multi-valued column or an expression.
+The input value to convert. This can be a single- or multi-valued column, or an expression.
 
 ## Examples
+
+This query creates a row with a list of string values and then converts each string to its boolean equivalent using the `TO_BOOLEAN` function. For example, "true" and "TRuE" will be converted to `true`, while "false", "", "yes", and "1" will be converted to `false` or `true` according to the conversion rules.
 
 ```esql
 ROW str = ["true", "TRuE", "false", "", "yes", "1"]
 | EVAL bool = TO_BOOLEAN(str)
 ```
-
-This example converts a multi-valued string column into boolean values. For instance:
-- `"true"` and `"TRuE"` are converted to `true`.
-- `"false"`, `""` (empty string), and other non-`true` strings are converted to `false`.
-- `"1"` is converted to `true`.
-
-```esql
-ROW num = [0, 1, 2, -1]
-| EVAL bool = TO_BOOLEAN(num)
-```
-
-## Notes
-
-- A string value of `true` is case-insensitively converted to the boolean `true`. For any other value, including an empty string, the function returns `false`.
-- A numerical value of `0` is converted to `false`, while any other numerical value is converted to `true`.
+Convert a list of string values to their boolean equivalents.

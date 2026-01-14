@@ -1,6 +1,6 @@
 # ROW
 
-The `ROW` command generates a single row with one or more columns, each assigned a specified value. This is particularly useful for testing purposes.
+The ROW command creates a single row with one or more columns, each assigned a value you specify. This is useful for testing or generating example data.
 
 ## Syntax
 
@@ -8,36 +8,29 @@ The `ROW` command generates a single row with one or more columns, each assigned
 
 ### Parameters
 
-#### `columnX`
+#### columnX
 
-The name of the column.
-If duplicate column names are provided, only the rightmost duplicate creates a column.
+The name of the column. If duplicate column names are provided, only the rightmost duplicate creates a column.
 
-#### `valueX`
+#### valueX
 
 The value assigned to the column. This can be a literal, an expression, or a function.
 
 ## Examples
 
-Basic usage
-
-Create a row with three columns, each assigned a specific value:
+The following query creates a single row with three columns: `a` is assigned the integer value 1, `b` is assigned the string "two", and `c` is assigned a null value.
 
 ```esql
 ROW a = 1, b = "two", c = null
 ```
 
-Multi-value columns
-
-Use square brackets to assign multiple values to a single column:
+This query creates a single row with one column `a`, which contains a multi-value array with the values 2 and 1.
 
 ```esql
 ROW a = [2, 1]
 ```
 
-Using functions
-
-Generate a row where a column's value is calculated using a function:
+This query creates a single row with one column `a`, where the value is the result of rounding 1.23 to zero decimal places (resulting in 1).
 
 ```esql
 ROW a = ROUND(1.23, 0)

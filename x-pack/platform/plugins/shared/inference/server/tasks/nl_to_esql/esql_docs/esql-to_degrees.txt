@@ -8,23 +8,16 @@ Converts a number in radians to degrees.
 
 ### Parameters
 
-#### `number`
+#### number
 
-The input value to be converted. It can be a single- or multi-valued column or an expression.
+Input value in radians. The input can be a single- or multi-valued column or an expression.
 
 ## Examples
 
-Convert a list of radian values to degrees:
+The following query creates a row with an array of radian values and then converts each value in the array to degrees using the `TO_DEGREES` function. The result is a new column containing the degree equivalents of the input radians.
 
 ```esql
 ROW rad = [1.57, 3.14, 4.71]
 | EVAL deg = TO_DEGREES(rad)
 ```
-
-### Result
-
-| rad   | deg       |
-|-------|-----------|
-| 1.57  | 89.954373 |
-| 3.14  | 179.908747|
-| 4.71  | 269.86312 |
+Convert an array of radian values to degrees.

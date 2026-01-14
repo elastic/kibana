@@ -11,12 +11,21 @@ The generated documentation is validated and will emit warnings when invalid que
 
 ### Run script to generate ES|QL docs and verify syntax
 
+To deterministically get the ES|QL docs from the built markdown files, without modification from LLMs, you can run:
 ```
 node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js
+
+or
+
+npx tsx x-pack/platform/plugins/shared/inference/scripts/generate_esql_docs/index.ts
 ```
 
-The script will also generate a report of syntax errors found during the generation process, located at
-`x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/esql_docs/__tmp__/syntax-errors.json`. This file will not be checked into git.
+To use an LLM to read the built docs, and then generate docs, you can pass in the connectorId.
+
+```
+npx tsx x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/generate_esql_docs.ts --connectorId example-connector-id
+```
+
 
 ### Checking syntax errors for generated files
 

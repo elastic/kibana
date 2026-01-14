@@ -1,6 +1,6 @@
 # PI
 
-Returns Pi, the mathematical constant representing the ratio of a circle’s circumference to its diameter.
+The PI function returns the mathematical constant Pi, which is the ratio of a circle’s circumference to its diameter.
 
 ## Syntax
 
@@ -12,8 +12,10 @@ This function does not take any parameters.
 
 ## Examples
 
-Returning the value of Pi
+The following query creates a single row containing the value of Pi.
 
 ```esql
 ROW PI()
 ```
+
+Return the value of Pi.

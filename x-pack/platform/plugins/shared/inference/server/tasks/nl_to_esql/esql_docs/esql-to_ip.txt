@@ -1,20 +1,28 @@
 # TO_IP
 
-Converts an input string to an IP value.
+Converts an input string to an IP value. If the conversion fails, the result is a `null` value and a warning header is added to the response with details about the failure.
 
 ## Syntax
 
-`TO_IP(field)`
+`TO_IP(field, options, leading_zeros)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value to be converted. This can be a single- or multi-valued column or an expression.
+Input value. The input can be a single- or multi-valued column or an expression.
+
+#### options
+
+(Optional) Additional options.
+
+#### leading_zeros
+
+(keyword) Specifies how to handle leading zeros in IPv4 addresses.
 
 ## Examples
 
-Converting strings to IP values
+The following query converts two string values to IP addresses and then filters the results to only include IPs that match the specified CIDR range (`1.0.0.0/8`). If the conversion fails (as with the string "foo"), the result is `null` and a warning header is added to the response.
 
 ```esql
 ROW str1 = "1.1.1.1", str2 = "foo"
@@ -22,18 +30,16 @@ ROW str1 = "1.1.1.1", str2 = "foo"
 | WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
 ```
 
-In this example:
-- The string `"1.1.1.1"` is successfully converted to an IP value and stored in `ip1`.
-- The string `"foo"` cannot be converted to an IP value, resulting in a `null` value for `ip2`.
+If the conversion fails (as with "foo"), the result is `null` and a warning header is added to the response.
 
-When a conversion fails, a *Warning* header is added to the response. The header provides details about the failure, including the source of the issue and the offending value. For instance:
+This query parses the IPv4 address string `"1.1.010.1"` and interprets the octet with leading zeros (`010`) as an octal value, using the `leading_zeros` option set to `"octal"`.
 
 ```esql
-"Line 1:68: evaluation of [TO_IP(str2)] failed, treating result as null. Only first 20 failures recorded."
+ROW s = "1.1.010.1" | EVAL ip = TO_IP(s, {"leading_zeros":"octal"})
 ```
 
-The failure reason and the problematic value are also included in a subsequent header:
+This query parses the IPv4 address string `"1.1.010.1"` and interprets the octet with leading zeros (`010`) as a decimal value, using the `leading_zeros` option set to `"decimal"`.
 
 ```esql
-"java.lang.IllegalArgumentException: 'foo' is not an IP string literal."
+ROW s = "1.1.010.1" | EVAL ip = TO_IP(s, {"leading_zeros":"decimal"})
 ```

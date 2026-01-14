@@ -8,32 +8,21 @@ Returns the first argument that is not null. If all arguments are null, it retur
 
 ### Parameters
 
-#### `first`
+#### first
 
 Expression to evaluate.
 
-#### `rest`
+#### rest
 
-Other expressions to evaluate.
+Other expression to evaluate.
 
 ## Examples
 
-Returning the first non-null value
+Calculate the first non-null value between columns `a` and `b`:
+
+This query creates a row with two columns, `a` (set to null) and `b` (set to "b"), and then uses the `COALESCE` function to return the first non-null value between `a` and `b`. In this case, since `a` is null, the result will be the value of `b`, which is "b".
 
 ```esql
 ROW a=null, b="b"
 | EVAL COALESCE(a, b)
-```
-
-#### Result
-
-| a    | b   | EVAL_COALESCE_a_b |
-|------|-----|-------------------|
-| null | "b" | "b"               |
-
-COALESCE supports any number of rest parameters:
-
-```esql
-ROW x=null, y=null, z="z"
-| EVAL first_non_null = COALESCE(x, y, z)
 ```

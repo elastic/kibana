@@ -1,0 +1,77 @@
+# GEOSPATIAL PREDICATES
+
+Geospatial predicates are functions used to perform spatial operations and comparisons between geometric objects, such as points, shapes, and geo-grids. These commands allow you to compute distances, check for intersections, containment, and spatial relationships between geometries.
+
+## Syntax
+
+`ST_DISTANCE(geomA, geomB)`
+
+`ST_INTERSECTS(geomA, geomB)`
+
+`ST_DISJOINT(geomA, geomB)`
+
+`ST_CONTAINS(geomA, geomB)`
+
+`ST_WITHIN(geomA, geomB)`
+
+### Parameters
+
+#### geomA
+
+Expression representing a geometry. The type can be `geo_point`, `cartesian_point`, `geo_shape`, `cartesian_shape`, or a geo-grid value (`geohash`, `geotile`, `geohex`) depending on the function. If `null`, the function returns `null`.
+
+#### geomB
+
+Expression representing a geometry. The type must match the coordinate system of `geomA` (either both geographic or both cartesian). If `null`, the function returns `null`. Mixing `geo_*` and `cartesian_*` types is not supported.
+
+## Examples
+
+Calculate the distance between two points:
+
+This query retrieves information about the airport with the abbreviation "CPH", calculates the distance between its `location` and `city_location` fields, and displays the abbreviation, name, both locations, and the computed distance.
+
+```esql
+FROM airports
+| WHERE abbrev == "CPH"
+| EVAL distance = ST_DISTANCE(location, city_location)
+| KEEP abbrev, name, location, city_location, distance
+```
+
+Check if a location intersects with a polygon:
+
+This query filters airports whose `location` intersects with a specified polygon, returning only those airports that are located within or touch the defined polygon area.
+
+```esql
+FROM airports
+| WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
+```
+
+Determine if a city boundary is disjoint from a polygon:
+
+This query selects airport city boundaries that do not overlap with the given polygon, keeping only those records where the `city_boundary` is completely separate from the specified polygon. The output includes the abbreviation, airport name, region, city, and city location.
+
+```esql
+FROM airport_city_boundaries
+| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+
+Check if a city boundary contains a polygon:
+
+This query returns airport city boundaries that fully contain the specified polygon, showing only those records where the `city_boundary` completely encloses the given polygon. The output includes the abbreviation, airport name, region, city, and city location.
+
+```esql
+FROM airport_city_boundaries
+| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+
+Check if a city boundary is within a polygon:
+
+This query filters for airport city boundaries that are entirely within the specified polygon, returning only those records where the `city_boundary` is completely contained by the polygon. The output includes the abbreviation, airport name, region, city, and city location.
+
+```esql
+FROM airport_city_boundaries
+| WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))
+| KEEP abbrev, airport, region, city, city_location
+```

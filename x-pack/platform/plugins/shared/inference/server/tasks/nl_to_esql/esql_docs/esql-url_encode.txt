@@ -1,0 +1,23 @@
+# URL_ENCODE
+
+The URL_ENCODE function encodes a string for safe use in URLs. All characters are percent-encoded except for alphanumerics, `.`, `-`, `_`, and `~`. Spaces are encoded as `+`.
+
+## Syntax
+
+`URL_ENCODE(string)`
+
+### Parameters
+
+#### string
+
+The URL or string to encode.
+
+## Examples
+
+Encode a URL containing spaces and special characters:
+
+This query creates a row with a URL containing spaces and special characters, then encodes the URL using the `URL_ENCODE` function so it is safe for use in web requests.
+
+```esql
+ROW u = "https://example.com/?x=foo bar&y=baz" | EVAL u = URL_ENCODE(u)
+```

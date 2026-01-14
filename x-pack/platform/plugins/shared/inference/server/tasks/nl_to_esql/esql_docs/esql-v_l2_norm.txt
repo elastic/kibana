@@ -1,0 +1,27 @@
+# V_L2_NORM
+
+The V_L2_NORM command calculates the l2 norm (Euclidean distance) between two dense vectors.
+
+## Syntax
+
+`V_L2_NORM(left, right)`
+
+### Parameters
+
+#### left
+
+The first dense_vector used to calculate the l2 norm similarity.
+
+#### right
+
+The second dense_vector used to calculate the l2 norm similarity.
+
+## Examples
+
+The following query calculates the l2 norm (Euclidean distance) between the `rgb_vector` column and the vector `[0, 255, 255]` for each row in the `colors` table. It then creates a new column called `similarity` with the calculated values, and finally sorts the results by similarity in descending order and by color in ascending order.
+
+```esql
+from colors
+| eval similarity = v_l2_norm(rgb_vector, [0, 255, 255])
+| sort similarity desc, color asc
+```

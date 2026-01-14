@@ -8,15 +8,15 @@ Returns the hyperbolic tangent of a number.
 
 ### Parameters
 
-#### `number`
+#### number
 
 Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
+This query creates a single row with the value `1.8` in column `a`, then calculates the hyperbolic tangent of `a` and stores the result in a new column called `tanh`.
+
 ```esql
 ROW a=1.8
-| EVAL tanh = TANH(a)
+| EVAL tanh=TANH(a)
 ```
-
-Calculate the hyperbolic tangent of the value `1.8`.

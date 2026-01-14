@@ -1,6 +1,6 @@
 # TO_DATE_NANOS
 
-Converts an input to a nanosecond-resolution date value (`date_nanos`).
+Converts an input value to a nanosecond-resolution date value (date_nanos). The supported range is from 1970-01-01T00:00:00.000000000Z to 2262-04-11T23:47:16.854775807Z. Values outside this range will result in null with a warning. Integers cannot be converted into date nanos, as the integer nanosecond range only covers about 2 seconds after the epoch.
 
 ## Syntax
 
@@ -8,31 +8,24 @@ Converts an input to a nanosecond-resolution date value (`date_nanos`).
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value to be converted. This can be a single- or multi-valued column or an expression.
+Input value to convert. The input can be a single- or multi-valued column or an expression.
 
 ## Examples
 
-Converting a timestamp string to `date_nanos`
+This query selects data from the `date_nanos` index, filters for rows where the minimum value in the `nanos` column is less than the nanosecond date corresponding to `"2023-10-23T12:27:28.948Z"` and where the `millis` field is after `"2000-01-01"`. The results are then sorted by the `nanos` field in descending order.
 
 ```esql
-ROW timestamp = "2023-10-26T12:34:56.123456789Z"
-| EVAL nanos_date = TO_DATE_NANOS(timestamp)
+FROM date_nanos
+| WHERE MV_MIN(nanos) < TO_DATE_NANOS("2023-10-23T12:27:28.948Z")
+    AND millis > "2000-01-01"
+| SORT nanos DESC
 ```
 
-This example converts a timestamp string into a `date_nanos` value.
-
-Handling values outside the `date_nanos` range
-
-```esql
-ROW timestamp = "2500-01-01T00:00:00.000000000Z"
-| EVAL nanos_date = TO_DATE_NANOS(timestamp)
-```
-
-This example attempts to convert a timestamp outside the valid `date_nanos` range. The result will be `null` with a warning.
+Filter rows where the minimum value in the `nanos` column is less than the specified nanosecond date and `millis` is after January 1, 2000, then sort the results by `nanos` in descending order.
 
 ## Limitations
 
-- The valid range for `date_nanos` is from `1970-01-01T00:00:00.000000000Z` to `2262-04-11T23:47:16.854775807Z`. Values outside this range will result in `null` and trigger a warning.
-- Integer values cannot be converted into `date_nanos` because the range of integer nanoseconds only spans approximately 2 seconds after the epoch.
+- The supported range for date nanos is 1970-01-01T00:00:00.000000000Z to 2262-04-11T23:47:16.854775807Z. Values outside this range will result in null with a warning.
+- Integers cannot be converted into date nanos, as the integer nanosecond range only covers about 2 seconds after the epoch.

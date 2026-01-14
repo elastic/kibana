@@ -1,0 +1,48 @@
+# MV_CONTAINS
+
+Checks if all values produced by the second multivalue expression are present in the values produced by the first multivalue expression. Returns a boolean value. Null values are treated as an empty set.
+
+## Syntax
+
+`MV_CONTAINS(superset, subset)`
+
+### Parameters
+
+#### superset
+
+A multivalue expression representing the set in which to check for the presence of all values from the subset.
+
+#### subset
+
+A multivalue expression representing the set of values to check for within the superset.
+
+## Examples
+
+Check if a set contains a specific element:
+
+This query creates a row with a set containing "a", "b", and "c", and an element "a". It then checks if the element "a" is present in the set, returning a boolean result.
+
+```esql
+ROW set = ["a", "b", "c"], element = "a"
+| EVAL set_contains_element = mv_contains(set, element)
+```
+
+Check if one set is a subset of another:
+
+This query creates two sets, setA and setB, and evaluates whether all elements of setA are present in setB (i.e., setA is a subset of setB), and vice versa. It returns boolean results for both checks.
+
+```esql
+ROW setA = ["a","c"], setB = ["a", "b", "c"]
+| EVAL a_subset_of_b = mv_contains(setB, setA)
+| EVAL b_subset_of_a = mv_contains(setA, setB)
+```
+
+Filter rows where a column contains all specified values:
+
+This query retrieves rows from the `airports` index where the `type` column contains both "major" and "military", and the `scalerank` is 9. It then keeps only the `scalerank`, `name`, and `country` columns in the output.
+
+```esql
+FROM airports
+| WHERE mv_contains(type, ["major","military"]) AND scalerank == 9
+| KEEP scalerank, name, country
+```

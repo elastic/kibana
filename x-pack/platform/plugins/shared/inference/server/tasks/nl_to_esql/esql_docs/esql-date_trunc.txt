@@ -1,6 +1,6 @@
-## DATE_TRUNC
+# DATE_TRUNC
 
-The `DATE_TRUNC` function rounds down a date to the closest specified interval.
+The DATE_TRUNC function rounds down a date to the closest interval since the epoch, which starts at `0001-01-01T00:00:00Z`.
 
 ## Syntax
 
@@ -8,17 +8,19 @@ The `DATE_TRUNC` function rounds down a date to the closest specified interval.
 
 ### Parameters
 
-#### `interval`
+#### interval
 
-The interval to which the date is rounded down, expressed using the timespan literal syntax.
+Interval, expressed using the timespan literal syntax.
 
-#### `date`
+#### date
 
-The date expression to be truncated.
+Date expression.
 
 ## Examples
 
-Truncate hire dates to the year
+Round the hire date of each employee down to the closest year:
+
+This query selects the first name, last name, and hire date of each employee, and then adds a new column called `year_hired` that contains the hire date rounded down to the start of the year.
 
 ```esql
 FROM employees
@@ -26,9 +28,9 @@ FROM employees
 | EVAL year_hired = DATE_TRUNC(1 year, hire_date)
 ```
 
-This example truncates the `hire_date` field to the beginning of the year and stores the result in a new column named `year_hired`.
+Calculate the number of hires per year by combining DATE_TRUNC with STATS:
 
-Number of hires per year
+This query creates a new column with the hire date truncated to the year, then counts the number of employees hired in each year, and sorts the results by year.
 
 ```esql
 FROM employees
@@ -37,16 +39,14 @@ FROM employees
 | SORT year
 ```
 
-This example calculates the number of hires per year by truncating the `hire_date` field to the year and grouping the results.
+Compute the average error rate per hour:
 
-Hourly error rate
+This query checks each message for the word "error" and assigns a value of 1 if found, otherwise 0. It then truncates the timestamp to the hour, calculates the average error rate for each hour, and sorts the results by hour.
 
 ```esql
 FROM sample_data
 | EVAL error = CASE(message LIKE "*error*", 1, 0)
 | EVAL hour = DATE_TRUNC(1 hour, @timestamp)
-| STATS error_rate = AVG(error) BY hour
+| STATS error_rate = AVG(error) by hour
 | SORT hour
 ```
-
-This example calculates the hourly error rate by truncating the `@timestamp` field to the hour and averaging the `error` values for each hour.

@@ -1,0 +1,77 @@
+# TRANGE
+
+The TRANGE function filters data for a specified time range using the `@timestamp` attribute. It can be used with either a single offset from the current time or with explicit start and end times.
+
+## Syntax
+
+`TRANGE(start_time_or_offset, end_time)`
+
+### Parameters
+
+#### start_time_or_offset
+
+Offset from NOW when used in single parameter mode. In two parameter mode, this is the start time, which can be provided as a date string, date, date_nanos, or epoch milliseconds.
+
+#### end_time
+
+Explicit end time for the range. This can be a date string, date, date_nanos, or epoch milliseconds.
+
+## Examples
+
+Filter data from the last hour using a single offset parameter:
+
+This query retrieves records from the `k8s` index where the `@timestamp` is within the last hour, and keeps only the `@timestamp` field in the results.
+
+```esql
+FROM k8s
+| WHERE TRANGE(1h)
+| KEEP @timestamp
+```
+
+Filter data between two specific timestamps using date strings:
+
+This query selects records from the `k8s` index where the `@timestamp` falls between "2024-05-10T00:17:14.000Z" and "2024-05-10T00:18:33.000Z". The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
+
+```esql
+FROM k8s
+| WHERE TRANGE("2024-05-10T00:17:14.000Z", "2024-05-10T00:18:33.000Z")
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+
+Filter data between two specific timestamps using the `to_datetime` function:
+
+This query retrieves records from the `k8s` index where the `@timestamp` is between the two specified times, which are converted to datetime objects using the `to_datetime` function. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
+
+```esql
+FROM k8s
+| WHERE TRANGE(to_datetime("2024-05-10T00:17:14Z"), to_datetime("2024-05-10T00:18:33Z"))
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+
+Filter data between two specific timestamps using `to_datetime` with milliseconds precision:
+
+This query is similar to the previous one, but the timestamps include milliseconds precision. It selects records from the `k8s` index where the `@timestamp` is between the two precise times, sorts the results by `@timestamp`, keeps only the `@timestamp` field, and limits the output to 10 records.
+
+```esql
+FROM k8s
+| WHERE TRANGE(to_datetime("2024-05-10T00:17:14.000Z"), to_datetime("2024-05-10T00:18:33.000Z"))
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+
+Filter data between two specific timestamps using epoch milliseconds:
+
+This query filters records from the `k8s` index where the `@timestamp` is between the two specified epoch millisecond values. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
+
+```esql
+FROM k8s
+| WHERE TRANGE(1715300236000, 1715300282000)
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```

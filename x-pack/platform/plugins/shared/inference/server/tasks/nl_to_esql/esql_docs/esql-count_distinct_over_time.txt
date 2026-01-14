@@ -1,0 +1,32 @@
+# COUNT_DISTINCT_OVER_TIME
+
+The COUNT_DISTINCT_OVER_TIME function calculates the count of distinct values over time for a specified field.
+
+## Syntax
+
+`COUNT_DISTINCT_OVER_TIME(field, precision)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the distinct count for.
+
+#### precision
+
+Optional. Precision threshold for the calculation. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000. For more details, refer to `AGG-COUNT-DISTINCT-APPROXIMATE`.
+
+## Examples
+
+Calculate the distinct count of `network.cost` over time, using both the default and a custom precision threshold:
+
+```esql
+TS k8s
+| STATS distincts=COUNT_DISTINCT(COUNT_DISTINCT_OVER_TIME(network.cost)),
+        distincts_imprecise=COUNT_DISTINCT(COUNT_DISTINCT_OVER_TIME(network.cost, 100))
+  BY cluster, time_bucket = TBUCKET(1minute)
+```
+This query retrieves time series data from the `k8s` source and calculates two metrics for each combination of `cluster` and 1-minute time bucket: 
+- `distincts` gives the distinct count of `network.cost` using the default precision.
+- `distincts_imprecise` gives the distinct count of `network.cost` using a custom precision threshold of 100.
+Both metrics are grouped by `cluster` and by 1-minute intervals.

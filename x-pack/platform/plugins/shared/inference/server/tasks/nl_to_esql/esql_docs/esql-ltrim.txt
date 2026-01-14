@@ -8,11 +8,13 @@ Removes leading whitespaces from a string.
 
 ### Parameters
 
-#### `string`
+#### string
 
-String expression. If `null`, the function returns `null`.
+String expression to process. If the value is `null`, the function returns `null`.
 
 ## Examples
+
+The following query demonstrates how to remove leading spaces from the `message` and `color` columns, and then wrap the cleaned results in single quotes for clarity:
 
 ```esql
 ROW message = "   some text  ",  color = " red "
@@ -21,5 +23,4 @@ ROW message = "   some text  ",  color = " red "
 | EVAL message = CONCAT("'", message, "'")
 | EVAL color = CONCAT("'", color, "'")
 ```
-
-This example removes leading whitespaces from the `message` and `color` columns, then wraps the resulting strings in single quotes.
+This query creates a row with two columns, `message` and `color`, each containing strings with leading spaces. It then removes the leading spaces from both columns using the `LTRIM` function. Finally, it wraps the trimmed values in single quotes using the `CONCAT` function.

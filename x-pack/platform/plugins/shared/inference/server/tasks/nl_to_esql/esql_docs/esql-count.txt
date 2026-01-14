@@ -1,6 +1,6 @@
-## COUNT
+# COUNT
 
-The `COUNT` function returns the total number of input values. If no field is specified, it counts the number of rows.
+The COUNT function returns the total number of input values. If no field is specified, it counts the number of rows.
 
 ## Syntax
 
@@ -8,22 +8,20 @@ The `COUNT` function returns the total number of input values. If no field is sp
 
 ### Parameters
 
-#### `field`
+#### field
 
-An expression that outputs values to be counted. If omitted, the function is equivalent to `COUNT(*)`, which counts the number of rows.
+Expression that outputs values to be counted. If omitted, COUNT returns the number of rows.
 
 ## Examples
 
-### Count specific field values
+This query counts the number of non-null values in the `height` field from the `employees` data source.
 
 ```esql
 FROM employees
 | STATS COUNT(height)
 ```
 
-Count the number of non-null values in the `height` field.
-
-### Count the number of rows
+This query counts the number of rows for each language in the `employees` data source, assigns the result to the `count` field, and sorts the output by language in descending order.
 
 ```esql
 FROM employees
@@ -31,18 +29,14 @@ FROM employees
 | SORT languages DESC
 ```
 
-Count the total number of rows grouped by the `languages` field and sort the results in descending order.
-
-### Count values using inline functions
+This query splits the string in the `words` field using the semicolon (`;`) as a delimiter, then counts the number of resulting values and assigns it to the `word_count` field.
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS word_count = COUNT(SPLIT(words, ";"))
 ```
 
-Count the number of elements in a string split by the `;` delimiter.
-
-### Count values based on a condition
+This query creates a single row with the value `n=1`, filters for rows where `n` is less than 0 (which will result in no rows), and then counts the number of rows that meet this condition.
 
 ```esql
 ROW n=1
@@ -50,13 +44,9 @@ ROW n=1
 | STATS COUNT(n)
 ```
 
-Count the number of rows where the value of `n` is less than 0.
-
-### Count based on two different expressions
+This query creates a single row with `n=1` and then counts, using three-valued logic, how many times the expression `n > 0 OR NULL` and `n < 0 OR NULL` are true, respectively.
 
 ```esql
 ROW n=1
 | STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)
 ```
-
-Count the number of rows where `n > 0` and `n < 0` separately.

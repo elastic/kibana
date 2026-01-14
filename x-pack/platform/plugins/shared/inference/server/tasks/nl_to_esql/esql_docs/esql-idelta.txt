@@ -1,0 +1,26 @@
+# IDELTA
+
+Calculates the idelta of a gauge, which is the absolute change between the last two data points. This function only considers the last two data points in each time period, making it more responsive to recent changes compared to the delta function.
+
+## Syntax
+
+`IDELTA(field, window)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the idelta for.
+
+#### window
+
+The time window over which to compute the idelta.
+
+## Examples
+
+The following query calculates the sum of the absolute change (idelta) in the `events_received` metric for each pod, grouped into 10-minute time buckets. This helps you see how much the number of events received has changed recently for each pod within each time interval.
+
+```esql
+TS k8s
+| STATS events = SUM(IDELTA(events_received)) by pod, time_bucket = TBUCKET(10minute)
+```

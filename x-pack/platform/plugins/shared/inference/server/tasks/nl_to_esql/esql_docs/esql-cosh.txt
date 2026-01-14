@@ -14,9 +14,9 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
+The following query creates a single row with the value `1.8` in column `a`, then calculates the hyperbolic cosine of `a` and stores the result in a new column called `cosh`:
+
 ```esql
 ROW a=1.8
-| EVAL cosh = COSH(a)
+| EVAL cosh=COSH(a)
 ```
-
-Calculate the hyperbolic cosine of the value `1.8`.

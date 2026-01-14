@@ -1,6 +1,6 @@
 # PERCENTILE
 
-The `PERCENTILE` function calculates the value at which a specified percentage of observed values occur. For example, the 95th percentile is the value greater than 95% of the observed values, while the 50th percentile corresponds to the `MEDIAN`.
+The PERCENTILE function returns the value at which a specified percentage of observed values occur. For example, the 95th percentile is the value greater than 95% of the observed values, and the 50th percentile is the median.
 
 ## Syntax
 
@@ -8,35 +8,35 @@ The `PERCENTILE` function calculates the value at which a specified percentage o
 
 ### Parameters
 
-#### `number`
+#### number
 
-The numeric field or expression for which the percentile is calculated.
+The column or expression containing the numeric values for which you want to calculate the percentile.
 
-#### `percentile`
+#### percentile
 
-The percentile value to calculate (e.g., 0 for the minimum, 50 for the median, 100 for the maximum).
+The percentile to calculate, expressed as a number (for example, 50 for the median, 99 for the 99th percentile).
 
 ## Examples
 
-Basic Percentile Calculation
+The following query calculates the 0th, 50th, and 99th percentiles for the `salary` column in the `employees` dataset. This means it finds the minimum salary (0th percentile), the median salary (50th percentile), and the salary value that is greater than 99% of all salaries (99th percentile).
 
 ```esql
 FROM employees
-| STATS p0 = PERCENTILE(salary, 0), p50 = PERCENTILE(salary, 50), p99 = PERCENTILE(salary, 99)
+| STATS p0 = PERCENTILE(salary,  0)
+     , p50 = PERCENTILE(salary, 50)
+     , p99 = PERCENTILE(salary, 99)
 ```
 
-This example calculates the 0th percentile (minimum), 50th percentile (median), and 99th percentile of the `salary` field.
-
-Using Inline Functions
+This query calculates the 80th percentile of the maximum salary change for each employee. It first determines the maximum salary change per employee and then finds the value that is greater than 80% of these maximum changes.
 
 ```esql
 FROM employees
 | STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)
 ```
 
-This example calculates the 80th percentile of the maximum values in a multivalued column `salary_change`. The `MV_MAX` function is used to determine the maximum value per row before applying the `PERCENTILE` function.
+## Limitations
 
-## Notes
-
-- PERCENTILE is usually approximate.
-- PERCENTILE is also non-deterministic. This means you can get slightly different results using the same data.
+- The PERCENTILE function uses the TDigest algorithm, which calculates approximate percentiles to efficiently handle large datasets.
+- Accuracy is higher for extreme percentiles (such as 99%) and for small sets of values. As the number of values increases, the algorithm trades accuracy for memory savings.
+- The function is non-deterministic, meaning you may get slightly different results when running the same query on the same data.
+- Precision may vary depending on the data distribution and the volume of data being aggregated.

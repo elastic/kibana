@@ -1,6 +1,6 @@
 # REPLACE
 
-The `REPLACE` function substitutes any match of a regular expression in a string with a specified replacement string.
+The REPLACE function substitutes any match of the regular expression in a string with a specified replacement string.
 
 ## Syntax
 
@@ -8,32 +8,34 @@ The `REPLACE` function substitutes any match of a regular expression in a string
 
 ### Parameters
 
-#### `string`
+#### string
 
-String expression.
+String expression to search for matches.
 
-#### `regex`
+#### regex
 
-Regular expression.
+Regular expression pattern to match within the string.
 
-#### `newString`
+#### newString
 
-Replacement string.
+Replacement string to substitute for each match.
 
 ## Examples
 
-The following example replaces any occurrence of the word "World" with the word "Universe":
+Replace any occurrence of the word "World" with the word "Universe":
+
+This query creates a row with the string "Hello World" and then replaces every occurrence of "World" with "Universe", resulting in "Hello Universe".
 
 ```esql
 ROW str = "Hello World"
 | EVAL str = REPLACE(str, "World", "Universe")
-| KEEP str
 ```
 
-Another example could be replacing digits in a string with a specific character:
+Remove all spaces from the string:
+
+This query creates a row with the string "Hello World" and then removes all spaces by replacing any sequence of whitespace characters with an empty string, resulting in "HelloWorld".
 
 ```esql
-ROW str = "User123"
-| EVAL str = REPLACE(str, "\\d", "*")
-| KEEP str
+ROW str = "Hello World"
+| EVAL str = REPLACE(str, "\\\\s+", "")
 ```

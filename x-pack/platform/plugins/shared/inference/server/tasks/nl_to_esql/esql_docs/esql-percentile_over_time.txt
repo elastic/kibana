@@ -1,0 +1,28 @@
+# PERCENTILE_OVER_TIME
+
+Calculates the percentile over time for a specified field.
+
+## Syntax
+
+`PERCENTILE_OVER_TIME(field, percentile)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the percentile for.
+
+#### percentile
+
+The percentile value to compute, specified as a number between 0 and 100.
+
+## Examples
+
+Calculate the 95th and 99th percentiles of `network.cost` over time, grouped by cluster and 1-minute time buckets:
+
+This query retrieves time series data from the `k8s` source, then calculates the 95th and 99th percentiles of the `network.cost` field for each cluster and each 1-minute time bucket. The results are grouped by `cluster` and by 1-minute intervals, with the maximum percentile values reported for each group.
+
+```esql
+TS k8s
+| STATS p95_cost=MAX(PERCENTILE_OVER_TIME(network.cost, 95)), p99_cost=MAX(PERCENTILE_OVER_TIME(network.cost, 99)) BY cluster, time_bucket = TBUCKET(1minute)
+```
