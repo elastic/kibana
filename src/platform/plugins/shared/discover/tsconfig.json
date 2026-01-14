@@ -121,7 +121,8 @@
     "@kbn/react-query",
     "@kbn/controls-schemas",
     "@kbn/zod",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/controls-renderer"
   ],
   "exclude": ["target/**/*"]
 }
