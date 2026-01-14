@@ -24,11 +24,12 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { EisTokenCostTour } from '@kbn/search-api-panels';
+import { InferenceCostsTransparencyTour } from '@kbn/search-api-panels';
 
+import { useCompatibleInferenceEndpoints } from '../../../../../../hooks/use_compatible_inference_endpoints';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
@@ -42,17 +43,6 @@ export interface SelectInferenceIdProps {
 type SelectInferenceIdContentProps = SelectInferenceIdProps & {
   setValue: (value: string) => void;
   value: string;
-};
-
-// Task types that are compatible with semantic_text field type
-const COMPATIBLE_TASK_TYPES = ['text_embedding', 'sparse_embedding'] as const;
-type CompatibleTaskType = (typeof COMPATIBLE_TASK_TYPES)[number];
-
-/**
- * Type guard to check if a task type is compatible with semantic_text fields
- */
-const isCompatibleTaskType = (taskType: string): taskType is CompatibleTaskType => {
-  return COMPATIBLE_TASK_TYPES.includes(taskType as CompatibleTaskType);
 };
 
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
@@ -88,8 +78,14 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     docLinks,
     plugins: { cloud, share },
   } = useAppContext();
-  const { isLoading, data: endpoints, resendRequest } = useLoadInferenceEndpoints();
+  const {
+    isLoading: endpointsLoading,
+    data: endpoints,
+    resendRequest,
+  } = useLoadInferenceEndpoints();
   const { euiTheme } = useEuiTheme();
+  const { compatibleEndpoints, isLoading: isCompatibleEndpointsLoading } =
+    useCompatibleInferenceEndpoints(endpoints, endpointsLoading);
   const [isSelectInferenceIdOpen, setIsSelectInferenceIdOpen] = useState(false);
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
@@ -116,46 +112,38 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   );
 
   /**
-   * Determines the default inference endpoint ID to select.
-   * Prioritizes .elser-2-elastic (ELSER in EIS), falls back to the first available compatible endpoint.
-   * Only considers endpoints compatible with semantic_text field type.
-   */
-  const getDefaultInferenceId = useCallback((endpointsList: typeof endpoints) => {
-    if (!endpointsList?.length) {
-      return undefined;
-    }
-
-    // Filter to only compatible endpoints first
-    const compatibleEndpoints = endpointsList.filter((endpoint) =>
-      isCompatibleTaskType(endpoint.task_type)
-    );
-
-    if (!compatibleEndpoints.length) {
-      return undefined;
-    }
-
-    const elserInEis = compatibleEndpoints.find(
-      (endpoint) => endpoint.inference_id === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
-    );
-
-    return elserInEis?.inference_id ?? compatibleEndpoints[0].inference_id;
-  }, []);
-
-  /**
    * Computes the selectable options for the inference endpoint dropdown.
    * Only includes endpoints compatible with semantic_text (text_embedding and sparse_embedding).
    * Includes optimistic updates for newly created endpoints that may not be in the list yet.
    */
   const options: EuiSelectableOption[] = useMemo(() => {
-    // Filter to only text and sparse embedding endpoints (compatible with semantic_text)
-    const compatibleEndpoints =
-      endpoints?.filter((endpoint) => isCompatibleTaskType(endpoint.task_type)) ?? [];
-
-    const selectableOptions: EuiSelectableOption[] = compatibleEndpoints.map((endpoint) => ({
-      label: endpoint.inference_id,
-      'data-test-subj': `custom-inference_${endpoint.inference_id}`,
-      checked: value === endpoint.inference_id ? 'on' : undefined,
-    }));
+    const selectableOptions: EuiSelectableOption[] =
+      compatibleEndpoints?.endpointDefinitions?.map((endpoint) => {
+        return {
+          label: endpoint.inference_id,
+          'data-test-subj': `custom-inference_${endpoint.inference_id}`,
+          checked: value === endpoint.inference_id ? 'on' : undefined,
+          disabled: !endpoint.accessible,
+          append: !endpoint.accessible && endpoint.requiredLicense && (
+            <EuiBadge color="hollow" iconType="lock">
+              {endpoint.requiredLicense[0].toUpperCase() + endpoint.requiredLicense.slice(1)}
+            </EuiBadge>
+          ),
+          'aria-label':
+            !endpoint.accessible && endpoint.requiredLicense
+              ? i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.disabledOption.ariaLabel',
+                  {
+                    defaultMessage: '{inferenceId} endpoint disabled - {license} license required',
+                    values: {
+                      inferenceId: endpoint.inference_id,
+                      license: endpoint.requiredLicense,
+                    },
+                  }
+                )
+              : undefined,
+        };
+      }) || [];
 
     // Optimistic update: if a value is set but not in the list, add it
     // (handles race condition where backend hasn't updated yet after creating a new endpoint)
@@ -167,9 +155,8 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         'data-test-subj': `custom-inference_${value}`,
       });
     }
-
     return selectableOptions;
-  }, [endpoints, value]);
+  }, [compatibleEndpoints, value]);
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
 
@@ -180,19 +167,17 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
    * This ensures a good default UX without requiring manual selection.
    */
   useEffect(() => {
-    const shouldSetDefault = !value && endpoints?.length;
-    if (!shouldSetDefault) {
-      return;
+    if (!value && compatibleEndpoints?.defaultInferenceId) {
+      setValue(compatibleEndpoints?.defaultInferenceId);
     }
+  }, [value, setValue, compatibleEndpoints]);
 
-    const defaultId = getDefaultInferenceId(endpoints);
-    if (defaultId) {
-      setValue(defaultId);
-    }
-  }, [endpoints, value, setValue, getDefaultInferenceId]);
-
+  /**
+   * Sets state to indicate the dropdown select is open after a delay to match animation timing.
+   * This ensures the InferenceCostsTransparencyTour component displays in the right place after the initial
+   * animation completes.
+   */
   useEffect(() => {
-    // Trigger once on mount, then clean up
     const delay = parseInt(euiTheme.animation.normal ?? '0', 10);
 
     const timeout = window.setTimeout(() => {
@@ -216,9 +201,9 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                   </p>
                 </EuiText>
                 <EuiSpacer size="xs" />
-                <EisTokenCostTour
-                  promoId="tokenConsumptionCost"
-                  ctaLink={documentationService.getEisDocumentationLink()}
+                <InferenceCostsTransparencyTour
+                  promoId="selectInferenceId"
+                  ctaLink={documentationService.getCloudPricing()}
                   isCloudEnabled={cloud?.isCloudEnabled ?? false}
                   isReady={isSelectInferenceIdOpen}
                 >
@@ -239,7 +224,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                         { defaultMessage: 'No inference endpoint selected' }
                       )}
                   </EuiButton>
-                </EisTokenCostTour>
+                </InferenceCostsTransparencyTour>
               </>
             }
             isOpen={isInferencePopoverVisible}
@@ -306,7 +291,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                     )}
                     data-test-subj={dataTestSubj}
                     searchable
-                    isLoading={isLoading}
+                    isLoading={isCompatibleEndpointsLoading}
                     singleSelection="always"
                     defaultChecked
                     searchProps={{

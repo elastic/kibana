@@ -118,6 +118,7 @@ dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -135,6 +136,7 @@ fileGroups:
     - package.json
     - cypress.config.ts
     - cypress.config.space_awareness.ts
+    - test/scout/**/*
     - '!cypress.config.ts'
     - '!cypress.config.space_awareness.ts'
     - '!target/**/*'
