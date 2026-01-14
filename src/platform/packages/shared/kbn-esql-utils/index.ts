@@ -51,7 +51,6 @@ export {
   convertTimeseriesCommandToFrom,
   getESQLStatsQueryMeta,
   constructCascadeQuery,
-  mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
   getESQLSources,
   getEsqlColumns,
