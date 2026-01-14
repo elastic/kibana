@@ -94,6 +94,8 @@
       "@kbn/alerts-ui-shared/*": ["src/platform/packages/shared/kbn-alerts-ui-shared/*"],
       "@kbn/ambient-common-types": ["src/platform/packages/private/kbn-ambient-common-types"],
       "@kbn/ambient-common-types/*": ["src/platform/packages/private/kbn-ambient-common-types/*"],
+      "@kbn/ambient-emotion-types": ["src/platform/packages/shared/kbn-ambient-emotion-types"],
+      "@kbn/ambient-emotion-types/*": ["src/platform/packages/shared/kbn-ambient-emotion-types/*"],
       "@kbn/ambient-ftr-types": ["src/platform/packages/private/kbn-ambient-ftr-types"],
       "@kbn/ambient-ftr-types/*": ["src/platform/packages/private/kbn-ambient-ftr-types/*"],
       "@kbn/ambient-storybook-types": ["src/platform/packages/shared/kbn-ambient-storybook-types"],

@@ -1521,6 +1521,7 @@
     "@kbn/ai-tools-cli": "link:x-pack/platform/packages/shared/kbn-ai-tools-cli",
     "@kbn/alerting-api-integration-helpers": "link:x-pack/platform/test/alerting_api_integration/packages/helpers",
     "@kbn/ambient-common-types": "link:src/platform/packages/private/kbn-ambient-common-types",
+    "@kbn/ambient-emotion-types": "link:src/platform/packages/shared/kbn-ambient-emotion-types",
     "@kbn/ambient-ftr-types": "link:src/platform/packages/private/kbn-ambient-ftr-types",
     "@kbn/ambient-storybook-types": "link:src/platform/packages/shared/kbn-ambient-storybook-types",
     "@kbn/ambient-ui-types": "link:src/platform/packages/shared/kbn-ambient-ui-types",

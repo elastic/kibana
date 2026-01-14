@@ -1,0 +1,22 @@
+---
+id: kibDevDocsOpsAmbientEmotionTypes
+slug: /kibana-dev-docs/ops/ambient-emotion-types
+title: "@kbn/ambient-emotion-types"
+description: A package holding ambient type definitions for Emotion theming with EUI.
+date: 2026-01-13
+tags: ['kibana', 'dev', 'contributor', 'operations', 'ambient', 'emotion', 'types', 'theme', 'eui']
+---
+
+This package holds ambient typescript definitions for `@emotion/react` module augmentation to support EUI theming.
+
+## Purpose
+
+This package augments the `@emotion/react` module's `Theme` interface to include EUI theme properties, allowing developers to use `css={({ euiTheme }) => ...}` in emotion css props throughout Kibana.
+
+## Plugins
+
+These types will automatically be included for plugins.
+
+## Packages
+
+To include these types in a package, add `"@kbn/ambient-emotion-types"` to the `types` portion of the `tsconfig.json` file.
