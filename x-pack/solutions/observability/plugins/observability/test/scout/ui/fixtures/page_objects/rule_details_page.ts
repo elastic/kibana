@@ -186,8 +186,10 @@ export class RuleDetailsPage {
       // Spinner might not appear if data is cached or loads very quickly
     });
 
-    // Wait for the options list to be visible with content loaded
-    await expect(this.comboboxOptionsList).toBeVisible({ timeout: BIGGER_TIMEOUT });
+    // Wait for at least one option to be available
+    await expect(this.comboboxOptionsList.locator('[role="option"]')).not.toHaveCount(0, {
+      timeout: BIGGER_TIMEOUT,
+    });
 
     // Get the visible text from all options
     const optionsText = await this.comboboxOptionsList.allTextContents();
