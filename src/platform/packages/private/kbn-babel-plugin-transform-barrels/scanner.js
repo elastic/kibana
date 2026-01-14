@@ -162,7 +162,7 @@ async function buildBarrelIndex(repoRoot) {
   const index = {};
 
   // Step 1: Find files in parallel
-  const [kibanaBarrels, packageJsonFiles] = await Promise.all([
+  const [kibanaBarrels, packageJsonFiles, kbnNodeModulesBarrels] = await Promise.all([
     // Internal barrel files (exclude node_modules)
     fg('**/index.{ts,tsx,js,jsx}', {
       cwd: repoRoot,
@@ -186,7 +186,16 @@ async function buildBarrelIndex(repoRoot) {
       absolute: true,
       followSymbolicLinks: true,
     }),
+    // All barrels within @kbn packages in node_modules (subpath imports like @kbn/*/public)
+    fg('node_modules/@kbn/**/index.{ts,tsx,js,jsx}', {
+      cwd: repoRoot,
+      absolute: true,
+      followSymbolicLinks: true,
+    }),
   ]);
+
+  // Merge @kbn node_modules barrels with internal barrels for unified processing in Step 3
+  const allInternalBarrels = [...kibanaBarrels, ...kbnNodeModulesBarrels];
 
   // Step 2: Process node_modules FIRST (has packageName for proper import paths)
   await Promise.all(
@@ -290,7 +299,7 @@ async function buildBarrelIndex(repoRoot) {
 
   // Step 3: Process internal barrels SECOND (skip if already indexed from node_modules)
   await Promise.all(
-    kibanaBarrels.map(async (barrelPath) => {
+    allInternalBarrels.map(async (barrelPath) => {
       // Skip if already indexed from node_modules scan (e.g., @kbn/* package entry points)
       if (index[barrelPath]) return;
 
