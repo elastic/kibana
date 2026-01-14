@@ -7,7 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition, TaskStatus } from '@kbn/streams-schema';
 import type { IdentifySystemsResult } from '@kbn/streams-ai';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
@@ -22,10 +22,15 @@ export interface SystemIdentificationTaskParams {
   end: number;
 }
 
+export const SYSTEMS_IDENTIFICATION_TASK_TYPE = 'streams_systems_identification';
+
+export function getSystemsIdentificationTaskId(streamName: string) {
+  return `${SYSTEMS_IDENTIFICATION_TASK_TYPE}_${streamName}`;
+}
+
 export function createStreamsSystemIdentificationTask(taskContext: TaskContext) {
   return {
-    // TODO: rename to streams_system_identification
-    streams_feature_identification: {
+    [SYSTEMS_IDENTIFICATION_TASK_TYPE]: {
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(
@@ -90,7 +95,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
 
                 await taskClient.update<SystemIdentificationTaskParams, IdentifySystemsResult>({
                   ..._task,
-                  status: 'completed',
+                  status: TaskStatus.Completed,
                   task: {
                     params: {
                       connectorId,
@@ -121,7 +126,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
 
                 await taskClient.update<SystemIdentificationTaskParams>({
                   ..._task,
-                  status: 'failed',
+                  status: TaskStatus.Failed,
                   task: {
                     params: {
                       connectorId,

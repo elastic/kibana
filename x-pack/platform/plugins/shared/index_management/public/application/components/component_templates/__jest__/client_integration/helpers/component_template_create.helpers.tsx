@@ -103,7 +103,9 @@ export const completeStep = {
         // Use EuiComboBoxTestHarness for field type selection
         await within(createFieldForm).findByTestId('fieldType');
         const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-        fieldTypeComboBox.select(type);
+        await fieldTypeComboBox.select(type);
+        // Close the combobox popover (portal) so it doesn't leak across fields/tests.
+        await fieldTypeComboBox.close();
 
         const addButton = within(createFieldForm).getByTestId('addButton');
 
