@@ -54,12 +54,7 @@ export async function send({
     const url = new URL(kibanaRequestUrl);
     const { pathname, searchParams } = url;
     const query = {
-      ...Object.fromEntries(
-        [...new Set(searchParams.keys())].map((key) => {
-          const values = searchParams.getAll(key);
-          return [key, values.length === 1 ? values[0] : values];
-        })
-      ),
+      ...Object.fromEntries(searchParams.entries()),
       ...(isPackagedEnvironment && { isKibanaRequest: 'true' }),
     };
     const body = ['post', 'put', 'patch'].includes(httpMethod) ? data : null;
