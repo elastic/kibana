@@ -15,7 +15,10 @@ import { inject, injectable, optional } from 'inversify';
 import { omit, zipObject } from 'lodash';
 import pLimit from 'p-limit';
 import type { AlertAction as AlertActionDocument } from '../../resources/alert_actions';
-import type { AlertAction, BulkAlertActionItem } from '../../routes/schemas/alert_action_schema';
+import type {
+  BulkAlertActionItemData,
+  CreateAlertActionData,
+} from '../../routes/schemas/alert_action_schema';
 import { QueryService } from '../services/query_service/query_service';
 import type { StorageService } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
@@ -37,7 +40,7 @@ export class AlertActionsClient {
 
   public async executeAction(params: {
     alertSeriesId: string;
-    action: AlertAction;
+    action: CreateAlertActionData;
   }): Promise<void> {
     const [username, alertEvent, alertTransition] = await Promise.all([
       this.getUserName(),
@@ -60,7 +63,7 @@ export class AlertActionsClient {
   }
 
   public async executeBulkActions(
-    actions: BulkAlertActionItem[]
+    actions: BulkAlertActionItemData[]
   ): Promise<{ processed: number; total: number }> {
     const username = await this.getUserName();
     const limiter = pLimit(10);
@@ -110,7 +113,7 @@ export class AlertActionsClient {
 
   private buildAlertActionDocument(params: {
     alertSeriesId: string;
-    action: AlertAction;
+    action: CreateAlertActionData;
     alertEvent: AlertEvent;
     alertTransition: AlertTransition;
     username: string | null;

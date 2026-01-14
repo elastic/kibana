@@ -55,7 +55,7 @@ const deactivateActionSchema = z.object({
   reason: z.string(),
 });
 
-export const alertActionSchema = z.discriminatedUnion('action_type', [
+export const createAlertActionDataSchema = z.discriminatedUnion('action_type', [
   ackActionSchema,
   unackActionSchema,
   tagActionSchema,
@@ -66,7 +66,7 @@ export const alertActionSchema = z.discriminatedUnion('action_type', [
   deactivateActionSchema,
 ]);
 
-export type AlertAction = z.infer<typeof alertActionSchema>;
+export type CreateAlertActionData = z.infer<typeof createAlertActionDataSchema>;
 
 export const alertActionParamsSchema = z.object({
   alert_series_id: z.string(),
@@ -74,12 +74,10 @@ export const alertActionParamsSchema = z.object({
 
 export type AlertActionParams = z.infer<typeof alertActionParamsSchema>;
 
-export const bulkAlertActionItemSchema = alertActionSchema.and(
+export const bulkAlertActionItemDataSchema = createAlertActionDataSchema.and(
   z.object({ alert_series_id: z.string() })
 );
+export type BulkAlertActionItemData = z.infer<typeof bulkAlertActionItemDataSchema>;
 
-export type BulkAlertActionItem = z.infer<typeof bulkAlertActionItemSchema>;
-
-export const bulkAlertActionBodySchema = z.array(bulkAlertActionItemSchema).min(1);
-
-export type BulkAlertActionBody = z.infer<typeof bulkAlertActionBodySchema>;
+export const bulkAlertActionDataSchema = z.array(bulkAlertActionItemDataSchema).min(1);
+export type BulkAlertActionData = z.infer<typeof bulkAlertActionDataSchema>;

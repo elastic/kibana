@@ -14,9 +14,9 @@ import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from './constants';
 import {
   alertActionParamsSchema,
-  alertActionSchema,
-  type AlertAction,
+  createAlertActionDataSchema,
   type AlertActionParams,
+  type CreateAlertActionData,
 } from './schemas/alert_action_schema';
 
 @injectable()
@@ -32,13 +32,13 @@ export class AlertActionRoute {
   static validate = {
     request: {
       params: alertActionParamsSchema,
-      body: alertActionSchema,
+      body: createAlertActionDataSchema,
     },
   } as const;
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<AlertActionParams, unknown, AlertAction>,
+    private readonly request: KibanaRequest<AlertActionParams, unknown, CreateAlertActionData>,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
   ) {}
