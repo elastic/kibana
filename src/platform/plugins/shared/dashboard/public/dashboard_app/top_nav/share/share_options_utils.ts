@@ -44,8 +44,6 @@ export function buildDashboardShareOptions({
 
   const unsavedDashboardStateForLocator: DashboardLocatorParams = {
     ...unsavedDashboardState,
-    controlGroupInput:
-      unsavedDashboardState.controlGroupInput as DashboardLocatorParams['controlGroupInput'],
   };
 
   const locatorParams: DashboardLocatorParams = {
