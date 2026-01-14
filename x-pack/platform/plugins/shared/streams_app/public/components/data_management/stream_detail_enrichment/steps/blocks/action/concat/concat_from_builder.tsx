@@ -66,8 +66,15 @@ const DraggableConcatFieldInput = ({ index }: DraggableConcatInputProps) => {
             prepend={i18n.translate('xpack.streams.draggableConcatFieldInput.fieldLabel', {
               defaultMessage: 'Field',
             })}
+            placeholder={i18n.translate(
+              'xpack.streams.draggableConcatFieldInput.fieldPlaceholder',
+              {
+                defaultMessage: 'Select a field',
+              }
+            )}
             isInvalid={fieldState.invalid}
             fullWidth
+            data-test-subj="streamsAppConcatFieldInput"
           />
         </EuiFormRow>
       )}
@@ -99,7 +106,11 @@ const DraggableConcatTextInput = ({ index }: DraggableConcatInputProps) => {
             prepend={i18n.translate('xpack.streams.draggableConcatTextInput.textLabel', {
               defaultMessage: 'Text',
             })}
+            placeholder={i18n.translate('xpack.streams.draggableConcatTextInput.textPlaceholder', {
+              defaultMessage: 'Enter a literal value',
+            })}
             fullWidth
+            data-test-subj="streamsAppConcatLiteralInput"
           />
         </EuiFormRow>
       )}
@@ -138,9 +149,9 @@ const FromBuilderItem = ({ type, id, index, onRemove }: FromBuilderItemProps) =>
           </EuiFlexItem>
           <EuiFlexItem>
             {type === 'field' ? (
-              <DraggableConcatFieldInput id={id} index={index} />
+              <DraggableConcatFieldInput index={index} />
             ) : (
-              <DraggableConcatTextInput id={id} index={index} />
+              <DraggableConcatTextInput index={index} />
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -209,7 +220,13 @@ export const ConcatFromBuilder = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButton color="text" iconType="plus" size="s" onClick={handleAddField}>
+          <EuiButton
+            color="text"
+            iconType="plus"
+            size="s"
+            onClick={handleAddField}
+            data-test-subj="streamsAppConcatAddFieldButton"
+          >
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.concatFromBuilderAddFieldLabel',
               { defaultMessage: 'Add field' }
@@ -217,7 +234,13 @@ export const ConcatFromBuilder = () => {
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color="text" iconType="plus" size="s" onClick={handleAddText}>
+          <EuiButton
+            color="text"
+            iconType="plus"
+            size="s"
+            onClick={handleAddText}
+            data-test-subj="streamsAppConcatAddLiteralButton"
+          >
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.concatFromBuilderAddTextLabel',
               { defaultMessage: 'Add text' }
