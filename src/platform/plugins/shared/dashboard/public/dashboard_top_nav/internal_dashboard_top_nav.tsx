@@ -368,17 +368,27 @@ export function InternalDashboardTopNav({
     []
   );
 
+  /**
+   * `ControlsRenderer` expects `controls` rather than `pinnedPanels` when rendering its layout; so,
+   * we should map this to the expected key and keep them in sync
+   */
   const dashboardWithControlsApi = useMemo(() => {
     const controlLayout: PublishesControlsLayout['layout$'] = new BehaviorSubject({
       controls: dashboardApi.layout$.getValue().pinnedPanels, // only controls can be pinned at the moment, so no need to filter
     });
-
-    const keepLayoutsInSyncSubscription = controlLayout.subscribe(({ controls }) => {
-      dashboardApi.layout$.next({ ...dashboardApi.layout$.getValue(), pinnedPanels: controls });
-    });
-
     return { ...dashboardApi, layout$: controlLayout };
   }, [dashboardApi]);
+
+  useEffect(() => {
+    const keepLayoutsInSyncSubscription = dashboardWithControlsApi.layout$.subscribe(
+      ({ controls }) => {
+        dashboardApi.layout$.next({ ...dashboardApi.layout$.getValue(), pinnedPanels: controls });
+      }
+    );
+    return () => {
+      keepLayoutsInSyncSubscription.unsubscribe();
+    };
+  }, [dashboardWithControlsApi, dashboardApi.layout$]);
 
   return (
     <div css={styles.container}>
