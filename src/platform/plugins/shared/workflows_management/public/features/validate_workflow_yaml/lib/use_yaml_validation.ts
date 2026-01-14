@@ -218,6 +218,25 @@ export function useYamlValidation(
               source: 'connector-id-validation',
             });
           }
+          // For valid connector-id, don't apply highlighting - show UUID as plain text
+          // Only apply error styling if there's an error
+          const decorationOptions: monaco.editor.IModelDecorationOptions = {
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            hoverMessage: validationResult.hoverMessage
+              ? createMarkdownContent(validationResult.hoverMessage)
+              : null,
+            before: validationResult.beforeMessage
+              ? {
+                  content: validationResult.beforeMessage,
+                  cursorStops: monaco.editor.InjectedTextCursorStops.None,
+                  inlineClassName: `connector-name-badge`,
+                }
+              : null,
+          };
+          // Only add inlineClassName for errors, not for valid connectors
+          if (validationResult.severity !== null) {
+            decorationOptions.inlineClassName = `template-variable-${validationResult.severity}`;
+          }
           decorations.push({
             range: new monaco.Range(
               validationResult.startLineNumber,
@@ -225,20 +244,7 @@ export function useYamlValidation(
               validationResult.endLineNumber,
               validationResult.endColumn
             ),
-            options: {
-              inlineClassName: `template-variable-${validationResult.severity ?? 'valid'}`,
-              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-              hoverMessage: validationResult.hoverMessage
-                ? createMarkdownContent(validationResult.hoverMessage)
-                : null,
-              after: validationResult.afterMessage
-                ? {
-                    content: validationResult.afterMessage,
-                    cursorStops: monaco.editor.InjectedTextCursorStops.None,
-                    inlineClassName: `after-text`,
-                  }
-                : null,
-            },
+            options: decorationOptions,
           });
         } else {
           if (validationResult.severity !== null) {

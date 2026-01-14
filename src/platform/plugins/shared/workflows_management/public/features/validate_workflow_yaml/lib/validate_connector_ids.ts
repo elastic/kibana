@@ -9,7 +9,12 @@
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
-import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
+import type {
+  ConnectorIdItem,
+  YamlValidationResult,
+  YamlValidationResultConnectorIdError,
+  YamlValidationResultConnectorIdValid,
+} from '../model/types';
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
@@ -19,20 +24,20 @@ export function validateConnectorIds(
   const results: YamlValidationResult[] = [];
 
   if (!dynamicConnectorTypes) {
-    return [
-      {
-        id: 'connector-id-validation',
-        severity: 'error',
-        message: 'Dynamic connector types not found',
-        owner: 'connector-id-validation',
-        startLineNumber: 0,
-        startColumn: 0,
-        endLineNumber: 0,
-        endColumn: 0,
-        afterMessage: null,
-        hoverMessage: null,
-      },
-    ];
+    const errorResult: YamlValidationResultConnectorIdError = {
+      id: 'connector-id-validation',
+      severity: 'error',
+      message: 'Dynamic connector types not found',
+      owner: 'connector-id-validation',
+      startLineNumber: 0,
+      startColumn: 0,
+      endLineNumber: 0,
+      endColumn: 0,
+      afterMessage: null,
+      beforeMessage: null,
+      hoverMessage: null,
+    };
+    return [errorResult];
   }
 
   const notReferenceConnectorIds = connectorIdItems.filter(
@@ -47,27 +52,27 @@ export function validateConnectorIds(
       dynamicConnectorTypes
     );
 
-    const instance = instances.find(
-      (ins) => ins.id === connectorIdItem.key || ins.name === connectorIdItem.key
-    );
+    const instance = instances.find((ins) => ins.id === connectorIdItem.key);
 
     if (!instance) {
-      results.push({
+      const errorResult: YamlValidationResultConnectorIdError = {
         id: connectorIdItem.id,
         severity: 'error',
-        message: `${displayName} connector "${connectorIdItem.key}" not found. Add a new connector or choose an existing one`,
+        message: `${displayName} connector UUID "${connectorIdItem.key}" not found. Add a new connector or choose an existing one`,
         owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
         afterMessage: null,
+        beforeMessage: null,
         hoverMessage: connectorsManagementUrl
           ? `[Open connectors management](${connectorsManagementUrl})`
           : null,
-      });
+      };
+      results.push(errorResult);
     } else {
-      results.push({
+      const validResult: YamlValidationResultConnectorIdValid = {
         id: connectorIdItem.id,
         severity: null,
         message: null,
@@ -76,9 +81,11 @@ export function validateConnectorIds(
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        afterMessage: `✓ Connected (${connectorIdItem.connectorType} connector, ID: ${instance.id})`,
+        beforeMessage: `${instance.name}`,
+        afterMessage: null,
         hoverMessage: null,
-      });
+      };
+      results.push(validResult);
     }
   }
 

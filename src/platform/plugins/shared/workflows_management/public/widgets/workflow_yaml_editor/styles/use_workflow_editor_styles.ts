@@ -55,6 +55,31 @@ export const useWorkflowEditorStyles = () => {
           marginLeft: '0', // Remove padding for consecutive after-text spans
         },
 
+        // Connector name badge (before decoration)
+        '.connector-name-badge': {
+          display: 'inline-block',
+          backgroundColor: transparentize(euiTheme.colors.success, 0.1),
+          color: euiTheme.colors.successText,
+          padding: '2px 6px',
+          borderRadius: '4px',
+          marginRight: '8px',
+          fontSize: '12px',
+          fontWeight: 500,
+          lineHeight: '1.4',
+          '&:before': {
+            content: '""',
+            display: 'inline-block',
+            width: '12px',
+            height: '12px',
+            marginRight: '4px',
+            verticalAlign: 'middle',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='${encodeURIComponent(euiTheme.colors.successText)}' d='M10 3L4.5 8.5L2 6l.7-.7L4.5 7.1l4.8-4.8L10 3z'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+          },
+        },
+
         // Step highlighting decorations
         '.step-highlight': {
           backgroundColor: euiTheme.colors.backgroundBaseAccent,

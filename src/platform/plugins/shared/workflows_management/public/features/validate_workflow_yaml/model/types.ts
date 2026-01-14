@@ -56,6 +56,7 @@ interface YamlValidationResultBase {
   endColumn: number;
   hoverMessage: string | null;
   afterMessage?: string | null;
+  beforeMessage?: string | null;
   source?: string; // the source of the marker, details e.g. yaml schema uri
 }
 
@@ -89,16 +90,18 @@ interface YamlValidationResultLiquidTemplate extends YamlValidationResultBase {
   message: string;
   owner: 'liquid-template-validation';
 }
-interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
+export interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
   severity: null;
   message: null;
   owner: 'connector-id-validation';
+  beforeMessage: string | null;
 }
 
-interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
+export interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
   owner: 'connector-id-validation';
+  beforeMessage: null;
 }
 
 interface YamlValidationResultCustomPropertyError extends YamlValidationResultBase {
