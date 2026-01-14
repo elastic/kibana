@@ -150,7 +150,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/control-group-renderer'
-  - '@kbn/zod'
   - '@kbn/agent-builder-plugin'
   - '@kbn/observability-agent-builder-plugin'
 tags:
