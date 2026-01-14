@@ -31,10 +31,9 @@ import { useAIFeatures } from '../../hooks/use_ai_features';
 
 interface Props {
   definition: Streams.all.GetResponse;
-  refreshDefinition: () => void;
 }
 
-export function StreamDetailSignificantEventsView({ definition, refreshDefinition }: Props) {
+export function StreamDetailSignificantEventsView({ definition }: Props) {
   const { timeState, setTime, refresh } = useTimefilter();
   const {
     dependencies: {
@@ -98,7 +97,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       setIsEditFlyoutOpen={setIsEditFlyoutOpen}
       isEditFlyoutOpen={isEditFlyoutOpen}
       definition={definition}
-      refreshDefinition={refreshDefinition}
       refresh={significantEventsFetchState.refetch}
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
