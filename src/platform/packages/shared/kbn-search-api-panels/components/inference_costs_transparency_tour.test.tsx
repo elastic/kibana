@@ -11,24 +11,24 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent, screen } from '@testing-library/react';
-import { EisPromotionalTour } from './eis_promotional_tour';
+import { InferenceCostsTransparencyTour } from './inference_costs_transparency_tour';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
-import { EIS_PROMO_TOUR_TITLE, TOUR_CTA } from '../translations';
+import * as i18n from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 
-describe('EisPromotionalTour', () => {
-  const promoId = 'testPromo';
-  const dataId = `${promoId}-eis-promo-tour`;
+describe('InferenceCostsTransparencyTour', () => {
+  const promoId = 'tokenPromo';
+  const dataId = `${promoId}-inference-costs-tour`;
   const childTestId = 'tourChild';
 
-  const renderEisPromotionalTour = (
-    props?: Partial<React.ComponentProps<typeof EisPromotionalTour>>
+  const renderComponent = (
+    props: Partial<React.ComponentProps<typeof InferenceCostsTransparencyTour>> = {}
   ) =>
     renderWithI18n(
-      <EisPromotionalTour promoId={promoId} isCloudEnabled={true} {...props}>
+      <InferenceCostsTransparencyTour promoId={promoId} isCloudEnabled={true} {...props}>
         <span data-test-subj={childTestId} />
-      </EisPromotionalTour>
+      </InferenceCostsTransparencyTour>
     );
 
   beforeEach(() => {
@@ -41,12 +41,27 @@ describe('EisPromotionalTour', () => {
       onDismissPromo: jest.fn(),
     });
 
-    renderEisPromotionalTour();
+    renderComponent();
 
     // Child should render
     expect(screen.getByTestId(childTestId)).toBeInTheDocument();
 
     // Tour should not render
+    expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
+  });
+
+  it('renders children and does not render the tour when isReady is false', () => {
+    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+      isPromoVisible: true, // would normally show the tour
+      onDismissPromo: jest.fn(),
+    });
+
+    renderComponent({ isReady: false });
+
+    // Child should be rendered
+    expect(screen.getByTestId(childTestId)).toBeInTheDocument();
+
+    // Tour should NOT be rendered even though promo is visible
     expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
   });
 
@@ -56,46 +71,30 @@ describe('EisPromotionalTour', () => {
       onDismissPromo: jest.fn(),
     });
 
-    renderEisPromotionalTour();
+    renderComponent();
 
-    const tour = screen.getByTestId(dataId);
-    expect(tour).toBeInTheDocument();
-
-    // Child should still render
+    expect(screen.getByTestId(dataId)).toBeInTheDocument();
     expect(screen.getByTestId(childTestId)).toBeInTheDocument();
 
-    // Title text should render
-    expect(screen.getByText(EIS_PROMO_TOUR_TITLE)).toBeInTheDocument();
+    // Title should render
+    expect(screen.getByText(i18n.COSTS_TOUR_TITLE)).toBeInTheDocument();
   });
 
-  it('calls onDismissPromo when clicking the close button', () => {
-    const mockOnDismissPromo = jest.fn();
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
-      isPromoVisible: true,
-      onDismissPromo: mockOnDismissPromo,
-    });
+  it('renders CTA button and passes href when ctaLink is provided', () => {
+    const ctaLink = 'https://elastic.co/example';
 
-    renderEisPromotionalTour();
-
-    const closeBtn = screen.getByTestId('eisPromoTourCloseBtn');
-    fireEvent.click(closeBtn);
-
-    expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
-  });
-
-  it('renders CTA button only when ctaLink is provided', () => {
-    const ctaLink = 'https://example.com';
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
       onDismissPromo: jest.fn(),
     });
 
-    renderEisPromotionalTour({ ctaLink });
+    renderComponent({ ctaLink });
 
-    const ctaBtn = screen.getByTestId('eisPromoTourCtaBtn');
+    const ctaBtn = screen.getByTestId('inferenceCostsTourCtaBtn');
+
     expect(ctaBtn).toBeInTheDocument();
     expect(ctaBtn).toHaveAttribute('href', ctaLink);
-    expect(ctaBtn).toHaveTextContent(TOUR_CTA);
+    expect(ctaBtn).toHaveTextContent(i18n.TOUR_CTA);
   });
 
   it('does not render CTA button when ctaLink is undefined', () => {
@@ -104,46 +103,38 @@ describe('EisPromotionalTour', () => {
       onDismissPromo: jest.fn(),
     });
 
-    renderEisPromotionalTour({ ctaLink: undefined });
+    renderComponent({ ctaLink: undefined });
 
-    expect(screen.queryByTestId('eisPromoTourCtaBtn')).not.toBeInTheDocument();
-
-    // Close button should still exist
-    expect(screen.getByTestId('eisPromoTourCloseBtn')).toBeInTheDocument();
+    const ctaBtn = screen.queryByTestId('inferenceCostsTourCtaBtn');
+    expect(ctaBtn).not.toBeInTheDocument();
   });
 
-  it('removes the tour from the DOM when close button is clicked, child remains', () => {
-    // Use a variable to simulate state
-    let isVisible = true;
+  it('removes the tour from DOM after clicking close, children remain', () => {
+    let visible = true;
     const mockOnDismissPromo = jest.fn(() => {
-      isVisible = false;
+      visible = false;
     });
 
     (useShowEisPromotionalContent as jest.Mock).mockImplementation(() => ({
       get isPromoVisible() {
-        return isVisible;
+        return visible;
       },
       onDismissPromo: mockOnDismissPromo,
     }));
 
-    const { rerender } = renderEisPromotionalTour();
+    const { rerender } = renderComponent();
 
-    // Tour exists initially
     expect(screen.getByTestId(dataId)).toBeInTheDocument();
-    expect(screen.getByTestId(childTestId)).toBeInTheDocument();
 
-    // Click the close button
-    fireEvent.click(screen.getByTestId('eisPromoTourCloseBtn'));
+    fireEvent.click(screen.getByTestId('inferenceCostsTourCloseBtn'));
     expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
 
-    // Re-render component to simulate state update
     rerender(
-      <EisPromotionalTour promoId={promoId} isCloudEnabled={true}>
+      <InferenceCostsTransparencyTour promoId={promoId} isCloudEnabled={true}>
         <span data-test-subj={childTestId} />
-      </EisPromotionalTour>
+      </InferenceCostsTransparencyTour>
     );
 
-    // Tour should be gone, child remains
     expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
     expect(screen.getByTestId(childTestId)).toBeInTheDocument();
   });
