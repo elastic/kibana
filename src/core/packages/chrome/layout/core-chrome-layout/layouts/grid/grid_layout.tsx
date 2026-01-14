@@ -28,6 +28,7 @@ import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
 const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig } = {
   classic: {
+    chromeStyle: 'classic',
     headerHeight: 96,
     bannerHeight: 32,
     sidebarWidth: 0,
@@ -35,6 +36,7 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
     navigationWidth: 0,
   },
   project: {
+    chromeStyle: 'project',
     headerHeight: 48,
     bannerHeight: 32,
 
