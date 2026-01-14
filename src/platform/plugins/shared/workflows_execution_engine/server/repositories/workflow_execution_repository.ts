@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
@@ -194,12 +194,7 @@ export class WorkflowExecutionRepository {
       // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
-          status: [
-            ExecutionStatus.PENDING,
-            ExecutionStatus.WAITING,
-            ExecutionStatus.WAITING_FOR_INPUT,
-            ExecutionStatus.RUNNING,
-          ],
+          status: NonTerminalExecutionStatuses,
         },
       },
     ];
@@ -249,12 +244,7 @@ export class WorkflowExecutionRepository {
       // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
-          status: [
-            ExecutionStatus.PENDING,
-            ExecutionStatus.WAITING,
-            ExecutionStatus.WAITING_FOR_INPUT,
-            ExecutionStatus.RUNNING,
-          ],
+          status: NonTerminalExecutionStatuses,
         },
       },
     ];
@@ -303,12 +293,7 @@ export class WorkflowExecutionRepository {
       // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
-          status: [
-            ExecutionStatus.PENDING,
-            ExecutionStatus.WAITING,
-            ExecutionStatus.WAITING_FOR_INPUT,
-            ExecutionStatus.RUNNING,
-          ],
+          status: NonTerminalExecutionStatuses,
         },
       },
     ];

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -217,12 +217,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: [
-                    ExecutionStatus.PENDING,
-                    ExecutionStatus.WAITING,
-                    ExecutionStatus.WAITING_FOR_INPUT,
-                    ExecutionStatus.RUNNING,
-                  ],
+                  status: NonTerminalExecutionStatuses,
                 },
               },
             ],
@@ -261,12 +256,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: [
-                    ExecutionStatus.PENDING,
-                    ExecutionStatus.WAITING,
-                    ExecutionStatus.WAITING_FOR_INPUT,
-                    ExecutionStatus.RUNNING,
-                  ],
+                  status: NonTerminalExecutionStatuses,
                 },
               },
               { term: { triggeredBy: 'scheduled' } },
@@ -317,12 +307,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: [
-                    ExecutionStatus.PENDING,
-                    ExecutionStatus.WAITING,
-                    ExecutionStatus.WAITING_FOR_INPUT,
-                    ExecutionStatus.RUNNING,
-                  ],
+                  status: NonTerminalExecutionStatuses,
                 },
               },
             ],
@@ -365,12 +350,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: [
-                    ExecutionStatus.PENDING,
-                    ExecutionStatus.WAITING,
-                    ExecutionStatus.WAITING_FOR_INPUT,
-                    ExecutionStatus.RUNNING,
-                  ],
+                  status: NonTerminalExecutionStatuses,
                 },
               },
               { term: { triggeredBy: 'scheduled' } },
@@ -460,12 +440,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: [
-                    ExecutionStatus.PENDING,
-                    ExecutionStatus.WAITING,
-                    ExecutionStatus.WAITING_FOR_INPUT,
-                    ExecutionStatus.RUNNING,
-                  ],
+                  status: NonTerminalExecutionStatuses,
                 },
               },
             ],
@@ -506,12 +481,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: [
-                    ExecutionStatus.PENDING,
-                    ExecutionStatus.WAITING,
-                    ExecutionStatus.WAITING_FOR_INPUT,
-                    ExecutionStatus.RUNNING,
-                  ],
+                  status: NonTerminalExecutionStatuses,
                 },
               },
               {
