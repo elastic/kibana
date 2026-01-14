@@ -28,6 +28,8 @@
     "@kbn/fleet-plugin",
     "@kbn/fleet-plugin",
     "@kbn/scout-oblt",
+    "@kbn/scout-oblt",
+    "@kbn/fleet-plugin",
   ],
   "exclude": [
     "target/**/*"
