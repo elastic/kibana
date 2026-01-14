@@ -8,9 +8,28 @@
 import fs from 'fs';
 import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const INDEX_FIELDS_LIMIT = 6000;
+
+const mappingCache = new Map<string, MappingTypeMapping>();
+
+const isMappingTypeMapping = (value: unknown): value is MappingTypeMapping => {
+  // MappingTypeMapping is a broad structural type; we validate minimally to avoid passing non-objects.
+  return typeof value === 'object' && value !== null;
+};
+
+const readMappingJsonCached = (mappingPath: string): MappingTypeMapping => {
+  const cached = mappingCache.get(mappingPath);
+  if (cached) return cached;
+  const parsed = JSON.parse(fs.readFileSync(mappingPath, 'utf8')) as unknown;
+  if (!isMappingTypeMapping(parsed)) {
+    throw new Error(`Invalid index mapping JSON (expected object): ${mappingPath}`);
+  }
+  mappingCache.set(mappingPath, parsed);
+  return parsed;
+};
 
 export interface EnsureIndexOptions {
   esClient: Client;
@@ -24,7 +43,7 @@ export const ensureIndex = async ({ esClient, index, mappingPath, log }: EnsureI
   if (exists) return;
 
   log.info(`Creating index ${index}`);
-  const mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
+  const mapping = readMappingJsonCached(mappingPath);
   await esClient.indices.create({
     index,
     settings: {
@@ -82,27 +101,35 @@ export const dateSuffix = (ms: number): string => {
 export const episodeIndexNames = ({
   episodeId,
   endMs,
+  indexPrefix = 'logs-endpoint',
 }: {
   episodeId: string; // ep1
   endMs: number;
+  /**
+   * Prefix for endpoint event/alert indices. Defaults to "logs-endpoint".
+   * Use a different value if your cluster has templates/data streams that conflict with creating
+   * concrete indices under "logs-endpoint.*".
+   */
+  indexPrefix?: string;
 }) => {
   const suffix = dateSuffix(endMs);
   const epMatch = episodeId.match(/^ep(\d+)$/);
   if (epMatch) {
     const epNum = epMatch[1];
     return {
-      endpointEvents: `logs-endpoint.events.insights.ep${epNum}.${suffix}`,
+      // Keep a dot after `events` to avoid matching common data-stream templates that use `logs-endpoint.events-*`.
+      endpointEvents: `${indexPrefix}.events.insights.ep${epNum}.${suffix}`,
       // Note: use a dot after `alerts` to avoid matching the Endpoint data stream template
       // which targets `logs-endpoint.alerts-*` (data streams only).
-      endpointAlerts: `logs-endpoint.alerts.insights.ep${epNum}.${suffix}`,
+      endpointAlerts: `${indexPrefix}.alerts.insights.ep${epNum}.${suffix}`,
       insightsAlerts: `insights-alerts-ep${epNum}-${suffix}`,
     };
   }
 
   const safe = episodeId.replace(/[^a-zA-Z0-9_-]/g, '_');
   return {
-    endpointEvents: `logs-endpoint.events.${safe}.${suffix}`,
-    endpointAlerts: `logs-endpoint.alerts.${safe}.${suffix}`,
+    endpointEvents: `${indexPrefix}.events.${safe}.${suffix}`,
+    endpointAlerts: `${indexPrefix}.alerts.${safe}.${suffix}`,
     insightsAlerts: `insights-alerts-${safe}-${suffix}`,
   };
 };

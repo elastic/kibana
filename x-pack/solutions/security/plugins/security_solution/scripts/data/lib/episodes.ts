@@ -90,6 +90,12 @@ export const loadEpisode = async (files: EpisodeFileSet): Promise<EpisodeDocs> =
     .map((d) => getTimestampMs(d))
     .filter((t): t is number => typeof t === 'number');
 
+  if (timestamps.length === 0) {
+    throw new Error(
+      `Episode ${files.episodeId} has no parseable timestamps. Expected @timestamp or event.created in fixtures: data=${files.dataPath} alerts=${files.alertsPath}`
+    );
+  }
+
   const minTimestampMs = Math.min(...timestamps);
   const maxTimestampMs = Math.max(...timestamps);
 
@@ -197,7 +203,9 @@ const rewriteEntityIdsInPlace = (doc: Record<string, unknown>, cloneKey: string)
     const o: any = node;
     for (const k of Object.keys(o)) {
       const v = o[k];
-      if (k === 'entity_id' || k === 'id' || k === 'ancestry') {
+      // Keep this intentionally narrow: avoid rewriting generic `id` fields which are common across ECS
+      // and may represent stable identifiers that should not be mutated.
+      if (k === 'entity_id' || k === 'ancestry') {
         o[k] = walk(v);
       } else if (typeof v === 'object') {
         o[k] = walk(v);

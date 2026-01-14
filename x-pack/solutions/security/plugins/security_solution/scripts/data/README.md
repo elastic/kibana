@@ -94,6 +94,8 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.j
 ### Rules
 
 - `--ruleset`: Path to a YAML ruleset file (default: `x-pack/solutions/security/plugins/security_solution/scripts/data/rulesets/default_ruleset.yml`)
+- `--indexPrefix`: Prefix for the endpoint event/alert indices created by this script (default: `logs-endpoint`)
+  - If your cluster has templates/data streams that conflict with creating concrete indices under `logs-endpoint.*`, set this to something else (e.g. `security-solution-data-gen`).
 
 Ruleset entries are resolved **best-effort**:
 

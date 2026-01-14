@@ -21,7 +21,13 @@ import { ensureIndex, episodeIndexNames, scriptsDataDir } from './lib/indexing';
 import { ensurePrebuiltRulesInstalledBestEffort } from './lib/prebuilt_rules';
 import { loadInsightsRuleCreateProps } from './lib/insights_rule';
 import { copyPreviewAlertsToRealAlertsIndex, previewRule } from './lib/rule_preview';
-import { enableRules, fetchRuleById, resolveRuleset, toRuleCreateProps } from './lib/ruleset';
+import {
+  enableRules,
+  fetchRuleById,
+  readRulesetFile,
+  resolveRuleset,
+  toRuleCreateProps,
+} from './lib/ruleset';
 import { generateAndIndexAttackDiscoveries } from './lib/attack_discoveries';
 
 const ATTACKS_DIR = scriptsDataDir('episodes', 'attacks');
@@ -104,14 +110,16 @@ const ensureGeneratorIndices = async ({
   endMs,
   episodeIds,
   log,
+  indexPrefix,
 }: {
   esClient: Client;
   endMs: number;
   episodeIds: string[];
   log: ToolingLog;
+  indexPrefix: string;
 }) => {
   for (const ep of episodeIds) {
-    const idx = episodeIndexNames({ episodeId: ep, endMs });
+    const idx = episodeIndexNames({ episodeId: ep, endMs, indexPrefix });
     await ensureIndex({ esClient, index: idx.endpointEvents, mappingPath: MAPPING_PATH, log });
     await ensureIndex({ esClient, index: idx.endpointAlerts, mappingPath: MAPPING_PATH, log });
     await ensureIndex({ esClient, index: idx.insightsAlerts, mappingPath: MAPPING_PATH, log });
@@ -127,6 +135,8 @@ const cleanGeneratedDataBestEffort = async ({
   startMs,
   username,
   ruleUuids,
+  ruleIds,
+  indexPrefix,
 }: {
   esClient: Client;
   log: ToolingLog;
@@ -136,6 +146,8 @@ const cleanGeneratedDataBestEffort = async ({
   startMs: number;
   username: string;
   ruleUuids: string[];
+  ruleIds: string[];
+  indexPrefix: string;
 }) => {
   log.warning(
     `--clean enabled: deleting generated episode indices and generated alerts/discoveries in space "${spaceId}" within the requested time range`
@@ -143,7 +155,7 @@ const cleanGeneratedDataBestEffort = async ({
 
   // 1) Remove the exact episode indices created for this run's episodeIds + date suffix.
   const episodeIndices = episodeIds.flatMap((ep) => {
-    const idx = episodeIndexNames({ episodeId: ep, endMs });
+    const idx = episodeIndexNames({ episodeId: ep, endMs, indexPrefix });
     return [idx.endpointEvents, idx.endpointAlerts, idx.insightsAlerts];
   });
 
@@ -163,7 +175,8 @@ const cleanGeneratedDataBestEffort = async ({
 
   // 2) Remove previously generated Security alerts (copied from preview) for the selected rules + time range.
   const alertsIndex = `.alerts-security.alerts-${spaceId}`;
-  if (ruleUuids.length > 0) {
+  const hasRuleFilters = ruleUuids.length > 0 || ruleIds.length > 0;
+  if (hasRuleFilters) {
     try {
       const exists = await esClient.indices.exists({ index: alertsIndex });
       if (exists) {
@@ -182,7 +195,19 @@ const cleanGeneratedDataBestEffort = async ({
                     },
                   },
                 },
-                { terms: { 'kibana.alert.rule.uuid': ruleUuids } },
+                {
+                  bool: {
+                    should: [
+                      ...(ruleUuids.length > 0
+                        ? [{ terms: { 'kibana.alert.rule.uuid': ruleUuids } }]
+                        : []),
+                      ...(ruleIds.length > 0
+                        ? [{ terms: { 'kibana.alert.rule.rule_id': ruleIds } }]
+                        : []),
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
               ],
             },
           },
@@ -195,6 +220,10 @@ const cleanGeneratedDataBestEffort = async ({
         )}`
       );
     }
+  } else {
+    log.warning(
+      `--clean: skipping Security alert deletion because no rule UUIDs or rule_ids were resolved from the ruleset.`
+    );
   }
 
   // 3) Remove previously generated ad-hoc Attack Discoveries (synthetic/no-LLM) for this user + time range.
@@ -297,12 +326,14 @@ const bulkIndexStreamed = async ({
   episodeIds,
   log,
   docs,
+  indexPrefix,
 }: {
   esClient: Client;
   endMs: number;
   episodeIds: string[];
   log: ToolingLog;
   docs: AsyncGenerator<ScaledDoc>;
+  indexPrefix: string;
 }) => {
   const buffers = new Map<string, Array<Record<string, unknown>>>();
   const indexedCounts = new Map<string, number>();
@@ -313,6 +344,13 @@ const bulkIndexStreamed = async ({
     const body = batch.flatMap((doc) => [{ index: { _index: index } }, doc]);
     const resp = await esClient.bulk({ refresh: false, body });
     if (resp.errors) {
+      const firstError = resp.items?.find((it) => {
+        const action = it.index ?? it.create ?? it.update ?? it.delete;
+        return action && 'error' in action;
+      });
+      log.error(
+        `Bulk indexing into ${index} had errors. First error: ${JSON.stringify(firstError)}`
+      );
       throw new Error(`Bulk indexing errors for ${index}`);
     }
     indexedCounts.set(index, (indexedCounts.get(index) ?? 0) + batch.length);
@@ -325,7 +363,7 @@ const bulkIndexStreamed = async ({
 
   for await (const item of docs) {
     if (episodeIds.includes(item.episodeId)) {
-      const idx = episodeIndexNames({ episodeId: item.episodeId, endMs });
+      const idx = episodeIndexNames({ episodeId: item.episodeId, endMs, indexPrefix });
       const index =
         item.kind === 'data'
           ? idx.endpointEvents
@@ -383,6 +421,7 @@ export const cli = () => {
       const username = cliContext.flags.username as string;
       const password = cliContext.flags.password as string;
       const spaceId = cliContext.flags.spaceId as string | undefined;
+      const indexPrefix = (cliContext.flags.indexPrefix as string | undefined) ?? 'logs-endpoint';
 
       const kbnClient: KbnClient = createKbnClient({
         kibanaUrl,
@@ -471,6 +510,14 @@ export const cli = () => {
         });
 
         if (clean) {
+          const rulesetFile = readRulesetFile(rulesetPath);
+          const explicitRuleIds = rulesetFile.rules
+            .map((r) => r.rule_id)
+            .filter((v): v is string => typeof v === 'string' && v.length > 0);
+          const ruleIdsForClean = Array.from(
+            new Set([...resolvedRules.map((r) => r.rule_id), ...explicitRuleIds])
+          );
+
           await cleanGeneratedDataBestEffort({
             esClient,
             log,
@@ -480,6 +527,8 @@ export const cli = () => {
             startMs,
             username,
             ruleUuids: resolvedRules.map((r) => r.id),
+            ruleIds: ruleIdsForClean,
+            indexPrefix,
           });
         }
 
@@ -490,7 +539,7 @@ export const cli = () => {
           loaded.push(await loadEpisode(fspec));
         }
 
-        await ensureGeneratorIndices({ esClient, endMs, episodeIds, log });
+        await ensureGeneratorIndices({ esClient, endMs, episodeIds, log, indexPrefix });
 
         const scaled = scaleEpisodes(loaded, {
           startMs,
@@ -512,6 +561,7 @@ export const cli = () => {
           episodeIds,
           log,
           docs: scaled,
+          indexPrefix,
         });
 
         log.info(`Done indexing episode events/endpoint alerts (and insights-alerts copies).`);
@@ -622,6 +672,7 @@ export const cli = () => {
           'start-date',
           'end-date',
           'ruleset',
+          'indexPrefix',
         ],
         boolean: ['clean'],
         alias: {
@@ -640,6 +691,7 @@ export const cli = () => {
           'start-date': '1d',
           'end-date': 'now',
           ruleset: scriptsDataDir('rulesets', 'default_ruleset.yml'),
+          indexPrefix: 'logs-endpoint',
           clean: false,
         },
         allowUnexpected: false,
@@ -649,10 +701,11 @@ export const cli = () => {
         -u, --users                      Number of users to spread events across (Default: 5)
         --start-date                     Date math start (e.g. 1d, now-1d) (Default: 1d)
         --end-date                       Date math end (e.g. now) (Default: now)
-        --episodes                       Comma-separated episode IDs or numbers (e.g. ep1,ep2 or 1,2). Default: ep1-ep8
+        --episodes                       Comma-separated episode IDs or numbers (e.g. ep1,ep2 or 1,2). Default: ep1-ep8,noise1,noise2
         --seed                           Optional seed for deterministic scaling
         --ruleset                        Path to ruleset file (Default: x-pack/solutions/security/plugins/security_solution/scripts/data/rulesets/default_ruleset.yml)
         --clean                          Delete previously generated data for the selected time range before generating new data
+        --indexPrefix                    Prefix for endpoint event/alert indices (Default: logs-endpoint)
 
         --username                       Kibana/Elasticsearch username (Default: elastic)
         --password                       Kibana/Elasticsearch password (Default: changeme)

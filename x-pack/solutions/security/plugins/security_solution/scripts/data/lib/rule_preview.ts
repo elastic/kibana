@@ -128,9 +128,10 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
               // This makes the UI look more realistic (alerts from different rules interleave).
               if (params.startMs != null && params.endMs != null && params.endMs > params.startMs) {
                 long rangeMs = params.endMs - params.startMs;
-                long h = (newId).hashCode();
-                if (h < 0) { h = -h; }
-                long tsMs = params.startMs + (h % rangeMs);
+                // hashCode() is an int; make it non-negative without risking MIN_VALUE overflow.
+                long h = (long)((newId).hashCode());
+                long uh = h & 0x7fffffffL;
+                long tsMs = params.startMs + (uh % rangeMs);
                 def iso = java.time.Instant.ofEpochMilli(tsMs).toString();
                 ctx._source['@timestamp'] = iso;
                 if (ctx._source.containsKey('kibana.alert.start')) { ctx._source['kibana.alert.start'] = iso; }

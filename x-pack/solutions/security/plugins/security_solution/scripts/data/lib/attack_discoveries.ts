@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v5 as uuidv5 } from 'uuid';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   BulkOperationType,
@@ -21,6 +21,7 @@ import { transformToAlertDocuments } from '@kbn/elastic-assistant-plugin/server/
 import { attackDiscoveryAlertFieldMap } from '@kbn/elastic-assistant-plugin/server/lib/attack_discovery/schedules/fields';
 
 const ALERT_UUID = 'kibana.alert.uuid';
+const ID_NAMESPACE = '3c0de8b5-1a9d-4d9f-9e2a-2fb3a58d6f9f';
 
 export interface GenerateAttackDiscoveriesOptions {
   startMs: number;
@@ -332,6 +333,14 @@ export const generateAndIndexAttackDiscoveries = async ({
   const bulkBody: Array<Record<string, unknown>> = [];
 
   for (const g of discoveryGroups) {
+    const discoveryKey = [
+      spaceId,
+      g.discoveryTimeIso,
+      g.hostName ?? 'unknown-host',
+      g.userName ?? 'unknown-user',
+      g.alertIds.join(','),
+    ].join('|');
+
     const attack: AttackDiscovery = {
       alertIds: g.alertIds,
       title: g.hostName ? `Attack discovery on ${g.hostName}` : `Attack discovery on unknown host`,
@@ -357,22 +366,23 @@ export const generateAndIndexAttackDiscoveries = async ({
         ...commonParams,
         alertsContextCount: g.alertIds.length,
         attackDiscoveries: [attack],
-        generationUuid: uuidv4(),
+        // Deterministic so repeated runs overwrite the same docs.
+        generationUuid: uuidv5(discoveryKey, ID_NAMESPACE),
       },
       now,
       spaceId,
     });
 
-    for (const doc of docs) {
-      const uuidField = (doc as unknown as Record<string, unknown>)[ALERT_UUID];
-      const id = asString(uuidField);
-      if (!id) {
-        throw new Error(`Attack Discovery alert document is missing a valid ${ALERT_UUID}`);
-      }
+    for (let i = 0; i < docs.length; i++) {
+      const doc = docs[i] as unknown as Record<string, unknown>;
+      const id = uuidv5(`${discoveryKey}|doc:${i}`, ID_NAMESPACE);
+      // Force deterministic ids regardless of any internal transform behavior.
+      doc[ALERT_UUID] = id;
+
       // Use "index" so repeated runs are idempotent (same deterministic ids).
       bulkBody.push(
         { index: { _index: attackDiscoveryIndex, _id: id } },
-        doc as unknown as Record<string, unknown>
+        doc
       );
     }
   }
