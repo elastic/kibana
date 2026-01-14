@@ -87,7 +87,8 @@ export class WorkflowExecutionRepository {
    *
    * This method requires the `id` property to be present in the `workflowExecution` object.
    * If the `id` is missing, an error is thrown.
-   * The update operation is performed using the Elasticsearch client, and the document is refreshed after the update.
+   * The update operation is performed using the Elasticsearch client with refresh: false for better performance.
+   * The document will be searchable after the next index refresh (typically within 1 second).
    *
    * @param workflowExecution - A partial object representing the workflow execution to update. Must include the `id` property.
    * @throws {Error} If the `id` property is not provided in the `workflowExecution` object.
@@ -298,7 +299,10 @@ export class WorkflowExecutionRepository {
       },
     ];
 
-    // Add exclusion as a nested bool query in filter context
+    // Add exclusion as a nested bool query in filter context.
+    // We nest must_not inside a bool query within the filter array (rather than using
+    // a top-level must_not) to keep all clauses in the same filter context for consistency
+    // and optimal performance. The nested must_not is still in filter context (no scoring).
     if (excludeExecutionId) {
       filterClauses.push({
         bool: {
