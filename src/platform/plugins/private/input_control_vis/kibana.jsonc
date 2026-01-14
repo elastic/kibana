@@ -17,6 +17,7 @@
       "visDefaultEditor",
       "visualizations",
       "unifiedSearch",
+      "kql",
       "uiActions"
     ],
     "requiredBundles": [
