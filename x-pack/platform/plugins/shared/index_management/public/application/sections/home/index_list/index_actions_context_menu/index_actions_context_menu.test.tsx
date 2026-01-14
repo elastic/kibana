@@ -117,7 +117,6 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
     kibanaVersion: {} as unknown as AppDependencies['kibanaVersion'],
     overlays: {} as unknown as AppDependencies['overlays'],
     canUseSyntheticSource: false,
-    canUseEis: false,
     privs: { monitor: true, manageEnrich: true, monitorEnrich: true, manageIndexTemplates: true },
   };
 
