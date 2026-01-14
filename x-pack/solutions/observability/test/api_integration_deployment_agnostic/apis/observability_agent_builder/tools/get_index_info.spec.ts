@@ -271,7 +271,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('returns keyword values for host.name', async () => {
         const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { operation: 'get-field-values', index: 'metrics-*', fields: 'host.name' },
+          params: { operation: 'get-field-values', index: 'metrics-*', fields: ['host.name'] },
         });
         const data = results[0].data as unknown as FieldValuesRecordResult;
 
@@ -289,7 +289,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             operation: 'get-field-values',
             index: 'metrics-*',
-            fields: 'system.cpu.total.norm.pct',
+            fields: ['system.cpu.total.norm.pct'],
           },
         });
         const data = results[0].data as unknown as FieldValuesRecordResult;
@@ -305,7 +305,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('returns date min/max for date field', async () => {
         const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { operation: 'get-field-values', index: 'metrics-*', fields: '@timestamp' },
+          params: { operation: 'get-field-values', index: 'metrics-*', fields: ['@timestamp'] },
         });
         const data = results[0].data as unknown as FieldValuesRecordResult;
 
@@ -329,7 +329,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             operation: 'get-field-values',
             index: 'metrics-*',
-            fields: 'non.existent.field',
+            fields: ['non.existent.field'],
           },
         });
         const data = results[0].data as unknown as FieldValuesRecordResult;
@@ -355,7 +355,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('returns error when index is missing', async () => {
         const results = await agentBuilderApiClient.executeTool({
           id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: { operation: 'get-field-values', fields: 'host.name' },
+          params: { operation: 'get-field-values', fields: ['host.name'] },
         });
 
         expect(results[0].type).to.be('error');
@@ -382,7 +382,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             operation: 'get-field-values',
             index: 'metrics-*',
-            fields: 'system.cpu.*',
+            fields: ['system.cpu.*'],
           },
         });
         const data = results[0].data as unknown as FieldValuesRecordResult;
@@ -428,7 +428,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             operation: 'get-field-values',
             index: 'metrics-*',
-            fields: 'nonexistent.pattern.*',
+            fields: ['nonexistent.pattern.*'],
           },
         });
         const data = results[0].data as unknown as FieldValuesRecordResult;
@@ -438,6 +438,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         if (result.type === 'error') {
           expect(result.message).to.contain('No fields match pattern');
         }
+      });
+
+      it('does not return parent object fields when querying a specific field', async () => {
+        // This tests that fieldCaps parent objects (from passthrough types) are filtered out
+        // When querying "host.name", we should NOT get "host" as an error
+        const results = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          params: {
+            operation: 'get-field-values',
+            index: 'metrics-*',
+            fields: ['host.name'],
+          },
+        });
+        const data = results[0].data as unknown as FieldValuesRecordResult;
+
+        const fieldNames = Object.keys(data.fields);
+
+        // Should only return the requested field, not parent objects
+        expect(fieldNames).to.eql(['host.name']);
+        expect(data.fields['host.name'].type).to.be('keyword');
+
+        // Verify no parent object errors are present
+        expect(data.fields).to.not.have.property('host');
       });
 
       it('handles mixed explicit fields and wildcard patterns', async () => {
@@ -462,29 +485,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(cpuFields.length).to.be.greaterThan(0);
       });
 
-      it('does not return parent object fields when querying a specific field', async () => {
-        // This tests that fieldCaps parent objects (from passthrough types) are filtered out
-        // When querying "host.name", we should NOT get "host" as an error
-        const results = await agentBuilderApiClient.executeTool({
-          id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          params: {
-            operation: 'get-field-values',
-            index: 'metrics-*',
-            fields: 'host.name',
-          },
-        });
-        const data = results[0].data as unknown as FieldValuesRecordResult;
-
-        const fieldNames = Object.keys(data.fields);
-
-        // Should only return the requested field, not parent objects
-        expect(fieldNames).to.eql(['host.name']);
-        expect(data.fields['host.name'].type).to.be('keyword');
-
-        // Verify no parent object errors are present
-        expect(data.fields).to.not.have.property('host');
-      });
-
       it('returns text samples for text/match_only_text fields', async () => {
         // The message field in logs is typically text or match_only_text type
         // Use logs-generic* to target the scenario's log data specifically
@@ -493,7 +493,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             operation: 'get-field-values',
             index: 'logs-generic*',
-            fields: 'message',
+            fields: ['message'],
           },
         });
         const data = results[0].data as unknown as FieldValuesRecordResult;
@@ -519,7 +519,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             operation: 'get-field-values',
             index: 'metrics-*',
-            fields: 'host.ip',
+            fields: ['host.ip'],
           },
         });
         const data = results[0].data as unknown as FieldValuesRecordResult;
@@ -539,7 +539,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             operation: 'get-field-values',
             index: 'metrics-*',
-            fields: 'system.cpu.total.norm.pct',
+            fields: ['system.cpu.total.norm.pct'],
             kqlFilter: 'host.name: field-discovery-host-01',
           },
         });
@@ -560,7 +560,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             operation: 'get-field-values',
             index: 'metrics-*',
-            fields: '@timestamp',
+            fields: ['@timestamp'],
             start: 'now-5m',
             end: 'now',
           },

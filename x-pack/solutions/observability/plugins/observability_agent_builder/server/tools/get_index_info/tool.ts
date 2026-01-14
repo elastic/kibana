@@ -48,7 +48,7 @@ const getIndexInfoSchema = z.object({
   kqlFilter: z
     .string()
     .optional()
-    .describe('KQL filter to scope field discovery (e.g., "service.name: checkout").'),
+    .describe('KQL filter to scope field discovery (e.g., ["service.name: checkout"]).'),
   intent: z
     .string()
     .optional()
