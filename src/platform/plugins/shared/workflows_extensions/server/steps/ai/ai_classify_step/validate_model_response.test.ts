@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionError } from '@kbn/workflows/common/errors';
+import { ExecutionError } from '@kbn/workflows/server';
 import { validateModelResponse } from './validate_model_response';
 
 describe('validateModelResponse', () => {
