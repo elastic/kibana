@@ -147,8 +147,7 @@ const ActionsCell: React.FC<{
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {/* Edit icon button */}
+    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center" responsive={false}>
       {onEdit && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
@@ -162,7 +161,6 @@ const ActionsCell: React.FC<{
           />
         </EuiFlexItem>
       )}
-      {/* Delete icon button */}
       {onDelete && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
@@ -177,7 +175,6 @@ const ActionsCell: React.FC<{
           />
         </EuiFlexItem>
       )}
-      {/* Action menu (Clone, Reconnect) */}
       {items.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiPopover
@@ -322,7 +319,8 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.actionsColumn', {
         defaultMessage: 'Actions',
       }),
-      width: '80px',
+      width: '120px',
+      align: 'center',
       render: (source: ActiveSource) => (
         <ActionsCell
           source={source}
