@@ -1,6 +1,6 @@
 # MATCH_PHRASE
 
-The MATCH_PHRASE function performs a phrase match on the specified field, similar to the `match_phrase` query in the Query DSL. It can be used on text fields as well as keyword, boolean, or date types, but is not supported for semantic_text or numeric types. MATCH_PHRASE supports all `match_phrase` query parameters and allows the use of function named parameters for additional options. The function returns true if the provided query matches the row.
+The MATCH_PHRASE function performs a phrase match on the specified field, similar to the `match_phrase` query in the Query DSL. It can be used on text fields, as well as keyword, boolean, or date types, but is not supported for semantic_text or numeric types. MATCH_PHRASE supports all `match_phrase` query parameters and allows the use of function named parameters for additional options. The function returns true if the provided query matches the row.
 
 ## Syntax
 
@@ -10,15 +10,15 @@ The MATCH_PHRASE function performs a phrase match on the specified field, simila
 
 #### field
 
-The field that the query will target.
+Field that the query will target.
 
 #### query
 
-The value to find in the provided field.
+Value to find in the provided field.
 
 #### options
 
-(Optional) Additional options for the match_phrase query, specified as function named parameters. See `match_phrase` for more information.
+(Optional) Additional options for the match_phrase query, specified as function named parameters.
 
 #### zero_terms_query
 

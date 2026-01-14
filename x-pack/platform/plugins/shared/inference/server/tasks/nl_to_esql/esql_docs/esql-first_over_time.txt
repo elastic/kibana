@@ -14,11 +14,11 @@ The metric field to calculate the earliest value for.
 
 #### window
 
-The time window over which to compute the earliest value.
+The time window over which to compute the first value.
 
 ## Examples
 
-The following query calculates the maximum network cost from the earliest recorded network cost value for each cluster, grouped into 1-minute time buckets:
+The following query calculates the maximum network cost using the earliest network cost value for each cluster, grouped into 1-minute time buckets:
 
 ```esql
 TS k8s

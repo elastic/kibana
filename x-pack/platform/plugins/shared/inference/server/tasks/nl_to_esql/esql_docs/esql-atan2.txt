@@ -18,7 +18,7 @@ The x coordinate. If this value is `null`, the function returns `null`.
 
 ## Examples
 
-This query creates a single row with values y=12.9 and x=0.6, then calculates the angle in radians between the positive x-axis and the point (0.6, 12.9) using the ATAN2 function. The result is stored in a new column called `atan2`.
+This query creates a single row with values `y=12.9` and `x=0.6`, then calculates the angle in radians between the positive x-axis and the point (0.6, 12.9) using the ATAN2 function. The result is stored in a new column called `atan2`.
 
 ```esql
 ROW y=12.9, x=.6

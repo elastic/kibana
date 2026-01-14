@@ -1,6 +1,6 @@
 # LOOKUP-JOIN
 
-The LOOKUP JOIN command adds new columns to your query results by finding documents in a lookup index that share the same join field value as your result rows. For each row that matches a document in the lookup index based on the join fields, all fields from the matching document are added as new columns. If multiple documents in the lookup index match a single row, the output will contain one row for each matching combination. This command enables you to enrich your results with data from another index, simplifying data enrichment and analysis workflows.
+The LOOKUP JOIN command adds new columns to your query results by finding documents in a lookup index that share the same join field value as your result rows. For each row that matches a document in the lookup index based on the join fields, all fields from the matching document are added as new columns to that row. If multiple documents in the lookup index match a single row, the output will contain one row for each matching combination. This command enables you to enrich your data by adding information from another index, simplifying data analysis workflows.
 
 ## Syntax
 
@@ -24,18 +24,16 @@ If using join on a single field or a field list, the fields used must exist in b
 
 ## Examples
 
-Correlate source IPs with known malicious addresses:
+IP Threat correlation: See if any source IPs match known malicious addresses.
 
-This query enriches firewall log data by joining it with a threat list based on the source IP address. For each log entry, if the source IP matches an entry in the threat list, threat information is added to the result.
+This query retrieves all records from the `firewall_logs` index and enriches each row by joining with the `threat_list` index where the `source.IP` field matches. This allows you to see which firewall log entries have source IPs that are present in the threat list.
 
 ```esql
 FROM firewall_logs
 | LOOKUP JOIN threat_list ON source.IP
 ```
 
-Filter only rows with a matching threat entry:
-
-This query first joins firewall logs with the threat list on source IP, then filters the results to only include rows where a threat level is present, effectively showing only logs that match a known threat.
+This query retrieves all records from the `firewall_logs` index, joins them with the `threat_list` index on the `source.IP` field, and then filters the results to only include rows where a matching threat level was found (i.e., where `threat_level` is not null). This helps you focus on logs that are associated with known threats.
 
 ```esql
 FROM firewall_logs
@@ -43,9 +41,9 @@ FROM firewall_logs
 | WHERE threat_level IS NOT NULL
 ```
 
-Correlate host metrics with environment or ownership details:
+Host metadata correlation: Pull in environment or ownership details for each host to correlate with your metrics data.
 
-This query enriches system metrics by joining with host inventory and ownership information based on the host name. The result includes additional details about each host from both lookup sources.
+This query retrieves all records from the `system_metrics` index, enriches them with host metadata from the `host_inventory` index by joining on `host.name`, and further enriches the results with ownership information from the `ownerships` index, also joined on `host.name`. This provides a comprehensive view of system metrics along with host and ownership details.
 
 ```esql
 FROM system_metrics
@@ -53,18 +51,18 @@ FROM system_metrics
 | LOOKUP JOIN ownerships ON host.name
 ```
 
-Map service logs to owning teams or escalation contacts:
+Service ownership mapping: Show logs with the owning team or escalation information for faster triage and incident response.
 
-This query joins application logs with service ownership information using the service ID, adding details about the owning team or escalation contacts to each log entry.
+This query retrieves all records from the `app_logs` index and enriches each log entry with service ownership information from the `service_owners` index by joining on the `service_id` field. This helps you quickly identify the responsible team or escalation path for each log entry.
 
 ```esql
 FROM app_logs
 | LOOKUP JOIN service_owners ON service_id
 ```
 
-Demonstrate optimizer behavior for WHERE clauses before and after LOOKUP JOIN:
+LOOKUP JOIN is generally faster when there are fewer rows to join with. The optimizer will move the filter before the lookup when possible, regardless of query order.
 
-This query creates a language code from the employee's languages, filters employees by employee number, and then performs a lookup join to enrich with language details. The filter is applied before the join.
+This query retrieves records from the `employees` index, creates a new field `language_code` from the `languages` field, filters employees with `emp_no` between 10091 and 10093, and then enriches the results with language details from the `languages_lookup` index by joining on `language_code`.
 
 ```esql
 FROM employees
@@ -73,7 +71,7 @@ FROM employees
 | LOOKUP JOIN languages_lookup ON language_code
 ```
 
-This query performs the lookup join before filtering by employee number. The optimizer may move the filter before the join for efficiency.
+This query retrieves records from the `employees` index, creates a new field `language_code` from the `languages` field, enriches the results with language details from the `languages_lookup` index by joining that's done before filtering employees with `emp_no` between 10091 and 10093. The optimizer may reorder these operations for efficiency.
 
 ```esql
 FROM employees
@@ -86,5 +84,4 @@ FROM employees
 
 - The lookup index must be a specific index name; wildcards, aliases, and remote cluster references are not supported.
 - Indices used for lookups must be configured with the `lookup` index mode.
-- Fields used in the join condition must exist in only one of the indexes; use RENAME to resolve naming conflicts.
 - If the join fields contain multi-valued entries, those entries will not match anything, and the added fields will contain null for those rows.

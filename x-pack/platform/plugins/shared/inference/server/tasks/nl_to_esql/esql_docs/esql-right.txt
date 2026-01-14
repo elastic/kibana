@@ -1,6 +1,6 @@
 # RIGHT
 
-Returns a substring that extracts a specified number of characters from the right side of a string.
+The RIGHT function returns a substring by extracting a specified number of characters from the end (right side) of a string.
 
 ## Syntax
 
@@ -18,7 +18,7 @@ The number of characters to return from the right end of the string.
 
 ## Examples
 
-This query selects the `last_name` column from the `employees` data, then creates a new column called `right` that contains the last three characters of each employee's last name.
+The following query extracts the last three characters from the `last_name` column for each employee and stores the result in a new column called `right`:
 
 ```esql
 FROM employees

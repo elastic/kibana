@@ -18,7 +18,9 @@ The time window over which to compute the standard deviation.
 
 ## Examples
 
-The following query calculates the maximum standard deviation of the `network.cost` field over time, grouping the results by `cluster` and by 1-minute time buckets. This helps identify clusters and time intervals with the highest variability in network cost.
+Calculate the maximum standard deviation of network cost over time, grouped by cluster and 1-minute time buckets:
+
+This query retrieves data from the `k8s` time series, calculates the standard deviation of the `network.cost` field over time, finds the maximum standard deviation value, and then groups the results by `cluster` and by 1-minute time intervals.
 
 ```esql
 TS k8s

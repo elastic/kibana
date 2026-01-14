@@ -1,6 +1,6 @@
 # EVAL
 
-The EVAL command is used to append new columns with calculated values. It supports various functions, literals, and expressions for calculating values, and allows you to define one or more new columns in your result set.
+The EVAL command allows you to add new columns to your results by calculating values using expressions, literals, or functions. You can use existing columns or previously defined columns in your calculations.
 
 ## Syntax
 
@@ -10,15 +10,17 @@ The EVAL command is used to append new columns with calculated values. It suppor
 
 #### columnX
 
-The name of the column to create. If a column with the same name already exists, the existing column is dropped. If a column name is used more than once, only the rightmost duplicate creates a column.
+The name of the column to be created. If a column with the same name already exists, it will be replaced by the new column. If a column name is used more than once, only the rightmost duplicate creates a column.
 
 #### valueX
 
-The value to assign to the column. This can be a literal, an expression, or a function. You can reference columns defined to the left of this one.
+The value assigned to the column. This can be a literal, an expression, or a function. You can reference columns defined to the left of this one.
 
 ## Examples
 
-This query retrieves employee data, sorts it by employee number, keeps only the first name, last name, and height columns, and then adds two new columns: `height_feet` (height converted to feet) and `height_cm` (height converted to centimeters).
+Calculate height in feet and centimeters for each employee:
+
+This query retrieves employee data, sorts it by employee number, keeps only the first name, last name, and height columns, and then adds two new columns: `height_feet`, which converts height to feet, and `height_cm`, which converts height to centimeters.
 
 ```esql
 FROM employees
@@ -27,7 +29,9 @@ FROM employees
 | EVAL height_feet = height * 3.281, height_cm = height * 100
 ```
 
-This query retrieves employee data, sorts it by employee number, keeps only the first name, last name, and height columns, and then replaces the existing `height` column with a new value calculated as `height * 3.281` (converting height to feet).
+Replace an existing column with a calculated value:
+
+This query retrieves employee data, sorts it by employee number, keeps only the first name, last name, and height columns, and then replaces the `height` column with a new value that converts the height to feet.
 
 ```esql
 FROM employees
@@ -36,7 +40,9 @@ FROM employees
 | EVAL height = height * 3.281
 ```
 
-This query retrieves employee data, sorts it by employee number, keeps only the first name, last name, and height columns, and then adds a new column named after the expression itself (`height*3.281`), which contains the height converted to feet.
+Add a new column without specifying a name, resulting in a column named after the expression:
+
+This query retrieves employee data, sorts it by employee number, keeps only the first name, last name, and height columns, and then adds a new column named after the expression `height * 3.281`, which contains the height converted to feet.
 
 ```esql
 FROM employees
@@ -45,7 +51,9 @@ FROM employees
 | EVAL height * 3.281
 ```
 
-This query retrieves employee data, adds a new column named after the expression (`height * 3.281`) with the height converted to feet, and then calculates the average of this new column, naming the result `avg_height_feet`. The column with special characters is referenced using backticks.
+Reference a column with special characters in its name by quoting it with backticks:
+
+This query retrieves employee data, calculates a new column `height * 3.281` (height in feet), and then computes the average of this column using the STATS command. The column name with special characters is referenced using backticks.
 
 ```esql
 FROM employees

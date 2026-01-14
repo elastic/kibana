@@ -1,6 +1,6 @@
 # CBRT
 
-Returns the cube root of a number. The input can be any numeric value, and the return value is always a double. If the input is infinity, the result is null.
+The CBRT function returns the cube root of a number. The input can be any numeric value, and the return value is always a double. Cube roots of infinities return null.
 
 ## Syntax
 
@@ -10,11 +10,11 @@ Returns the cube root of a number. The input can be any numeric value, and the r
 
 #### number
 
-Numeric expression. If the value is `null`, the function returns `null`.
+Numeric expression. If the value is null, the function returns null.
 
 ## Examples
 
-The following query creates a row with a value of 1000.0 and then calculates its cube root, storing the result in a new column named `c`:
+The following query creates a row with a single column `d` set to 1000.0, then calculates the cube root of `d` and stores the result in a new column `c`.
 
 ```esql
 ROW d = 1000.0

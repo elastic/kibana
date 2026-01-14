@@ -1,6 +1,6 @@
 # REPEAT
 
-The REPEAT function returns a string created by concatenating a given string with itself a specified number of times.
+Returns a string created by concatenating the input string with itself a specified number of times.
 
 ## Syntax
 
@@ -18,7 +18,7 @@ The number of times to repeat the string.
 
 ## Examples
 
-This query creates a row with the value "Hello!" in column `a`, then uses the REPEAT function to concatenate the value of `a` three times, resulting in "Hello!Hello!Hello!" in the new column `triple_a`.
+The following query creates a row with the value "Hello!" in column `a`, then uses the `REPEAT` function to concatenate "Hello!" three times and stores the result in a new column called `triple_a`:
 
 ```esql
 ROW a = "Hello!"

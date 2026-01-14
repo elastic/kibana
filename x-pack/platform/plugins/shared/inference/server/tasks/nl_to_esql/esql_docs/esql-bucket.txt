@@ -1,6 +1,6 @@
 # BUCKET
 
-The BUCKET function creates groups of values, called buckets, from a datetime or numeric input. Buckets can be sized directly or determined based on a recommended count and value range.
+The BUCKET function creates groups of values, known as buckets, from a datetime or numeric input. Buckets can be sized directly or determined based on a recommended count and value range.
 
 ## Syntax
 
@@ -26,9 +26,9 @@ End of the range. Can be a number, a date, or a date expressed as a string.
 
 ## Examples
 
-Generate monthly buckets for a year by specifying a target number of buckets and a date range:
+Create monthly buckets for a year by specifying a target number of buckets and a date range:
 
-This query selects employees hired in 1985, sorts their hire dates, and groups them into 20 monthly buckets within the year.
+This query selects employees hired in 1985, sorts their hire dates, and groups them into approximately 20 buckets (roughly monthly) within the year 1985.
 
 ```esql
 FROM employees
@@ -38,7 +38,7 @@ FROM employees
 
 Combine BUCKET with an aggregation to create a histogram of hires per month:
 
-This query counts the number of employees hired in each month of 1985 by grouping hire dates into 20 monthly buckets and sorting the results by month.
+This query counts how many employees were hired in each month of 1985 by grouping hire dates into 20 buckets (roughly monthly) and sorting the results by month.
 
 ```esql
 FROM employees
@@ -47,9 +47,9 @@ FROM employees
 | SORT month
 ```
 
-Generate weekly buckets by asking for more buckets in the same range:
+Create weekly buckets by asking for more buckets in the same range:
 
-This query counts the number of employees hired each week in 1985 by dividing the year into 100 weekly buckets.
+This query counts the number of employees hired each week in 1985 by dividing the year into 100 buckets (approximately weekly).
 
 ```esql
 FROM employees
@@ -59,7 +59,7 @@ FROM employees
 
 Specify the bucket size directly when known, such as weekly buckets:
 
-This query counts the number of employees hired each week in 1985 by explicitly setting the bucket size to one week.
+This query creates buckets of exactly one week for hire dates in 1985 and counts the number of hires per week, sorting the results by week.
 
 ```esql
 FROM employees
@@ -70,7 +70,7 @@ FROM employees
 
 Create a salary histogram by bucketing numeric values:
 
-This query groups employee salaries into 20 buckets ranging from 25,324 to 74,999 and counts the number of employees in each bucket.
+This query divides salary values into 20 buckets between 25,324 and 74,999 and counts the number of employees in each salary bucket, sorting the results by bucket.
 
 ```esql
 FROM employees
@@ -78,9 +78,9 @@ FROM employees
 | SORT bs
 ```
 
-Specify a numeric bucket size directly:
+Specify the bucket size directly for numeric fields:
 
-This query counts the number of employees in each salary bucket of 5,000 for those hired in 1985.
+This query creates salary buckets of size 5,000 for employees hired in 1985 and counts the number of employees in each bucket, sorting the results by bucket.
 
 ```esql
 FROM employees
@@ -91,7 +91,7 @@ FROM employees
 
 Create hourly buckets for the last 24 hours and count events per hour:
 
-This query counts the number of events that occurred in each hour over the last 24 hours by dividing the time range into 25 hourly buckets.
+This query counts the number of events that occurred in each hour over the last 24 hours by dividing the time range into 25 buckets (approximately one per hour).
 
 ```esql
 FROM sample_data
@@ -101,7 +101,7 @@ FROM sample_data
 
 Calculate average salary by hiring month using monthly buckets:
 
-This query calculates the average salary of employees hired in each month of 1985 by grouping hire dates into 20 monthly buckets.
+This query calculates the average salary of employees hired in each month of 1985 by grouping hire dates into 20 buckets (roughly monthly).
 
 ```esql
 FROM employees
@@ -111,7 +111,7 @@ FROM employees
 
 Use BUCKET in both the aggregating and grouping part of the STATS command:
 
-This query performs aggregations and grouping using bucketed salary values, allowing for complex analysis of salary distributions.
+This query demonstrates advanced usage of the BUCKET function by applying it to both the aggregation and grouping expressions. It creates two sets of buckets based on salary calculations, performs arithmetic on the results, and sorts the output.
 
 ```esql
 FROM employees
@@ -122,7 +122,7 @@ FROM employees
 
 Adjust the start value of each bucket by a given duration, such as offsetting buckets by one hour:
 
-This query creates yearly buckets for employee birth dates, offsetting each bucket by one hour, and counts the number of birth dates in each bucket.
+This query creates yearly buckets for employee birth dates, offsetting each bucket by one hour, and counts the number of dates in each bucket.
 
 ```esql
 FROM employees
@@ -133,6 +133,6 @@ FROM employees
 ## Limitations
 
 - BUCKET does not create buckets that do not match any documents; only buckets with matching data are returned.
-- BUCKET does not filter rows outside the provided range; it returns bucket values for all rows, including those outside the range. Use WHERE to filter rows as needed.
-- When specifying the bucket size directly, it must be a time duration or date period, and the reference is epoch (`0001-01-01T00:00:00Z`).
-- For numeric fields, you must determine the minimum and maximum values separately, as automatic range detection is not available.
+- BUCKET does not filter rows outside the provided range; it assigns out-of-range values to corresponding buckets outside the range. Use WHERE to filter rows as needed.
+- When specifying the bucket size directly, the value must be a time duration or date period, and the reference epoch is `0001-01-01T00:00:00Z`.
+- For numeric fields, you must manually determine the minimum and maximum values for the range, as automatic calculation is not available.

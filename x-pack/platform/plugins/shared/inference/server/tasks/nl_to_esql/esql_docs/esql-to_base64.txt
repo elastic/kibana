@@ -14,7 +14,9 @@ The string value to be encoded.
 
 ## Examples
 
-The following query creates a row with the value "elastic" and then encodes it into its base64 representation using the TO_BASE64 function:
+Encode the string "elastic" to its base64 representation:
+
+This query creates a row with a column `a` containing the string "elastic", then adds a new column `e` with the base64-encoded value of `a`.
 
 ```esql
 ROW a = "elastic"

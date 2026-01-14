@@ -18,7 +18,7 @@ Multivalue expression. Null values are treated as empty sets.
 
 ## Examples
 
-The following query creates two arrays of integers and combines them, returning a single array containing all unique values from both arrays.
+The following query combines two arrays of integers and returns all unique values from both arrays:
 
 ```esql
 ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
@@ -26,7 +26,7 @@ ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
 | KEEP finalValue
 ```
 
-This query creates two arrays of long integers, merges them, and outputs an array with all unique long integer values from both arrays.
+This query combines two arrays of long integers and returns a single array containing all unique long values from both arrays:
 
 ```esql
 ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
@@ -34,7 +34,7 @@ ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
 | KEEP finalValue
 ```
 
-This query combines two arrays of boolean values and returns an array containing all unique boolean values present in either array.
+This query merges two arrays of boolean values and returns an array with all unique boolean values present in either array:
 
 ```esql
 ROW a = [true, false], b = [false]
@@ -42,7 +42,7 @@ ROW a = [true, false], b = [false]
 | KEEP finalValue
 ```
 
-This query merges two arrays of floating-point numbers and returns an array with all unique floating-point values from both arrays.
+This query combines two arrays of floating-point numbers and returns an array containing all unique float values from both arrays:
 
 ```esql
 ROW a = [5.2, 10.5, 1.12345], b = [10.5, 2.6928]
@@ -50,7 +50,7 @@ ROW a = [5.2, 10.5, 1.12345], b = [10.5, 2.6928]
 | KEEP finalValue
 ```
 
-This query combines two arrays of strings and returns an array containing all unique string values from both arrays.
+This query merges two arrays of strings and returns an array with all unique string values from both arrays:
 
 ```esql
 ROW a = ["one", "two", "three"], b = ["two", "four"]

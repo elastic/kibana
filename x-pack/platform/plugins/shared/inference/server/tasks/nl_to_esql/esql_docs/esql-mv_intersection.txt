@@ -1,6 +1,6 @@
 # MV_INTERSECTION
 
-Returns the values that appear in both input fields. If either field is null or if no values match, the function returns `null`.
+The MV_INTERSECTION function returns the values that appear in both input fields. If either field is null or if no values match, it returns `null`.
 
 ## Syntax
 
@@ -18,7 +18,9 @@ Multivalue expression. If null, the function returns null.
 
 ## Examples
 
-The following query finds the intersection of two arrays of integers, returning the values that are present in both arrays:
+Find the intersection of two arrays of integers:
+
+This query creates two arrays of integers, `a` and `b`, and then computes the values that are present in both arrays. The result is stored in the `finalValue` field and only this field is kept in the output.
 
 ```esql
 ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
@@ -26,7 +28,9 @@ ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
 | KEEP finalValue
 ```
 
-This query finds the intersection of two arrays of long integers, showing which long values are shared between the two arrays:
+Find the intersection of two arrays of long integers:
+
+This query defines two arrays of long integers, `a` and `b`, and calculates their intersection. The resulting values that appear in both arrays are stored in `finalValue` and displayed.
 
 ```esql
 ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
@@ -34,7 +38,9 @@ ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
 | KEEP finalValue
 ```
 
-This query finds the intersection of two boolean arrays, returning the boolean values that are present in both arrays:
+Find the intersection of boolean arrays:
+
+This query creates two boolean arrays, `a` and `b`, and finds the values that are present in both arrays. The intersection is stored in `finalValue` and shown in the output.
 
 ```esql
 ROW a = [true, false, false, false], b = [false]
@@ -42,7 +48,9 @@ ROW a = [true, false, false, false], b = [false]
 | KEEP finalValue
 ```
 
-This query finds the intersection of two arrays of floating-point numbers, returning the float values that exist in both arrays:
+Find the intersection of floating point arrays:
+
+This query defines two arrays of floating point numbers, `a` and `b`, and computes the intersection of these arrays. The shared values are stored in `finalValue` and returned.
 
 ```esql
 ROW a = [5.2, 10.5, 1.12345, 2.6928], b = [10.5, 2.6928]
@@ -50,7 +58,9 @@ ROW a = [5.2, 10.5, 1.12345, 2.6928], b = [10.5, 2.6928]
 | KEEP finalValue
 ```
 
-This query finds the intersection of two arrays of strings, returning the string values that are present in both arrays:
+Find the intersection of string arrays:
+
+This query creates two arrays of strings, `a` and `b`, and determines which values are present in both arrays. The intersection is stored in `finalValue` and displayed.
 
 ```esql
 ROW a = ["one", "two", "three", "four", "five"], b = ["one", "four"]

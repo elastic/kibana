@@ -1,6 +1,6 @@
 # TO_GEOTILE
 
-The TO_GEOTILE function converts an input value to a `geotile` value. A string will only be converted successfully if it matches the `geotile` format, as defined for the geotile grid aggregation.
+The TO_GEOTILE function converts an input value to a `geotile` value. Conversion is successful only if the input string matches the required `geotile` format, as defined for the geotile grid aggregation.
 
 ## Syntax
 
@@ -10,14 +10,13 @@ The TO_GEOTILE function converts an input value to a `geotile` value. A string w
 
 #### field
 
-The input value to convert. This can be a single- or multi-valued column or an expression.
+The input value to be converted. This can be a single- or multi-valued column, or an expression.
 
 ## Examples
 
-The following query creates a row with a column named `string` containing the value "4/8/5", and then uses the `TO_GEOTILE` function to convert this string into a geotile value, storing the result in a new column called `geotile`.
+The following query creates a row with a column named `string` containing the value `"4/8/5"`, and then uses the `TO_GEOTILE` function to convert this string into a geotile value, storing the result in a new column called `geotile`.
 
 ```esql
 ROW string = "4/8/5"
 | EVAL geotile = TO_GEOTILE(string)
 ```
-This example converts the string "4/8/5" into a geotile value.

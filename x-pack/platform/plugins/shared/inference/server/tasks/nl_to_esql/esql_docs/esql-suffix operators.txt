@@ -23,7 +23,7 @@ FROM employees
 | WHERE birth_date IS NULL
 ```
 
-This query finds all employees where the `is_rehired` field has a value (is not NULL), and then counts the total number of employee numbers that meet this condition.
+This query finds all employees where the `is_rehired` field is not NULL (i.e., the field contains a value), and then counts the number of employee numbers in that group.
 
 ```esql
 FROM employees

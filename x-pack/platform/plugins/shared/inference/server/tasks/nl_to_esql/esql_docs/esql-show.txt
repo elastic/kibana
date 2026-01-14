@@ -16,7 +16,7 @@ Can only be INFO.
 
 Use SHOW INFO to return the deployment’s version, build date, and hash.
 
-The following query retrieves general information about the Elasticsearch deployment, including its version, build date, and build hash.
+This query retrieves general information about the Elasticsearch deployment, such as the version, build date, and build hash.
 
 ```esql
 SHOW INFO

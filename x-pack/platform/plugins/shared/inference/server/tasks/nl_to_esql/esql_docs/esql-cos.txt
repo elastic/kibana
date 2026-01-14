@@ -14,7 +14,7 @@ An angle in radians. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-This query creates a single row with the value `1.8` in column `a`, then calculates the cosine of `a` and stores the result in a new column called `cos`.
+This query creates a single row with a column `a` set to 1.8, then calculates the cosine of `a` and stores the result in a new column called `cos`.
 
 ```esql
 ROW a=1.8

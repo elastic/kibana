@@ -1,6 +1,6 @@
 # SCORE
 
-The SCORE function evaluates an expression and returns relevance scores for all resulting documents. Only full text functions are scored.
+The SCORE function calculates the relevance score of an expression. Only full text functions are scored, and it returns scores for all resulting documents.
 
 ## Syntax
 
@@ -10,11 +10,11 @@ The SCORE function evaluates an expression and returns relevance scores for all 
 
 #### query
 
-Boolean expression containing one or more full text functions to be scored.
+A boolean expression containing full text function(s) to be scored.
 
 ## Examples
 
-This query retrieves documents from the `books` index, including the metadata field `_score`. It filters for books where the title matches "Return" and the author matches "Tolkien". Then, it calculates the relevance score for the title match and stores it in a new field called `first_score`.
+This query retrieves documents from the `books` index where the `title` matches "Return" and the `author` matches "Tolkien". It then calculates the relevance score for the title match and stores it in a new field called `first_score`.
 
 ```esql
 FROM books METADATA _score

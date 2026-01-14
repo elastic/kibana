@@ -18,7 +18,7 @@ A numeric value representing the weight for each corresponding number.
 
 ## Examples
 
-The following query calculates the weighted average salary for each language group, using the employees' height as the weight. The result is rounded, and only the weighted average and language columns are kept in the output, which is then sorted by language.
+The following query calculates the weighted average salary for each language, using the employees' height as the weight. The result is then rounded, and only the weighted average and language columns are kept in the output, which is sorted by language.
 
 ```esql
 FROM employees

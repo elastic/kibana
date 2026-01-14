@@ -10,13 +10,13 @@ The FORK command creates multiple execution branches that operate on the same in
 
 #### <processing_commands>
 
-A sequence of processing commands to execute in each branch. Each set of commands is enclosed in parentheses and operates independently on the same input data.
+A sequence of processing commands to apply in each branch. Each set of commands is enclosed in parentheses and operates independently on the same input data.
 
 ## Examples
 
 In this example, each FORK branch returns one row. The `_fork` column indicates which branch each row comes from:
 
-This query retrieves data from the `employees` index and creates two branches: one that selects the employee with `emp_no` 10001 and another that selects the employee with `emp_no` 10002. The results from both branches are combined into a single output, with the `_fork` column indicating the originating branch for each row. Only the `emp_no` and `_fork` columns are kept, and the results are sorted by `emp_no`.
+This query selects employees with `emp_no` 10001 and 10002 in separate branches, adds the `_fork` column to identify the branch, and keeps only the `emp_no` and `_fork` columns, sorting the results by `emp_no`.
 
 ```esql
 FROM employees

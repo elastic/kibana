@@ -1,6 +1,6 @@
 # TO_RADIANS
 
-Converts a number in degrees to radians.
+Converts a number from degrees to radians.
 
 ## Syntax
 

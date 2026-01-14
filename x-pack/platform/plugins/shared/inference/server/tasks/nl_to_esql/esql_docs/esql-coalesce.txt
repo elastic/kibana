@@ -14,15 +14,14 @@ Expression to evaluate.
 
 #### rest
 
-Other expression to evaluate.
+Other expressions to evaluate.
 
 ## Examples
 
-Calculate the first non-null value between columns `a` and `b`:
-
-This query creates a row with two columns, `a` (set to null) and `b` (set to "b"), and then uses the `COALESCE` function to return the first non-null value between `a` and `b`. In this case, since `a` is null, the result will be the value of `b`, which is "b".
+This query creates a row with two columns, `a` set to null and `b` set to "b". It then uses the `COALESCE` function to return the first non-null value between `a` and `b`, which in this case is the value of `b`.
 
 ```esql
 ROW a=null, b="b"
 | EVAL COALESCE(a, b)
 ```
+This example returns the value of `b` since `a` is null.

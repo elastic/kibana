@@ -14,10 +14,11 @@ Input value in radians. The input can be a single- or multi-valued column or an 
 
 ## Examples
 
-The following query creates a row with an array of radian values and then converts each value in the array to degrees using the `TO_DEGREES` function. The result is a new column containing the degree equivalents of the input radians.
+Convert an array of radian values to degrees:
+
+This query creates a row with an array of radian values and then adds a new column that contains the corresponding degree values for each radian value in the array.
 
 ```esql
 ROW rad = [1.57, 3.14, 4.71]
 | EVAL deg = TO_DEGREES(rad)
 ```
-Convert an array of radian values to degrees.

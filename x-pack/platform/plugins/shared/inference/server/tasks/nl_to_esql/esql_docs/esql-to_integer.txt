@@ -1,6 +1,6 @@
 # TO_INTEGER
 
-Converts an input value to an integer. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to an integer. Boolean `true` is converted to `1`, and `false` to `0`. When two arguments are provided—a string value and a whole number base—the string is parsed as an integer in the specified base. If parsing fails, a warning is generated and the result is null. A leading '0x' prefix is allowed for base 16.
+Converts an input value to an integer. If the input is a date type, it is interpreted as milliseconds since the Unix epoch and converted to an integer. Boolean `true` is converted to `1`, and `false` to `0`. When two arguments are provided—a string value and a whole number base—the string is parsed as an integer in the specified base. If parsing fails, a warning is generated and the result is `null`. A leading '0x' prefix is allowed for base 16.
 
 ## Syntax
 
@@ -18,14 +18,14 @@ The input value to convert. This can be a single- or multi-valued column or an e
 
 ## Examples
 
-This query takes a multi-valued field containing long numbers and converts each value to an integer. If a value cannot be converted (for example, if it exceeds the integer range), the result is null and a warning is generated.
+The following query converts each value in the multi-valued `long` field to an integer. If a value cannot be converted, the result is `null` and a warning is generated.
 
 ```esql
 ROW long = [5013792, 2147483647, 501379200000]
 | EVAL int = TO_INTEGER(long)
 ```
 
-This query parses two string fields as integers: `str1` is interpreted as a hexadecimal (base 16) value, and `str2` is parsed as a base 13 value. The resulting integer values are kept alongside the original strings.
+This query parses two string values as integers: `str1` is parsed as a base 16 (hexadecimal) integer, and `str2` is parsed as a base 13 integer. The resulting integer values are kept along with the original strings.
 
 ```esql
 ROW str1 = "0x32", str2 = "31"
@@ -33,7 +33,7 @@ ROW str1 = "0x32", str2 = "31"
 | KEEP str1, int1, str2, int2
 ```
 
-This query attempts to parse the string "Kona" as an integer in base 27 (which succeeds) and in base 10 (which fails). The failed conversion returns null and generates a warning.
+This query attempts to parse the string `"Kona"` as an integer in base 27 (which succeeds) and in base 10 (which fails). If parsing fails, a warning is generated and the result is `null`.
 
 ```esql
 ROW str1 = "Kona"

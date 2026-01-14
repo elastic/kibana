@@ -14,7 +14,7 @@ String expression to be trimmed. If the value is `null`, the function returns `n
 
 ## Examples
 
-The following query demonstrates how to remove leading and trailing spaces from the `message` and `color` columns. It first creates a row with extra spaces in both fields, then uses the `TRIM` function to clean up the values.
+The following query creates two columns, `message` and `color`, each containing extra spaces at the beginning and end. It then removes the leading and trailing spaces from both columns using the `TRIM` function.
 
 ```esql
 ROW message = "   some text  ",  color = " red "

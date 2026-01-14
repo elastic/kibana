@@ -1,6 +1,6 @@
 # INLINESTATS-BY
 
-The INLINE STATS command groups rows based on a common value specified after BY and calculates one or more aggregated values over the grouped rows. The output table retains all columns from the input table, with new columns added or existing columns overridden if their names overlap. Aggregated values can be filtered using WHERE for each calculation, and if BY is omitted, aggregations are applied over the entire dataset. The new columns appear in the order defined in the INLINE STATS command.
+The INLINE STATS command groups rows based on a common value specified after BY and calculates one or more aggregated values over the grouped rows. The output table retains all columns from the input table, with new columns added or existing columns overridden if their names overlap. Aggregated values can be filtered using WHERE clauses, and if BY is omitted, aggregations are applied over the entire dataset. Supported aggregation functions include AVG, COUNT, MAX, MIN, SUM, and more. Supported grouping functions include BUCKET and TBUCKET. This command is similar to STATS, but preserves all columns from the input table.
 
 ## Syntax
 
@@ -15,7 +15,7 @@ The INLINE STATS command groups rows based on a common value specified after BY 
 
 #### columnX
 
-The name for the aggregated value returned. If omitted, the name defaults to the corresponding expression. If multiple columns share the same name, only the rightmost column with that name is kept.
+The name by which the aggregated value is returned. If omitted, the name is equal to the corresponding expression. If multiple columns have the same name, all but the rightmost column with this name will be ignored.
 
 #### expressionX
 
@@ -23,7 +23,7 @@ An expression that computes an aggregated value.
 
 #### grouping_expressionX
 
-An expression that outputs the values to group by. If its name matches an existing or computed column, that column will be overridden.
+An expression that outputs the values to group by. If its name coincides with one of the existing or computed columns, that column will be overridden by this one.
 
 #### boolean_expressionX
 
@@ -33,7 +33,7 @@ The condition that determines which rows are included when evaluating expression
 
 Calculate the maximum salary for each language group:
 
-This query retrieves the employee number, languages, and salary for each employee, then calculates the maximum salary within each language group. The result adds a new column, `max_salary`, showing the highest salary for each language.
+This query retrieves the employee number, languages, and salary columns from the employees dataset, then calculates the maximum salary for each language group and adds it as a new column called `max_salary` to each row within the group.
 
 ```esql
 FROM employees
@@ -43,7 +43,7 @@ FROM employees
 
 Calculate the maximum salary over the entire dataset, adding the result as a new column:
 
-This query selects the employee number, languages, and salary for all employees, then calculates the maximum salary across the entire dataset. The result includes a new column, `max_salary`, which contains the highest salary value for all employees.
+This query selects the employee number, languages, and salary columns from the employees dataset, then calculates the maximum salary across all employees and adds it as a new column called `max_salary` to every row.
 
 ```esql
 FROM employees
@@ -53,7 +53,7 @@ FROM employees
 
 Calculate average salary and count, grouped by languages and tenure:
 
-This query filters for employees who are still hired, keeps relevant columns, calculates each employee's tenure in years, and removes the hire date. It then computes the average salary and the count of employees, grouped by both language and tenure, adding `avg_salary` and `count` columns to the result.
+This query filters for employees who are still hired, keeps relevant columns, calculates each employee's tenure in years, removes the hire date column, and then computes the average salary and the count of employees for each combination of language and tenure. The results are added as new columns to each row in their respective groups.
 
 ```esql
 FROM employees
@@ -66,7 +66,7 @@ FROM employees
 
 Calculate rounded average salaries for different salary ranges using WHERE clauses:
 
-This query keeps the employee number and salary, then calculates the rounded average salary for three different salary ranges: less than $50,000, between $50,000 and $60,000, and greater than or equal to $60,000. Each range's average is added as a separate column: `avg_lt_50`, `avg_lt_60`, and `avg_gt_60`.
+This query keeps the employee number and salary columns, then calculates the rounded average salary for three different salary ranges: less than $50,000, between $50,000 and $60,000, and $60,000 or more. Each result is added as a new column to every row, depending on which salary range the row falls into.
 
 ```esql
 FROM employees

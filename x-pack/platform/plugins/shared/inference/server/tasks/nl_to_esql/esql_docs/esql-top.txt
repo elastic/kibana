@@ -22,11 +22,11 @@ The order to calculate the top values. Either `asc` or `desc`. If omitted, defau
 
 #### outputField
 
-Optional. If provided, this field will be the output of the TOP call instead of `field`.
+Optional. If present, this field will be the output of the TOP call instead of `field`.
 
 ## Examples
 
-The following query retrieves the top 3 highest salary values from the `employees` index in descending order, and also calculates the maximum salary among all employees.
+This query retrieves the top 3 highest salary values from the employees table and also calculates the maximum salary among all employees. The results are returned in two columns: `top_salaries`, which contains the top 3 salaries, and `top_salary`, which contains the single highest salary.
 
 ```esql
 FROM employees

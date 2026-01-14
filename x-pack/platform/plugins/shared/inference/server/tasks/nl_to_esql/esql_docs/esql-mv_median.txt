@@ -1,6 +1,6 @@
 # MV_MEDIAN
 
-The MV_MEDIAN function converts a multivalued field into a single value containing the median of the values. If the number of values is even, the result is the average of the two middle values. For non-floating point columns, the average is rounded down.
+The MV_MEDIAN function converts a multivalued field into a single valued field containing the median value. If the field has an even number of values, the result is the average of the middle two entries. For non-floating point columns, the average rounds down.
 
 ## Syntax
 
@@ -10,18 +10,22 @@ The MV_MEDIAN function converts a multivalued field into a single value containi
 
 #### number
 
-A multivalue expression containing the values from which to calculate the median.
+A multivalue expression containing the values for which the median will be calculated.
 
 ## Examples
 
-This query creates a row with an array of values `[3, 5, 1]` and calculates the median value from that array, storing the result in the field `median_a`.
+Calculate the median value from a list of numbers in a row:
+
+This query creates a row with a field `a` containing the values `[3, 5, 1]`, then computes the median of those values and stores it in a new field called `median_a`.
 
 ```esql
 ROW a=[3, 5, 1]
 | EVAL median_a = MV_MEDIAN(a)
 ```
 
-This query creates a row with an array of values `[3, 7, 1, 6]` and calculates the median value. Since the array has an even number of elements, the result is the average of the two middle values (rounded down if not floating point), and the result is stored in the field `median_a`.
+Calculate the median for a row with an even number of values; the result is the average of the middle two entries, rounded down for non-floating point columns:
+
+This query creates a row with a field `a` containing the values `[3, 7, 1, 6]`, then calculates the median of those values. Since there is an even number of values, the median is the average of the two middle numbers (rounded down if not a floating point), and the result is stored in the field `median_a`.
 
 ```esql
 ROW a=[3, 7, 1, 6]

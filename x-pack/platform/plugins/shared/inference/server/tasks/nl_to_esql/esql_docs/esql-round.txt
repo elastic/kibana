@@ -18,10 +18,12 @@ The number of decimal places to round to. Optional. Defaults to 0. If `null`, th
 
 ## Examples
 
-This query selects the `first_name`, `last_name`, and `height` columns from the `employees` data. It then calculates each employee's height in feet by multiplying the `height` (in meters) by 3.281, and rounds the result to one decimal place, storing it in a new column called `height_ft`.
+This query selects the `first_name`, `last_name`, and `height` columns from the `employees` data. It then creates a new column called `height_ft` by converting the `height` from meters to feet (multiplying by 3.281) and rounding the result to one decimal place.
 
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | EVAL height_ft = ROUND(height * 3.281, 1)
 ```
+
+This example converts the `height` column from meters to feet and rounds the result to one decimal place.

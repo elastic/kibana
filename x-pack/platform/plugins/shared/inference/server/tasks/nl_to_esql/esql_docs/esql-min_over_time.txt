@@ -1,6 +1,6 @@
 # MIN_OVER_TIME
 
-Calculates the minimum value of a field over a specified time window.
+Calculates the minimum value of a field within a specified time window.
 
 ## Syntax
 
@@ -18,9 +18,7 @@ The time window over which to compute the minimum.
 
 ## Examples
 
-Calculate the minimum network cost over time, grouped by cluster and 1-minute time buckets:
-
-This query retrieves data from the `k8s` time series, calculates the minimum value of `network.cost` within each time window, sums these minimum values, and then groups the results by `cluster` and by 1-minute time buckets.
+The following query calculates the minimum network cost over time, grouped by cluster and 1-minute time buckets. It first selects data from the `k8s` time series, then computes the sum of the minimum network cost within each 1-minute window for each cluster.
 
 ```esql
 TS k8s

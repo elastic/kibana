@@ -30,14 +30,14 @@ The input text containing only query terms for snippet extraction. Lucene query 
 
 ## Examples
 
-The following query extracts the best matching snippets from the `description` field for each book, using the query term "Tolkien". The resulting snippets are stored in a new column called `snippets`.
+This query extracts the best matching snippets from the `description` field for each book, using the term "Tolkien" as the search query. The resulting snippets are stored in a new column called `snippets`.
 
 ```esql
 FROM books
 | EVAL snippets = TOP_SNIPPETS(description, "Tolkien")
 ```
 
-This query filters the books to only those whose title contains the word "Return". For each of these books, it extracts up to 3 snippets from the `description` field, with each snippet containing a maximum of 25 words, based on the query term "Tolkien". The extracted snippets are stored in the `snippets` column.
+This query filters the books to only those whose title contains the word "Return". For each of these books, it extracts up to 3 snippets from the `description` field, with each snippet containing a maximum of 25 words, using "Tolkien" as the search query. The extracted snippets are stored in the `snippets` column.
 
 ```esql
 FROM books

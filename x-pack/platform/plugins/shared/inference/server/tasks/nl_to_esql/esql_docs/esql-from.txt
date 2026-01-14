@@ -20,7 +20,7 @@ A comma-separated list of metadata fields to retrieve. This parameter is optiona
 
 Retrieve all documents from the `employees` index:
 
-This query fetches all documents from the `employees` index, returning each document as a row and each field as a column.
+This query selects all documents from the `employees` index, returning each document as a row in the result.
 
 ```esql
 FROM employees
@@ -28,7 +28,7 @@ FROM employees
 
 Access today’s index using date math:
 
-This query retrieves documents from the index named with today's date, using date math to dynamically select the current day's logs.
+This query retrieves all documents from the index named with today’s date, using date math to dynamically select the current day's logs.
 
 ```esql
 FROM <logs-{now/d}>
@@ -36,15 +36,15 @@ FROM <logs-{now/d}>
 
 Query multiple data streams, indices, or aliases using comma-separated lists or wildcards:
 
-This query pulls documents from both the `employees-00001` index and any indices matching the pattern `other-employees-*`, allowing you to combine data from multiple sources.
+This query fetches documents from both the `employees-00001` index and any indices matching the pattern `other-employees-*`.
 
 ```esql
 FROM employees-00001,other-employees-*
 ```
 
-Query data streams and indices on remote clusters using the format `<remote_cluster_name>:<target>`:
+Query data streams and indices on remote clusters using the `<remote_cluster_name>:<target>` format:
 
-This query retrieves documents from the `employees-00001` index on `cluster_one` and from all indices matching `other-employees-*` on `cluster_two`, enabling cross-cluster querying.
+This query retrieves documents from the `employees-00001` index on `cluster_one` and from all indices matching `other-employees-*` on `cluster_two`.
 
 ```esql
 FROM cluster_one:employees-00001,cluster_two:other-employees-*
@@ -52,7 +52,7 @@ FROM cluster_one:employees-00001,cluster_two:other-employees-*
 
 Enable metadata fields with the optional `METADATA` directive:
 
-This query fetches all documents from the `employees` index and includes the `_id` metadata field for each document in the results.
+This query selects all documents from the `employees` index and includes the `_id` metadata field for each document in the results.
 
 ```esql
 FROM employees METADATA _id
@@ -60,7 +60,7 @@ FROM employees METADATA _id
 
 Escape index names containing special characters using double quotes or triple double quotes:
 
-This query demonstrates how to retrieve documents from indices with special characters in their names by escaping them with quotes.
+This query demonstrates how to select from indices with special characters in their names by escaping them with quotes.
 
 ```esql
 FROM "this=that", """this[that"""

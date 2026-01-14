@@ -1,6 +1,6 @@
 # ATAN
 
-Returns the arctangent of a numeric expression as an angle in radians.
+The ATAN function returns the arctangent of a numeric expression as an angle in radians.
 
 ## Syntax
 
@@ -10,7 +10,7 @@ Returns the arctangent of a numeric expression as an angle in radians.
 
 #### number
 
-Numeric expression to calculate the arctangent for. If the value is `null`, the function returns `null`.
+Numeric expression for which to calculate the arctangent. If the value is `null`, the function returns `null`.
 
 ## Examples
 

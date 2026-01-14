@@ -10,11 +10,11 @@ Removes trailing whitespaces from a string.
 
 #### string
 
-The string expression to process. If the value is `null`, the function returns `null`.
+String expression to process. If `null`, the function returns `null`.
 
 ## Examples
 
-The following query demonstrates how to remove trailing spaces from the `message` and `color` columns, and then wrap the cleaned results in single quotes:
+This query creates two columns, `message` and `color`, with leading and trailing spaces. It then removes trailing spaces from both columns using the `RTRIM` function, and finally wraps the cleaned values in single quotes for clarity.
 
 ```esql
 ROW message = "   some text  ",  color = " red "
@@ -24,4 +24,4 @@ ROW message = "   some text  ",  color = " red "
 | EVAL color = CONCAT("'", color, "'")
 ```
 
-This query creates a row with two columns: `message` containing `"   some text  "` and `color` containing `" red "`. It then removes any trailing spaces from both columns using the `RTRIM` function. Finally, it wraps the trimmed values in single quotes using the `CONCAT` function.
+Remove trailing spaces from the `message` and `color` columns, then wrap the results in single quotes.

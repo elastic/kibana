@@ -10,22 +10,20 @@ The TO_AGGREGATE_METRIC_DOUBLE function encodes a numeric value as an aggregate_
 
 #### number
 
-Input value to encode. The input can be a single- or multi-valued column or an expression.
+Input value to be encoded. The input can be a single- or multi-valued column or an expression.
 
 ## Examples
 
-This query creates a row with a single numeric value and encodes it as an aggregate_metric_double using the TO_AGGREGATE_METRIC_DOUBLE function.
+The following query creates a row with a single numeric value and then encodes it as an aggregate_metric_double using the TO_AGGREGATE_METRIC_DOUBLE function.
 
 ```esql
 ROW x = 3892095203
 | EVAL agg_metric = TO_AGGREGATE_METRIC_DOUBLE(x)
 ```
-Encode a single numeric value as an aggregate_metric_double.
 
-This query creates a row with an array of numeric values and encodes the entire array as an aggregate_metric_double.
+This query creates a row with multiple numeric values in an array and encodes the array as an aggregate_metric_double.
 
 ```esql
 ROW x = [5032, 11111, 40814]
 | EVAL agg_metric = TO_AGGREGATE_METRIC_DOUBLE(x)
 ```
-Encode a multi-valued numeric array as an aggregate_metric_double.

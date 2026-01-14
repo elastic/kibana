@@ -1,6 +1,6 @@
 # MD5
 
-The MD5 command computes the MD5 hash of the input value, if the MD5 hash function is available on the JVM.
+The MD5 command computes the MD5 hash of the input value, if the MD5 hash is available on the JVM.
 
 ## Syntax
 
@@ -14,7 +14,7 @@ The value to hash.
 
 ## Examples
 
-This query selects all rows from the `sample_data` index where the `message` column does not equal "Connection error". For each of these rows, it calculates the MD5 hash of the `message` column and stores the result in a new column called `md5`. Finally, it keeps only the `message` and `md5` columns in the output.
+This query selects all rows from the `sample_data` index where the `message` column does not equal "Connection error". For each of these rows, it computes the MD5 hash of the `message` column and stores the result in a new column called `md5`. Finally, it outputs only the `message` and `md5` columns.
 
 ```esql
 FROM sample_data

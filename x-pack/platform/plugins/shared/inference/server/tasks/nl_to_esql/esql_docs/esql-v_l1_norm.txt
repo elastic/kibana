@@ -18,7 +18,7 @@ Second dense_vector to calculate l1 norm similarity.
 
 ## Examples
 
-This query calculates the l1 norm similarity (Manhattan distance) between the `rgb_vector` column and the vector `[0, 255, 255]` for each row in the `colors` dataset. It then sorts the results by similarity in descending order (so the most similar colors appear first) and by color name in ascending order.
+This query calculates the l1 norm similarity (Manhattan distance) between the `rgb_vector` column and the vector `[0, 255, 255]` for each row in the `colors` dataset. It then sorts the results by similarity in descending order (showing the most similar colors first) and by color name in ascending order.
 
 ```esql
 from colors

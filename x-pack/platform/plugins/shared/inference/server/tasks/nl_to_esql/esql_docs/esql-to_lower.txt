@@ -10,22 +10,22 @@ Returns a new string with all characters in the input string converted to lower 
 
 #### str
 
-String expression to be converted to lower case. If the value is `null`, the function returns `null`. The input can be a single-valued column or expression, or a multi-valued column or expression.
+String expression to convert to lower case. If the value is `null`, the function returns `null`. The input can be a single-valued or multi-valued column or expression.
 
 ## Examples
 
-Convert a single string value to lower case:
+Convert a single string to lower case:
 
-This query creates a row with a column named `message` containing the string "Some Text", then adds a new column `message_lower` where the value is the lower case version of `message`.
+This query creates a row with a column named `message` containing the text "Some Text", then adds a new column `message_lower` where the value is the lower-case version of `message`.
 
 ```esql
 ROW message = "Some Text"
 | EVAL message_lower = TO_LOWER(message)
 ```
 
-Convert each value in a multi-valued string array to lower case:
+Convert each value in a multi-valued string to lower case:
 
-This query creates a row with a column `v` that contains an array where each string from the original array `["Some", "Text"]` has been converted to lower case.
+This query creates a row with a column `v` that contains an array of strings, where each string from the original array `["Some", "Text"]` is converted to lower case.
 
 ```esql
 ROW v = TO_LOWER(["Some", "Text"])

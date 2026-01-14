@@ -16,7 +16,7 @@ A multivalue expression to be averaged.
 
 Calculate the average of the values in a multivalued field:
 
-This query creates a row with a multivalued field `a` containing the values `[3, 5, 1, 6]`, then calculates the average of those values and stores the result in a new field called `avg_a`.
+This query creates a row with a field `a` containing the values `[3, 5, 1, 6]`, then calculates the average of these values and stores the result in a new field called `avg_a`.
 
 ```esql
 ROW a=[3, 5, 1, 6]

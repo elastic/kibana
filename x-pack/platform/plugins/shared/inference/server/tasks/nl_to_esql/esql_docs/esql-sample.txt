@@ -10,7 +10,7 @@ The SAMPLE function collects a specified number of sample values from a field.
 
 #### field
 
-The field from which to collect sample values.
+The field to collect sample values for.
 
 #### limit
 
@@ -18,11 +18,12 @@ The maximum number of values to collect.
 
 ## Examples
 
-The following query retrieves up to 5 sample values from the `gender` field in the `employees` data:
+This query retrieves up to 5 sample values from the `gender` field in the `employees` dataset.
 
 ```esql
 FROM employees
 | STATS sample = SAMPLE(gender, 5)
 ```
-| SAMPLE 0.05
+Collect up to 5 sample values from the `gender` field in the `employees` dataset.
 ```
+This example randomly selects approximately 5% of the employee numbers from the employees table.

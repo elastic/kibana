@@ -1,6 +1,6 @@
 # REVERSE
 
-Returns a new string with the characters of the input string in reverse order. Unicode grapheme clusters are preserved during reversal.
+The REVERSE function returns a new string with the characters of the input string in reverse order. It preserves unicode grapheme clusters, ensuring that complex characters remain intact during reversal.
 
 ## Syntax
 
@@ -14,9 +14,9 @@ String expression to be reversed. If the value is `null`, the function returns `
 
 ## Examples
 
-Reverse the characters in a string:
+Reverse the characters in a simple string:
 
-This query creates a row with a column named `message` containing the text "Some Text", then adds a new column `message_reversed` with the characters of `message` in reverse order.
+This query creates a row with a column named `message` containing the text "Some Text", then adds a new column `message_reversed` where the characters of `message` are reversed.
 
 ```esql
 ROW message = "Some Text" | EVAL message_reversed = REVERSE(message);
@@ -24,7 +24,7 @@ ROW message = "Some Text" | EVAL message_reversed = REVERSE(message);
 
 Reverse a string containing unicode grapheme clusters, keeping them together:
 
-This query creates a row with a column named `bending_arts` containing the string "💧🪨🔥💨", then adds a new column `bending_arts_reversed` where the order of the grapheme clusters (emojis) is reversed, but each emoji remains intact.
+This query creates a row with a column named `bending_arts` containing the string "💧🪨🔥💨" (a sequence of emoji), then adds a new column `bending_arts_reversed` where the order of the emoji is reversed, while preserving each emoji as a whole character.
 
 ```esql
 ROW bending_arts = "💧🪨🔥💨" | EVAL bending_arts_reversed = REVERSE(bending_arts);
