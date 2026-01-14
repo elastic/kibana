@@ -16,19 +16,19 @@ import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_re
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 import { SecretConfigurationSchema } from '@kbn/connector-schemas/common/auth';
-import type { ActionParamsType } from '@kbn/connector-schemas/api';
+import type { ActionParamsType } from '@kbn/connector-schemas/http';
 import {
   CONNECTOR_ID,
   CONNECTOR_ID_SYSTEM,
   CONNECTOR_NAME,
   ConfigSchema,
   ParamsSchema,
-} from '@kbn/connector-schemas/api';
+} from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod';
 import type {
-  ApiConnectorType,
-  ApiConnectorTypeExecutorOptions,
-  ApiConnectorTypeExecutorResult,
+  HttpConnectorType,
+  HttpConnectorTypeExecutorOptions,
+  HttpConnectorTypeExecutorResult,
 } from './types';
 import type { Result } from '../lib/result_type';
 
@@ -49,7 +49,7 @@ const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 
 // connector type definition
 
-const connectorTypeDefinition: Omit<ApiConnectorType, 'id' | 'validate'> = {
+const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
   minimumLicenseRequired: 'gold',
   name: CONNECTOR_NAME,
   supportedFeatureIds: [WorkflowsConnectorFeatureId],
@@ -63,7 +63,7 @@ const connectorTypeDefinition: Omit<ApiConnectorType, 'id' | 'validate'> = {
  * - The system connector type: To be executed as system action without the need of creating a saved objects instance, doesn't manage authentication and secrets configuration
  */
 
-export const getConnectorType = (): ApiConnectorType => ({
+export const getConnectorType = (): HttpConnectorType => ({
   id: CONNECTOR_ID,
   ...connectorTypeDefinition,
   validate: {
@@ -80,7 +80,7 @@ export const getConnectorType = (): ApiConnectorType => ({
   },
 });
 
-export const getSystemConnectorType = (): ApiConnectorType => ({
+export const getSystemConnectorType = (): HttpConnectorType => ({
   id: CONNECTOR_ID_SYSTEM,
   ...connectorTypeDefinition,
   isSystemActionType: true,
@@ -156,8 +156,8 @@ function buildQueryString(query?: Record<string, string>): string {
 
 // action executor
 export async function executor(
-  execOptions: ApiConnectorTypeExecutorOptions
-): Promise<ApiConnectorTypeExecutorResult> {
+  execOptions: HttpConnectorTypeExecutorOptions
+): Promise<HttpConnectorTypeExecutorResult> {
   const {
     actionId,
     config,
@@ -168,31 +168,15 @@ export async function executor(
     services,
   } = execOptions;
 
-  const { url: configUrl, headers: configHeaders } = config;
-  const {
-    url: paramsUrl,
-    method,
-    path,
-    body,
-    query,
-    headers: paramsHeaders,
-    timeout,
-    fetcher,
-  } = params;
+  const { method, path, body, query, headers: paramsHeaders, timeout, fetcher } = params;
 
-  const baseUrl = configUrl || paramsUrl;
+  const baseUrl = config.url || params.url;
   if (!baseUrl) {
     return errorResultInvalid(actionId, 'URL is required');
   }
 
   // Combine base url and path
   const url = combineUrl(baseUrl, path) + buildQueryString(query);
-
-  // Merge headers: params headers take precedence over config headers
-  const mergedHeaders = {
-    ...(configHeaders || {}),
-    ...(paramsHeaders || {}),
-  };
 
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
@@ -215,13 +199,10 @@ export async function executor(
     );
   }
 
-  const { axiosInstance, headers: authHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
+  const { axiosInstance, headers: configHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
 
-  // Merge auth headers with merged config/params headers
-  const finalHeaders = {
-    ...mergedHeaders,
-    ...authHeaders,
-  };
+  // Merge headers: params headers take precedence over config headers
+  const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
 
   // Handle fetcher options
   let sslOverrides = baseSslOverrides;
@@ -268,7 +249,7 @@ export async function executor(
     const {
       value: { status, statusText, data },
     } = result;
-    logger.debug(`response from api action "${actionId}": [HTTP ${status}] ${statusText}`);
+    logger.debug(`response from http action "${actionId}": [HTTP ${status}] ${statusText}`);
 
     const headers = Object.entries(result.value.headers || {}).reduce<Record<string, string>>(
       (acc, [key, value]) => {
@@ -288,7 +269,7 @@ export async function executor(
       const responseMessage = responseData?.message;
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
       const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
-      logger.error(`error on ${actionId} api event: ${message}`);
+      logger.error(`error on ${actionId} http event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
@@ -314,15 +295,15 @@ export async function executor(
       return errorResult;
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
-      logger.error(`error on ${actionId} api event: ${message}`);
+      logger.error(`error on ${actionId} http event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     } else if (error.isAxiosError) {
       const message = `${error.message}`;
-      logger.error(`error on ${actionId} api event: ${message}`);
+      logger.error(`error on ${actionId} http event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     }
 
-    logger.error(`error on ${actionId} api action: unexpected error`);
+    logger.error(`error on ${actionId} http action: unexpected error`);
     return errorResultUnexpectedError(actionId);
   }
 }

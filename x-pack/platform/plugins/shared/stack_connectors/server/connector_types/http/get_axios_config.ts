@@ -17,7 +17,10 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import type { Logger } from '@kbn/logging/src/logger';
 import type { SSLSettings } from '@kbn/actions-utils';
 import type { Services } from '@kbn/actions-plugin/server/types';
-import type { ConnectorTypeConfigType, ConnectorTypeSecretsType } from '@kbn/connector-schemas/api';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/http';
 import { AuthType } from '@kbn/connector-schemas/common/auth';
 import { buildConnectorAuth } from '../../../common/auth/utils';
 

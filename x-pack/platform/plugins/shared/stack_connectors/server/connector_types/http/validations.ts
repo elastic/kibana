@@ -10,7 +10,7 @@ import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 
-import type { ConnectorTypeConfigType } from '@kbn/connector-schemas/api';
+import type { ConnectorTypeConfigType } from '@kbn/connector-schemas/http';
 import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth';
 import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
 
@@ -19,8 +19,8 @@ function validateUrl(configuredUrl: string) {
     new URL(configuredUrl);
   } catch (err) {
     throw new Error(
-      i18n.translate('xpack.stackConnectors.api.configurationErrorNoHostname', {
-        defaultMessage: 'error validation api action config: unable to parse url: {err}',
+      i18n.translate('xpack.stackConnectors.http.configurationErrorNoHostname', {
+        defaultMessage: 'error validation http action config: unable to parse url: {err}',
         values: {
           err: err.toString(),
         },
@@ -37,8 +37,8 @@ function ensureUriAllowed(
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     throw new Error(
-      i18n.translate('xpack.stackConnectors.api.configurationError', {
-        defaultMessage: 'error validation api action config: {message}',
+      i18n.translate('xpack.stackConnectors.http.configurationError', {
+        defaultMessage: 'error validation http action config: {message}',
         values: {
           message: allowListError.message,
         },
@@ -50,9 +50,9 @@ function ensureUriAllowed(
 function validateAuthType(configObject: ConnectorTypeConfigType) {
   if (Boolean(configObject.authType) && !configObject.hasAuth) {
     throw new Error(
-      i18n.translate('xpack.stackConnectors.api.authConfigurationError', {
+      i18n.translate('xpack.stackConnectors.http.authConfigurationError', {
         defaultMessage:
-          'error validation api action config: authType must be null or undefined if hasAuth is false',
+          'error validation http action config: authType must be null or undefined if hasAuth is false',
       })
     );
   }
@@ -66,8 +66,8 @@ function validateCertType(
     const webhookSettings = configurationUtilities.getWebhookSettings();
     if (!webhookSettings.ssl.pfx.enabled) {
       throw new Error(
-        i18n.translate('xpack.stackConnectors.api.pfxConfigurationError', {
-          defaultMessage: 'error validation api action config: certType "{certType}" is disabled',
+        i18n.translate('xpack.stackConnectors.http.pfxConfigurationError', {
+          defaultMessage: 'error validation http action config: certType "{certType}" is disabled',
           values: {
             certType: SSLCertType.PFX,
           },
@@ -109,8 +109,8 @@ function validateOAuth2(configObject: ConnectorTypeConfigType) {
     }
 
     throw new Error(
-      i18n.translate('xpack.stackConnectors.api.oauth2ConfigurationError', {
-        defaultMessage: `error validation api action config: missing {missingItems} fields`,
+      i18n.translate('xpack.stackConnectors.http.oauth2ConfigurationError', {
+        defaultMessage: `error validation http action config: missing {missingItems} fields`,
         values: {
           missingItems: missingFields.join(', '),
         },

@@ -6,4 +6,5 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-export * from './v1';
+
+export { ConfigSchema, HTTP_METHODS, ParamsSchema } from './v1';

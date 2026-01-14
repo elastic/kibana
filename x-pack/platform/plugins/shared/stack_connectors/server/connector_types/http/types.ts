@@ -14,15 +14,15 @@ import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType,
-} from '@kbn/connector-schemas/api';
+} from '@kbn/connector-schemas/http';
 
-export type ApiConnectorType = ConnectorType<
+export type HttpConnectorType = ConnectorType<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType,
   unknown
 >;
-export type ApiConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
+export type HttpConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType
@@ -35,4 +35,4 @@ export interface HttpConnectorResponse {
   headers: Record<string, string>;
 }
 
-export type ApiConnectorTypeExecutorResult = ActionTypeExecutorResult<HttpConnectorResponse>;
+export type HttpConnectorTypeExecutorResult = ActionTypeExecutorResult<HttpConnectorResponse>;

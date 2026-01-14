@@ -22,7 +22,7 @@ const { urlField } = fieldValidators;
 
 const LazyLoadedAuthConfig = React.lazy(() => import('../../common/auth/auth_config'));
 
-const ApiActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
   const {
@@ -44,7 +44,7 @@ const ApiActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPro
         componentProps={{
           euiFieldProps: {
             readOnly,
-            'data-test-subj': 'apiUrlText',
+            'data-test-subj': 'httpUrlText',
             fullWidth: true,
             placeholder: 'https://example.com/api/v1',
           },
@@ -63,4 +63,4 @@ const ApiActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPro
 };
 
 // eslint-disable-next-line import/no-default-export
-export { ApiActionConnectorFields as default };
+export { HttpActionConnectorFields as default };

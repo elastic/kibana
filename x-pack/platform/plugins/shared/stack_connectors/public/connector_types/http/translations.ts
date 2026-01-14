@@ -8,45 +8,45 @@
 import { i18n } from '@kbn/i18n';
 
 export const BASE_URL_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.api.baseUrlTextFieldLabel',
+  'xpack.stackConnectors.components.http.baseUrlTextFieldLabel',
   { defaultMessage: 'Base URL' }
 );
 
 export const BASE_URL_INVALID = i18n.translate(
-  'xpack.stackConnectors.components.api.error.invalidBaseUrlTextField',
+  'xpack.stackConnectors.components.http.error.invalidBaseUrlTextField',
   { defaultMessage: 'Base URL is invalid.' }
 );
 
 export const BASE_URL_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.api.error.requiredBaseUrlText',
+  'xpack.stackConnectors.components.http.error.requiredBaseUrlText',
   { defaultMessage: 'Base URL is required.' }
 );
 
 export const PATH_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.api.pathFieldLabel',
+  'xpack.stackConnectors.components.http.pathFieldLabel',
   { defaultMessage: 'Path' }
 );
 
 export const METHOD_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.api.methodFieldLabel',
+  'xpack.stackConnectors.components.http.methodFieldLabel',
   { defaultMessage: 'Method' }
 );
 
 export const BODY_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.api.bodyFieldLabel',
+  'xpack.stackConnectors.components.http.bodyFieldLabel',
   { defaultMessage: 'Body' }
 );
 
 export const QUERY_PARAMS_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.api.queryParamsTitle',
+  'xpack.stackConnectors.components.http.queryParamsTitle',
   { defaultMessage: 'Query Parameters' }
 );
 
-export const HEADERS_TITLE = i18n.translate('xpack.stackConnectors.components.api.headersTitle', {
+export const HEADERS_TITLE = i18n.translate('xpack.stackConnectors.components.http.headersTitle', {
   defaultMessage: 'Headers',
 });
 
 export const TIMEOUT_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.api.timeoutFieldLabel',
+  'xpack.stackConnectors.components.http.timeoutFieldLabel',
   { defaultMessage: 'Timeout (seconds)' }
 );

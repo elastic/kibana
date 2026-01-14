@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const ADDITIONAL_FIELD_CONFIG_ERROR = i18n.translate(
-  'xpack.stackConnectors.api.configurationErrorAdditionalFields',
+  'xpack.stackConnectors.http.configurationErrorAdditionalFields',
   {
     defaultMessage:
-      'error validation api action config: additionalFields must be a valid JSON object',
+      'error validation http action config: additionalFields must be a valid JSON object',
   }
 );

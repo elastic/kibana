@@ -12,8 +12,6 @@ export type {
   AtomicGraphNodeSchema,
   DataSetGraphNode,
   DataSetGraphNodeSchema,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
   WaitGraphNode,
   WaitGraphNodeSchema,
   ElasticsearchGraphNode,

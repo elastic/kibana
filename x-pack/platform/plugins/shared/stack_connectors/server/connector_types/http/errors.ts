@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import type { ApiConnectorTypeExecutorResult } from './types';
+import type { HttpConnectorTypeExecutorResult } from './types';
 
 export function errorResultInvalid(
   actionId: string,
   serviceMessage: string
-): ApiConnectorTypeExecutorResult {
-  const errMessage = i18n.translate('xpack.stackConnectors.api.invalidResponseErrorMessage', {
-    defaultMessage: 'error calling api, invalid response',
+): HttpConnectorTypeExecutorResult {
+  const errMessage = i18n.translate('xpack.stackConnectors.http.invalidResponseErrorMessage', {
+    defaultMessage: 'error calling http, invalid response',
   });
   return {
     status: 'error',
@@ -28,9 +28,9 @@ export function errorResultRequestFailed(
   actionId: string,
   serviceMessage: string,
   errorSource?: TaskErrorSource
-): ApiConnectorTypeExecutorResult {
-  const errMessage = i18n.translate('xpack.stackConnectors.api.requestFailedErrorMessage', {
-    defaultMessage: 'error calling api, request failed',
+): HttpConnectorTypeExecutorResult {
+  const errMessage = i18n.translate('xpack.stackConnectors.http.requestFailedErrorMessage', {
+    defaultMessage: 'error calling http, request failed',
   });
   return {
     status: 'error',
@@ -41,9 +41,9 @@ export function errorResultRequestFailed(
   };
 }
 
-export function errorResultUnexpectedError(actionId: string): ApiConnectorTypeExecutorResult {
-  const errMessage = i18n.translate('xpack.stackConnectors.api.unreachableErrorMessage', {
-    defaultMessage: 'error calling api, unexpected error',
+export function errorResultUnexpectedError(actionId: string): HttpConnectorTypeExecutorResult {
+  const errMessage = i18n.translate('xpack.stackConnectors.http.unreachableErrorMessage', {
+    defaultMessage: 'error calling http, unexpected error',
   });
   return {
     status: 'error',
@@ -54,9 +54,9 @@ export function errorResultUnexpectedError(actionId: string): ApiConnectorTypeEx
 
 export function errorResultUnexpectedNullResponse(
   actionId: string
-): ApiConnectorTypeExecutorResult {
-  const message = i18n.translate('xpack.stackConnectors.api.unexpectedNullResponseErrorMessage', {
-    defaultMessage: 'unexpected null response from api',
+): HttpConnectorTypeExecutorResult {
+  const message = i18n.translate('xpack.stackConnectors.http.unexpectedNullResponseErrorMessage', {
+    defaultMessage: 'unexpected null response from http',
   });
   return {
     status: 'error',
@@ -68,11 +68,11 @@ export function errorResultUnexpectedNullResponse(
 export function retryResult(
   actionId: string,
   serviceMessage: string
-): ApiConnectorTypeExecutorResult {
+): HttpConnectorTypeExecutorResult {
   const errMessage = i18n.translate(
-    'xpack.stackConnectors.api.invalidResponseRetryLaterErrorMessage',
+    'xpack.stackConnectors.http.invalidResponseRetryLaterErrorMessage',
     {
-      defaultMessage: 'error calling api, retry later',
+      defaultMessage: 'error calling http, retry later',
     }
   );
   return {
@@ -88,14 +88,14 @@ export function retryResultSeconds(
   actionId: string,
   serviceMessage: string,
   retryAfter: number
-): ApiConnectorTypeExecutorResult {
+): HttpConnectorTypeExecutorResult {
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
   const errMessage = i18n.translate(
-    'xpack.stackConnectors.api.invalidResponseRetryDateErrorMessage',
+    'xpack.stackConnectors.http.invalidResponseRetryDateErrorMessage',
     {
-      defaultMessage: 'error calling api, retry at {retryString}',
+      defaultMessage: 'error calling http, retry at {retryString}',
       values: {
         retryString,
       },

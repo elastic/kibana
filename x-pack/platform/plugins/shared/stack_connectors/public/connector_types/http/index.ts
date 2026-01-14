@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorType, getSystemConnectorType } from './api_connector';
+export { getConnectorType as getHttpConnectorType } from './http';

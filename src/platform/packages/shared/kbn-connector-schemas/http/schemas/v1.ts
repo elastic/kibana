@@ -9,6 +9,8 @@
 import { z } from '@kbn/zod';
 import { AuthConfiguration } from '../../common/auth';
 
+export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
+
 export const HeadersSchema = z.record(z.string(), z.string());
 
 export const ConfigSchema = z
@@ -31,7 +33,7 @@ export const ParamsSchema = z
   .object({
     url: z.string().url().optional(),
     path: z.string().optional(),
-    method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).default('GET'),
+    method: z.enum(HTTP_METHODS).default('GET'),
     body: z.string().optional(),
     query: z.record(z.string(), z.string()).optional(),
     headers: z.record(z.string(), z.string()).optional(),

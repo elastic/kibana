@@ -8,8 +8,12 @@
  */
 import type { z } from '@kbn/zod';
 import type { SecretConfigurationSchema } from '../../common/auth';
-import type { ConfigSchema, ParamsSchema } from '../schemas/v1';
+import type { ConfigSchema, HTTP_METHODS, ParamsSchema } from '../schemas/v1';
 
+// http method definition
+export type HttpMethod = (typeof HTTP_METHODS)[number];
+
+// config definition
 export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 
 // secrets definition

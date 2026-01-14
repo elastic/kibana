@@ -8,14 +8,14 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/api/constants';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/http/constants';
 import type {
   ActionParamsType,
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
-} from '@kbn/connector-schemas/api';
-import { icon as logoWebhook } from '@elastic/eui/es/components/icon/assets/logo_webhook';
-import { formDeserializer, formSerializer } from '../lib/api/form_serialization';
+} from '@kbn/connector-schemas/http';
+import { icon } from '@elastic/eui/es/components/icon/assets/globe';
+import { formDeserializer, formSerializer } from '../lib/http/form_serialization';
 
 export function getConnectorType(): ConnectorTypeModel<
   ConnectorTypeConfigType,
@@ -24,15 +24,15 @@ export function getConnectorType(): ConnectorTypeModel<
 > {
   return {
     id: CONNECTOR_ID,
-    iconClass: logoWebhook, // using the logoWebhook icon from EUI assets so it works out of the box with workflows
-    selectMessage: i18n.translate('xpack.stackConnectors.components.api.selectMessageText', {
-      defaultMessage: 'Send requests to an API with configurable authentication.',
+    iconClass: icon, // using the globe icon from EUI assets so it works out of the box with workflows
+    selectMessage: i18n.translate('xpack.stackConnectors.components.http.selectMessageText', {
+      defaultMessage: 'Send requests to an HTTP endpoint with configurable authentication.',
     }),
-    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.api.connectorTypeTitle', {
-      defaultMessage: 'API',
+    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.http.connectorTypeTitle', {
+      defaultMessage: 'HTTP',
     }),
-    actionConnectorFields: lazy(() => import('./api_connectors')),
-    actionParamsFields: lazy(() => import('./api_params')),
+    actionConnectorFields: lazy(() => import('./http_connectors')),
+    actionParamsFields: lazy(() => import('./http_params')),
     validateParams: async (actionParams: ActionParamsType) => {
       return { errors: {} };
     },

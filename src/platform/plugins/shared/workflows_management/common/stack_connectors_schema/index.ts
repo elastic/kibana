@@ -27,8 +27,8 @@ export { SlackParamsSchema, SlackResponseSchema } from './slack';
 // Email connector schemas
 export { EmailParamsSchema, EmailResponseSchema } from './email';
 
-// API connector schemas
-export { ApiParamsSchema, ApiResponseSchema } from './api';
+// HTTP connector schemas
+export { HttpParamsSchema, HttpResponseSchema } from './http';
 
 // Jira connector schemas
 export {

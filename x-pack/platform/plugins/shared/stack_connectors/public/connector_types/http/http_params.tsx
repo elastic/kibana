@@ -20,20 +20,17 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiTitle,
+  type EuiSelectOption,
 } from '@elastic/eui';
-import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
-import type { ActionParamsType } from '@kbn/connector-schemas/api';
+import { HTTP_METHODS, type ActionParamsType, type HttpMethod } from '@kbn/connector-schemas/http';
 
-const HTTP_METHODS = [
-  { value: WebhookMethods.GET, text: 'GET' },
-  { value: WebhookMethods.POST, text: 'POST' },
-  { value: WebhookMethods.PUT, text: 'PUT' },
-  { value: WebhookMethods.PATCH, text: 'PATCH' },
-  { value: WebhookMethods.DELETE, text: 'DELETE' },
-];
+const HTTP_METHOD_OPTIONS: EuiSelectOption[] = HTTP_METHODS.map((method) => ({
+  value: method,
+  text: method,
+}));
 
-const methodExpectsBody = (method: string): boolean => {
-  return ![WebhookMethods.GET, WebhookMethods.DELETE].includes(method as WebhookMethods);
+const methodExpectsBody = (method: HttpMethod): boolean => {
+  return !['GET', 'DELETE'].includes(method);
 };
 
 interface KeyValuePair {
@@ -41,14 +38,14 @@ interface KeyValuePair {
   value: string;
 }
 
-const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsType>> = ({
+const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsType>> = ({
   actionParams,
   editAction,
   index,
   messageVariables,
   errors,
 }) => {
-  const { path, method = WebhookMethods.GET, body, query, headers, timeout } = actionParams;
+  const { path, method = 'GET', body, query, headers, timeout } = actionParams;
 
   const [queryParams, setQueryParams] = useState<KeyValuePair[]>(() => {
     if (!query) return [{ key: '', value: '' }];
@@ -130,7 +127,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            label={i18n.translate('xpack.stackConnectors.components.api.pathFieldLabel', {
+            label={i18n.translate('xpack.stackConnectors.components.http.pathFieldLabel', {
               defaultMessage: 'Path',
             })}
             fullWidth
@@ -145,13 +142,13 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
                 editAction('path', e.target.value || undefined, index);
               }}
               placeholder="/api/v1/users"
-              data-test-subj="apiPathInput"
+              data-test-subj="httpPathInput"
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate('xpack.stackConnectors.components.api.methodFieldLabel', {
+            label={i18n.translate('xpack.stackConnectors.components.http.methodFieldLabel', {
               defaultMessage: 'Method',
             })}
             fullWidth
@@ -161,12 +158,12 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
             <EuiSelect
               isInvalid={Boolean(errors.method?.length)}
               fullWidth
-              options={HTTP_METHODS}
+              options={HTTP_METHOD_OPTIONS}
               value={method}
               onChange={(e) => {
                 editAction('method', e.target.value, index);
               }}
-              data-test-subj="apiMethodSelect"
+              data-test-subj="httpMethodSelect"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -179,10 +176,10 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
         isOptionalField={!methodExpectsBody(method)}
         paramsProperty={'body'}
         inputTargetValue={body}
-        label={i18n.translate('xpack.stackConnectors.components.api.bodyFieldLabel', {
+        label={i18n.translate('xpack.stackConnectors.components.http.bodyFieldLabel', {
           defaultMessage: 'Body',
         })}
-        ariaLabel={i18n.translate('xpack.stackConnectors.components.api.bodyCodeEditorAriaLabel', {
+        ariaLabel={i18n.translate('xpack.stackConnectors.components.http.bodyCodeEditorAriaLabel', {
           defaultMessage: 'Body code editor',
         })}
         errors={errors.body as string[]}
@@ -194,7 +191,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
             editAction('body', undefined, index);
           }
         }}
-        dataTestSubj="apiBodyJsonEditor"
+        dataTestSubj="httpBodyJsonEditor"
       />
 
       <EuiSpacer size="m" />
@@ -203,7 +200,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h5>
-              {i18n.translate('xpack.stackConnectors.components.api.queryParamsTitle', {
+              {i18n.translate('xpack.stackConnectors.components.http.queryParamsTitle', {
                 defaultMessage: 'Query Parameters',
               })}
             </h5>
@@ -213,10 +210,10 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
           <EuiButton
             iconType="plusInCircle"
             onClick={addQueryParam}
-            data-test-subj="apiQueryAddButton"
+            data-test-subj="httpQueryAddButton"
             size="s"
           >
-            {i18n.translate('xpack.stackConnectors.components.api.addQueryParam', {
+            {i18n.translate('xpack.stackConnectors.components.http.addQueryParam', {
               defaultMessage: 'Add',
             })}
           </EuiButton>
@@ -227,7 +224,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
         <EuiFlexGroup key={idx} gutterSize="s">
           <EuiFlexItem>
             <EuiFormRow
-              label={i18n.translate('xpack.stackConnectors.components.api.queryKeyLabel', {
+              label={i18n.translate('xpack.stackConnectors.components.http.queryKeyLabel', {
                 defaultMessage: 'Key',
               })}
               fullWidth
@@ -237,13 +234,13 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
                 value={param.key}
                 onChange={(e) => updateQueryParam(idx, 'key', e.target.value)}
                 placeholder="param"
-                data-test-subj={`apiQueryKeyInput-${idx}`}
+                data-test-subj={`httpQueryKeyInput-${idx}`}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
-              label={i18n.translate('xpack.stackConnectors.components.api.queryValueLabel', {
+              label={i18n.translate('xpack.stackConnectors.components.http.queryValueLabel', {
                 defaultMessage: 'Value',
               })}
               fullWidth
@@ -253,7 +250,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
                 value={param.value}
                 onChange={(e) => updateQueryParam(idx, 'value', e.target.value)}
                 placeholder="value"
-                data-test-subj={`apiQueryValueInput-${idx}`}
+                data-test-subj={`httpQueryValueInput-${idx}`}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -264,12 +261,12 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
                 color="danger"
                 onClick={() => removeQueryParam(idx)}
                 aria-label={i18n.translate(
-                  'xpack.stackConnectors.components.api.removeQueryParam',
+                  'xpack.stackConnectors.components.http.removeQueryParam',
                   {
                     defaultMessage: 'Remove query parameter',
                   }
                 )}
-                data-test-subj={`apiQueryRemoveButton-${idx}`}
+                data-test-subj={`httpQueryRemoveButton-${idx}`}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -282,7 +279,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h5>
-              {i18n.translate('xpack.stackConnectors.components.api.headersTitle', {
+              {i18n.translate('xpack.stackConnectors.components.http.headersTitle', {
                 defaultMessage: 'Headers',
               })}
             </h5>
@@ -292,10 +289,10 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
           <EuiButton
             iconType="plusInCircle"
             onClick={addHeader}
-            data-test-subj="apiHeaderAddButton"
+            data-test-subj="httpHeaderAddButton"
             size="s"
           >
-            {i18n.translate('xpack.stackConnectors.components.api.addHeader', {
+            {i18n.translate('xpack.stackConnectors.components.http.addHeader', {
               defaultMessage: 'Add',
             })}
           </EuiButton>
@@ -306,7 +303,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
         <EuiFlexGroup key={idx} gutterSize="s">
           <EuiFlexItem>
             <EuiFormRow
-              label={i18n.translate('xpack.stackConnectors.components.api.headerKeyLabel', {
+              label={i18n.translate('xpack.stackConnectors.components.http.headerKeyLabel', {
                 defaultMessage: 'Key',
               })}
               fullWidth
@@ -316,13 +313,13 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
                 value={header.key}
                 onChange={(e) => updateHeaderParam(idx, 'key', e.target.value)}
                 placeholder="X-Custom-Header"
-                data-test-subj={`apiHeaderKeyInput-${idx}`}
+                data-test-subj={`httpHeaderKeyInput-${idx}`}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
-              label={i18n.translate('xpack.stackConnectors.components.api.headerValueLabel', {
+              label={i18n.translate('xpack.stackConnectors.components.http.headerValueLabel', {
                 defaultMessage: 'Value',
               })}
               fullWidth
@@ -332,7 +329,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
                 value={header.value}
                 onChange={(e) => updateHeaderParam(idx, 'value', e.target.value)}
                 placeholder="value"
-                data-test-subj={`apiHeaderValueInput-${idx}`}
+                data-test-subj={`httpHeaderValueInput-${idx}`}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -342,10 +339,10 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
                 iconType="trash"
                 color="danger"
                 onClick={() => removeHeader(idx)}
-                aria-label={i18n.translate('xpack.stackConnectors.components.api.removeHeader', {
+                aria-label={i18n.translate('xpack.stackConnectors.components.http.removeHeader', {
                   defaultMessage: 'Remove header',
                 })}
-                data-test-subj={`apiHeaderRemoveButton-${idx}`}
+                data-test-subj={`httpHeaderRemoveButton-${idx}`}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -355,7 +352,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
       <EuiSpacer size="m" />
 
       <EuiFormRow
-        label={i18n.translate('xpack.stackConnectors.components.api.timeoutFieldLabel', {
+        label={i18n.translate('xpack.stackConnectors.components.http.timeoutFieldLabel', {
           defaultMessage: 'Timeout (seconds)',
         })}
         fullWidth
@@ -372,7 +369,7 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
           }}
           placeholder="30"
           min={1}
-          data-test-subj="apiTimeoutInput"
+          data-test-subj="httpTimeoutInput"
         />
       </EuiFormRow>
     </>
@@ -380,4 +377,4 @@ const ApiParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTyp
 };
 
 // eslint-disable-next-line import/no-default-export
-export { ApiParamsFields as default };
+export { HttpParamsFields as default };
