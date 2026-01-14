@@ -11,55 +11,55 @@ import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash, getTypeHashes } from '@kbn/core-test-helpers-so-type-serializer';
 import type { Root } from '@kbn/core-root-server-internal';
 import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
+        createTestServers,
+        createRootWithCorePlugins,
+        type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 import { sortBy } from 'lodash';
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-  let esServer: TestElasticsearchUtils;
-  let root: Root;
-  let typeRegistry: ISavedObjectTypeRegistry;
+        let esServer: TestElasticsearchUtils;
+        let root: Root;
+        let typeRegistry: ISavedObjectTypeRegistry;
 
-  beforeAll(async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-    });
+        beforeAll(async () => {
+                const { startES } = createTestServers({
+                        adjustTimeout: (t: number) => jest.setTimeout(t),
+                });
 
-    esServer = await startES();
-    root = createRootWithCorePlugins({}, { oss: false });
-    await root.preboot();
-    await root.setup();
-    const coreStart = await root.start();
-    typeRegistry = coreStart.savedObjects.getTypeRegistry();
-  });
+                esServer = await startES();
+                root = createRootWithCorePlugins({}, { oss: false });
+                await root.preboot();
+                await root.setup();
+                const coreStart = await root.start();
+                typeRegistry = coreStart.savedObjects.getTypeRegistry();
+        });
 
-  afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
-  });
+        afterAll(async () => {
+                if (root) {
+                        await root.shutdown();
+                }
+                if (esServer) {
+                        await esServer.stop();
+                }
+        });
 
-  // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
-  // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
-  // The intent is to trigger a code review from the Core team to review the SO type changes.
-  // The number of types in the hashMap should never be reduced, it can only increase.
-  // Removing saved object types is forbidden after 8.8.
-  it('detecting migration related changes in registered types', () => {
-    const allTypes = typeRegistry.getAllTypes();
+        // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
+        // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
+        // The intent is to trigger a code review from the Core team to review the SO type changes.
+        // The number of types in the hashMap should never be reduced, it can only increase.
+        // Removing saved object types is forbidden after 8.8.
+        it('detecting migration related changes in registered types', () => {
+                const allTypes = typeRegistry.getAllTypes();
 
-    const hashMap = allTypes.reduce((map, type) => {
-      map[type.name] = getMigrationHash(type);
-      return map;
-    }, {} as Record<string, string>);
+                const hashMap = allTypes.reduce((map, type) => {
+                        map[type.name] = getMigrationHash(type);
+                        return map;
+                }, {} as Record<string, string>);
 
-    expect(hashMap).toMatchInlineSnapshot(`
+                expect(hashMap).toMatchInlineSnapshot(`
       Object {
         "action": "696d997e420024a8cf973da94d905c8756e1177c",
         "action_task_params": "cd91a48515202852ebf1fed0d999cd96f6b2823e",
@@ -200,34 +200,34 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "10e278fe9ae1396bfc36ae574bc387d7e696d43f",
       }
     `);
-    expect(Object.keys(hashMap).length).toEqual(SAVED_OBJECT_TYPES_COUNT);
-  });
+                expect(Object.keys(hashMap).length).toEqual(SAVED_OBJECT_TYPES_COUNT);
+        });
 
-  it('detecting modelVersions are properly defined whenever mappings change', () => {
-    const allTypes = typeRegistry.getAllTypes();
+        it('detecting modelVersions are properly defined whenever mappings change', () => {
+                const allTypes = typeRegistry.getAllTypes();
 
-    const hashMap: string[] = sortBy(allTypes, 'name').flatMap((type, index) => {
-      const typeHashes = getTypeHashes(type);
+                const hashMap: string[] = sortBy(allTypes, 'name').flatMap((type, index) => {
+                        const typeHashes = getTypeHashes(type);
 
-      if (index < allTypes.length - 1) {
-        const length = typeHashes[typeHashes.length - 1].length;
-        if (length) {
-          typeHashes.push('='.repeat(length));
-        }
-      }
-      return typeHashes;
-    });
+                        if (index < allTypes.length - 1) {
+                                const length = typeHashes[typeHashes.length - 1].length;
+                                if (length) {
+                                        typeHashes.push('='.repeat(length));
+                                }
+                        }
+                        return typeHashes;
+                });
 
-    /*
-      PLEASE BEAR IN MIND THAT:
-       - Existing soType|semver lines should NEVER be modified => it means changes in existing migrations / modelVersions
-       - New soType|semver lines > 10.0.0 can be added => it means new modelVersions are defined for the given type
-       - New soType|semver lines < 10.0.0 should NEVER be added => those are associated with 'migrations:' which is deprecated. These will NOT run
-       - If soType|mappings changes => there should be a new soType|semver entry that matches that change.
-       - If soType|schemas is defined, schemas should change whenever a new soType|semver entry is added.
-       - soType|schemas can evolve without actual changes in the soType|mappings
-     */
-    expect(hashMap).toMatchInlineSnapshot(`
+                /*
+                  PLEASE BEAR IN MIND THAT:
+                   - Existing soType|semver lines should NEVER be modified => it means changes in existing migrations / modelVersions
+                   - New soType|semver lines > 10.0.0 can be added => it means new modelVersions are defined for the given type
+                   - New soType|semver lines < 10.0.0 should NEVER be added => those are associated with 'migrations:' which is deprecated. These will NOT run
+                   - If soType|mappings changes => there should be a new soType|semver entry that matches that change.
+                   - If soType|schemas is defined, schemas should change whenever a new soType|semver entry is added.
+                   - soType|schemas can evolve without actual changes in the soType|mappings
+                 */
+                expect(hashMap).toMatchInlineSnapshot(`
       Array [
         "action|global: 04984aae6011426601f8a2a06278e30080f6da3a",
         "action|mappings: c4a658c865d4c30b51ae9b49e1dec06d012bc213",
@@ -1239,13 +1239,13 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
       ]
     `);
-  });
+        });
 
-  it('ensures mappings._meta virtual versions are not downgraded', () => {
-    const types = typeRegistry.getAllTypes();
-    const map = getVirtualVersionMap({ types, useModelVersionsOnly: true });
-    // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
-    expect(map).toMatchInlineSnapshot(`
+        it('ensures mappings._meta virtual versions are not downgraded', () => {
+                const types = typeRegistry.getAllTypes();
+                const map = getVirtualVersionMap({ types, useModelVersionsOnly: true });
+                // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
+                expect(map).toMatchInlineSnapshot(`
       Object {
         "action": "10.1.0",
         "action_task_params": "10.2.0",
@@ -1386,13 +1386,13 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "10.0.0",
       }
     `);
-  });
+        });
 
-  it('ensures typeMigrationVersion versions are not downgraded', () => {
-    const types = typeRegistry.getAllTypes();
-    const map = getVirtualVersionMap({ types, useModelVersionsOnly: false });
-    // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
-    expect(map).toMatchInlineSnapshot(`
+        it('ensures typeMigrationVersion versions are not downgraded', () => {
+                const types = typeRegistry.getAllTypes();
+                const map = getVirtualVersionMap({ types, useModelVersionsOnly: false });
+                // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
+                expect(map).toMatchInlineSnapshot(`
       Object {
         "action": "10.1.0",
         "action_task_params": "10.2.0",
@@ -1533,5 +1533,5 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "0.0.0",
       }
     `);
-  });
+        });
 });
