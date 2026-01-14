@@ -15,6 +15,12 @@ import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 
+export const DESCRIPTION_GENERATION_TASK_TYPE = 'streams_description_generation';
+
+export function getDescriptionGenerationTaskId(streamName: string) {
+  return `${DESCRIPTION_GENERATION_TASK_TYPE}_${streamName}`;
+}
+
 export interface DescriptionGenerationTaskParams {
   connectorId: string;
   start: number;
@@ -27,7 +33,7 @@ export interface GenerateDescriptionResult {
 
 export function createStreamsDescriptionGenerationTask(taskContext: TaskContext) {
   return {
-    streams_description_generation: {
+    [DESCRIPTION_GENERATION_TASK_TYPE]: {
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(

@@ -10,9 +10,11 @@ import { TaskStatus } from '@kbn/streams-schema';
 import { conflict } from '@hapi/boom';
 import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
 import { isStale } from '../../../../lib/tasks/is_stale';
-import type {
-  DescriptionGenerationTaskParams,
-  GenerateDescriptionResult,
+import {
+  DESCRIPTION_GENERATION_TASK_TYPE,
+  getDescriptionGenerationTaskId,
+  type DescriptionGenerationTaskParams,
+  type GenerateDescriptionResult,
 } from '../../../../lib/tasks/task_definitions/description_generation';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
@@ -84,7 +86,7 @@ export const descriptionGenerationStatusRoute = createServerRoute({
     }
 
     const task = await taskClient.get<DescriptionGenerationTaskParams, GenerateDescriptionResult>(
-      `streams_description_generation_${name}`
+      getDescriptionGenerationTaskId(name)
     );
 
     if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
@@ -184,8 +186,8 @@ export const descriptionGenerationTaskRoute = createServerRoute({
       try {
         await taskClient.schedule<DescriptionGenerationTaskParams>({
           task: {
-            type: 'streams_description_generation',
-            id: `streams_description_generation_${name}`,
+            type: DESCRIPTION_GENERATION_TASK_TYPE,
+            id: getDescriptionGenerationTaskId(name),
             space: '*',
             stream: name,
           },
@@ -208,7 +210,7 @@ export const descriptionGenerationTaskRoute = createServerRoute({
         throw error;
       }
     } else if (action === 'cancel') {
-      await taskClient.cancel(`streams_description_generation_${name}`);
+      await taskClient.cancel(getDescriptionGenerationTaskId(name));
 
       return {
         status: TaskStatus.BeingCanceled,
@@ -219,7 +221,7 @@ export const descriptionGenerationTaskRoute = createServerRoute({
       const task = await taskClient.acknowledge<
         DescriptionGenerationTaskParams,
         GenerateDescriptionResult
-      >(`streams_description_generation_${name}`);
+      >(getDescriptionGenerationTaskId(name));
 
       return {
         status: TaskStatus.Acknowledged,
