@@ -17,7 +17,7 @@ import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 
-const KEY = 'visualizations';
+const KEY = 'document-details-flyout-visualizations';
 
 /**
  * Visualizations section in overview. It contains analyzer preview and session view preview.

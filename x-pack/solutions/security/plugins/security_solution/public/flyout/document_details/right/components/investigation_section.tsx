@@ -17,7 +17,7 @@ import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
 
-const KEY = 'investigation';
+const KEY = 'document-details-flyout-investigation';
 
 /**
  * Second section of the overview tab in details flyout.

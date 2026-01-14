@@ -22,7 +22,7 @@ import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
 import { AlertStatus } from './alert_status';
 
-const KEY = 'about';
+const KEY = 'document-details-flyout-about';
 
 /**
  * Most top section of the overview tab.

@@ -19,7 +19,7 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 
-const KEY = 'insights';
+const KEY = 'document-details-flyout-insights';
 
 /**
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.

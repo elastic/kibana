@@ -12,8 +12,9 @@ import { EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
+import { ATTACK_DETAILS_FLYOUT_PREFIX } from '../constants/test_ids';
 
-const KEY = 'AIsummary';
+const KEY = `${ATTACK_DETAILS_FLYOUT_PREFIX}-AIsummary`;
 
 /**
  * Renders the AI Summary section in the Overview tab of the Attack Details flyout.
@@ -44,9 +45,12 @@ export const AISummarySection = memo(() => {
       }
       localStorageKey={KEY}
       gutterSize="s"
-      data-test-subj="overview-tab-ai-summary-section"
+      data-test-subj={KEY}
     >
-      {'AISummarySection'}
+      {
+        // TODO: Add AI Summary content here
+        'AISummarySection'
+      }
     </ExpandableSection>
   );
 });

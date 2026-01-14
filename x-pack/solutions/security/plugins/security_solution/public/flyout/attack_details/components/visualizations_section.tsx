@@ -10,8 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
+import { ATTACK_DETAILS_FLYOUT_PREFIX } from '../constants/test_ids';
 
-const KEY = 'visualizations';
+const KEY = `${ATTACK_DETAILS_FLYOUT_PREFIX}-visualizations`;
 
 /**
  * Renders the Overview tab - VisualizationsSection content in the Attack Details flyout.
@@ -30,9 +31,12 @@ export const VisualizationsSection = memo(() => {
       }
       localStorageKey={KEY}
       gutterSize="s"
-      data-test-subj="overview-tab-visualizations-section"
+      data-test-subj={KEY}
     >
-      {'VisualizationsSection'}
+      {
+        // TODO: Add VisualizationsSection content here
+        'VisualizationsSection'
+      }
     </ExpandableSection>
   );
 });

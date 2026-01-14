@@ -17,7 +17,7 @@ import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
 
-const KEY = 'response';
+const KEY = 'document-details-flyout-response';
 
 /**
  * Most bottom section of the overview tab. It contains a summary of the response tab.
