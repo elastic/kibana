@@ -169,6 +169,17 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
+export const BuiltInStepProperties = [
+  'name',
+  'type',
+  'with',
+  'if',
+  'foreach',
+  'timeout',
+  'on-failure',
+];
+export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
+
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
   with: z.object({
