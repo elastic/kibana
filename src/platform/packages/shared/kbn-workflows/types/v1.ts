@@ -440,7 +440,7 @@ export interface InternalConnectorContract extends BaseConnectorContract {
   };
 }
 
-export interface StepPropertyHandler<T = string> {
+export interface StepPropertyHandler<T = unknown> {
   /**
    * Autocompletion configuration for the property.
    */
