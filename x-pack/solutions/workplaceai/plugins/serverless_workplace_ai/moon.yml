@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/serverless-workplace-ai-settings'
   - '@kbn/i18n'
   - '@kbn/core-chrome-browser'
-  - '@kbn/data-connectors-plugin'
 tags:
   - plugin
   - prod
