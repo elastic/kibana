@@ -50,6 +50,7 @@ export const GithubConnector: ConnectorSpec = {
         repo: z.string(),
         type: z.enum(['issue', 'pr']),
         query: z.string().optional(),
+        size: z.number().default(10),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -57,19 +58,17 @@ export const GithubConnector: ConnectorSpec = {
           repo: string;
           type: 'issue' | 'pr';
           query?: string;
+          size?: number;
         };
-        const queryParts = [
-          `repo:${typedInput.owner}/${typedInput.repo}`,
-          `is:${typedInput.type}`,
-          `is:open`,
-        ];
 
-        if (typedInput.query) queryParts.push(typedInput.query);
+        const query = `repo:${typedInput.owner}/${typedInput.repo} is:${typedInput.type} is:open ${
+          typedInput.query || ''
+        }`;
 
         const response = await ctx.client.get('https://api.github.com/search/issues', {
           params: {
-            q: queryParts.join(' '),
-            per_page: 10,
+            q: query,
+            per_page: typedInput.size,
           },
           headers: {
             Accept: 'application/vnd.github.v3+json',
@@ -461,31 +460,6 @@ export const GithubConnector: ConnectorSpec = {
 
         const response = await ctx.client.get(
           `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}/reviews`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    getPullRequestStatus: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}`,
           {
             headers: {
               Accept: 'application/vnd.github.v3+json',

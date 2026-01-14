@@ -7,7 +7,7 @@
 export function generateGithubSearchIssuesOrPullRequestsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.github.search_issues_or_pull_requests'
-description: 'Search for issues or pull requests in a GitHub repository. Returns up to 10 results per search. The first page of results contains the most relevant matches - do not paginate through subsequent pages as they are unlikely to be relevant to your query.'
+description: 'Search for issues or pull requests in a GitHub repository. Returns a number of results specified by the size parameter.'
 enabled: true
 triggers:
   - type: 'manual'
@@ -21,6 +21,9 @@ inputs:
   - name: query
     type: string
     required: false
+  - name: size
+    type: number
+    default: 10
 steps:
   - name: search-issues
     type: github.searchIssues
@@ -30,6 +33,7 @@ steps:
       repo: "\${{inputs.repo}}"
       type: "\${{inputs.type}}"
       query: "\${{inputs.query}}"
+      size: "\${{inputs.size}}"
 `;
 }
 
@@ -369,31 +373,6 @@ inputs:
 steps:
   - name: get-pull-request-reviews
     type: github.getPullRequestReviews
-    connector-id: ${stackConnectorId}
-    with:
-      owner: "\${{inputs.owner}}"
-      repo: "\${{inputs.repo}}"
-      pullNumber: "\${{inputs.pullNumber}}"
-`;
-}
-
-export function generateGithubGetPullRequestStatusWorkflow(stackConnectorId: string): string {
-  return `version: '1'
-name: 'sources.github.get_pull_request_status'
-description: 'Get status information for a specific pull request'
-enabled: true
-triggers:
-  - type: 'manual'
-inputs:
-  - name: owner
-    type: string
-  - name: repo
-    type: string
-  - name: pullNumber
-    type: number
-steps:
-  - name: get-pull-request-status
-    type: github.getPullRequestStatus
     connector-id: ${stackConnectorId}
     with:
       owner: "\${{inputs.owner}}"

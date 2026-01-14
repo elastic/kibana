@@ -23,7 +23,6 @@ import {
   generateGithubGetPullRequestFilesWorkflow,
   generateGithubGetPullRequestDiffWorkflow,
   generateGithubGetPullRequestReviewsWorkflow,
-  generateGithubGetPullRequestStatusWorkflow,
 } from './workflows';
 
 export const githubDataSource: DataTypeDefinition = {
@@ -98,10 +97,6 @@ export const githubDataSource: DataTypeDefinition = {
       },
       {
         content: generateGithubGetPullRequestReviewsWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetPullRequestStatusWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
     ];

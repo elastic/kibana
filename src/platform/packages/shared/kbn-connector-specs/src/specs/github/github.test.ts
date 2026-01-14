@@ -1239,46 +1239,6 @@ index abc123..def456 100644
     });
   });
 
-  describe('getPullRequestStatus action', () => {
-    it('should get pull request status', async () => {
-      const mockResponse = {
-        data: {
-          number: 123,
-          title: 'Test Pull Request',
-          state: 'open',
-          mergeable: true,
-          mergeable_state: 'clean',
-          merged: false,
-          head: {
-            ref: 'feature-branch',
-            sha: 'abc123',
-          },
-          base: {
-            ref: 'main',
-            sha: 'def456',
-          },
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await GithubConnector.actions.getPullRequestStatus.handler(mockContext, {
-        owner: 'owner',
-        repo: 'repo',
-        pullNumber: 123,
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.github.com/repos/owner/repo/pulls/123',
-        {
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-  });
-
   describe('listBranches action', () => {
     it('should list branches without pagination', async () => {
       const mockResponse = {
