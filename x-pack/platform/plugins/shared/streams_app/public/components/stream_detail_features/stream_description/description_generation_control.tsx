@@ -5,48 +5,50 @@
  * 2.0.
  */
 
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import type { DescriptionGenerationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/description_generation/route';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
-import { useStreamDescriptionApi } from './use_stream_description_api';
 
 interface DescriptionGenerationControlProps {
+  isTaskLoading: boolean;
+  task: DescriptionGenerationTaskResult | undefined;
+  taskError: Error | undefined;
+  refreshTask: () => Promise<DescriptionGenerationTaskResult>;
+  getDescriptionGenerationStatus: () => Promise<DescriptionGenerationTaskResult>;
+  scheduleDescriptionGenerationTask: (connectorId: string) => Promise<void>;
+  cancelDescriptionGenerationTask: () => Promise<void>;
+  acknowledgeDescriptionGenerationTask: () => Promise<void>;
   onLoadDescription: (description: string) => void;
-  definition: Streams.all.GetResponse;
-  refreshDefinition: () => void;
   aiFeatures: AIFeatures | null;
   disabled?: boolean;
 }
 
 export function DescriptionGenerationControl({
+  isTaskLoading,
+  task,
+  taskError,
+  refreshTask,
+  getDescriptionGenerationStatus,
+  scheduleDescriptionGenerationTask,
+  cancelDescriptionGenerationTask,
+  acknowledgeDescriptionGenerationTask,
   onLoadDescription,
-  definition,
-  refreshDefinition,
   aiFeatures,
   disabled = false,
 }: DescriptionGenerationControlProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    getDescriptionGenerationStatus,
-    scheduleDescriptionGenerationTask,
-    cancelDescriptionGenerationTask,
-    acknowledgeDescriptionGenerationTask,
-  } = useStreamDescriptionApi({ definition, refreshDefinition });
-
-  const [{ loading, value: task, error }, getTask] = useAsyncFn(getDescriptionGenerationStatus);
   useEffect(() => {
-    getTask();
-  }, [getTask]);
-  useTaskPolling(task, getDescriptionGenerationStatus, getTask);
+    refreshTask();
+  }, [refreshTask]);
+  useTaskPolling(task, getDescriptionGenerationStatus, refreshTask);
 
-  if (error) {
+  if (taskError) {
     return (
       <EuiCallOut
         announceOnMount
@@ -57,7 +59,7 @@ export function DescriptionGenerationControl({
         color="danger"
         iconType="error"
       >
-        {error.message}
+        {taskError.message}
       </EuiCallOut>
     );
   }
@@ -71,14 +73,14 @@ export function DescriptionGenerationControl({
       buttonProps={{
         size: 'm',
         iconType: 'sparkles',
-        isLoading: isLoading || loading,
+        isLoading: isLoading || isTaskLoading,
         isDisabled: disabled,
         onClick: () => {
           setIsLoading(true);
           scheduleDescriptionGenerationTask(aiFeatures?.genAiConnectors.selectedConnector!).then(
             () => {
               setIsLoading(false);
-              getTask();
+              refreshTask();
             }
           );
         },
@@ -103,8 +105,8 @@ export function DescriptionGenerationControl({
 
   if (task.status === 'in_progress') {
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
           <EuiButton
             iconType="sparkle"
             iconSide="right"
@@ -114,17 +116,17 @@ export function DescriptionGenerationControl({
             {i18n.translate(
               'xpack.streams.streamDetailView.streamDescription.descriptionGenerationInProgressLabel',
               {
-                defaultMessage: 'Description generation in progress',
+                defaultMessage: 'Generating description',
               }
             )}
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="cancel_description_generation_button"
             onClick={() => {
               cancelDescriptionGenerationTask().then(() => {
-                getTask();
+                refreshTask();
               });
             }}
           >
@@ -153,7 +155,7 @@ export function DescriptionGenerationControl({
           children: i18n.translate(
             'xpack.streams.streamDetailView.streamDescription.descriptionGenerationCancellingLabel',
             {
-              defaultMessage: 'Canceling description generation task',
+              defaultMessage: 'Canceling generation',
             }
           ),
         }}
@@ -162,45 +164,7 @@ export function DescriptionGenerationControl({
   }
 
   if (task.status === 'completed') {
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiButton
-            onClick={() => {
-              const description = task.description;
-              acknowledgeDescriptionGenerationTask()
-                .then(getTask)
-                .then(() => {
-                  onLoadDescription(description);
-                });
-            }}
-            data-test-subj="load_generated_description_button"
-          >
-            {i18n.translate(
-              'xpack.streams.streamDetailView.streamDescription.loadGeneratedDescriptionButtonLabel',
-              {
-                defaultMessage: 'Load generated description',
-              }
-            )}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton
-            onClick={() => {
-              acknowledgeDescriptionGenerationTask().then(getTask);
-            }}
-            data-test-subj="discard_generated_description_button"
-          >
-            {i18n.translate(
-              'xpack.streams.streamDetailView.streamDescription.discardGeneratedDescriptionButtonLabel',
-              {
-                defaultMessage: 'Discard generated description',
-              }
-            )}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return triggerButton;
   }
 
   if (task.status === 'failed') {
@@ -219,6 +183,7 @@ export function DescriptionGenerationControl({
           >
             {task.error}
           </EuiCallOut>
+          {triggerButton}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -246,6 +211,7 @@ export function DescriptionGenerationControl({
               }
             )}
           </EuiCallOut>
+          {triggerButton}
         </EuiFlexItem>
       </EuiFlexGroup>
     );

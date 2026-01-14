@@ -8,7 +8,7 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition, TaskStatus } from '@kbn/streams-schema';
-import type { IdentifySystemsResult as IdentifySystemsResultWithTokens } from '@kbn/streams-ai';
+import type { IdentifySystemsResult } from '@kbn/streams-ai';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -21,8 +21,6 @@ export interface SystemIdentificationTaskParams {
   start: number;
   end: number;
 }
-
-export type IdentifySystemsResult = Pick<IdentifySystemsResultWithTokens, 'systems'>;
 
 export function createStreamsSystemIdentificationTask(taskContext: TaskContext) {
   return {
@@ -90,7 +88,10 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   output_tokens_used: tokensUsed.completion,
                 });
 
-                await taskClient.update<SystemIdentificationTaskParams, IdentifySystemsResult>({
+                await taskClient.update<
+                  SystemIdentificationTaskParams,
+                  Pick<IdentifySystemsResult, 'systems'>
+                >({
                   ..._task,
                   status: TaskStatus.Completed,
                   task: {

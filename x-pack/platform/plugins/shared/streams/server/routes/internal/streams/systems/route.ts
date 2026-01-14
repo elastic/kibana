@@ -279,7 +279,7 @@ export type SystemIdentificationTaskResult =
     }
   | ({
       status: TaskStatus.Completed | TaskStatus.Acknowledged;
-    } & IdentifySystemsResult);
+    } & Pick<IdentifySystemsResult, 'systems'>);
 
 export const systemsStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/systems/_status',
@@ -321,9 +321,10 @@ export const systemsStatusRoute = createServerRoute({
       throw new SecurityError(`Cannot read systems for stream ${name}, insufficient privileges`);
     }
 
-    const task = await taskClient.get<SystemIdentificationTaskParams, IdentifySystemsResult>(
-      `streams_feature_identification_${name}`
-    );
+    const task = await taskClient.get<
+      SystemIdentificationTaskParams,
+      Pick<IdentifySystemsResult, 'systems'>
+    >(`streams_feature_identification_${name}`);
 
     if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
       return {
@@ -455,7 +456,7 @@ export const systemsTaskRoute = createServerRoute({
     try {
       const task = await taskClient.acknowledge<
         SystemIdentificationTaskParams,
-        IdentifySystemsResult
+        Pick<IdentifySystemsResult, 'systems'>
       >(`streams_feature_identification_${name}`);
 
       return {

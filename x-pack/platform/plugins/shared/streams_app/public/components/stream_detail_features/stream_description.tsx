@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useStreamDescriptionApi } from './stream_description/use_stream_description_api';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
 import type { AIFeatures } from '../../hooks/use_ai_features';
@@ -91,7 +91,23 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
     onCancelEdit,
     onSaveDescription,
     onStartEditing,
+    isTaskLoading,
+    task,
+    taskError,
+    refreshTask,
+    getDescriptionGenerationStatus,
+    scheduleDescriptionGenerationTask,
+    cancelDescriptionGenerationTask,
+    acknowledgeDescriptionGenerationTask,
   } = useStreamDescriptionApi({ definition, refreshDefinition });
+
+  const onLoadDescription = useCallback(
+    (nextDescription: string) => {
+      setDescription(nextDescription);
+      onStartEditing();
+    },
+    [setDescription, onStartEditing]
+  );
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
@@ -135,16 +151,6 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                       </EuiFlexItem>
                     )}
                     <EuiFlexItem grow={false}>
-                      <DescriptionGenerationControl
-                        onLoadDescription={(nextDescription) => {
-                          setDescription(nextDescription);
-                        }}
-                        definition={definition}
-                        refreshDefinition={refreshDefinition}
-                        aiFeatures={aiFeatures}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
                       <EuiButton
                         iconType={isEditing ? 'save' : 'pencil'}
                         size="s"
@@ -167,6 +173,20 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                       >
                         {isEditing ? SAVE_DESCRIPTION_BUTTON_LABEL : EDIT_DESCRIPTION_BUTTON_LABEL}
                       </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <DescriptionGenerationControl
+                        isTaskLoading={isTaskLoading}
+                        task={task}
+                        taskError={taskError}
+                        refreshTask={refreshTask}
+                        getDescriptionGenerationStatus={getDescriptionGenerationStatus}
+                        scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
+                        cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
+                        acknowledgeDescriptionGenerationTask={acknowledgeDescriptionGenerationTask}
+                        onLoadDescription={onLoadDescription}
+                        aiFeatures={aiFeatures}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ),
@@ -196,12 +216,15 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <DescriptionGenerationControl
-                    onLoadDescription={(nextDescription) => {
-                      setDescription(nextDescription);
-                      onStartEditing();
-                    }}
-                    definition={definition}
-                    refreshDefinition={refreshDefinition}
+                    isTaskLoading={isTaskLoading}
+                    task={task}
+                    taskError={taskError}
+                    refreshTask={refreshTask}
+                    getDescriptionGenerationStatus={getDescriptionGenerationStatus}
+                    scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
+                    cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
+                    acknowledgeDescriptionGenerationTask={acknowledgeDescriptionGenerationTask}
+                    onLoadDescription={onLoadDescription}
                     aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>

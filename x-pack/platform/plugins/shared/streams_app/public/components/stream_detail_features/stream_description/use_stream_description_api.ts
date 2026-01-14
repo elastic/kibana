@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { getFormattedError } from '../../../util/errors';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -112,25 +114,9 @@ export const useStreamDescriptionApi = ({
     ]
   );
 
-  const onCancelEdit = useCallback(() => {
-    setDescription(definition.stream.description);
-    setIsEditing(false);
-  }, [setIsEditing, setDescription, definition.stream.description]);
-
   const onStartEditing = useCallback(() => {
     setIsEditing(true);
   }, [setIsEditing]);
-
-  const onSaveDescription = useCallback(
-    (desc?: string) => {
-      const generatedDescription = desc ?? description;
-      if (generatedDescription !== definition.stream.description) {
-        return save(generatedDescription).then(() => setIsEditing(false));
-      }
-      setIsEditing(false);
-    },
-    [description, definition.stream.description, save, setIsEditing]
-  );
 
   const getDescriptionGenerationStatus = useCallback(async () => {
     return await streams.streamsRepositoryClient.fetch(
@@ -182,19 +168,58 @@ export const useStreamDescriptionApi = ({
   }, [definition.stream.name, signal, streams.streamsRepositoryClient]);
 
   const acknowledgeDescriptionGenerationTask = useCallback(async () => {
-    await streams.streamsRepositoryClient.fetch(
-      'POST /internal/streams/{name}/_description_generation/_task',
-      {
-        signal,
-        params: {
-          path: { name: definition.stream.name },
-          body: {
-            action: 'acknowledge',
+    try {
+      await streams.streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/_description_generation/_task',
+        {
+          signal,
+          params: {
+            path: { name: definition.stream.name },
+            body: {
+              action: 'acknowledge',
+            },
           },
-        },
+        }
+      );
+    } catch (error) {
+      if (!(isHttpFetchError(error) && error.response?.status === 409)) {
+        throw error;
       }
-    );
+    }
   }, [definition.stream.name, signal, streams.streamsRepositoryClient]);
+
+  const [{ loading: isTaskLoading, value: task, error: taskError }, refreshTask] = useAsyncFn(
+    getDescriptionGenerationStatus
+  );
+
+  const onCancelEdit = useCallback(() => {
+    acknowledgeDescriptionGenerationTask()
+      .then(refreshTask)
+      .then(() => {
+        setDescription(definition.stream.description);
+        setIsEditing(false);
+      });
+  }, [acknowledgeDescriptionGenerationTask, definition.stream.description, refreshTask]);
+
+  const onSaveDescription = useCallback(
+    (desc?: string) => {
+      acknowledgeDescriptionGenerationTask().then(() => {
+        const generatedDescription = desc ?? description;
+        if (generatedDescription !== definition.stream.description) {
+          return save(generatedDescription).then(() => setIsEditing(false));
+        }
+        setIsEditing(false);
+      });
+    },
+    [acknowledgeDescriptionGenerationTask, description, definition.stream.description, save]
+  );
+
+  useEffect(() => {
+    if (task?.status === 'completed') {
+      setDescription(task.description);
+      setIsEditing(true);
+    }
+  }, [task, description]);
 
   return {
     description,
@@ -204,6 +229,10 @@ export const useStreamDescriptionApi = ({
     onCancelEdit,
     onStartEditing,
     onSaveDescription,
+    isTaskLoading,
+    task,
+    taskError,
+    refreshTask,
     getDescriptionGenerationStatus,
     scheduleDescriptionGenerationTask,
     cancelDescriptionGenerationTask,
