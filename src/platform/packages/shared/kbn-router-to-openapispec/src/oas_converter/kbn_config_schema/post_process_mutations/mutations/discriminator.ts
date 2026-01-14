@@ -30,8 +30,21 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
 
   const namespace = ctx.getNamespace();
 
+  let catchAllIdx = -1;
+  let nr = 1;
+
   (schema.oneOf ?? []).forEach((entry, idx) => {
-    ctx.addSharedSchema(`${namespace}-${idx}`, entry as OpenAPIV3.SchemaObject);
-    schema.oneOf![idx] = { $ref: `#/components/schemas/${namespace}-${idx}` };
+    const discriminatorProp = (schema.oneOf![idx] as OpenAPIV3.SchemaObject).properties?.[
+      propertyName
+    ] as OpenAPIV3.SchemaObject;
+    if (discriminatorProp?.type !== 'string' || discriminatorProp?.enum?.length !== 1) {
+      catchAllIdx = idx;
+    } else {
+      ctx.addSharedSchema(`${namespace}-${nr}`, entry as OpenAPIV3.SchemaObject);
+      schema.oneOf![idx] = { $ref: `#/components/schemas/${namespace}-${nr}` };
+      nr++;
+    }
   });
+
+  if (catchAllIdx > -1) schema.oneOf?.splice(catchAllIdx, 1);
 };

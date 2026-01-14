@@ -18,37 +18,74 @@ test.each([
       schema.object({ type: schema.literal('str'), value: schema.string() }),
       schema.object({ type: schema.literal('num'), value: schema.number() }),
     ]),
+    'test-simple',
     {
       oneOf: [
         {
-          $ref: '#/components/schemas/get-test-0',
+          $ref: '#/components/schemas/test-simple-1',
         },
         {
-          $ref: '#/components/schemas/get-test-1',
+          $ref: '#/components/schemas/test-simple-2',
         },
       ],
       discriminator: {
         propertyName: 'type',
       },
     },
+    {
+      'test-simple-1': {
+        type: 'object',
+        properties: {
+          type: { type: 'string', enum: ['str'] },
+        },
+      },
+      'test-simple-2': {
+        type: 'object',
+        properties: {
+          type: { type: 'string', enum: ['num'] },
+        },
+      },
+    },
   ],
-])('processDiscriminator %#', (input, result) => {
+  [
+    schema.discriminatedUnion('type', [
+      schema.object({ type: schema.literal('str'), value: schema.string() }),
+      schema.object({ type: schema.literal('num'), value: schema.number() }),
+      schema.object({ type: schema.string(), value: schema.number() }),
+    ]),
+    'test-catch-all',
+    {
+      oneOf: [
+        {
+          $ref: '#/components/schemas/test-catch-all-1',
+        },
+        {
+          $ref: '#/components/schemas/test-catch-all-2',
+        },
+      ],
+      discriminator: {
+        propertyName: 'type',
+      },
+    },
+    {
+      'test-catch-all-1': {
+        type: 'object',
+        properties: {
+          type: { type: 'string', enum: ['str'] },
+        },
+      },
+      'test-catch-all-2': {
+        type: 'object',
+        properties: {
+          type: { type: 'string', enum: ['num'] },
+        },
+      },
+    },
+  ],
+])('processDiscriminator %#', (input, namespace, resultSchema, resultSharedSchemas) => {
   const parsed = joi2JsonInternal(input.getSchema());
-  const ctx = createCtx({ namespace: 'get-test' });
+  const ctx = createCtx({ namespace });
   processDiscriminator(ctx, parsed);
-  expect(ctx.getSharedSchemas()).toMatchObject({
-    'get-test-0': {
-      type: 'object',
-      properties: {
-        type: { type: 'string', enum: ['str'] },
-      },
-    },
-    'get-test-1': {
-      type: 'object',
-      properties: {
-        type: { type: 'string', enum: ['num'] },
-      },
-    },
-  });
-  expect(parsed).toEqual(result);
+  expect(parsed).toEqual(resultSchema);
+  expect(ctx.getSharedSchemas()).toMatchObject(resultSharedSchemas);
 });
