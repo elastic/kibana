@@ -1056,6 +1056,55 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
               },
             },
           },
+          options: {
+            oasOperationObject: () => ({
+              requestBody: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      changeAgentPrivilegeLevelRequest: {
+                        value: {
+                          user_info: {
+                            username: 'username',
+                            groupname: 'groupname',
+                            password: 'password',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            actionId: 'actionId',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
         },
 
         changeAgentPrivilegeLevelHandler
@@ -1095,6 +1144,56 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
                 body: genericErrorResponse,
               },
             },
+          },
+          options: {
+            oasOperationObject: () => ({
+              requestBody: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      bulkChangeAgentPrivilegeLevelRequest: {
+                        value: {
+                          agents: 'agent',
+                          user_info: {
+                            username: 'username',
+                            groupname: 'groupname',
+                            password: 'password',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            actionId: 'actionId',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
           },
         },
 
