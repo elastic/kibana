@@ -16,5 +16,7 @@
     "@kbn/react-context-registry",
     "@kbn/use-observable",
     "@kbn/zod",
+    "@kbn/core-chrome-layout-utils",
+    "@kbn/core-chrome-layout-components",
   ]
 }
