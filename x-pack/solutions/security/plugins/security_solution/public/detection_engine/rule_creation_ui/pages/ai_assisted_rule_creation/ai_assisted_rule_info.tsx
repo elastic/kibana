@@ -14,7 +14,12 @@ import {
 
 export const AiAssistedRuleInfo: React.FC = () => {
   return (
-    <EuiCallOut title={AI_ASSISTED_RULE_CREATION_INFO_TITLE} color="primary" size="s">
+    <EuiCallOut
+      title={AI_ASSISTED_RULE_CREATION_INFO_TITLE}
+      color="primary"
+      size="s"
+      data-test-subj="ai-assisted-rule-creation-info-callout"
+    >
       <EuiText size="s">{AI_ASSISTED_RULE_CREATION_INFO_MESSAGE}</EuiText>
     </EuiCallOut>
   );

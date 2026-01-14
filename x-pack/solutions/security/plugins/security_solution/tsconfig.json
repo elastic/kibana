@@ -270,6 +270,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/ai-assistant-common",
     "@kbn/product-doc-common",
-    "@kbn/sse-utils-client"
+    "@kbn/sse-utils-client",
+    "@kbn/kql"
   ]
 }

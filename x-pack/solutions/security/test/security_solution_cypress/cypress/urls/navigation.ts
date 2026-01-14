@@ -113,3 +113,6 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+// AI Assisted Rule Creation
+export const AI_ASSISTED_RULE_CREATE_URL = '/app/security/rules/ai_assisted_create';
