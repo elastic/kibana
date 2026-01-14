@@ -558,6 +558,29 @@ export const QueryBarTopRow = React.memo(
       [onDraftChange]
     );
 
+    const settingsDateFormat = uiSettings.get('dateFormat');
+    // Hard-coding here for now to test the feature first
+    // TODO store the "no ms" format alongside the default format somewhere
+    // and get it from the same "central" place
+    const DATE_FORMAT_DEFAULT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+    const DATE_FORMAT_NO_MS = 'MMM D, YYYY @ HH:mm:ss';
+
+    // Show milliseconds only if zoom level is within the second
+    const dateFormat = useMemo(() => {
+      if (settingsDateFormat !== DATE_FORMAT_DEFAULT || !draftDateRangeFrom || !draftDateRangeTo) {
+        return settingsDateFormat;
+      }
+
+      const from = dateMath.parse(draftDateRangeFrom);
+      const to = dateMath.parse(draftDateRangeTo);
+      if (!from?.isValid() || !to?.isValid()) {
+        return settingsDateFormat;
+      }
+      const diff = Math.abs(from.diff(to));
+
+      return diff <= 1000 ? DATE_FORMAT_DEFAULT : DATE_FORMAT_NO_MS;
+    }, [draftDateRangeFrom, draftDateRangeTo, settingsDateFormat]);
+
     useEffect(() => {
       onDraftChangeDebounced?.(draft);
     }, [onDraftChangeDebounced, draft]);
@@ -649,7 +672,7 @@ export const QueryBarTopRow = React.memo(
           recentlyUsedRanges={recentlyUsedRanges}
           locale={i18n.getLocale()}
           commonlyUsedRanges={commonlyUsedRanges}
-          dateFormat={uiSettings.get('dateFormat')}
+          dateFormat={dateFormat}
           isAutoRefreshOnly={showAutoRefreshOnly}
           className="kbnQueryBar__datePicker"
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
@@ -983,7 +1006,7 @@ export const QueryBarTopRow = React.memo(
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}
-          dateFormat={uiSettings.get('dateFormat')}
+          dateFormat={settingsDateFormat}
         />
         {!isScreenshotMode && (
           <>
