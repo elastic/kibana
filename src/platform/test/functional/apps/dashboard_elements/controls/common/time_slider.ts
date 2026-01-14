@@ -91,7 +91,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
-          width: 'medium',
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];
@@ -126,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
         await dashboard.loadDashboardInEditMode('test time slider control');
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureMissingUnsavedChangesNotification();
       });
 
       it('deletes an existing control', async () => {

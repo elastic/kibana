@@ -5,81 +5,63 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const CIRCLE_TYPE = 'circle';
 
 describe('Processor: Circle', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
-    testBed.component.update();
-    const {
-      actions: { addProcessor, addProcessorType },
-    } = testBed;
-    // Open the processor flyout
-    addProcessor();
 
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(CIRCLE_TYPE);
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: CIRCLE_TYPE },
+    });
+
+    await screen.findByTestId('addProcessorForm');
+    await screen.findByTestId('fieldNameField');
   });
 
   test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
 
     // Expect form error as "field", "shape_type" and "error_distance" are required parameters
-    expect(form.getErrorsMessages()).toEqual([
-      'A field value is required.',
-      'An error distance value is required.',
-      'A shape type value is required.',
-    ]);
+    expect(await screen.findByText('A field value is required.')).toBeInTheDocument();
+    expect(screen.getByText('An error distance value is required.')).toBeInTheDocument();
+    expect(screen.getByText('A shape type value is required.')).toBeInTheDocument();
   });
 
   test('saves with required parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
+    });
     // Save the field
-    form.setSelectValue('shapeSelectorField', 'shape');
+    fireEvent.change(screen.getByTestId('shapeSelectorField'), { target: { value: 'shape' } });
     // Set the error distance
-    form.setInputValue('errorDistanceField.input', '10');
+    fireEvent.change(within(screen.getByTestId('errorDistanceField')).getByTestId('input'), {
+      target: { value: '10' },
+    });
 
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, CIRCLE_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0].circle).toEqual({
       field: 'field_1',
@@ -89,24 +71,26 @@ describe('Processor: Circle', () => {
   });
 
   test('allows optional parameters to be set', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Set required parameters
-    form.setInputValue('fieldNameField.input', 'field_1');
-    form.setSelectValue('shapeSelectorField', 'geo_shape');
-    form.setInputValue('errorDistanceField.input', '10');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
+    });
+    fireEvent.change(screen.getByTestId('shapeSelectorField'), { target: { value: 'geo_shape' } });
+    fireEvent.change(within(screen.getByTestId('errorDistanceField')).getByTestId('input'), {
+      target: { value: '10' },
+    });
 
     // Set optional parameters
-    form.setInputValue('targetField.input', 'target_field');
-    form.toggleEuiSwitch('ignoreMissingSwitch.input');
+    fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
+      target: { value: 'target_field' },
+    });
+    fireEvent.click(within(screen.getByTestId('ignoreMissingSwitch')).getByTestId('input'));
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, CIRCLE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].circle).toEqual({
       field: 'field_1',
       error_distance: 10,

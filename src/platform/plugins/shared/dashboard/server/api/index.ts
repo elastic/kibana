@@ -15,6 +15,7 @@ export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './
 export type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './update';
 export type {
   DashboardState,
+  DashboardControlsState,
   DashboardPanel,
   DashboardSection,
   DashboardFilter,

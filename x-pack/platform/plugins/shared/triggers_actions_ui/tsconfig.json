@@ -60,7 +60,6 @@
     "@kbn/lens-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
-    "@kbn/controls-plugin",
     "@kbn/alerting-comparators",
     "@kbn/alerting-types",
     "@kbn/visualization-utils",
@@ -93,7 +92,9 @@
     "@kbn/react-query",
     "@kbn/router-utils",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/actions-types"
+    "@kbn/actions-types",
+    "@kbn/kql",
+    "@kbn/shared-ux-page-kibana-template"
   ],
   "exclude": ["target/**/*"]
 }

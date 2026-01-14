@@ -104,5 +104,7 @@
     "@kbn/language-documentation",
     "@kbn/shared-ux-markdown",
     "@kbn/test-jest-helpers",
+    "@kbn/react-query",
+    "@kbn/timerange",
   ]
 }

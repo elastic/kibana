@@ -2269,7 +2269,7 @@
                   "- Optional log level string (highest priority)"
                 ],
                 "signature": [
-                  "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
+                  "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/common/services/logger.ts",
                 "deprecated": false,
@@ -2706,15 +2706,7 @@
             "section": "def-common.ApiServicesFixture",
             "text": "ApiServicesFixture"
           },
-          "; } & { samlAuth: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.SamlAuth",
-            "text": "SamlAuth"
-          },
-          "; preCreateSecurityIndexes: void; }>"
+          "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/index.ts",
         "deprecated": false,
@@ -8260,6 +8252,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/page_objects/utils.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts"
               }
             ],
             "children": [
@@ -9617,6 +9613,20 @@
             "tags": [],
             "label": "[VALID_CONFIG_MARKER]",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ScoutTestOptions.runGlobalSetup",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "runGlobalSetup",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
             "deprecated": false,
             "trackAdoption": false

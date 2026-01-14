@@ -63,7 +63,7 @@ This tool will:
     tags: [],
     handler: async (
       { title, description, panels, markdownContent },
-      { logger, request, esClient }
+      { logger, request, esClient, resultStore }
     ) => {
       try {
         const coreContext = {
@@ -82,7 +82,7 @@ This tool will:
         // Build markdown panel and offset other panels accordingly
         const markdownPanel = buildMarkdownPanel(markdownContent);
         const yOffset = getMarkdownPanelHeight(markdownContent);
-        const normalizedPanels = [markdownPanel, ...normalizePanels(panels, yOffset)];
+        const normalizedPanels = [markdownPanel, ...normalizePanels(panels, yOffset, resultStore)];
 
         const dashboardCreateResponse = await dashboard.client.create(requestHandlerContext, {
           data: { title, description, panels: normalizedPanels },

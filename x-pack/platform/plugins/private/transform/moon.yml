@@ -91,6 +91,7 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/licensing-types'
   - '@kbn/react-query'
+  - '@kbn/kql'
   - '@kbn/scout'
   - '@kbn/core-http-common'
 tags:

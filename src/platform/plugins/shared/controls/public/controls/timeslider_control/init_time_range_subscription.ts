@@ -9,7 +9,7 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
+import { apiPublishesTimeRange } from '@kbn/presentation-publishing';
 import moment from 'moment';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, skip } from 'rxjs';
@@ -18,11 +18,11 @@ import type { TimeRangeMeta } from './get_time_range_meta';
 import { getTimeRangeMeta, getTimezone } from './get_time_range_meta';
 import { getMomentTimezone } from './time_utils';
 
-export function initTimeRangeSubscription(controlGroupApi: unknown) {
-  const timeRange$ =
-    apiHasParentApi(controlGroupApi) && apiPublishesTimeRange(controlGroupApi.parentApi)
-      ? controlGroupApi.parentApi.timeRange$
-      : new BehaviorSubject<TimeRange | undefined>(undefined);
+export function initTimeRangeSubscription(parentApi: unknown) {
+  const timeRange$ = apiPublishesTimeRange(parentApi)
+    ? parentApi.timeRange$
+    : new BehaviorSubject<TimeRange | undefined>(undefined);
+
   const timeRangeMeta$ = new BehaviorSubject<TimeRangeMeta>(getTimeRangeMeta(timeRange$.value));
 
   const timeRangeSubscription = timeRange$.pipe(skip(1)).subscribe((timeRange) => {
@@ -30,8 +30,8 @@ export function initTimeRangeSubscription(controlGroupApi: unknown) {
   });
 
   let reloadSubscription: undefined | Subscription;
-  if (apiHasParentApi(controlGroupApi) && apiPublishesReload(controlGroupApi.parentApi)) {
-    reloadSubscription = controlGroupApi.parentApi.reload$.subscribe(() => {
+  if (apiPublishesReload(parentApi)) {
+    reloadSubscription = parentApi.reload$.subscribe(() => {
       timeRangeMeta$.next(getTimeRangeMeta(timeRange$.value));
     });
   }

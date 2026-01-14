@@ -20,13 +20,10 @@ describe('Clone panel action', () => {
     action = new ClonePanelAction();
     context = {
       embeddable: {
+        isDuplicable: true,
         uuid: 'superId',
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
-        serializeState: () => {
-          return {
-            rawState: {},
-          };
-        },
+        serializeState: () => ({}),
         parentApi: {
           duplicatePanel: jest.fn(),
         },

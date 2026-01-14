@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
+import type {
+  BaseConnectorContract,
+  ConnectorContractUnion,
+  ConnectorTypeInfo,
+  StepPropertyHandler,
+} from '@kbn/workflows';
 import {
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
 } from '@kbn/workflows';
-import type { BaseConnectorContract } from '@kbn/workflows/types/v1';
 import { z } from '@kbn/zod/v4';
 
 // Import connector schemas from the organized structure
@@ -82,30 +86,33 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
  * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
  */
 function getRegisteredStepDefinitions(): BaseConnectorContract[] {
-  return stepSchemas.getAllRegisteredStepDefinitions().map((stepDefinition) => {
-    const definition = {
-      type: stepDefinition.id,
-      paramsSchema: stepDefinition.inputSchema,
-      outputSchema: stepDefinition.outputSchema,
-      configSchema: stepDefinition.configSchema,
-      summary: null,
-      description: null,
-    };
-
-    if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-      // Only public step definitions have documentation and examples
-      return {
-        ...definition,
-        summary: stepDefinition.label,
-        description: stepDefinition.description ?? null,
-        documentation: stepDefinition.documentation?.url,
-        examples: stepDefinition.documentation?.examples
-          ? { snippet: stepDefinition.documentation?.examples.join('\n') }
-          : undefined,
+  return stepSchemas
+    .getAllRegisteredStepDefinitions()
+    .map((stepDefinition): BaseConnectorContract => {
+      const definition = {
+        type: stepDefinition.id,
+        paramsSchema: stepDefinition.inputSchema,
+        outputSchema: stepDefinition.outputSchema,
+        configSchema: stepDefinition.configSchema,
+        summary: null,
+        description: null,
       };
-    }
-    return definition;
-  });
+
+      if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
+        // Only public step definitions have documentation and examples
+        return {
+          ...definition,
+          summary: stepDefinition.label,
+          description: stepDefinition.description ?? null,
+          documentation: stepDefinition.documentation?.url,
+          examples: stepDefinition.documentation?.examples
+            ? { snippet: stepDefinition.documentation?.examples.join('\n') }
+            : undefined,
+          editorHandlers: stepDefinition.editorHandlers,
+        };
+      }
+      return definition;
+    });
 }
 
 /**
@@ -202,7 +209,7 @@ export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(static
  * Combine static connectors with dynamic Elasticsearch and Kibana connectors
  * Internal implementation - use exported getAllConnectors() instead
  */
-function getAllConnectorsInternal(): ConnectorContractUnion[] {
+export function getAllConnectorsInternal(): ConnectorContractUnion[] {
   // Return cached connectors if available
   const cached = stepSchemas.getAllConnectorsCache();
   if (cached !== null) {
@@ -342,31 +349,6 @@ export function getAllConnectors(): ConnectorContractUnion[] {
   return getAllConnectorsInternal();
 }
 
-export const getOutputSchemaForStepType = (stepType: string): z.ZodSchema => {
-  const allConnectors = getAllConnectorsInternal();
-  const connector = allConnectors.find((c) => c.type === stepType);
-  if (connector) {
-    if (!connector.outputSchema) {
-      // throw new Error(`Output schema not found for step type ${stepType}`);
-      return z.unknown();
-    }
-    return connector.outputSchema;
-  }
-
-  // Handle internal actions with pattern matching
-  // TODO: add output schema support for elasticsearch.request and kibana.request connectors
-  if (stepType.startsWith('elasticsearch.')) {
-    return z.unknown();
-  }
-
-  if (stepType.startsWith('kibana.')) {
-    return z.unknown();
-  }
-
-  // Fallback to any if not found
-  return z.unknown();
-};
-
 export function getAllConnectorsWithDynamic(
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {
@@ -385,4 +367,13 @@ export const getWorkflowZodSchemaLoose = (
 ): z.ZodTypeAny => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, true);
+};
+
+export const getPropertyHandler = (
+  stepType: string,
+  scope: 'config' | 'input',
+  propertyKey: string
+): StepPropertyHandler | null => {
+  const connector = stepSchemas.getAllConnectorsMapCache()?.get(stepType);
+  return connector?.editorHandlers?.[scope]?.[propertyKey] ?? null;
 };
