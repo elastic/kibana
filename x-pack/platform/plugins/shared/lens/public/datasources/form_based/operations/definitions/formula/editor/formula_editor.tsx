@@ -103,7 +103,7 @@ export function FormulaEditor({
   columnId,
   indexPattern,
   operationDefinitionMap,
-  unifiedSearch,
+  kql,
   dataViews,
   toggleFullscreen,
   isFullscreen,
@@ -457,7 +457,7 @@ export function FormulaEditor({
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
-            unifiedSearch,
+            kql,
             dataViews,
             dateHistogramInterval: baseIntervalRef.current,
             timefilter: data.query.timefilter.timefilter,
@@ -470,7 +470,7 @@ export function FormulaEditor({
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
-          unifiedSearch,
+          kql,
           dataViews,
           dateHistogramInterval: baseIntervalRef.current,
           timefilter: data.query.timefilter.timefilter,
@@ -489,7 +489,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, data.query.timefilter.timefilter]
+    [indexPattern, visibleOperationsMap, kql, dataViews, data.query.timefilter.timefilter]
   );
 
   const provideSignatureHelp = useCallback(
