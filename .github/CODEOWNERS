@@ -38,7 +38,7 @@ examples/saved_objects @elastic/kibana-core
 examples/screenshot_mode_example @elastic/response-ops
 examples/search_examples @elastic/kibana-data-discovery
 examples/share_examples @elastic/appex-sharedux
-examples/sidebar_examples @elastic/@elastic/appex-sharedux
+examples/sidebar_examples @elastic/appex-sharedux
 examples/sse_example @elastic/kibana-core
 examples/state_containers_examples @elastic/appex-sharedux
 examples/ui_action_examples @elastic/appex-sharedux
