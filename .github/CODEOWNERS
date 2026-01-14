@@ -794,6 +794,7 @@ src/platform/plugins/shared/home @elastic/appex-sharedux
 src/platform/plugins/shared/inspector @elastic/kibana-presentation
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
+src/platform/plugins/shared/kql @elastic/kibana-presentation
 src/platform/plugins/shared/management @elastic/kibana-management
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
 src/platform/plugins/shared/newsfeed @elastic/kibana-core
