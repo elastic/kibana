@@ -25,24 +25,24 @@ export const useLayoutApi = (
   childrenApi: ReturnType<typeof useChildrenApi>['childrenApi'],
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ) => {
-  const layout$Ref = useRef(new BehaviorSubject<ControlsLayout>({ pinnedPanels: {} }));
+  const layout$Ref = useRef(new BehaviorSubject<ControlsLayout>({ controls: {} }));
 
   useEffect(() => {
     /** Keep `layout$` in sync with `lastSavedState$Ref` */
     const lastSavedStateSubscription = lastSavedState$Ref.current.subscribe((lastSavedState) => {
-      const lastSavedLayout: ControlsLayout['pinnedPanels'] = {};
+      const lastSavedLayout: ControlsLayout['controls'] = {};
       Object.entries(lastSavedState).forEach(([id, control]) => {
         lastSavedLayout[id] = pick(control, [
           'grow',
           'width',
           'order',
           'type',
-        ]) as ControlsLayout['pinnedPanels'][string];
+        ]) as ControlsLayout['controls'][string];
       });
       const currentLayout = layout$Ref.current.getValue();
       layout$Ref.current.next({
         ...currentLayout,
-        pinnedPanels: { ...currentLayout.pinnedPanels, ...lastSavedLayout },
+        controls: { ...currentLayout.controls, ...lastSavedLayout },
       });
     });
 
@@ -55,7 +55,7 @@ export const useLayoutApi = (
     if (!state || !childrenApi) return;
 
     layout$Ref.current.next({
-      pinnedPanels: getControlsLayout(state?.initialChildControlState),
+      controls: getControlsLayout(state?.initialChildControlState),
     });
 
     return {
@@ -67,14 +67,14 @@ export const useLayoutApi = (
         const uuid = maybePanelId ?? uuidv4();
 
         if (serializedState) childrenApi?.setSerializedStateForChild(uuid, serializedState);
-        const oldControls = layout$Ref.current.getValue().pinnedPanels;
+        const oldControls = layout$Ref.current.getValue().controls;
         const controlState = {
           width: DEFAULT_CONTROL_WIDTH as PinnedControlState['width'],
           grow: DEFAULT_CONTROL_GROW as PinnedControlState['grow'],
           ...serializedState,
         };
         layout$Ref.current.next({
-          pinnedPanels: {
+          controls: {
             ...oldControls,
             [uuid]: {
               order: Object.keys(oldControls).length,
@@ -95,7 +95,7 @@ export const useLayoutApi = (
         if (serializedState) childrenApi?.setSerializedStateForChild(uuid, serializedState);
 
         const currentLayout = layout$Ref.current.value;
-        const controls = { ...currentLayout.pinnedPanels };
+        const controls = { ...currentLayout.controls };
         let newOrder = Math.max(...Object.values(controls).map(({ order }) => order));
         if (controls[idToRemove]) {
           newOrder = controls[idToRemove].order;
@@ -106,22 +106,22 @@ export const useLayoutApi = (
           ...serializedState,
           order: newOrder,
         };
-        layout$Ref.current.next({ ...currentLayout, pinnedPanels: controls });
+        layout$Ref.current.next({ ...currentLayout, controls });
         return uuid;
       },
       removePanel: (idToRemove: string) => {
         const currentLayout = layout$Ref.current.value;
-        const controls = { ...currentLayout.pinnedPanels };
+        const controls = { ...currentLayout.controls };
         if (controls[idToRemove]) {
           delete controls[idToRemove];
-          layout$Ref.current.next({ ...currentLayout, pinnedPanels: controls });
+          layout$Ref.current.next({ ...currentLayout, controls });
         }
         childrenApi?.removeChild(idToRemove);
       },
 
       childrenLoading$: combineLatest([childrenApi.children$, layout$Ref.current]).pipe(
         map(([children, layout]) => {
-          const expectedChildCount = Object.values(layout.pinnedPanels).length;
+          const expectedChildCount = Object.values(layout.controls).length;
           const currentChildCount = Object.keys(children).length;
           return expectedChildCount !== currentChildCount;
         }),

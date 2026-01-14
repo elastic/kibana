@@ -20,7 +20,7 @@ import { apiPublishesControlsLayout } from './types';
 const compatibilityCheck = (api: unknown | null) =>
   apiCanPinPanels(api) &&
   apiPublishesControlsLayout(api) &&
-  !Object.values(api.layout$.getValue().pinnedPanels).find(
+  !Object.values(api.layout$.getValue().controls).find(
     (control) => control.type === TIME_SLIDER_CONTROL
   );
 

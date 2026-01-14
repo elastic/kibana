@@ -130,7 +130,7 @@ async function getCompatibleControlType(
   return undefined;
 }
 
-function getNextControlOrder(controlPanelsState?: ControlsLayout['pinnedPanels']) {
+function getNextControlOrder(controlPanelsState?: ControlsLayout['controls']) {
   if (!controlPanelsState) {
     return 0;
   }

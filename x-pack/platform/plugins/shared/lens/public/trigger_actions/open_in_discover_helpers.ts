@@ -114,7 +114,7 @@ function getEsqlControls(embeddable: LensApi) {
 
   const usedVariables = getESQLQueryVariables(embeddableQuery.esql);
   const controlsLayout = apiPublishesControlsLayout(parentApi)
-    ? parentApi.layout$.getValue().pinnedPanels
+    ? parentApi.layout$.getValue().controls
     : {};
   const esqlControlState = Object.values(parentApi.children$.getValue()).reduce(
     (acc: { [uuid: string]: Serializable }, api, index) => {
