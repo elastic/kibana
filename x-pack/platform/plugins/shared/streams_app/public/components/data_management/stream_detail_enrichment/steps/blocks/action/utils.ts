@@ -153,21 +153,14 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
         }
       );
     } else if (step.action === 'concat') {
-      let mustacheString = '';
-      for (const from of step.from) {
-        if (from.type === 'field') {
-          mustacheString += `{{${from.value}}}`;
-        } else {
-          mustacheString += from.value;
-        }
-      }
+      const fromLength = step.from.length;
+      const isPlural = fromLength !== 1;
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.concatProcessorDescription',
         {
-          defaultMessage: 'Concatenates via pattern "{pattern}" to "{to}" field',
+          defaultMessage: `Concatenates {fromLength} value${isPlural ? 's' : ''}.`,
           values: {
-            pattern: mustacheString,
-            to: step.to,
+            fromLength,
           },
         }
       );

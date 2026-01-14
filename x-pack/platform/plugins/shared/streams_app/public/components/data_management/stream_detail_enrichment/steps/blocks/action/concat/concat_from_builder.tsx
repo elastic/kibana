@@ -9,7 +9,6 @@ import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiDraggable,
   EuiFieldText,
   EuiFlexGroup,
@@ -23,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FieldNameWithIcon } from '@kbn/react-field';
 import React from 'react';
-import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { useEnrichmentFieldSuggestions } from '../../../../../../../hooks/use_field_suggestions';
 import { SortableList } from '../../../../sortable_list';
 import type { ConcatFormState } from '../../../../types';
@@ -170,29 +169,6 @@ const FromBuilderItem = ({ type, id, index, onRemove }: FromBuilderItemProps) =>
   );
 };
 
-const ConcatPreview = () => {
-  const from: ConcatFormState['from'] = useWatch({ name: 'from' });
-  const isEmpty = from.length === 0;
-  let mustacheString = '';
-  from.forEach((item) => {
-    if (item.type === 'field') {
-      mustacheString += `{{${item.value}}}`;
-    } else {
-      mustacheString += item.value;
-    }
-  });
-  if (isEmpty) {
-    return (
-      <EuiCodeBlock language="text">
-        {i18n.translate('xpack.streams.concatPreview.empty', {
-          defaultMessage: 'Your preview will appear here.',
-        })}
-      </EuiCodeBlock>
-    );
-  }
-  return <EuiCodeBlock language="text">{mustacheString}</EuiCodeBlock>;
-};
-
 export const ConcatFromBuilder = () => {
   const { fields, append, remove, move } = useFieldArray<Pick<ConcatFormState, 'from'>>({
     name: 'from',
@@ -259,7 +235,6 @@ export const ConcatFromBuilder = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <ConcatPreview from={fields} />
     </>
   );
 };
