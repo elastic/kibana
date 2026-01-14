@@ -593,7 +593,14 @@ describe('fieldStatsUtils', function () {
             sampler: { shard_size: 5000 },
             aggs: {
               sample_count: { value_count: { field: 'extension.keyword' } },
-              top_values: { terms: { field: 'extension.keyword', size: 10, shard_size: 25 } },
+              top_values: {
+                terms: {
+                  field: 'extension.keyword',
+                  missing: '__missing__',
+                  size: 10,
+                  shard_size: 25,
+                },
+              },
             },
           },
         },
