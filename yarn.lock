@@ -11612,7 +11612,7 @@
   dependencies:
     pako "^1.0.6"
 
-"@pdf-lib/upng@^1.0.1":
+"@pdf-lib/upng@1.0.1", "@pdf-lib/upng@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@pdf-lib/upng/-/upng-1.0.1.tgz#7dc9c636271aca007a9df4deaf2dd7e7960280cb"
   integrity sha512-dQK2FUMQtowVP00mtIksrlZhdFXQZPC+taih1q4CvPZ5vqdxR/LKBaFg0oAfzd1GlHZXXSPdQfzQnt+ViGvEIQ==
