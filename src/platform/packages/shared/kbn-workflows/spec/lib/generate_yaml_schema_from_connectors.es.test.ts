@@ -25,7 +25,7 @@ describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
   });
 
   ES_VALID_SAMPLE_STEPS.forEach((step) => {
-    it(`${step.type}`, async () => {
+    it(`${step.type} (${step.name})`, async () => {
       const result = workflowSchema.safeParse({
         name: 'test-workflow',
         enabled: true,
@@ -34,11 +34,12 @@ describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
       });
       expect(result.error).toBeUndefined();
       expect(result.success).toBe(true);
+      expect((result.data as any).steps[0]).toMatchObject(step);
     });
   });
 
   ES_INVALID_SAMPLE_STEPS.forEach(({ step, zodErrorMessage }) => {
-    it(`${step.type} with invalid params`, async () => {
+    it(`${step.type} (${step.name}) with invalid params`, async () => {
       const result = workflowSchema.safeParse({
         name: 'test-workflow',
         enabled: true,

@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 } from 'uuid';
-import { getReferencesForPanelId } from '../../common';
 
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
@@ -43,6 +41,7 @@ import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
+import { initializeRelatedPanelsManager } from './related_panels_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -83,18 +82,12 @@ export function getDashboardApi({
     await layoutManager.api.getChildApi(id);
   }, dashboardContainerRef$);
 
-  const references$ = new BehaviorSubject<Reference[] | undefined>(initialState.references);
-  const getReferences = (id: string) => {
-    return getReferencesForPanelId(id, references$.value ?? []);
-  };
-
   const layoutManager = initializeLayoutManager(
     viewModeManager,
     incomingEmbeddables,
     initialState.panels,
     initialState.controlGroupInput,
-    trackPanel,
-    getReferences
+    trackPanel
   );
 
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
@@ -145,29 +138,23 @@ export function getDashboardApi({
   });
 
   function getState() {
-    const {
-      panels,
-      controlGroupInput,
-      references: panelReferences,
-    } = layoutManager.internalApi.serializeLayout();
+    const { panels, controlGroupInput } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const projectRoutingState = projectRoutingManager?.internalApi.getState();
-    const dashboardState: DashboardState = {
+    return {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
       ...projectRoutingState,
       panels,
       controlGroupInput,
-    };
-    return {
-      dashboardState,
-      references: [...(panelReferences ?? [])],
-    };
+    } satisfies DashboardState;
   }
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
+
+  const relatedPanelsManager = initializeRelatedPanelsManager(trackPanel, layoutManager);
 
   const dashboardApi = {
     ...viewModeManager.api,
@@ -199,13 +186,9 @@ export function getDashboardApi({
     },
     isEmbeddedExternally: Boolean(creationOptions?.isEmbeddedExternally),
     isManaged,
-    getSerializedState: () => {
-      const { dashboardState, references } = getState();
-      return {
-        attributes: dashboardState,
-        references,
-      };
-    },
+    getSerializedState: () => ({
+      attributes: getState(),
+    }),
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
 
@@ -238,7 +221,6 @@ export function getDashboardApi({
       }
 
       if (saveResult) {
-        references$.next(saveResult.references);
         unsavedChangesManager.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
@@ -255,17 +237,15 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
-      const { dashboardState, references } = getState();
+      const dashboardState = getState();
       const saveResult = await saveDashboard({
         dashboardState,
-        references,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
         accessMode: accessControlManager.api.accessControl$.value?.accessMode,
       });
 
       if (saveResult?.error) return;
-      references$.next(saveResult.references);
       unsavedChangesManager.internalApi.onSave(dashboardState);
 
       return;
@@ -290,6 +270,7 @@ export function getDashboardApi({
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
     ...esqlVariablesManager.api,
+    ...relatedPanelsManager.api,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
   };
