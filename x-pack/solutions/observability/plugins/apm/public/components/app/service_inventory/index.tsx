@@ -188,6 +188,9 @@ export function ServiceInventory() {
     (item) => ServiceInventoryFieldName.AlertsCount in item
   );
 
+  // TODO: Remove this for real implementation
+  const displaySlos = mainStatisticsData.items.length > 0;
+
   const tiebreakerField = ServiceInventoryFieldName.Throughput;
 
   const initialSortField = displayHealthStatus
@@ -301,6 +304,7 @@ export function ServiceInventory() {
             comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
             displayHealthStatus={displayHealthStatus}
             displayAlerts={displayAlerts}
+            displaySlos={displaySlos}
             initialSortField={initialSortField}
             initialSortDirection={initialSortDirection}
             sortFn={sortFn}

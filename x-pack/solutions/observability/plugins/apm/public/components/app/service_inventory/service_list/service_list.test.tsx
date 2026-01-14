@@ -81,6 +81,7 @@ describe('ServiceList', () => {
             isXl: true,
           } as Breakpoints,
           showAlertsColumn: true,
+          showSlosColumn: false,
           link: apmRouter.link,
           serviceOverflowCount: 0,
         }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
@@ -120,6 +121,7 @@ describe('ServiceList', () => {
             isXl: true,
           } as Breakpoints,
           showAlertsColumn: true,
+          showSlosColumn: false,
           link: apmRouter.link,
           serviceOverflowCount: 0,
         }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
@@ -148,6 +150,7 @@ describe('ServiceList', () => {
               isXl: true,
             } as Breakpoints,
             showAlertsColumn: true,
+            showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
           }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
@@ -186,6 +189,7 @@ describe('ServiceList', () => {
               isXl: false,
             } as Breakpoints,
             showAlertsColumn: true,
+            showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
           }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
@@ -227,6 +231,7 @@ describe('ServiceList', () => {
           isXl: false,
         } as Breakpoints,
         showAlertsColumn: true,
+        showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
       }).map((c) => c.field);
@@ -247,6 +252,7 @@ describe('ServiceList', () => {
           isXl: false,
         } as Breakpoints,
         showAlertsColumn: true,
+        showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
       }).map((c) => c.field);
@@ -267,6 +273,7 @@ describe('ServiceList', () => {
           isXl: false,
         } as Breakpoints,
         showAlertsColumn: false,
+        showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
       }).map((c) => c.field);
@@ -287,6 +294,7 @@ describe('ServiceList', () => {
           isXl: false,
         } as Breakpoints,
         showAlertsColumn: true,
+        showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
       }).map((c) => c.field);
