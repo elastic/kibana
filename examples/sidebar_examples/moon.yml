@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/sidebar-examples-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/sidebar-examples-plugin'
   description: Moon project for @kbn/sidebar-examples-plugin
   channel: ''
-  owner: '@elastic/kibana-core'
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/sidebar_examples
 dependsOn:
