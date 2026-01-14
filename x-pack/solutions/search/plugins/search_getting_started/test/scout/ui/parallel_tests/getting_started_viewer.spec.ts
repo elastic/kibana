@@ -14,25 +14,25 @@ test.describe('Getting Started - Viewer', { tag: ['@ess', '@svlSearch'] }, () =>
     await pageObjects.gettingStarted.goto();
   });
 
-  test('should display no API keys access message', async ({ pageObjects }) => {
-    const noAccessMessage = await pageObjects.gettingStarted.getNoApiKeysAccessMessage();
-    await expect(noAccessMessage).toBeVisible();
-  });
+  test('verifies viewer has limited access to API keys functionality', async ({ pageObjects }) => {
+    await test.step('should display no API keys access message', async () => {
+      const noAccessMessage = await pageObjects.gettingStarted.getNoApiKeysAccessMessage();
+      await expect(noAccessMessage).toBeVisible();
+    });
 
-  test('Connection details flyout should not show API Keys tab when user lacks permission', async ({
-    pageObjects,
-  }) => {
-    await pageObjects.gettingStarted.clickViewConnectionDetailsLink();
+    await test.step('connection details flyout should not show API Keys tab', async () => {
+      await pageObjects.gettingStarted.clickViewConnectionDetailsLink();
 
-    const modalTitle = await pageObjects.gettingStarted.getConnectionDetailsModalTitle();
-    await expect(modalTitle).toBeVisible();
+      const modalTitle = await pageObjects.gettingStarted.getConnectionDetailsModalTitle();
+      await expect(modalTitle).toBeVisible();
 
-    // Endpoints tab should exist
-    const endpointsTab = await pageObjects.gettingStarted.getConnectionDetailsEndpointsTab();
-    await expect(endpointsTab).toBeVisible();
+      // Endpoints tab should exist
+      const endpointsTab = await pageObjects.gettingStarted.getConnectionDetailsEndpointsTab();
+      await expect(endpointsTab).toBeVisible();
 
-    // API Keys tab should NOT exist for viewer
-    const apiKeysTab = await pageObjects.gettingStarted.getConnectionDetailsApiKeysTab();
-    await expect(apiKeysTab).toBeHidden();
+      // API Keys tab should NOT exist for viewer
+      const apiKeysTab = await pageObjects.gettingStarted.getConnectionDetailsApiKeysTab();
+      await expect(apiKeysTab).toBeHidden();
+    });
   });
 });
