@@ -9,7 +9,7 @@ import React from 'react';
 import { ColdStartBadge } from './cold_start_badge';
 
 export default {
-  title: 'app/TransactionDetails/Waterfall/Badge/ColdStartBadge',
+  title: 'shared/TraceWaterfall/Badges/ColdStartBadge',
   component: ColdStartBadge,
 };
 
