@@ -98,10 +98,35 @@ export const dateSuffix = (ms: number): string => {
   return `${yyyy}.${mm}.${dd}`;
 };
 
+export const dateSuffixesBetween = (startMs: number, endMs: number): string[] => {
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
+    throw new Error(`Invalid time range: startMs/endMs must be finite numbers`);
+  }
+  if (endMs < startMs) {
+    throw new Error(`Invalid time range: endMs must be >= startMs`);
+  }
+
+  const suffixes: string[] = [];
+
+  // Iterate UTC days inclusively, from start day to end day.
+  const start = new Date(startMs);
+  const end = new Date(endMs);
+  let cur = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
+  const endDay = Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate());
+
+  while (cur <= endDay) {
+    suffixes.push(dateSuffix(cur));
+    cur += 24 * 60 * 60 * 1000;
+  }
+
+  return suffixes;
+};
+
 export const episodeIndexNames = ({
   episodeId,
   endMs,
   indexPrefix = 'logs-endpoint',
+  dateSuffixOverride,
 }: {
   episodeId: string; // ep1
   endMs: number;
@@ -111,8 +136,12 @@ export const episodeIndexNames = ({
    * concrete indices under "logs-endpoint.*".
    */
   indexPrefix?: string;
+  /**
+   * Optional override for the date suffix (YYYY.MM.DD). Useful for deleting indices across a range.
+   */
+  dateSuffixOverride?: string;
 }) => {
-  const suffix = dateSuffix(endMs);
+  const suffix = dateSuffixOverride ?? dateSuffix(endMs);
   const epMatch = episodeId.match(/^ep(\d+)$/);
   if (epMatch) {
     const epNum = epMatch[1];

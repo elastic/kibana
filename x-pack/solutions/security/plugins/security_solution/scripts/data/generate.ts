@@ -17,7 +17,12 @@ import type { KbnClient } from '@kbn/test';
 import { createEsClient, createKbnClient } from './lib/clients';
 import type { EpisodeDocs, EpisodeFileSet, ScaledDoc } from './lib/episodes';
 import { loadEpisode, scaleEpisodes } from './lib/episodes';
-import { ensureIndex, episodeIndexNames, scriptsDataDir } from './lib/indexing';
+import {
+  dateSuffixesBetween,
+  ensureIndex,
+  episodeIndexNames,
+  scriptsDataDir,
+} from './lib/indexing';
 import { ensurePrebuiltRulesInstalledBestEffort } from './lib/prebuilt_rules';
 import { loadInsightsRuleCreateProps } from './lib/insights_rule';
 import { copyPreviewAlertsToRealAlertsIndex, previewRule } from './lib/rule_preview';
@@ -153,16 +158,24 @@ const cleanGeneratedDataBestEffort = async ({
     `--clean enabled: deleting generated episode indices and generated alerts/discoveries in space "${spaceId}" within the requested time range`
   );
 
-  // 1) Remove the exact episode indices created for this run's episodeIds + date suffix.
-  const episodeIndices = episodeIds.flatMap((ep) => {
-    const idx = episodeIndexNames({ episodeId: ep, endMs, indexPrefix });
-    return [idx.endpointEvents, idx.endpointAlerts, idx.insightsAlerts];
-  });
+  // 1) Remove episode indices created by this script for the selected episodeIds across the requested date range.
+  // Indices are suffixed by UTC day (YYYY.MM.DD), so we delete all day-suffixed indices that overlap the range.
+  const suffixes = dateSuffixesBetween(startMs, endMs);
+  const episodeIndices = episodeIds.flatMap((ep) =>
+    suffixes.flatMap((suffix) => {
+      const idx = episodeIndexNames({
+        episodeId: ep,
+        endMs,
+        indexPrefix,
+        dateSuffixOverride: suffix,
+      });
+      return [idx.endpointEvents, idx.endpointAlerts, idx.insightsAlerts];
+    })
+  );
 
   try {
     await esClient.indices.delete({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      index: episodeIndices as any,
+      index: episodeIndices,
       ignore_unavailable: true,
     });
   } catch (e) {
@@ -284,11 +297,25 @@ const ensurePreviewAlertsIndexBestEffort = async ({
 
   // If the preview index was deleted, Rule Preview might not recreate it automatically.
   // Recreate it by cloning the mappings from the real Security alerts backing index.
-  const realAlertsBackingIndex = `.internal.alerts-security.alerts-${spaceId}-000001`;
-  const realExists = await esClient.indices.exists({ index: realAlertsBackingIndex });
-  if (!realExists) {
+  const resolveBackingIndexFromAlias = async (alias: string): Promise<string | undefined> => {
+    try {
+      const resp = await esClient.indices.getAlias({ name: alias });
+      const indices = Object.keys(resp as Record<string, unknown>);
+      return indices.sort()[0];
+    } catch (e) {
+      // Alias might not exist (404) or caller might not have privileges.
+      return undefined;
+    }
+  };
+
+  const realAlertsBackingIndex =
+    (await resolveBackingIndexFromAlias(`.internal.alerts-security.alerts-${spaceId}`)) ??
+    (await resolveBackingIndexFromAlias(`.alerts-security.alerts-${spaceId}`));
+
+  if (!realAlertsBackingIndex) {
     log.warning(
-      `Preview alerts index ${previewAlias} is missing, but cannot recreate it because ${realAlertsBackingIndex} is missing.`
+      `Preview alerts index ${previewAlias} is missing, but cannot recreate it because the real Security alerts backing index could not be resolved. ` +
+        `Initialize detections (Security app) and re-run.`
     );
     return;
   }
@@ -379,6 +406,22 @@ const bulkIndexStreamed = async ({
 
   for (const index of buffers.keys()) {
     await flush(index);
+  }
+
+  // Ensure the freshly indexed docs are visible to searches before rule preview runs.
+  // Without this, rule preview can intermittently see 0 docs until the next refresh interval.
+  try {
+    const indices = [...buffers.keys()];
+    if (indices.length > 0) {
+      await esClient.indices.refresh({ index: indices });
+      log.info(`Refreshed ${indices.length} episode indices`);
+    }
+  } catch (e) {
+    log.warning(
+      `Failed to refresh episode indices (best-effort); rule preview may miss newly indexed docs: ${String(
+        (e as Error).message ?? e
+      )}`
+    );
   }
 
   for (const [index, count] of [...indexedCounts.entries()].sort(([a], [b]) =>
