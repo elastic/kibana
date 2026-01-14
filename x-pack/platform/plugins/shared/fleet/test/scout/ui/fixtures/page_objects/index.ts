@@ -9,14 +9,23 @@ import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 
 import { BrowseIntegrationPage } from './browse_integrations_page';
+import { CreateIntegrationLandingPage } from './create_integration_landing_page';
+import { FleetHomePage } from './fleet_home';
+import { IntegrationHomePage } from './integration_home';
 
 export interface StreamsPageObjects extends PageObjects {
   browseIntegrations: BrowseIntegrationPage;
+  createIntegrationLanding: CreateIntegrationLandingPage;
+  fleetHome: FleetHomePage;
+  integrationHome: IntegrationHomePage;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): StreamsPageObjects {
   return {
     ...pageObjects,
     browseIntegrations: createLazyPageObject(BrowseIntegrationPage, page),
+    createIntegrationLanding: createLazyPageObject(CreateIntegrationLandingPage, page),
+    fleetHome: createLazyPageObject(FleetHomePage, page),
+    integrationHome: createLazyPageObject(IntegrationHomePage, page),
   };
 }
