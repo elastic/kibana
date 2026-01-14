@@ -105,7 +105,7 @@ export const EisUpdateCallout = ({
                 size="s"
                 onClick={handleOnClick}
                 data-test-subj="eisUpdateCalloutCtaBtn"
-                data-telemetry-id={`${dataId}-openUpdateModal-btn`}
+                data-telemetry-id={`${dataId}-updateToEis-btn`}
               >
                 {i18n.EIS_UPDATE_CALLOUT_CTA}
               </EuiButton>
