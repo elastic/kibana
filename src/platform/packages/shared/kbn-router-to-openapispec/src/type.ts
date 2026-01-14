@@ -14,6 +14,10 @@ export interface KnownParameters {
   [paramName: string]: { optional: boolean };
 }
 
+export interface ConvertOptions {
+  sharedSchemas?: Map<string, OpenAPIV3.SchemaObject>;
+}
+
 export interface OpenAPIConverter {
   convertPathParameters(
     schema: unknown,
@@ -30,7 +34,7 @@ export interface OpenAPIConverter {
 
   convert(
     schema: unknown,
-    namespace?: string
+    opts?: ConvertOptions
   ): {
     schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
     shared: { [key: string]: OpenAPIV3.SchemaObject };
