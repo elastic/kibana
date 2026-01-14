@@ -16,7 +16,6 @@ import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 export const EditSignificantEventFlyout = ({
-  refreshDefinition,
   queryToEdit,
   definition,
   isEditFlyoutOpen,
@@ -31,7 +30,6 @@ export const EditSignificantEventFlyout = ({
   generateOnMount,
   aiFeatures,
 }: {
-  refreshDefinition: () => void;
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
@@ -51,7 +49,7 @@ export const EditSignificantEventFlyout = ({
     services: { telemetryClient },
   } = useKibana();
 
-  const { upsertQuery, bulk } = useSignificantEventsApi({
+  const { upsertQuery, bulk, acknowledgeGenerationTask } = useSignificantEventsApi({
     name: definition.stream.name,
   });
 
@@ -64,7 +62,6 @@ export const EditSignificantEventFlyout = ({
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
       generateOnMount={generateOnMount}
-      refreshDefinition={refreshDefinition}
       refreshFeatures={refreshFeatures}
       definition={definition}
       query={queryToEdit}
@@ -109,7 +106,12 @@ export const EditSignificantEventFlyout = ({
                 index: query,
               }))
             ).then(
-              () => {
+              async () => {
+                // Acknowledge the task after successful save
+                await acknowledgeGenerationTask().catch(() => {
+                  // Ignore errors - task acknowledgment is not critical
+                });
+
                 notifications.toasts.addSuccess({
                   title: i18n.translate(
                     'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
@@ -117,7 +119,7 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
-                setIsEditFlyoutOpen(false);
+                onCloseFlyout();
                 refresh();
 
                 telemetryClient.trackSignificantEventsCreated({
