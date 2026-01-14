@@ -29,7 +29,7 @@ export function validateSettings({
 }): ValidationResult {
   if (isServerless) {
     const disallowedSettings = Object.keys(settings).filter(
-      (setting) => !SERVERLESS_SETTINGS_ALLOWLIST.includes(setting)
+      (setting) => !SERVERLESS_SETTINGS_ALLOWLIST.includes(setting as keyof IngestStreamSettings)
     );
     if (disallowedSettings.length > 0) {
       return {
