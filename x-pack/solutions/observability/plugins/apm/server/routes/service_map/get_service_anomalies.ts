@@ -101,6 +101,28 @@ export async function getServiceAnomalies({
                 },
               },
             },
+            // fallback to model_plot if no records are found
+            model_plot_results: {
+              filter: {
+                term: {
+                  result_type: 'model_plot',
+                },
+              },
+              aggs: {
+                metrics: {
+                  top_metrics: {
+                    metrics: asMutableArray([
+                      { field: 'actual' },
+                      { field: ML_TRANSACTION_TYPE_FIELD },
+                    ] as const),
+                    size: 1,
+                    sort: {
+                      timestamp: 'desc' as const,
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -130,9 +152,13 @@ export async function getServiceAnomalies({
     return {
       mlJobIds: jobIds,
       serviceAnomalies: relevantBuckets.map((bucket) => {
-        const metrics = bucket.record_results.metrics.top[0]?.metrics;
+        const recordMetrics = bucket.record_results.metrics.top[0]?.metrics;
+        const modelPlotMetrics = bucket.model_plot_results.metrics.top[0]?.metrics;
 
-        const anomalyScore = metrics?.record_score ? (metrics.record_score as number) : 0;
+        // Anomaly score always comes from records, 0 if no records
+        const anomalyScore = recordMetrics?.record_score
+          ? (recordMetrics.record_score as number)
+          : 0;
 
         const severity = getSeverity(anomalyScore);
         const healthStatus = getServiceHealthStatus({ severity });
@@ -140,8 +166,10 @@ export async function getServiceAnomalies({
         return {
           serviceName: bucket.key.serviceName as string,
           jobId: bucket.key.jobId as string,
-          transactionType: metrics?.by_field_value as string,
-          actualValue: metrics?.actual as number,
+          // Prefer record metrics, fallback to model_plot for context values
+          transactionType: (recordMetrics?.by_field_value ||
+            modelPlotMetrics?.by_field_value) as string,
+          actualValue: (recordMetrics?.actual || modelPlotMetrics?.actual) as number,
           anomalyScore,
           healthStatus,
         };
