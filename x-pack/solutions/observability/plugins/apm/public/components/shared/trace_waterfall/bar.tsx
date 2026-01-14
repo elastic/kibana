@@ -22,25 +22,52 @@ export function Bar({
   left,
   color,
   segments,
+  duration,
+  composite,
 }: {
   width: number;
   left: number;
   color: string;
   segments?: BarSegment[];
+  duration: number;
+  composite?: { count: number; sum: number };
 }) {
   const { euiTheme } = useEuiTheme();
+
+  const barStyle = composite
+    ? getCompositeBarStyle(color, duration, composite)
+    : { backgroundColor: color };
 
   return (
     <div
       css={css`
         position: relative;
         height: ${euiTheme.size.base};
-        background-color: ${color};
         width: ${width}%;
         margin-left: ${left}%;
       `}
+      style={barStyle}
     >
       {segments?.length ? <BarSegments segments={segments} /> : null}
     </div>
   );
+}
+
+function getCompositeBarStyle(
+  color: string,
+  duration: number,
+  composite: { count: number; sum: number }
+) {
+  const percNumItems = 100.0 / composite.count;
+  const spanSumRatio = composite.sum / duration;
+  const percDuration = percNumItems * spanSumRatio;
+
+  return {
+    backgroundImage:
+      `repeating-linear-gradient(90deg, ${color},` +
+      ` ${color} max(${percDuration}%,3px),` +
+      ` transparent max(${percDuration}%,3px),` +
+      ` transparent max(${percNumItems}%,max(${percDuration}%,3px) + 3px))`,
+    backgroundColor: 'transparent',
+  };
 }

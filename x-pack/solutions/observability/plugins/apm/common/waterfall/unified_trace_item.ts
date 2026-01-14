@@ -31,4 +31,9 @@ export interface TraceItem {
   };
   icon?: string;
   coldstart?: boolean;
+  composite?: {
+    count: number;
+    sum: number;
+    compressionStrategy: string;
+  };
 }

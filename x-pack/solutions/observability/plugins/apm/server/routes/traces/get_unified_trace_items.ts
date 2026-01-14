@@ -24,6 +24,9 @@ import {
   PARENT_ID,
   PROCESSOR_EVENT,
   SERVICE_NAME,
+  SPAN_COMPOSITE_COUNT,
+  SPAN_COMPOSITE_SUM,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_DURATION,
   SPAN_ID,
   SPAN_LINKS_TRACE_ID,
@@ -73,6 +76,9 @@ const optionalFields = asMutableArray([
   SPAN_LINKS_TRACE_ID,
   AGENT_NAME,
   FAAS_COLDSTART,
+  SPAN_COMPOSITE_COUNT,
+  SPAN_COMPOSITE_SUM,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -235,6 +241,11 @@ export async function getUnifiedTraceItems({
         processorEvent: event[PROCESSOR_EVENT],
       }),
       coldstart: event[FAAS_COLDSTART],
+      composite: resolveComposite(
+        event[SPAN_COMPOSITE_COUNT],
+        event[SPAN_COMPOSITE_SUM],
+        event[SPAN_COMPOSITE_COMPRESSION_STRATEGY]
+      ),
     } satisfies TraceItem;
   });
 
@@ -286,4 +297,14 @@ const resolveStatus = (eventOutcome?: EventOutcome, statusCode?: StatusCode): Ev
   if (statusCode) {
     return { fieldName: STATUS_CODE, value: statusCode };
   }
+};
+
+const resolveComposite = (
+  count?: number,
+  sum?: number,
+  compressionStrategy?: string
+): { count: number; sum: number; compressionStrategy: string } | undefined => {
+  if (!count || !sum || !compressionStrategy) return undefined;
+
+  return { count, sum, compressionStrategy };
 };

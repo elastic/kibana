@@ -52,6 +52,12 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
     }
   );
 
+  const compositePrefix = item.composite?.compressionStrategy === 'exact_match' ? 'x' : '';
+
+  const displayName = item.composite
+    ? `${item.composite.count}${compositePrefix} ${item.name}`
+    : item.name;
+
   return (
     <div
       css={css`
@@ -87,7 +93,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           `}
         >
           <EuiText css={{ overflow: 'hidden' }} size="s">
-            <TruncateWithTooltip content={item.name} text={item.name} />
+            <TruncateWithTooltip content={displayName} text={displayName} />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
