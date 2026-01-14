@@ -11,7 +11,7 @@ import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_
 import { internalStateActions, selectTab } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -20,7 +20,7 @@ const setup = async () => {
   const services = createDiscoverServicesMock();
   const { internalState, initializeTabs, initializeSingleTab } = getDiscoverInternalStateMock({
     services,
-    persistedDataViews: [dataViewMock],
+    persistedDataViews: [dataViewMockWithTimeField],
   });
 
   // Create a persisted tab with ES|QL query
@@ -28,7 +28,10 @@ const setup = async () => {
     tab: getTabStateMock({
       id: 'test-tab',
       initialInternalState: {
-        serializedSearchSource: { index: dataViewMock.id, query: { esql: 'FROM test-index' } },
+        serializedSearchSource: {
+          index: dataViewMockWithTimeField.id,
+          query: { esql: 'FROM test-index' },
+        },
       },
       appState: {
         query: { esql: 'FROM test-index' },
@@ -94,6 +97,76 @@ describe('tab_state actions', () => {
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.DataView,
         dataViewId,
+      });
+    });
+  });
+
+  describe('transitionFromDataViewToESQL', () => {
+    it('should transition from Data View mode to ES|QL mode', async () => {
+      const { internalState, tabId } = await setup();
+      const dataView = dataViewMockWithTimeField;
+
+      const query = { query: "foo: 'bar'", language: 'kuery' };
+      const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
+      internalState.dispatch(
+        internalStateActions.setGlobalState({
+          tabId,
+          globalState: { filters },
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId,
+          appState: {
+            query,
+            dataSource: {
+              type: DataSourceType.DataView,
+              dataViewId: 'the-data-view-id',
+            },
+            sort: [
+              ['@timestamp', 'asc'],
+              ['bytes', 'desc'],
+            ],
+          },
+        })
+      );
+
+      let state = internalState.getState();
+      let tab = selectTab(state, tabId);
+
+      expect(tab.appState.query).toStrictEqual(query);
+      expect(tab.appState.sort).toEqual([
+        ['@timestamp', 'asc'],
+        ['bytes', 'desc'],
+      ]);
+      expect(tab.globalState.filters).toStrictEqual(filters);
+      expect(tab.appState.filters).toBeUndefined();
+      expect(tab.appState.dataSource).toStrictEqual({
+        type: DataSourceType.DataView,
+        dataViewId: 'the-data-view-id',
+      });
+
+      // Transition to ES|QL mode
+      internalState.dispatch(
+        internalStateActions.transitionFromDataViewToESQL({
+          tabId,
+          dataView,
+        })
+      );
+
+      // Get the updated tab state
+      state = internalState.getState();
+      tab = selectTab(state, tabId);
+
+      // Verify the state was updated correctly
+      expect(tab.appState.query).toStrictEqual({
+        esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
+      });
+      expect(tab.appState.sort).toEqual([['bytes', 'desc']]);
+      expect(tab.globalState.filters).toStrictEqual([]);
+      expect(tab.appState.filters).toStrictEqual([]);
+      expect(tab.appState.dataSource).toStrictEqual({
+        type: DataSourceType.Esql,
       });
     });
   });

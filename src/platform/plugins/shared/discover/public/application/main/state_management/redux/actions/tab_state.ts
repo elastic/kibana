@@ -8,6 +8,9 @@
  */
 
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { isOfQueryType } from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
@@ -18,7 +21,7 @@ import {
   type TabActionPayload,
 } from '../internal_state';
 import { selectTab } from '../selectors';
-import type { DiscoverInternalState, TabState } from '../types';
+import type { DiscoverAppState, DiscoverInternalState, TabState } from '../types';
 
 type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
 
@@ -141,7 +144,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewId: string }>]
 > = ({ tabId, dataViewId }) =>
   async function transitionFromESQLToDataViewThunkFn(dispatch) {
-    return dispatch(
+    dispatch(
       updateAppState({
         tabId,
         appState: {
@@ -157,4 +160,49 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
         },
       })
     );
+  };
+
+const clearTimeFieldFromSort = (
+  sort: DiscoverAppState['sort'],
+  timeFieldName: string | undefined
+) => {
+  if (!Array.isArray(sort) || !timeFieldName) return sort;
+
+  const filteredSort = sort.filter(([field]) => field !== timeFieldName);
+
+  return filteredSort;
+};
+
+/**
+ * Triggered when transitioning from ESQL to Dataview
+ * Clean ups the ES|QL query and moves to the dataview mode
+ */
+export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  async function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+    const currentState = getState();
+    const appState = selectTab(currentState, tabId).appState;
+    const { query, sort } = appState;
+    const filterQuery = query && isOfQueryType(query) ? query : undefined;
+    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
+    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
+
+    dispatch(
+      updateAppState({
+        tabId,
+        appState: {
+          query: { esql: queryString },
+          filters: [],
+          dataSource: {
+            type: DataSourceType.Esql,
+          },
+          columns: [],
+          sort: clearedSort,
+        },
+      })
+    );
+
+    // clears pinned filters
+    dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
   };

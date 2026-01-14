@@ -238,6 +238,9 @@ export const useTopNavLinks = ({
   const transitionFromESQLToDataView = useCurrentTabAction(
     internalStateActions.transitionFromESQLToDataView
   );
+  const transitionFromDataViewToESQL = useCurrentTabAction(
+    internalStateActions.transitionFromDataViewToESQL
+  );
 
   return useMemo(() => {
     const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
@@ -288,7 +291,7 @@ export const useTopNavLinks = ({
                 dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
               }
             } else {
-              state.actions.transitionFromDataViewToESQL(dataView);
+              dispatch(transitionFromDataViewToESQL({ dataView }));
               services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
             }
           }
@@ -334,5 +337,6 @@ export const useTopNavLinks = ({
     dispatch,
     state,
     transitionFromESQLToDataView,
+    transitionFromDataViewToESQL,
   ]);
 };

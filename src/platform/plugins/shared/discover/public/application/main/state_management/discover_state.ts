@@ -28,9 +28,8 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import { FilterStateStore, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
+import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual, isFunction } from 'lodash';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../..';
@@ -185,11 +184,6 @@ export interface DiscoverStateContainer {
      * @param dataView
      */
     onDataViewEdited: (dataView: DataView) => Promise<void>;
-    /**
-     * Triggered when transitioning from ESQL to Dataview
-     * Clean ups the ES|QL query and moves to the dataview mode
-     */
-    transitionFromDataViewToESQL: (dataView: DataView) => void;
     /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
@@ -350,44 +344,6 @@ export function getDiscoverStateContainer({
         savedSearchId: newSavedSearchId,
       });
     }
-  };
-
-  const clearTimeFieldFromSort = (
-    sort: DiscoverAppState['sort'],
-    timeFieldName: string | undefined
-  ) => {
-    if (!Array.isArray(sort) || !timeFieldName) return sort;
-
-    const filteredSort = sort.filter(([field]) => field !== timeFieldName);
-
-    return filteredSort;
-  };
-
-  const transitionFromDataViewToESQL = (dataView: DataView) => {
-    const appState = getCurrentTab().appState;
-    const { query, sort } = appState;
-    const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
-    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
-
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.updateAppState)({
-        appState: {
-          query: { esql: queryString },
-          filters: [],
-          dataSource: {
-            type: DataSourceType.Esql,
-          },
-          columns: [],
-          sort: clearedSort,
-        },
-      })
-    );
-
-    // clears pinned filters
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.updateGlobalState)({ globalState: { filters: [] } })
-    );
   };
 
   const onDataViewCreated = async (nextDataView: DataView) => {
@@ -800,7 +756,6 @@ export function getDiscoverStateContainer({
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
-      transitionFromDataViewToESQL,
       onUpdateQuery,
       setDataView,
       updateAdHocDataViewId,
