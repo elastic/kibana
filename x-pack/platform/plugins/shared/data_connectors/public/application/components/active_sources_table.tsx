@@ -298,7 +298,6 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
           onEdit={onEdit}
           onClone={onClone}
           onDelete={onDelete}
-          disabled={selectedItems.length > 0}
         />
       ),
     },
