@@ -346,8 +346,8 @@ describe('telemetry tasks', () => {
 
       expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
       expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
-      expect(body.policy_config).toStrictEqual({});
-      expect(body.policy_response).toStrictEqual({});
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
     });
 
     it('should manage runtime errors searching endpoint metrics', async () => {
