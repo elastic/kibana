@@ -81,7 +81,9 @@ export const ensurePrebuiltRulesInstalledBestEffort = async ({
     });
 
     // Get the list of installable rules (rule_id + version) and install only the ones in the ruleset.
-    const review = await kbnClient.request<{ rules: Array<{ rule_id: string; name: string; version?: number }> }>({
+    const review = await kbnClient.request<{
+      rules: Array<{ rule_id: string; name: string; version?: number }>;
+    }>({
       method: 'POST',
       path: REVIEW_RULE_INSTALLATION_URL,
       headers: {
@@ -122,4 +124,3 @@ export const ensurePrebuiltRulesInstalledBestEffort = async ({
     );
   }
 };
-

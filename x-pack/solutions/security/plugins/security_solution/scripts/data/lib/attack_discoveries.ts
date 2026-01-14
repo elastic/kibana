@@ -7,11 +7,18 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Client } from '@elastic/elasticsearch';
+import type {
+  BulkOperationType,
+  BulkResponseItem,
+  SortResults,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import { transformToAlertDocuments } from '../../../../elastic_assistant/server/lib/attack_discovery/persistence/transforms/transform_to_alert_documents';
-import { attackDiscoveryAlertFieldMap } from '../../../../elastic_assistant/server/lib/attack_discovery/schedules/fields';
+import { transformToAlertDocuments } from '@kbn/elastic-assistant-plugin/server/lib/attack_discovery/persistence/transforms/transform_to_alert_documents';
+import { attackDiscoveryAlertFieldMap } from '@kbn/elastic-assistant-plugin/server/lib/attack_discovery/schedules/fields';
 
 const ALERT_UUID = 'kibana.alert.uuid';
 
@@ -30,6 +37,16 @@ interface AlertSummary {
   ruleName?: string;
 }
 
+interface AlertSearchHitSource {
+  '@timestamp'?: unknown;
+  host?: { name?: unknown };
+  user?: { name?: unknown };
+  kibana?: { alert?: { rule?: { name?: unknown } } };
+}
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
+
 const fetchAlertSummaries = async ({
   esClient,
   alertsIndex,
@@ -44,10 +61,10 @@ const fetchAlertSummaries = async ({
   maxAlerts: number;
 }): Promise<AlertSummary[]> => {
   const results: AlertSummary[] = [];
-  let searchAfter: unknown[] | undefined;
+  let searchAfter: SortResults | undefined;
 
   while (results.length < maxAlerts) {
-    const resp = await esClient.search<unknown>({
+    const resp = await esClient.search<AlertSearchHitSource>({
       index: alertsIndex,
       size: Math.min(1000, maxAlerts - results.length),
       sort: [{ '@timestamp': 'asc' }, { _shard_doc: 'asc' }],
@@ -73,14 +90,18 @@ const fetchAlertSummaries = async ({
     if (hits.length === 0) break;
 
     for (const hit of hits) {
-      const src = hit._source as any;
-      results.push({
-        id: hit._id!,
-        timestamp: src?.['@timestamp'],
-        hostName: src?.host?.name,
-        userName: src?.user?.name,
-        ruleName: src?.kibana?.alert?.rule?.name,
-      });
+      const id = hit._id;
+      const src = hit._source;
+      const timestamp = asString(src?.['@timestamp']);
+      if (id && timestamp) {
+        results.push({
+          id,
+          timestamp,
+          hostName: asString(src?.host?.name),
+          userName: asString(src?.user?.name),
+          ruleName: asString(src?.kibana?.alert?.rule?.name),
+        });
+      }
     }
 
     searchAfter = hits[hits.length - 1].sort;
@@ -138,7 +159,7 @@ const groupAlertsToDiscoveries = ({
       byDay.set(day, list);
     }
 
-    for (const [day, dayAlerts] of [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    for (const [, dayAlerts] of [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b))) {
       const alertIds = dayAlerts.slice(0, 20).map((a) => a.id); // keep small per discovery
       const discoveryTimeIso = dayAlerts[dayAlerts.length - 1].timestamp;
       discoveries.push({
@@ -187,6 +208,7 @@ const ensureAdhocAttackDiscoveryIndex = async ({
       index: backingIndex,
       properties: {
         ecs: {
+          type: 'object',
           properties: {
             version: { type: 'keyword' },
           },
@@ -204,12 +226,13 @@ const ensureAdhocAttackDiscoveryIndex = async ({
 
   log.info(`Creating ad-hoc Attack Discovery backing index: ${backingIndex}`);
 
-  const baseMappings = mappingFromFieldMap(attackDiscoveryAlertFieldMap) as any;
-  const mappings = {
+  const baseMappings: MappingTypeMapping = mappingFromFieldMap(attackDiscoveryAlertFieldMap);
+  const mappings: MappingTypeMapping = {
     ...baseMappings,
     properties: {
       ...(baseMappings?.properties ?? {}),
       ecs: {
+        type: 'object',
         properties: {
           version: { type: 'keyword' },
         },
@@ -276,14 +299,21 @@ export const generateAndIndexAttackDiscoveries = async ({
     `Generating ${discoveryGroups.length} synthetic Attack Discoveries into ${attackDiscoveryIndex}`
   );
 
-  const authenticatedUser = {
+  const authenticatedUser: AuthenticatedUser = {
     // IMPORTANT:
     // The Attack Discovery "find" API filters results to the current user unless "shared" is requested.
     // If we attribute docs to a different username, they won't show up in the UI for the logged-in user.
     username: authenticatedUsername,
+    roles: [],
+    enabled: true,
+    authentication_realm: { name: 'scripts', type: 'scripts' },
+    lookup_realm: { name: 'scripts', type: 'scripts' },
+    authentication_provider: { type: 'scripts', name: 'scripts' },
+    authentication_type: 'realm',
+    elastic_cloud_user: false,
     // `profile_uid` is only used if `username` is empty; keep it stable anyway.
     profile_uid: authenticatedUsername,
-  } as any;
+  };
 
   const commonParams = {
     alertsContextCount: 0,
@@ -292,7 +322,6 @@ export const generateAndIndexAttackDiscoveries = async ({
       actionTypeId: 'none',
       connectorId: 'none',
       model: 'none',
-      provider: 'none',
     },
     connectorName: 'Synthetic (no-LLM)',
     enableFieldRendering: true,
@@ -314,9 +343,9 @@ export const generateAndIndexAttackDiscoveries = async ({
         : undefined,
       detailsMarkdown:
         `This synthetic attack discovery groups alerts that occurred close in time for investigation.\n\n` +
-        `- Alerts: ${g.alertIds.length}\n` +
-        (g.hostName ? `- Host: {{ host.name ${g.hostName} }}\n` : '') +
-        (g.userName ? `- User: {{ user.name ${g.userName} }}\n` : ''),
+        `- Alerts: ${g.alertIds.length}\n${
+          g.hostName ? `- Host: {{ host.name ${g.hostName} }}\n` : ''
+        }${g.userName ? `- User: {{ user.name ${g.userName} }}\n` : ''}`,
       mitreAttackTactics: [],
       timestamp: g.discoveryTimeIso,
     };
@@ -335,18 +364,27 @@ export const generateAndIndexAttackDiscoveries = async ({
     });
 
     for (const doc of docs) {
-      const id = (doc as any)[ALERT_UUID];
+      const uuidField = (doc as unknown as Record<string, unknown>)[ALERT_UUID];
+      const id = asString(uuidField);
+      if (!id) {
+        throw new Error(`Attack Discovery alert document is missing a valid ${ALERT_UUID}`);
+      }
       // Use "index" so repeated runs are idempotent (same deterministic ids).
-      bulkBody.push({ index: { _index: attackDiscoveryIndex, _id: id } }, doc as any);
+      bulkBody.push(
+        { index: { _index: attackDiscoveryIndex, _id: id } },
+        doc as unknown as Record<string, unknown>
+      );
     }
   }
 
   const resp = await esClient.bulk({ refresh: true, body: bulkBody });
   if (resp.errors) {
-    const first = (resp.items ?? []).find((item: any) => {
-      const op = item?.index ?? item?.create ?? item?.update ?? item?.delete;
-      return Boolean(op?.error);
-    }) as any;
+    const first = (resp.items ?? []).find(
+      (item: Partial<Record<BulkOperationType, BulkResponseItem>>) => {
+        const op = item.index ?? item.create ?? item.update ?? item.delete;
+        return Boolean(op?.error);
+      }
+    );
     const op = first?.index ?? first?.create ?? first?.update ?? first?.delete;
     if (op?.error) {
       log.error(

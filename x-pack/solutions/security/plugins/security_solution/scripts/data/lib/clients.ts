@@ -57,8 +57,6 @@ export const createKbnClient = ({
     log,
     // KbnClient uses the URL (including credentials) to do basic auth.
     url: buildUrlWithCredentials(url, username, password),
-    username,
-    password,
   };
   return new KbnClient(options);
 };

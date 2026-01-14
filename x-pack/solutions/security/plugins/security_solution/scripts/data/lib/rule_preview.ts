@@ -27,19 +27,21 @@ export const previewRule = async ({
   log: ToolingLog;
   req: RulePreviewRequest;
 }): Promise<{ previewId: string }> => {
-  const resp = await kbnClient.request<{ previewId?: string; logs?: unknown; isAborted?: boolean }>({
-    method: 'POST',
-    path: DETECTION_ENGINE_RULES_PREVIEW,
-    headers: {
-      'kbn-xsrf': 'true',
-      'elastic-api-version': PUBLIC_API_VERSION,
-    },
-    body: {
-      ...req.rule,
-      invocationCount: req.invocationCount,
-      timeframeEnd: req.timeframeEndIso,
-    },
-  });
+  const resp = await kbnClient.request<{ previewId?: string; logs?: unknown; isAborted?: boolean }>(
+    {
+      method: 'POST',
+      path: DETECTION_ENGINE_RULES_PREVIEW,
+      headers: {
+        'kbn-xsrf': 'true',
+        'elastic-api-version': PUBLIC_API_VERSION,
+      },
+      body: {
+        ...req.rule,
+        invocationCount: req.invocationCount,
+        timeframeEnd: req.timeframeEndIso,
+      },
+    }
+  );
 
   const previewId = resp.data.previewId;
   if (!previewId) {
@@ -67,12 +69,16 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
   const previewIndex = `.preview.alerts-security.alerts-${spaceId}`;
   const destIndex = `.alerts-security.alerts-${spaceId}`;
 
-  log.info(`Copying preview alerts from ${previewIndex} to ${destIndex} for previewId=${previewId}`);
+  log.info(
+    `Copying preview alerts from ${previewIndex} to ${destIndex} for previewId=${previewId}`
+  );
 
   try {
     const srcExists = await esClient.indices.exists({ index: previewIndex });
     if (!srcExists) {
-      log.warning(`Preview alerts index ${previewIndex} does not exist (no preview alerts were written).`);
+      log.warning(
+        `Preview alerts index ${previewIndex} does not exist (no preview alerts were written).`
+      );
       return;
     }
 
@@ -86,68 +92,66 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
     await esClient.reindex({
       wait_for_completion: true,
       refresh: true,
-      body: {
-        source: {
-          index: previewIndex,
-          query: {
-            term: {
-              'kibana.alert.rule.uuid': previewId,
-            },
+      source: {
+        index: previewIndex,
+        query: {
+          term: {
+            'kibana.alert.rule.uuid': previewId,
           },
         },
-        dest: {
-          index: destIndex,
-          // Default op_type overwrites existing docs, which makes reruns idempotent.
-        },
-        script: targetRule
-          ? {
-              lang: 'painless',
-              params: {
-                uuid: targetRule.id,
-                rule_id: targetRule.rule_id,
-                name: targetRule.name,
-                startMs: timestampRange?.startMs,
-                endMs: timestampRange?.endMs,
-              },
-              source: `
-                // IMPORTANT:
-                // Preview alerts often have deterministic _ids that can collide across multiple previews.
-                // If we reindex them as-is, later previews overwrite earlier ones and it looks like all
-                // alerts came from a single rule. To make attribution stable across multiple rules,
-                // namespace both the ES _id and the kibana.alert.uuid by the target rule uuid.
-                def newId = ctx._id + ':' + params.uuid;
-                ctx._id = newId;
-                ctx._source['kibana.alert.uuid'] = newId;
-
-                // Spread alerts across the requested time range to avoid clustering by rule.
-                // This makes the UI look more realistic (alerts from different rules interleave).
-                if (params.startMs != null && params.endMs != null && params.endMs > params.startMs) {
-                  long rangeMs = params.endMs - params.startMs;
-                  long h = (newId).hashCode();
-                  if (h < 0) { h = -h; }
-                  long tsMs = params.startMs + (h % rangeMs);
-                  def iso = java.time.Instant.ofEpochMilli(tsMs).toString();
-                  ctx._source['@timestamp'] = iso;
-                  if (ctx._source.containsKey('kibana.alert.start')) { ctx._source['kibana.alert.start'] = iso; }
-                  if (ctx._source.containsKey('kibana.alert.last_detected')) { ctx._source['kibana.alert.last_detected'] = iso; }
-                  if (ctx._source.containsKey('kibana.alert.rule.execution.timestamp')) { ctx._source['kibana.alert.rule.execution.timestamp'] = iso; }
-                }
-
-                ctx._source['kibana.alert.rule.uuid'] = params.uuid;
-                ctx._source['kibana.alert.rule.rule_id'] = params.rule_id;
-                ctx._source['kibana.alert.rule.name'] = params.name;
-                ctx._source['kibana.alert.rule.enabled'] = true;
-                ctx._source['kibana.alert.rule.producer'] = 'siem';
-
-                if (ctx._source.containsKey('kibana.alert.rule.parameters') && ctx._source['kibana.alert.rule.parameters'] != null) {
-                  ctx._source['kibana.alert.rule.parameters'].rule_id = params.rule_id;
-                  // ensure the name isn't overridden by source fields
-                  ctx._source['kibana.alert.rule.parameters'].rule_name_override = null;
-                }
-              `,
-            }
-          : undefined,
       },
+      dest: {
+        index: destIndex,
+        // Default op_type overwrites existing docs, which makes reruns idempotent.
+      },
+      script: targetRule
+        ? {
+            lang: 'painless',
+            params: {
+              uuid: targetRule.id,
+              rule_id: targetRule.rule_id,
+              name: targetRule.name,
+              startMs: timestampRange?.startMs,
+              endMs: timestampRange?.endMs,
+            },
+            source: `
+              // IMPORTANT:
+              // Preview alerts often have deterministic _ids that can collide across multiple previews.
+              // If we reindex them as-is, later previews overwrite earlier ones and it looks like all
+              // alerts came from a single rule. To make attribution stable across multiple rules,
+              // namespace both the ES _id and the kibana.alert.uuid by the target rule uuid.
+              def newId = ctx._id + ':' + params.uuid;
+              ctx._id = newId;
+              ctx._source['kibana.alert.uuid'] = newId;
+
+              // Spread alerts across the requested time range to avoid clustering by rule.
+              // This makes the UI look more realistic (alerts from different rules interleave).
+              if (params.startMs != null && params.endMs != null && params.endMs > params.startMs) {
+                long rangeMs = params.endMs - params.startMs;
+                long h = (newId).hashCode();
+                if (h < 0) { h = -h; }
+                long tsMs = params.startMs + (h % rangeMs);
+                def iso = java.time.Instant.ofEpochMilli(tsMs).toString();
+                ctx._source['@timestamp'] = iso;
+                if (ctx._source.containsKey('kibana.alert.start')) { ctx._source['kibana.alert.start'] = iso; }
+                if (ctx._source.containsKey('kibana.alert.last_detected')) { ctx._source['kibana.alert.last_detected'] = iso; }
+                if (ctx._source.containsKey('kibana.alert.rule.execution.timestamp')) { ctx._source['kibana.alert.rule.execution.timestamp'] = iso; }
+              }
+
+              ctx._source['kibana.alert.rule.uuid'] = params.uuid;
+              ctx._source['kibana.alert.rule.rule_id'] = params.rule_id;
+              ctx._source['kibana.alert.rule.name'] = params.name;
+              ctx._source['kibana.alert.rule.enabled'] = true;
+              ctx._source['kibana.alert.rule.producer'] = 'siem';
+
+              if (ctx._source.containsKey('kibana.alert.rule.parameters') && ctx._source['kibana.alert.rule.parameters'] != null) {
+                ctx._source['kibana.alert.rule.parameters'].rule_id = params.rule_id;
+                // ensure the name isn't overridden by source fields
+                ctx._source['kibana.alert.rule.parameters'].rule_name_override = null;
+              }
+            `,
+          }
+        : undefined,
       conflicts: 'proceed',
     });
   } catch (e) {
@@ -156,4 +160,3 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
     throw e;
   }
 };
-

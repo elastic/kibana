@@ -12,7 +12,9 @@ import fs from 'fs';
  * The export contains additional fields that are not allowed by the create schema, so we
  * whitelist only the supported create fields.
  */
-export const loadInsightsRuleCreateProps = (ruleExportNdjsonPath: string): Record<string, unknown> => {
+export const loadInsightsRuleCreateProps = (
+  ruleExportNdjsonPath: string
+): Record<string, unknown> => {
   const firstLine = fs.readFileSync(ruleExportNdjsonPath, 'utf8').split('\n').find(Boolean);
   if (!firstLine) throw new Error(`Invalid rule export file (empty): ${ruleExportNdjsonPath}`);
   const rule = JSON.parse(firstLine) as Record<string, unknown>;
@@ -57,4 +59,3 @@ export const loadInsightsRuleCreateProps = (ruleExportNdjsonPath: string): Recor
 
   return allowed;
 };
-

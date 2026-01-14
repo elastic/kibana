@@ -65,8 +65,9 @@ export const readNdjson = async (filePath: string): Promise<Array<Record<string,
   const rl = createInterface({ input: out, crlfDelay: Infinity });
   const reader = (async () => {
     for await (const line of rl) {
-      if (!line) continue;
-      docs.push(JSON.parse(line) as Record<string, unknown>);
+      if (line) {
+        docs.push(JSON.parse(line) as Record<string, unknown>);
+      }
     }
   })();
 
@@ -294,7 +295,8 @@ export async function* scaleEpisodes(
 
     const pickFrom = (pool: string[], salt: string, fallback: string[]): string => {
       const effective = pool.length > 0 ? pool : fallback;
-      const idx = Math.floor(hashToUnitFloat(`${cloneKey}:${salt}`) * effective.length) % effective.length;
+      const idx =
+        Math.floor(hashToUnitFloat(`${cloneKey}:${salt}`) * effective.length) % effective.length;
       return effective[idx];
     };
 
