@@ -2581,11 +2581,6 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 
 ## Security Solution sub teams - Threat Hunting
 
-/x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/security-threat-hunting
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/security-threat-hunting
-src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/security-threat-hunting
-
 /x-pack/solutions/security/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/control_columns @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/security-threat-hunting
@@ -2610,7 +2605,6 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/accessibility @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/draggables @elastic/security-threat-hunting-investigations
@@ -2623,11 +2617,9 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 /x-pack/solutions/security/plugins/security_solution/public/common/components/first_last_seen/first_last_seen.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_date/index.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_number/index.tsx @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/hover_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/inspect @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/last_event_time @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links @elastic/security-threat-hunting-investigations
@@ -2703,6 +2695,11 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 /x-pack/solutions/security/packages/test-api-clients/supertest/timelines.gen.ts @elastic/security-threat-hunting-investigations
 
 ## Security Solution Threat Hunting areas - Kibana Cases
+
+/x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/security-threat-hunting
+src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/security-threat-hunting
 
 /x-pack/solutions/observability/test/api_integration/apis/cases/ @elastic/kibana-cases
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/cases/ @elastic/kibana-cases
