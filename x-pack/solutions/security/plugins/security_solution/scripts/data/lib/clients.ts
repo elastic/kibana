@@ -16,6 +16,13 @@ export interface StackConnectionOptions {
   spaceId?: string;
 }
 
+const buildUrlWithCredentials = (url: string, username: string, password: string): string => {
+  const u = new URL(url);
+  u.username = username;
+  u.password = password;
+  return u.toString();
+};
+
 export const createEsClient = ({
   elasticsearchUrl,
   username,
@@ -35,13 +42,21 @@ export const createKbnClient = ({
   spaceId,
   log,
 }: StackConnectionOptions & { log: ToolingLog }): KbnClient => {
-  const url = spaceId ? new URL(`/s/${spaceId}`, kibanaUrl).toString() : kibanaUrl;
+  const url = (() => {
+    if (!spaceId) return kibanaUrl;
+
+    const base = new URL(kibanaUrl);
+    // Preserve Kibana basePath (e.g. /kbn) if present
+    const basePath = base.pathname.replace(/\/+$/, ''); // trim trailing slashes
+    base.pathname = `${basePath}/s/${spaceId}`;
+    return base.toString();
+  })();
   const options: KbnClientOptions = {
     log,
-    url,
+    // KbnClient uses the URL (including credentials) to do basic auth.
+    url: buildUrlWithCredentials(url, username, password),
     username,
     password,
   };
   return new KbnClient(options);
 };
-

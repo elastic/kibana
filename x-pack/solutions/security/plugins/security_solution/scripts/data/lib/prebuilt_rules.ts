@@ -11,7 +11,9 @@ import {
   BOOTSTRAP_PREBUILT_RULES_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
+  REVIEW_RULE_INSTALLATION_URL,
 } from '../../../common/api/detection_engine/prebuilt_rules';
+import { resolveRulesetForInstall } from './ruleset';
 
 interface PrebuiltRulesStatusResponse {
   stats: {
@@ -27,9 +29,11 @@ const INTERNAL_API_VERSION = '1';
 export const ensurePrebuiltRulesInstalledBestEffort = async ({
   kbnClient,
   log,
+  rulesetPath,
 }: {
   kbnClient: KbnClient;
   log: ToolingLog;
+  rulesetPath: string;
 }) => {
   const statusResp = await kbnClient.request<PrebuiltRulesStatusResponse>({
     method: 'GET',
@@ -41,7 +45,8 @@ export const ensurePrebuiltRulesInstalledBestEffort = async ({
   });
 
   const stats = statusResp.data.stats;
-  const needsInstall = stats.num_prebuilt_rules_installed === 0 || stats.num_prebuilt_rules_to_install > 0;
+  const needsInstall =
+    stats.num_prebuilt_rules_installed === 0 || stats.num_prebuilt_rules_to_install > 0;
 
   if (!needsInstall) {
     log.info(
@@ -50,8 +55,18 @@ export const ensurePrebuiltRulesInstalledBestEffort = async ({
     return;
   }
 
+  // If there are already many installed rules, we cannot "uninstall" from here.
+  // We'll only install the ruleset subset on completely fresh installs.
+  if (stats.num_prebuilt_rules_installed > 0) {
+    log.warning(
+      `Prebuilt rules are partially installed already (installed=${stats.num_prebuilt_rules_installed}). ` +
+        `This script will not install additional rules beyond what is already present.`
+    );
+    return;
+  }
+
   log.info(
-    `Prebuilt rules missing (installed=${stats.num_prebuilt_rules_installed}, to_install=${stats.num_prebuilt_rules_to_install}). Installing best-effort...`
+    `Prebuilt rules missing (installed=${stats.num_prebuilt_rules_installed}, to_install=${stats.num_prebuilt_rules_to_install}). Installing ruleset subset best-effort...`
   );
 
   try {
@@ -65,6 +80,28 @@ export const ensurePrebuiltRulesInstalledBestEffort = async ({
       },
     });
 
+    // Get the list of installable rules (rule_id + version) and install only the ones in the ruleset.
+    const review = await kbnClient.request<{ rules: Array<{ rule_id: string; name: string; version?: number }> }>({
+      method: 'POST',
+      path: REVIEW_RULE_INSTALLATION_URL,
+      headers: {
+        'kbn-xsrf': 'true',
+        'elastic-api-version': INTERNAL_API_VERSION,
+      },
+    });
+
+    const toInstall = resolveRulesetForInstall({
+      log,
+      rulesetPath,
+      installableRules: review.data.rules,
+      strict: false,
+    });
+
+    if (toInstall.length === 0) {
+      log.warning(`No installable prebuilt rules matched the ruleset; skipping install.`);
+      return;
+    }
+
     await kbnClient.request({
       method: 'POST',
       path: PERFORM_RULE_INSTALLATION_URL,
@@ -72,7 +109,10 @@ export const ensurePrebuiltRulesInstalledBestEffort = async ({
         'kbn-xsrf': 'true',
         'elastic-api-version': INTERNAL_API_VERSION,
       },
-      body: {},
+      body: {
+        mode: 'SPECIFIC_RULES',
+        rules: toInstall.map((r) => ({ rule_id: r.rule_id, version: r.version })),
+      },
     });
   } catch (e) {
     log.error(`Failed to install prebuilt rules automatically.`);

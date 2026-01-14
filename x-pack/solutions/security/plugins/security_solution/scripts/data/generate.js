@@ -8,5 +8,5 @@
 require('@kbn/setup-node-env');
 require('@kbn/babel-register').install();
 
-require('./generate');
+require('./generate.ts');
 

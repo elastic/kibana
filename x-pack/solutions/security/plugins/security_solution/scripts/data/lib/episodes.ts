@@ -57,9 +57,8 @@ const setNested = (obj: Record<string, unknown>, path: string[], value: unknown)
   cur[path[path.length - 1]] = value;
 };
 
-export const readNdjsonGz = async (filePath: string): Promise<Array<Record<string, unknown>>> => {
+export const readNdjson = async (filePath: string): Promise<Array<Record<string, unknown>>> => {
   const fileStream = fs.createReadStream(filePath);
-  const gunzip = createGunzip();
   const out = new PassThrough();
   const docs: Array<Record<string, unknown>> = [];
 
@@ -71,15 +70,20 @@ export const readNdjsonGz = async (filePath: string): Promise<Array<Record<strin
     }
   })();
 
-  await pipeline(fileStream, gunzip, out);
+  if (filePath.endsWith('.gz')) {
+    const gunzip = createGunzip();
+    await pipeline(fileStream, gunzip, out);
+  } else {
+    await pipeline(fileStream, out);
+  }
   await reader;
 
   return docs;
 };
 
 export const loadEpisode = async (files: EpisodeFileSet): Promise<EpisodeDocs> => {
-  const dataDocs = await readNdjsonGz(files.dataPath);
-  const alertDocs = await readNdjsonGz(files.alertsPath);
+  const dataDocs = await readNdjson(files.dataPath);
+  const alertDocs = await readNdjson(files.alertsPath);
 
   const timestamps = [...dataDocs, ...alertDocs]
     .map((d) => getTimestampMs(d))
@@ -98,6 +102,16 @@ export interface ScaleEpisodesOptions {
   hostCount: number;
   userCount: number;
   /**
+   * Concentrate most events on a small subset of risky hosts/users.
+   * The remaining hosts/users still receive some benign/noisy activity.
+   */
+  riskyHostCount?: number;
+  riskyUserCount?: number;
+  /**
+   * Probability (0..1) that a clone will be assigned a risky host+user pair.
+   */
+  riskyProbability?: number;
+  /**
    * If defined, every clone uses this fixed seed for deterministic distribution.
    * Useful for reproducible datasets.
    */
@@ -113,10 +127,30 @@ export interface ScaledDoc {
 const hash = (input: string): string =>
   crypto.createHash('sha256').update(input).digest('hex').slice(0, 16);
 
+const hashToUnitFloat = (input: string): number => {
+  const h = crypto.createHash('sha256').update(input).digest('hex').slice(0, 8);
+  const n = parseInt(h, 16);
+  // 0..1 inclusive-ish
+  return n / 0xffffffff;
+};
+
 const shiftIso = (iso: string, deltaMs: number): string => {
   const ms = Date.parse(iso);
   if (!Number.isFinite(ms)) return iso;
   return new Date(ms + deltaMs).toISOString();
+};
+
+const normalizeTimestampsInPlace = (doc: Record<string, unknown>) => {
+  const ts = doc['@timestamp'];
+  if (typeof ts !== 'string') return;
+  const baseMs = Date.parse(ts);
+  if (!Number.isFinite(baseMs)) return;
+
+  // Normalize to a consistent relationship:
+  // - event.created matches @timestamp
+  // - event.ingested is 1s after @timestamp
+  setNested(doc, ['event', 'created'], new Date(baseMs).toISOString());
+  setNested(doc, ['event', 'ingested'], new Date(baseMs + 1000).toISOString());
 };
 
 const shiftTimeFieldsInPlace = (doc: Record<string, unknown>, deltaMs: number) => {
@@ -137,6 +171,8 @@ const shiftTimeFieldsInPlace = (doc: Record<string, unknown>, deltaMs: number) =
     const v = getNested(doc, p);
     if (typeof v === 'string') setNested(doc, p, shiftIso(v, deltaMs));
   }
+
+  normalizeTimestampsInPlace(doc);
 };
 
 const rewriteEntityIdsInPlace = (doc: Record<string, unknown>, cloneKey: string) => {
@@ -195,10 +231,7 @@ const setHostAndUserInPlace = ({
   setNested(doc, ['elastic', 'agent', 'id'], agentId);
 
   // User (best effort)
-  const existingUserName = getNested(doc, ['user', 'name']);
-  if (typeof existingUserName === 'string') {
-    setNested(doc, ['user', 'name'], userName);
-  }
+  setNested(doc, ['user', 'name'], userName);
 };
 
 const generatePool = (prefix: string, count: number): string[] =>
@@ -214,8 +247,20 @@ export async function* scaleEpisodes(
   const hosts = generatePool('host-', opts.hostCount);
   const users = generatePool('user-', opts.userCount);
 
-  const baseDocs: Array<{ episodeId: string; kind: ScaledDoc['kind']; doc: Record<string, unknown> }> =
-    [];
+  const riskyHostCount = Math.min(Math.max(opts.riskyHostCount ?? 2, 0), hosts.length);
+  const riskyUserCount = Math.min(Math.max(opts.riskyUserCount ?? 2, 0), users.length);
+  const riskyProbability = Math.min(Math.max(opts.riskyProbability ?? 0.7, 0), 1);
+
+  const riskyHosts = hosts.slice(0, riskyHostCount);
+  const riskyUsers = users.slice(0, riskyUserCount);
+  const nonRiskyHosts = hosts.slice(riskyHostCount);
+  const nonRiskyUsers = users.slice(riskyUserCount);
+
+  const baseDocs: Array<{
+    episodeId: string;
+    kind: ScaledDoc['kind'];
+    doc: Record<string, unknown>;
+  }> = [];
   for (const ep of episodes) {
     for (const d of ep.dataDocs) baseDocs.push({ episodeId: ep.episodeId, kind: 'data', doc: d });
     for (const a of ep.alertDocs)
@@ -223,11 +268,20 @@ export async function* scaleEpisodes(
   }
 
   // We scale based on data docs only (source events). Alerts are carried alongside each episode clone.
-  const baseDataDocs = episodes.flatMap((e) => e.dataDocs.map((d) => ({ episodeId: e.episodeId, doc: d })));
+  const baseDataDocs = episodes.flatMap((e) =>
+    e.dataDocs.map((d) => ({ episodeId: e.episodeId, doc: d }))
+  );
   const baseDataCount = baseDataDocs.length;
   if (baseDataCount === 0) throw new Error('No episode data docs found');
 
-  const cloneCount = Math.max(1, Math.ceil(opts.targetEvents / baseDataCount));
+  // Ensure we actually exercise the requested host/user pools even when targetEvents is small
+  // relative to the available base dataset.
+  const minCloneCount = Math.min(
+    opts.targetEvents,
+    Math.max(1, Math.max(opts.hostCount, opts.userCount))
+  );
+  const cloneCount = Math.max(minCloneCount, Math.ceil(opts.targetEvents / baseDataCount));
+  const perCloneTargetEvents = Math.max(1, Math.ceil(opts.targetEvents / cloneCount));
 
   let producedDataDocs = 0;
 
@@ -235,27 +289,48 @@ export async function* scaleEpisodes(
     const seed = opts.seed ?? 'seed';
     const cloneKey = `clone:${cloneIdx}:${hash(seed)}`;
 
-    const hostName = hosts[cloneIdx % hosts.length];
-    const userName = users[cloneIdx % users.length];
+    const riskRoll = hashToUnitFloat(`${cloneKey}:risk`);
+    const isRisky = riskyHosts.length > 0 && riskyUsers.length > 0 && riskRoll < riskyProbability;
+
+    const pickFrom = (pool: string[], salt: string, fallback: string[]): string => {
+      const effective = pool.length > 0 ? pool : fallback;
+      const idx = Math.floor(hashToUnitFloat(`${cloneKey}:${salt}`) * effective.length) % effective.length;
+      return effective[idx];
+    };
+
+    const hostName = isRisky
+      ? pickFrom(riskyHosts, 'host', hosts)
+      : pickFrom(nonRiskyHosts, 'host', hosts);
+    const userName = isRisky
+      ? pickFrom(riskyUsers, 'user', users)
+      : pickFrom(nonRiskyUsers, 'user', users);
+
     const hostId = `host-${hash(`${cloneKey}:${hostName}`)}`;
     const agentId = `agent-${hash(`${cloneKey}:${hostName}:${userName}`)}`;
 
     // Place the episode clone in the time window. We spread clones evenly across the range.
     const anchor = opts.startMs + Math.floor((rangeMs * cloneIdx) / cloneCount);
 
-    for (const ep of episodes) {
+    let producedThisClone = 0;
+
+    // Rotate episode order per clone so we don't always take from the first episode(s).
+    for (let i = 0; i < episodes.length; i++) {
+      const ep = episodes[(cloneIdx + i) % episodes.length];
       const episodeDurationMs = ep.maxTimestampMs - ep.minTimestampMs;
       const latestAllowedStart = Math.max(opts.startMs, opts.endMs - episodeDurationMs - 1);
       const targetStart = Math.min(anchor, latestAllowedStart);
       const deltaMs = targetStart - ep.minTimestampMs;
 
       for (const doc of ep.dataDocs) {
-        if (producedDataDocs >= opts.targetEvents) return;
+        if (producedDataDocs >= opts.targetEvents) break;
+        if (producedThisClone >= perCloneTargetEvents) break;
+
         const cloned = structuredClone(doc) as Record<string, unknown>;
         shiftTimeFieldsInPlace(cloned, deltaMs);
         setHostAndUserInPlace({ doc: cloned, hostName, userName, hostId, agentId });
         rewriteEntityIdsInPlace(cloned, `${cloneKey}:${ep.episodeId}`);
         producedDataDocs++;
+        producedThisClone++;
         yield { doc: cloned, kind: 'data', episodeId: ep.episodeId };
       }
 
@@ -270,7 +345,10 @@ export async function* scaleEpisodes(
         const insightsCopy = structuredClone(cloned) as Record<string, unknown>;
         yield { doc: insightsCopy, kind: 'insights_alert', episodeId: ep.episodeId };
       }
+
+      if (producedDataDocs >= opts.targetEvents || producedThisClone >= perCloneTargetEvents) {
+        break;
+      }
     }
   }
 }
-

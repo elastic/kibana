@@ -64,7 +64,9 @@ export const bulkIndex = async ({
         const action = it.index ?? it.create ?? it.update ?? it.delete;
         return action && 'error' in action;
       });
-      log.error(`Bulk indexing into ${index} had errors. First error: ${JSON.stringify(firstError)}`);
+      log.error(
+        `Bulk indexing into ${index} had errors. First error: ${JSON.stringify(firstError)}`
+      );
       throw new Error(`Bulk indexing errors for ${index}`);
     }
   }
@@ -86,14 +88,24 @@ export const episodeIndexNames = ({
   endMs: number;
 }) => {
   const suffix = dateSuffix(endMs);
-  const epNum = episodeId.replace(/^ep/, '');
+  const epMatch = episodeId.match(/^ep(\d+)$/);
+  if (epMatch) {
+    const epNum = epMatch[1];
+    return {
+      endpointEvents: `logs-endpoint.events.insights.ep${epNum}.${suffix}`,
+      // Note: use a dot after `alerts` to avoid matching the Endpoint data stream template
+      // which targets `logs-endpoint.alerts-*` (data streams only).
+      endpointAlerts: `logs-endpoint.alerts.insights.ep${epNum}.${suffix}`,
+      insightsAlerts: `insights-alerts-ep${epNum}-${suffix}`,
+    };
+  }
+
+  const safe = episodeId.replace(/[^a-zA-Z0-9_-]/g, '_');
   return {
-    endpointEvents: `logs-endpoint.events.insights.ep${epNum}.${suffix}`,
-    endpointAlerts: `logs-endpoint.alerts-ep${epNum}.${suffix}`,
-    insightsAlerts: `insights-alerts-ep${epNum}-${suffix}`,
+    endpointEvents: `logs-endpoint.events.${safe}.${suffix}`,
+    endpointAlerts: `logs-endpoint.alerts.${safe}.${suffix}`,
+    insightsAlerts: `insights-alerts-${safe}-${suffix}`,
   };
 };
 
-export const scriptsDataDir = (...parts: string[]) =>
-  path.resolve(__dirname, '..', ...parts);
-
+export const scriptsDataDir = (...parts: string[]) => path.resolve(__dirname, '..', ...parts);

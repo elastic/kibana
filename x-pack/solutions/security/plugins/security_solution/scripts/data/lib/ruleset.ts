@@ -54,6 +54,12 @@ export interface ResolvedRuleRef {
   name: string;
 }
 
+export interface InstallableRuleRef {
+  rule_id: string;
+  name: string;
+  version: number;
+}
+
 export const fetchAllInstalledRules = async ({
   kbnClient,
 }: {
@@ -82,6 +88,101 @@ const scoreCandidate = (rule: FindRulesResponse['data'][number], tokens: string[
   const name = rule.name.toLowerCase();
   const matched = tokens.filter((t) => name.includes(t.toLowerCase())).length;
   return matched * 10 + (rule.enabled ? 5 : 0) + (rule.immutable ? 1 : 0);
+};
+
+const scoreInstallableCandidate = (
+  rule: { name: string; immutable?: boolean },
+  tokens: string[]
+): number => {
+  const name = rule.name.toLowerCase();
+  const matched = tokens.filter((t) => name.includes(t.toLowerCase())).length;
+  return matched * 10 + (rule.immutable ? 1 : 0);
+};
+
+/**
+ * Resolve ruleset entries against a list of installable prebuilt rules (from the review API),
+ * returning rule_id+version so we can install only the requested set.
+ */
+export const resolveRulesetForInstall = ({
+  log,
+  rulesetPath,
+  installableRules,
+  strict = true,
+}: {
+  log: ToolingLog;
+  rulesetPath: string;
+  installableRules: Array<{ rule_id: string; name: string; version?: number; immutable?: boolean }>;
+  strict?: boolean;
+}): InstallableRuleRef[] => {
+  const ruleset = readRulesetFile(rulesetPath);
+  const resolved: InstallableRuleRef[] = [];
+
+  for (const spec of ruleset.rules) {
+    if (spec.rule_id) {
+      const found = installableRules.find((r) => r.rule_id === spec.rule_id);
+      if (!found) {
+        if (strict) {
+          throw new Error(`Ruleset rule_id not installable: ${spec.rule_id} (${spec.id})`);
+        }
+        log.warning(`Ruleset rule_id not installable, skipping: ${spec.rule_id} (${spec.id})`);
+        continue;
+      }
+      if (typeof found.version !== 'number') {
+        throw new Error(`Installable rule missing version for rule_id: ${found.rule_id}`);
+      }
+      resolved.push({ rule_id: found.rule_id, name: found.name, version: found.version });
+      continue;
+    }
+
+    const tokens = spec.match?.name_contains_any ?? [];
+    if (tokens.length === 0) {
+      throw new Error(`Ruleset entry ${spec.id} missing rule_id and match.name_contains_any`);
+    }
+
+    const candidates = installableRules
+      .map((r) => ({ r, score: scoreInstallableCandidate(r, tokens) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score || a.r.name.localeCompare(b.r.name));
+
+    const best = candidates[0]?.r;
+    if (!best) {
+      if (strict) {
+        throw new Error(
+          `Ruleset entry ${spec.id} did not match any installable rules by name tokens: ${tokens.join(', ')}`
+        );
+      }
+      log.warning(
+        `Ruleset entry ${spec.id} did not match any installable rules, skipping (tokens: ${tokens.join(
+          ', '
+        )})`
+      );
+      continue;
+    }
+
+    if (typeof best.version !== 'number') {
+      throw new Error(`Installable rule missing version for rule_id: ${best.rule_id}`);
+    }
+    log.info(`Ruleset ${spec.id} matched installable rule: ${best.name} (${best.rule_id})`);
+    resolved.push({ rule_id: best.rule_id, name: best.name, version: best.version });
+  }
+
+  return resolved;
+};
+
+export const enableRules = async ({
+  kbnClient,
+  ids,
+}: {
+  kbnClient: KbnClient;
+  ids: string[];
+}): Promise<void> => {
+  if (ids.length === 0) return;
+  await kbnClient.request({
+    method: 'POST',
+    path: `/api/detection_engine/rules/_bulk_action`,
+    headers: { 'kbn-xsrf': 'true', 'elastic-api-version': PUBLIC_API_VERSION },
+    body: { action: 'enable', ids },
+  });
 };
 
 export const resolveRuleset = async ({
