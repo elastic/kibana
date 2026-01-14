@@ -13,7 +13,6 @@
   "kbn_references": [
     "@kbn/scout-oblt",
     "@kbn/fleet-plugin",
-    "@kbn/observability-plugin",
   ],
   "exclude": [
     "target/**/*"
