@@ -566,6 +566,130 @@ Object {
 }
 `;
 
+exports[`generateOpenApiDocument @kbn/config-schema handles discriminator schemas 1`] = `
+Object {
+  "components": Object {
+    "schemas": Object {
+      "my-a-my-team": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "type": Object {
+            "enum": Array [
+              "a",
+            ],
+            "type": "string",
+          },
+          "value": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "type",
+          "value",
+        ],
+        "type": "object",
+      },
+      "my-b-my-team": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "type": Object {
+            "enum": Array [
+              "b",
+            ],
+            "type": "string",
+          },
+          "value": Object {
+            "type": "number",
+          },
+        },
+        "required": Array [
+          "type",
+          "value",
+        ],
+        "type": "object",
+      },
+      "my-catch-all-my-team": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "type": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "type": "boolean",
+          },
+        },
+        "required": Array [
+          "type",
+          "value",
+        ],
+        "type": "object",
+        "x-oas-discriminator-catch-all": true,
+      },
+    },
+    "securitySchemes": Object {
+      "apiKeyAuth": Object {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+      },
+      "basicAuth": Object {
+        "scheme": "basic",
+        "type": "http",
+      },
+    },
+  },
+  "externalDocs": undefined,
+  "info": Object {
+    "description": undefined,
+    "title": "test",
+    "version": "99.99.99",
+  },
+  "openapi": "3.0.0",
+  "paths": Object {
+    "/foo/{id}": Object {
+      "get": Object {
+        "operationId": "get-foo-id",
+        "parameters": Array [],
+        "requestBody": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "description": "The catch all schema for this discriminator is my-catch-all-my-team",
+                "discriminator": Object {
+                  "propertyName": "type",
+                },
+                "oneOf": Array [
+                  Object {
+                    "$ref": "#/components/schemas/my-a-my-team",
+                  },
+                  Object {
+                    "$ref": "#/components/schemas/my-b-my-team",
+                  },
+                ],
+              },
+            },
+          },
+        },
+        "responses": Object {},
+        "summary": "",
+        "tags": Array [],
+      },
+    },
+  },
+  "security": Array [
+    Object {
+      "basicAuth": Array [],
+    },
+  ],
+  "servers": Array [
+    Object {
+      "url": "https://test.oas",
+    },
+  ],
+  "tags": Array [],
+}
+`;
+
 exports[`generateOpenApiDocument @kbn/config-schema handles recursive schemas 1`] = `
 Object {
   "components": Object {
