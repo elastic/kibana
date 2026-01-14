@@ -9,6 +9,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
+import type { SidebarAppId } from '../sidebar_app_id';
 import { useSidebarService } from '../providers';
 
 /**
@@ -16,11 +17,11 @@ import { useSidebarService } from '../providers';
  */
 export interface UseSidebarApi {
   isOpen: boolean;
-  open: <TParams = {}>(appId: string, params?: Partial<TParams>) => void;
+  open: <TParams = {}>(appId: SidebarAppId, params?: Partial<TParams>) => void;
   close: () => void;
   setWidth: (width: number) => void;
-  setParams: <TParams = {}>(appId: string, params: Partial<TParams>) => void;
-  currentAppId: string | null;
+  setParams: <TParams = {}>(appId: SidebarAppId, params: Partial<TParams>) => void;
+  currentAppId: SidebarAppId | null;
 }
 
 /**
@@ -34,13 +35,13 @@ export function useSidebar(): UseSidebarApi {
   const currentAppId = useObservable(sidebar.getCurrentAppId$(), sidebar.getCurrentAppId());
 
   const open = useCallback(
-    <TParams = {},>(appId: string, params?: Partial<TParams>) => sidebar.open(appId, params),
+    <TParams = {},>(appId: SidebarAppId, params?: Partial<TParams>) => sidebar.open(appId, params),
     [sidebar]
   );
   const close = useCallback(() => sidebar.close(), [sidebar]);
   const setWidth = useCallback((newWidth: number) => sidebar.setWidth(newWidth), [sidebar]);
   const setParams = useCallback(
-    <TParams = {},>(appId: string, params: Partial<TParams>) =>
+    <TParams = {},>(appId: SidebarAppId, params: Partial<TParams>) =>
       sidebarService.appState.setParams(appId, params),
     [sidebarService]
   );
@@ -78,7 +79,7 @@ export interface UseSidebarAppApi<TParams = {}> {
  * React hook for accessing actions for a specific sidebar app
  * @param appId
  */
-export function useSidebarApp<TParams = {}>(appId: string): UseSidebarAppApi<TParams> {
+export function useSidebarApp<TParams = {}>(appId: SidebarAppId): UseSidebarAppApi<TParams> {
   const sidebarService = useSidebarService();
 
   const open = useCallback(

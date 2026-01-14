@@ -20,6 +20,7 @@ export type {
   SidebarComponentProps,
   SidebarComponentType,
 } from './sidebar_registry_service';
+export type { SidebarAppId } from '../sidebar_app_id';
 
 export { SidebarRegistryService, type SidebarRegistryServiceApi } from './sidebar_registry_service';
 export { SidebarStateService, type SidebarStateServiceApi } from './sidebar_state_service';

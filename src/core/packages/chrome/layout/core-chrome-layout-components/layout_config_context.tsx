@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle } from './layout.types';
 import type { LayoutDimensions } from './layout.types';
 
 /**

@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { z } from '@kbn/zod/v4';
+import type { SidebarAppId } from '../sidebar_app_id';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -18,13 +19,13 @@ const isDev = process.env.NODE_ENV !== 'production';
  */
 export interface SidebarAppStateServiceApi {
   /** Get observable stream of app params */
-  getParams$<T>(appId: string): Observable<T>;
+  getParams$<T>(appId: SidebarAppId): Observable<T>;
 
   /** Get current app params synchronously */
-  getParams<T>(appId: string): T;
+  getParams<T>(appId: SidebarAppId): T;
 
   /** Update app params (merges with existing params) */
-  setParams<T>(appId: string, params: Partial<T>): void;
+  setParams<T>(appId: SidebarAppId, params: Partial<T>): void;
 }
 
 /**
@@ -38,15 +39,15 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
 
   constructor(private readonly registry: SidebarRegistryServiceApi) {}
 
-  getParams$<T>(appId: string): Observable<T> {
+  getParams$<T>(appId: SidebarAppId): Observable<T> {
     return this.getOrCreateParams<T>(appId);
   }
 
-  getParams<T>(appId: string): T {
+  getParams<T>(appId: SidebarAppId): T {
     return this.getOrCreateParams<T>(appId).getValue();
   }
 
-  setParams<T>(appId: string, params: Partial<T>): void {
+  setParams<T>(appId: SidebarAppId, params: Partial<T>): void {
     const currentParams = this.getParams<T>(appId);
     const newParams = { ...currentParams, ...params };
 
@@ -61,7 +62,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
    * Initialize params for an app, optionally with provided initial values
    * @internal Used by sidebar state service when opening an app
    */
-  initializeParams<T>(appId: string, initialParams?: Partial<T>): void {
+  initializeParams<T>(appId: SidebarAppId, initialParams?: Partial<T>): void {
     const defaultParams = this.createDefaultParams<T>(appId);
     const mergedParams = initialParams ? { ...defaultParams, ...initialParams } : defaultParams;
 
@@ -78,7 +79,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
     this.saveToStorage(appId, mergedParams as T);
   }
 
-  private getOrCreateParams<T>(appId: string): BehaviorSubject<T> {
+  private getOrCreateParams<T>(appId: SidebarAppId): BehaviorSubject<T> {
     if (!this.appParams.has(appId)) {
       const storedParams = this.loadFromStorage<T>(appId);
       const initialParams = storedParams ?? this.createDefaultParams<T>(appId);
@@ -91,14 +92,14 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
   /**
    * Creates default params from schema defaults
    */
-  private createDefaultParams<T>(appId: string): T {
+  private createDefaultParams<T>(appId: SidebarAppId): T {
     return this.validateParams(appId, {});
   }
 
   /**
    * Validates params against app's schema
    */
-  private validateParams<T>(appId: string, params: unknown): T {
+  private validateParams<T>(appId: SidebarAppId, params: unknown): T {
     const schema = this.registry.getApp(appId).getParamsSchema();
     try {
       return schema.parse(params) as T;
@@ -110,7 +111,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
     }
   }
 
-  private getStorageKey(appId: string): string {
+  private getStorageKey(appId: SidebarAppId): string {
     return `core.chrome.sidebar.app:${appId}`;
   }
 
@@ -118,7 +119,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
    * Loads params from localStorage and validates against schema.
    * Returns null if not found, corrupted, or validation fails.
    */
-  private loadFromStorage<T>(appId: string): T | null {
+  private loadFromStorage<T>(appId: SidebarAppId): T | null {
     try {
       const key = this.getStorageKey(appId);
       const stored = localStorage.getItem(key);
@@ -136,7 +137,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
    * Saves params to localStorage.
    * Fails silently on errors (quota exceeded, unavailable, etc.)
    */
-  private saveToStorage<T>(appId: string, params: T): void {
+  private saveToStorage<T>(appId: SidebarAppId, params: T): void {
     try {
       const key = this.getStorageKey(appId);
       localStorage.setItem(key, JSON.stringify(params));

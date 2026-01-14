@@ -62,3 +62,8 @@ export interface ChromeLayoutSlots {
   applicationTopBar?: Slot | null;
   applicationBottomBar?: Slot | null;
 }
+
+/**
+ * Chrome style variants.
+ */
+export type ChromeStyle = 'classic' | 'project';

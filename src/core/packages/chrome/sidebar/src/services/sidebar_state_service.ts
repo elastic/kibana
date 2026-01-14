@@ -11,21 +11,23 @@
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, filter, map, take } from 'rxjs';
 import { memoize } from 'decko';
+import type { SidebarAppId } from '../sidebar_app_id';
+import { isValidSidebarAppId } from '../sidebar_app_id';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 import type { SidebarAppStateService } from './sidebar_app_state_service';
 
 export interface SidebarStateServiceApi {
   isOpen$: () => Observable<boolean>;
   isOpen: () => boolean;
-  open: <TParams = {}>(appId: string, params?: Partial<TParams>) => void;
+  open: <TParams = {}>(appId: SidebarAppId, params?: Partial<TParams>) => void;
   close: () => void;
 
   getWidth$: () => Observable<number>;
   getWidth: () => number;
   setWidth: (width: number) => void;
 
-  getCurrentAppId$: () => Observable<string | null>;
-  getCurrentAppId: () => string | null;
+  getCurrentAppId$: () => Observable<SidebarAppId | null>;
+  getCurrentAppId: () => SidebarAppId | null;
 }
 
 const DEFAULT_WIDTH = 400;
@@ -37,7 +39,7 @@ function getMaxWidth(): number {
 }
 
 export class SidebarStateService implements SidebarStateServiceApi {
-  private readonly currentAppId$ = new BehaviorSubject<string | null>(null);
+  private readonly currentAppId$ = new BehaviorSubject<SidebarAppId | null>(null);
   private readonly width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
   private pendingRestoreSubscription?: Subscription;
 
@@ -57,14 +59,15 @@ export class SidebarStateService implements SidebarStateServiceApi {
   }
 
   @memoize
-  getCurrentAppId$(): Observable<string | null> {
+  getCurrentAppId$(): Observable<SidebarAppId | null> {
     return this.currentAppId$.asObservable();
   }
 
   start() {
     const currentAppId = StorageHelper.get<string>('currentAppId') ?? null;
 
-    if (currentAppId && this.registry.hasApp(currentAppId)) {
+    // Validate app ID from localStorage - ignore if invalid
+    if (currentAppId && isValidSidebarAppId(currentAppId) && this.registry.hasApp(currentAppId)) {
       if (this.registry.isAvailable(currentAppId)) {
         // App exists and is available - restore immediately
         this.open(currentAppId);
@@ -92,7 +95,7 @@ export class SidebarStateService implements SidebarStateServiceApi {
    * Subscribe to availability changes and restore the app when it becomes available.
    * Only restores once, then cleans up the subscription.
    */
-  private waitForAvailabilityAndRestore(appId: string): void {
+  private waitForAvailabilityAndRestore(appId: SidebarAppId): void {
     // Clean up any existing pending restore
     this.pendingRestoreSubscription?.unsubscribe();
 
@@ -110,7 +113,7 @@ export class SidebarStateService implements SidebarStateServiceApi {
       });
   }
 
-  open<TParams = {}>(appId: string, params?: Partial<TParams>): void {
+  open<TParams = {}>(appId: SidebarAppId, params?: Partial<TParams>): void {
     if (!this.registry.hasApp(appId)) {
       throw new Error(`[Sidebar State] Cannot open sidebar. App not registered: ${appId}`);
     }
@@ -153,7 +156,7 @@ export class SidebarStateService implements SidebarStateServiceApi {
     return this.width$.getValue();
   }
 
-  getCurrentAppId(): string | null {
+  getCurrentAppId(): SidebarAppId | null {
     return this.currentAppId$.getValue();
   }
 }

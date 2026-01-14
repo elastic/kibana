@@ -10,11 +10,12 @@
 import React, { lazy, Suspense, useMemo, useCallback } from 'react';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { useObservable } from '@kbn/use-observable';
+import type { SidebarAppId } from '../sidebar_app_id';
 import type { SidebarComponentType } from '../services';
 import { useSidebarAppStateService } from '../providers';
 
 interface SidebarAppRendererProps {
-  appId: string;
+  appId: SidebarAppId;
   loadComponent: () => Promise<SidebarComponentType<any>>;
 }
 
