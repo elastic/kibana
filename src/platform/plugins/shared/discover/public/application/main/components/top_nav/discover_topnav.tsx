@@ -39,6 +39,7 @@ import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
+import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
 
 const EMPTY_FILTERS: Filter[] = [];
 
@@ -105,12 +106,19 @@ export const DiscoverTopNav = ({
   const closeFieldEditor = useRef<() => void | undefined>();
 
   // ES|QL controls logic
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
+    (queryOrUpdater) => {
+      dispatch(updateESQLQuery({ queryOrUpdater }));
+    },
+    [dispatch, updateESQLQuery]
+  );
   const { onSaveControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
     stateContainer,
     currentEsqlVariables: esqlVariables,
     controlGroupApi,
-    onUpdateESQLQuery: stateContainer.actions.updateESQLQuery,
+    onUpdateESQLQuery,
   });
 
   const onOpenQueryInNewTab = useCallback(

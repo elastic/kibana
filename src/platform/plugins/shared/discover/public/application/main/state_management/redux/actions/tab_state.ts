@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isFunction } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { isOfQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
@@ -21,7 +22,13 @@ import {
   type TabActionPayload,
 } from '../internal_state';
 import { selectTab } from '../selectors';
-import type { DiscoverAppState, DiscoverInternalState, TabState } from '../types';
+import type {
+  DiscoverAppState,
+  DiscoverInternalState,
+  TabState,
+  UpdateESQLQueryPayload,
+} from '../types';
+import { addLog } from '../../../../../utils/add_log';
 
 type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
 
@@ -205,4 +212,29 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
 
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
+  };
+
+/**
+ * Updates the ES|QL query string
+ */
+export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryPayload]> = ({
+  tabId,
+  queryOrUpdater,
+}) =>
+  async function updateESQLQueryThunkFn(dispatch, getState) {
+    addLog('updateESQLQuery');
+    const currentState = getState();
+    const appState = selectTab(currentState, tabId).appState;
+    const { query: currentQuery } = appState;
+
+    if (!isOfAggregateQueryType(currentQuery)) {
+      throw new Error(
+        'Cannot update a non-ES|QL query. Make sure this function is only called once in ES|QL mode.'
+      );
+    }
+
+    const queryUpdater = isFunction(queryOrUpdater) ? queryOrUpdater : () => queryOrUpdater;
+    const query = { esql: queryUpdater(currentQuery.esql) };
+
+    dispatch(updateAppState({ tabId, appState: { query } }));
   };

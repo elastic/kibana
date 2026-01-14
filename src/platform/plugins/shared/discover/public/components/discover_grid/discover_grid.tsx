@@ -14,13 +14,12 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import { useProfileAccessor } from '../../context_awareness';
+import { useProfileAccessor, type UpdateESQLQueryFn } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
-import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
-  onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+  onUpdateESQLQuery?: UpdateESQLQueryFn;
 }
 
 /**

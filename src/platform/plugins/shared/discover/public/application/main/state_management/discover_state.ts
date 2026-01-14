@@ -30,7 +30,7 @@ import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
-import { isEqual, isFunction } from 'lodash';
+import { isEqual } from 'lodash';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../..';
 import { FetchStatus } from '../../types';
@@ -213,10 +213,6 @@ export interface DiscoverStateContainer {
      * This is to prevent duplicate ids messing with our system
      */
     updateAdHocDataViewId: (editedDataView: DataView) => Promise<DataView | undefined>;
-    /**
-     * Updates the ES|QL query string
-     */
-    updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
   };
 }
 
@@ -717,24 +713,6 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
-    addLog('updateESQLQuery');
-    const { query: currentQuery } = getCurrentTab().appState;
-
-    if (!isOfAggregateQueryType(currentQuery)) {
-      throw new Error(
-        'Cannot update a non-ES|QL query. Make sure this function is only called once in ES|QL mode.'
-      );
-    }
-
-    const queryUpdater = isFunction(queryOrUpdater) ? queryOrUpdater : () => queryOrUpdater;
-    const query = { esql: queryUpdater(currentQuery.esql) };
-
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.updateAppState)({ appState: { query } })
-    );
-  };
-
   return {
     appState$,
     internalState,
@@ -759,7 +737,6 @@ export function getDiscoverStateContainer({
       onUpdateQuery,
       setDataView,
       updateAdHocDataViewId,
-      updateESQLQuery,
     },
   };
 }

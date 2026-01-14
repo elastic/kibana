@@ -32,7 +32,9 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { UpdateESQLQueryPayload } from '../application/main/state_management/redux/types';
+
+export type UpdateESQLQueryFn = (queryOrUpdater: UpdateESQLQueryPayload['queryOrUpdater']) => void;
 
 /**
  * Supports extending the Discover app menu
@@ -133,7 +135,7 @@ export interface ChartSectionConfigurationExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+    updateESQLQuery?: UpdateESQLQueryFn;
   };
 }
 
@@ -197,7 +199,7 @@ export interface DocViewerExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    updateESQLQuery?: UpdateESQLQueryFn;
   };
   /**
    * The record being displayed in the doc viewer
@@ -312,7 +314,7 @@ export interface RowControlsExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    updateESQLQuery?: UpdateESQLQueryFn;
     /**
      * Sets the expanded document, which is displayed in a flyout
      * @param record - The record to display in the flyout
