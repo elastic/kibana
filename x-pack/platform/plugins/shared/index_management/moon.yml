@@ -74,7 +74,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/scout'
   - '@kbn/deeplinks-management'
-  - '@kbn/test-eui-helpers'
   - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
