@@ -79,6 +79,11 @@ export function getExpressionType(
     if (isParamLiteral(lastArg)) {
       return lastArg.literalType;
     }
+
+    // TODO: handle unmapped fields types correctly. For now we treat them as 'unknown'.
+    // If the stratetgy is NULLIFY return 'null', this can't be done today as null is not well supported on function definitions.
+    // Depends on https://github.com/elastic/elasticsearch/issues/140575
+    // For LOAD strategy it's still not clear which type will come from ES if the source data is not compatible with keyword.
     if (!column) {
       return 'unknown';
     }
