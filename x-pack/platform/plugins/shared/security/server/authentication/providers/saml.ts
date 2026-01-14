@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -412,6 +413,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       refresh_token: string;
       realm: string;
       authentication: AuthenticationInfo;
+      in_response_to?: string;
     };
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
@@ -428,10 +430,20 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         },
       })) as any;
     } catch (err) {
+      // console.log(`**** SAML AUTH ERROR: ${JSON.stringify(err.meta.body, null, 2)}`);
+      let inResponseToRequestId;
+      if (err instanceof errors.ResponseError) {
+        const body = (err as errors.ResponseError).meta.body as
+          | { error: Record<string, string> }
+          | undefined;
+        inResponseToRequestId =
+          body?.error?.['security.saml.unsolicited_in_response_to'] ?? undefined;
+      }
       this.logger.error(
         `Failed to log in with SAML response, ${
-          !isIdPInitiatedLogin ? `current requestIds: ${stateRequestIds}, ` : ''
-        } error: ${getDetailedErrorMessage(err)}`
+          inResponseToRequestId ? `unsolicited InResponseTo: ${inResponseToRequestId}, ` : ''
+        } ${!isIdPInitiatedLogin ? `current requestIds: ${stateRequestIds}, ` : ''} error:
+        ${getDetailedErrorMessage(err)}`
       );
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
@@ -469,7 +481,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     let remainingRequestIdMap = stateRequestIdMap;
 
     if (!isIdPInitiatedLogin) {
-      const inResponseToRequestId = this.parseRequestIdFromSAMLResponse(samlResponse);
+      const inResponseToRequestId = result.in_response_to;
       this.logger.debug(`Login was performed with requestId: ${inResponseToRequestId}`);
 
       if (stateRequestIds.length && inResponseToRequestId) {
@@ -507,16 +519,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     );
   }
 
-  private parseRequestIdFromSAMLResponse(samlResponse: string): string | null {
-    const samlResponseBuffer = Buffer.from(samlResponse, 'base64');
-    const samlResponseString = samlResponseBuffer.toString('utf-8');
-    const inResponseToRequestIdMatch = samlResponseString.match(/InResponseTo="([a-z0-9_]*)"/);
-
-    return inResponseToRequestIdMatch ? inResponseToRequestIdMatch[1] : null;
-  }
-
   private updateRemainingRequestIds(
-    requestIdToRemove: string | null,
+    requestIdToRemove: string | undefined,
     remainingRequestIds: Record<RequestId, { redirectURL: string }>
   ): [boolean, Record<RequestId, { redirectURL: string }>] {
     if (requestIdToRemove) {
@@ -811,7 +815,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Calls `saml/invalidate` with the `SAMLRequest` query string parameter received from the Identity
+   * Calls `saml/invalidate` with the `` query string parameter received from the Identity
    * Provider and redirects user back to the Identity Provider if needed.
    * @param request Request instance.
    * @param realm Configured SAML realm name.

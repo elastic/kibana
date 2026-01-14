@@ -9,6 +9,10 @@
 
 import { existsSync } from 'fs';
 import { resolve } from 'path';
+import url from 'url';
+import { promisify } from 'util';
+import { parseString } from 'xml2js';
+import zlib from 'zlib';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
@@ -73,6 +77,26 @@ const readStatefulRoles = () => {
   return readRolesFromResource(rolesResourcePath);
 };
 
+const inflateRawAsync = promisify(zlib.inflateRaw);
+const parseStringAsync = promisify(parseString);
+
+async function extractSamlRequestId(requestUrl: string): Promise<string | undefined> {
+  const samlRequest = url.parse(requestUrl, true /* parseQueryString */).query.SAMLRequest;
+
+  if (!samlRequest) {
+    return undefined;
+  }
+
+  const inflatedSAMLRequest = (await inflateRawAsync(
+    Buffer.from(samlRequest as string, 'base64')
+  )) as Buffer;
+
+  const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
+  const requestId = parsedSAMLRequest['saml2p:AuthnRequest'].$.ID as string;
+
+  return requestId;
+}
+
 export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 
 export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
@@ -83,6 +107,8 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
     const config = initializerContext.config.get<ConfigType>();
     const router = core.http.createRouter();
 
+    let requestId: string | undefined;
+
     core.http.resources.register(
       {
         path: MOCK_IDP_LOGIN_PATH,
@@ -91,6 +117,12 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
+        requestId = await extractSamlRequestId(request.url.href);
+        logger.info(
+          requestId
+            ? `SP initiated login, SAML request ID: ${requestId}`
+            : 'IDP initiated login, no request ID'
+        );
         return response.renderAnonymousCoreApp();
       }
     );
@@ -149,6 +181,10 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           : {};
 
         try {
+          if (requestId) {
+            logger.info(`Sending SAML response for request ID: ${requestId}`);
+          }
+
           return response.ok({
             body: {
               SAMLResponse: await createSAMLResponse({
@@ -157,6 +193,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
                 full_name: request.body.full_name ?? undefined,
                 email: request.body.email ?? undefined,
                 roles: request.body.roles,
+                ...(requestId ? { authnRequestId: requestId } : {}),
                 ...serverlessOptions,
               }),
             },
