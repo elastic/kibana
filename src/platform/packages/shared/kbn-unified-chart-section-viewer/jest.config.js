@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-unified-metrics-grid'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-unified-chart-section-viewer'],
 };
