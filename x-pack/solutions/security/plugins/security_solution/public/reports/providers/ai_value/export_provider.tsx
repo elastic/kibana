@@ -94,14 +94,11 @@ export function AIValueExportProvider({ children }: AIValueExportProviderProps) 
       if (parsedState?.insight && parsedState?.reportDataHash) {
         setForwardedState(parsedState);
         setIsExportMode(true);
-      } else {
-        setForwardedState(undefined);
-        setIsExportMode(false);
+        return;
       }
-    } else {
-      setForwardedState(undefined);
-      setIsExportMode(false);
     }
+    setForwardedState(undefined);
+    setIsExportMode(false);
   }, [history.location.state]);
 
   useEffect(() => {
