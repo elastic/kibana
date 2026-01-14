@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { partitionScreen } from './stitched_screenshot';
+import { partitionScreen } from './tiled_screenshot';
 
 describe('stitched_screenshot', () => {
   describe('partitionScreen', () => {

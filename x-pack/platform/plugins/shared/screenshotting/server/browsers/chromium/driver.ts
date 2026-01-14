@@ -20,7 +20,7 @@ import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
 import { getFooterTemplate, getHeaderTemplate } from './templates';
-import { getStitchedScreenshot } from './stitched_screenshot';
+import { getTiledScreenshot } from './tiled_screenshot';
 declare module 'puppeteer' {
   interface Page {
     _client(): CDPSession;
@@ -278,7 +278,7 @@ export class HeadlessChromiumDriver {
       width: boundingClientRect.width,
     });
 
-    return await getStitchedScreenshot({
+    return await getTiledScreenshot({
       logger,
       page: this.page,
       rect: {

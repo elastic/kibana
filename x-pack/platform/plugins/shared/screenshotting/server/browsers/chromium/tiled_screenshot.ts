@@ -6,43 +6,35 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { Page } from 'puppeteer';
+import type { Page, BoundingBox } from 'puppeteer';
 import UPNG from '@pdf-lib/upng';
 
 import { ZOOM } from '../../layouts/preserve_layout';
 
-const ROWS_PER_PANE = 400; // change to something like 4000, but 400 is easy to test with
+const ROWS_PER_TILE = 8000;
 
-export interface Rectangle {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
 interface GetScreenshotParams {
   logger: Logger;
   page: Page;
-  rect: Rectangle;
+  rect: BoundingBox;
 }
 
-export async function getStitchedScreenshot(
-  params: GetScreenshotParams
-): Promise<Buffer | undefined> {
+export async function getTiledScreenshot(params: GetScreenshotParams): Promise<Buffer | undefined> {
   try {
-    return getStitchedScreenshotWrapped(params);
+    return getTiledScreenshotWrapped(params);
   } catch (err) {
     params.logger.error(`error generating screenshot: ${err.message}`, err);
     return;
   }
 }
 
-export async function getStitchedScreenshotWrapped(
+export async function getTiledScreenshotWrapped(
   params: GetScreenshotParams
 ): Promise<Buffer | undefined> {
   const { page, rect, logger } = params;
 
-  const panes = partitionScreen(rect);
-  if (panes.length === 0) {
+  const tiles = partitionScreen(rect);
+  if (tiles.length === 0) {
     logger.warn('screenshot was 0-sized, skipping');
     return;
   }
@@ -50,47 +42,55 @@ export async function getStitchedScreenshotWrapped(
   // 4 bytes for each pixel (RGBA), multiply by zoom (both dimensions)
   const bufferSize = 4 * ZOOM * ZOOM * rect.width * rect.height;
   const result = new Uint8Array(new ArrayBuffer(bufferSize));
+  log(`width: ${rect.width}; height: ${rect.height}; bufferSize: ${bufferSize}`);
 
   let offset = 0;
-  for (const pane of panes) {
-    const screenshot = await getSingleScreenshot({ logger, page, rect: pane });
+  for (const tile of tiles) {
+    const screenshot = await getSingleScreenshot({ logger, page, rect: tile });
+    log(`- tile ${JSON.stringify(tile)}; offset: ${offset}`);
     const bytes = new Uint8Array(screenshot);
     const image = UPNG.decode(bytes.buffer);
-    const imageData = new Uint8Array(image.data);
+    const rgbaBytes = UPNG.toRGBA8(image)[0];
+    log(`  - image: width: ${image.width}; height: ${image.height}; depth: ${image.depth}`);
+    const imageData = new Uint8Array(rgbaBytes);
 
     result.set(imageData, offset);
 
-    offset += imageData.length;
+    offset += rgbaBytes.byteLength;
   }
 
+  log(`new image; height: ${rect.height * ZOOM}; width: ${rect.width * ZOOM}`);
   const resultImage = UPNG.encode([result.buffer], rect.width * ZOOM, rect.height * ZOOM, 0);
   return Buffer.from(new Uint8Array(resultImage));
+
+  function log(message: string) {
+    logger.debug(`getTiledScreenshot: ${message}`);
+  }
 }
 
 async function getSingleScreenshot(params: GetScreenshotParams): Promise<Uint8Array> {
   const { page } = params;
-  const { x, y, width, height } = params.rect;
 
   return await page.screenshot({
-    clip: { x, y, height, width },
+    clip: params.rect,
     captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
   });
 }
 
-// Split a page into panes but only length-wise, as it's easy to
+// Split a page into tiles but only length-wise, as it's easy to
 // concatenate rows, much harder to concatenate columns.  And we've
 // only seen issues with "big dashboards" be long ones, not wide ones.
-export function partitionScreen(rect: Rectangle): Rectangle[] {
-  const result: Rectangle[] = [];
+export function partitionScreen(rect: BoundingBox): BoundingBox[] {
+  const result: BoundingBox[] = [];
 
   const { x, y, width, height } = rect;
 
   let currY = 0;
   while (currY < height) {
-    const paneHeight =
-      currY + ROWS_PER_PANE <= height
-        ? // use ROWS_PER_PANE if this pane has at least that many rows
-          ROWS_PER_PANE
+    const tileHeight =
+      currY + ROWS_PER_TILE <= height
+        ? // use ROWS_PER_TILE if this tile has at least that many rows
+          ROWS_PER_TILE
         : // otherwse use remaining rows
           height - currY;
 
@@ -98,10 +98,10 @@ export function partitionScreen(rect: Rectangle): Rectangle[] {
       x,
       y: y + currY,
       width,
-      height: paneHeight,
+      height: tileHeight,
     });
 
-    currY += ROWS_PER_PANE;
+    currY += ROWS_PER_TILE;
   }
 
   return result;
