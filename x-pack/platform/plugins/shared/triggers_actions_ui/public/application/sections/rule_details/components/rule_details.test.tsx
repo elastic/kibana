@@ -20,8 +20,7 @@ import type {
   GetDescriptionFieldsFn,
   RuleType,
 } from '../../../../types';
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiPageHeader, type EuiPageHeaderProps } from '@elastic/eui';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
   RuleExecutionStatusErrorReasons,
@@ -228,7 +227,7 @@ describe('rule_details', () => {
       expect(
         shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        ).find('EuiPageHeader')
+        ).find(EuiPageHeader)
       ).toBeTruthy();
     });
 
@@ -537,7 +536,7 @@ describe('rule_details', () => {
         const pageHeaderProps = shallowWithIntl(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
         )
-          .find('EuiPageHeader')
+          .find(EuiPageHeader)
           .props() as EuiPageHeaderProps;
         const rightSideItems = pageHeaderProps.rightSideItems;
         expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
@@ -601,7 +600,7 @@ describe('rule_details', () => {
       const pageHeaderProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
-        .find('EuiPageHeader')
+        .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
@@ -665,7 +664,7 @@ describe('rule_details', () => {
       const pageHeaderProps = shallowWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
-        .find('EuiPageHeader')
+        .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`

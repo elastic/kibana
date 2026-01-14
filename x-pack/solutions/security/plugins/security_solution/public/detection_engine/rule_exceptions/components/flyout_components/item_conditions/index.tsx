@@ -105,7 +105,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onSetErrorExists,
   getExtendedFields,
 }): JSX.Element => {
-  const { http, unifiedSearch } = useKibana().services;
+  const { http, kql } = useKibana().services;
   const isEndpointException = useMemo(
     (): boolean => exceptionListType === ExceptionListTypeEnum.ENDPOINT,
     [exceptionListType]
@@ -255,7 +255,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       {getExceptionBuilderComponentLazy({
         allowLargeValueLists,
         httpService: http,
-        autocompleteService: unifiedSearch.autocomplete,
+        autocompleteService: kql.autocomplete,
         exceptionListItems,
         listType: exceptionListType,
         osTypes,
