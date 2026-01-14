@@ -80,7 +80,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occured right before running step, etc.
     if (!monitorAbortController.signal.aborted) {
-      runStepPromise = Promise.resolve(nodeImplementation.run()).then(
+      runStepPromise = nodeImplementation.run().then(
         () => stepExecutionRuntime && handleExecutionDelay(params, stepExecutionRuntime)
       );
     }

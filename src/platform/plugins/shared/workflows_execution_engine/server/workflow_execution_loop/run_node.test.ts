@@ -17,36 +17,17 @@ import type { NodeImplementation } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
+import * as catchErrorModule from './catch_error';
+import * as handleExecutionDelayModule from './handle_execution_delay';
+import * as runStackMonitorModule from './run_stack_monitor/run_stack_monitor';
 
-// Mock the dependencies
-const mockRunStackMonitor = jest
-  .fn()
-  .mockImplementation(
-    async (
-      _params: WorkflowExecutionLoopParams,
-      _stepExecutionRuntime: StepExecutionRuntime,
-      _monitorAbortController: AbortController
-    ) => {
-      // Simulate the monitoring loop running briefly
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      // Don't abort by default - let the step run to completion
-    }
-  );
+jest.mock('./run_stack_monitor/run_stack_monitor');
+jest.mock('./catch_error');
+jest.mock('./handle_execution_delay');
 
-const mockCatchError = jest.fn().mockResolvedValue(undefined);
-const mockHandleExecutionDelay = jest.fn().mockResolvedValue(undefined);
-
-jest.mock('./run_stack_monitor/run_stack_monitor', () => ({
-  runStackMonitor: mockRunStackMonitor,
-}));
-
-jest.mock('./catch_error', () => ({
-  catchError: mockCatchError,
-}));
-
-jest.mock('./handle_execution_delay', () => ({
-  handleExecutionDelay: mockHandleExecutionDelay,
-}));
+const mockCatchError = catchErrorModule.catchError as jest.Mock;
+const mockHandleExecutionDelay = handleExecutionDelayModule.handleExecutionDelay as jest.Mock;
+const mockRunStackMonitor = runStackMonitorModule.runStackMonitor as jest.Mock;
 
 describe('runNode', () => {
   let mockParams: jest.Mocked<WorkflowExecutionLoopParams>;
@@ -57,6 +38,22 @@ describe('runNode', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Set up default implementations for mocks
+    mockRunStackMonitor.mockImplementation(
+      async (
+        _params: WorkflowExecutionLoopParams,
+        _stepExecutionRuntime: StepExecutionRuntime,
+        _monitorAbortController: AbortController
+      ) => {
+        // Simulate the monitoring loop running briefly
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Don't abort by default - let the step run to completion
+      }
+    );
+    
+    mockCatchError.mockResolvedValue(undefined);
+    mockHandleExecutionDelay.mockResolvedValue(undefined);
 
     workflowExecution = {
       id: 'test-workflow-execution-id',
