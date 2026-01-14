@@ -14,7 +14,7 @@ import {
 } from './connectors_helpers';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import * as connectorSpecsModule from '@kbn/connector-specs';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/common';
 import {
   createToolRegistryMock,
   createMockedTool,

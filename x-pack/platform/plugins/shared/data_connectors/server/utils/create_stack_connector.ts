@@ -11,7 +11,7 @@ import type {
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/core/server';
 import type { MCPConnectorConfig } from '@kbn/connector-schemas/mcp';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/common';
 import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/utils/bulk_create_mcp_tools';
 import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
 import { getNamedMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
