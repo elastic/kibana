@@ -497,10 +497,10 @@ describe('AgentlessConnectorsInfraService', () => {
               vars: {
                 connector_id: '000000005',
                 connector_name: 'Test Agentless Connector',
-                service_type: 'github',
               },
             },
           },
+          policy_template: 'github',
           name: 'github connector 000000005',
           namespace: '',
           package: { name: 'elastic_connectors', title: 'Elastic Connectors', version: '0.0.5' },
