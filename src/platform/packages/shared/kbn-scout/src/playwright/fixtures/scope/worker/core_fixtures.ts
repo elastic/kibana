@@ -253,9 +253,6 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
         return { cookieValue, cookieHeader };
       };
 
-      // Hide the announcements (including the sidenav tour) in the default space
-      await kbnClient.uiSettings.update({ hideAnnouncements: true });
-
       await use({
         session,
         customRoleName,
