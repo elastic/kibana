@@ -8992,6 +8992,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/synthetics-forge@link:x-pack/solutions/observability/packages/kbn-synthetics-forge":
+  version "0.0.0"
+  uid ""
+
 "@kbn/synthetics-plugin@link:x-pack/solutions/observability/plugins/synthetics":
   version "0.0.0"
   uid ""

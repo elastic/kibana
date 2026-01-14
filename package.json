@@ -1724,6 +1724,7 @@
     "@kbn/streamlang-tests": "link:x-pack/platform/packages/shared/kbn-streamlang-tests",
     "@kbn/styled-components-mapping-cli": "link:packages/kbn-styled-components-mapping-cli",
     "@kbn/synthetics-e2e": "link:x-pack/solutions/observability/plugins/synthetics/e2e",
+    "@kbn/synthetics-forge": "link:x-pack/solutions/observability/packages/kbn-synthetics-forge",
     "@kbn/synthetics-private-location": "link:x-pack/packages/kbn-synthetics-private-location",
     "@kbn/synthtrace": "link:src/platform/packages/shared/kbn-synthtrace",
     "@kbn/synthtrace-client": "link:src/platform/packages/shared/kbn-synthtrace-client",

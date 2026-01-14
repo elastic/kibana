@@ -2240,6 +2240,8 @@
       "@kbn/styled-components-mapping-cli/*": ["packages/kbn-styled-components-mapping-cli/*"],
       "@kbn/synthetics-e2e": ["x-pack/solutions/observability/plugins/synthetics/e2e"],
       "@kbn/synthetics-e2e/*": ["x-pack/solutions/observability/plugins/synthetics/e2e/*"],
+      "@kbn/synthetics-forge": ["x-pack/solutions/observability/packages/kbn-synthetics-forge"],
+      "@kbn/synthetics-forge/*": ["x-pack/solutions/observability/packages/kbn-synthetics-forge/*"],
       "@kbn/synthetics-plugin": ["x-pack/solutions/observability/plugins/synthetics"],
       "@kbn/synthetics-plugin/*": ["x-pack/solutions/observability/plugins/synthetics/*"],
       "@kbn/synthetics-private-location": ["x-pack/packages/kbn-synthetics-private-location"],
