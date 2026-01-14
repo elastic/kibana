@@ -178,7 +178,15 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; owner: string[]; permissions: ",
+          "> | undefined; onClose?: ((theCase?: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CaseUI",
+            "text": "CaseUI"
+          },
+          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -204,15 +212,7 @@
             "section": "def-common.CaseUI",
             "text": "CaseUI"
           },
-          " | undefined) => void) | undefined; onClose?: ((theCase?: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseUI",
-            "text": "CaseUI"
-          },
-          " | undefined, isCreateCase?: boolean | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; getAttachments?: ",
+          " | undefined) => void) | undefined; onCreateCaseClicked?: (() => void) | undefined; getAttachments?: ",
           "GetAttachments",
           " | undefined; }"
         ],
@@ -231,7 +231,7 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; owner: string[]; observables?: { typeKey: string; value: string; description: string | null; }[] | undefined; permissions: ",
+          "> | undefined; onClose?: (() => void) | undefined; owner: string[]; observables?: { typeKey: string; value: string; description: string | null; }[] | undefined; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -241,7 +241,7 @@
           },
           "; basePath?: string | undefined; releasePhase?: ",
           "ReleasePhase",
-          " | undefined; onClose?: (() => void) | undefined; attachments?: ",
+          " | undefined; attachments?: ",
           {
             "pluginId": "cases",
             "scope": "public",
