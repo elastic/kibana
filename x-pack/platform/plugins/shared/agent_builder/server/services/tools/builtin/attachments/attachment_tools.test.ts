@@ -14,8 +14,15 @@ import { createAttachmentTools } from '.';
 describe('attachment tools', () => {
   let attachmentManager: AttachmentStateManager;
 
+  const getTypeDefinition = (type: string) =>
+    ({
+      id: type,
+      validate: (input: unknown) => ({ valid: true, data: input }),
+      format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+    }) as any;
+
   beforeEach(() => {
-    attachmentManager = createAttachmentStateManager([]);
+    attachmentManager = createAttachmentStateManager([], { getTypeDefinition });
   });
 
   const getTools = () => createAttachmentTools({ attachmentManager });
@@ -55,7 +62,7 @@ describe('attachment tools', () => {
 
     it('returns error for duplicate ID', async () => {
       // First, create an attachment with a specific ID
-      attachmentManager.add({
+      await attachmentManager.add({
         id: 'duplicate-id',
         type: 'text',
         data: 'first',
@@ -82,7 +89,7 @@ describe('attachment tools', () => {
 
   describe('attachment_read', () => {
     it('reads an existing attachment', async () => {
-      const attachment = attachmentManager.add({
+      const attachment = await attachmentManager.add({
         type: 'text',
         data: 'hello',
         description: 'Test',
@@ -99,8 +106,8 @@ describe('attachment tools', () => {
     });
 
     it('reads a specific version', async () => {
-      const attachment = attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
-      attachmentManager.update(attachment.id, { data: 'v2' });
+      const attachment = await attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
+      await attachmentManager.update(attachment.id, { data: 'v2' });
 
       const tool = getTool('platform.core.attachment_read');
       const result = (await tool.handler(
@@ -126,7 +133,7 @@ describe('attachment tools', () => {
 
   describe('attachment_update', () => {
     it('updates an attachment', async () => {
-      const attachment = attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
+      const attachment = await attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
       const tool = getTool('platform.core.attachment_update');
       const result = (await tool.handler(
         { attachment_id: attachment.id, data: 'v2' },
@@ -139,7 +146,7 @@ describe('attachment tools', () => {
     });
 
     it('returns error for deleted attachment', async () => {
-      const attachment = attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
+      const attachment = await attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
       attachmentManager.delete(attachment.id);
 
       const tool = getTool('platform.core.attachment_update');
@@ -154,8 +161,8 @@ describe('attachment tools', () => {
 
   describe('attachment_list', () => {
     it('lists active attachments', async () => {
-      attachmentManager.add({ type: 'text', data: 'a1', description: 'Attachment 1' });
-      attachmentManager.add({ type: 'json', data: { key: 'value' }, description: 'Attachment 2' });
+      await attachmentManager.add({ type: 'text', data: 'a1', description: 'Attachment 1' });
+      await attachmentManager.add({ type: 'json', data: { key: 'value' }, description: 'Attachment 2' });
 
       const tool = getTool('platform.core.attachment_list');
       const result = (await tool.handler({}, {} as any)) as ToolHandlerStandardReturn;
@@ -165,8 +172,8 @@ describe('attachment tools', () => {
     });
 
     it('includes deleted when requested', async () => {
-      const a1 = attachmentManager.add({ type: 'text', data: 'a1', description: 'Attachment 1' });
-      attachmentManager.add({ type: 'text', data: 'a2', description: 'Attachment 2' });
+      const a1 = await attachmentManager.add({ type: 'text', data: 'a1', description: 'Attachment 1' });
+      await attachmentManager.add({ type: 'text', data: 'a2', description: 'Attachment 2' });
       attachmentManager.delete(a1.id);
 
       const tool = getTool('platform.core.attachment_list');
@@ -183,12 +190,12 @@ describe('attachment tools', () => {
 
   describe('attachment_diff', () => {
     it('computes diff between versions', async () => {
-      const attachment = attachmentManager.add({
+      const attachment = await attachmentManager.add({
         type: 'text',
         data: 'version 1',
         description: 'Test',
       });
-      attachmentManager.update(attachment.id, { data: 'version 2' });
+      await attachmentManager.update(attachment.id, { data: 'version 2' });
 
       const tool = getTool('platform.core.attachment_diff');
       const result = (await tool.handler(
