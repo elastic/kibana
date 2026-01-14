@@ -42,7 +42,8 @@ export async function getSynthtraceClient<
   TClient extends SynthtraceClientTypes = SynthtraceClientTypes
 >(
   synthClient: TClient,
-  { esClient, kbnUrl, log, config }: SynthtraceClientOptions
+  { esClient, kbnUrl, log, config }: SynthtraceClientOptions,
+  overrides: { skipInstallation?: boolean } = {}
 ): Promise<GetClientsReturn<TClient>> {
   if (instantiatedClients[synthClient]) {
     return instantiatedClients[synthClient] as unknown as GetClientsReturn<TClient>;
@@ -54,6 +55,7 @@ export async function getSynthtraceClient<
     client: esClient,
     logger: createLogger(LogLevel.info),
     refreshAfterIndex: true,
+    concurrency: 4, // set a default concurrency to allign with EsArchiver
   });
 
   const clients = clientManager.getClients({
@@ -68,8 +70,15 @@ export async function getSynthtraceClient<
 
   await clientManager.initFleetPackageForClient({
     clients,
-    skipInstallation: false,
+    skipInstallation: overrides.skipInstallation ?? false,
   });
+
+  if (overrides.skipInstallation) {
+    log.serviceMessage(
+      synthClient,
+      'Skipped fleet package installation because "overrides.skipInstallation" is true'
+    );
+  }
 
   log.serviceLoaded(synthClient);
 
