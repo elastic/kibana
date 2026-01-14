@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type TestAgent from 'supertest/lib/agent';
 import expect from '@kbn/expect';
 import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { createNote, deleteNote, getNote } from '../../utils/notes';
@@ -21,16 +22,19 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const config = getService('config');
   const isServerless = config.get('serverless');
   const isEss = !isServerless;
+  const supertestCache = new Map<(typeof roles.roles)[number]['name'], TestAgent>();
 
   describe('Notes privileges', () => {
+    before(async () => {
+      for (const role of roles.roles) {
+        supertestCache.set(role.name, await utils.createSuperTestWithCustomRole(role));
+      }
+    });
+
     after(async () => {
       if (isEss) {
-        try {
-          await utils.deleteUsers(roles.roles.map(({ name }) => name));
-          await utils.deleteRoles(roles.roles.map(({ name }) => name));
-        } catch (err) {
-          // do nothing
-        }
+        await utils.deleteUsers(roles.roles.map(({ name }) => name));
+        await utils.deleteRoles(roles.roles.map(({ name }) => name));
       }
       await utils.cleanUpCustomRole();
     });
@@ -38,7 +42,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('read notes', () => {
       let getNoteId = () => '';
       before(async () => {
-        const superTest = await utils.createSuperTestWithCustomRole(roles.secNotesAllV2);
+        const superTest = supertestCache.get(roles.secNotesAllV2.name)!;
         const {
           body: {
             note: { noteId },
@@ -49,7 +53,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       canWriteOrReadRoles.forEach((role) => {
         it(`role "${role.name}" can read notes`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const getNoteResponse = await getNote(superTest, getNoteId());
           expect(getNoteResponse.status).to.be(200);
         });
@@ -57,7 +61,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       cannotAccessRoles.forEach((role) => {
         it(`role "${role.name}" cannot read notes`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const getNoteResponse = await getNote(superTest, getNoteId());
           expect(getNoteResponse.status).to.be(403);
         });
@@ -67,7 +71,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('create notes', () => {
       canWriteRoles.forEach((role) => {
         it(`role "${role.name}" can create notes`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const { status } = await createNote(superTest, { text: 'test', documentId: '123' });
           expect(status).to.be(200);
         });
@@ -75,7 +79,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       cannotWriteRoles.forEach((role) => {
         it(`role "${role.name}" cannot create notes`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const { status } = await createNote(superTest, { text: 'test', documentId: '123' });
           expect(status).to.be(403);
         });
@@ -85,7 +89,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('delete notes', () => {
       let getNoteId = () => '';
       before(async () => {
-        const superTest = await utils.createSuperTestWithCustomRole(roles.secNotesAllV2);
+        const superTest = supertestCache.get(roles.secNotesAllV2.name)!;
         const {
           body: {
             note: { noteId },
@@ -96,7 +100,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       canWriteRoles.forEach((role) => {
         it(`role "${role.name}" can delete notes`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const deleteNoteRequest = await deleteNote(superTest, getNoteId());
           expect(deleteNoteRequest.status).to.be(200);
         });
@@ -104,7 +108,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       cannotWriteRoles.forEach((role) => {
         it(`role "${role.name}" cannot delete notes`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const deleteNoteRequest = await deleteNote(superTest, getNoteId());
           expect(deleteNoteRequest.status).to.be(403);
         });

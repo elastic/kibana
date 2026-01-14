@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type TestAgent from 'supertest/lib/agent';
 import expect from '@kbn/expect';
 import type { CreateTimelinesResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
@@ -33,8 +34,15 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const config = getService('config');
   const isServerless = config.get('serverless');
   const isEss = !isServerless;
+  const supertestCache = new Map<(typeof roles.roles)[number]['name'], TestAgent>();
 
   describe('Timeline privileges', () => {
+    before(async () => {
+      for (const role of roles.roles) {
+        supertestCache.set(role.name, await utils.createSuperTestWithCustomRole(role));
+      }
+    });
+
     after(async () => {
       if (isEss) {
         await utils.deleteUsers(roles.roles.map(({ name }) => name));
@@ -46,7 +54,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('read timelines', () => {
       canWriteOrReadRoles.forEach((role) => {
         it(`role "${role.name}" can read timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const getTimelinesResponse = await getTimelines(superTest);
           expect(getTimelinesResponse.status).to.be(200);
         });
@@ -54,7 +62,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       cannotAccessRoles.forEach((role) => {
         it(`role "${role.name}" cannot read timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const getTimelinesResponse = await getTimelines(superTest);
           expect(getTimelinesResponse.status).to.be(403);
         });
@@ -64,7 +72,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('resolve timelines', () => {
       let getTimelineId = () => '';
       before(async () => {
-        const superTest = await utils.createSuperTestWithCustomRole(roles.secTimelineAllV2);
+        const superTest = supertestCache.get(roles.secTimelineAllV2.name)!;
         const {
           body: { savedObjectId },
         } = await createBasicTimeline(superTest, 'test timeline');
@@ -72,7 +80,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
       canWriteOrReadRoles.forEach((role) => {
         it(`role "${role.name}" can resolve timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const resolveTimelineResponse = await resolveTimeline(superTest, getTimelineId());
           expect(resolveTimelineResponse.status).to.be(200);
         });
@@ -80,7 +88,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       cannotAccessRoles.forEach((role) => {
         it(`role "${role.name}" cannot resolve timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const resolveTimelineResponse = await resolveTimeline(superTest, getTimelineId());
           expect(resolveTimelineResponse.status).to.be(403);
         });
@@ -90,7 +98,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('create and delete timelines', () => {
       canWriteRoles.forEach((role) => {
         it(`role "${role.name}" can create and delete timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
 
           const createResponse = await createBasicTimeline(superTest, 'test timeline');
           expect(createResponse.status).to.be(200);
@@ -104,9 +112,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         let getTimelineToDeleteId = () => '';
         before(async () => {
           // create a timeline with a privileged user
-          const privilegedSuperTest = await utils.createSuperTestWithCustomRole(
-            roles.secTimelineAllV2
-          );
+          const privilegedSuperTest = supertestCache.get(roles.secTimelineAllV2.name)!;
           const {
             body: { savedObjectId: timelineId },
           } = await createBasicTimeline(privilegedSuperTest, 'test timeline');
@@ -115,13 +121,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
         cannotWriteRoles.forEach((role) => {
           it(`role "${role.name}" cannot create timelines`, async () => {
-            const superTest = await utils.createSuperTestWithCustomRole(role);
+            const superTest = supertestCache.get(role.name)!;
             const createResponse = await createBasicTimeline(superTest, 'test timeline');
             expect(createResponse.status).to.be(403);
           });
 
           it(`role "${role.name}" cannot delete timelines`, async () => {
-            const superTest = await utils.createSuperTestWithCustomRole(role);
+            const superTest = supertestCache.get(role.name)!;
             const deleteResponse = await deleteTimeline(superTest, getTimelineToDeleteId());
             expect(deleteResponse.status).to.be(403);
           });
@@ -132,7 +138,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('update timelines', () => {
       canWriteRoles.forEach((role) => {
         it(`role "${role.name}" can update timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const {
             body: { savedObjectId: timelineId, version },
           } = await createBasicTimeline(superTest, 'test timeline');
@@ -147,7 +153,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         let getTimelineId = () => '';
         let getVersion = () => '';
         before(async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(roles.secTimelineAllV2);
+          const superTest = supertestCache.get(roles.secTimelineAllV2.name)!;
           const {
             body: { savedObjectId, version },
           } = await createBasicTimeline(superTest, 'test timeline');
@@ -156,7 +162,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         });
         cannotWriteRoles.forEach((role) => {
           it(`role "${role.name}" cannot create timelines`, async () => {
-            const superTest = await utils.createSuperTestWithCustomRole(role);
+            const superTest = supertestCache.get(role.name)!;
             await patchTimeline(superTest, getTimelineId(), getVersion(), {
               title: 'updated title',
             }).expect(403);
@@ -168,7 +174,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('favorite/unfavorite timelines', () => {
       let getTimelineId = () => '';
       before(async () => {
-        const superTest = await utils.createSuperTestWithCustomRole(roles.secTimelineAllV2);
+        const superTest = supertestCache.get(roles.secTimelineAllV2.name)!;
         const {
           body: { savedObjectId },
         } = await createBasicTimeline(superTest, 'test timeline');
@@ -176,7 +182,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
       canWriteRoles.forEach((role) => {
         it(`role "${role.name}" can favorite/unfavorite timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const favoriteTimelineRequest = await favoriteTimeline(superTest, getTimelineId());
           expect(favoriteTimelineRequest.status).to.be(200);
           expect(favoriteTimelineRequest.body.favorite).to.have.length(1);
@@ -190,7 +196,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       cannotWriteRoles.forEach((role) => {
         it(`role "${role.name}" cannot favorite/unfavorite timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
 
           const favoriteTimelineRequest = await favoriteTimeline(superTest, getTimelineId());
           expect(favoriteTimelineRequest.status).to.be(403);
@@ -202,7 +208,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       let getTimelineId = () => '';
       const eventId = 'anId';
       before(async () => {
-        const superTest = await utils.createSuperTestWithCustomRole(roles.secTimelineAllV2);
+        const superTest = supertestCache.get(roles.secTimelineAllV2.name)!;
         const {
           body: { savedObjectId },
         } = await createBasicTimeline(superTest, 'test timeline');
@@ -229,7 +235,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       cannotWriteRoles.forEach((role) => {
         it(`role "${role.name}" cannot pin/unpin events`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
 
           const pinEventResponse = await pinEvent(superTest, getTimelineId(), eventId);
           expect(pinEventResponse.status).to.be(403);
@@ -241,13 +247,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       let getTimeline: () => CreateTimelinesResponse = () =>
         ({} as unknown as CreateTimelinesResponse);
       before(async () => {
-        const superTest = await utils.createSuperTestWithCustomRole(roles.secTimelineAllV2);
+        const superTest = supertestCache.get(roles.secTimelineAllV2.name)!;
         const { body } = await createBasicTimeline(superTest, 'test timeline');
         getTimeline = () => body;
       });
       canWriteRoles.forEach((role) => {
         it(`role "${role.name}" can copy timeline`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const timeline = getTimeline();
           const copyTimelineResponse = await copyTimeline(
             superTest,
@@ -260,7 +266,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       cannotWriteRoles.forEach((role) => {
         it(`role "${role.name}" cannot copy timeline`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const timeline = getTimeline();
           const copyTimelineResponse = await copyTimeline(
             superTest,
@@ -275,7 +281,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('install prepackaged timelines', () => {
       canWriteRoles.forEach((role) => {
         it(`role "${role.name}" can install prepackaged timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const installTimelinesResponse = await installPrepackedTimelines(superTest);
           expect(installTimelinesResponse.status).to.be(200);
         });
@@ -283,7 +289,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       cannotWriteRoles.forEach((role) => {
         it(`role "${role.name}" cannot install prepackaged timelines`, async () => {
-          const superTest = await utils.createSuperTestWithCustomRole(role);
+          const superTest = supertestCache.get(role.name)!;
           const installTimelinesResponse = await installPrepackedTimelines(superTest);
           expect(installTimelinesResponse.status).to.be(403);
         });
