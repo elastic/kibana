@@ -53,10 +53,10 @@ export const validate = (command: ESQLAstAllCommands, commands: ESQLCommand[]): 
     const settingValue = getSettingValue(command);
     if (settingValue) {
       const expectedTypes = setting.type;
-      const valueType = getExpressionType(settingValue);
-      const typedValueType = TypeMap[valueType] || valueType;
+      const settingValueType = getExpressionType(settingValue);
+      const valueType = TypeMap[settingValueType] || settingValueType;
 
-      if (!expectedTypes.includes(typedValueType)) {
+      if (!expectedTypes.includes(valueType)) {
         messages.push(
           getMessageFromId({
             messageId: 'invalidSettingValueType',
