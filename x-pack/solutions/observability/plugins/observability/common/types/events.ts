@@ -74,6 +74,7 @@ export const EXTERNAL_EVENTS_INDEX = '.external-events';
 
 export const EVENTS_API_URLS = {
   EVENTS: '/api/observability/events',
+  EVENTS_RAW: '/api/observability/events/raw', // Bypasses strict validation
   EVENTS_MOCK: '/api/observability/events/mock',
   EVENTS_WEBHOOK: '/api/observability/events/webhook',
 } as const;

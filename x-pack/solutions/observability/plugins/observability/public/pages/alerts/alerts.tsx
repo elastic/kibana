@@ -127,7 +127,7 @@ function InternalAlertsPage() {
   // Generate mock events state
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number | undefined>(undefined);
 
   const [tableLoading, setTableLoading] = useState(true);
   const [tableCount, setTableCount] = useState(0);
@@ -277,7 +277,8 @@ function InternalAlertsPage() {
     async (payload: ExternalEventInput) => {
       setIsGenerating(true);
       try {
-        await http.post(EVENTS_API_URLS.EVENTS, {
+        // Use the raw endpoint which bypasses strict io-ts validation
+        await http.post(EVENTS_API_URLS.EVENTS_RAW, {
           body: JSON.stringify(payload),
         });
         toasts.addSuccess({
@@ -286,13 +287,20 @@ function InternalAlertsPage() {
             values: { source: payload.source },
           }),
         });
-        setRefreshKey((prev) => prev + 1);
+        setLastReloadRequestTime(Date.now());
         setIsGenerateModalOpen(false);
       } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : typeof error === 'object' && error !== null && 'body' in error
+              ? (error as { body?: { message?: string } }).body?.message || 'Unknown error'
+              : 'Unknown error';
         toasts.addDanger({
           title: i18n.translate('xpack.observability.alerts.generateError', {
             defaultMessage: 'Failed to generate mock event',
           }),
+          text: errorMessage,
         });
       } finally {
         setIsGenerating(false);
@@ -413,7 +421,6 @@ function InternalAlertsPage() {
                   });
                   return (
                     <ObservabilityAlertsTable
-                      key={refreshKey}
                       id={ALERTS_TABLE_ID}
                       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                       consumers={observabilityAlertFeatureIds}
@@ -421,6 +428,7 @@ function InternalAlertsPage() {
                       pageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}
                       columns={tableColumns}
+                      lastReloadRequestTime={lastReloadRequestTime}
                       renderAdditionalToolbarControls={() => (
                         <GroupingToolbarControls
                           groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}

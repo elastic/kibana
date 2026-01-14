@@ -17,6 +17,83 @@ import type { ExternalEventInput, EventSeverity, EventStatus } from '../../../co
 export function registerWebhookRoute(core: CoreSetup, logger: Logger) {
   const router = core.http.createRouter();
 
+  // Register raw events POST route that bypasses strict validation
+  // This is used by the Generate Mock Event modal
+  router.post(
+    {
+      path: '/api/observability/events/raw',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'PoC endpoint for external events - no auth required',
+        },
+      },
+      options: {
+        access: 'public',
+      },
+      validate: {
+        query: schema.object({
+          connector_id: schema.maybe(schema.string()),
+        }),
+        body: schema.any(),
+      },
+    },
+    async (context, request, response) => {
+      const body = request.body as Record<string, unknown>;
+      const connectorId = request.query.connector_id;
+
+      logger.info(`[Events Raw] Received event creation request`);
+      logger.info(`[Events Raw] Body: ${JSON.stringify(body, null, 2)}`);
+
+      try {
+        // Basic validation
+        if (!body.title || typeof body.title !== 'string') {
+          return response.badRequest({ body: { message: 'Missing required field: title' } });
+        }
+        if (!body.message || typeof body.message !== 'string') {
+          return response.badRequest({ body: { message: 'Missing required field: message' } });
+        }
+        if (!body.severity || typeof body.severity !== 'string') {
+          return response.badRequest({ body: { message: 'Missing required field: severity' } });
+        }
+        if (!body.source || typeof body.source !== 'string') {
+          return response.badRequest({ body: { message: 'Missing required field: source' } });
+        }
+
+        const coreContext = await context.core;
+        const esClient = coreContext.elasticsearch.client.asInternalUser;
+        const eventsService = new EventsService(esClient);
+
+        const eventInput: ExternalEventInput = {
+          title: body.title as string,
+          message: body.message as string,
+          severity: body.severity as EventSeverity,
+          source: body.source as string,
+          status: (body.status as EventStatus) || 'open',
+          timestamp: (body.timestamp as string) || new Date().toISOString(),
+          tags: Array.isArray(body.tags) ? (body.tags as string[]) : [],
+          links: body.links as Array<{ label: string; url: string }> | undefined,
+          raw_payload: body.raw_payload as Record<string, unknown> | undefined,
+          connector_id: (body.connector_id as string) || connectorId,
+          fingerprint: body.fingerprint as string | undefined,
+        };
+
+        const event = await eventsService.createEvent(eventInput);
+        logger.info(`[Events Raw] Event created with id: ${event.id}`);
+
+        return response.ok({
+          body: { event, count: 1 },
+        });
+      } catch (error) {
+        logger.error(`[Events Raw] Error creating event: ${error}`);
+        return response.customError({
+          statusCode: 500,
+          body: { message: `Error creating event: ${error}` },
+        });
+      }
+    }
+  );
+
   router.post(
     {
       path: '/api/observability/events/webhook',

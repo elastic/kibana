@@ -42,7 +42,8 @@ const getEventsRoute = createObservabilityServerRoute({
   }),
   handler: async ({ context, params }): Promise<{ events: ExternalEvent[]; total: number }> => {
     const coreContext = await context.core;
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    // Use asInternalUser since we're reading from .alerts-* indices which require elevated privileges
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
     const eventsService = new EventsService(esClient);
 
     const query = params?.query || {};
@@ -66,6 +67,7 @@ const getEventsRoute = createObservabilityServerRoute({
 
 // POST /api/observability/events - Create event(s)
 // Accepts optional connector_id query parameter for connector integration
+// Using t.unknown for body to accept any JSON payload - validation happens in handler
 const createEventsRoute = createObservabilityServerRoute({
   endpoint: `POST ${EVENTS_API_URLS.EVENTS}`,
   security: {
@@ -77,49 +79,9 @@ const createEventsRoute = createObservabilityServerRoute({
   options: { access: 'public' },
   params: t.intersection([
     t.type({
-    body: t.union([
-      // Single event
-        t.intersection([
-      t.type({
-        title: t.string,
-        message: t.string,
-        severity: t.string,
-        source: t.string,
-      }),
-          t.partial({
-            timestamp: t.string,
-            status: t.string,
-            tags: t.array(t.string),
-            links: t.array(t.type({ label: t.string, url: t.string })),
-            raw_payload: t.record(t.string, t.unknown),
-            fingerprint: t.string,
-            connector_id: t.string,
-          }),
-        ]),
-      // Batch of events
-      t.type({
-        events: t.array(
-            t.intersection([
-          t.type({
-            title: t.string,
-            message: t.string,
-            severity: t.string,
-            source: t.string,
-              }),
-              t.partial({
-                timestamp: t.string,
-                status: t.string,
-                tags: t.array(t.string),
-                links: t.array(t.type({ label: t.string, url: t.string })),
-                raw_payload: t.record(t.string, t.unknown),
-                fingerprint: t.string,
-                connector_id: t.string,
-              }),
-            ])
-        ),
-      }),
-    ]),
-  }),
+      // Accept any JSON body - we'll validate required fields in the handler
+      body: t.unknown,
+    }),
     t.partial({
       query: t.partial({
         connector_id: t.string,
@@ -131,17 +93,36 @@ const createEventsRoute = createObservabilityServerRoute({
     params,
   }): Promise<{ event?: ExternalEvent; events?: ExternalEvent[]; count: number }> => {
     const coreContext = await context.core;
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    // Use asInternalUser since we're writing to .alerts-* indices which require elevated privileges
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
     const eventsService = new EventsService(esClient);
 
     // connector_id can come from query param (legacy) or body (preferred)
     const queryConnectorId = params.query?.connector_id;
-    const body = params.body as ExternalEventInput | { events: ExternalEventInput[] };
+    const body = params.body as Record<string, unknown>;
+
+    // Basic validation - check required fields
+    const validateEvent = (event: Record<string, unknown>): ExternalEventInput => {
+      if (!event.title || typeof event.title !== 'string') {
+        throw new Error('Missing or invalid required field: title');
+      }
+      if (!event.message || typeof event.message !== 'string') {
+        throw new Error('Missing or invalid required field: message');
+      }
+      if (!event.severity || typeof event.severity !== 'string') {
+        throw new Error('Missing or invalid required field: severity');
+      }
+      if (!event.source || typeof event.source !== 'string') {
+        throw new Error('Missing or invalid required field: source');
+      }
+      return event as unknown as ExternalEventInput;
+    };
 
     // Check if it's a batch request
     if ('events' in body && Array.isArray(body.events)) {
+      const validatedEvents = (body.events as Record<string, unknown>[]).map(validateEvent);
       // Use body connector_id if present, otherwise fall back to query param
-      const eventsWithConnector = body.events.map((event) => ({
+      const eventsWithConnector = validatedEvents.map((event) => ({
         ...event,
         connector_id: event.connector_id || queryConnectorId,
       }));
@@ -149,8 +130,8 @@ const createEventsRoute = createObservabilityServerRoute({
       return { events, count: events.length };
     }
 
-    // Single event - use body connector_id if present, otherwise fall back to query param
-    const singleEvent = body as ExternalEventInput;
+    // Single event - validate and use body connector_id if present, otherwise fall back to query param
+    const singleEvent = validateEvent(body);
     const eventWithConnector = {
       ...singleEvent,
       connector_id: singleEvent.connector_id || queryConnectorId,
@@ -182,7 +163,8 @@ const createMockEventsRoute = createObservabilityServerRoute({
     params,
   }): Promise<{ events: ExternalEvent[]; count: number; provider: string }> => {
     const coreContext = await context.core;
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    // Use asInternalUser since we're writing to .alerts-* indices which require elevated privileges
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
     const eventsService = new EventsService(esClient);
 
     const query = params?.query || {};
