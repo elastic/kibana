@@ -46,11 +46,11 @@ describe('initializeSettingsManager', () => {
     });
   });
 
-  describe('startComparing$', () => {
+  describe('startComparing', () => {
     test('Should return no changes when there are no changes', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`Object {}`);
         done();
       });
@@ -59,7 +59,7 @@ describe('initializeSettingsManager', () => {
     test('Should return time_restore change when time_restoreChanges', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
             "time_restore": false,
@@ -77,7 +77,7 @@ describe('initializeSettingsManager', () => {
     test('Should return only changed keys when there are changes', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
             "options": Object {

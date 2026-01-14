@@ -51,7 +51,7 @@ export const EditSignificantEventFlyout = ({
     services: { telemetryClient },
   } = useKibana();
 
-  const { upsertQuery, bulk } = useSignificantEventsApi({
+  const { upsertQuery, bulk, acknowledgeGenerationTask } = useSignificantEventsApi({
     name: definition.stream.name,
   });
 
@@ -108,7 +108,12 @@ export const EditSignificantEventFlyout = ({
                 index: query,
               }))
             ).then(
-              () => {
+              async () => {
+                // Acknowledge the task after successful save
+                await acknowledgeGenerationTask().catch(() => {
+                  // Ignore errors - task acknowledgment is not critical
+                });
+
                 notifications.toasts.addSuccess({
                   title: i18n.translate(
                     'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',

@@ -26,7 +26,7 @@ import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import type { LensDocument, LensAppServices, LensAttributesService } from '@kbn/lens-common';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
@@ -151,6 +151,7 @@ export function makeDefaultServices(
     dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    kql: kqlPluginMock.createStartContract(),
     contentManagement: contentManagementMock.createStartContract(),
     eventAnnotationService: {} as EventAnnotationServiceType,
   };
