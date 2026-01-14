@@ -187,9 +187,9 @@ describe('<DocViewer />', () => {
 
   test('should prioritize the initialTabId prop over local storage value', () => {
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Render function', component: jest.fn() });
-    registry.add({ id: 'test2', order: 20, title: 'Render function', component: jest.fn() });
-    registry.add({ id: 'test3', order: 30, title: 'Render function', component: jest.fn() });
+    registry.add({ id: 'test1', order: 10, title: 'Render function', render: jest.fn() });
+    registry.add({ id: 'test2', order: 20, title: 'Render function', render: jest.fn() });
+    registry.add({ id: 'test3', order: 30, title: 'Render function', render: jest.fn() });
 
     mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test2';
 
@@ -264,8 +264,8 @@ describe('<DocViewer />', () => {
   test('should call onUpdateSelectedTabId when tab selection changes', async () => {
     const onUpdateSelectedTabId = jest.fn();
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Tab 1', component: jest.fn() });
-    registry.add({ id: 'test2', order: 20, title: 'Tab 2', component: jest.fn() });
+    registry.add({ id: 'test1', order: 10, title: 'Tab 1', render: jest.fn() });
+    registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: jest.fn() });
 
     render(
       <WrappedDocViewer
