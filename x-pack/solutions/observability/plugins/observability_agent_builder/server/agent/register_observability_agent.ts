@@ -13,7 +13,7 @@ import type {
   ObservabilityAgentBuilderPluginStart,
 } from '../types';
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
-import { OBSERVABILITY_GET_ALERTS_TOOL_ID, OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools';
+import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
@@ -48,7 +48,6 @@ export async function registerObservabilityAgent({
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
-        ${getOutputStyleInstructions()}
       `),
       tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
     },
@@ -87,13 +86,5 @@ function getFieldDiscoveryInstructions() {
     ### FIELD DISCOVERY
     Before using field names in \`groupBy\`, \`kqlFilter\`, or \`aggregation.field\` parameters, call \`${OBSERVABILITY_GET_INDEX_INFO_TOOL_ID}\` first.
     Clusters use different naming conventions (ECS vs OpenTelemetry) - discovering fields first prevents errors.
-  `);
-}
-
-function getOutputStyleInstructions() {
-  return dedent(`
-    ### OUTPUT STYLE
-    For \`${OBSERVABILITY_GET_ALERTS_TOOL_ID}\` results: Display as a Markdown table with up to 5 columns from \`selectedFields\`.
-    Use human-friendly column names (Title Case, strip prefixes like \`kibana.alert.\`). Include a summary with total count.
   `);
 }
