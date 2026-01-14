@@ -94,6 +94,7 @@ export const ActiveSourcesView: React.FC = () => {
           isLoading={isLoading}
           onReconnect={() => {}}
           onEdit={handleEdit}
+          onClone={() => {}}
           onDelete={handleDelete}
         />
       )}

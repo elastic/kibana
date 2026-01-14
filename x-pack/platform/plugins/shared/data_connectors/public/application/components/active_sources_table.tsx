@@ -39,6 +39,7 @@ interface ActiveSourcesTableProps {
   isLoading?: boolean;
   onReconnect?: (source: ActiveSource) => void;
   onEdit?: (source: ActiveSource) => void;
+  onClone?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
 }
 
@@ -60,9 +61,10 @@ const ActionsCell: React.FC<{
   source: ActiveSource;
   onReconnect?: (source: ActiveSource) => void;
   onEdit?: (source: ActiveSource) => void;
+  onClone?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
   disabled?: boolean;
-}> = ({ source, onReconnect, onEdit, onDelete, disabled = false }) => {
+}> = ({ source, onReconnect, onEdit, onClone, onDelete, disabled = false }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const items = [
@@ -78,6 +80,21 @@ const ActionsCell: React.FC<{
       >
         {i18n.translate('xpack.dataConnectors.activeSources.editAction', {
           defaultMessage: 'Edit',
+        })}
+      </EuiContextMenuItem>
+    ),
+    onClone && (
+      <EuiContextMenuItem
+        key="clone"
+        icon="copy"
+        onClick={() => {
+          setIsPopoverOpen(false);
+          onClone(source);
+        }}
+        data-test-subj={`cloneActiveSource-${source.id}`}
+      >
+        {i18n.translate('xpack.dataConnectors.activeSources.cloneAction', {
+          defaultMessage: 'Clone',
         })}
       </EuiContextMenuItem>
     ),
@@ -151,6 +168,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   isLoading = false,
   onReconnect,
   onEdit,
+  onClone,
   onDelete,
 }) => {
   const {
@@ -278,6 +296,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
           source={source}
           onReconnect={onReconnect}
           onEdit={onEdit}
+          onClone={onClone}
           onDelete={onDelete}
           disabled={selectedItems.length > 0}
         />
@@ -303,19 +322,6 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
                   values: { count: selectedItems.length },
                 })}
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="copy"
-                onClick={() => {}}
-                disabled
-                data-test-subj="bulkCloneButton"
-              >
-                {i18n.translate('xpack.dataConnectors.activeSources.cloneSelected', {
-                  defaultMessage: 'Clone selected',
-                })}
-              </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
