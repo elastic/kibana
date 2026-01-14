@@ -1,6 +1,6 @@
-# SHOW
+## SHOW
 
-The SHOW command returns information about the deployment and its capabilities.
+The `SHOW` command provides information about the deployment and its capabilities.
 
 ## Syntax
 
@@ -8,15 +8,13 @@ The SHOW command returns information about the deployment and its capabilities.
 
 ### Parameters
 
-#### item
+#### `item`
 
-Can only be INFO.
+This parameter can only be `INFO`.
 
 ## Examples
 
-Use SHOW INFO to return the deployment’s version, build date, and hash.
-
-This query retrieves general information about the Elasticsearch deployment, such as the version, build date, and build hash.
+Retrieve the deployment’s version, build date, and hash:
 
 ```esql
 SHOW INFO

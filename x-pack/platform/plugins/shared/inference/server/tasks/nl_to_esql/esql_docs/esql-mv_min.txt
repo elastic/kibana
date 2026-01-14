@@ -1,6 +1,6 @@
 # MV_MIN
 
-The MV_MIN function converts a multivalued expression into a single valued column containing the minimum value.
+Converts a multivalued expression into a single-valued column containing the minimum value.
 
 ## Syntax
 
@@ -8,26 +8,26 @@ The MV_MIN function converts a multivalued expression into a single valued colum
 
 ### Parameters
 
-#### field
+#### `field`
 
-The multivalue expression to be evaluated.
+A multivalued expression.
+
+## Supported Types
+
+This function can be used with any column type, including `keyword` columns. For `keyword` columns, it selects the first string by comparing their UTF-8 representation byte by byte.
 
 ## Examples
 
-Calculate the minimum value from a list of numbers:
-
-This query creates a row with a multivalued field `a` containing the numbers 2 and 1, then computes the minimum value in `a` and stores it in a new column called `min_a`.
-
-```esql
+#```esql
 ROW a=[2, 1]
 | EVAL min_a = MV_MIN(a)
 ```
 
-Find the minimum value from a list of strings by comparing their utf-8 representation byte by byte:
+Extracts the minimum value from the multivalued column `a`, resulting in `min_a = 1`.
 
-This query creates a row with a multivalued field `a` containing the strings "foo" and "bar", then determines the minimum string based on their UTF-8 byte values and stores it in a new column called `min_a`.
-
-```esql
-ROW a=["foo", "bar"]
-| EVAL min_a = MV_MIN(a)
+#```esql
+FROM bag_of_numbers
+| EVAL min = MV_MIN(numbers)
 ```
+
+Extracts the minimum value from the multivalued column `numbers` by comparing the values lexicographically.

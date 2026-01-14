@@ -1,19 +1,20 @@
-# ES|QL Operators Reference
+```markdown
+# ES|QL Operators
 
-This document provides an overview of the operators available in ES|QL (Elasticsearch Query Language), including binary, unary, logical, and other special operators. Each section includes a brief description and an example ES|QL query.
+This document provides an overview of the operators available in ES|QL, categorized into binary, unary, logical, and other operators. Each operator is accompanied by an example query to demonstrate its usage.
 
 ---
 
-## 1. Binary Operators
+## Binary Operators
 
-Binary operators operate on two expressions.
+Binary operators are used to compare or perform arithmetic operations between two values.
 
 ### Equality (`==`)
 Checks if two values are equal.
 
 ```esql
 FROM employees
-| WHERE first_name == "Alice"
+| WHERE first_name == "John"
 ```
 
 ### Inequality (`!=`)
@@ -25,7 +26,7 @@ FROM employees
 ```
 
 ### Less Than (`<`)
-Checks if the left value is less than the right value.
+Checks if a value is less than another.
 
 ```esql
 FROM employees
@@ -33,7 +34,7 @@ FROM employees
 ```
 
 ### Less Than or Equal To (`<=`)
-Checks if the left value is less than or equal to the right value.
+Checks if a value is less than or equal to another.
 
 ```esql
 FROM employees
@@ -41,19 +42,19 @@ FROM employees
 ```
 
 ### Greater Than (`>`)
-Checks if the left value is greater than the right value.
+Checks if a value is greater than another.
 
 ```esql
 FROM employees
-| WHERE height > 1.8
+| WHERE age > 30
 ```
 
 ### Greater Than or Equal To (`>=`)
-Checks if the left value is greater than or equal to the right value.
+Checks if a value is greater than or equal to another.
 
 ```esql
 FROM employees
-| WHERE languages >= 3
+| WHERE experience_years >= 5
 ```
 
 ### Add (`+`)
@@ -61,16 +62,15 @@ Adds two values.
 
 ```esql
 FROM employees
-| EVAL total = salary + bonus
-| WHERE total > 100000
+| EVAL total_compensation = salary + bonus
 ```
 
 ### Subtract (`-`)
-Subtracts the right value from the left value.
+Subtracts one value from another.
 
 ```esql
 FROM employees
-| WHERE vacation_days - used_days > 5
+| EVAL remaining_vacation_days = total_vacation_days - used_vacation_days
 ```
 
 ### Multiply (`*`)
@@ -78,63 +78,63 @@ Multiplies two values.
 
 ```esql
 FROM employees
-| WHERE height * 100 > 180
+| EVAL annual_salary = monthly_salary * 12
 ```
 
 ### Divide (`/`)
-Divides the left value by the right value.
+Divides one value by another.
 
 ```esql
 FROM employees
-| WHERE salary / 12 > 4000
+| EVAL average_salary = total_salary / employee_count
 ```
 
 ### Modulus (`%`)
-Returns the remainder of division.
+Returns the remainder of a division.
 
 ```esql
 FROM employees
-| WHERE emp_no % 2 == 0
+| EVAL remainder = employee_id % 2
 ```
 
 ---
 
-## 2. Unary Operators
+## Unary Operators
 
-Unary operators operate on a single expression.
+Unary operators operate on a single operand.
 
 ### Negation (`-`)
 Negates a numeric value.
 
 ```esql
-ROW a = 5
-| EVAL neg_a = -a
+ROW value = 10
+| EVAL negative_value = -value
 ```
 
 ---
 
-## 3. Logical Operators
+## Logical Operators
 
-Logical operators are used to combine multiple boolean expressions.
+Logical operators are used to combine or negate conditions.
 
 ### AND
-Returns `true` if both expressions are true.
+Returns `true` if both conditions are true.
 
 ```esql
 FROM employees
-| WHERE still_hired AND salary > 50000
+| WHERE age > 30 AND department == "Engineering"
 ```
 
 ### OR
-Returns `true` if at least one expression is true.
+Returns `true` if at least one condition is true.
 
 ```esql
 FROM employees
-| WHERE department == "Engineering" OR department == "IT"
+| WHERE department == "HR" OR department == "Finance"
 ```
 
 ### NOT
-Negates a boolean expression.
+Negates a condition.
 
 ```esql
 FROM employees
@@ -143,16 +143,19 @@ FROM employees
 
 ---
 
-## 4. Other Operators and Predicates
+## Other Operators
 
-### IS NULL / IS NOT NULL
-Checks if a value is `null` or not.
+### IS NULL and IS NOT NULL
+Checks if a value is `NULL` or not.
 
+#### IS NULL
 ```esql
 FROM employees
 | WHERE birth_date IS NULL
+| KEEP first_name, last_name
 ```
 
+#### IS NOT NULL
 ```esql
 FROM employees
 | WHERE is_rehired IS NOT NULL
@@ -160,11 +163,11 @@ FROM employees
 ```
 
 ### Cast (`::`)
-Casts a value to a different type.
+Casts a value to a specific type.
 
 ```esql
 FROM employees
-| EVAL salary_str = salary::keyword
+| EVAL salary_as_string = salary::KEYWORD
 ```
 
 ### IN
@@ -172,54 +175,43 @@ Checks if a value is in a list of values.
 
 ```esql
 ROW a = 1, b = 4, c = 3
-| WHERE c-a IN (3, b / 2, a)
+| WHERE c - a IN (3, b / 2, a)
 ```
 
 ### LIKE
-Pattern matching using wildcards (`*` for any number of characters, `?` for a single character).
+Filters data based on string patterns using wildcards.
 
+#Basic usage
 ```esql
 FROM employees
-| WHERE first_name LIKE """?b*"""
-| KEEP first_name, last_name
+| WHERE first_name LIKE "J*"
 ```
 
+#Escaping special characters
 ```esql
 ROW message = "foo * bar"
-| WHERE message LIKE """foo \* bar"""
+| WHERE message LIKE "foo \\* bar"
 ```
 
 ### RLIKE
-Pattern matching using regular expressions.
+Filters data based on string patterns using regular expressions.
 
 ```esql
 FROM employees
-| WHERE last_name RLIKE """^S.*n$"""
-| KEEP first_name, last_name
+| WHERE first_name RLIKE "J.*"
 ```
 
----
+### Cast `::`
 
-## 5. Example: Combining Operators
+The `::` operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
 
-You can combine multiple operators in a single query:
+Examples:
 
 ```esql
 FROM employees
-| WHERE (salary > 50000 AND still_hired) OR department IN ("Engineering", "IT")
+| EVAL salary = salary::double
 ```
 
----
-
-## 6. Notes
-
-- Wildcards in `LIKE`: `*` matches zero or more characters, `?` matches one character.
-- Use triple quotes (`"""`) to avoid escaping special characters in patterns.
-- For more advanced pattern matching, use `RLIKE` with regular expressions.
-- The `IN` operator can be used with lists of literals, fields, or expressions.
-- Use `IS NULL` and `IS NOT NULL` for null checks.
-- Use `::` or type conversion functions to cast values.
-
----
-
-For more details, refer to the [ES|QL Syntax Reference](#).
+```esql
+ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
+```

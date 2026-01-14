@@ -1,6 +1,6 @@
 # LOG
 
-Calculates the logarithm of a numeric value to a specified base. The result is always a double. Logs of zero, negative numbers, or a base of one return `null` and a warning.
+Calculates the logarithm of a numeric value to a specified base. If the base is not provided, it defaults to the natural logarithm (base e).
 
 ## Syntax
 
@@ -8,26 +8,34 @@ Calculates the logarithm of a numeric value to a specified base. The result is a
 
 ### Parameters
 
-#### base
+#### `base`
 
-Base of the logarithm. If `null`, the function returns `null`. If not provided, the function returns the natural logarithm (base e) of the value.
+- Base of the logarithm. If `null`, the function returns `null`. If not provided, the function calculates the natural logarithm (base e).
 
-#### number
+#### `number`
 
-Numeric expression. If `null`, the function returns `null`.
+- Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-This query creates a row with two columns: `base` set to 2.0 and `value` set to 8.0. It then calculates the logarithm of `value` (8.0) using base 2 and stores the result in a new column `s`.
+Logarithm with a specified base
+
+Calculate the logarithm of 8 to base 2:
 
 ```esql
 ROW base = 2.0, value = 8.0
 | EVAL s = LOG(base, value)
 ```
 
-This query creates a row with a single column `value` set to 100. It then calculates the natural logarithm (base e) of 100 and stores the result in a new column `s`.
+Natural logarithm (base e)
+
+Calculate the natural logarithm of 100:
 
 ```esql
 ROW value = 100
-| EVAL s = LOG(value);
+| EVAL s = LOG(value)
 ```
+
+## Limitations
+
+- Logs of zero, negative numbers, and a base of one return `null` and generate a warning.

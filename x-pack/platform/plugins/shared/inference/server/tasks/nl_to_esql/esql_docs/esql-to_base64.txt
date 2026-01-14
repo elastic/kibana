@@ -1,24 +1,15 @@
-# TO_BASE64
+## TO_BASE64
 
-The TO_BASE64 command encodes a string into its base64 representation.
+Encodes a string to a base64 string.
 
-## Syntax
-
-`TO_BASE64(string)`
-
-### Parameters
-
-#### string
-
-The string value to be encoded.
-
-## Examples
-
-Encode the string "elastic" to its base64 representation:
-
-This query creates a row with a column `a` containing the string "elastic", then adds a new column `e` with the base64-encoded value of `a`.
+### Examples
 
 ```esql
 ROW a = "elastic"
 | EVAL e = TO_BASE64(a)
+```
+
+```esql
+ROW text = "Hello, World!"
+| EVAL encoded_text = TO_BASE64(text)
 ```

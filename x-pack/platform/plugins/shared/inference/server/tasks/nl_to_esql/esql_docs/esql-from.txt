@@ -1,6 +1,6 @@
-# FROM
+## FROM
 
-The FROM command retrieves a table of data from a data stream, index, or alias. Each row in the resulting table represents a document, and each column corresponds to a field that can be accessed by its name.
+The `FROM` command retrieves data from a data stream, index, or alias and returns it as a table. Each row in the table represents a document, and each column corresponds to a field that can be accessed by its name.
 
 ## Syntax
 
@@ -8,64 +8,73 @@ The FROM command retrieves a table of data from a data stream, index, or alias. 
 
 ### Parameters
 
-#### index_pattern
+#### `index_pattern`
 
-A list of indices, data streams, or aliases to query. Supports wildcards and date math.
+A list of indices, data streams, or aliases. Supports wildcards and date math.
 
-#### fields
+#### `fields`
 
-A comma-separated list of metadata fields to retrieve. This parameter is optional.
+A comma-separated list of metadata fields to retrieve.
 
 ## Examples
 
-Retrieve all documents from the `employees` index:
+### Basic Example
 
-This query selects all documents from the `employees` index, returning each document as a row in the result.
+Retrieve all documents from the `employees` index:
 
 ```esql
 FROM employees
 ```
 
-Access today’s index using date math:
+### Using Date Math
 
-This query retrieves all documents from the index named with today’s date, using date math to dynamically select the current day's logs.
+Access indices, aliases, or data streams using date math. For example, retrieve today’s index for time series data:
 
 ```esql
 FROM <logs-{now/d}>
 ```
 
-Query multiple data streams, indices, or aliases using comma-separated lists or wildcards:
+### Querying Multiple Data Streams, Indices, or Aliases
 
-This query fetches documents from both the `employees-00001` index and any indices matching the pattern `other-employees-*`.
+Query multiple data streams, indices, or aliases using a comma-separated list or wildcards:
 
 ```esql
 FROM employees-00001,other-employees-*
 ```
 
-Query data streams and indices on remote clusters using the `<remote_cluster_name>:<target>` format:
+### Querying Across Clusters
 
-This query retrieves documents from the `employees-00001` index on `cluster_one` and from all indices matching `other-employees-*` on `cluster_two`.
+Query data streams and indices on remote clusters using the format `<remote_cluster_name>:<target>`:
 
 ```esql
 FROM cluster_one:employees-00001,cluster_two:other-employees-*
 ```
 
-Enable metadata fields with the optional `METADATA` directive:
+### Using the `METADATA` Directive
 
-This query selects all documents from the `employees` index and includes the `_id` metadata field for each document in the results.
+Enable metadata fields by using the optional `METADATA` directive:
 
 ```esql
 FROM employees METADATA _id
 ```
 
-Escape index names containing special characters using double quotes or triple double quotes:
+### Escaping Index Names
 
-This query demonstrates how to select from indices with special characters in their names by escaping them with quotes.
+Escape index names containing special characters using double quotes (`"`) or triple double quotes (`"""`):
 
 ```esql
-FROM "this=that", """this[that"""
+FROM "this=that","""this[that"""
 ```
 
 ## Limitations
 
-By default, a query without an explicit `LIMIT` uses an implicit limit of 1000 rows. For example, `FROM employees` is executed as `FROM employees | LIMIT 1000`.
+- By default, the `FROM` command applies an implicit limit of 1,000 rows if no explicit `LIMIT` is specified. For example:
+  ```esql
+FROM employees
+```
+  is equivalent to:
+  ```esql
+FROM employees
+| LIMIT 1000
+```
+- Queries cannot return more than 10,000 rows, even if a higher `LIMIT` is specified. This is a configurable upper limit. For more details, refer to the [LIMIT command](#LIMIT).

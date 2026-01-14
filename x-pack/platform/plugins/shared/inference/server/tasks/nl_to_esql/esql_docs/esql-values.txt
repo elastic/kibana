@@ -1,6 +1,6 @@
 # VALUES
 
-The VALUES function returns the unique values from a field as a multivalued field. The order of the returned values is not guaranteed. To return values in order, use `MV_SORT`.
+The `VALUES` function retrieves all values in a group as a multivalued field. The order of the returned values is not guaranteed. To ensure the values are returned in order, use the `MV_SORT` function.
 
 ## Syntax
 
@@ -8,13 +8,14 @@ The VALUES function returns the unique values from a field as a multivalued fiel
 
 ### Parameters
 
-#### field
+#### `field`
 
-The field from which to extract unique values.
+The field from which to retrieve all values.
 
 ## Examples
 
-The following query groups employees by the first letter of their first name, then collects all unique first names for each group and sorts them alphabetically. Finally, the results are sorted by the first letter.
+Retrieve and sort first names by their first letter
+The following query extracts the first letter of each employee's first name, groups the data by this letter, and retrieves all first names in each group as a multivalued field. The `MV_SORT` function is used to sort the names within each group.
 
 ```esql
 FROM employees
@@ -23,9 +24,7 @@ FROM employees
 | SORT first_letter
 ```
 
-This example groups employees by the first letter of their first name and collects all unique first names for each group, sorted alphabetically.
+## Notes
 
-## Limitations
-
-- This function can use a significant amount of memory. Aggregations do not grow beyond available memory. If too many values are collected to fit in memory, the query will fail with a Circuit Breaker Error.
-- Use `TOP` if you need to keep repeated values.
+- This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+- The `VALUES` function can consume a significant amount of memory. ES|QL does not currently support growing aggregations beyond available memory. If the aggregation collects more values than can fit into memory, the query will fail with a Circuit Breaker Error.

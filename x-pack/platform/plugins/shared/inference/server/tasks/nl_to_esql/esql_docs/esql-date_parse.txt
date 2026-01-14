@@ -1,39 +1,28 @@
 # DATE_PARSE
 
-The DATE_PARSE function returns a date by parsing a string according to the specified date format pattern.
+Parses a date string into a date object using the specified format.
 
 ## Syntax
 
-`DATE_PARSE(datePattern, dateString, options, time_zone, locale)`
+`DATE_PARSE(datePattern, dateString)`
 
 ### Parameters
 
-#### datePattern
+#### `datePattern`
 
-The date format pattern to use for parsing. Refer to the `DateTimeFormatter` documentation for the syntax. If `null`, the function returns `null`.
+The date format. Refer to the `DateTimeFormatter` documentation for the syntax. If `null`, the function returns `null`.
 
-#### dateString
+#### `dateString`
 
-The string containing the date to parse. If `null` or an empty string, the function returns `null`.
-
-#### options
-
-(Optional) Additional options for date parsing, allowing you to specify time zone and locale as named parameters.
-
-#### time_zone
-
-Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.
-
-#### locale
-
-The locale to use when parsing the date, which is relevant when parsing month names or week days.
+A date expression as a string. If `null` or an empty string, the function returns `null`.
 
 ## Examples
 
-This query creates a row with a column named `date_string` containing the value "2022-05-06", and then parses this string into a date using the "yyyy-MM-dd" format pattern.
+Parsing a date string
 
 ```esql
 ROW date_string = "2022-05-06"
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 ```
-Parse the string "2022-05-06" as a date using the "yyyy-MM-dd" format.
+
+This example parses the string `"2022-05-06"` into a date object using the format `"yyyy-MM-dd"`.
