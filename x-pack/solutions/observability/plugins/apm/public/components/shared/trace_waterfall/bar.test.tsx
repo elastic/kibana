@@ -9,7 +9,7 @@ import React from 'react';
 import type { ComponentProps } from 'react';
 import { renderWithTheme } from '../../../utils/test_helpers';
 import type { Bar } from './bar';
-import { Bar as BarComponent } from './bar';
+import { Bar as BarComponent, getCompositeBarStyle } from './bar';
 
 function renderBar(props: ComponentProps<typeof Bar>) {
   const { container } = renderWithTheme(<BarComponent {...props} />);
@@ -71,6 +71,59 @@ describe('Bar', () => {
       expect(segment2).toHaveStyle('left: 50%');
       expect(segment2).toHaveStyle('width: 30%');
       expect(segment2).toHaveStyle('background-color: green');
+    });
+  });
+
+  describe('with composite spans', () => {
+    it('applies transparent background when composite is provided', () => {
+      const segments = [{ id: 'segment-1', left: 0, width: 1, color: 'red' }];
+      const barDiv = renderBar({
+        width: 50,
+        left: 10,
+        color: 'red',
+        duration: 60000,
+        composite: { count: 9, sum: 45000 },
+        segments,
+      });
+
+      expect(barDiv).toHaveStyle('background-color: transparent');
+    });
+
+    it('applies solid background when composite is not provided', () => {
+      const barDiv = renderBar({
+        width: 50,
+        left: 10,
+        color: 'red',
+      });
+
+      expect(barDiv).toHaveStyle('background-color: red');
+    });
+  });
+
+  describe('getCompositeBarStyle helper', () => {
+    it('returns striped gradient pattern', () => {
+      const result = getCompositeBarStyle('red', 60000, { count: 9, sum: 45000 });
+
+      expect(result.backgroundColor).toBe('transparent');
+      expect(result.backgroundImage).toContain('repeating-linear-gradient');
+      expect(result.backgroundImage).toContain('red');
+    });
+
+    it('calculates correct percentages when sum equals duration', () => {
+      const result = getCompositeBarStyle('green', 100000, { count: 4, sum: 100000 });
+
+      // percNumItems = 100 / 4 = 25%
+      // percDuration = 25 * 1 = 25%
+      expect(result.backgroundImage).toContain('25%');
+    });
+
+    it('calculates narrower stripes when sum is less than duration', () => {
+      const result = getCompositeBarStyle('purple', 100000, { count: 10, sum: 50000 });
+
+      // percNumItems = 100 / 10 = 10%
+      // percDuration = 10 * 0.5 = 5%
+      expect(result.backgroundImage).toContain('5%');
+      expect(result.backgroundImage).toContain('10%');
     });
   });
 });

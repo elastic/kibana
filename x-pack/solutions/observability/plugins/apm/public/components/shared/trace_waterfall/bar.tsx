@@ -29,14 +29,15 @@ export function Bar({
   left: number;
   color: string;
   segments?: BarSegment[];
-  duration: number;
+  duration?: number;
   composite?: { count: number; sum: number };
 }) {
   const { euiTheme } = useEuiTheme();
 
-  const barStyle = composite
-    ? getCompositeBarStyle(color, duration, composite)
-    : { backgroundColor: color };
+  const barStyle =
+    duration && composite
+      ? getCompositeBarStyle(color, duration, composite)
+      : { backgroundColor: color };
 
   return (
     <div
@@ -53,7 +54,7 @@ export function Bar({
   );
 }
 
-function getCompositeBarStyle(
+export function getCompositeBarStyle(
   color: string,
   duration: number,
   composite: { count: number; sum: number }
