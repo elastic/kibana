@@ -12,14 +12,16 @@ enabled: true
 triggers:
   - type: 'manual'
 inputs:
+  - name: query
+    type: string
   - name: order
     type: string
     default: "desc"
+    description: "Sort order. Valid values: asc, desc"
   - name: owner
     type: string
+    required: false
   - name: repo
-    type: string
-  - name: query
     type: string
     required: false
   - name: page
@@ -28,6 +30,10 @@ inputs:
   - name: per_page
     type: number
     default: 10
+  - name: sort
+    type: string
+    default: "created"
+    description: "Sort field. Valid values: comments, reactions, reactions-+1, reactions--1, reactions-smile, reactions-thinking_face, reactions-heart, reactions-tada, interactions, created, updated"
 steps:
   - name: search-issues
     type: mcp.callTool
@@ -35,12 +41,13 @@ steps:
     with:
       name: "search_issues"
       arguments:
+        query: "\${{inputs.query}}"
         order: "\${{inputs.order}}"
         owner: "\${{inputs.owner}}"
         repo: "\${{inputs.repo}}"
-        query: "\${{inputs.query}}"
         page: "\${{inputs.page}}"
-        per_page: "\${{inputs.per_page}}"
+        perPage: "\${{inputs.per_page}}"
+        sort: "\${{inputs.sort}}"
 `;
 }
 
@@ -52,21 +59,22 @@ enabled: true
 triggers:
   - type: 'manual'
 inputs:
+  - name: query
+    type: string
   - name: order
     type: string
     default: "desc"
+    description: "Sort order. Valid values: asc, desc"
   - name: page
     type: number
     default: 1
   - name: per_page
     type: number
     default: 10
-  - name: query
-    type: string
-    required: false
   - name: sort
     type: string
-    default: "best_match"
+    default: "indexed"
+    description: "Sort field. Valid values: indexed"
 steps:
   - name: search-code
     type: mcp.callTool
@@ -74,10 +82,10 @@ steps:
     with:
       name: "search_code"
       arguments:
+        query: "\${{inputs.query}}"
         order: "\${{inputs.order}}"
         page: "\${{inputs.page}}"
         perPage: "\${{inputs.per_page}}"
-        query: "\${{inputs.query}}"
         sort: "\${{inputs.sort}}"
 `;
 }
@@ -93,14 +101,16 @@ enabled: true
 triggers:
   - type: 'manual'
 inputs:
+  - name: query
+    type: string
   - name: order
     type: string
     default: "desc"
+    description: "Sort order. Valid values: asc, desc"
   - name: owner
     type: string
+    required: false
   - name: repo
-    type: string
-  - name: query
     type: string
     required: false
   - name: page
@@ -111,7 +121,8 @@ inputs:
     default: 10
   - name: sort
     type: string
-    default: "best_match"
+    default: "created"
+    description: "Sort field. Valid values: comments, reactions, reactions-+1, reactions--1, reactions-smile, reactions-thinking_face, reactions-heart, reactions-tada, interactions, created, updated"
 steps:
   - name: search-pull-requests
     type: mcp.callTool
@@ -119,10 +130,10 @@ steps:
     with:
       name: "search_pull_requests"
       arguments:
+        query: "\${{inputs.query}}"
         order: "\${{inputs.order}}"
         owner: "\${{inputs.owner}}"
         repo: "\${{inputs.repo}}"
-        query: "\${{inputs.query}}"
         page: "\${{inputs.page}}"
         perPage: "\${{inputs.per_page}}"
         sort: "\${{inputs.sort}}"
@@ -140,24 +151,25 @@ enabled: true
 triggers:
   - type: 'manual'
 inputs:
+  - name: query
+    type: string
   - name: minimal_output
     type: boolean
-    default: false
+    default: true
   - name: order
     type: string
     default: "desc"
+    description: "Sort order. Valid values: asc, desc"
   - name: page
     type: number
     default: 1
   - name: per_page
     type: number
     default: 10
-  - name: query
-    type: string
-    required: false
   - name: sort
     type: string
-    default: "best_match"
+    default: "stars"
+    description: "Sort field. Valid values: stars, forks, help-wanted-issues, updated"
 steps:
   - name: search-repositories
     type: mcp.callTool
@@ -165,11 +177,11 @@ steps:
     with:
       name: "search_repositories"
       arguments:
+        query: "\${{inputs.query}}"
         minimalOutput: "\${{inputs.minimal_output}}"
         order: "\${{inputs.order}}"
         page: "\${{inputs.page}}"
         perPage: "\${{inputs.per_page}}"
-        query: "\${{inputs.query}}"
         sort: "\${{inputs.sort}}"
 `;
 }
@@ -182,21 +194,22 @@ enabled: true
 triggers:
   - type: 'manual'
 inputs:
+  - name: query
+    type: string
   - name: order
     type: string
     default: "desc"
+    description: "Sort order. Valid values: asc, desc"
   - name: page
     type: number
     default: 1
   - name: per_page
     type: number
     default: 10
-  - name: query
-    type: string
-    required: false
   - name: sort
     type: string
-    default: "best_match"
+    default: "followers"
+    description: "Sort field. Valid values: followers, repositories, joined"
 steps:
   - name: search-users
     type: mcp.callTool
@@ -204,10 +217,10 @@ steps:
     with:
       name: "search_users"
       arguments:
+        query: "\${{inputs.query}}"
         order: "\${{inputs.order}}"
         page: "\${{inputs.page}}"
         perPage: "\${{inputs.per_page}}"
-        query: "\${{inputs.query}}"
         sort: "\${{inputs.sort}}"
 `;
 }
