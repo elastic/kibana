@@ -16,6 +16,7 @@ import type {
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
+import { v4 as uuidv4 } from 'uuid';
 import {
   legacyMonitorAttributes,
   syntheticsMonitorAttributes,
@@ -37,6 +38,7 @@ export interface SyncTaskState extends Record<string, unknown> {
   hasAlreadyDoneCleanup: boolean;
   maxCleanUpRetries: number;
   disableAutoSync?: boolean;
+  privateLocationId?: string;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -88,7 +90,7 @@ export class SyncPrivateLocationMonitorsTask {
     const {
       coreStart: { savedObjects },
       logger,
-      pluginsStart: { encryptedSavedObjects },
+      encryptedSavedObjects,
     } = this.serverSetup;
 
     let lastStartedAt = taskInstance.state.lastStartedAt;
@@ -96,26 +98,43 @@ export class SyncPrivateLocationMonitorsTask {
     if (!lastStartedAt || moment(lastStartedAt).isBefore(moment().subtract(6, 'hour'))) {
       lastStartedAt = moment().subtract(10, 'minute').toISOString();
     }
-
     const taskState = this.getNewTaskState({ taskInstance });
-
-    const defaultState = {
-      state: taskState,
-      schedule: {
-        interval: TASK_SCHEDULE,
-      },
-    };
 
     try {
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
+      const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
+
+      if (taskInstance.state.privateLocationId) {
+        // if privateLocationId exists on state, we just perform sync and exit
+        await this.deployPackagePolicies.syncAllPackagePolicies({
+          allPrivateLocations,
+          encryptedSavedObjects,
+          privateLocationId: taskInstance.state.privateLocationId,
+          soClient: savedObjects.createInternalRepository(),
+        });
+
+        return {
+          state: {
+            ...taskInstance.state,
+            privateLocationId: undefined,
+          } as SyncTaskState,
+        };
+      }
+
+      const defaultState = {
+        state: taskState,
+        schedule: {
+          interval: TASK_SCHEDULE,
+        },
+      };
+
       const { performCleanupSync } = await this.cleanUpDuplicatedPackagePolicies(
         soClient,
         taskState
       );
 
-      const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
       if (allPrivateLocations.length === 0) {
         this.debugLog(`No private locations found, skipping sync of private location monitors`);
         return {
@@ -128,11 +147,21 @@ export class SyncPrivateLocationMonitorsTask {
       if (performCleanupSync) {
         this.debugLog(`Syncing private location monitors because cleanup performed a change`);
 
-        await this.deployPackagePolicies.syncAllPackagePolicies({
-          allPrivateLocations,
-          soClient,
-          encryptedSavedObjects,
-        });
+        if (allPrivateLocations.length > 1) {
+          // if there are multiple locations, we run a task per location to optimize it
+          for (const location of allPrivateLocations) {
+            await runTaskPerPrivateLocation({
+              server: this.serverSetup,
+              privateLocationId: location.id,
+            });
+          }
+        } else {
+          await this.deployPackagePolicies.syncAllPackagePolicies({
+            allPrivateLocations,
+            soClient,
+            encryptedSavedObjects,
+          });
+        }
         return defaultState;
       }
 
@@ -385,4 +414,24 @@ export const disableSyncPrivateLocationTask = async ({
     disableAutoSync,
   }));
   logger.debug(`Synthetics sync private location monitors disableAutoSync set successfully`);
+};
+
+export const runTaskPerPrivateLocation = async ({
+  server,
+  privateLocationId,
+}: {
+  server: SyntheticsServerSetup;
+  privateLocationId: string;
+}) => {
+  const {
+    pluginsStart: { taskManager },
+  } = server;
+
+  await taskManager.ensureScheduled({
+    id: `${TASK_TYPE}:${uuidv4()}`,
+    params: {},
+    taskType: TASK_TYPE,
+    runAt: new Date(Date.now() + 3 * 1000),
+    state: { privateLocationId },
+  });
 };
