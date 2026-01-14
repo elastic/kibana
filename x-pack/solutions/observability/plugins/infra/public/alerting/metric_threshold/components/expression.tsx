@@ -66,21 +66,30 @@ export { defaultExpression };
 const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
   {
     id: 'recover',
-    label: i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.recover', {
-      defaultMessage: 'Recover active alerts',
-    }),
+    label: (
+      <>
+        {i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.recover', {
+          defaultMessage: 'Recover active alerts',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={i18n.translate('xpack.infra.metricThreshold.rule.recoverHelpText', {
+            defaultMessage:
+              'Any active alerts will recover when no data is returned for the configured conditions.',
+          })}
+        />
+      </>
+    ),
   },
   {
     id: 'alertOnNoData',
     label: (
       <>
-        {hasGroupBy
-          ? i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.alertOnMissingGroup', {
-              defaultMessage: 'Alert me about missing group',
-            })
-          : i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.alertOnNoData', {
-              defaultMessage: "Alert me if there's no data",
-            })}{' '}
+        {i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.alertOnNoData', {
+          defaultMessage: 'Alert me about the missing data',
+        })}{' '}
         <EuiIconTip
           size="s"
           type="question"
@@ -102,9 +111,22 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
   },
   {
     id: 'remainActive',
-    label: i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.remainActive', {
-      defaultMessage: 'Do nothing',
-    }),
+    label: (
+      <>
+        {i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.remainActive', {
+          defaultMessage: 'Do nothing',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={i18n.translate('xpack.infra.metricThreshold.rule.remainActiveHelpText', {
+            defaultMessage:
+              'Active alerts will remain in their current state and no new alerts will be triggered when there is no data.',
+          })}
+        />
+      </>
+    ),
   },
 ];
 
