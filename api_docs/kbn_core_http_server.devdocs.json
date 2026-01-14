@@ -8997,6 +8997,10 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
               {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/update.ts"
               },

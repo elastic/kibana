@@ -196,12 +196,16 @@
           {
             "parentPluginId": "@kbn/core-chrome-layout-components",
             "id": "def-public.LayoutConfigProviderProps.value",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "value",
             "description": [],
             "signature": [
-              "{ bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; sidebarWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; applicationMarginBottom?: number | undefined; applicationMarginRight?: number | undefined; }"
+              "Pick<Partial<",
+              "LayoutDimensions",
+              ">, \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"sidebarWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
+              "ChromeStyle",
+              " | undefined; }"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
             "deprecated": false,
@@ -246,6 +250,21 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
+        "id": "def-public.ChromeStyle",
+        "type": "Type",
+        "tags": [],
+        "label": "ChromeStyle",
+        "description": [],
+        "signature": [
+          "\"project\" | \"classic\""
+        ],
+        "path": "src/core/packages/chrome/browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-components",
         "id": "def-public.LayoutConfig",
         "type": "Type",
         "tags": [],
@@ -254,7 +273,11 @@
           "\nConfiguration for the layout."
         ],
         "signature": [
-          "{ bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; sidebarWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; applicationMarginBottom?: number | undefined; applicationMarginRight?: number | undefined; }"
+          "Pick<Partial<",
+          "LayoutDimensions",
+          ">, \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"sidebarWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
+          "ChromeStyle",
+          " | undefined; }"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
         "deprecated": false,
