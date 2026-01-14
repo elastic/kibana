@@ -137,9 +137,7 @@ export const useESQLVariables = ({
       await controlGroupApi.addNewPanel({
         panelType: ESQL_CONTROL,
         serializedState: {
-          rawState: {
-            ...controlState,
-          },
+          ...controlState,
         },
       });
     },

@@ -46,11 +46,7 @@ import {
   useFleetStatus,
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
-import {
-  ExperimentalFeaturesService,
-  isVerificationError,
-  packageToPackagePolicy,
-} from '../../../../../services';
+import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import type {
   CreatePackagePolicyResponse,
   NewPackagePolicyInput,
@@ -137,10 +133,7 @@ export const createAgentPolicyIfNeeded = async ({
     }
 
     // Skip policy creation for agentless as it's done through agentless_policies API
-    if (
-      ExperimentalFeaturesService.get().useAgentlessAPIInUI &&
-      newAgentPolicy.supports_agentless
-    ) {
+    if (newAgentPolicy.supports_agentless) {
       return;
     }
 
@@ -155,8 +148,8 @@ export const createAgentPolicyIfNeeded = async ({
 async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
-  // If agentless and feature enabled use new API
-  if (ExperimentalFeaturesService.get().useAgentlessAPIInUI && policy.supports_agentless) {
+  // If agentless use agentless policies API
+  if (policy.supports_agentless) {
     function formatPackage(pkg: NewPackagePolicy['package']) {
       return omit(pkg, 'title');
     }
