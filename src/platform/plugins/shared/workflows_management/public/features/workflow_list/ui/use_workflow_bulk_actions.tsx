@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];
@@ -38,6 +39,7 @@ export const useWorkflowBulkActions = ({
 }: UseWorkflowBulkActionsProps): UseWorkflowBulkActionsReturn => {
   const { application, notifications } = useKibana().services;
   const { deleteWorkflows, updateWorkflow } = useWorkflowActions();
+  const telemetry = useTelemetry();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
@@ -104,6 +106,20 @@ export const useWorkflowBulkActions = ({
           {
             onSettled: (data, error) => {
               completedCount++;
+              const errorObj =
+                error instanceof Error ? error : error ? new Error(String(error)) : undefined;
+
+              // Report telemetry for update action
+              // The telemetry service automatically determines which event to publish based on the update
+              telemetry.reportWorkflowUpdated({
+                workflowId: workflow.id,
+                workflowUpdate: updateData,
+                hasValidationErrors: false,
+                validationErrorCount: 0,
+                isBulkAction: true,
+                error: errorObj,
+              });
+
               if (error) {
                 failedCount++;
               }
@@ -140,7 +156,7 @@ export const useWorkflowBulkActions = ({
         );
       });
     },
-    [updateWorkflow, onAction, onActionSuccess, deselectWorkflows, notifications]
+    [updateWorkflow, onAction, onActionSuccess, deselectWorkflows, notifications, telemetry]
   );
 
   const handleEnableWorkflows = useCallback(() => {

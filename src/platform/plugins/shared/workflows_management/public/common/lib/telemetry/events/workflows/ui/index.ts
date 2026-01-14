@@ -8,13 +8,13 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { WorkflowEditorType } from '../types';
 import type {
   ReportWorkflowDetailViewedActionParams,
   ReportWorkflowListViewedActionParams,
   ReportWorkflowSearchedActionParams,
   WorkflowUIEventTypes,
 } from './types';
+import type { WorkflowEditorType } from '../types';
 
 export const workflowUIEventNames = {
   [WorkflowUIEventTypes.WorkflowSearched]: 'Workflow searched',
@@ -117,4 +117,3 @@ export const workflowUIEventSchemas = {
   [WorkflowUIEventTypes.WorkflowListViewed]: workflowListViewedSchema,
   [WorkflowUIEventTypes.WorkflowDetailViewed]: workflowDetailViewedSchema,
 };
-

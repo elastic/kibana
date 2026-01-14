@@ -85,4 +85,3 @@ export interface ReportWorkflowDetailViewedActionParams {
    */
   editorType?: WorkflowEditorType;
 }
-

@@ -28,6 +28,10 @@ function isConnectorStep(step: unknown): boolean {
  */
 export interface WorkflowTelemetryMetadata {
   /**
+   * Whether the workflow is enabled
+   */
+  enabled: boolean;
+  /**
    * Total number of steps in the workflow (including nested steps)
    */
   stepCount: number;
@@ -126,6 +130,7 @@ export function extractWorkflowMetadata(
 ): WorkflowTelemetryMetadata {
   // Default values for empty/invalid workflows
   const defaultMetadata: WorkflowTelemetryMetadata = {
+    enabled: false,
     stepCount: 0,
     connectorTypes: [],
     stepTypeCounts: {},
@@ -190,6 +195,7 @@ export function extractWorkflowMetadata(
   const inputCount = Array.isArray(workflow.inputs) ? workflow.inputs.length : 0;
 
   // Extract settings
+  const enabled = Boolean(workflow.enabled);
   const settings = workflow.settings;
   const hasTimeout = Boolean(settings?.timeout);
   const hasConcurrency = Boolean(settings?.concurrency);
@@ -198,6 +204,7 @@ export function extractWorkflowMetadata(
   const hasOnFailure = Boolean(settings?.['on-failure']);
 
   return {
+    enabled,
     stepCount,
     connectorTypes: [...new Set(connectorTypes)], // Remove duplicates
     stepTypeCounts,

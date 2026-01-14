@@ -8,11 +8,11 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { WorkflowEditorType } from '../types';
 import type {
   ReportWorkflowValidationErrorActionParams,
   WorkflowValidationEventTypes,
 } from './types';
+import type { WorkflowEditorType } from '../types';
 
 export const workflowValidationEventNames = {
   [WorkflowValidationEventTypes.WorkflowValidationError]: 'Workflow validation error',
@@ -66,4 +66,3 @@ const workflowValidationErrorSchema: RootSchema<ReportWorkflowValidationErrorAct
 export const workflowValidationEventSchemas = {
   [WorkflowValidationEventTypes.WorkflowValidationError]: workflowValidationErrorSchema,
 };
-

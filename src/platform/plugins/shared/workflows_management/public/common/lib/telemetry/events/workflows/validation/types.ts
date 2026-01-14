@@ -47,4 +47,3 @@ export interface ReportWorkflowValidationErrorActionParams {
    */
   editorType?: WorkflowEditorType;
 }
-

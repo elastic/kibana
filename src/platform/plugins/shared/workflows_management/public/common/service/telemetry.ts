@@ -59,6 +59,7 @@ export class WorkflowsBaseTelemetry {
       workflowId,
       ...(editorType && { editorType }),
       ...(metadata && {
+        enabled: metadata.enabled,
         stepCount: metadata.stepCount,
         connectorTypes: metadata.connectorTypes,
         stepTypeCounts: metadata.stepTypeCounts,
@@ -75,27 +76,90 @@ export class WorkflowsBaseTelemetry {
   };
 
   /**
+   * Determines the update type from the workflow update object.
+   * This logic is centralized in the telemetry layer for better separation of concerns.
+   */
+  private determineUpdateType = (
+    workflow: Partial<{
+      yaml?: string;
+      enabled?: boolean;
+      tags?: unknown;
+      description?: string;
+      name?: string;
+    }>
+  ): WorkflowUpdateType => {
+    if (workflow.yaml !== undefined) {
+      return 'yaml';
+    }
+    if (workflow.enabled !== undefined) {
+      return 'enabled';
+    }
+    if (workflow.tags !== undefined) {
+      return 'tags';
+    }
+    if (workflow.description !== undefined) {
+      return 'description';
+    }
+    // name or other metadata fields
+    return 'metadata';
+  };
+
+  /**
    * Reports a workflow update attempt.
    * Call this AFTER the update request completes (in both success and error cases).
+   * The telemetry service automatically determines the update type and publishes the appropriate event:
+   * - For enable/disable actions, publishes WorkflowEnabledStateChanged
+   * - For all other updates, publishes WorkflowUpdated
    */
   reportWorkflowUpdated = (params: {
     workflowId: string;
-    updateType: WorkflowUpdateType;
+    workflowUpdate: Partial<{
+      yaml?: string;
+      enabled?: boolean;
+      tags?: unknown;
+      description?: string;
+      name?: string;
+    }>;
+    workflowDefinition?: Partial<WorkflowYaml> | null;
     hasValidationErrors: boolean;
     validationErrorCount: number;
     validationErrorTypes?: string[];
     error?: Error;
     editorType?: WorkflowEditorType;
+    isBulkAction?: boolean;
   }) => {
     const {
       workflowId,
-      updateType,
+      workflowUpdate,
+      workflowDefinition,
       hasValidationErrors,
       validationErrorCount,
       validationErrorTypes,
       error,
       editorType,
+      isBulkAction = false,
     } = params;
+
+    // For enable/disable actions, use the specific event instead of the general update event
+    if (workflowUpdate.enabled !== undefined) {
+      this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged, {
+        eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
+        workflowId,
+        enabled: workflowUpdate.enabled,
+        isBulkAction,
+        ...(editorType && { editorType }),
+        ...this.getBaseResultParams(error),
+      });
+      return;
+    }
+
+    // For all other updates, use the general update event
+    // Determine update type from the update object (centralized in telemetry layer)
+    const updateType = this.determineUpdateType(workflowUpdate);
+
+    // Extract metadata if workflow definition is provided
+    const metadata = workflowDefinition ? extractWorkflowMetadata(workflowDefinition) : undefined;
+
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowUpdated, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowUpdated],
       workflowId,
@@ -104,6 +168,21 @@ export class WorkflowsBaseTelemetry {
       validationErrorCount,
       ...(validationErrorTypes && { validationErrorTypes }),
       ...(editorType && { editorType }),
+      ...(metadata && {
+        enabled: metadata.enabled,
+        stepCount: metadata.stepCount,
+        connectorTypes: metadata.connectorTypes,
+        stepTypeCounts: metadata.stepTypeCounts,
+        hasScheduledTriggers: metadata.hasScheduledTriggers,
+        hasAlertTriggers: metadata.hasAlertTriggers,
+        inputCount: metadata.inputCount,
+        triggerCount: metadata.triggerCount,
+        hasTimeout: metadata.hasTimeout,
+        hasConcurrency: metadata.hasConcurrency,
+        concurrencyMax: metadata.concurrencyMax,
+        concurrencyStrategy: metadata.concurrencyStrategy,
+        hasOnFailure: metadata.hasOnFailure,
+      }),
       ...this.getBaseResultParams(error),
     });
   };

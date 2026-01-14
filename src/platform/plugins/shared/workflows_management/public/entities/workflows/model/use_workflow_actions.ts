@@ -17,6 +17,7 @@ import type {
   WorkflowListDto,
 } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
@@ -36,6 +37,7 @@ interface OptimisticContext {
 export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const { http } = useKibana().services;
+  const telemetry = useTelemetry();
 
   const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
     mutationKey: ['PUT', 'workflows', 'id'],
@@ -158,8 +160,27 @@ export function useWorkflowActions() {
           queryClient.setQueryData(queryKey, data);
         });
       }
+
+      // Report telemetry for failed deletion
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      variables.ids.forEach((workflowId) => {
+        telemetry.reportWorkflowDeleted({
+          workflowId,
+          isBulkAction: variables.ids.length > 1,
+          error: errorObj,
+        });
+      });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Report telemetry for successful deletion
+      variables.ids.forEach((workflowId) => {
+        telemetry.reportWorkflowDeleted({
+          workflowId,
+          isBulkAction: variables.ids.length > 1,
+          error: undefined,
+        });
+      });
+
       // Refetch to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
@@ -196,13 +217,28 @@ export function useWorkflowActions() {
     },
   });
 
-  const cloneWorkflow = useMutation({
+  const cloneWorkflow = useMutation<WorkflowDetailDto, HttpError, { id: string }>({
     mutationKey: ['POST', 'workflows', 'id', 'clone'],
     mutationFn: ({ id }: { id: string }) => {
-      return http.post(`/api/workflows/${id}/clone`);
+      return http.post<WorkflowDetailDto>(`/api/workflows/${id}/clone`);
     },
-    onSuccess: () => {
+    onSuccess: (clonedWorkflow, variables) => {
+      // Report telemetry for successful clone
+      telemetry.reportWorkflowCloned({
+        sourceWorkflowId: variables.id,
+        clonedWorkflowId: clonedWorkflow.id,
+        error: undefined,
+      });
+
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
+    },
+    onError: (err, variables) => {
+      // Report telemetry for failed clone
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      telemetry.reportWorkflowCloned({
+        sourceWorkflowId: variables.id,
+        error: errorObj,
+      });
     },
   });
 
