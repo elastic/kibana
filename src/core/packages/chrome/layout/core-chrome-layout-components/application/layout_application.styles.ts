@@ -37,7 +37,10 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
       css`
         background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
         border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
-        border: ${getHighContrastBorder(useEuiTheme)};
+
+        // use outline so it doesn't affect size/layout and cause a scrollbar
+        outline: ${getHighContrastBorder(useEuiTheme)};
+
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
       `}
       ${!isProjectStyle &&
@@ -56,12 +59,6 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
         ${euiOverflowScroll(useEuiTheme, { direction: 'y' })};
         // reset the height back to respect the margin bottom
         height: calc(100% - ${layoutVar('application.marginBottom')});
-
-        // Hide scrollbar
-        scrollbar-width: none; /* Firefox */
-        &::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Edge */
-        }
       }
     `;
   };
