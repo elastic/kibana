@@ -122,8 +122,9 @@
     "@kbn/controls-schemas",
     "@kbn/zod",
     "@kbn/cps",
+    "@kbn/controls-renderer",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/core-chrome-app-menu"
+    "@kbn/core-chrome-app-menu",
   ],
   "exclude": ["target/**/*"]
 }

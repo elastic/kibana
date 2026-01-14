@@ -507,6 +507,12 @@ export class DataGridService extends FtrService {
     return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${id}`);
   }
 
+  public async isDocViewerTabSelected(id: string) {
+    const tabTestSubj = `docViewerTab-${id}`;
+    const ariaSelected = await this.testSubjects.getAttribute(tabTestSubj, 'aria-selected');
+    return ariaSelected === 'true';
+  }
+
   public async getDetailsRows(): Promise<WebElementWrapper[]> {
     return await this.testSubjects.findAll('docViewerFlyout');
   }

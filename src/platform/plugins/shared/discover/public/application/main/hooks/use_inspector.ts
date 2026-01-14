@@ -16,8 +16,9 @@ import type { DiscoverStateContainer } from '../state_management/discover_state'
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import {
   internalStateActions,
-  useInternalStateDispatch,
   useInternalStateSelector,
+  useCurrentTabAction,
+  useInternalStateDispatch,
 } from '../state_management/redux';
 import { useActiveContexts } from '../../../context_awareness/hooks';
 
@@ -31,7 +32,10 @@ export function useInspector({
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
+
   const dispatch = useInternalStateDispatch();
+  const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
+
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const getContextsAdapter = useActiveContexts({
@@ -40,7 +44,7 @@ export function useInspector({
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
+    dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
     const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
@@ -54,7 +58,7 @@ export function useInspector({
         contexts: getContextsAdapter({
           onOpenDocDetails: (record) => {
             session?.close();
-            dispatch(internalStateActions.setExpandedDoc({ expandedDoc: record }));
+            dispatch(setExpandedDoc({ expandedDoc: record }));
           },
         }),
       },
@@ -64,10 +68,11 @@ export function useInspector({
     setInspectorSession(session);
   }, [
     dispatch,
-    getContextsAdapter,
-    inspector,
-    persistedDiscoverSession?.title,
+    setExpandedDoc,
     stateContainer.dataState.inspectorAdapters,
+    inspector,
+    getContextsAdapter,
+    persistedDiscoverSession?.title,
   ]);
 
   useEffect(() => {
