@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Import the Joi type augmentation (compile-time only, enables JoiRoot export).
+// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+import type {} from '@kbn/joi-augmentation';
+
 import Joi from 'joi';
 import type { JoiRoot, CustomHelpers } from 'joi';
 import { isPlainObject } from 'lodash';

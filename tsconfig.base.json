@@ -2500,6 +2500,10 @@
       "@elastic/kibana-d3-color": ["node_modules/@types/d3-color"],
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": ["typings/@emotion"],
+      // Joi module augmentation for kbn-config-schema custom types.
+      "@kbn/joi-augmentation": [
+        "typings/joi.d.ts"
+      ],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
       "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],

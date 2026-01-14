@@ -8,6 +8,7 @@
  */
 
 import typeDetect from 'type-detect';
+import type { CustomHelpers } from 'joi';
 import { internals } from '../internals';
 import type { TypeOptions } from './type';
 import { Type, convertValidationFunction } from './type';
@@ -30,7 +31,7 @@ export class StringType extends Type<string> {
     let schema =
       options.hostname === true
         ? internals.string().hostname()
-        : internals.any().custom((value, { error }) => {
+        : internals.any().custom((value: unknown, { error }: CustomHelpers) => {
             if (typeof value !== 'string') {
               if (options.coerceFromNumber && typeof value === 'number') {
                 return value.toString(10);
@@ -45,7 +46,7 @@ export class StringType extends Type<string> {
     if (options.minLength !== undefined) {
       schema = schema
         .custom(
-          convertValidationFunction((value) => {
+          convertValidationFunction<string>((value) => {
             if (value.length < options.minLength!) {
               return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
             }
@@ -57,7 +58,7 @@ export class StringType extends Type<string> {
     if (options.maxLength !== undefined) {
       schema = schema
         .custom(
-          convertValidationFunction((value) => {
+          convertValidationFunction<string>((value) => {
             if (value.length > options.maxLength!) {
               return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
             }

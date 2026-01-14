@@ -2,16 +2,12 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "stripInternal": true,
-    "types": [
-      "jest",
-      "node"
-    ]
+    "stripInternal": true
   },
   "include": [
     "**/*.ts"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }
