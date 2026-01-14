@@ -358,7 +358,8 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('read-only user on non-existent list', () => {
+    // @skipInServerless - waiting for https://github.com/elastic/kibana/pull/248962
+    describe('@skipInServerless read-only user on non-existent list', () => {
       let readOnlyNoSoWriteSupertest: TestAgent;
 
       before(async () => {
