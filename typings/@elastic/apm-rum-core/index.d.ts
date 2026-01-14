@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module '@elastic/apm-rum-core' {
-  export type AfterFrameCallback = () => void;
+/**
+ * Type declarations for @elastic/apm-rum-core which doesn't ship with types.
+ */
+export type AfterFrameCallback = () => void;
 
-  export function afterFrame(callback: AfterFrameCallback): void;
-}
+export function afterFrame(callback: AfterFrameCallback): void;

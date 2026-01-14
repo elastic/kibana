@@ -2504,6 +2504,10 @@
       "@kbn/joi-augmentation": [
         "typings/joi.d.ts"
       ],
+      // @elastic/apm-rum-core doesn't ship with type declarations.
+      "@elastic/apm-rum-core": [
+        "typings/@elastic/apm-rum-core"
+      ],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
       "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
