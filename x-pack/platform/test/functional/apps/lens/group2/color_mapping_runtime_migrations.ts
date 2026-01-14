@@ -386,33 +386,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // range-key values
         await editAndApplyColorMapping(...testParams.xy3);
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
       });
 
       it('should apply new mappings for pie vis', async () => {
         await editAndApplyColorMapping(...testParams.pie);
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
       });
 
       it('should apply new mappings for tag clouds vis', async () => {
         await editAndApplyColorMapping(...testParams.tagCloud);
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
       });
 
       it('should apply new mappings for table vis', async () => {
         await editAndApplyColorMapping(...testParams.table);
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
       });
 
       async function verifyCustomColor(panelTitle: string, dimension: string) {
