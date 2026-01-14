@@ -53,7 +53,6 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
     const navControl: ChromeNavControl = {
-      id: 'globalSearchBar',
       order: 1000,
       mount: (container) => {
         ReactDOM.render(

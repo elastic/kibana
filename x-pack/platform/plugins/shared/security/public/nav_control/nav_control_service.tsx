@@ -107,7 +107,6 @@ export class SecurityNavControlService {
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
     core.chrome.navControls.registerRight({
-      id: 'securityNavControl',
       order: 4000,
       mount: (element: HTMLElement) => {
         ReactDOM.render(

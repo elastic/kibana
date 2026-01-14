@@ -10,6 +10,8 @@
 import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { useIsNavControlVisible } from '../../hooks/use_is_nav_control_visible';
 import type { AIExperienceSelection } from '../../types';
 
 const LazyNavControl = dynamic(() =>
@@ -21,16 +23,26 @@ export const NavControlInitiator = ({
   isSecurityAIAssistantEnabled,
   isObservabilityAIAssistantEnabled,
   triggerOpenChat,
+  spaces,
 }: {
   coreStart: CoreStart;
   isSecurityAIAssistantEnabled: boolean;
   isObservabilityAIAssistantEnabled: boolean;
   triggerOpenChat: (selection: AIExperienceSelection) => void;
-}) => (
-  <LazyNavControl
-    isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
-    isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
-    coreStart={coreStart}
-    triggerOpenChat={triggerOpenChat}
-  />
-);
+  spaces?: SpacesPluginStart;
+}) => {
+  const { isVisible } = useIsNavControlVisible(coreStart, spaces);
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <LazyNavControl
+      isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
+      isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
+      coreStart={coreStart}
+      triggerOpenChat={triggerOpenChat}
+    />
+  );
+};

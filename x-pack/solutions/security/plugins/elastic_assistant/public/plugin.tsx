@@ -25,7 +25,6 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
-import { getIsNavControlVisible$ } from './src/utils/get_is_nav_control_visible';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -78,14 +77,11 @@ export class ElasticAssistantPublicPlugin
       return services;
     };
 
-    const services = startServices();
-
     coreStart.chrome.navControls.registerRight({
-      id: 'elasticAssistantNavControl',
-      enabled: getIsNavControlVisible$(services, this.isServerless),
       order: 1001,
       mount: (target) => {
-        return this.mountAIAssistantButton(target, coreStart, services);
+        const startService = startServices();
+        return this.mountAIAssistantButton(target, coreStart, startService);
       },
     });
 

@@ -55,7 +55,6 @@ export class InspectComponentPluginPublic implements Plugin<void, PluginStartDep
             });
           } else {
             core.chrome.navControls.registerRight({
-              id: 'inspectComponentButton',
               order: 1002,
               mount: toMountPoint(
                 <InspectButton core={core} branch={this.branch} buttonLocation={'header'} />,

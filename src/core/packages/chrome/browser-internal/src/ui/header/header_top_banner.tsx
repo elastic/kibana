@@ -63,7 +63,6 @@ export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({
       data-test-subj="headerTopBanner"
     >
       <HeaderExtension
-        id="header-top-banner"
         containerClassName="header__topBannerContainer"
         display="block"
         extension={headerBanner.content}

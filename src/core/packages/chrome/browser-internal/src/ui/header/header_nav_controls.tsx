@@ -11,7 +11,6 @@ import { EuiHeaderSectionItem } from '@elastic/eui';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
 import type { ChromeNavControl } from '@kbn/core-chrome-browser';
 import { HeaderExtension } from './header_extension';
 
@@ -19,27 +18,6 @@ interface Props {
   navControls$: Observable<readonly ChromeNavControl[]>;
   side?: 'left' | 'right';
   append?: JSX.Element | null;
-}
-
-function NavControlItem({ navControl }: { navControl: ChromeNavControl }) {
-  // Handle both boolean and Observable<boolean> enabled values
-  const enabled$ =
-    typeof navControl.enabled === 'boolean' || navControl.enabled === undefined
-      ? of(navControl.enabled ?? true)
-      : navControl.enabled;
-
-  const isEnabled = useObservable(enabled$, true);
-
-  // Don't render wrapper if disabled
-  if (!isEnabled) {
-    return null;
-  }
-
-  return (
-    <EuiHeaderSectionItem>
-      <HeaderExtension extension={navControl.mount} id={navControl.id} />
-    </EuiHeaderSectionItem>
-  );
 }
 
 export function HeaderNavControls({ navControls$, append = null }: Props) {
@@ -53,8 +31,10 @@ export function HeaderNavControls({ navControls$, append = null }: Props) {
   // to change while Kibana is running.
   return (
     <>
-      {navControls.map((navControl: ChromeNavControl) => (
-        <NavControlItem key={navControl.id} navControl={navControl} />
+      {navControls.map((navControl: ChromeNavControl, index: number) => (
+        <EuiHeaderSectionItem key={index}>
+          <HeaderExtension extension={navControl.mount} />
+        </EuiHeaderSectionItem>
       ))}
       {append}
     </>

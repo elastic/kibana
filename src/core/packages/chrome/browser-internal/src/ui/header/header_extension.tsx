@@ -11,7 +11,6 @@ import React from 'react';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 interface Props {
-  id: string;
   extension?: MountPoint<HTMLDivElement>;
   display?: 'block' | 'inlineBlock';
   containerClassName?: string;
@@ -41,7 +40,6 @@ export class HeaderExtension extends React.Component<Props> {
   public render() {
     return (
       <div
-        data-navcontrol-id={this.props.id}
         ref={this.ref}
         className={this.props.containerClassName}
         style={{ display: this.props.display === 'inlineBlock' ? 'inline-block' : undefined }}

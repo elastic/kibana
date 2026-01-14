@@ -61,7 +61,6 @@ export const BreadcrumbsWithExtensionsWrapper = ({
         const isLast = breadcrumbsAppendExtensions.length - 1 === index;
         return (
           <HeaderExtension
-            id={`breadcrumbs-append-extension-${index}`}
             key={index}
             extension={breadcrumbsAppendExtension.content}
             containerClassName={classnames({

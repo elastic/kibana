@@ -52,7 +52,6 @@ export class NewsfeedPublicPlugin
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
     core.chrome.navControls.registerRight({
       order: 1000,
-      id: 'newsfeedNavControl',
       mount: (target) => this.mount(api, target, core),
     });
 

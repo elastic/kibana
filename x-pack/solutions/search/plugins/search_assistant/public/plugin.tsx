@@ -62,7 +62,6 @@ export class SearchAssistantPlugin
     }
 
     coreStart.chrome.navControls.registerRight({
-      id: 'search-assistant-nav-control',
       mount: (element) => {
         ReactDOM.render(
           <NavControlInitiator
