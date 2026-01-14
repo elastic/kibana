@@ -11,6 +11,7 @@ import { useWatch } from 'react-hook-form';
 import { EuiCode, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ToggleField } from './toggle_field';
+import type { ExtractBooleanFields, ProcessorFormState } from '../../../types';
 
 export const IgnoreFailureToggle = () => {
   const value = useWatch({ name: 'ignore_failure' });
@@ -50,6 +51,25 @@ export const IgnoreMissingToggle = () => {
       helpText={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingHelpText',
         { defaultMessage: 'Ignore documents with a missing field.' }
+      )}
+    />
+  );
+};
+
+export const IgnoreEmptyValueToggle = () => {
+  return (
+    <ToggleField
+      name={'ignore_empty_value' as ExtractBooleanFields<ProcessorFormState>}
+      label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreEmptyValueLabel',
+        { defaultMessage: 'Ignore empty value' }
+      )}
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreEmptyValueHelpText',
+        {
+          defaultMessage:
+            'Quietly exit without modifying the document if field value is null or an empty string.',
+        }
       )}
     />
   );

@@ -55,6 +55,7 @@ export const processConcatProcessor = (
       description: processor.description,
       if: processor.if,
       ignore_failure: processor.ignore_failure,
+      ignore_empty_value: processor.ignore_empty_value,
       tag: processor.tag,
     },
   };

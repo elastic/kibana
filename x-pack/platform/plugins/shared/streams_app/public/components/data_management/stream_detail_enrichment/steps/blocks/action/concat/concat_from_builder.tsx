@@ -155,7 +155,6 @@ const FromBuilderItem = ({ type, id, index, onRemove }: FromBuilderItemProps) =>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="trash"
-              color="danger"
               aria-label={i18n.translate('xpack.streams.fromBuilderItem.removeLabel', {
                 defaultMessage: 'Remove',
               })}
