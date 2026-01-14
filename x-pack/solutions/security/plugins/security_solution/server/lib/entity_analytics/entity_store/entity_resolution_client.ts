@@ -11,6 +11,7 @@ import type { EntityType as APIEntityType } from '../../../../common/api/entity_
 import type { LinkEntitiesResponse } from '../../../../common/api/entity_analytics/entity_store/resolution/link_entities.gen';
 import type { GetResolutionResponse } from '../../../../common/api/entity_analytics/entity_store/resolution/get_resolution.gen';
 import type { ListResolutionsResponse } from '../../../../common/api/entity_analytics/entity_store/resolution/list_resolutions.gen';
+import type { ListFilterableEntitiesResponse } from '../../../../common/api/entity_analytics/entity_store/resolution/list_filterable_entities.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import { EngineNotRunningError, BadCRUDRequestError } from './errors';
@@ -29,6 +30,7 @@ interface ResolutionDocument {
   '@timestamp': string;
   entity_id: string;
   resolution_id: string;
+  is_primary: boolean;
 }
 
 /**
@@ -84,6 +86,7 @@ export class EntityResolutionClient {
             '@timestamp': { type: 'date' },
             entity_id: { type: 'keyword' },
             resolution_id: { type: 'keyword' },
+            is_primary: { type: 'boolean' },
           },
         },
       });
@@ -96,9 +99,12 @@ export class EntityResolutionClient {
   private async getExistingResolutions(
     entityType: EntityType,
     entityIds: string[]
-  ): Promise<Map<string, { resolution_id: string; doc_id: string }>> {
+  ): Promise<Map<string, { resolution_id: string; doc_id: string; is_primary: boolean }>> {
     const indexName = getResolutionIndexName(entityType, this.namespace);
-    const resolutions = new Map<string, { resolution_id: string; doc_id: string }>();
+    const resolutions = new Map<
+      string,
+      { resolution_id: string; doc_id: string; is_primary: boolean }
+    >();
 
     try {
       const result = await this.esClient.search<ResolutionDocument>({
@@ -114,6 +120,7 @@ export class EntityResolutionClient {
           resolutions.set(hit._source.entity_id, {
             resolution_id: hit._source.resolution_id,
             doc_id: hit._id,
+            is_primary: hit._source.is_primary ?? false,
           });
         }
       }
@@ -133,7 +140,7 @@ export class EntityResolutionClient {
   private async getResolutionMembers(
     entityType: EntityType,
     resolutionId: string
-  ): Promise<Array<{ entity_id: string; doc_id: string }>> {
+  ): Promise<Array<{ entity_id: string; doc_id: string; is_primary: boolean }>> {
     const indexName = getResolutionIndexName(entityType, this.namespace);
 
     try {
@@ -145,14 +152,18 @@ export class EntityResolutionClient {
         },
       });
 
-      return (
-        result.hits.hits
-          .filter((h) => h._source && h._id)
-          .map((h) => ({
-            entity_id: h._source!.entity_id,
-            doc_id: h._id!,
-          })) || []
-      );
+      return result.hits.hits.flatMap((h) => {
+        if (h._source && h._id) {
+          return [
+            {
+              entity_id: h._source.entity_id,
+              doc_id: h._id,
+              is_primary: h._source.is_primary ?? false,
+            },
+          ];
+        }
+        return [];
+      });
     } catch (error) {
       if ((error as { statusCode?: number }).statusCode === 404) {
         return [];
@@ -201,14 +212,23 @@ export class EntityResolutionClient {
    */
   public async linkEntities(
     entityType: APIEntityType,
-    entityIds: string[]
+    entityIds: string[],
+    primaryEntityId: string
   ): Promise<LinkEntitiesResponse> {
     const type = EntityType[entityType];
-    this.logger.info(`Linking entities: ${entityIds.join(', ')} (type: ${entityType})`);
 
-    // Validate input
-    if (entityIds.length < 2) {
-      throw new BadCRUDRequestError('Need at least 2 entities to link');
+    // Combine primary + entities into all entity IDs (primary is separate in the API)
+    const allEntityIds = [primaryEntityId, ...entityIds];
+
+    this.logger.info(
+      `Linking entities: ${entityIds.join(
+        ', '
+      )} to primary: ${primaryEntityId} (type: ${entityType})`
+    );
+
+    // Validate input - need at least 1 entity to link to the primary
+    if (entityIds.length < 1) {
+      throw new BadCRUDRequestError('Need at least 1 entity to link to the primary');
     }
 
     // Verify engine is running
@@ -217,8 +237,8 @@ export class EntityResolutionClient {
       throw new EngineNotRunningError(entityType);
     }
 
-    // Verify entities exist in Entity Store
-    const { missing } = await this.verifyEntitiesExist(type, entityIds);
+    // Verify all entities exist in Entity Store (including primary)
+    const { missing } = await this.verifyEntitiesExist(type, allEntityIds);
     if (missing.length > 0) {
       throw new BadCRUDRequestError(`Entities not found in Entity Store: ${missing.join(', ')}`);
     }
@@ -226,8 +246,8 @@ export class EntityResolutionClient {
     // Ensure resolution index exists
     await this.ensureResolutionIndex(type);
 
-    // Get existing resolutions
-    const existingResolutions = await this.getExistingResolutions(type, entityIds);
+    // Get existing resolutions for all entities
+    const existingResolutions = await this.getExistingResolutions(type, allEntityIds);
 
     // Collect unique resolution IDs
     const uniqueResolutionIds = new Set<string>();
@@ -247,12 +267,13 @@ export class EntityResolutionClient {
       targetResolutionId = this.generateResolutionId();
       this.logger.debug(`Case 1: Creating new resolution ${targetResolutionId}`);
 
-      for (const entityId of entityIds) {
+      for (const entityId of allEntityIds) {
         bulkOps.push({ index: { _index: indexName } });
         bulkOps.push({
           '@timestamp': now,
           entity_id: entityId,
           resolution_id: targetResolutionId,
+          is_primary: entityId === primaryEntityId,
         });
         created++;
       }
@@ -261,13 +282,28 @@ export class EntityResolutionClient {
       targetResolutionId = [...uniqueResolutionIds][0];
       this.logger.debug(`Case 2: Adding to existing resolution ${targetResolutionId}`);
 
-      for (const entityId of entityIds) {
+      // Get all current members to handle primary updates
+      const currentMembers = await this.getResolutionMembers(type, targetResolutionId);
+
+      // Update all existing members to set correct is_primary
+      for (const member of currentMembers) {
+        const shouldBePrimary = member.entity_id === primaryEntityId;
+        if (member.is_primary !== shouldBePrimary) {
+          bulkOps.push({ update: { _index: indexName, _id: member.doc_id } });
+          bulkOps.push({ doc: { is_primary: shouldBePrimary, '@timestamp': now } });
+          updated++;
+        }
+      }
+
+      // Add new entities (including primary if not already in resolution)
+      for (const entityId of allEntityIds) {
         if (!existingResolutions.has(entityId)) {
           bulkOps.push({ index: { _index: indexName } });
           bulkOps.push({
             '@timestamp': now,
             entity_id: entityId,
             resolution_id: targetResolutionId,
+            is_primary: entityId === primaryEntityId,
           });
           created++;
         }
@@ -280,26 +316,45 @@ export class EntityResolutionClient {
         `Case 3: Merging ${uniqueResolutionIds.size} resolutions into ${targetResolutionId}`
       );
 
+      // Update members from the target resolution to set correct is_primary
+      const targetMembers = await this.getResolutionMembers(type, targetResolutionId);
+      for (const member of targetMembers) {
+        const shouldBePrimary = member.entity_id === primaryEntityId;
+        if (member.is_primary !== shouldBePrimary) {
+          bulkOps.push({ update: { _index: indexName, _id: member.doc_id } });
+          bulkOps.push({ doc: { is_primary: shouldBePrimary, '@timestamp': now } });
+          updated++;
+        }
+      }
+
       // Get all members from other resolutions and update them
       for (let i = 1; i < resolutionIdArray.length; i++) {
         const otherResolutionId = resolutionIdArray[i];
         const members = await this.getResolutionMembers(type, otherResolutionId);
 
         for (const member of members) {
+          const shouldBePrimary = member.entity_id === primaryEntityId;
           bulkOps.push({ update: { _index: indexName, _id: member.doc_id } });
-          bulkOps.push({ doc: { resolution_id: targetResolutionId, '@timestamp': now } });
+          bulkOps.push({
+            doc: {
+              resolution_id: targetResolutionId,
+              is_primary: shouldBePrimary,
+              '@timestamp': now,
+            },
+          });
           updated++;
         }
       }
 
-      // Add any new entities not yet in any resolution
-      for (const entityId of entityIds) {
+      // Add any new entities not yet in any resolution (including primary)
+      for (const entityId of allEntityIds) {
         if (!existingResolutions.has(entityId)) {
           bulkOps.push({ index: { _index: indexName } });
           bulkOps.push({
             '@timestamp': now,
             entity_id: entityId,
             resolution_id: targetResolutionId,
+            is_primary: entityId === primaryEntityId,
           });
           created++;
         }
@@ -327,6 +382,7 @@ export class EntityResolutionClient {
     return {
       resolution_id: targetResolutionId,
       entities: finalMembers.map((m) => m.entity_id),
+      primary_entity_id: primaryEntityId,
       created,
       updated,
     };
@@ -366,7 +422,9 @@ export class EntityResolutionClient {
       // Entity is not resolved
       return {
         entity_id: entityId,
+        is_primary: false,
         resolution_id: null,
+        primary_entity_id: null,
         group_members: [],
         '@timestamp': null,
       };
@@ -396,9 +454,15 @@ export class EntityResolutionClient {
       this.logger.debug(`Could not fetch timestamp for entity ${entityId}: ${error}`);
     }
 
+    // Find the primary entity in the group
+    const primaryMember = members.find((m) => m.is_primary);
+    const primaryEntityId = primaryMember?.entity_id ?? null;
+
     return {
       entity_id: entityId,
+      is_primary: resolution.is_primary,
       resolution_id: resolution.resolution_id,
+      primary_entity_id: primaryEntityId,
       group_members: members.map((m) => m.entity_id),
       '@timestamp': timestamp,
     };
@@ -433,13 +497,18 @@ export class EntityResolutionClient {
         sort: [{ resolution_id: 'asc' }, { entity_id: 'asc' }],
       });
 
-      const resolutions = result.hits.hits
-        .filter((h) => h._source)
-        .map((h) => ({
-          entity_id: h._source!.entity_id,
-          resolution_id: h._source!.resolution_id,
-          '@timestamp': h._source!['@timestamp'],
-        }));
+      const resolutions = result.hits.hits.flatMap((h) => {
+        if (h._source) {
+          return [
+            {
+              entity_id: h._source.entity_id,
+              resolution_id: h._source.resolution_id,
+              '@timestamp': h._source['@timestamp'],
+            },
+          ];
+        }
+        return [];
+      });
 
       return { resolutions };
     } catch (error) {
@@ -449,5 +518,175 @@ export class EntityResolutionClient {
       }
       throw error;
     }
+  }
+
+  /**
+   * List filterable entities for the resolution selection UI
+   *
+   * Supports two filter modes:
+   * - primaries_and_unresolved: Returns entities that are primary OR not resolved
+   * - unresolved_only: Returns only entities that are not part of any resolution group
+   */
+  public async listFilterableEntities(
+    entityType: APIEntityType,
+    filter: 'primaries_and_unresolved' | 'unresolved_only',
+    options: {
+      excludeEntityId?: string;
+      searchTerm?: string;
+      limit?: number;
+    } = {}
+  ): Promise<ListFilterableEntitiesResponse> {
+    const type = EntityType[entityType];
+    const { excludeEntityId, searchTerm, limit = 50 } = options;
+
+    this.logger.debug(
+      `Listing filterable entities: type=${entityType}, filter=${filter}, exclude=${excludeEntityId}, search=${searchTerm}`
+    );
+
+    // Verify engine is running
+    const engineRunning = await this.dataClient.isEngineRunning(type);
+    if (!engineRunning) {
+      throw new EngineNotRunningError(entityType);
+    }
+
+    const entitiesIndexName = getEntitiesIndexName(type, this.namespace);
+    const resolutionIndexName = getResolutionIndexName(type, this.namespace);
+
+    // Step 1: Get all resolution documents to build lookup maps
+    const resolutionMap = new Map<string, { resolution_id: string; is_primary: boolean }>();
+    const resolutionCounts = new Map<string, number>();
+
+    try {
+      const resolutionResult = await this.esClient.search<ResolutionDocument>({
+        index: resolutionIndexName,
+        size: 10000,
+        query: { match_all: {} },
+      });
+
+      for (const hit of resolutionResult.hits.hits) {
+        if (hit._source) {
+          resolutionMap.set(hit._source.entity_id, {
+            resolution_id: hit._source.resolution_id,
+            is_primary: hit._source.is_primary,
+          });
+          // Count entities per resolution group
+          const currentCount = resolutionCounts.get(hit._source.resolution_id) || 0;
+          resolutionCounts.set(hit._source.resolution_id, currentCount + 1);
+        }
+      }
+    } catch (error) {
+      // Resolution index may not exist yet - that's fine, all entities are unresolved
+      if ((error as { statusCode?: number }).statusCode !== 404) {
+        throw error;
+      }
+    }
+
+    // Step 2: Build the query for entities
+    const mustClauses: object[] = [];
+    const mustNotClauses: object[] = [];
+
+    // Apply search filter if provided
+    if (searchTerm) {
+      mustClauses.push({
+        wildcard: {
+          'entity.name': {
+            value: `*${searchTerm}*`,
+            case_insensitive: true,
+          },
+        },
+      });
+    }
+
+    // Exclude specific entity if provided
+    if (excludeEntityId) {
+      mustNotClauses.push({
+        term: { 'entity.id': excludeEntityId },
+      });
+    }
+
+    // Step 3: Query entities from Entity Store
+    const entitiesResult = await this.esClient.search({
+      index: entitiesIndexName,
+      size: 10000, // Get all entities, we'll filter and limit after
+      _source: ['entity.id', 'entity.name', 'entity.type', 'user.risk', 'host.risk'],
+      query:
+        mustClauses.length > 0 || mustNotClauses.length > 0
+          ? {
+              bool: {
+                ...(mustClauses.length > 0 ? { must: mustClauses } : {}),
+                ...(mustNotClauses.length > 0 ? { must_not: mustNotClauses } : {}),
+              },
+            }
+          : { match_all: {} },
+    });
+
+    // Step 4: Transform and filter entities based on resolution status
+    interface EntitySource {
+      entity: { id: string; name: string; type?: string };
+      user?: { risk?: { calculated_score_norm?: number } };
+      host?: { risk?: { calculated_score_norm?: number } };
+    }
+
+    const filteredEntities: Array<{
+      id: string;
+      name: string;
+      type: string;
+      risk_score: number | null;
+      is_primary: boolean | null;
+      resolution_id: string | null;
+      resolved_count: number;
+    }> = [];
+
+    for (const hit of entitiesResult.hits.hits) {
+      const source = hit._source as EntitySource;
+      if (source?.entity?.id) {
+        const entityId = source.entity.id;
+        const resolution = resolutionMap.get(entityId);
+
+        // Apply filter logic
+        const shouldInclude =
+          filter === 'unresolved_only'
+            ? !resolution // Only include entities that are NOT resolved
+            : filter === 'primaries_and_unresolved'
+            ? !resolution || resolution.is_primary // Include primaries OR unresolved
+            : true;
+
+        if (shouldInclude) {
+          // Get risk score (check both user and host)
+          const riskScore =
+            source.user?.risk?.calculated_score_norm ??
+            source.host?.risk?.calculated_score_norm ??
+            null;
+
+          filteredEntities.push({
+            id: entityId,
+            name: source.entity.name || entityId,
+            type: source.entity.type || entityType,
+            risk_score: riskScore,
+            is_primary: resolution?.is_primary ?? null,
+            resolution_id: resolution?.resolution_id ?? null,
+            resolved_count: resolution ? resolutionCounts.get(resolution.resolution_id) || 0 : 0,
+          });
+        }
+      }
+    }
+
+    // Sort by risk score descending (nulls last), then by name
+    filteredEntities.sort((a, b) => {
+      if (a.risk_score === null && b.risk_score === null) {
+        return a.name.localeCompare(b.name);
+      }
+      if (a.risk_score === null) return 1;
+      if (b.risk_score === null) return -1;
+      return b.risk_score - a.risk_score;
+    });
+
+    // Apply limit
+    const limitedEntities = filteredEntities.slice(0, limit);
+
+    return {
+      entities: limitedEntities,
+      total: filteredEntities.length,
+    };
   }
 }

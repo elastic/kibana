@@ -109,3 +109,7 @@ components:
         risk_level:
           type: string
           nullable: true
+        is_primary:
+          type: boolean
+          nullable: true
+          description: Whether this entity is the primary entity in its resolution group (null if unresolved)

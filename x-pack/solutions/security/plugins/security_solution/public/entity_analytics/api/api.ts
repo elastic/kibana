@@ -21,6 +21,8 @@ import type {
   InitMonitoringEngineResponse,
   InitRiskEngineResponse,
   LinkEntitiesResponse,
+  ListFilterableEntitiesRequestQueryInput,
+  ListFilterableEntitiesResponse,
   ListGroupedEntitiesResponse,
   ListResolutionsResponse,
   ListEntitiesRequestQuery,
@@ -48,6 +50,7 @@ import {
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   ASSET_CRITICALITY_PUBLIC_URL,
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
+  getFilterableEntitiesUrl,
   getLinkEntitiesUrl,
   getListGroupedEntitiesUrl,
   getListResolutionsUrl,
@@ -481,13 +484,40 @@ export const useEntityAnalyticsRoutes = () => {
      */
     const linkEntities = async (params: {
       entityType: string;
+      primaryEntityId: string;
       entities: string[];
       signal?: AbortSignal;
     }): Promise<LinkEntitiesResponse> =>
       http.fetch<LinkEntitiesResponse>(getLinkEntitiesUrl(params.entityType), {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
-        body: JSON.stringify({ entities: params.entities }),
+        body: JSON.stringify({
+          primary_entity_id: params.primaryEntityId,
+          entities: params.entities,
+        }),
+        signal: params.signal,
+      });
+
+    /**
+     * Fetch filterable entities for entity resolution UI
+     */
+    const fetchFilterableEntities = async (params: {
+      entityType: string;
+      filter: ListFilterableEntitiesRequestQueryInput['filter'];
+      excludeEntityId?: string;
+      searchTerm?: string;
+      limit?: number;
+      signal?: AbortSignal;
+    }): Promise<ListFilterableEntitiesResponse> =>
+      http.fetch<ListFilterableEntitiesResponse>(getFilterableEntitiesUrl(params.entityType), {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          filter: params.filter,
+          exclude_entity_id: params.excludeEntityId,
+          search_term: params.searchTerm,
+          limit: params.limit,
+        },
         signal: params.signal,
       });
 
@@ -567,6 +597,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchResolution,
       fetchListResolutions,
       fetchListGroupedEntities,
+      fetchFilterableEntities,
     };
   }, [http]);
 };

@@ -36,10 +36,17 @@ paths:
                   entity_id:
                     type: string
                     description: The entity ID queried
+                  is_primary:
+                    type: boolean
+                    description: Whether the queried entity is the primary (golden) entity of its resolution group
                   resolution_id:
                     type: string
                     nullable: true
                     description: The resolution ID if entity is resolved, null otherwise
+                  primary_entity_id:
+                    type: string
+                    nullable: true
+                    description: The entity ID of the primary (golden) entity in the resolution group, null if not resolved
                   group_members:
                     type: array
                     items:

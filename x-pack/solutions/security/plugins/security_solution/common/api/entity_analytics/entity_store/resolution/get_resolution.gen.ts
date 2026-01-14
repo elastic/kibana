@@ -35,9 +35,17 @@ export const GetResolutionResponse = z.object({
    */
   entity_id: z.string(),
   /**
+   * Whether the queried entity is the primary (golden) entity of its resolution group
+   */
+  is_primary: z.boolean().optional(),
+  /**
    * The resolution ID if entity is resolved, null otherwise
    */
   resolution_id: z.string().nullable().optional(),
+  /**
+   * The entity ID of the primary (golden) entity in the resolution group, null if not resolved
+   */
+  primary_entity_id: z.string().nullable().optional(),
   /**
    * All entity IDs in the resolution group (empty if not resolved)
    */

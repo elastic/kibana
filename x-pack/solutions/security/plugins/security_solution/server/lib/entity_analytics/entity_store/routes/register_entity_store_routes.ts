@@ -20,7 +20,13 @@ import { enableEntityStoreRoute } from './enablement';
 import { upsertEntity } from './entity_crud/upsert_entity';
 import { upsertEntitiesBulk } from './entity_crud/upsert_entities_bulk';
 import { deleteEntity } from './entity_crud/delete_entity';
-import { linkEntities, getResolution, listResolutions, listGroupedEntities } from './resolution';
+import {
+  linkEntities,
+  getResolution,
+  listResolutions,
+  listGroupedEntities,
+  listFilterableEntities,
+} from './resolution';
 
 export const registerEntityStoreRoutes = ({
   router,
@@ -48,4 +54,5 @@ export const registerEntityStoreRoutes = ({
   getResolution(router, logger);
   listResolutions(router, logger);
   listGroupedEntities(router, logger);
+  listFilterableEntities(router, logger);
 };

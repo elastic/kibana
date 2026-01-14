@@ -35,13 +35,17 @@ paths:
               type: object
               required:
                 - entities
+                - primary_entity_id
               properties:
+                primary_entity_id:
+                  type: string
+                  description: The entity ID to designate as the primary (golden) entity for this resolution group.
                 entities:
                   type: array
-                  minItems: 2
+                  minItems: 1
                   items:
                     type: string
-                  description: Array of entity IDs to link (minimum 2)
+                  description: Array of entity IDs to link to the primary entity (minimum 1).
       responses:
         '200':
           description: Entities linked successfully
@@ -52,6 +56,7 @@ paths:
                 required:
                   - resolution_id
                   - entities
+                  - primary_entity_id
                   - created
                   - updated
                 properties:
@@ -63,6 +68,9 @@ paths:
                     items:
                       type: string
                     description: All entity IDs in this resolution group
+                  primary_entity_id:
+                    type: string
+                    description: The entity ID marked as the primary (golden) entity
                   created:
                     type: integer
                     description: Number of new resolution documents created

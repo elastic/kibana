@@ -298,6 +298,11 @@ import type {
   LinkEntitiesResponse,
 } from './entity_analytics/entity_store/resolution/link_entities.gen';
 import type {
+  ListFilterableEntitiesRequestQueryInput,
+  ListFilterableEntitiesRequestParamsInput,
+  ListFilterableEntitiesResponse,
+} from './entity_analytics/entity_store/resolution/list_filterable_entities.gen';
+import type {
   ListGroupedEntitiesRequestQueryInput,
   ListGroupedEntitiesRequestParamsInput,
   ListGroupedEntitiesResponse,
@@ -2450,6 +2455,24 @@ providing you with the most current and effective threat detection capabilities.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Returns a flat list of entities with resolution flags, designed for the primary-first selection UI (UX-4). Supports filtering to show only primaries + unresolved entities (for primary selection) or only unresolved entities (for linking to a primary).
+
+    */
+  async listFilterableEntities(props: ListFilterableEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListFilterableEntities`);
+    return this.kbnClient
+      .request<ListFilterableEntitiesResponse>({
+        path: replaceParams('/api/entity_store/resolution/{entityType}/entities', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * Returns entities grouped by resolution_id, with complete entity data for each group.
 Uses ES|QL LOOKUP JOIN to efficiently join entities with resolutions.
 Groups are sorted by max risk score descending.
@@ -3694,6 +3717,10 @@ export interface ListEntitiesProps {
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
+}
+export interface ListFilterableEntitiesProps {
+  query: ListFilterableEntitiesRequestQueryInput;
+  params: ListFilterableEntitiesRequestParamsInput;
 }
 export interface ListGroupedEntitiesProps {
   query: ListGroupedEntitiesRequestQueryInput;

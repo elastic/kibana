@@ -23,6 +23,8 @@ export const getListResolutionsUrl = (entityType: string) =>
   `${RESOLUTION_URL}/${entityType}` as const;
 export const getListGroupedEntitiesUrl = (entityType: string) =>
   `${RESOLUTION_URL}/${entityType}/grouped` as const;
+export const getFilterableEntitiesUrl = (entityType: string) =>
+  `${RESOLUTION_URL}/${entityType}/entities` as const;
 
 export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',

@@ -7,20 +7,23 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import type { LinkEntitiesResponse } from '../../../../../../common/api/entity_analytics/entity_store/resolution/link_entities.gen';
+import type { ListFilterableEntitiesResponse } from '../../../../../../common/api/entity_analytics/entity_store/resolution/list_filterable_entities.gen';
 import {
-  LinkEntitiesRequestBody,
-  LinkEntitiesRequestParams,
-} from '../../../../../../common/api/entity_analytics/entity_store/resolution/link_entities.gen';
+  ListFilterableEntitiesRequestParams,
+  ListFilterableEntitiesRequestQuery,
+} from '../../../../../../common/api/entity_analytics/entity_store/resolution/list_filterable_entities.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { EngineNotRunningError, BadCRUDRequestError } from '../../errors';
 
-export const linkEntities = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const listFilterableEntities = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
-    .put({
+    .get({
       access: 'public',
-      path: '/api/entity_store/resolution/{entityType}',
+      path: '/api/entity_store/resolution/{entityType}/entities',
       options: {
         availability: {
           stability: 'experimental',
@@ -37,20 +40,28 @@ export const linkEntities = (router: EntityAnalyticsRoutesDeps['router'], logger
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(LinkEntitiesRequestParams),
-            body: buildRouteValidationWithZod(LinkEntitiesRequestBody),
+            params: buildRouteValidationWithZod(ListFilterableEntitiesRequestParams),
+            query: buildRouteValidationWithZod(ListFilterableEntitiesRequestQuery),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<LinkEntitiesResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<ListFilterableEntitiesResponse>> => {
         const secSol = await context.securitySolution;
 
         try {
           const resolutionClient = secSol.getEntityResolutionClient();
-          const result = await resolutionClient.linkEntities(
+          const result = await resolutionClient.listFilterableEntities(
             request.params.entityType,
-            request.body.entities,
-            request.body.primary_entity_id
+            request.query.filter,
+            {
+              excludeEntityId: request.query.exclude_entity_id,
+              searchTerm: request.query.search_term,
+              limit: request.query.limit,
+            }
           );
 
           return response.ok({ body: result });

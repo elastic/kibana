@@ -39,6 +39,7 @@ interface EntityRow {
   riskLevel: string | null;
   groupId: string;
   isResolved: boolean;
+  isPrimary: boolean | null;
 }
 
 export const listGroupedEntities = (router: SecuritySolutionPluginRouter, logger: Logger) => {
@@ -81,7 +82,7 @@ export const listGroupedEntities = (router: SecuritySolutionPluginRouter, logger
 
           // ES|QL query that:
           // 1. Fetches all entities
-          // 2. Joins with resolution index to get resolution_ids
+          // 2. Joins with resolution index to get resolution_ids and is_primary
           // 3. Creates a group_id for each entity (resolution_id or synthetic __single_ prefix)
           // 4. Returns individual entity rows with their group info
           const esqlQuery = `
@@ -90,7 +91,7 @@ export const listGroupedEntities = (router: SecuritySolutionPluginRouter, logger
             | LOOKUP JOIN ${resolutionIndexName} ON entity_id
             | EVAL group_id = COALESCE(resolution_id, CONCAT("__single_", entity.id)),
                    is_resolved = resolution_id IS NOT NULL
-            | KEEP entity.id, entity.name, entity.type, ${riskFieldPrefix}.risk.calculated_score_norm, ${riskFieldPrefix}.risk.calculated_level, group_id, is_resolved
+            | KEEP entity.id, entity.name, entity.type, ${riskFieldPrefix}.risk.calculated_score_norm, ${riskFieldPrefix}.risk.calculated_level, group_id, is_resolved, is_primary
             | SORT ${riskFieldPrefix}.risk.calculated_score_norm DESC NULLS LAST
             | LIMIT 10000
           `;
@@ -103,6 +104,7 @@ export const listGroupedEntities = (router: SecuritySolutionPluginRouter, logger
           const result = esqlResult as unknown as EsqlResponse;
 
           // Parse ES|QL results into entity rows
+          // Columns: entity.id, entity.name, entity.type, risk_score, risk_level, group_id, is_resolved, is_primary
           const entityRows: EntityRow[] = result.values
             .filter((row) => row[0] != null && row[5] != null) // Filter out rows with null entity_id or group_id
             .map((row) => ({
@@ -113,16 +115,20 @@ export const listGroupedEntities = (router: SecuritySolutionPluginRouter, logger
               riskLevel: row[4] as string | null,
               groupId: row[5] as string,
               isResolved: row[6] as boolean,
+              isPrimary: row[7] != null ? (row[7] as boolean) : null,
             }));
 
           // Group entities by group_id
           const groupMap = new Map<string, EntityRow[]>();
           for (const entity of entityRows) {
-            if (!entity.groupId) continue; // Skip entities without group_id
-            if (!groupMap.has(entity.groupId)) {
-              groupMap.set(entity.groupId, []);
+            if (entity.groupId) {
+              const existingGroup = groupMap.get(entity.groupId);
+              if (existingGroup) {
+                existingGroup.push(entity);
+              } else {
+                groupMap.set(entity.groupId, [entity]);
+              }
             }
-            groupMap.get(entity.groupId)!.push(entity);
           }
 
           // Convert to EntityGroup format and calculate max risk scores
@@ -136,12 +142,20 @@ export const listGroupedEntities = (router: SecuritySolutionPluginRouter, logger
             const isResolved = !groupId.startsWith('__single_');
             const resolutionId = isResolved ? groupId : null;
 
-            const groupedEntities: GroupedEntity[] = entities.map((e) => ({
+            // Sort entities so primary comes first
+            const sortedEntities = [...entities].sort((a, b) => {
+              if (a.isPrimary && !b.isPrimary) return -1;
+              if (!a.isPrimary && b.isPrimary) return 1;
+              return 0;
+            });
+
+            const groupedEntities: GroupedEntity[] = sortedEntities.map((e) => ({
               id: e.entityId,
               name: e.entityName,
               type: e.entityType,
               risk_score: e.riskScore,
               risk_level: e.riskLevel,
+              is_primary: e.isPrimary,
             }));
 
             groups.push({

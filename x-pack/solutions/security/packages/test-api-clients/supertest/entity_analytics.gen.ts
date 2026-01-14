@@ -69,6 +69,10 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/link_entities.gen';
 import type { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import type {
+  ListFilterableEntitiesRequestQueryInput,
+  ListFilterableEntitiesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/list_filterable_entities.gen';
+import type {
   ListGroupedEntitiesRequestQueryInput,
   ListGroupedEntitiesRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/resolution/list_grouped_entities.gen';
@@ -541,6 +545,23 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .query(props.query);
   },
   /**
+      * Returns a flat list of entities with resolution flags, designed for the primary-first selection UI (UX-4). Supports filtering to show only primaries + unresolved entities (for primary selection) or only unresolved entities (for linking to a primary).
+
+      */
+  listFilterableEntities(props: ListFilterableEntitiesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/entity_store/resolution/{entityType}/entities', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Returns entities grouped by resolution_id, with complete entity data for each group.
 Uses ES|QL LOOKUP JOIN to efficiently join entities with resolutions.
 Groups are sorted by max risk score descending.
@@ -875,6 +896,10 @@ export interface ListEntitiesProps {
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
+}
+export interface ListFilterableEntitiesProps {
+  query: ListFilterableEntitiesRequestQueryInput;
+  params: ListFilterableEntitiesRequestParamsInput;
 }
 export interface ListGroupedEntitiesProps {
   query: ListGroupedEntitiesRequestQueryInput;

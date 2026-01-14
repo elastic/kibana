@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - List Filterable Entities
+paths:
+  /api/entity_store/resolution/{entityType}/entities:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ListFilterableEntities
+      summary: List entities with resolution status for selection UI
+      description: >
+        Returns a flat list of entities with resolution flags, designed for the
+        primary-first selection UI (UX-4). Supports filtering to show only
+        primaries + unresolved entities (for primary selection) or only
+        unresolved entities (for linking to a primary).
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            $ref: '../common.schema.yaml#/components/schemas/EntityType'
+        - name: filter
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - primaries_and_unresolved
+              - unresolved_only
+          description: >
+            Filter mode:
+            - primaries_and_unresolved: Returns entities that are either primary (is_primary=true) or not resolved (no resolution_id)
+            - unresolved_only: Returns only entities that are not part of any resolution group
+        - name: exclude_entity_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Entity ID to exclude from results (used to exclude selected primary in step 2)
+        - name: search_term
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search term to filter entities by name
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 1000
+          description: Maximum number of entities to return
+      responses:
+        '200':
+          description: Entities returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - entities
+                  - total
+                properties:
+                  entities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FilterableEntity'
+                  total:
+                    type: integer
+                    description: Total number of matching entities
+        '400':
+          description: Bad request - invalid filter or entity type
+        '503':
+          description: Engine not running
+
+components:
+  schemas:
+    FilterableEntity:
+      type: object
+      required:
+        - id
+        - name
+        - type
+      properties:
+        id:
+          type: string
+          description: The entity ID (entity.id)
+        name:
+          type: string
+          description: The entity name (entity.name)
+        type:
+          type: string
+          description: The entity type (user, host, service, generic)
+        risk_score:
+          type: number
+          nullable: true
+          description: The entity's risk score (if available)
+        is_primary:
+          type: boolean
+          nullable: true
+          description: Whether this entity is a primary in its resolution group (null if not resolved)
+        resolution_id:
+          type: string
+          nullable: true
+          description: The resolution ID if entity is resolved (null if not resolved)
+        resolved_count:
+          type: integer
+          description: Number of entities in this resolution group (0 if not resolved)

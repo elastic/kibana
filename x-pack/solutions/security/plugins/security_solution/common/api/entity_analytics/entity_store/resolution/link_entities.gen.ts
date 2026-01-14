@@ -27,9 +27,13 @@ export type LinkEntitiesRequestParamsInput = z.input<typeof LinkEntitiesRequestP
 export type LinkEntitiesRequestBody = z.infer<typeof LinkEntitiesRequestBody>;
 export const LinkEntitiesRequestBody = z.object({
   /**
-   * Array of entity IDs to link (minimum 2)
+   * The entity ID to designate as the primary (golden) entity for this resolution group.
    */
-  entities: z.array(z.string()).min(2),
+  primary_entity_id: z.string(),
+  /**
+   * Array of entity IDs to link to the primary entity (minimum 1).
+   */
+  entities: z.array(z.string()).min(1),
 });
 export type LinkEntitiesRequestBodyInput = z.input<typeof LinkEntitiesRequestBody>;
 
@@ -43,6 +47,10 @@ export const LinkEntitiesResponse = z.object({
    * All entity IDs in this resolution group
    */
   entities: z.array(z.string()),
+  /**
+   * The entity ID marked as the primary (golden) entity
+   */
+  primary_entity_id: z.string(),
   /**
    * Number of new resolution documents created
    */

@@ -23,6 +23,10 @@ export const GroupedEntity = z.object({
   type: z.string(),
   risk_score: z.number().nullable().optional(),
   risk_level: z.string().nullable().optional(),
+  /**
+   * Whether this entity is the primary entity in its resolution group (null if unresolved)
+   */
+  is_primary: z.boolean().nullable().optional(),
 });
 
 export type EntityGroup = z.infer<typeof EntityGroup>;
