@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { EMPTY_LABEL } from '@kbn/field-formats-common';
+import { EMPTY_LABEL, NULL_LABEL, MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldTopValuesBucketParams {
@@ -150,6 +150,8 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                     ? i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
                         defaultMessage: 'Other',
                       })
+                    : formattedFieldValue === MISSING_TOKEN
+                    ? NULL_LABEL
                     : formattedFieldValue === ''
                     ? EMPTY_LABEL
                     : '-'}
