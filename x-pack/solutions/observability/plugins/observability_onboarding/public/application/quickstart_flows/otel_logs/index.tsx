@@ -116,7 +116,7 @@ export const OtelLogsPanel: React.FC = () => {
             agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
           })
         : '',
-      start: 'sudo ./otelcol --config otel.yml',
+      start: 'sudo ./otelcol --config otel.yml --feature-gates=service.profilesSupport',
       type: 'copy',
     },
     {
