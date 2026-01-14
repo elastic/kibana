@@ -260,6 +260,3 @@ xpack.securitySolution.enableExperimental: [riskScoreAssistantToolDisabled, disa
 
 # AI Assistant config
 aiAssistantManagementSelection.preferredAIAssistantType: 'security'
-
-feature_flags.overrides:
-  aiAssistant.aiAgents.enabled: true
