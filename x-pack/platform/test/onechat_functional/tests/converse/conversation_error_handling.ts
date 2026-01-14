@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import { AGENT_BUILDER_TOUR_STORAGE_KEY } from '@kbn/onechat-plugin/public/application/storage_keys';
 import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
-import { setupAgentDirectAnswer, setupAgentDirectError } from '../../../onechat_api_integration/utils/proxy_scenario';
+import {
+  setupAgentDirectAnswer,
+  setupAgentDirectError,
+} from '../../../onechat_api_integration/utils/proxy_scenario';
 import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
