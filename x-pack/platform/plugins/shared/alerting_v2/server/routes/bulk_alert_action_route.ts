@@ -39,9 +39,16 @@ export class BulkAlertActionRoute {
 
   async handle() {
     try {
-      await this.alertActionsClient.executeBulkActions(this.request.body);
+      const { processed, total } = await this.alertActionsClient.executeBulkActions(
+        this.request.body
+      );
 
-      return this.response.noContent();
+      return this.response.ok({
+        body: {
+          processed,
+          total,
+        },
+      });
     } catch (e) {
       const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
       return this.response.customError({

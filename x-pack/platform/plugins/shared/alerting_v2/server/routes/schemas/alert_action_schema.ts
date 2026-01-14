@@ -80,6 +80,6 @@ export const bulkAlertActionItemSchema = alertActionSchema.and(
 
 export type BulkAlertActionItem = z.infer<typeof bulkAlertActionItemSchema>;
 
-export const bulkAlertActionBodySchema = z.array(bulkAlertActionItemSchema);
+export const bulkAlertActionBodySchema = z.array(bulkAlertActionItemSchema).min(1);
 
 export type BulkAlertActionBody = z.infer<typeof bulkAlertActionBodySchema>;
