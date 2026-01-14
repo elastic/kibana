@@ -6,6 +6,7 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
@@ -50,7 +51,8 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
 
   if (!isLogsEssentialsMode) {
     await otelHostFlowPage.clickHostsOverviewCTA();
-    await hostsOverviewPage.assertCpuPercentageNotEmpty();
+    const hostname = os.hostname();
+    await hostsOverviewPage.assertHostCpuNotEmpty(hostname);
   } else {
     await otelHostFlowPage.clickLogsExplorationCTA();
 
