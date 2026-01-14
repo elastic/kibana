@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-/**
- * Fixed data stream name for ES|QL alert events written by `alerting_v2`.
- */
-export const ALERT_EVENTS_INDEX = '.alerts-events';
+import type { ServiceIdentifier } from 'inversify';
+import type { IRetryService } from './alerting_retry_service';
+
+export const RetryServiceToken = Symbol.for(
+  'alerting_v2.RetryService'
+) as ServiceIdentifier<IRetryService>;

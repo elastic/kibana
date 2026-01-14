@@ -1,0 +1,148 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { inject, injectable } from 'inversify';
+
+import type { IRetryService } from '../retry_service/alerting_retry_service';
+import type { IResourceInitializer } from './resource_initializer';
+import { LoggerService } from '../logger_service/logger_service';
+import { RetryServiceToken } from '../retry_service/tokens';
+
+interface ResourceState {
+  initializer?: IResourceInitializer;
+  initializationPromise?: Promise<void>;
+  error?: Error;
+  status: 'not_started' | 'pending' | 'ready' | 'failed';
+}
+
+@injectable()
+export class ResourceManager {
+  private readonly resources = new Map<string, ResourceState>();
+  private readonly startupResourceKeys = new Set<string>();
+
+  constructor(
+    @inject(LoggerService) private readonly logger: LoggerService,
+    @inject(RetryServiceToken) private readonly retryService: IRetryService
+  ) {}
+
+  /**
+   * Register a resource initializer instance, keyed by a unique name.
+   *
+   * A resource can later be initialized either at startup (via `startInitialization()`)
+   * or on-demand (via `ensureResourceReady()`).
+   */
+  public registerResource(key: string, initializer: IResourceInitializer): void {
+    const existing = this.resources.get(key);
+    if (
+      existing?.status === 'pending' ||
+      existing?.status === 'ready' ||
+      existing?.status === 'failed'
+    ) {
+      throw new Error(
+        `ResourceManager: cannot register resource [${key}] after initialization has started`
+      );
+    }
+
+    this.resources.set(key, {
+      status: 'not_started',
+      initializer,
+    });
+  }
+
+  /**
+   * Trigger async initialization for a set of resources (or all currently registered ones).
+   *
+   * This is intended to be called during plugin setup to kick off initialization, while
+   * consumers await readiness later (Ready Promise / Async Initializer pattern).
+   */
+  public startInitialization({ resourceKeys }: { resourceKeys?: string[] } = {}): void {
+    const keysToStart = resourceKeys ?? Array.from(this.resources.keys());
+    for (const key of keysToStart) {
+      this.startupResourceKeys.add(key);
+
+      // Fire-and-forget: initialization errors must NOT become unhandled rejections
+      // (which would crash Kibana). The error is still stored on the resource state,
+      // and consumers will fail fast when calling `waitUntilReady()` / `ensureResourceReady()`.
+      void this.initResource(key).catch(() => {
+        this.logger.debug({
+          message: `ResourceManager: Initialization for resource [${key}] failed`,
+        });
+      });
+    }
+  }
+
+  /**
+   * Wait until startup-triggered resources are ready.
+   *
+   * If initialization permanently fails, this rejects (fail-fast) and subsequent callers will
+   * also fail immediately with the stored error.
+   */
+  public async waitUntilReady(): Promise<void> {
+    await Promise.all(
+      Array.from(this.startupResourceKeys).map((key) => this.ensureResourceReady(key))
+    );
+  }
+
+  public isReady(key: string): boolean {
+    return this.resources.get(key)?.status === 'ready';
+  }
+
+  /**
+   * Ensure a resource is ready. If it has never been started, this starts it and awaits completion.
+   *
+   * If the resource permanently fails (even after retries), this rejects quickly for all callers.
+   */
+  public async ensureResourceReady(key: string): Promise<void> {
+    await this.initResource(key);
+  }
+
+  private async initResource(key: string): Promise<void> {
+    const state = this.resources.get(key);
+
+    if (!state?.initializer) {
+      throw new Error(`ResourceManager: resource [${key}] is not registered`);
+    }
+
+    if (state.status === 'ready') {
+      return;
+    }
+
+    if (state.status === 'failed') {
+      const err =
+        state.error ?? new Error(`ResourceManager: resource [${key}] failed to initialize`);
+      throw err;
+    }
+
+    if (state.status === 'pending' && state.initializationPromise) {
+      await state.initializationPromise;
+      return;
+    }
+
+    state.status = 'pending';
+
+    state.initializationPromise = this.retryService
+      .retry(() => state.initializer!.initialize())
+      .then(() => {
+        state.status = 'ready';
+        this.logger.debug({ message: `ResourceManager: resource [${key}] is ready` });
+      })
+      .catch((err) => {
+        state.status = 'failed';
+        state.error = err;
+
+        this.logger.error({
+          error: err,
+          code: 'ALERTING_RESOURCES_SERVICE_ERROR',
+          type: 'AlertingResourcesServiceError',
+        });
+
+        throw state.error;
+      });
+
+    await state.initializationPromise;
+  }
+}
