@@ -187,7 +187,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
 
       router.post(
         {
-          path: '/mock_idp/grant_api_key',
+          path: '/mock_idp/uiam/grant_api_key',
           validate: {
             body: schema.object({
               name: schema.string(),
@@ -247,7 +247,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
 
       router.post(
         {
-          path: '/mock_idp/call_scoped_client_with_uiam_api_key',
+          path: '/mock_idp/uiam/call_scoped_client_with_api_key',
           validate: {
             body: schema.object({
               apiKey: schema.string(),
@@ -298,7 +298,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
 
       router.post(
         {
-          path: '/mock_idp/invalidate_api_key_via_uiam',
+          path: '/mock_idp/uiam/invalidate_api_key',
           validate: {
             body: schema.object({
               apiKeyId: schema.string(),

@@ -94,13 +94,11 @@ describe('UiamAPIKeys', () => {
           name: 'test-key',
           expiration: '7d',
         })
-      ).rejects.toThrow(
-        'Cannot grant API key via UIAM: provided credential is not compatible with UIAM'
-      );
+      ).rejects.toThrow('Cannot grant API key: provided credential is not compatible with UIAM');
 
       expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(
-        'Cannot grant API key via UIAM: provided credential is not compatible with UIAM'
+        'Cannot grant API key: provided credential is not compatible with UIAM'
       );
     });
 
@@ -133,9 +131,9 @@ describe('UiamAPIKeys', () => {
         }
       );
 
-      expect(logger.debug).toHaveBeenCalledWith('Trying to grant an API key via UIAM');
+      expect(logger.debug).toHaveBeenCalledWith('Trying to grant an API key');
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: ApiKey');
-      expect(logger.debug).toHaveBeenCalledWith('API key was granted successfully via UIAM');
+      expect(logger.debug).toHaveBeenCalledWith('API key was granted successfully');
     });
 
     it('grants API key without expiration when not provided', async () => {
@@ -175,9 +173,7 @@ describe('UiamAPIKeys', () => {
         'UIAM service error'
       );
 
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to grant API key via UIAM: UIAM service error'
-      );
+      expect(logger.error).toHaveBeenCalledWith('Failed to grant API key: UIAM service error');
     });
 
     it('throws error when using Bearer scheme without UIAM prefix', async () => {
@@ -188,9 +184,7 @@ describe('UiamAPIKeys', () => {
           name: 'test-key',
           expiration: '7d',
         })
-      ).rejects.toThrow(
-        'Cannot grant API key via UIAM: provided credential is not compatible with UIAM'
-      );
+      ).rejects.toThrow('Cannot grant API key: provided credential is not compatible with UIAM');
 
       expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
     });
@@ -258,7 +252,7 @@ describe('UiamAPIKeys', () => {
       const request = createMockRequest('ApiKey regular_api_key_123');
 
       await expect(uiamApiKeys.invalidate(request, { id: 'key_id_123' })).rejects.toThrow(
-        'Cannot invalidate API key via UIAM: not a UIAM API key'
+        'Cannot invalidate API key: not a UIAM API key'
       );
     });
 
@@ -276,10 +270,8 @@ describe('UiamAPIKeys', () => {
         error_count: 0,
       });
       expect(mockUiam.revokeApiKey).toHaveBeenCalledWith('key_id_123', 'essu_uiam_credential_123');
-      expect(logger.debug).toHaveBeenCalledWith('Trying to invalidate API key key_id_123 via UIAM');
-      expect(logger.debug).toHaveBeenCalledWith(
-        'API key key_id_123 was invalidated successfully via UIAM'
-      );
+      expect(logger.debug).toHaveBeenCalledWith('Trying to invalidate API key key_id_123');
+      expect(logger.debug).toHaveBeenCalledWith('API key key_id_123 was invalidated successfully');
     });
 
     it('returns error details when UIAM API key invalidation fails', async () => {
@@ -298,12 +290,12 @@ describe('UiamAPIKeys', () => {
         error_details: [
           {
             type: 'exception',
-            reason: 'Failed to invalidate API key key_id_123 via UIAM: Revocation failed',
+            reason: 'Failed to invalidate API key key_id_123: Revocation failed',
           },
         ],
       });
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to invalidate API key key_id_123 via UIAM: Revocation failed'
+        'Failed to invalidate API key key_id_123: Revocation failed'
       );
     });
   });

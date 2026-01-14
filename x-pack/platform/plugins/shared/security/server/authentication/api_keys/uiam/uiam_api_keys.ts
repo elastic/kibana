@@ -15,6 +15,7 @@ import type {
 } from '@kbn/security-plugin-types-server';
 
 import type { SecurityLicense } from '../../../../common';
+import { getDetailedErrorMessage } from '../../../errors';
 import type { UiamServicePublic } from '../../../uiam';
 import { HTTPAuthorizationHeader } from '../../http_authentication';
 
@@ -27,7 +28,7 @@ export interface UiamAPIKeysOptions {
   logger: Logger;
   clusterClient: IClusterClient;
   license: SecurityLicense;
-  uiam?: UiamServicePublic;
+  uiam: UiamServicePublic;
 }
 
 /**
@@ -38,7 +39,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
-  private readonly uiam?: UiamServicePublic;
+  private readonly uiam: UiamServicePublic;
 
   constructor({ logger, clusterClient, license, uiam }: UiamAPIKeysOptions) {
     this.logger = logger;
@@ -65,7 +66,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
     const authorization = UiamAPIKeys.getAuthorizationHeader(request);
 
-    this.logger.debug('Trying to grant an API key via UIAM');
+    this.logger.debug('Trying to grant an API key');
     this.logger.debug(`Using authorization scheme: ${authorization.scheme}`);
 
     let result: GrantAPIKeyResult;
@@ -73,12 +74,12 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     // Provided credential must be a UIAM credential with appropriate prefix
     if (!UiamAPIKeys.isUiamCredential(authorization)) {
       const nonUiamCredentialError =
-        'Cannot grant API key via UIAM: provided credential is not compatible with UIAM';
+        'Cannot grant API key: provided credential is not compatible with UIAM';
       this.logger.error(nonUiamCredentialError);
       throw new Error(nonUiamCredentialError);
     } else {
       try {
-        const { id, key, description } = await this.uiam!.grantApiKey(authorization, params);
+        const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
 
         result = {
           id,
@@ -86,9 +87,9 @@ export class UiamAPIKeys implements UiamAPIKeysType {
           api_key: key,
         };
 
-        this.logger.debug('API key was granted successfully via UIAM');
+        this.logger.debug('API key was granted successfully');
       } catch (e) {
-        this.logger.error(`Failed to grant API key via UIAM: ${e.message}`);
+        this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
         throw e;
       }
     }
@@ -115,18 +116,18 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     const authorization = UiamAPIKeys.getAuthorizationHeader(request);
     const { id } = params;
 
-    this.logger.debug(`Trying to invalidate API key ${id} via UIAM`);
+    this.logger.debug(`Trying to invalidate API key ${id}`);
 
     if (!UiamAPIKeys.isUiamCredential(authorization)) {
-      const uiamCredentialError = 'Cannot invalidate API key via UIAM: not a UIAM API key';
+      const uiamCredentialError = 'Cannot invalidate API key: not a UIAM API key';
       this.logger.error(uiamCredentialError);
       throw new Error(uiamCredentialError);
     }
 
     try {
-      await this.uiam!.revokeApiKey(id, authorization.credentials);
+      await this.uiam?.revokeApiKey(id, authorization.credentials);
 
-      this.logger.debug(`API key ${id} was invalidated successfully via UIAM`);
+      this.logger.debug(`API key ${id} was invalidated successfully`);
 
       return {
         invalidated_api_keys: [id],
@@ -134,7 +135,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
         error_count: 0,
       };
     } catch (e) {
-      const errorMessage = `Failed to invalidate API key ${id} via UIAM: ${e.message}`;
+      const errorMessage = `Failed to invalidate API key ${id}: ${getDetailedErrorMessage(e)}`;
       this.logger.error(errorMessage);
 
       return {
@@ -162,28 +163,15 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @returns A scoped cluster client configured with API key authentication
    */
   getScopedClusterClientWithApiKey(apiKey: string) {
-    // Create authorization header in the format: ApiKey base64(id:key)
-    const authorizationHeader = `ApiKey ${apiKey}`;
-
-    // Check if this is a UIAM credential
-    const isUiam = apiKey.startsWith(UIAM_CREDENTIALS_PREFIX);
-
-    if (isUiam) {
-      const uiamHeaders = this.uiam!.getEsClientAuthenticationHeader();
-
-      return this.clusterClient.asScoped({
-        headers: {
-          authorization: authorizationHeader,
-          ...uiamHeaders,
-        },
-      });
-    } else {
-      return this.clusterClient.asScoped({
-        headers: {
-          authorization: authorizationHeader,
-        },
-      });
-    }
+    const authorization = new HTTPAuthorizationHeader('ApiKey', apiKey);
+    return this.clusterClient.asScoped({
+      headers: {
+        authorization: authorization.toString(),
+        ...(UiamAPIKeys.isUiamCredential(authorization)
+          ? this.uiam.getEsClientAuthenticationHeader()
+          : {}),
+      },
+    });
   }
 
   /**
@@ -192,7 +180,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @param authorization The HTTP authorization header to check.
    * @returns True if the credentials start with UIAM_CREDENTIALS_PREFIX, false otherwise.
    */
-  static isUiamCredential(authorization: HTTPAuthorizationHeader): boolean {
+  static isUiamCredential(authorization: HTTPAuthorizationHeader) {
     return authorization.credentials.startsWith(UIAM_CREDENTIALS_PREFIX);
   }
 
@@ -203,7 +191,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @returns The HTTP authorization header extracted from the request.
    * @throws {Error} If the request does not contain an authorization header.
    */
-  static getAuthorizationHeader(request: KibanaRequest): HTTPAuthorizationHeader {
+  static getAuthorizationHeader(request: KibanaRequest) {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
 
     if (!authorizationHeader) {

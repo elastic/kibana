@@ -229,11 +229,11 @@ export class UiamService implements UiamServicePublic {
    * See {@link UiamServicePublic.grantApiKey}.
    */
   async grantApiKey(authorization: HTTPAuthorizationHeader, params: GrantUiamAPIKeyParams) {
-    try {
-      this.#logger.debug(
-        `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
-      );
+    this.#logger.debug(
+      `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
+    );
 
+    try {
       const body: GrantUiamApiKeyRequestBody = {
         description: params.name,
         internal: true,
