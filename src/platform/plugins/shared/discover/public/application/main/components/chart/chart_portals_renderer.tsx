@@ -14,7 +14,8 @@ import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogr
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { i18n } from '@kbn/i18n';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
@@ -292,7 +293,11 @@ const CustomChartSectionWrapper = ({
   const isComponentVisible = !!layoutProps.chart && !layoutProps.chart.hidden;
 
   return (
-    <EuiErrorBoundary>
+    <KibanaSectionErrorBoundary
+      sectionName={i18n.translate('discover.chart.errorBoundarySectionName', {
+        defaultMessage: 'Discover chart section',
+      })}
+    >
       {chartSectionConfig.renderChartSection({
         histogramCss,
         chartToolbarCss,
@@ -304,6 +309,6 @@ const CustomChartSectionWrapper = ({
         initialState: metricsGridState,
         onInitialStateChange,
       })}
-    </EuiErrorBoundary>
+    </KibanaSectionErrorBoundary>
   );
 };
