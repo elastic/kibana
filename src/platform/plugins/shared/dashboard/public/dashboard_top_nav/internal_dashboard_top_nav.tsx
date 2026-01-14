@@ -60,7 +60,7 @@ import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
 import { arePinnedPanelLayoutsEqual } from '../dashboard_api/layout_manager/are_layouts_equal';
-import { DashboardLayout } from '../dashboard_api/layout_manager';
+import type { DashboardLayout } from '../dashboard_api/layout_manager';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
