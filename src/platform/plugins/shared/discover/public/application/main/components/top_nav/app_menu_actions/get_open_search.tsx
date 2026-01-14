@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// import React from 'react';
+import React from 'react';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { DiscoverServices } from '../../../../../build_services';
+import { OpenSearchPanel } from '../open_search_panel';
 
 export const getOpenSearchAppMenuItem = ({
+  services,
   onOpenSavedSearch,
 }: {
+  services: DiscoverServices;
   onOpenSavedSearch: (savedSearchId: string) => void;
 }): AppMenuItemType => {
   return {
@@ -26,7 +32,20 @@ export const getOpenSearchAppMenuItem = ({
     iconType: 'folderOpen',
     testId: 'discoverOpenButton',
     run: () => {
-      // return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
+      const overlay = services.core.overlays.openFlyout(
+        toMountPoint(
+          <KibanaContextProvider services={services}>
+            <OpenSearchPanel
+              onClose={() => overlay.close()}
+              onOpenSavedSearch={(savedSearchId) => {
+                overlay.close();
+                onOpenSavedSearch(savedSearchId);
+              }}
+            />
+          </KibanaContextProvider>,
+          services.core
+        )
+      );
     },
   };
 };
