@@ -44,9 +44,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
     type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
-      const runtimeState = initialState.rawState;
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const runtimeState = initialState;
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
       const { logRateAnalysisControlsApi, serializeLogRateAnalysisChartState } =
         initializeLogRateAnalysisControls(runtimeState);
@@ -64,12 +64,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...serializeLogRateAnalysisChartState(),
-          },
-          references: [],
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...serializeLogRateAnalysisChartState(),
         };
       }
 
@@ -88,9 +85,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
           ...titleComparators,
         }),
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          logRateAnalysisControlsApi.updateUserInput(lastSaved?.rawState ?? {});
+          titleManager.reinitializeState(lastSaved);
+          timeRangeManager.reinitializeState(lastSaved);
+          logRateAnalysisControlsApi.updateUserInput(lastSaved ?? {});
         },
       });
 

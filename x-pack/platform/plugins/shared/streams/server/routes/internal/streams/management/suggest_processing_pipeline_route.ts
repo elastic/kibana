@@ -20,7 +20,6 @@ import {
   getGrokProcessor,
   getReviewFields as getGrokReviewFields,
   mergeGrokProcessors,
-  unwrapPatternDefinitions,
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
 import {
@@ -324,11 +323,7 @@ async function processGrokPatterns({
         `[suggest_pipeline][grok] getGrokProcessor produced patterns=${grokProcessorResult.patterns.length}`
       );
 
-      return {
-        ...grokProcessorResult,
-        patterns: unwrapPatternDefinitions(grokProcessorResult),
-        pattern_definitions: {},
-      };
+      return grokProcessorResult;
     })
   );
 

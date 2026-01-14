@@ -133,6 +133,8 @@ export type {
   SignificantEventsPreviewResponse,
   SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
@@ -160,3 +162,5 @@ export {
 } from './src/models/processing_simulation';
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
+
+export { TaskStatus } from './src/tasks/types';
