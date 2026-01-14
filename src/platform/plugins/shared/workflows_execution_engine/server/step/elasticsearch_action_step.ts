@@ -10,6 +10,8 @@
 // TODO: Remove eslint exceptions comments
 /* eslint-disable @typescript-eslint/no-explicit-any,  */
 
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildRequestFromConnector } from '@kbn/workflows';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
@@ -91,7 +93,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
   }
 
   private async executeElasticsearchRequest(
-    esClient: any,
+    esClient: ElasticsearchClient,
     stepType: string,
     params: any
   ): Promise<any> {
@@ -146,7 +148,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         if (bulkBody?.length) {
           return esClient.bulk({
             index: pathIndex, // default index for all actions
-            refresh, // true | false | 'wait_for'
+            refresh: refresh as Refresh, // true | false | 'wait_for'
             body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
           });
         }
