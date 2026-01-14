@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DATA_CONNECTORS_APP_ID = 'data_connectors';
+export const DATA_SOURCES_APP_ID = 'data_sources';

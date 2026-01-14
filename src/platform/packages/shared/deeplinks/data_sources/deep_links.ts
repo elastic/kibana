@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DATA_CONNECTORS_APP_ID } from './constants';
+import type { DATA_SOURCES_APP_ID } from './constants';
 
-export type DataConnectorsApp = typeof DATA_CONNECTORS_APP_ID;
+export type DataSourcesApp = typeof DATA_SOURCES_APP_ID;
 
-export type DeepLinkId = DataConnectorsApp;
+export type DeepLinkId = DataSourcesApp;

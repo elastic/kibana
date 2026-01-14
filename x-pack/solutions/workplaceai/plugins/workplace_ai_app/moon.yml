@@ -35,7 +35,7 @@ dependsOn:
   - '@kbn/data-sources-registry-plugin'
   - '@kbn/react-query'
   - '@kbn/deeplinks-agent-builder'
-  - '@kbn/deeplinks-data-connectors'
+  - '@kbn/deeplinks-data-sources'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-workflows'
   - '@kbn/agent-builder-common'
