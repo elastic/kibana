@@ -10,12 +10,12 @@
 import { isFunction } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import {
   type AggregateQuery,
   type Query,
   isOfAggregateQueryType,
   isOfQueryType,
-  TimeRange,
 } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
@@ -34,7 +34,6 @@ import type {
   DiscoverInternalState,
   TabState,
   UpdateESQLQueryActionPayload,
-  OnQuerySubmitActionPayload,
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
 
