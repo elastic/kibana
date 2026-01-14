@@ -14,6 +14,7 @@ import {
   EuiColorPickerSwatch,
   EuiFieldNumber,
   EuiFieldText,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
@@ -173,6 +174,7 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
           'data-test-subj': `legendStepRow-${item.value}`,
         })}
       />
+      <EuiSpacer size="s" />
       <EuiButton
         color="text"
         size="s"
