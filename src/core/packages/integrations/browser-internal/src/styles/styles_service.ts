@@ -11,7 +11,6 @@ import type { Subscription } from 'rxjs';
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-// @ts-expect-error
 import disableAnimationsCss from './disable_animations.css?raw';
 
 interface StartDeps {
