@@ -62,42 +62,60 @@ export const ServiceNode = memo(
       return null;
     }, [data.agentName, isDarkMode]);
 
+    const CIRCLE_SIZE = 56;
+
     return (
       <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
-        <Handle
-          type="target"
-          position={targetPosition ?? Position.Left}
-          css={css`
-            visibility: hidden;
-          `}
-        />
+        {/* Circle container with handles inside for proper edge positioning */}
         <EuiFlexItem
           grow={false}
           css={css`
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            border: ${borderWidth ?? euiTheme.border.width.medium} solid ${borderColor};
-            background: ${euiTheme.colors.backgroundBasePlain};
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
+            position: relative;
+            width: ${CIRCLE_SIZE}px;
+            height: ${CIRCLE_SIZE}px;
           `}
         >
-          {iconUrl && (
-            <img
-              src={iconUrl}
-              alt={data.agentName}
-              style={{ width: '60%', height: '60%', objectFit: 'contain' }}
-            />
-          )}
+          <Handle
+            type="target"
+            position={targetPosition ?? Position.Left}
+            css={css`
+              visibility: hidden;
+            `}
+          />
+          <div
+            css={css`
+              width: ${CIRCLE_SIZE}px;
+              height: ${CIRCLE_SIZE}px;
+              border-radius: 50%;
+              border: ${borderWidth ?? euiTheme.border.width.medium} solid ${borderColor};
+              background: ${euiTheme.colors.backgroundBasePlain};
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+              cursor: pointer;
+            `}
+          >
+            {iconUrl && (
+              <img
+                src={iconUrl}
+                alt={data.agentName}
+                style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+              />
+            )}
+          </div>
+          <Handle
+            type="source"
+            position={sourcePosition ?? Position.Right}
+            css={css`
+              visibility: hidden;
+            `}
+          />
         </EuiFlexItem>
+        {/* Label */}
         <EuiFlexItem
           grow={false}
           css={css`
-            margin-top: 8px;
             font-size: ${euiTheme.size.s};
             color: ${selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
             font-family: ${euiTheme.font.family};
@@ -108,13 +126,6 @@ export const ServiceNode = memo(
         >
           {data.label}
         </EuiFlexItem>
-        <Handle
-          type="source"
-          position={sourcePosition ?? Position.Right}
-          css={css`
-            visibility: hidden;
-          `}
-        />
       </EuiFlexGroup>
     );
   }
