@@ -19,11 +19,14 @@ export interface SoftDeletionResults {
   };
 }
 
+const MAX_SOFT_DELETED_USERS_EXPECTED = 10_000;
+
 export const softDeleteOmittedUsers =
   (esClient: ElasticsearchClient, index: string, { flushBytes, retries }: Options) =>
   async (processed: BulkProcessingResults) => {
     const res = await esClient.helpers.search<MonitoredUserDoc>({
       index,
+      size: MAX_SOFT_DELETED_USERS_EXPECTED,
       query: {
         bool: {
           must: [{ term: { 'user.is_privileged': true } }, { term: { 'labels.sources': 'csv' } }],
