@@ -135,8 +135,8 @@ export function ChartBarSeriesBase({
   ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
-    <>
-      <Chart size={{ height: 250 }}>
+    <div style={{ height: '100%', minHeight: '200px', width: '100%' }}>
+      <Chart size={{ height: '100%', width: '100%' }}>
         <Settings showLegend={false} baseTheme={chartBaseTheme} />
 
         <BarSeries
@@ -165,7 +165,7 @@ export function ChartBarSeriesBase({
           gridLine={{ visible: true }}
         />
       </Chart>
-    </>
+    </div>
   );
 }
 
@@ -199,10 +199,14 @@ function ChartBarPhasesSeriesBase({
   ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
-    <>
-      <EuiFlexGroup justifyContent="spaceBetween" css={{ width: '100%' }} gutterSize="s">
-        <EuiFlexItem grow={9}>
-          <Chart size={{ height: 250 }}>
+    <div style={{ width: '100%', height: '100%', minHeight: '200px' }}>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        css={{ width: '100%', height: '100%' }}
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={9} css={{ minHeight: '200px' }}>
+          <Chart size={{ height: '100%', width: '100%' }}>
             <Settings showLegend={false} baseTheme={chartBaseTheme} />
             {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
               <BarSeries
@@ -238,7 +242,7 @@ function ChartBarPhasesSeriesBase({
           <PhasesLegend phases={availablePhases} />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </div>
   );
 }
 
@@ -310,7 +314,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
       <EuiSpacer size="s" />
       {availablePhases.map((phase) => (
         <React.Fragment key={phase.name}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false} css={{ width: '20px', alignItems: 'center' }}>
               {'color' in phase ? (
                 <span
