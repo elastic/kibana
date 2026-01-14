@@ -10,7 +10,7 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ExecutionError } from '@kbn/workflows/common/errors';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';

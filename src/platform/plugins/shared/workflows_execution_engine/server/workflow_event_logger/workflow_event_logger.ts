@@ -9,7 +9,7 @@
 
 import { merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import { ExecutionError } from '@kbn/workflows/common/errors';
+import { ExecutionError } from '@kbn/workflows/server';
 import type {
   IWorkflowEventLogger,
   WorkflowEventLoggerContext,

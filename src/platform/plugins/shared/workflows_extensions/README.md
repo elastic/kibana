@@ -122,7 +122,7 @@ Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
 
 ```typescript
 import type { ServerStepDefinition, StepHandler } from '@kbn/workflows-extensions/server';
-import { ExecutionError } from '@kbn/workflows/common/errors';
+import { ExecutionError } from '@kbn/workflows/server';
 import { myStepCommonDefinition } from '../../common/step_types/my_step';
 
 export const getMyStepDefinition = (coreSetup: CoreSetup) =>
@@ -385,7 +385,7 @@ const myStepHandler: StepHandler = async (context) => {
 
 Step handlers can return errors in their result, or throw errors directly. The workflow execution engine automatically catches thrown errors and converts them to `ExecutionError`, so you don't need to handle conversion manually.
 
-However, if you need to throw or return an error with a **custom error type** or **additional details** for better debugging and error categorization, you can use the `ExecutionError` class from `@kbn/workflows/common/errors`.
+However, if you need to throw or return an error with a **custom error type** or **additional details** for better debugging and error categorization, you can use the `ExecutionError` class from `@kbn/workflows/server`.
 
 #### Standard Error Handling (No ExecutionError Required)
 
@@ -419,7 +419,7 @@ const myStepHandler: StepHandler = async (context) => {
 Use `ExecutionError` when you need to provide structured error information with custom types and additional context. You can either throw it or return it:
 
 ```typescript
-import { ExecutionError } from '@kbn/workflows/common/errors';
+import { ExecutionError } from '@kbn/workflows/server';
 
 const myStepHandler: StepHandler = async (context) => {
   const { userId, action } = context.input;

@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowExecutionNotFoundError } from './workflow_execution_not_found_error';
-export { WorkflowNotFoundError } from './workflow_not_found_error';
+export { ExecutionError } from './errors/execution_error';
