@@ -1565,7 +1565,7 @@
                 "label": "environments",
                 "description": [],
                 "signature": [
-                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                  "(\"kibana\" | \"session\" | \"browser\")[]"
                 ],
                 "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,
@@ -1670,7 +1670,7 @@
                 "label": "environments",
                 "description": [],
                 "signature": [
-                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                  "(\"kibana\" | \"session\" | \"browser\")[]"
                 ],
                 "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
                 "deprecated": false,

@@ -54,9 +54,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   const { services } = useMlKibana();
   const {
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = services;
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
