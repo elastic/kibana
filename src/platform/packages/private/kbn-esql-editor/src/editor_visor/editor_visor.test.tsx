@@ -30,8 +30,12 @@ describe('Quick search visor', () => {
     return Promise.resolve([]);
   });
 
+  const kqlMock = kqlPluginMock.createStartContract();
+  (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
   const services = {
     core: corePluginMock,
+    kql: kqlMock,
   };
 
   function renderESQLVisor(testProps: QuickSearchVisorProps) {
@@ -43,14 +47,10 @@ describe('Quick search visor', () => {
   }
   let props: QuickSearchVisorProps;
   beforeEach(() => {
-    const kqlMock = kqlPluginMock.createStartContract();
-    (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
-
     props = {
       query: 'FROM test_index',
       isSpaceReduced: false,
       isVisible: true,
-      kql: kqlMock,
       onUpdateAndSubmitQuery: jest.fn(),
     };
   });
@@ -63,7 +63,7 @@ describe('Quick search visor', () => {
     // find the dropdown
     expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
 
-    expect(props.kql.QueryStringInput).toHaveBeenCalled();
+    expect(kqlMock.QueryStringInput).toHaveBeenCalled();
   });
 
   it('should display the available sources in the dropdown list', async () => {
