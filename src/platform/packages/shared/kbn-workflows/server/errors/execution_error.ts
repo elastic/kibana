@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedError } from '@kbn/workflows';
+import type { SerializedError } from '../../spec/schema';
 
 export class ExecutionError extends Error {
   public readonly type: string;
