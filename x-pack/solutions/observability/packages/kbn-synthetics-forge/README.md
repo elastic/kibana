@@ -28,7 +28,7 @@ node x-pack/scripts/synthetics_forge.js cleanup
 | `BROWSER` | `1` | Browser monitors to create |
 | `RESOURCE_PREFIX` | `scalability-test` | Prefix for all resources |
 | `PRIVATE_LOCATION_ID` | - | Use existing private location (skips creating policy/location) |
-| `FORGE_OUTPUT_FILE` | - | Write output JSON to file |
+| `OUTPUT_FILE` | - | Write output JSON to file |
 
 ## Examples
 
@@ -91,9 +91,9 @@ Returns an enrollment token for deploying an Elastic Agent:
 ```
 
 > [!TIP]
-> Use `FORGE_OUTPUT_FILE` to save this to a file:
+> Use `OUTPUT_FILE` to save this to a file:
 > ```bash
-> FORGE_OUTPUT_FILE=/tmp/forge_output.json node x-pack/scripts/synthetics_forge.js create
+> OUTPUT_FILE=/tmp/forge_output.json node x-pack/scripts/synthetics_forge.js create
 > ```
 
 ## Using with synthetics_private_location (Local Development)
@@ -155,7 +155,4 @@ node x-pack/scripts/synthetics_forge.js create
 
 ## Using with Ensemble
 
-The Ensemble workflow uses this script. See:
-```
-x-pack/solutions/observability/test/ensemble/synthetics/scalability.yaml
-```
+This script is used by Ensemble workflows for automated scalability testing. See the [Ensemble README](../../../test/ensemble/README.md) for setup and usage.

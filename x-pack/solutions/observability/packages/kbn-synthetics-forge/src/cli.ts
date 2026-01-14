@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as fs from 'fs';
+import { writeFileSync } from '@kbn/fs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { run, cleanup } from './run';
 import type { ForgeConfig, ForgeOutput } from './types';
@@ -42,9 +42,9 @@ function getConfigFromEnv(): ForgeConfig {
 }
 
 function writeOutputFile(output: ForgeOutput, log: ToolingLog): void {
-  const outputFile = process.env.FORGE_OUTPUT_FILE;
+  const outputFile = process.env.OUTPUT_FILE;
   if (outputFile) {
-    fs.writeFileSync(outputFile, JSON.stringify(output, null, 2));
+    writeFileSync(outputFile, JSON.stringify(output, null, 2));
     log.info(`Output written to: ${outputFile}`);
   }
 }
