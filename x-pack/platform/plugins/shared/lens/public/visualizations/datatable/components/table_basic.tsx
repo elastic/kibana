@@ -538,7 +538,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         width: 50,
       },
     ];
-  }, [euiTheme.colors.backgroundFilledText, euiTheme.size.xs, props.args.showRowNumbers]);
+  }, [euiTheme.colors.backgroundFilledText, euiTheme.size.m, props.args.showRowNumbers]);
 
   if (isEmpty) {
     return (
