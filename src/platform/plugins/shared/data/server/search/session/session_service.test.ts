@@ -19,6 +19,7 @@ import type { ConfigSchema } from '../../config';
 import type { AuthenticatedUser, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import * as updateSessionStatusModule from './status/update_session_status';
 
 const MAX_UPDATE_RETRIES = 3;
 
@@ -59,6 +60,9 @@ describe('SearchSessionService', () => {
       username: mockUser1.username,
     },
     references: [],
+  };
+  const mockBulkGetResponse = {
+    saved_objects: [mockSavedObject],
   };
 
   describe('Feature disabled', () => {
@@ -220,7 +224,7 @@ describe('SearchSessionService', () => {
       });
 
       it('throws error if user conflicts', async () => {
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
 
         await expect(
           service.get({ savedObjectsClient }, mockUser2, sessionId)
@@ -254,21 +258,25 @@ describe('SearchSessionService', () => {
 
     describe('get', () => {
       it('calls saved objects client', async () => {
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
 
         const response = await service.get({ savedObjectsClient }, mockUser1, sessionId);
 
         expect(response).toBe(mockSavedObject);
-        expect(savedObjectsClient.get).toHaveBeenCalledWith(SEARCH_SESSION_TYPE, sessionId);
+        expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+          { type: SEARCH_SESSION_TYPE, id: sessionId },
+        ]);
       });
 
       it('works without security', async () => {
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
 
         const response = await service.get({ savedObjectsClient }, null, sessionId);
 
         expect(response).toBe(mockSavedObject);
-        expect(savedObjectsClient.get).toHaveBeenCalledWith(SEARCH_SESSION_TYPE, sessionId);
+        expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+          { type: SEARCH_SESSION_TYPE, id: sessionId },
+        ]);
       });
     });
 
@@ -605,7 +613,7 @@ describe('SearchSessionService', () => {
           ...mockSavedObject,
           attributes: {},
         };
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
         const attributes = { name: 'new_name' };
@@ -630,7 +638,7 @@ describe('SearchSessionService', () => {
           ...mockSavedObject,
           attributes: {},
         };
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
         const attributes = { name: 'new_name' };
@@ -644,7 +652,7 @@ describe('SearchSessionService', () => {
           ...mockSavedObject,
           attributes: {},
         };
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
         const attributes = { name: 'new_name' };
@@ -660,7 +668,7 @@ describe('SearchSessionService', () => {
 
     describe('cancel', () => {
       it('updates object status', async () => {
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
 
         await service.cancel({ savedObjectsClient }, mockUser1, sessionId);
         const [type, id, callAttributes] = savedObjectsClient.update.mock.calls[0];
@@ -671,7 +679,7 @@ describe('SearchSessionService', () => {
       });
 
       it('throws if user conflicts', async () => {
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
 
         await expect(
           service.cancel({ savedObjectsClient }, mockUser2, sessionId)
@@ -679,7 +687,7 @@ describe('SearchSessionService', () => {
       });
 
       it('works without security', async () => {
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
 
         await service.cancel({ savedObjectsClient }, null, sessionId);
 
@@ -720,6 +728,7 @@ describe('SearchSessionService', () => {
           attributes: {},
         };
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
 
         await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
@@ -743,6 +752,7 @@ describe('SearchSessionService', () => {
 
       it('passes retryOnConflict param to es', async () => {
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
 
         await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
@@ -774,6 +784,7 @@ describe('SearchSessionService', () => {
           attributes: {},
         };
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+        savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
 
         await Promise.all([
           service.trackId({ savedObjectsClient }, mockUser1, searchId1, {
@@ -883,7 +894,7 @@ describe('SearchSessionService', () => {
             },
           },
         };
-        savedObjectsClient.get.mockResolvedValue(mockSession);
+        savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [mockSession] });
 
         const id = await service.getId({ savedObjectsClient }, mockUser1, searchRequest, {
           sessionId,
@@ -910,7 +921,7 @@ describe('SearchSessionService', () => {
             },
           },
         };
-        savedObjectsClient.get.mockResolvedValue(mockSession);
+        savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [mockSession] });
         const searchIdMapping = await service.getSearchIdMapping(
           { savedObjectsClient },
           mockUser1,
@@ -921,6 +932,92 @@ describe('SearchSessionService', () => {
             "FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0" => "ese",
           }
         `);
+      });
+    });
+
+    describe('updateStatuses', () => {
+      describe('when the user does NOT have access to all sessions', () => {
+        it('should throw', async () => {
+          // Given
+          savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
+
+          // When / Then
+          await expect(
+            service.updateStatuses(
+              { savedObjectsClient, asCurrentUserElasticsearchClient },
+              mockUser2,
+              [mockBulkGetResponse.saved_objects[0].id]
+            )
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('when there are no sessions', () => {
+        it('should return an empty map', async () => {
+          // Given
+          savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+
+          // When
+          const statuses = await service.updateStatuses(
+            { savedObjectsClient, asCurrentUserElasticsearchClient },
+            mockUser1,
+            []
+          );
+
+          // Then
+          expect(statuses).toEqual({
+            statuses: {},
+          });
+        });
+      });
+
+      it('should return the statuses', async () => {
+        // Given
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              ...mockSavedObject,
+              id: 'session1',
+              attributes: {
+                ...mockSavedObject.attributes,
+                sessionId: 'session1',
+              },
+            },
+            {
+              ...mockSavedObject,
+              id: 'session2',
+              attributes: {
+                ...mockSavedObject.attributes,
+                sessionId: 'session2',
+              },
+            },
+          ],
+        });
+
+        const spy = jest.spyOn(updateSessionStatusModule, 'updateSessionStatus');
+
+        spy.mockResolvedValueOnce({
+          status: SearchSessionStatus.COMPLETE,
+        });
+        spy.mockResolvedValueOnce({
+          status: SearchSessionStatus.ERROR,
+          errors: ['Test errors'],
+        });
+
+        // When
+        const res = await service.updateStatuses(
+          { savedObjectsClient, asCurrentUserElasticsearchClient },
+          mockUser1,
+          ['session1', 'session2']
+        );
+
+        // Then
+        expect(res).toEqual({
+          statuses: {
+            session1: { status: SearchSessionStatus.COMPLETE, errors: [] },
+            session2: { status: SearchSessionStatus.ERROR, errors: ['Test errors'] },
+          },
+        });
       });
     });
   });

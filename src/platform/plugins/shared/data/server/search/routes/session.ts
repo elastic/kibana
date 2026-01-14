@@ -177,48 +177,6 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
 
   router.versioned
     .post({
-      path: `${pathPrefix}/_status`,
-      access,
-      security: {
-        authz: { requiredPrivileges },
-      },
-    })
-    .addVersion(
-      {
-        version,
-        validate: {
-          request: {
-            body: schema.object({
-              sessionIds: schema.arrayOf(schema.string()),
-            }),
-          },
-          response: {
-            200: {
-              body: searchSessionStatusesSchema,
-            },
-          },
-        },
-      },
-      async (context, request, res) => {
-        const { sessionIds } = request.body;
-        try {
-          const searchContext = await context.search;
-          const response: SearchSessionStatusesResponse =
-            await searchContext!.updateSessionStatuses(sessionIds);
-
-          return res.ok({
-            body: response,
-          });
-        } catch (e) {
-          const err = e.output?.payload || e;
-          logger.error(err);
-          return reportServerError(res, err);
-        }
-      }
-    );
-
-  router.versioned
-    .post({
       path: `${pathPrefix}/_find`,
       access,
       security: {
@@ -428,6 +386,48 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             id,
             new Date(expires)
           );
+
+          return res.ok({
+            body: response,
+          });
+        } catch (e) {
+          const err = e.output?.payload || e;
+          logger.error(err);
+          return reportServerError(res, err);
+        }
+      }
+    );
+
+  router.versioned
+    .post({
+      path: `${pathPrefix}/_status`,
+      access,
+      security: {
+        authz: { requiredPrivileges },
+      },
+    })
+    .addVersion(
+      {
+        version,
+        validate: {
+          request: {
+            body: schema.object({
+              sessionIds: schema.arrayOf(schema.string()),
+            }),
+          },
+          response: {
+            200: {
+              body: searchSessionStatusesSchema,
+            },
+          },
+        },
+      },
+      async (context, request, res) => {
+        const { sessionIds } = request.body;
+        try {
+          const searchContext = await context.search;
+          const response: SearchSessionStatusesResponse =
+            await searchContext!.updateSessionStatuses(sessionIds);
 
           return res.ok({
             body: response,
