@@ -62,7 +62,7 @@ describe('resolveConnectorId', () => {
 
       await expect(
         resolveConnectorId(undefined, mockInferencePlugin, mockKibanaRequest)
-      ).rejects.toThrow('No default connector configured');
+      ).rejects.toThrow('No default AI connector configured');
 
       expect(mockInferencePlugin.getDefaultConnector).toHaveBeenCalledWith(mockKibanaRequest);
     });
@@ -73,7 +73,7 @@ describe('resolveConnectorId', () => {
 
       await expect(
         resolveConnectorId(undefined, mockInferencePlugin, mockKibanaRequest)
-      ).rejects.toThrow('No default connector configured');
+      ).rejects.toThrow('No default AI connector configured');
 
       expect(mockInferencePlugin.getDefaultConnector).toHaveBeenCalledWith(mockKibanaRequest);
     });
