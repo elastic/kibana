@@ -85,7 +85,7 @@ export class SecuritySolutionServerlessPlugin
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
-    const projectSettings = SECURITY_PROJECT_SETTINGS;
+    const projectSettings = [...SECURITY_PROJECT_SETTINGS];
 
     // This setting is only registered in complete and ease tiers. Adding it to the project settings list while in the essentials tier causes an error.
     // This is a temporary UI setting to enable workflows, it's planned to be removed on 9.4.0 release.

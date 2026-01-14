@@ -32,7 +32,7 @@ export const registerUISettings = (
         defaultMessage:
           'Enables Elastic Workflows and related experiences. {licenseText} {learnMoreLink}',
         values: {
-          learnMoreLink: `<a href="https://ela.st/workflows-docs" target="_blank">${i18n.translate(
+          learnMoreLink: `<a href="https://ela.st/workflows-docs" target="_blank" rel="noreferrer noopener">${i18n.translate(
             'workflowsManagement.uiSettings.ui.learnMore',
             { defaultMessage: 'Learn more' }
           )}</a>.`,
