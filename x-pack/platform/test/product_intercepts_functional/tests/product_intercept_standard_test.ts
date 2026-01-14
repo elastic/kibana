@@ -29,22 +29,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('presents all available navigable steps', async () => {
         await PageObjects.common.navigateToUrl('home');
 
-        let timingRecord: Record<string, { timerStart: Date }> = {};
-
-        await retry.waitFor('assert timing record for standard intercept gets set', async () => {
-          timingRecord = JSON.parse(
-            (await browser.getLocalStorageItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY)) || '{}'
-          );
-
-          return timingRecord && !!timingRecord[TRIGGER_DEF_ID];
-        });
-
         // adjust timing record with a value that's in the past considering the configured interval,
         // so that the intercept would be displayed to the user
         await browser.setLocalStorageItem(
           INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
           JSON.stringify({
-            ...timingRecord,
             [TRIGGER_DEF_ID]: {
               // set record time that's in the past considering the configured interval
               timerStart: new Date(Date.now() - CONFIGURED_STANDARD_INTERCEPT_INTERVAL - 1000),
@@ -54,10 +43,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Refresh the page and expect the intercept to be displayed
         await browser.refresh();
-
-        await retry.waitFor('wait for product intercept to be displayed', async () => {
-          return await testSubjects.exists(interceptTestId);
-        });
 
         await retry.waitFor('wait for product intercept to be displayed', async () => {
           const intercept = await testSubjects.find(interceptTestId);
@@ -93,16 +78,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // navigate the home journey to set a record for new intercept journey
         await PageObjects.common.navigateToUrl('home');
 
-        let timingRecord: Record<string, { timerStart: Date }> = {};
-
-        await retry.waitFor('assert timing record for standard intercept gets set', async () => {
-          timingRecord = JSON.parse(
-            (await browser.getLocalStorageItem(INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY)) || '{}'
-          );
-
-          return timingRecord && !!timingRecord[TRIGGER_DEF_ID];
-        });
-
         // open a new tab and navigate to the discover app
         await browser.openNewTab();
 
@@ -112,7 +87,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await browser.setLocalStorageItem(
           INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
           JSON.stringify({
-            ...timingRecord,
             [TRIGGER_DEF_ID]: {
               // set record time that's in the past considering the configured interval
               timerStart: new Date(Date.now() - CONFIGURED_STANDARD_INTERCEPT_INTERVAL - 1000),
