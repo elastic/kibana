@@ -35,10 +35,17 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = async (
             id: customId,
             aggregations: {
               [customId]: {
-                top_metrics: {
-                  metrics: { field: metric.field },
-                  size: 1,
-                  sort: { '@timestamp': 'desc' },
+                filter: {
+                  exists: { field: metric.field },
+                },
+                aggs: {
+                  value: {
+                    top_metrics: {
+                      metrics: { field: metric.field },
+                      size: 1,
+                      sort: { '@timestamp': 'desc' },
+                    },
+                  },
                 },
               },
             },
