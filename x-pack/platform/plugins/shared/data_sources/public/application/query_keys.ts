@@ -6,10 +6,10 @@
  */
 
 export const queryKeys = {
-  dataConnectors: {
-    all: ['dataConnectors'] as const,
-    list: () => ['dataConnectors', 'list'] as const,
-    byId: (id: string) => ['dataConnectors', 'detail', id] as const,
+  dataSources: {
+    all: ['dataSources'] as const,
+    list: () => ['dataSources', 'list'] as const,
+    byId: (id: string) => ['dataSources', 'detail', id] as const,
   },
   connectorTypes: {
     all: ['connectorTypes'] as const,

@@ -65,10 +65,10 @@ export const useAddConnectorFlyout = ({
       // Show loading toast
       const loadingToast = toasts.addInfo(
         {
-          title: i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.creatingTitle', {
+          title: i18n.translate('xpack.dataSources.hooks.useAddConnectorFlyout.creatingTitle', {
             defaultMessage: 'Creating data source',
           }),
-          text: i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.creatingText', {
+          text: i18n.translate('xpack.dataSources.hooks.useAddConnectorFlyout.creatingText', {
             defaultMessage: 'Setting up {connectorName}...',
             values: {
               connectorName: name,
@@ -91,7 +91,7 @@ export const useAddConnectorFlyout = ({
 
       // Show success toast
       toasts.addSuccess(
-        i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.createSuccessText', {
+        i18n.translate('xpack.dataSources.hooks.useAddConnectorFlyout.createSuccessText', {
           defaultMessage: 'Data source {connectorName} connected successfully',
           values: {
             connectorName: variables.name,
@@ -100,7 +100,7 @@ export const useAddConnectorFlyout = ({
       );
 
       // Invalidate queries to refresh Active Sources table
-      queryClient.invalidateQueries(queryKeys.dataConnectors.list());
+      queryClient.invalidateQueries(queryKeys.dataSources.list());
     },
     onError: (error, variables) => {
       // Dismiss loading toast
@@ -111,7 +111,7 @@ export const useAddConnectorFlyout = ({
 
       // Show error toast
       toasts.addError(error as Error, {
-        title: i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.createErrorTitle', {
+        title: i18n.translate('xpack.dataSources.hooks.useAddConnectorFlyout.createErrorTitle', {
           defaultMessage: 'Failed to create data connector',
         }),
       });

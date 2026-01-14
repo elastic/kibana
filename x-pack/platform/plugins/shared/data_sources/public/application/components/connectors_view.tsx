@@ -75,14 +75,14 @@ export const DataSourcesView: React.FC = () => {
           iconType="search"
           title={
             <h2>
-              {i18n.translate('xpack.dataConnectors.connectors.noResults', {
+              {i18n.translate('xpack.dataSources.connectors.noResults', {
                 defaultMessage: 'No connectors found',
               })}
             </h2>
           }
           body={
             <p>
-              {i18n.translate('xpack.dataConnectors.connectors.noResultsDescription', {
+              {i18n.translate('xpack.dataSources.connectors.noResultsDescription', {
                 defaultMessage: 'No connectors available',
               })}
             </p>
@@ -106,7 +106,7 @@ export const DataSourcesView: React.FC = () => {
             <>
               <EuiSpacer size="l" />
               <EuiTablePagination
-                aria-label={i18n.translate('xpack.dataConnectors.connectors.paginationLabel', {
+                aria-label={i18n.translate('xpack.dataSources.connectors.paginationLabel', {
                   defaultMessage: 'Connector pagination',
                 })}
                 pageCount={pageCount}

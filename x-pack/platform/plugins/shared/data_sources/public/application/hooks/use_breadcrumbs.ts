@@ -9,19 +9,19 @@ import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 
-export interface DataConnectorsBreadcrumb {
+export interface DataSourcesBreadcrumb {
   text: string;
   href?: string;
 }
 
-export const useBreadcrumbs = (breadcrumbs: DataConnectorsBreadcrumb[] = []) => {
+export const useBreadcrumbs = (breadcrumbs: DataSourcesBreadcrumb[] = []) => {
   const {
     services: { chrome },
   } = useKibana();
 
   useEffect(() => {
     const rootBreadcrumb = {
-      text: i18n.translate('xpack.dataConnectors.breadcrumbs.root', {
+      text: i18n.translate('xpack.dataSources.breadcrumbs.root', {
         defaultMessage: 'Sources',
       }),
       href: undefined,

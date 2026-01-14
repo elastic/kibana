@@ -40,7 +40,7 @@ export const ConfirmDeleteActiveSourceModal: React.FC<ConfirmDeleteActiveSourceM
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
-            id="xpack.dataConnectors.deleteActiveSourceModal.title"
+            id="xpack.dataSources.deleteActiveSourceModal.title"
             defaultMessage="Delete {name}"
             values={{ name: activeSource.name }}
           />
@@ -50,7 +50,7 @@ export const ConfirmDeleteActiveSourceModal: React.FC<ConfirmDeleteActiveSourceM
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.dataConnectors.deleteActiveSourceModal.description"
+              id="xpack.dataSources.deleteActiveSourceModal.description"
               defaultMessage="Are you sure you want to delete this data source? This action cannot be undone."
             />
           </p>
@@ -59,7 +59,7 @@ export const ConfirmDeleteActiveSourceModal: React.FC<ConfirmDeleteActiveSourceM
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} isDisabled={isDeleting}>
           <FormattedMessage
-            id="xpack.dataConnectors.deleteActiveSourceModal.cancelButton"
+            id="xpack.dataSources.deleteActiveSourceModal.cancelButton"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -71,7 +71,7 @@ export const ConfirmDeleteActiveSourceModal: React.FC<ConfirmDeleteActiveSourceM
           data-test-subj="confirmDeleteActiveSourceButton"
         >
           <FormattedMessage
-            id="xpack.dataConnectors.deleteActiveSourceModal.confirmButton"
+            id="xpack.dataSources.deleteActiveSourceModal.confirmButton"
             defaultMessage="Delete"
           />
         </EuiButton>

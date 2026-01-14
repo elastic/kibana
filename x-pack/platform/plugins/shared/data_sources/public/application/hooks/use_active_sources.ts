@@ -11,7 +11,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 import type { ActiveSource } from '../../types/connector';
 import { queryKeys } from '../query_keys';
 
-interface ListDataConnectorsResponse {
+interface ListDataSourcesResponse {
   connectors: ActiveSource[];
   total: number;
 }
@@ -21,8 +21,8 @@ export const useActiveSources = () => {
     services: { http },
   } = useKibana();
 
-  const { data, isLoading, error } = useQuery(queryKeys.dataConnectors.list(), async () => {
-    return await http.get<ListDataConnectorsResponse>(API_BASE_PATH);
+  const { data, isLoading, error } = useQuery(queryKeys.dataSources.list(), async () => {
+    return await http.get<ListDataSourcesResponse>(API_BASE_PATH);
   });
 
   return {

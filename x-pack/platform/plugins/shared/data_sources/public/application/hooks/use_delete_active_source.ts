@@ -25,9 +25,9 @@ export const useDeleteActiveSource = (onSuccess?: () => void) => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(queryKeys.dataConnectors.list());
+        queryClient.invalidateQueries(queryKeys.dataSources.list());
         toasts?.addSuccess({
-          title: i18n.translate('xpack.dataConnectors.deleteActiveSource.successToast', {
+          title: i18n.translate('xpack.dataSources.deleteActiveSource.successToast', {
             defaultMessage: 'Data source deleted successfully',
           }),
         });
@@ -35,7 +35,7 @@ export const useDeleteActiveSource = (onSuccess?: () => void) => {
       },
       onError: (error: { body: KibanaServerError }) => {
         toasts?.addError(new Error(error.body?.message || 'Unknown error'), {
-          title: i18n.translate('xpack.dataConnectors.deleteActiveSource.errorToast', {
+          title: i18n.translate('xpack.dataSources.deleteActiveSource.errorToast', {
             defaultMessage: 'Failed to delete data source',
           }),
           toastMessage: error.body?.message,

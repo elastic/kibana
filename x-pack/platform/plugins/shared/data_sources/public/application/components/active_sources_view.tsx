@@ -75,14 +75,14 @@ export const ActiveSourcesView: React.FC = () => {
           iconType="database"
           title={
             <h2>
-              {i18n.translate('xpack.dataConnectors.activeSources.emptyTitle', {
+              {i18n.translate('xpack.dataSources.activeSources.emptyTitle', {
                 defaultMessage: 'No active sources',
               })}
             </h2>
           }
           body={
             <p>
-              {i18n.translate('xpack.dataConnectors.activeSources.emptyDescription', {
+              {i18n.translate('xpack.dataSources.activeSources.emptyDescription', {
                 defaultMessage: 'Connect a data source to get started',
               })}
             </p>

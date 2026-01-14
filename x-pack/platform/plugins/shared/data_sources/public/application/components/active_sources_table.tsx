@@ -72,7 +72,7 @@ const ActionsCell: React.FC<{
         }}
         data-test-subj={`editActiveSource-${source.id}`}
       >
-        {i18n.translate('xpack.dataConnectors.activeSources.editAction', {
+        {i18n.translate('xpack.dataSources.activeSources.editAction', {
           defaultMessage: 'Edit',
         })}
       </EuiContextMenuItem>
@@ -87,7 +87,7 @@ const ActionsCell: React.FC<{
           onReconnect(source);
         }}
       >
-        {i18n.translate('xpack.dataConnectors.activeSources.reconnectAction', {
+        {i18n.translate('xpack.dataSources.activeSources.reconnectAction', {
           defaultMessage: 'Reconnect',
         })}
       </EuiContextMenuItem>
@@ -105,7 +105,7 @@ const ActionsCell: React.FC<{
         }}
         data-test-subj={`deleteActiveSource-${source.id}`}
       >
-        {i18n.translate('xpack.dataConnectors.activeSources.deleteAction', {
+        {i18n.translate('xpack.dataSources.activeSources.deleteAction', {
           defaultMessage: 'Delete',
         })}
       </EuiContextMenuItem>
@@ -120,7 +120,7 @@ const ActionsCell: React.FC<{
   const button = (
     <EuiButtonIcon
       iconType="boxesHorizontal"
-      aria-label={i18n.translate('xpack.dataConnectors.activeSources.actionsLabel', {
+      aria-label={i18n.translate('xpack.dataSources.activeSources.actionsLabel', {
         defaultMessage: 'Actions',
       })}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -168,7 +168,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   const columns: Array<EuiBasicTableColumn<ActiveSource>> = [
     {
       field: 'name',
-      name: i18n.translate('xpack.dataConnectors.activeSources.nameColumn', {
+      name: i18n.translate('xpack.dataSources.activeSources.nameColumn', {
         defaultMessage: 'Name',
       }),
       render: (name: string, source: ActiveSource) => (
@@ -184,28 +184,28 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     },
     {
       field: 'type',
-      name: i18n.translate('xpack.dataConnectors.activeSources.typeColumn', {
+      name: i18n.translate('xpack.dataSources.activeSources.typeColumn', {
         defaultMessage: 'Type',
       }),
       render: (type: string) => <EuiText size="s">{type}</EuiText>,
     },
     {
       field: 'workflows',
-      name: i18n.translate('xpack.dataConnectors.activeSources.workflowsColumn', {
+      name: i18n.translate('xpack.dataSources.activeSources.workflowsColumn', {
         defaultMessage: 'Workflows',
       }),
       render: (workflows: string[]) => <EuiText size="s">{workflows.length}</EuiText>,
     },
     {
       field: 'agentTools',
-      name: i18n.translate('xpack.dataConnectors.activeSources.toolsColumn', {
+      name: i18n.translate('xpack.dataSources.activeSources.toolsColumn', {
         defaultMessage: 'Tools',
       }),
       render: (agentTools: string[]) => <EuiText size="s">{agentTools.length}</EuiText>,
     },
     {
       field: 'usedBy',
-      name: i18n.translate('xpack.dataConnectors.activeSources.usedByColumn', {
+      name: i18n.translate('xpack.dataSources.activeSources.usedByColumn', {
         defaultMessage: 'Used by',
       }),
       render: (agents?: ActiveSource['usedBy']) =>
@@ -216,7 +216,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
         ),
     },
     {
-      name: i18n.translate('xpack.dataConnectors.activeSources.actionsColumn', {
+      name: i18n.translate('xpack.dataSources.activeSources.actionsColumn', {
         defaultMessage: 'Actions',
       }),
       width: '80px',
@@ -245,7 +245,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="s">
-                {i18n.translate('xpack.dataConnectors.activeSources.selectedCount', {
+                {i18n.translate('xpack.dataSources.activeSources.selectedCount', {
                   defaultMessage: 'Sources selected: {count}',
                   values: { count: selectedItems.length },
                 })}
@@ -259,7 +259,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
                 disabled
                 data-test-subj="bulkCloneButton"
               >
-                {i18n.translate('xpack.dataConnectors.activeSources.cloneSelected', {
+                {i18n.translate('xpack.dataSources.activeSources.cloneSelected', {
                   defaultMessage: 'Clone selected',
                 })}
               </EuiButton>
@@ -273,7 +273,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
                 disabled
                 data-test-subj="bulkDeleteButton"
               >
-                {i18n.translate('xpack.dataConnectors.activeSources.deleteSelected', {
+                {i18n.translate('xpack.dataSources.activeSources.deleteSelected', {
                   defaultMessage: 'Delete selected',
                 })}
               </EuiButton>
@@ -288,7 +288,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
         columns={columns}
         loading={isLoading}
         selection={selection}
-        tableCaption={i18n.translate('xpack.dataConnectors.activeSources.tableCaption', {
+        tableCaption={i18n.translate('xpack.dataSources.activeSources.tableCaption', {
           defaultMessage: 'Active data sources',
         })}
         data-test-subj="activeSourcesTable"
@@ -297,7 +297,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
         <>
           <EuiSpacer size="l" />
           <EuiTablePagination
-            aria-label={i18n.translate('xpack.dataConnectors.activeSources.paginationLabel', {
+            aria-label={i18n.translate('xpack.dataSources.activeSources.paginationLabel', {
               defaultMessage: 'Active sources pagination',
             })}
             pageCount={pageCount}

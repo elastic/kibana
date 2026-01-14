@@ -65,7 +65,7 @@ export const useEditActiveSourceFlyout = ({
       enabled: isOpen && !!stackConnectorId, // Only fetch when flyout is open and we have an ID
       onError: (error: Error) => {
         toasts.addError(error, {
-          title: i18n.translate('xpack.dataConnectors.hooks.useEditActiveSourceFlyout.loadError', {
+          title: i18n.translate('xpack.dataSources.hooks.useEditActiveSourceFlyout.loadError', {
             defaultMessage: 'Failed to load connector details',
           }),
         });
@@ -90,10 +90,10 @@ export const useEditActiveSourceFlyout = ({
     },
     onSuccess: (data, variables) => {
       // Invalidate cache to refresh the table
-      queryClient.invalidateQueries(queryKeys.dataConnectors.list());
+      queryClient.invalidateQueries(queryKeys.dataSources.list());
 
       toasts.addSuccess(
-        i18n.translate('xpack.dataConnectors.hooks.useEditActiveSourceFlyout.updateSuccessText', {
+        i18n.translate('xpack.dataSources.hooks.useEditActiveSourceFlyout.updateSuccessText', {
           defaultMessage: 'Data source {connectorName} updated successfully',
           values: {
             connectorName: variables.name,
@@ -108,7 +108,7 @@ export const useEditActiveSourceFlyout = ({
     onError: (error: Error) => {
       toasts.addError(error, {
         title: i18n.translate(
-          'xpack.dataConnectors.hooks.useEditActiveSourceFlyout.updateErrorTitle',
+          'xpack.dataSources.hooks.useEditActiveSourceFlyout.updateErrorTitle',
           {
             defaultMessage: 'Failed to update data connector',
           }

@@ -9,10 +9,10 @@ import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataSourcesPluginStartDependencies } from '../../types';
 
-export type DataConnectorsKibanaContext = CoreStart & {
+export type DataSourcesKibanaContext = CoreStart & {
   plugins: DataSourcesPluginStartDependencies;
 };
 
 export const useKibana = () => {
-  return useKibanaBase<DataConnectorsKibanaContext>();
+  return useKibanaBase<DataSourcesKibanaContext>();
 };
