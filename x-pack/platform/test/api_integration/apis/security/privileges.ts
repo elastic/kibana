@@ -339,6 +339,8 @@ export default function ({ getService }: FtrProviderContext) {
       dataQuality: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_rules', 'manage_alerts'],
       manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
       apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
+      alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
+      alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
       discover: [
         'all',
         'read',
