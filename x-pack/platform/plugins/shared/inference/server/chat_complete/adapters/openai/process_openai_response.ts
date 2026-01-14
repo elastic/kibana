@@ -20,11 +20,11 @@ export function processOpenAIResponse() {
     return source.pipe(
       mergeMap((response): Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> => {
         const events: Array<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> = [];
-        if (response.usage) {
-          events.push(tokenCountFromOpenAI(response.usage, response.model));
-        }
         if (response.choices?.length) {
           events.push(chunkFromCompletionResponse(response));
+        }
+        if (response.usage) {
+          events.push(tokenCountFromOpenAI(response.usage, response.model));
         }
         return from(events);
       }),
