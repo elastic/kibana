@@ -167,6 +167,27 @@ describe('useGenAIConnectors', () => {
       // The hook returns `selectedConnector || connectors?.[0]?.id`
       expect(result.current.selectedConnector).toBe('connector-1');
     });
+
+    it('returns undefined selectedConnector when no connectors exist', async () => {
+      // No localStorage value, no connectors available
+      mockStreamsRepositoryClient.fetch.mockResolvedValue({
+        connectors: [],
+      });
+
+      const { result } = renderHook(() =>
+        useGenAIConnectors({
+          streamsRepositoryClient: mockStreamsRepositoryClient,
+          uiSettings: mockUiSettings,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.selectedConnector).toBeUndefined();
+      expect(result.current.connectors).toEqual([]);
+    });
   });
 
   describe('selectConnector', () => {
