@@ -15,7 +15,7 @@ import {
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import { type Filter, isOfAggregateQueryType } from '@kbn/es-query';
+import { type Filter, type Query, type TimeRange, isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cloneDeep } from 'lodash';
@@ -104,6 +104,14 @@ export const DiscoverTopNav = ({
   }, [dataView, isEsqlMode]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
+
+  const onQuerySubmitAction = useCurrentTabAction(internalStateActions.onQuerySubmit);
+  const onQuerySubmit = useCallback(
+    (payload: { dateRange: TimeRange; query?: QT | Query }, isUpdate?: boolean) => {
+      dispatch(onQuerySubmitAction({ payload, isUpdate }));
+    },
+    [dispatch, onQuerySubmitAction]
+  );
 
   // ES|QL controls logic
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
@@ -299,7 +307,7 @@ export const DiscoverTopNav = ({
         }
         appName="discover"
         indexPatterns={[dataView]}
-        onQuerySubmit={stateContainer.actions.onUpdateQuery}
+        onQuerySubmit={onQuerySubmit}
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}

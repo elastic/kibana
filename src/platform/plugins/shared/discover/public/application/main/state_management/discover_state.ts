@@ -190,15 +190,6 @@ export interface DiscoverStateContainer {
      */
     onOpenSavedSearch: (savedSearchId: string) => Promise<void>;
     /**
-     * Triggered when the unified search bar query is updated
-     * @param payload
-     * @param isUpdate
-     */
-    onUpdateQuery: (
-      payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-      isUpdate?: boolean
-    ) => void;
-    /**
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
      */
@@ -664,34 +655,6 @@ export function getDiscoverStateContainer({
     return newDataView;
   };
 
-  const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
-    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const scopedEbtManager = scopedEbtManager$.getValue();
-    const { fieldsMetadata } = services;
-
-    scopedEbtManager.trackSubmittingQuery({
-      query,
-      fieldsMetadata,
-    });
-  };
-
-  /**
-   * Triggered when a user submits a query in the search bar
-   */
-  const onUpdateQuery = (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-    isUpdate?: boolean
-  ) => {
-    trackQueryFields(payload.query);
-
-    if (isUpdate === false) {
-      // remove the search session if the given query is not just updated
-      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-      addLog('[getDiscoverStateContainer] onUpdateQuery triggers data fetching');
-      dataStateContainer.fetch();
-    }
-  };
-
   /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
@@ -734,7 +697,6 @@ export function getDiscoverStateContainer({
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
-      onUpdateQuery,
       setDataView,
       updateAdHocDataViewId,
     },

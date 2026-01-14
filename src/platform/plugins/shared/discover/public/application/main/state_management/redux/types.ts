@@ -211,3 +211,9 @@ export interface UpdateESQLQueryPayload {
   tabId: string;
   queryOrUpdater: string | ((prevQuery: string) => string);
 }
+
+export interface OnQuerySubmitPayload {
+  tabId: string;
+  payload: { dateRange: TimeRange; query?: Query | AggregateQuery };
+  isUpdate?: boolean;
+}
