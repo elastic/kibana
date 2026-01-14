@@ -75,6 +75,7 @@ export class ServiceManager {
 
     const tools = this.services.tools.start({
       getRunner,
+      security,
       spaces,
       elasticsearch,
       uiSettings,

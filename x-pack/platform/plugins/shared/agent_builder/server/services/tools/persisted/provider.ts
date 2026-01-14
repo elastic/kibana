@@ -10,6 +10,8 @@ import type { ToolType } from '@kbn/agent-builder-common';
 import { createBadRequestError, isToolNotFoundError } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { WritableToolProvider, ToolProviderFn } from '../tool_provider';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../tool_types/definitions';
 import { isEnabledDefinition } from '../tool_types/definitions';
@@ -25,12 +27,14 @@ export const createPersistedProviderFn =
     logger: Logger;
     esClient: ElasticsearchClient;
     toolTypes: AnyToolTypeDefinition[];
+    security: SecurityServiceStart;
   }): ToolProviderFn<false> =>
   ({ request, space }) => {
     return createPersistedToolClient({
       ...opts,
       request,
       space,
+      auditLogger: opts.security.audit.asScoped(request),
     });
   };
 
@@ -40,14 +44,16 @@ export const createPersistedToolClient = ({
   logger,
   esClient,
   space,
+  auditLogger,
 }: {
   toolTypes: AnyToolTypeDefinition[];
   logger: Logger;
   esClient: ElasticsearchClient;
   space: string;
   request: KibanaRequest;
+  auditLogger: AuditLogger;
 }): WritableToolProvider => {
-  const toolClient = createClient({ space, esClient, logger });
+  const toolClient = createClient({ space, esClient, logger, auditLogger });
   const definitionMap = toolTypes.filter(isEnabledDefinition).reduce((map, def) => {
     map[def.toolType] = def;
     return map;

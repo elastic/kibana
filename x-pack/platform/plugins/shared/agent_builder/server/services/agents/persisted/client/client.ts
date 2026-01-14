@@ -11,6 +11,7 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
   createAgentNotFoundError,
@@ -58,10 +59,11 @@ export const createClient = async ({
   logger: Logger;
 }): Promise<AgentClient> => {
   const user = getUserFromRequest(request, security);
+  const auditLogger = security.audit.asScoped(request);
   const esClient = elasticsearch.client.asScoped(request).asInternalUser;
   const storage = createStorage({ logger, esClient });
 
-  return new AgentClientImpl({ storage, user, request, space, toolsService });
+  return new AgentClientImpl({ storage, user, request, space, toolsService, auditLogger });
 };
 
 class AgentClientImpl implements AgentClient {
@@ -70,6 +72,7 @@ class AgentClientImpl implements AgentClient {
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
   private readonly user: UserIdAndName;
+  private readonly auditLogger: AuditLogger;
 
   constructor({
     storage,
@@ -77,31 +80,45 @@ class AgentClientImpl implements AgentClient {
     user,
     request,
     space,
+    auditLogger,
   }: {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: UserIdAndName;
     request: KibanaRequest;
     space: string;
+    auditLogger: AuditLogger;
   }) {
     this.storage = storage;
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
     this.space = space;
+    this.auditLogger = auditLogger;
   }
 
   async get(agentId: string): Promise<PersistedAgentDefinition> {
-    const document = await this._get(agentId);
-    if (!document) {
-      throw createAgentNotFoundError({ agentId });
-    }
+    return this.withAudit(
+      {
+        action: 'agent_builder_agent_get',
+        eventType: 'access',
+        id: agentId,
+        successMessage: `Accessed agent [id=${agentId}]`,
+        failureMessage: `Failed to access agent [id=${agentId}]`,
+      },
+      async () => {
+        const document = await this._get(agentId);
+        if (!document) {
+          throw createAgentNotFoundError({ agentId });
+        }
 
-    if (!hasAccess({ document, user: this.user })) {
-      throw createAgentNotFoundError({ agentId });
-    }
+        if (!hasAccess({ document, user: this.user })) {
+          throw createAgentNotFoundError({ agentId });
+        }
 
-    return fromEs(document);
+        return fromEs(document);
+      }
+    );
   }
 
   async has(agentId: string): Promise<boolean> {
@@ -110,94 +127,137 @@ class AgentClientImpl implements AgentClient {
   }
 
   async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
-    const response = await this.storage.getClient().search({
-      track_total_hits: false,
-      size: 1000,
-      query: {
-        bool: {
-          filter: [createSpaceDslFilter(this.space)],
-        },
+    return this.withAudit(
+      {
+        action: 'agent_builder_agent_list',
+        eventType: 'access',
+        successMessage: 'Listed agents',
+        failureMessage: 'Failed to list agents',
       },
-    });
+      async () => {
+        const response = await this.storage.getClient().search({
+          track_total_hits: false,
+          size: 1000,
+          query: {
+            bool: {
+              filter: [createSpaceDslFilter(this.space)],
+            },
+          },
+        });
 
-    return response.hits.hits.map((hit) => fromEs(hit as Document));
+        return response.hits.hits.map((hit) => fromEs(hit as Document));
+      }
+    );
   }
 
   async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
-    const now = new Date();
+    return this.withAudit(
+      {
+        action: 'agent_builder_agent_create',
+        eventType: 'creation',
+        id: profile.id,
+        successMessage: `Created agent [id=${profile.id}]`,
+        failureMessage: `Failed to create agent [id=${profile.id}]`,
+      },
+      async () => {
+        const now = new Date();
 
-    const validationError = validateAgentId({ agentId: profile.id, builtIn: false });
-    if (validationError) {
-      throw createBadRequestError(`Invalid agent id: "${profile.id}": ${validationError}`);
-    }
+        const validationError = validateAgentId({ agentId: profile.id, builtIn: false });
+        if (validationError) {
+          throw createBadRequestError(`Invalid agent id: "${profile.id}": ${validationError}`);
+        }
 
-    if (await this.exists(profile.id)) {
-      throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
-    }
+        if (await this.exists(profile.id)) {
+          throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
+        }
 
-    await this.validateAgentToolSelection(profile.configuration.tools);
+        await this.validateAgentToolSelection(profile.configuration.tools);
 
-    const attributes = createRequestToEs({
-      profile,
-      space: this.space,
-      creationDate: now,
-    });
+        const attributes = createRequestToEs({
+          profile,
+          space: this.space,
+          creationDate: now,
+        });
 
-    await this.storage.getClient().index({
-      document: attributes,
-    });
+        await this.storage.getClient().index({
+          document: attributes,
+        });
 
-    return this.get(profile.id);
+        return this.get(profile.id);
+      }
+    );
   }
 
   async update(
     agentId: string,
     profileUpdate: AgentUpdateRequest
   ): Promise<PersistedAgentDefinition> {
-    const document = await this._get(agentId);
-    if (!document) {
-      throw createAgentNotFoundError({
-        agentId,
-      });
-    }
+    return this.withAudit(
+      {
+        action: 'agent_builder_agent_update',
+        eventType: 'change',
+        id: agentId,
+        successMessage: `Updated agent [id=${agentId}]`,
+        failureMessage: `Failed to update agent [id=${agentId}]`,
+      },
+      async () => {
+        const document = await this._get(agentId);
+        if (!document) {
+          throw createAgentNotFoundError({
+            agentId,
+          });
+        }
 
-    if (!hasAccess({ document, user: this.user })) {
-      throw createAgentNotFoundError({ agentId });
-    }
+        if (!hasAccess({ document, user: this.user })) {
+          throw createAgentNotFoundError({ agentId });
+        }
 
-    if (profileUpdate.configuration?.tools) {
-      await this.validateAgentToolSelection(profileUpdate.configuration.tools);
-    }
+        if (profileUpdate.configuration?.tools) {
+          await this.validateAgentToolSelection(profileUpdate.configuration.tools);
+        }
 
-    const updatedConversation = updateRequestToEs({
-      agentId,
-      currentProps: document._source!,
-      update: profileUpdate,
-      updateDate: new Date(),
-    });
+        const updatedConversation = updateRequestToEs({
+          agentId,
+          currentProps: document._source!,
+          update: profileUpdate,
+          updateDate: new Date(),
+        });
 
-    await this.storage.getClient().index({
-      id: document._id,
-      document: updatedConversation,
-    });
+        await this.storage.getClient().index({
+          id: document._id,
+          document: updatedConversation,
+        });
 
-    return this.get(agentId);
+        return this.get(agentId);
+      }
+    );
   }
 
   async delete(options: AgentDeleteRequest): Promise<boolean> {
     const { id } = options;
 
-    const document = await this._get(id);
-    if (!document) {
-      throw createAgentNotFoundError({ agentId: id });
-    }
+    return this.withAudit(
+      {
+        action: 'agent_builder_agent_delete',
+        eventType: 'deletion',
+        id,
+        successMessage: `Deleted agent [id=${id}]`,
+        failureMessage: `Failed to delete agent [id=${id}]`,
+      },
+      async () => {
+        const document = await this._get(id);
+        if (!document) {
+          throw createAgentNotFoundError({ agentId: id });
+        }
 
-    if (!hasAccess({ document, user: this.user })) {
-      throw createAgentNotFoundError({ agentId: id });
-    }
+        if (!hasAccess({ document, user: this.user })) {
+          throw createAgentNotFoundError({ agentId: id });
+        }
 
-    const deleteResponse = await this.storage.getClient().delete({ id: document._id });
-    return deleteResponse.result === 'deleted';
+        const deleteResponse = await this.storage.getClient().delete({ id: document._id });
+        return deleteResponse.result === 'deleted';
+      }
+    );
   }
 
   // Agent tool selection validation helper
@@ -244,6 +304,75 @@ class AgentClientImpl implements AgentClient {
     } else {
       return response.hits.hits[0] as Document;
     }
+  }
+
+  private async withAudit<T>(
+    event: {
+      action: string;
+      eventType: string;
+      id?: string;
+      successMessage: string;
+      failureMessage: string;
+    },
+    operation: () => Promise<T>
+  ): Promise<T> {
+    try {
+      const result = await operation();
+      this.logAudit({
+        ...event,
+        message: event.successMessage,
+        outcome: 'success',
+      });
+      return result;
+    } catch (error) {
+      this.logAudit({
+        ...event,
+        message: event.failureMessage,
+        outcome: 'failure',
+        error,
+      });
+      throw error;
+    }
+  }
+
+  private logAudit(event: {
+    action: string;
+    eventType: string;
+    id?: string;
+    message: string;
+    outcome: 'success' | 'failure';
+    error?: unknown;
+  }) {
+    const errorInfo = event.error
+      ? {
+          code: event.error instanceof Error ? event.error.name : 'Error',
+          message: event.error instanceof Error ? event.error.message : String(event.error),
+        }
+      : undefined;
+
+    const kibanaMeta = {
+      ...(event.id
+        ? {
+            saved_object: {
+              type: 'agent_builder_agent',
+              id: event.id,
+            },
+          }
+        : {}),
+      space_ids: [this.space],
+    };
+
+    this.auditLogger.log({
+      message: event.message,
+      event: {
+        action: event.action,
+        category: ['database'],
+        type: [event.eventType],
+        outcome: event.outcome,
+      },
+      kibana: kibanaMeta,
+      ...(errorInfo ? { error: errorInfo } : {}),
+    });
   }
 }
 
