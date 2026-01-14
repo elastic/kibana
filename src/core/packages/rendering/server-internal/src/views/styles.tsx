@@ -32,8 +32,21 @@ export const Styles: FC<Props> = ({ darkMode, themeName, stylesheetPaths }) => {
 const InlineStyles: FC<{ darkMode: boolean; themeName: ThemeName }> = ({ darkMode, themeName }) => {
   const getThemeStyles = (theme: ThemeName) => {
     if (theme === 'borealis') {
+      // Dark mode layered background: radial light source in center, blue tint in middle, dark gradient base
+      const darkModeBackground = [
+        'radial-gradient(1200px 800px at 50% 50%, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.04))', // light source effect
+        'linear-gradient(rgba(36, 61, 111, 0.1), rgba(36, 61, 111, 0))', // subtle blue tint
+        'linear-gradient(#030812 0%, #0C1626 50%, #0E1621 100%)', // dark gradient base
+      ].join(', ');
+
+      // Light mode layered background: subtle blue glow at top center, light gradient base
+      const lightModeBackground = [
+        'radial-gradient(1200px 800px at 50% 0%, rgba(36, 61, 111, 0.04), rgba(36, 61, 111, 0))',
+        'linear-gradient(#F6F9FC, #F4F7FA)',
+      ].join(', ');
+
       return {
-        pageBackground: darkMode ? '#07101F' : '#F6F9FC', // colors.body
+        pageBackground: darkMode ? darkModeBackground : lightModeBackground, // colors.body
         welcomeText: darkMode ? '#8E9FBC' : '#5A6D8C', // colors.subduedText
         progress: darkMode ? '#172336' : '#ECF1F9', // colors.lightestShade
         progressBefore: darkMode ? '#599DFF' : '#0B64DD', // colors.primary
@@ -57,7 +70,7 @@ const InlineStyles: FC<{ darkMode: boolean; themeName: ThemeName }> = ({ darkMod
         __html: `
 
           html {
-            background-color: ${themeStyles.pageBackground}
+            background: ${themeStyles.pageBackground};
           }
 
           .kbnWelcomeText {
