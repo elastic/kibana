@@ -70,16 +70,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     const esClient = services.scopedClusterClient.asInternalUser;
 
     try {
-      const {
-        task_settings: taskSettings,
-        service_settings: serviceSettings,
-        headers,
-      } = config ?? {};
-
-      const taskSettingsWithHeaders = {
-        ...(unflattenObject(taskSettings ?? {}) ?? {}),
-        ...(headers ? { headers } : {}),
-      };
+      const { task_settings: taskSettings, service_settings: serviceSettings } = config ?? {};
 
       const serviceSettingsWithSecrets = {
         ...(isUpdate === false ? unflattenObject(serviceSettings ?? {}) : {}),
@@ -104,14 +95,13 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       }
 
       if (isUpdate && inferenceExists && config && config.provider) {
-        // test num_allocations
         await esClient?.inference.update({
           inference_id: config?.inferenceId,
           task_type: config?.taskType as InferenceTaskType,
           // @ts-ignore The InferenceInferenceEndpoint type is out of date and has 'service' as a required property but this call will error if service is included
           inference_config: {
             service_settings: serviceSettingsWithSecrets,
-            task_settings: taskSettingsWithHeaders,
+            task_settings: taskSettings,
           },
         });
       } else {
@@ -121,7 +111,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
           inference_config: {
             service: config!.provider,
             service_settings: serviceSettingsWithSecrets,
-            task_settings: taskSettingsWithHeaders,
+            task_settings: taskSettings,
           },
         });
       }

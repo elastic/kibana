@@ -97,6 +97,18 @@ export const mapProviderFields = (
       }
     });
   }
+  // fieldOverrides.supplementalData is a temporary solution until the 'location' field is added for the services api - this can be removed once that is in.
+  if (fieldOverrides?.supplementalData) {
+    fieldOverrides?.supplementalData.forEach((supplementalDataField) => {
+      const fieldKey = Object.keys(supplementalDataField)[0];
+      if (newProvider.configurations[fieldKey]) {
+        newProvider.configurations[fieldKey] = {
+          ...newProvider.configurations[fieldKey],
+          ...supplementalDataField[fieldKey],
+        };
+      }
+    });
+  }
 
   return Object.keys(newProvider.configurations ?? {})
     .filter(

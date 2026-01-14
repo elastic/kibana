@@ -65,6 +65,7 @@ export interface OverrideFieldsContentType {
   serverlessOnly?: boolean;
   hidden?: string[];
   additional?: FieldsConfiguration[];
+  supplementalData?: Record<string, Partial<ConfigProperties>>[];
 }
 export type InternalOverrideFieldsType = {
   [Key in ServiceProviderKeysType | string]?: OverrideFieldsContentType;

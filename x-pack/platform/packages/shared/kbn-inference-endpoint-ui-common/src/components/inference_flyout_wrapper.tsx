@@ -29,68 +29,82 @@ import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mu
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
+// Check if previous format with 'providerConfig', otherwise the only change is moving max_number_of_allocations into service_settings.
 const formDeserializer = (data: InferenceEndpoint) => {
-  if (
-    data.config?.providerConfig?.adaptive_allocations?.max_number_of_allocations ||
-    data.config?.headers
-  ) {
-    const { headers, ...restConfig } = data.config;
-    const maxAllocations =
-      data.config.providerConfig?.adaptive_allocations?.max_number_of_allocations;
+  const { providerConfig, headers, service_settings, task_settings, ...restConfig } =
+    data.config || {};
+
+  if (providerConfig) {
+    const { adaptive_allocations, max_tokens, ...restProviderConfig } = providerConfig;
+    const maxAllocations = adaptive_allocations?.max_number_of_allocations;
 
     return {
       ...data,
       config: {
         ...restConfig,
-        providerConfig: {
-          ...(data.config.providerConfig as InferenceEndpoint['config']['providerConfig']),
+        service_settings: {
+          ...restProviderConfig,
+          ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+        },
+        task_settings: {
           ...(headers ? { headers } : {}),
-          ...(maxAllocations
-            ? // remove the adaptive_allocations from the data config as form does not expect it
-              { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
-            : {}),
+          ...(max_tokens ? { max_tokens } : {}),
         },
       },
     };
   }
 
-  return data;
+  const { adaptive_allocations, ...restServiceSettings } = service_settings ?? {};
+  const maxAllocations = adaptive_allocations?.max_number_of_allocations;
+
+  const reformatted = {
+    ...data,
+    config: {
+      ...restConfig,
+      service_settings: {
+        ...restServiceSettings,
+        ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+      },
+      task_settings,
+    },
+  };
+
+  return reformatted;
 };
 
 // This serializer is used to transform the form data before sending it to the server
 export const formSerializer = (formData: InferenceEndpoint) => {
-  const providerConfig = formData.config?.providerConfig as
-    | InferenceEndpoint['config']['providerConfig']
-    | undefined;
-  if (formData && providerConfig) {
+  const { service_settings, ...restConfig } = formData.config || {};
+  if (formData && service_settings) {
     const {
-      max_number_of_allocations: maxAllocations,
-      headers,
-      ...restProviderConfig
-    } = providerConfig || {};
+      max_number_of_allocations,
+      // Remove headers from service_settings, as it should be in task_settings - can remove once location changes are in.
+      headers: nullHeaders,
+      ...restServiceSettings
+    } = service_settings || {};
 
     return {
       ...formData,
       config: {
-        ...formData.config,
-        providerConfig: {
-          ...restProviderConfig,
-          ...(maxAllocations
+        ...restConfig,
+        service_settings: {
+          ...restServiceSettings,
+          ...(max_number_of_allocations
             ? {
                 adaptive_allocations: {
                   enabled: true,
                   min_number_of_allocations: MIN_ALLOCATIONS,
-                  ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+                  ...(max_number_of_allocations ? { max_number_of_allocations } : {}),
                 },
                 // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
                 num_threads: DEFAULT_NUM_THREADS,
               }
             : {}),
         },
-        ...(headers ? { headers } : {}),
       },
     };
   }
+
   return formData;
 };
 
