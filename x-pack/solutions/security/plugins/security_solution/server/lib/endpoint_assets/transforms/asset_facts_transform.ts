@@ -401,6 +401,18 @@ export const getAssetFactsTransformConfig = (namespace: string): TransformPutTra
         },
       },
 
+      // Privileges - SSH authorized keys count
+      'endpoint.privileges.ssh_keys_count': {
+        filter: { exists: { field: 'osquery.key' } },
+        aggs: {
+          count: {
+            value_count: {
+              field: 'osquery.key',
+            },
+          },
+        },
+      },
+
       // =================================================================
       // ENDPOINT SOFTWARE (filter: has osquery.version)
       // =================================================================
@@ -415,6 +427,29 @@ export const getAssetFactsTransformConfig = (namespace: string): TransformPutTra
         filter: { exists: { field: 'osquery.status' } },
         aggs: {
           count: { cardinality: { field: 'osquery.name' } },
+        },
+      },
+
+      // =================================================================
+      // ENDPOINT NETWORK
+      // =================================================================
+
+      // Network - listening ports count
+      'endpoint.network.listening_ports_count': {
+        filter: {
+          bool: {
+            must: [
+              { exists: { field: 'osquery.port' } },
+              { term: { 'osquery.state': 'LISTEN' } },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.port',
+            },
+          },
         },
       },
 
@@ -549,6 +584,32 @@ export const getAssetFactsTransformConfig = (namespace: string): TransformPutTra
           _value: {
             top_metrics: {
               metrics: [{ field: 'osquery.secure_boot' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      // Posture - macOS SIP (System Integrity Protection)
+      'endpoint.posture.sip_enabled_raw': {
+        filter: { exists: { field: 'osquery.config_flag' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.config_flag' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      // Posture - macOS Gatekeeper
+      'endpoint.posture.gatekeeper_enabled_raw': {
+        filter: { exists: { field: 'osquery.assessments_enabled' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.assessments_enabled' }],
               sort: [{ '@timestamp': 'desc' }],
             },
           },
@@ -865,6 +926,90 @@ export const getAssetFactsTransformConfig = (namespace: string): TransformPutTra
       },
 
       // =================================================================
+      // SECURITY: LOTL (Living Off The Land) DETECTIONS
+      // =================================================================
+
+      // Detections - Encoded PowerShell commands (LOTL attack indicator)
+      'endpoint.security.encoded_powershell_count': {
+        filter: {
+          bool: {
+            should: [
+              { wildcard: { 'osquery.cmdline': '*-enc*' } },
+              { wildcard: { 'osquery.cmdline': '*-EncodedCommand*' } },
+              { wildcard: { 'osquery.cmdline': '*FromBase64String*' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        aggs: {
+          count: {
+            value_count: {
+              field: 'osquery.cmdline',
+            },
+          },
+        },
+      },
+
+      // Detections - Hidden files in temp directories (evasion indicator)
+      'endpoint.security.hidden_temp_files_count': {
+        filter: {
+          bool: {
+            must: [
+              { term: { 'osquery.hidden': '1' } },
+              {
+                bool: {
+                  should: [
+                    { wildcard: { 'osquery.path': '*tmp*' } },
+                    { wildcard: { 'osquery.path': '*temp*' } },
+                    { wildcard: { 'osquery.path': '*Temp*' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            value_count: {
+              field: 'osquery.path',
+            },
+          },
+        },
+      },
+
+      // Detections - Listening on suspicious ports (C2/backdoor indicator)
+      'endpoint.security.suspicious_ports_count': {
+        filter: {
+          bool: {
+            must: [
+              { term: { 'osquery.state': 'LISTEN' } },
+              {
+                bool: {
+                  should: [
+                    { term: { 'osquery.port': 4444 } },
+                    { term: { 'osquery.port': 5555 } },
+                    { term: { 'osquery.port': 6666 } },
+                    { term: { 'osquery.port': 1337 } },
+                    { term: { 'osquery.port': 31337 } },
+                    { range: { 'osquery.port': { gte: 49152, lte: 65535 } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.port',
+            },
+          },
+        },
+      },
+
+      // =================================================================
       // QUERY METADATA
       // =================================================================
       'endpoint.queries.total_results': {
@@ -905,7 +1050,20 @@ export const getAssetFactsTransformConfig = (namespace: string): TransformPutTra
  */
 export const getAssetIndexMapping = () => ({
   mappings: {
-    dynamic: 'false', // Allow unmapped fields from transform
+    dynamic: 'true', // Allow unmapped fields from transform to be indexed
+    dynamic_templates: [
+      {
+        // Map all string fields as keyword to allow aggregation in Entity Store
+        // IMPORTANT: Without this, ES defaults strings to "text" type which cannot be aggregated
+        strings_as_keywords: {
+          match_mapping_type: 'string',
+          mapping: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+        },
+      },
+    ],
     properties: {
       // =================================================================
       // ENTITY STORE COMPATIBLE FIELDS
@@ -1026,6 +1184,10 @@ export const getAssetIndexMapping = () => ({
               firewall_enabled_raw: { type: 'keyword' },
               secure_boot: { type: 'boolean' },
               secure_boot_raw: { type: 'keyword' },
+              sip_enabled: { type: 'boolean' },
+              sip_enabled_raw: { type: 'keyword' },
+              gatekeeper_enabled: { type: 'boolean' },
+              gatekeeper_enabled_raw: { type: 'keyword' },
               checks: {
                 properties: {
                   passed: { type: 'integer' },
@@ -1041,6 +1203,7 @@ export const getAssetIndexMapping = () => ({
               local_admins: { type: 'keyword' },
               admin_count: { type: 'integer' },
               root_users: { type: 'keyword' },
+              ssh_keys_count: { type: 'integer' },
               elevated_risk: { type: 'boolean' },
             },
           },
@@ -1186,6 +1349,10 @@ export const getAssetIndexMapping = () => ({
                   doc_count: { type: 'integer' },
                 },
               },
+              // LOTL detection counts
+              encoded_powershell_count: { type: 'integer' },
+              hidden_temp_files_count: { type: 'integer' },
+              suspicious_ports_count: { type: 'integer' },
             },
           },
           // =================================================================
@@ -1355,6 +1522,38 @@ export const getAssetIngestPipeline = (namespace: string) => ({
           if (ctx.endpoint.hardware.model != null && ctx.endpoint.hardware.model._value != null) {
             def v = ctx.endpoint.hardware.model._value;
             if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.model = e.getValue(); break; } } }
+          }
+
+          // Memory fields from filtered aggregations
+          // Flatten endpoint.memory nested structure from transform output
+          if (ctx.endpoint.memory == null) { ctx.endpoint.memory = new HashMap(); }
+          if (ctx.endpoint.memory.total != null && ctx.endpoint.memory.total instanceof Map) {
+            def memTotal = ctx.endpoint.memory.total;
+            if (memTotal.containsKey('osquery.memory_total')) {
+              ctx.endpoint.memory.total = memTotal['osquery.memory_total'];
+            } else {
+              for (e in memTotal.entrySet()) { if (e.getValue() != null && !(e.getValue() instanceof Map)) { ctx.endpoint.memory.total = e.getValue(); break; } }
+            }
+          }
+          if (ctx.endpoint.memory.free != null && ctx.endpoint.memory.free instanceof Map) {
+            def memFree = ctx.endpoint.memory.free;
+            if (memFree.containsKey('osquery.memory_free')) {
+              ctx.endpoint.memory.free = memFree['osquery.memory_free'];
+            } else {
+              for (e in memFree.entrySet()) { if (e.getValue() != null && !(e.getValue() instanceof Map)) { ctx.endpoint.memory.free = e.getValue(); break; } }
+            }
+          }
+          if (ctx.endpoint.memory.available != null && ctx.endpoint.memory.available instanceof Map) {
+            def memAvail = ctx.endpoint.memory.available;
+            if (memAvail.containsKey('osquery.memory_available')) {
+              ctx.endpoint.memory.available = memAvail['osquery.memory_available'];
+            } else {
+              for (e in memAvail.entrySet()) { if (e.getValue() != null && !(e.getValue() instanceof Map)) { ctx.endpoint.memory.available = e.getValue(); break; } }
+            }
+          }
+          // Remove doc_count from memory if present (artifact of filter aggregation)
+          if (ctx.endpoint.memory.containsKey('doc_count')) {
+            ctx.endpoint.memory.remove('doc_count');
           }
 
           // Initialize privileges structure
@@ -1534,6 +1733,118 @@ export const getAssetIngestPipeline = (namespace: string) => ({
               ctx.endpoint.posture.secure_boot_raw = null;
             }
           }
+
+          // macOS SIP (System Integrity Protection)
+          if (ctx.endpoint.posture.sip_enabled_raw != null) {
+            if (ctx.endpoint.posture.sip_enabled_raw._value != null) {
+              def sipValue = ctx.endpoint.posture.sip_enabled_raw._value;
+              if (sipValue.containsKey('osquery.config_flag')) {
+                ctx.endpoint.posture.sip_enabled_raw = sipValue['osquery.config_flag'];
+              } else {
+                ctx.endpoint.posture.sip_enabled_raw = null;
+              }
+            } else {
+              ctx.endpoint.posture.sip_enabled_raw = null;
+            }
+          }
+
+          // macOS Gatekeeper
+          if (ctx.endpoint.posture.gatekeeper_enabled_raw != null) {
+            if (ctx.endpoint.posture.gatekeeper_enabled_raw._value != null) {
+              def gkValue = ctx.endpoint.posture.gatekeeper_enabled_raw._value;
+              if (gkValue.containsKey('osquery.assessments_enabled')) {
+                ctx.endpoint.posture.gatekeeper_enabled_raw = gkValue['osquery.assessments_enabled'];
+              } else {
+                ctx.endpoint.posture.gatekeeper_enabled_raw = null;
+              }
+            } else {
+              ctx.endpoint.posture.gatekeeper_enabled_raw = null;
+            }
+          }
+
+          // Flatten network listening_ports_count
+          if (ctx.endpoint.network == null) { ctx.endpoint.network = new HashMap(); }
+          if (ctx.endpoint.network.listening_ports_count != null) {
+            def lpc = ctx.endpoint.network.listening_ports_count;
+            if (lpc instanceof Map && lpc.containsKey('count')) {
+              def countObj = lpc.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.network.listening_ports_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.network.listening_ports_count = countObj;
+              } else {
+                ctx.endpoint.network.listening_ports_count = 0;
+              }
+            } else if (!(lpc instanceof Number)) {
+              ctx.endpoint.network.listening_ports_count = 0;
+            }
+          }
+
+          // Flatten privileges.ssh_keys_count
+          if (ctx.endpoint.privileges.ssh_keys_count != null) {
+            def skc = ctx.endpoint.privileges.ssh_keys_count;
+            if (skc instanceof Map && skc.containsKey('count')) {
+              def countObj = skc.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.privileges.ssh_keys_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.privileges.ssh_keys_count = countObj;
+              } else {
+                ctx.endpoint.privileges.ssh_keys_count = 0;
+              }
+            } else if (!(skc instanceof Number)) {
+              ctx.endpoint.privileges.ssh_keys_count = 0;
+            }
+          }
+
+          // Flatten security LOTL detection counts
+          if (ctx.endpoint.security.encoded_powershell_count != null) {
+            def epc = ctx.endpoint.security.encoded_powershell_count;
+            if (epc instanceof Map && epc.containsKey('count')) {
+              def countObj = epc.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.security.encoded_powershell_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.security.encoded_powershell_count = countObj;
+              } else {
+                ctx.endpoint.security.encoded_powershell_count = 0;
+              }
+            } else if (!(epc instanceof Number)) {
+              ctx.endpoint.security.encoded_powershell_count = 0;
+            }
+          }
+
+          if (ctx.endpoint.security.hidden_temp_files_count != null) {
+            def htfc = ctx.endpoint.security.hidden_temp_files_count;
+            if (htfc instanceof Map && htfc.containsKey('count')) {
+              def countObj = htfc.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.security.hidden_temp_files_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.security.hidden_temp_files_count = countObj;
+              } else {
+                ctx.endpoint.security.hidden_temp_files_count = 0;
+              }
+            } else if (!(htfc instanceof Number)) {
+              ctx.endpoint.security.hidden_temp_files_count = 0;
+            }
+          }
+
+          if (ctx.endpoint.security.suspicious_ports_count != null) {
+            def spc = ctx.endpoint.security.suspicious_ports_count;
+            if (spc instanceof Map && spc.containsKey('count')) {
+              def countObj = spc.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.security.suspicious_ports_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.security.suspicious_ports_count = countObj;
+              } else {
+                ctx.endpoint.security.suspicious_ports_count = 0;
+              }
+            } else if (!(spc instanceof Number)) {
+              ctx.endpoint.security.suspicious_ports_count = 0;
+            }
+          }
         `,
       },
     },
@@ -1649,6 +1960,26 @@ export const getAssetIngestPipeline = (namespace: string) => ({
         `,
       },
     },
+    // Convert sip_enabled_raw to boolean (macOS System Integrity Protection)
+    // SIP config_flag values: CS_ENFORCEMENT is enabled when SIP is on
+    {
+      script: {
+        source: `
+          def raw = ctx.endpoint?.posture?.sip_enabled_raw;
+          // SIP is considered enabled if config_flag contains enforcement flags
+          ctx.endpoint.posture.sip_enabled = (raw != null && raw != '' && raw != '0');
+        `,
+      },
+    },
+    // Convert gatekeeper_enabled_raw to boolean (macOS Gatekeeper)
+    {
+      script: {
+        source: `
+          def raw = ctx.endpoint?.posture?.gatekeeper_enabled_raw;
+          ctx.endpoint.posture.gatekeeper_enabled = (raw == '1' || raw == 'true' || raw == 'yes');
+        `,
+      },
+    },
     // Calculate posture score and level
     // IMPORTANT: Only deduct points if we have DATA showing the feature is disabled.
     // If no data was collected (raw field is null), it's UNKNOWN - don't deduct.
@@ -1719,6 +2050,28 @@ export const getAssetIngestPipeline = (namespace: string) => ({
             if (adminCount > 2) {
               score -= 10;
               failedChecks.add('excessive_admins');
+            }
+          }
+
+          // macOS SIP check (-15) - only for macOS systems
+          def sipRaw = ctx.endpoint?.posture?.sip_enabled_raw;
+          def sipEnabled = ctx.endpoint?.posture?.sip_enabled;
+          if (sipRaw != null && sipRaw != '') {
+            checksWithData++;
+            if (sipEnabled == false) {
+              score -= 15;
+              failedChecks.add('sip_disabled');
+            }
+          }
+
+          // macOS Gatekeeper check (-10) - only for macOS systems
+          def gatekeeperRaw = ctx.endpoint?.posture?.gatekeeper_enabled_raw;
+          def gatekeeperEnabled = ctx.endpoint?.posture?.gatekeeper_enabled;
+          if (gatekeeperRaw != null && gatekeeperRaw != '') {
+            checksWithData++;
+            if (gatekeeperEnabled == false) {
+              score -= 10;
+              failedChecks.add('gatekeeper_disabled');
             }
           }
 

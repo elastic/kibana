@@ -131,6 +131,17 @@ export const ENDPOINT_FIELDS = {
   LAST_CHANGE: 'endpoint.drift.last_change',
   CHANGE_TYPES: 'endpoint.drift.change_types',
   RECENTLY_CHANGED: 'endpoint.drift.recently_changed',
+
+  // Unknown Knowns - Dormant Risk Detection
+  UK_SSH_KEYS_OVER_180D: 'endpoint.unknown_knowns.ssh_keys_over_180d',
+  UK_DORMANT_USERS_30D: 'endpoint.unknown_knowns.dormant_users_30d',
+  UK_DORMANT_USERS_LIST: 'endpoint.unknown_knowns.dormant_users_list',
+  UK_EXTERNAL_TASKS_WINDOWS: 'endpoint.unknown_knowns.external_tasks_windows',
+  UK_EXTERNAL_TASKS_LIST: 'endpoint.unknown_knowns.external_tasks_list',
+  UK_EXTERNAL_CRON_JOBS: 'endpoint.unknown_knowns.external_cron_jobs',
+  UK_EXTERNAL_LAUNCH_ITEMS: 'endpoint.unknown_knowns.external_launch_items',
+  UK_TOTAL_DORMANT_RISKS: 'endpoint.unknown_knowns.total_dormant_risks',
+  UK_RISK_LEVEL: 'endpoint.unknown_knowns.risk_level',
 } as const;
 
 // =============================================================================
@@ -224,6 +235,7 @@ export const ENDPOINT_ASSETS_ROUTES = {
   PRIVILEGES_SUMMARY: `${ENDPOINT_ASSETS_API_BASE}/privileges/summary`,
   DRIFT_SUMMARY: `${ENDPOINT_ASSETS_API_BASE}/drift/summary`,
   DRIFT_EVENTS: `${ENDPOINT_ASSETS_API_BASE}/drift/events`,
+  UNKNOWN_KNOWNS_SUMMARY: `${ENDPOINT_ASSETS_API_BASE}/unknown_knowns/summary`,
   TRANSFORM_STATUS: `${ENDPOINT_ASSETS_API_BASE}/transform/status`,
   TRANSFORM_START: `${ENDPOINT_ASSETS_API_BASE}/transform/start`,
   TRANSFORM_STOP: `${ENDPOINT_ASSETS_API_BASE}/transform/stop`,

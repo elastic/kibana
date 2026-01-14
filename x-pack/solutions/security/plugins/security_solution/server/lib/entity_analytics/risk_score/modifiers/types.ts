@@ -17,6 +17,15 @@ interface ModifierTypeMap {
     subtype: 'privmon';
     metadata: { is_privileged_user: boolean | undefined };
   };
+  // Endpoint posture modifier - adjusts risk based on security posture score
+  endpoint_posture: {
+    subtype: void;
+    metadata: {
+      posture_score: number | undefined;
+      posture_level: string | undefined;
+      failed_checks: string[] | undefined;
+    };
+  };
 }
 export type MODIFIER_TYPE = keyof ModifierTypeMap;
 

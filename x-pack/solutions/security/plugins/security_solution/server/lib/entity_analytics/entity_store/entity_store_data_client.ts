@@ -140,6 +140,7 @@ import {
   deleteEntityUpdatesIndexComponentTemplate,
   getEntityUpdatesIndexComponentTemplateStatus,
 } from './elasticsearch_assets/updates_component_template';
+import { createEndpointAssetsService } from '../../endpoint_assets';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -537,6 +538,30 @@ export class EntityStoreDataClient {
       this.log(`debug`, entityType, `Created entity updates index component template`);
       await initEntityUpdatesDataStream(entityType, this.esClient, namespace);
       this.log(`debug`, entityType, `Initialized entity updates data stream`);
+
+      // Initialize CAASM transform for host entities
+      // This creates the endpoint-assets-osquery-* index that the host entity engine reads from
+      if (entityType === 'host') {
+        try {
+          const endpointAssetsService = createEndpointAssetsService({
+            esClient: this.esClient,
+            soClient: this.options.soClient,
+            logger,
+            namespace,
+          });
+          await endpointAssetsService.initializeTransform();
+          this.log(`debug`, entityType, `Initialized CAASM endpoint assets transform`);
+          await endpointAssetsService.startTransform();
+          this.log(`debug`, entityType, `Started CAASM endpoint assets transform`);
+        } catch (casmError) {
+          // Log but don't fail - CAASM is an enhancement, not a requirement
+          this.log(
+            `warn`,
+            entityType,
+            `Failed to initialize CAASM transform: ${(casmError as Error).message}. Host entity engine will work without osquery data.`
+          );
+        }
+      }
 
       // finally start the entity definition now that everything is in place
       const updated = await this.start(entityType, { force: true });

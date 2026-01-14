@@ -189,5 +189,142 @@ export const hostEntityEngineDescription: EntityDescription = {
 
     // Query stats
     newestValue({ source: 'endpoint.queries.total_results', mapping: { type: 'integer' } }),
+
+    // ==========================================================================
+    // Extended CAASM Inventory Fields
+    // ==========================================================================
+
+    // --- Core Identity ---
+    newestValue({ source: 'endpoint.identity.uptime_days', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.identity.uptime_seconds', mapping: { type: 'long' } }),
+    newestValue({ source: 'endpoint.identity.logged_in_users_count', mapping: { type: 'integer' } }),
+
+    // --- Network Exposure Extended ---
+    newestValue({
+      source: 'endpoint.network.physical_interfaces_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.network.arp_cache_count', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.network.routes_count', mapping: { type: 'integer' } }),
+    newestValue({
+      source: 'endpoint.network.active_connections_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.network.suspicious_connections_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.network.smb_custom_shares_count', mapping: { type: 'integer' } }),
+
+    // --- Privilege Assessment Extended ---
+    newestValue({ source: 'endpoint.privileges.root_users_count', mapping: { type: 'integer' } }),
+    newestValue({
+      source: 'endpoint.privileges.sudoers_nopasswd_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.privileges.privileged_memberships_count',
+      mapping: { type: 'integer' },
+    }),
+
+    // --- Security Controls Extended ---
+    newestValue({ source: 'endpoint.controls.security_tools_count', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.controls.security_tool' }),
+    newestValue({ source: 'endpoint.controls.last_patch_date' }),
+    newestValue({ source: 'endpoint.controls.xprotect_version' }),
+
+    // --- Persistence Detection ---
+    newestValue({
+      source: 'endpoint.persistence.custom_systemd_units_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.persistence.cron_jobs_count', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.persistence.cron_external_count', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.persistence.wmi_consumers_count', mapping: { type: 'integer' } }),
+    newestValue({
+      source: 'endpoint.persistence.unusual_kernel_modules_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.persistence.third_party_kext_count',
+      mapping: { type: 'integer' },
+    }),
+
+    // --- Unknown Knowns (Dormant Risk Detection) ---
+    newestValue({
+      source: 'endpoint.unknown_knowns.ssh_keys_over_180d',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.unknown_knowns.dormant_users_30d', mapping: { type: 'integer' } }),
+    collect({ source: 'endpoint.unknown_knowns.dormant_users_list' }),
+    newestValue({
+      source: 'endpoint.unknown_knowns.external_tasks_windows',
+      mapping: { type: 'integer' },
+    }),
+    collect({ source: 'endpoint.unknown_knowns.external_tasks_list' }),
+    newestValue({
+      source: 'endpoint.unknown_knowns.external_cron_jobs',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.unknown_knowns.external_launch_items',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.unknown_knowns.expiring_certs_30d', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.unknown_knowns.expired_certs', mapping: { type: 'integer' } }),
+    newestValue({
+      source: 'endpoint.unknown_knowns.nonstandard_system_services',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.unknown_knowns.nonstandard_root_processes',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.unknown_knowns.dormant_admins_90d', mapping: { type: 'integer' } }),
+    collect({ source: 'endpoint.unknown_knowns.dormant_admins_list' }),
+    newestValue({ source: 'endpoint.unknown_knowns.old_known_hosts', mapping: { type: 'integer' } }),
+    newestValue({
+      source: 'endpoint.unknown_knowns.total_dormant_risks',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.unknown_knowns.risk_level' }),
+
+    // --- Shadow IT Detection ---
+    newestValue({ source: 'endpoint.shadow_it.vpn_clients_count', mapping: { type: 'integer' } }),
+    collect({ source: 'endpoint.shadow_it.vpn_types' }),
+    newestValue({
+      source: 'endpoint.shadow_it.remote_access_tools_count',
+      mapping: { type: 'integer' },
+    }),
+    collect({ source: 'endpoint.shadow_it.remote_access_types' }),
+    newestValue({ source: 'endpoint.shadow_it.cloud_cli_count', mapping: { type: 'integer' } }),
+    collect({ source: 'endpoint.shadow_it.cloud_cli_types' }),
+
+    // --- Container Awareness ---
+    newestValue({
+      source: 'endpoint.container.running_containers_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.container.non_production_count', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.container.docker_images_count', mapping: { type: 'integer' } }),
+
+    // --- Software Supply Chain ---
+    newestValue({
+      source: 'endpoint.software.python_packages_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.software.npm_packages_count', mapping: { type: 'integer' } }),
+    newestValue({
+      source: 'endpoint.software.homebrew_packages_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.software.firefox_extensions_count',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.software.sensitive_extensions_count',
+      mapping: { type: 'integer' },
+    }),
   ],
 };

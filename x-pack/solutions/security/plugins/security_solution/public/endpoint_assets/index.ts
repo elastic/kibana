@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { EndpointAssetsPage } from './pages';
 export * from './components';
 export * from './hooks';

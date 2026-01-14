@@ -297,11 +297,32 @@ export class EndpointAssetsService {
   async initializeTransform(): Promise<void> {
     this.logger.info(`Initializing endpoint assets transform: ${this.transformId}`);
 
-    // Note: We don't create the index manually because the destination index pattern
-    // logs-osquery_manager.endpoint_assets-* matches a data stream template.
-    // The index will be created automatically when the transform writes data.
+    // 1. Create the destination index with proper mappings FIRST
+    // IMPORTANT: Must create index before transform starts, otherwise ES auto-creates
+    // the index from aggregation output structure (nested objects), and the ingest
+    // pipeline's flattening causes mapping conflicts.
+    const destIndex = `endpoint-assets-osquery-${this.namespace}`;
+    this.logger.info(`Creating destination index: ${destIndex}`);
+    const indexMapping = getAssetIndexMapping();
 
-    // 1. Create ingest pipeline first (required for transform to use it)
+    try {
+      await this.esClient.indices.create({
+        index: destIndex,
+        ...indexMapping,
+      });
+      this.logger.info(`Destination index ${destIndex} created successfully`);
+    } catch (error) {
+      if (
+        (error as { meta?: { body?: { error?: { type?: string } } } }).meta?.body?.error?.type ===
+        'resource_already_exists_exception'
+      ) {
+        this.logger.info(`Destination index ${destIndex} already exists`);
+      } else {
+        throw error;
+      }
+    }
+
+    // 2. Create ingest pipeline (required for transform to use it)
     const pipelineId = getAssetIngestPipelineId(this.namespace);
     const pipelineConfig = getAssetIngestPipeline(this.namespace);
     this.logger.info(`Creating ingest pipeline: ${pipelineId}`);
@@ -314,7 +335,7 @@ export class EndpointAssetsService {
 
     this.logger.info(`Ingest pipeline ${pipelineId} created successfully`);
 
-    // 2. Create transform
+    // 3. Create transform
     const transformConfig = getAssetFactsTransformConfig(this.namespace);
     await createTransform({
       esClient: this.esClient,
@@ -420,31 +441,46 @@ export class EndpointAssetsService {
   }
 
   async migrateTransform(): Promise<void> {
-    this.logger.info('Starting CAASM transform migration to v7.0.0 (state-centric model)');
+    this.logger.info('Starting CAASM transform migration to v8.0.0 (flattened structure)');
+
+    const destIndex = `endpoint-assets-osquery-${this.namespace}`;
 
     try {
       // 1. Stop existing transform
-      this.logger.info('Step 1/5: Stopping existing transform');
+      this.logger.info('Step 1/6: Stopping existing transform');
       await this.stopTransformService().catch((error) => {
         this.logger.warn(`Transform stop failed (may not exist): ${error.message}`);
       });
 
-      // 2. Delete old transform (keep data)
-      this.logger.info('Step 2/5: Deleting old transform configuration');
+      // 2. Delete old transform (keep data initially)
+      this.logger.info('Step 2/6: Deleting old transform configuration');
       await this.deleteTransformService().catch((error) => {
         this.logger.warn(`Transform delete failed (may not exist): ${error.message}`);
       });
 
-      // 3. Create new transform with updated config
-      this.logger.info('Step 3/5: Creating new transform with v7.0.0 configuration');
+      // 3. Delete old destination index (required because mappings changed from nested objects to flat primitives)
+      this.logger.info(`Step 3/6: Deleting old destination index: ${destIndex}`);
+      try {
+        await this.esClient.indices.delete({ index: destIndex });
+        this.logger.info(`Destination index ${destIndex} deleted successfully`);
+      } catch (error) {
+        if ((error as { statusCode?: number }).statusCode === 404) {
+          this.logger.info(`Destination index ${destIndex} does not exist, skipping delete`);
+        } else {
+          throw error;
+        }
+      }
+
+      // 4. Create new transform with updated config (this creates index + pipeline + transform)
+      this.logger.info('Step 4/6: Creating new transform with v8.0.0 configuration');
       await this.initializeTransform();
 
-      // 4. Start new transform
-      this.logger.info('Step 4/5: Starting new transform');
+      // 5. Start new transform
+      this.logger.info('Step 5/6: Starting new transform');
       await this.startTransform();
 
-      // 5. Verify transform is running
-      this.logger.info('Step 5/5: Verifying transform status');
+      // 6. Verify transform is running
+      this.logger.info('Step 6/6: Verifying transform status');
       const status = await this.getTransformStatus();
       if (status.status === 'started' || status.status === 'indexing') {
         this.logger.info(
@@ -456,7 +492,7 @@ export class EndpointAssetsService {
         );
       }
     } catch (error) {
-      this.logger.error(`CAASM transform migration failed: ${error.message}`);
+      this.logger.error(`CAASM transform migration failed: ${(error as Error).message}`);
       throw error;
     }
   }

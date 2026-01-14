@@ -9,4 +9,6 @@ export * from './constants';
 export * from './types';
 export * from './posture_queries';
 export * from './drift_queries';
+export * from './inventory_queries';
 export * from './security_finding_types';
+export * from './pack_generator';

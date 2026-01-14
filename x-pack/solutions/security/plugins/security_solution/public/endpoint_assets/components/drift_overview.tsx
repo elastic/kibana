@@ -84,6 +84,7 @@ export const DriftOverview: React.FC = React.memo(() => {
     );
   }
 
+  console.log({ data });
   const {
     total_events,
     events_by_category,
@@ -140,9 +141,7 @@ export const DriftOverview: React.FC = React.memo(() => {
       name: i18n.DRIFT_COLUMN_SEVERITY,
       width: '100px',
       render: (severity: string) => (
-        <EuiHealth color={getSeverityColor(severity)}>
-          {severity.toUpperCase()}
-        </EuiHealth>
+        <EuiHealth color={getSeverityColor(severity)}>{severity.toUpperCase()}</EuiHealth>
       ),
     },
   ];
@@ -164,7 +163,9 @@ export const DriftOverview: React.FC = React.memo(() => {
                 title={total_events}
                 description={i18n.DRIFT_EVENTS_24H}
                 titleSize="l"
-                titleColor={total_events > 50 ? 'danger' : total_events > 20 ? 'warning' : 'default'}
+                titleColor={
+                  total_events > 50 ? 'danger' : total_events > 20 ? 'warning' : 'default'
+                }
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -318,11 +319,7 @@ export const DriftOverview: React.FC = React.memo(() => {
               </EuiTitle>
               <EuiSpacer size="m" />
 
-              <EuiBasicTable<RecentChangeRow>
-                items={recentChanges}
-                columns={columns}
-                compressed
-              />
+              <EuiBasicTable<RecentChangeRow> items={recentChanges} columns={columns} compressed />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

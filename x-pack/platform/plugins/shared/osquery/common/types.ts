@@ -9,25 +9,3 @@ export const savedQuerySavedObjectType = 'osquery-saved-query';
 export const packSavedObjectType = 'osquery-pack';
 export const packAssetSavedObjectType = 'osquery-pack-asset';
 export const usageMetricSavedObjectType = 'osquery-manager-usage-metric';
-
-export type {
-  EndpointAssetDocument,
-  EndpointAssetEntity,
-  EndpointAssetInfo,
-  EndpointAssetHost,
-  EndpointAssetAgent,
-  EndpointAssetLifecycle,
-  EndpointAssetHardware,
-  EndpointAssetNetwork,
-  EndpointAssetNetworkInterface,
-  EndpointAssetSoftware,
-  EndpointAssetPosture,
-  EndpointAssetPostureChecks,
-  EndpointAssetPrivileges,
-  EndpointAssetDrift,
-  EndpointAssetQueries,
-  EndpointAssetEndpoint,
-  EndpointAssetEvent,
-} from './types/endpoint_assets';
-
-export { ENTITY_FIELDS, ASSET_FIELDS, ENDPOINT_FIELDS } from './types/endpoint_assets';

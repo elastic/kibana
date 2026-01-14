@@ -13,7 +13,7 @@
  * This pipeline:
  * 1. Sets drift.category based on query_id prefix
  * 2. Maps drift.severity based on category
- * 3. Copies osquery.action to drift.action
+ * 3. Copies osquery_meta.action to drift.action
  * 4. Sets event.* metadata fields
  * 5. Extracts drift.item details from osquery fields
  */
@@ -68,7 +68,7 @@ export const getDriftEventsPipeline = (namespace: string) => ({
     {
       set: {
         field: 'drift.action',
-        copy_from: 'osquery.action',
+        copy_from: 'osquery_meta.action',
         ignore_empty_value: true,
       },
     },
@@ -86,10 +86,21 @@ export const getDriftEventsPipeline = (namespace: string) => ({
           def category = ctx.drift.category;
 
           if (category == 'privileges') {
-            ctx.drift.item.type = 'user';
-            ctx.drift.item.name = osquery.username ?: 'unknown';
-            if (osquery.groupname != null) {
-              ctx.drift.item.value = osquery.groupname;
+            // User/group membership changes OR sudoers rule changes.
+            if (osquery.username != null) {
+              ctx.drift.item.type = 'user';
+              ctx.drift.item.name = osquery.username ?: 'unknown';
+              if (osquery.groupname != null) {
+                ctx.drift.item.value = osquery.groupname;
+              }
+            } else if (osquery.sudoers_header != null || osquery.header != null) {
+              ctx.drift.item.type = 'sudoers_rule';
+              ctx.drift.item.name = osquery.sudoers_header ?: osquery.header ?: 'unknown';
+              ctx.drift.item.value = osquery.sudoers_rule ?: osquery.rule_details;
+            } else {
+              ctx.drift.item.type = 'privilege_item';
+              ctx.drift.item.name = osquery.name ?: 'unknown';
+              ctx.drift.item.value = osquery.value;
             }
           } else if (category == 'persistence') {
             if (osquery.start_type != null) {
@@ -101,13 +112,25 @@ export const getDriftEventsPipeline = (namespace: string) => ({
             } else {
               ctx.drift.item.type = 'persistence_item';
             }
-            ctx.drift.item.name = osquery.name ?: 'unknown';
-            ctx.drift.item.value = osquery.path ?: osquery.action;
+            // Prefer stable identifiers for non-startup persistence types (systemd units, cron).
+            ctx.drift.item.name = osquery.name ?: osquery.command ?: osquery.id ?: 'unknown';
+            ctx.drift.item.value = osquery.path ?: osquery.fragment_path ?: osquery.action;
           } else if (category == 'network') {
-            ctx.drift.item.type = 'port';
-            ctx.drift.item.name = osquery.process_name ?: 'unknown';
-            if (osquery.port != null && osquery.protocol != null) {
-              ctx.drift.item.value = osquery.port.toString() + '/' + osquery.protocol;
+            // Ports OR network exposure objects (e.g., SMB shares).
+            if (osquery.port != null || osquery.protocol != null) {
+              ctx.drift.item.type = 'port';
+              ctx.drift.item.name = osquery.process_name ?: 'unknown';
+              if (osquery.port != null && osquery.protocol != null) {
+                ctx.drift.item.value = osquery.port.toString() + '/' + osquery.protocol;
+              }
+            } else if (osquery.share_name != null || osquery.share_path != null) {
+              ctx.drift.item.type = 'share';
+              ctx.drift.item.name = osquery.share_name ?: 'unknown';
+              ctx.drift.item.value = osquery.share_path;
+            } else {
+              ctx.drift.item.type = 'network_item';
+              ctx.drift.item.name = osquery.name ?: 'unknown';
+              ctx.drift.item.value = osquery.value;
             }
           } else if (category == 'software') {
             ctx.drift.item.type = 'software';

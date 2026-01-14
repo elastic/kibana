@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { EndpointAssetsPage } from './endpoint_assets_page';
+// Translations are re-exported for use by components
+export * from './translations';

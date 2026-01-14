@@ -80,6 +80,7 @@ export const riskScoreServiceFactory = ({
         assetCriticalityService,
         privmonUserCrudService,
         esClient,
+        namespace: spaceId,
         logger,
         experimentalFeatures,
         filters: params.filters || [],

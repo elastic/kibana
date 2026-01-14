@@ -314,3 +314,173 @@ export const DRIFT_NO_CHANGES = i18n.translate(
     defaultMessage: 'No drift events detected in the selected time range',
   }
 );
+
+// Unknown Knowns (Dormant Risk) Translations
+export const TAB_UNKNOWN_KNOWNS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.tabUnknownKnowns',
+  {
+    defaultMessage: 'Dormant Risks',
+  }
+);
+
+export const UNKNOWN_KNOWNS_ASSETS_AT_RISK = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsAssetsAtRisk',
+  {
+    defaultMessage: 'Assets at Risk',
+  }
+);
+
+export const UNKNOWN_KNOWNS_ASSETS_AT_RISK_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsAssetsAtRiskTooltip',
+  {
+    defaultMessage: 'Assets with at least one dormant risk indicator',
+  }
+);
+
+export const UNKNOWN_KNOWNS_OF_TOTAL_ASSETS = (total: number) =>
+  i18n.translate('xpack.securitySolution.endpointAssets.unknownKnownsOfTotalAssets', {
+    defaultMessage: 'of {total} total assets',
+    values: { total },
+  });
+
+export const UNKNOWN_KNOWNS_SSH_KEYS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsSshKeys',
+  {
+    defaultMessage: 'Old SSH Keys',
+  }
+);
+
+export const UNKNOWN_KNOWNS_SSH_KEYS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsSshKeysTooltip',
+  {
+    defaultMessage: 'SSH authorized keys older than 180 days that have not been rotated',
+  }
+);
+
+export const UNKNOWN_KNOWNS_DORMANT_USERS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsDormantUsers',
+  {
+    defaultMessage: 'Dormant Users',
+  }
+);
+
+export const UNKNOWN_KNOWNS_DORMANT_USERS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsDormantUsersTooltip',
+  {
+    defaultMessage: 'User accounts with no login activity in the last 30 days',
+  }
+);
+
+export const UNKNOWN_KNOWNS_EXTERNAL_TASKS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsExternalTasks',
+  {
+    defaultMessage: 'External Tasks',
+  }
+);
+
+export const UNKNOWN_KNOWNS_EXTERNAL_TASKS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsExternalTasksTooltip',
+  {
+    defaultMessage:
+      'Scheduled tasks, cron jobs, and launch items that call external URLs or resources',
+  }
+);
+
+export const UNKNOWN_KNOWNS_RISK_DISTRIBUTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsRiskDistribution',
+  {
+    defaultMessage: 'Risk Distribution',
+  }
+);
+
+export const UNKNOWN_KNOWNS_HIGH = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsHigh',
+  {
+    defaultMessage: 'High',
+  }
+);
+
+export const UNKNOWN_KNOWNS_MEDIUM = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsMedium',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+
+export const UNKNOWN_KNOWNS_LOW = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsLow',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
+export const UNKNOWN_KNOWNS_TOP_RISK_ASSETS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsTopRiskAssets',
+  {
+    defaultMessage: 'Top Assets by Dormant Risk',
+  }
+);
+
+export const UNKNOWN_KNOWNS_TOP_DORMANT_USERS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsTopDormantUsers',
+  {
+    defaultMessage: 'Most Common Dormant Users',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_HOST = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnHost',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_RISKS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnRisks',
+  {
+    defaultMessage: 'Risks',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnRiskLevel',
+  {
+    defaultMessage: 'Level',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_USERNAME = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnUsername',
+  {
+    defaultMessage: 'Username',
+  }
+);
+
+export const UNKNOWN_KNOWNS_COLUMN_ASSET_COUNT = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsColumnAssetCount',
+  {
+    defaultMessage: 'Assets',
+  }
+);
+
+export const UNKNOWN_KNOWNS_ERROR_LOADING = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsErrorLoading',
+  {
+    defaultMessage: 'Error loading dormant risks summary',
+  }
+);
+
+export const UNKNOWN_KNOWNS_NO_RISKS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsNoRisks',
+  {
+    defaultMessage: 'No dormant risks detected',
+  }
+);
+
+export const UNKNOWN_KNOWNS_NO_RISKS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.unknownKnownsNoRisksDescription',
+  {
+    defaultMessage:
+      'No old SSH keys, dormant users, or external scheduled tasks were detected across your fleet.',
+  }
+);

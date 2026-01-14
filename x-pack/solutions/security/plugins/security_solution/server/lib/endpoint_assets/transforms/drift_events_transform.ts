@@ -15,7 +15,7 @@ import { getDriftEventsPipelineId } from './drift_events_pipeline';
  *
  * This transform:
  * - Reads from logs-osquery_manager.result-{namespace} (osquery results)
- * - Filters for documents with osquery.action field (differential mode results)
+ * - Filters for documents with osquery_meta.action field (differential mode results)
  * - Filters for drift queries (query name starts with "Drift –")
  * - Enriches with drift metadata via ingest pipeline
  * - Outputs to endpoint-drift-events-{namespace}
@@ -37,13 +37,13 @@ export const getDriftEventsTransformConfig = (namespace: string): TransformPutTr
     query: {
       bool: {
         must: [
-          { exists: { field: 'osquery.action' } },
+          { exists: { field: 'osquery_meta.action' } },
           { exists: { field: 'host.id' } },
         ],
         should: [
-          { term: { 'osquery.action': 'added' } },
-          { term: { 'osquery.action': 'removed' } },
-          { term: { 'osquery.action': 'changed' } },
+          { term: { 'osquery_meta.action': 'added' } },
+          { term: { 'osquery_meta.action': 'removed' } },
+          { term: { 'osquery_meta.action': 'changed' } },
         ],
         minimum_should_match: 1,
         filter: [

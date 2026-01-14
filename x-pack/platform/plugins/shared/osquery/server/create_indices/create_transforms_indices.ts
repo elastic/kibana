@@ -13,11 +13,6 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { actionsMapping } from './actions_mapping';
 import { actionResponsesMapping } from './action_responses_mapping';
-import { endpointAssetsMapping } from './endpoint_assets_mapping';
-import {
-  ENDPOINT_ASSETS_INDEX_PREFIX,
-  ENDPOINT_ASSETS_DEFAULT_NAMESPACE,
-} from '../../common/constants';
 
 interface ESMappingObject {
   [key: string]: ESMappingValue;
@@ -31,10 +26,6 @@ export const ACTIONS_INDEX_DEFAULT_NS = '.logs-' + ACTIONS_INDEX_NAME + '-defaul
 export const ACTION_RESPONSES_INDEX_NAME = 'osquery_manager.action.responses';
 export const ACTION_RESPONSES_INDEX_DEFAULT_NS =
   '.logs-' + ACTION_RESPONSES_INDEX_NAME + '-default';
-
-export const ENDPOINT_ASSETS_INDEX_NAME = 'osquery_manager.endpoint_assets';
-export const ENDPOINT_ASSETS_INDEX_DEFAULT_NS =
-  ENDPOINT_ASSETS_INDEX_PREFIX + '-' + ENDPOINT_ASSETS_DEFAULT_NAMESPACE;
 
 export const initializeTransformsIndices = async (esClient: ElasticsearchClient, logger: Logger) =>
   Promise.all([
@@ -50,13 +41,6 @@ export const initializeTransformsIndices = async (esClient: ElasticsearchClient,
       ACTION_RESPONSES_INDEX_NAME,
       ACTION_RESPONSES_INDEX_DEFAULT_NS,
       actionResponsesMapping,
-      logger
-    ),
-    createIndexIfNotExists(
-      esClient,
-      ENDPOINT_ASSETS_INDEX_NAME,
-      ENDPOINT_ASSETS_INDEX_DEFAULT_NS,
-      endpointAssetsMapping,
       logger
     ),
   ]);

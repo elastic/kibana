@@ -56,6 +56,7 @@ import { usePrivileges } from '../hooks/use_privileges';
 import type { FindingType } from '../../../common/endpoint_assets';
 import { SecurityFindingsDetailFlyout } from '../components/security_findings_detail_flyout';
 import { DriftOverview } from '../../endpoint_assets/components/drift_overview';
+import { UnknownKnownsOverview } from '../../endpoint_assets/components/unknown_knowns_overview.tsx';
 
 const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.endpointAssets.pageTitle',
@@ -89,6 +90,13 @@ const TAB_PRIVILEGES = i18n.translate(
 const TAB_DRIFT = i18n.translate('xpack.securitySolution.entityAnalytics.endpointAssets.tabDrift', {
   defaultMessage: 'Drift',
 });
+
+export const TAB_UNKNOWN_KNOWNS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.tabUnknownKnowns',
+  {
+    defaultMessage: 'Dormant Risks',
+  }
+);
 
 // Constants - Use Entity Store index for all queries
 // The Entity Store aggregates data from endpoint-assets-osquery-* via the host entity engine
@@ -135,7 +143,7 @@ interface EndpointAssetRecord {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AssetDetailDocument = Record<string, any>;
 
-type TabId = 'inventory' | 'posture' | 'privileges' | 'drift';
+type TabId = 'inventory' | 'posture' | 'privileges' | 'drift' | 'unknown_knowns';
 
 // Helper functions
 const normalizePlatform = (platform: string): 'windows' | 'macos' | 'linux' | null => {
@@ -328,7 +336,11 @@ const useEndpointAssetsFromEntityStore = () => {
       };
       return {
         id: source.entity.id,
-        name: source.entity.name || getFirst(source.host?.hostname) || getFirst(source.host?.name) || 'Unknown',
+        name:
+          source.entity.name ||
+          getFirst(source.host?.hostname) ||
+          getFirst(source.host?.name) ||
+          'Unknown',
         hostname: getFirst(source.host?.hostname) || getFirst(source.host?.name) || '',
         platform: source.host?.os?.platform || getFirst(source.host?.os?.type) || 'unknown',
         osName: getFirst(source.host?.os?.name) || 'Unknown',
@@ -2423,6 +2435,11 @@ const EndpointAssetsPageComponent: React.FC = () => {
       id: 'drift',
       name: TAB_DRIFT,
       content: <DriftOverview />,
+    },
+    {
+      id: 'unknown_knowns',
+      name: TAB_UNKNOWN_KNOWNS,
+      content: <UnknownKnownsOverview />,
     },
   ];
 

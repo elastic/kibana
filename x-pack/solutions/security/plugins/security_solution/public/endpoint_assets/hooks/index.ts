@@ -11,3 +11,4 @@ export { usePostureSummary } from './use_posture_summary';
 export { usePrivilegesSummary } from './use_privileges_summary';
 export { useAssetDetail } from './use_asset_detail';
 export { useTransformStatus } from './use_transform_status';
+export { useUnknownKnownsSummary } from './use_unknown_knowns_summary';

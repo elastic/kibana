@@ -10,3 +10,4 @@ export { EndpointAssetsTable } from './endpoint_assets_table';
 export { AssetDetailFlyout } from './asset_detail_flyout';
 export { PostureOverview } from './posture_overview';
 export { PrivilegesOverview } from './privileges_overview';
+export { UnknownKnownsOverview } from './unknown_knowns_overview';

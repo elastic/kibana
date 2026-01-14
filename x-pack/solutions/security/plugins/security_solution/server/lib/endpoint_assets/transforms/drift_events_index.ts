@@ -12,7 +12,7 @@
  * Purpose: Store individual drift events extracted from osquery differential results
  *
  * This index stores granular drift events that are:
- * 1. Extracted from osquery differential query results (osquery.action field)
+ * 1. Extracted from osquery differential query results (osquery_meta.action field)
  * 2. Enriched with drift metadata (category, severity, item details)
  * 3. Aggregated to endpoint.drift fields in asset documents
  */

@@ -438,6 +438,278 @@ WHERE uid >= 500 OR uid = 0;
   },
 };
 
+// =============================================================================
+// UNKNOWN KNOWNS QUERIES - Dormant Risk Detection
+// =============================================================================
+
+/**
+ * SSH Authorized Keys with Age (Linux/macOS)
+ *
+ * Detects SSH keys that haven't been rotated in over 180 days.
+ * Old keys represent dormant access that may have been forgotten.
+ * Maps key age to osquery.key_age_days for transform aggregation.
+ */
+export const SSH_AUTHORIZED_KEYS_QUERY: PostureQuery = {
+  id: 'unknown_knowns_ssh_keys',
+  name: 'SSH Authorized Keys Age',
+  description: 'Query SSH authorized_keys with file modification times for Unknown Knowns detection',
+  query: `
+SELECT
+  ak.uid,
+  u.username,
+  ak.key_file,
+  ak.algorithm,
+  f.mtime,
+  CAST((strftime('%s', 'now') - f.mtime) / 86400 AS INTEGER) as key_age_days,
+  CASE
+    WHEN (strftime('%s', 'now') - f.mtime) > (180 * 86400) THEN '1'
+    ELSE '0'
+  END AS key_over_180d
+FROM authorized_keys ak
+JOIN users u ON ak.uid = u.uid
+JOIN file f ON f.path = ak.key_file
+WHERE u.uid >= 500 OR u.uid = 0;
+  `.trim(),
+  platform: 'posix',
+  interval: 86400, // Daily
+  ecsMapping: {
+    'osquery.key_file': { field: 'key_file' },
+    'osquery.algorithm': { field: 'algorithm' },
+    'osquery.mtime': { field: 'mtime' },
+    'osquery.key_age_days': { field: 'key_age_days' },
+    'osquery.key_over_180d': { field: 'key_over_180d' },
+    'osquery.username': { field: 'username' },
+  },
+};
+
+/**
+ * Dormant Users - No Login in 30+ Days (Linux/macOS)
+ *
+ * Detects user accounts that haven't logged in for over 30 days.
+ * Dormant accounts with privileges represent forgotten access risks.
+ * Maps to osquery.days_since_login for transform aggregation.
+ */
+export const DORMANT_USERS_QUERY: PostureQuery = {
+  id: 'unknown_knowns_dormant_users',
+  name: 'Dormant User Detection',
+  description: 'Query users with last login times for Unknown Knowns detection',
+  query: `
+SELECT
+  u.username,
+  u.uid,
+  u.gid,
+  u.directory,
+  u.shell,
+  COALESCE(l.time, 0) as last_login_time,
+  CASE
+    WHEN l.time IS NULL THEN 9999
+    ELSE CAST((strftime('%s', 'now') - l.time) / 86400 AS INTEGER)
+  END as days_since_login,
+  CASE
+    WHEN l.time IS NULL OR (strftime('%s', 'now') - l.time) > (30 * 86400) THEN '1'
+    ELSE '0'
+  END AS dormant_30d
+FROM users u
+LEFT JOIN last l ON u.username = l.username
+WHERE u.shell NOT LIKE '%nologin%'
+  AND u.shell NOT LIKE '%false%'
+  AND (u.uid >= 500 OR u.uid = 0);
+  `.trim(),
+  platform: 'posix',
+  interval: 86400, // Daily
+  ecsMapping: {
+    'osquery.username': { field: 'username' },
+    'osquery.last_login_time': { field: 'last_login_time' },
+    'osquery.days_since_login': { field: 'days_since_login' },
+    'osquery.dormant_30d': { field: 'dormant_30d' },
+    'osquery.user_shell': { field: 'shell' },
+  },
+};
+
+/**
+ * Windows Dormant Users - No Login in 30+ Days
+ *
+ * Detects Windows user accounts that haven't logged in for over 30 days.
+ * Uses logon_sessions and user_groups to identify dormant privileged accounts.
+ */
+export const WINDOWS_DORMANT_USERS_QUERY: PostureQuery = {
+  id: 'unknown_knowns_windows_dormant_users',
+  name: 'Windows Dormant User Detection',
+  description: 'Query Windows users with last logon times for Unknown Knowns detection',
+  query: `
+SELECT
+  u.username,
+  u.uid,
+  u.type,
+  u.directory,
+  COALESCE(
+    (SELECT MAX(logon_time) FROM logon_sessions ls WHERE ls.user = u.username),
+    0
+  ) as last_login_time,
+  CASE
+    WHEN (SELECT MAX(logon_time) FROM logon_sessions ls WHERE ls.user = u.username) IS NULL THEN 9999
+    ELSE CAST((strftime('%s', 'now') - (SELECT MAX(logon_time) FROM logon_sessions ls WHERE ls.user = u.username)) / 86400 AS INTEGER)
+  END as days_since_login,
+  CASE
+    WHEN (SELECT MAX(logon_time) FROM logon_sessions ls WHERE ls.user = u.username) IS NULL
+      OR (strftime('%s', 'now') - (SELECT MAX(logon_time) FROM logon_sessions ls WHERE ls.user = u.username)) > (30 * 86400)
+    THEN '1'
+    ELSE '0'
+  END AS dormant_30d
+FROM users u
+WHERE u.type = 'local';
+  `.trim(),
+  platform: 'windows',
+  interval: 86400, // Daily
+  ecsMapping: {
+    'osquery.username': { field: 'username' },
+    'osquery.last_login_time': { field: 'last_login_time' },
+    'osquery.days_since_login': { field: 'days_since_login' },
+    'osquery.dormant_30d': { field: 'dormant_30d' },
+  },
+};
+
+/**
+ * Windows Scheduled Tasks with External URLs
+ *
+ * Detects scheduled tasks that call external URLs (potential C2 or data exfil).
+ * Looks for http/https/curl/wget/Invoke-WebRequest patterns.
+ */
+export const WINDOWS_EXTERNAL_TASKS_QUERY: PostureQuery = {
+  id: 'unknown_knowns_windows_external_tasks',
+  name: 'Windows External Scheduled Tasks',
+  description: 'Query scheduled tasks calling external URLs for Unknown Knowns detection',
+  query: `
+SELECT
+  name,
+  action,
+  path,
+  enabled,
+  state,
+  last_run_time,
+  next_run_time,
+  CASE
+    WHEN action LIKE '%http://%' OR action LIKE '%https://%'
+      OR action LIKE '%curl%' OR action LIKE '%wget%'
+      OR action LIKE '%Invoke-WebRequest%' OR action LIKE '%Invoke-RestMethod%'
+      OR action LIKE '%Net.WebClient%' OR action LIKE '%DownloadString%'
+    THEN '1'
+    ELSE '0'
+  END AS calls_external
+FROM scheduled_tasks
+WHERE enabled = 1;
+  `.trim(),
+  platform: 'windows',
+  interval: 86400, // Daily
+  ecsMapping: {
+    'osquery.task_name': { field: 'name' },
+    'osquery.task_action': { field: 'action' },
+    'osquery.task_path': { field: 'path' },
+    'osquery.task_enabled': { field: 'enabled' },
+    'osquery.calls_external': { field: 'calls_external' },
+  },
+};
+
+/**
+ * Linux/macOS Cron Jobs with External URLs
+ *
+ * Detects cron jobs that call external URLs (potential C2 or data exfil).
+ * Looks for http/https/curl/wget patterns in crontab entries.
+ */
+export const CRON_EXTERNAL_JOBS_QUERY: PostureQuery = {
+  id: 'unknown_knowns_cron_external_jobs',
+  name: 'Cron Jobs with External URLs',
+  description: 'Query cron jobs calling external URLs for Unknown Knowns detection',
+  query: `
+SELECT
+  c.minute,
+  c.hour,
+  c.day_of_month,
+  c.month,
+  c.day_of_week,
+  c.command,
+  c.path,
+  CASE
+    WHEN c.command LIKE '%http://%' OR c.command LIKE '%https://%'
+      OR c.command LIKE '%curl %' OR c.command LIKE '%wget %'
+    THEN '1'
+    ELSE '0'
+  END AS calls_external
+FROM crontab c;
+  `.trim(),
+  platform: 'posix',
+  interval: 86400, // Daily
+  ecsMapping: {
+    'osquery.cron_command': { field: 'command' },
+    'osquery.cron_path': { field: 'path' },
+    'osquery.calls_external': { field: 'calls_external' },
+  },
+};
+
+/**
+ * macOS Launch Agents/Daemons with External URLs
+ *
+ * Detects launchd items that call external URLs.
+ */
+export const MACOS_LAUNCH_EXTERNAL_QUERY: PostureQuery = {
+  id: 'unknown_knowns_macos_launch_external',
+  name: 'macOS Launch Items with External URLs',
+  description: 'Query launch agents/daemons calling external URLs for Unknown Knowns detection',
+  query: `
+SELECT
+  name,
+  label,
+  program,
+  program_arguments,
+  path,
+  CASE
+    WHEN program_arguments LIKE '%http://%' OR program_arguments LIKE '%https://%'
+      OR program_arguments LIKE '%curl%' OR program_arguments LIKE '%wget%'
+    THEN '1'
+    ELSE '0'
+  END AS calls_external
+FROM launchd;
+  `.trim(),
+  platform: 'darwin',
+  interval: 86400, // Daily
+  ecsMapping: {
+    'osquery.launch_name': { field: 'name' },
+    'osquery.launch_label': { field: 'label' },
+    'osquery.launch_program': { field: 'program' },
+    'osquery.calls_external': { field: 'calls_external' },
+  },
+};
+
+/**
+ * All Unknown Knowns queries grouped by category
+ */
+export const UNKNOWN_KNOWNS_QUERIES = {
+  sshKeys: {
+    posix: SSH_AUTHORIZED_KEYS_QUERY,
+  },
+  dormantUsers: {
+    posix: DORMANT_USERS_QUERY,
+    windows: WINDOWS_DORMANT_USERS_QUERY,
+  },
+  externalTasks: {
+    windows: WINDOWS_EXTERNAL_TASKS_QUERY,
+    posix: CRON_EXTERNAL_JOBS_QUERY,
+    darwin: MACOS_LAUNCH_EXTERNAL_QUERY,
+  },
+} as const;
+
+/**
+ * Get all Unknown Knowns queries as a flat array
+ */
+export const getAllUnknownKnownsQueries = (): PostureQuery[] => [
+  SSH_AUTHORIZED_KEYS_QUERY,
+  DORMANT_USERS_QUERY,
+  WINDOWS_DORMANT_USERS_QUERY,
+  WINDOWS_EXTERNAL_TASKS_QUERY,
+  CRON_EXTERNAL_JOBS_QUERY,
+  MACOS_LAUNCH_EXTERNAL_QUERY,
+];
+
 /**
  * All posture queries grouped by category
  */

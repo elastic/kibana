@@ -312,6 +312,31 @@ export interface DriftEvent {
 }
 
 /**
+ * Unknown Knowns - Dormant risk indicators
+ * Detects forgotten access, old credentials, and external dependencies
+ */
+export interface EndpointUnknownKnowns {
+  /** SSH keys older than 180 days (not rotated) */
+  ssh_keys_over_180d: number;
+  /** Users with no login in 30+ days */
+  dormant_users_30d: number;
+  /** List of dormant usernames */
+  dormant_users_list?: string[];
+  /** Windows scheduled tasks calling external URLs */
+  external_tasks_windows: number;
+  /** Windows external task names */
+  external_tasks_list?: string[];
+  /** Linux/macOS cron jobs calling external URLs */
+  external_cron_jobs: number;
+  /** macOS launch items calling external URLs */
+  external_launch_items: number;
+  /** Total dormant risk count */
+  total_dormant_risks: number;
+  /** Risk level based on dormant risk count */
+  risk_level: 'low' | 'medium' | 'high';
+}
+
+/**
  * All endpoint-specific fields
  */
 export interface EndpointDomainFields {
@@ -322,6 +347,8 @@ export interface EndpointDomainFields {
   posture: EndpointPosture;
   privileges: EndpointPrivileges;
   drift: EndpointDrift;
+  /** Unknown Knowns - dormant risk indicators */
+  unknown_knowns?: EndpointUnknownKnowns;
 }
 
 // =============================================================================
@@ -439,6 +466,38 @@ export interface DriftSummaryResponse {
     severity: string;
   }>;
   time_range: string;
+}
+
+export interface UnknownKnownsSummaryResponse {
+  /** Total assets analyzed */
+  total_assets: number;
+  /** Assets with at least one dormant risk */
+  assets_with_dormant_risks: number;
+  /** Total SSH keys older than 180 days across fleet */
+  ssh_keys_over_180d: number;
+  /** Total dormant users (30+ days no login) across fleet */
+  dormant_users_30d: number;
+  /** Total external scheduled tasks/cron jobs */
+  external_tasks_total: number;
+  /** Distribution by risk level */
+  risk_distribution: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  /** Top assets by dormant risk count */
+  top_risk_assets: Array<{
+    entity_id: string;
+    entity_name: string;
+    platform: string;
+    total_dormant_risks: number;
+    risk_level: string;
+  }>;
+  /** Most common dormant users across fleet */
+  top_dormant_users: Array<{
+    username: string;
+    asset_count: number;
+  }>;
 }
 
 export interface DriftEventsRequest {
