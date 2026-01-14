@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -455,11 +455,17 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [{ term: { concurrencyGroupKey: 'server-1' } }, { term: { spaceId: 'default' } }],
-            must_not: [
+            filter: [
+              { term: { concurrencyGroupKey: 'server-1' } },
+              { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: TerminalExecutionStatuses,
+                  status: [
+                    ExecutionStatus.PENDING,
+                    ExecutionStatus.WAITING,
+                    ExecutionStatus.WAITING_FOR_INPUT,
+                    ExecutionStatus.RUNNING,
+                  ],
                 },
               },
             ],
@@ -495,14 +501,24 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [{ term: { concurrencyGroupKey: 'server-1' } }, { term: { spaceId: 'default' } }],
-            must_not: [
+            filter: [
+              { term: { concurrencyGroupKey: 'server-1' } },
+              { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: TerminalExecutionStatuses,
+                  status: [
+                    ExecutionStatus.PENDING,
+                    ExecutionStatus.WAITING,
+                    ExecutionStatus.WAITING_FOR_INPUT,
+                    ExecutionStatus.RUNNING,
+                  ],
                 },
               },
-              { term: { id: 'exec-1' } },
+              {
+                bool: {
+                  must_not: [{ term: { id: 'exec-1' } }],
+                },
+              },
             ],
           },
         },

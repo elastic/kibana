@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
@@ -297,30 +297,36 @@ export class WorkflowExecutionRepository {
     excludeExecutionId?: string,
     size: number = 5000
   ): Promise<string[]> {
-    const mustClauses: Array<Record<string, unknown>> = [
+    const filterClauses: Array<Record<string, unknown>> = [
       { term: { concurrencyGroupKey } },
       { term: { spaceId } },
-    ];
-
-    // Exclude terminal statuses - include PENDING, RUNNING, WAITING, etc.
-    const mustNotClauses: Array<Record<string, unknown>> = [
+      // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
-          status: TerminalExecutionStatuses,
+          status: [
+            ExecutionStatus.PENDING,
+            ExecutionStatus.WAITING,
+            ExecutionStatus.WAITING_FOR_INPUT,
+            ExecutionStatus.RUNNING,
+          ],
         },
       },
     ];
 
+    // Add exclusion as a nested bool query in filter context
     if (excludeExecutionId) {
-      mustNotClauses.push({ term: { id: excludeExecutionId } });
+      filterClauses.push({
+        bool: {
+          must_not: [{ term: { id: excludeExecutionId } }],
+        },
+      });
     }
 
     const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
       index: this.indexName,
       query: {
         bool: {
-          must: mustClauses,
-          must_not: mustNotClauses.length > 0 ? mustNotClauses : undefined,
+          filter: filterClauses, // Filter context = no scoring = faster
         },
       },
       _source: ['id'], // Only fetch ID field for efficiency
