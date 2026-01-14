@@ -9,12 +9,12 @@
 
 import { isFilterPinned, type Query } from '@kbn/es-query';
 import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import type { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
-import type { DashboardLocatorParams } from '..';
+import { DashboardNavigationOptions } from '../../server';
+import { DashboardLocatorParams } from '../types';
 
 export const getDashboardLocatorParamsFromEmbeddable = (
   api: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>,
-  options: DashboardDrilldownOptions
+  options: DashboardNavigationOptions
 ): Partial<DashboardLocatorParams> => {
   const params: DashboardLocatorParams = {};
 

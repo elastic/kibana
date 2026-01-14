@@ -112,15 +112,15 @@ export class DashboardPageLinks extends FtrService {
     }
 
     await this.testSubjects.setEuiSwitch(
-      'dashboardDrillDownOptions--useCurrentFilters--checkbox',
+      'dashboardNavigationOptions--useCurrentFilters--checkbox',
       useCurrentFilters ? 'check' : 'uncheck'
     );
     await this.testSubjects.setEuiSwitch(
-      'dashboardDrillDownOptions--useCurrentDateRange--checkbox',
+      'dashboardNavigationOptions--useCurrentDateRange--checkbox',
       useCurrentDateRange ? 'check' : 'uncheck'
     );
     await this.testSubjects.setEuiSwitch(
-      'dashboardDrillDownOptions--openInNewTab--checkbox',
+      'dashboardNavigationOptions--openInNewTab--checkbox',
       openInNewTab ? 'check' : 'uncheck'
     );
 

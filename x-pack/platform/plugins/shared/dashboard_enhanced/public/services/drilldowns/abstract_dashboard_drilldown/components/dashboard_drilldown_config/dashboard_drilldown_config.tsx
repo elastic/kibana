@@ -8,15 +8,10 @@
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
-import {
-  withSuspense,
-  DashboardDrilldownOptionsComponent,
-} from '@kbn/presentation-util-plugin/public';
+import { DashboardNavigationOptionsEditor } from '@kbn/dashboard-plugin/public';
 
 import { txtChooseDestinationDashboard } from './i18n';
 import type { Config as DrilldownConfig } from '../../types';
-
-const DashboardDrilldownOptions = withSuspense(DashboardDrilldownOptionsComponent, null);
 
 export interface DashboardDrilldownConfigProps {
   dashboards: Array<EuiComboBoxOptionOption<string>>;
@@ -57,7 +52,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
           isInvalid={!!error}
         />
       </EuiFormRow>
-      <DashboardDrilldownOptions options={config} onOptionChange={onConfigChange} />
+      <DashboardNavigationOptionsEditor options={config} onOptionChange={onConfigChange} />
     </>
   );
 };

@@ -18,8 +18,8 @@ import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
-import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
 
 import type { LinksLayoutType } from '../../../common/content_management';
 import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
@@ -89,9 +89,9 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
     if (!link.destination || link.destination === parentDashboardId) return;
 
     const linkOptions = {
-      ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+      ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       ...link.options,
-    } as DashboardDrilldownOptions;
+    } as DashboardNavigationOptions;
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,

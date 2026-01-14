@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -22,6 +21,7 @@ import type { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
 
 function createMockLinksParent({
   initialQuery,
@@ -132,7 +132,7 @@ describe('Dashboard link component', () => {
     renderComponent({
       link: {
         ...resolvedLink,
-        options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
+        options: { ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS, openInNewTab: true },
       },
       parentApi,
     });
@@ -170,7 +170,7 @@ describe('Dashboard link component', () => {
     renderComponent({
       link: {
         ...resolvedLink,
-        options: DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
       parentApi,
     });
@@ -205,7 +205,7 @@ describe('Dashboard link component', () => {
       link: {
         ...resolvedLink,
         options: {
-          ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+          ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
           useCurrentDateRange: false,
         },
       },
@@ -241,7 +241,7 @@ describe('Dashboard link component', () => {
       link: {
         ...resolvedLink,
         options: {
-          ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+          ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
           useCurrentFilters: false,
         },
       },

@@ -23,11 +23,12 @@ export type { DashboardStart } from './plugin';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
+export { DashboardNavigationOptionsEditor } from './dashboard_navigation';
 export type { RedirectToProps } from './dashboard_app/types';
 
 export type { FindDashboardsByIdResponse } from './dashboard_client';
 
-export { DASHBOARD_APP_ID } from '../common/page_bundle_constants';
+export { DASHBOARD_APP_ID, DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '../common/page_bundle_constants';
 export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';
 export { getDashboardLocatorParamsFromEmbeddable } from '../common/locator/get_dashboard_locator_params';
 

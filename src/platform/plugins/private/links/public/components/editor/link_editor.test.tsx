@@ -42,7 +42,7 @@ describe('LinksEditor', () => {
 
   const getOptionAriaChecked = (option: string): string | null => {
     return screen
-      .getByTestId(`dashboardDrillDownOptions--${option}--checkbox`)
+      .getByTestId(`dashboardNavigationOptions--${option}--checkbox`)
       .getAttribute('aria-checked');
   };
 
@@ -50,7 +50,7 @@ describe('LinksEditor', () => {
     test('starts with default when options not provided', async () => {
       render(<LinkEditor {...defaultProps} />);
       await waitFor(() => {
-        expect(screen.queryByTestId('dashboardDrillDownOptions')).not.toBeNull(); // wait for lazy load
+        expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
       expect(getOptionAriaChecked('useCurrentFilters')).toBe('true');
@@ -69,7 +69,7 @@ describe('LinksEditor', () => {
         />
       );
       await waitFor(() => {
-        expect(screen.queryByTestId('dashboardDrillDownOptions')).not.toBeNull(); // wait for lazy load
+        expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
       expect(getOptionAriaChecked('useCurrentFilters')).toBe('false');
@@ -88,7 +88,7 @@ describe('LinksEditor', () => {
         />
       );
       await waitFor(() => {
-        expect(screen.queryByTestId('dashboardDrillDownOptions')).not.toBeNull(); // wait for lazy load
+        expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
       await userEvent.click(screen.getByTestId('links--linkEditor--linkLabel--input'));
