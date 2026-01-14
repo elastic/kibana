@@ -1,0 +1,31 @@
+# DERIV
+
+Calculates the derivative over time of a numeric field using linear regression.
+
+```
+stack: preview 9.3.0
+serverless: preview
+```
+
+**Syntax**
+`DERIV(field, window)`
+
+### Parameters
+
+#### `field`
+
+the metric field to calculate the value for
+
+#### `window`
+
+the time window over which to compute the derivative over time
+
+**Supported types**
+
+**Example**
+```esql
+TS datenanos-k8s
+| WHERE pod == "three"
+| STATS max_deriv = MAX(DERIV(network.cost)) BY time_bucket = BUCKET(@timestamp,5minute), pod
+```
+

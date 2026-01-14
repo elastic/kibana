@@ -1,0 +1,32 @@
+# COUNT_DISTINCT_OVER_TIME
+
+Calculates the count of distinct values over time for a field.
+
+```
+stack: preview 9.2.0
+serverless: preview
+```
+
+**Syntax**
+`COUNT_DISTINCT_OVER_TIME(field, precision)`
+
+### Parameters
+
+#### `field`
+
+the metric field to calculate the value for
+
+#### `precision`
+
+Precision threshold. Refer to `AGG-COUNT-DISTINCT-APPROXIMATE`. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.
+
+**Supported types**
+
+**Example**
+```esql
+TS k8s
+| STATS distincts=COUNT_DISTINCT(COUNT_DISTINCT_OVER_TIME(network.cost)),
+        distincts_imprecise=COUNT_DISTINCT(COUNT_DISTINCT_OVER_TIME(network.cost, 100))
+  BY cluster, time_bucket = TBUCKET(1minute)
+```
+

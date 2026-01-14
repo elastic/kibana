@@ -1,0 +1,6 @@
+# LOGICAL OPERATORS
+
+The following logical operators are supported:
+- `AND`
+- `OR`
+- `NOT`

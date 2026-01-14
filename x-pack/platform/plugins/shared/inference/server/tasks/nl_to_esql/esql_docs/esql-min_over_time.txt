@@ -1,0 +1,30 @@
+# MIN_OVER_TIME
+
+Calculates the minimum over time value of a field.
+
+```
+stack: preview 9.2.0
+serverless: preview
+```
+
+**Syntax**
+`MIN_OVER_TIME(field, window)`
+
+### Parameters
+
+#### `field`
+
+the metric field to calculate the value for
+
+#### `window`
+
+the time window over which to compute the minimum
+
+**Supported types**
+
+**Example**
+```esql
+TS k8s
+| STATS cost=SUM(MIN_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)
+```
+

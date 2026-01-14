@@ -1,0 +1,34 @@
+# CLAMP
+
+Limits (or clamps) the values of all samples to have a lower limit of min and an upper limit of max.
+
+```
+stack: preview 9.3.0
+```
+
+**Syntax**
+`CLAMP(field, min, max)`
+
+### Parameters
+
+#### `field`
+
+Numeric expression. If `null`, the function returns `null`.
+
+#### `min`
+
+The min value to clamp data into.
+
+#### `max`
+
+The max value to clamp data into.
+
+**Supported types**
+
+**Example**
+```esql
+TS k8s
+| EVAL full_clamped_cost = clamp(network.cost, clamp_max(network.bytes_in, 5), network.bytes_in / 100)
+| KEEP full_clamped_cost, @timestamp
+```
+

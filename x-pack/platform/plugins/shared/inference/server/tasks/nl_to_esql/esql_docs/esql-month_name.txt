@@ -1,0 +1,24 @@
+# MONTH_NAME
+
+Returns the month name for the provided date based on the configured Locale.
+
+```
+stack: ga 9.2.0
+```
+
+**Syntax**
+`MONTH_NAME(date)`
+
+### Parameters
+
+#### `date`
+
+Date expression. If `null`, the function returns `null`.
+
+**Supported types**
+
+**Example**
+```esql
+ROW dt = to_datetime("1996-03-21T00:00:00.000Z")
+| EVAL monthName = MONTH_NAME(dt);
+```

@@ -1,0 +1,102 @@
+# GEOMETRY FUNCTIONS
+
+Extracts the `x` coordinate from the supplied point. If the point is of type `geo_point` this is equivalent to extracting the `longitude` value.
+
+### `ST_X`
+
+**Syntax**
+`GEOMETRY FUNCTIONS(point, point, geometry, geometry, tolerance)`
+
+### Parameters
+
+#### `point`
+
+Expression of type `geo_point` or `cartesian_point`. If `null`, the function returns `null`.
+
+**Supported types**
+
+**Example**
+```esql
+ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
+| EVAL x =  ST_X(point), y = ST_Y(point)
+```
+
+### `ST_Y`
+
+**Syntax**
+`GEOMETRY FUNCTIONS(point, point, geometry, geometry, tolerance)`
+
+### Parameters
+
+#### `point`
+
+Expression of type `geo_point` or `cartesian_point`. If `null`, the function returns `null`.
+
+**Description**
+Extracts the `y` coordinate from the supplied point. If the point is of type `geo_point` this is equivalent to extracting the `latitude` value.
+**Supported types**
+
+**Example**
+```esql
+ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
+| EVAL x =  ST_X(point), y = ST_Y(point)
+```
+
+### `ST_NPOINTS`
+
+```
+stack: preview 9.4.0
+serverless: preview
+```
+
+**Syntax**
+`GEOMETRY FUNCTIONS(point, point, geometry, geometry, tolerance)`
+
+### Parameters
+
+#### `geometry`
+
+Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
+
+**Description**
+Counts the number of points in the supplied geometry.
+**Supported types**
+
+**Example**
+```esql
+FROM airport_city_boundaries
+| WHERE abbrev == "CPH"
+| EVAL points = ST_NPOINTS(city_boundary)
+| KEEP abbrev, airport, points
+```
+
+### `ST_SIMPLIFY`
+
+```
+stack: preview 9.4.0
+serverless: preview
+```
+
+**Syntax**
+`GEOMETRY FUNCTIONS(point, point, geometry, geometry, tolerance)`
+
+### Parameters
+
+#### `geometry`
+
+Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
+
+#### `tolerance`
+
+Tolerance for the geometry simplification, in the units of the input SRS
+
+**Description**
+Simplifies the input geometry by applying the Douglas-Peucker algorithm with a specified tolerance. Vertices that fall within the tolerance distance from the simplified shape are removed. Note that the resulting geometry may be invalid, even if the original input was valid.
+**Supported types**
+
+**Example**
+```esql
+ROW wkt = "POLYGON ((7.998 53.827, 9.470 53.068, 15.754 53.801, 16.523 57.160, 11.162 57.868, 8.064 57.445, 6.219 55.317, 7.998 53.827))"
+| EVAL simplified = ST_SIMPLIFY(TO_GEOSHAPE(wkt), 0.7)
+```
+

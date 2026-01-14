@@ -1,0 +1,31 @@
+# V_HAMMING
+
+Calculates the Hamming distance between two dense vectors.
+
+```
+stack: preview 9.3.0
+serverless: preview
+```
+
+**Syntax**
+`V_HAMMING(left, right)`
+
+### Parameters
+
+#### `left`
+
+First dense_vector to use to calculate the Hamming distance
+
+#### `right`
+
+Second dense_vector to use to calculate the Hamming distance
+
+**Supported types**
+
+**Example**
+```esql
+from colors
+| eval similarity = v_hamming(rgb_byte_vector, [0, 127, 127])
+| sort similarity desc, color asc
+```
+

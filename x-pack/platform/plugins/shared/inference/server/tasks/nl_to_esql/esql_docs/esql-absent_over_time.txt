@@ -1,0 +1,31 @@
+# ABSENT_OVER_TIME
+
+Calculates the absence of a field in the output result over time range.
+
+```
+stack: preview 9.2.0
+serverless: preview
+```
+
+**Syntax**
+`ABSENT_OVER_TIME(field, window)`
+
+### Parameters
+
+#### `field`
+
+the metric field to calculate the value for
+
+#### `window`
+
+the time window over which to compute the absent over time
+
+**Supported types**
+
+**Example**
+```esql
+TS k8s
+| WHERE cluster == "prod" AND pod == "two"
+| STATS events_received = MAX(ABSENT_OVER_TIME(events_received)) BY pod, time_bucket = TBUCKET(2 minute)
+```
+

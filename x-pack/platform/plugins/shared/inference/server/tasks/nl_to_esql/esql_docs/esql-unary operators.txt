@@ -1,0 +1,7 @@
+# UNARY OPERATORS
+
+The only unary operator is negation (`-`):
+**Syntax**
+`UNARY OPERATORS()`
+
+**Supported types**

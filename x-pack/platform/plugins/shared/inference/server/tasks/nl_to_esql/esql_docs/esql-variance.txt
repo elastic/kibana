@@ -1,0 +1,19 @@
+# VARIANCE
+
+The population variance of a numeric field.
+
+**Syntax**
+`VARIANCE(number)`
+
+### Parameters
+
+#### `number`
+
+**Supported types**
+
+**Example**
+```esql
+FROM employees
+| STATS var_height = VARIANCE(height)
+```
+

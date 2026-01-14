@@ -1,0 +1,148 @@
+# INFIX OPERATORS
+
+- Cast `::`
+- `IN`
+- `LIKE`
+- `RLIKE`
+- Match `:` `stack: preview` `serverless: preview`
+
+### Cast (`::`)
+
+The `::` operator provides a convenient alternative syntax to the TO_<type> conversion functions.
+**Example**
+```esql
+ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
+```
+
+### `IN`
+
+The `IN` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions.
+**Example**
+```esql
+ROW a = 1, b = 4, c = 3
+| WHERE c-a IN (3, b / 2, a)
+```
+
+### `LIKE`
+
+Use `LIKE` to filter data based on string patterns using wildcards. `LIKE` usually acts on a field placed on the left-hand side of the operator, but it can also act on a constant (literal) expression. The right-hand side of the operator represents the pattern.
+The following wildcard characters are supported:
+- `*` matches zero or more characters.
+- `?` matches one character.
+
+**Supported types**
+
+**Example**
+```esql
+FROM employees
+| WHERE first_name LIKE """?b*"""
+| KEEP first_name, last_name
+```
+
+Matching the exact characters `*` and `.` will require escaping.
+The escape character is backslash `\`. Since also backslash is a special character in string literals,
+it will require further escaping.
+```esql
+ROW message = "foo * bar"
+| WHERE message LIKE "foo \\* bar"
+```
+
+To reduce the overhead of escaping, we suggest using triple quotes strings `"""`
+```esql
+ROW message = "foo * bar"
+| WHERE message LIKE """foo \* bar"""
+```
+
+```
+stack: ga 9.1
+serverless: ga
+```
+
+Both a single pattern or a list of patterns are supported. If a list of patterns is provided,
+the expression will return true if any of the patterns match.
+```esql
+ROW message = "foobar"
+| WHERE message like ("foo*", "bar?")
+```
+
+Patterns may be specified with REST query placeholders as well
+```esql
+FROM employees
+| WHERE first_name LIKE ?pattern
+| KEEP first_name, last_name
+```
+
+```
+stack: ga 9.3
+```
+
+### `RLIKE`
+
+Use `RLIKE` to filter data based on string patterns using regular expressions. `RLIKE` usually acts on a field placed on the left-hand side of the operator, but it can also act on a constant (literal) expression. The right-hand side of the operator represents the pattern.
+**Supported types**
+
+**Example**
+```esql
+FROM employees
+| WHERE first_name RLIKE """.leja.*"""
+| KEEP first_name, last_name
+```
+
+Matching special characters (eg. `.`, `*`, `(`...) will require escaping.
+The escape character is backslash `\`. Since also backslash is a special character in string literals,
+it will require further escaping.
+```esql
+ROW message = "foo ( bar"
+| WHERE message RLIKE "foo \\( bar"
+```
+
+To reduce the overhead of escaping, we suggest using triple quotes strings `"""`
+```esql
+ROW message = "foo ( bar"
+| WHERE message RLIKE """foo \( bar"""
+```
+
+```
+stack: ga 9.2
+serverless: ga
+```
+
+Both a single pattern or a list of patterns are supported. If a list of patterns is provided,
+the expression will return true if any of the patterns match.
+```esql
+ROW message = "foobar"
+| WHERE message RLIKE ("foo.*", "bar.")
+```
+
+Patterns may be specified with REST query placeholders as well
+```esql
+FROM employees
+| WHERE first_name RLIKE ?pattern
+| KEEP first_name, last_name
+```
+
+```
+stack: ga 9.3
+```
+
+### Match operator (`:`)
+
+```
+stack: preview 9.0, ga 9.1
+```
+
+The only search operator is match (`:`).
+**Syntax**
+`INFIX OPERATORS()`
+
+The match operator performs a match query on the specified field. Returns true if the provided query matches the row.
+The match operator is equivalent to the match function.
+For using the function syntax, or adding match query parameters, you can use the match function.
+**Supported types**
+
+**Example**
+```esql
+FROM books
+| WHERE author:"Faulkner"
+```
+

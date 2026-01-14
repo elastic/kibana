@@ -1,0 +1,39 @@
+# ABSENT
+
+Returns true if the input expression yields no non-null values within the current aggregation context. Otherwise it returns false.
+
+```
+stack: ga 9.2.0
+```
+
+**Syntax**
+`ABSENT(field)`
+
+### Parameters
+
+#### `field`
+
+Expression that outputs values to be checked for absence.
+
+**Supported types**
+
+**Examples**
+```esql
+FROM employees
+| WHERE emp_no == 10020
+| STATS is_absent = ABSENT(languages)
+```
+
+To check for the absence inside a group use `ABSENT()` and `BY` clauses
+```esql
+FROM employees
+| STATS is_absent = ABSENT(salary) BY languages
+```
+
+To check for the absence and return 1 when it's true and 0 when it's false you can use to_integer()
+```esql
+FROM employees
+| WHERE emp_no == 10020
+| STATS is_absent = TO_INTEGER(ABSENT(languages))
+```
+

@@ -1,0 +1,23 @@
+# SHA256
+
+Computes the SHA256 hash of the input.
+
+**Syntax**
+`SHA256(input)`
+
+### Parameters
+
+#### `input`
+
+Input to hash.
+
+**Supported types**
+
+**Example**
+```esql
+FROM sample_data
+| WHERE message != "Connection error"
+| EVAL sha256 = sha256(message)
+| KEEP message, sha256
+```
+

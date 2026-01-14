@@ -1,0 +1,132 @@
+# GEOSPATIAL PREDICATES
+
+Computes the distance between two points. For cartesian geometries, this is the pythagorean distance in the same units as the original coordinates. For geographic geometries, this is the circular distance along the great circle in meters.
+
+### `ST_DISTANCE`
+
+**Syntax**
+`GEOSPATIAL PREDICATES(geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB)`
+
+### Parameters
+
+#### `geomA`
+
+Expression of type `geo_point` or `cartesian_point`. If `null`, the function returns `null`.
+
+#### `geomB`
+
+Expression of type `geo_point` or `cartesian_point`. If `null`, the function returns `null`. The second parameter must also have the same coordinate system as the first. This means it is not possible to combine `geo_point` and `cartesian_point` parameters.
+
+**Supported types**
+
+**Example**
+```esql
+FROM airports
+| WHERE abbrev == "CPH"
+| EVAL distance = ST_DISTANCE(location, city_location)
+| KEEP abbrev, name, location, city_location, distance
+```
+
+### `ST_INTERSECTS`
+
+**Syntax**
+`GEOSPATIAL PREDICATES(geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB)`
+
+### Parameters
+
+#### `geomA`
+
+Expression that is either a geometry (`geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`) or a geo-grid value (`geohash`, `geotile`, `geohex`). If `null`, the function returns `null`.
+
+#### `geomB`
+
+Expression that is either a geometry (`geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`) or a geo-grid value (`geohash`, `geotile`, `geohex`). If `null`, the function returns `null`. The second parameter must also have the same coordinate system as the first. This means it is not possible to combine `geo_*` and `cartesian_*` parameters.
+
+**Description**
+Returns true if two geometries intersect. They intersect if they have any point in common, including their interior points (points along lines or within polygons). This is the inverse of the ST_DISJOINT function. In mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅
+**Supported types**
+
+**Example**
+```esql
+FROM airports
+| WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
+```
+
+### `ST_DISJOINT`
+
+**Syntax**
+`GEOSPATIAL PREDICATES(geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB)`
+
+### Parameters
+
+#### `geomA`
+
+Expression that is either a geometry (`geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`) or a geo-grid value (`geohash`, `geotile`, `geohex`). If `null`, the function returns `null`.
+
+#### `geomB`
+
+Expression that is either a geometry (`geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`) or a geo-grid value (`geohash`, `geotile`, `geohex`). If `null`, the function returns `null`. The second parameter must also have the same coordinate system as the first. This means it is not possible to combine `geo_*` and `cartesian_*` parameters.
+
+**Description**
+Returns whether the two geometries or geometry columns are disjoint. This is the inverse of the ST_INTERSECTS function. In mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅
+**Supported types**
+
+**Example**
+```esql
+FROM airport_city_boundaries
+| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+
+### `ST_CONTAINS`
+
+**Syntax**
+`GEOSPATIAL PREDICATES(geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB)`
+
+### Parameters
+
+#### `geomA`
+
+Expression of type `geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`. If `null`, the function returns `null`.
+
+#### `geomB`
+
+Expression of type `geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`. If `null`, the function returns `null`. The second parameter must also have the same coordinate system as the first. This means it is not possible to combine `geo_*` and `cartesian_*` parameters.
+
+**Description**
+Returns whether the first geometry contains the second geometry. This is the inverse of the ST_WITHIN function.
+**Supported types**
+
+**Example**
+```esql
+FROM airport_city_boundaries
+| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+
+### `ST_WITHIN`
+
+**Syntax**
+`GEOSPATIAL PREDICATES(geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB, geomA, geomB)`
+
+### Parameters
+
+#### `geomA`
+
+Expression of type `geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`. If `null`, the function returns `null`.
+
+#### `geomB`
+
+Expression of type `geo_point`, `cartesian_point`, `geo_shape` or `cartesian_shape`. If `null`, the function returns `null`. The second parameter must also have the same coordinate system as the first. This means it is not possible to combine `geo_*` and `cartesian_*` parameters.
+
+**Description**
+Returns whether the first geometry is within the second geometry. This is the inverse of the ST_CONTAINS function.
+**Supported types**
+
+**Example**
+```esql
+FROM airport_city_boundaries
+| WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+

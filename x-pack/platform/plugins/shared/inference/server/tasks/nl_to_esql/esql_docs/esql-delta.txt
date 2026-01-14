@@ -1,0 +1,31 @@
+# DELTA
+
+Calculates the absolute change of a gauge field in a time window.
+
+```
+stack: preview 9.2.0
+serverless: preview
+```
+
+**Syntax**
+`DELTA(field, window)`
+
+### Parameters
+
+#### `field`
+
+the metric field to calculate the value for
+
+#### `window`
+
+the time window over which to compute the delta over time
+
+**Supported types**
+
+**Example**
+```esql
+TS k8s
+| WHERE pod == "one"
+| STATS tx = SUM(DELTA(network.bytes_in)) BY cluster, time_bucket = TBUCKET(10minute)
+```
+

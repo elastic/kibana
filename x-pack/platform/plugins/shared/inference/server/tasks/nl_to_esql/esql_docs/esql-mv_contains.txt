@@ -1,0 +1,41 @@
+# MV_CONTAINS
+
+Checks if all values yielded by the second multivalue expression are present in the values yielded by the first multivalue expression. Returns a boolean. Null values are treated as an empty set.
+
+```
+stack: preview 9.2.0
+```
+
+**Syntax**
+`MV_CONTAINS(superset, subset)`
+
+### Parameters
+
+#### `superset`
+
+Multivalue expression.
+
+#### `subset`
+
+Multivalue expression.
+
+**Supported types**
+
+**Examples**
+```esql
+ROW set = ["a", "b", "c"], element = "a"
+| EVAL set_contains_element = mv_contains(set, element)
+```
+
+```esql
+ROW setA = ["a","c"], setB = ["a", "b", "c"]
+| EVAL a_subset_of_b = mv_contains(setB, setA)
+| EVAL b_subset_of_a = mv_contains(setA, setB)
+```
+
+```esql
+FROM airports
+| WHERE mv_contains(type, ["major","military"]) AND scalerank == 9
+| KEEP scalerank, name, country
+```
+

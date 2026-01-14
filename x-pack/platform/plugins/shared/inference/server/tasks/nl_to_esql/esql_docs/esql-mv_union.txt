@@ -1,0 +1,55 @@
+# MV_UNION
+
+Returns all unique values from the combined input fields (set union). Null values are treated as empty sets; returns `null` only if both fields are null.
+
+```
+stack: preview 9.4.0
+serverless: preview
+```
+
+**Syntax**
+`MV_UNION(field1, field2)`
+
+### Parameters
+
+#### `field1`
+
+Multivalue expression. Null values are treated as empty sets.
+
+#### `field2`
+
+Multivalue expression. Null values are treated as empty sets.
+
+**Supported types**
+
+**Examples**
+```esql
+ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```
+
+```esql
+ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```
+
+```esql
+ROW a = [true, false], b = [false]
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```
+
+```esql
+ROW a = [5.2, 10.5, 1.12345], b = [10.5, 2.6928]
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```
+
+```esql
+ROW a = ["one", "two", "three"], b = ["two", "four"]
+| EVAL finalValue = MV_UNION(a, b)
+| KEEP finalValue
+```
+

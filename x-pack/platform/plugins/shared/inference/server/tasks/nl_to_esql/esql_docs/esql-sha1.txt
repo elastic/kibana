@@ -1,0 +1,23 @@
+# SHA1
+
+Computes the SHA1 hash of the input.
+
+**Syntax**
+`SHA1(input)`
+
+### Parameters
+
+#### `input`
+
+Input to hash.
+
+**Supported types**
+
+**Example**
+```esql
+FROM sample_data
+| WHERE message != "Connection error"
+| EVAL sha1 = sha1(message)
+| KEEP message, sha1
+```
+

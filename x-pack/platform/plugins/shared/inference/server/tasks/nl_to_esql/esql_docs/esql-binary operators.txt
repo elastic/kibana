@@ -1,0 +1,99 @@
+# BINARY OPERATORS
+
+- Equality
+- Inequality `!=`
+- Less than `<`
+- Less than or equal to `<=`
+- Greater than `>`
+- Greater than or equal to `>=`
+- Add `+`
+- Subtract `-`
+- Multiply `*`
+- Divide `/`
+- Modulus `%`
+
+### Equality
+
+**Syntax**
+`BINARY OPERATORS()`
+
+Check if two fields are equal. If either field is multivalued then the result is `null`.
+<note>
+  This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an mapping-index and doc-values.
+</note>
+
+**Supported types**
+
+### Inequality `!=`
+
+Check if two fields are unequal. If either field is multivalued then the result is `null`.
+<note>
+  This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an mapping-index and doc-values.
+</note>
+
+**Supported types**
+
+### Less than `<`
+
+Check if one field is less than another. If either field is multivalued then the result is `null`.
+<note>
+  This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an mapping-index and doc-values.
+</note>
+
+**Supported types**
+
+### Less than or equal to `<=`
+
+Check if one field is less than or equal to another. If either field is multivalued then the result is `null`.
+<note>
+  This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an mapping-index and doc-values.
+</note>
+
+**Supported types**
+
+### Greater than `>`
+
+Check if one field is greater than another. If either field is multivalued then the result is `null`.
+<note>
+  This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an mapping-index and doc-values.
+</note>
+
+**Supported types**
+
+### Greater than or equal to `>=`
+
+Check if one field is greater than or equal to another. If either field is multivalued then the result is `null`.
+<note>
+  This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an mapping-index and doc-values.
+</note>
+
+**Supported types**
+
+### Add `+`
+
+Add two numbers together. If either field is multivalued then the result is `null`.
+**Supported types**
+
+### Subtract `-`
+
+Subtract one number from another. If either field is multivalued then the result is `null`.
+**Supported types**
+
+### Multiply `*`
+
+Multiply two numbers together. If either field is multivalued then the result is `null`.
+**Supported types**
+
+### Divide `/`
+
+Divide one number by another. If either field is multivalued then the result is `null`.
+<note>
+  Division of two integer types will yield an integer result, rounding towards 0. If you need floating point division, `Cast (::)` one of the arguments to a `DOUBLE`.
+</note>
+
+**Supported types**
+
+### Modulus `%`
+
+Divide one number by another and return the remainder. If either field is multivalued then the result is `null`.
+**Supported types**

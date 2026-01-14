@@ -1,0 +1,30 @@
+# VARIANCE_OVER_TIME
+
+Calculates the population variance over time of a numeric field.
+
+```
+stack: preview 9.3.0
+serverless: preview
+```
+
+**Syntax**
+`VARIANCE_OVER_TIME(field, window)`
+
+### Parameters
+
+#### `field`
+
+the metric field to calculate the value for
+
+#### `window`
+
+the time window over which to compute the variance over time
+
+**Supported types**
+
+**Example**
+```esql
+TS k8s
+| STATS avg_var_cost=AVG(VARIANCE_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)
+```
+

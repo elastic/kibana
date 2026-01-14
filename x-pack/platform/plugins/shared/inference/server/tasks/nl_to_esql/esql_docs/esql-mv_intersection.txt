@@ -1,0 +1,55 @@
+# MV_INTERSECTION
+
+Returns the values that appear in both input fields. Returns `null` if either field is null or if no values match.
+
+```
+stack: preview 9.3.0
+serverless: preview
+```
+
+**Syntax**
+`MV_INTERSECTION(field1, field2)`
+
+### Parameters
+
+#### `field1`
+
+Multivalue expression. If null, the function returns null.
+
+#### `field2`
+
+Multivalue expression. If null, the function returns null.
+
+**Supported types**
+
+**Examples**
+```esql
+ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```
+
+```esql
+ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```
+
+```esql
+ROW a = [true, false, false, false], b = [false]
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```
+
+```esql
+ROW a = [5.2, 10.5, 1.12345, 2.6928], b = [10.5, 2.6928]
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```
+
+```esql
+ROW a = ["one", "two", "three", "four", "five"], b = ["one", "four"]
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```
+

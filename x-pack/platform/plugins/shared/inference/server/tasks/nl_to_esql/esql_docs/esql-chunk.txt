@@ -1,0 +1,75 @@
+# CHUNK
+
+Use `CHUNK` to split a text field into smaller chunks.
+Chunk can be used on fields from the text famiy like text and semantic_text.
+Chunk will split a text field into smaller chunks, using a sentence-based chunking strategy.
+The number of chunks returned, and the length of the sentences used to create the chunks can be specified.
+
+```
+stack: preview 9.3.0
+serverless: preview
+```
+
+**Syntax**
+`CHUNK(field, chunking_settings, separator_group, overlap, sentence_overlap, strategy, max_chunk_size, separators)`
+
+### Parameters
+
+#### `field`
+
+The input to chunk.
+
+#### `chunking_settings`
+
+Options to customize chunking behavior. Defaults to {"strategy":"sentence","max_chunk_size":300,"sentence_overlap":0}.
+
+**Supported types**
+
+**Supported function named parameters**
+### Parameters
+
+#### `separator_group`
+
+(keyword) Sets a predefined lists of separators based on the selected text type. Values may be `markdown` or `plaintext`.
+ Only applicable to the `recursive` chunking strategy. When using the `recursive` chunking strategy one of
+ `separators` or `separator_group` must be specified.
+
+#### `overlap`
+
+(integer) The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy.
+ This value cannot be higher than half the `max_chunk_size` value.
+
+#### `sentence_overlap`
+
+(integer) The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy.
+ It can be either `1` or `0`.
+
+#### `strategy`
+
+(keyword) The chunking strategy to use. Default value is `sentence`.
+
+#### `max_chunk_size`
+
+(integer) The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy)
+ or `10` (for `word` or `recursive` strategies). This model should not exceed the window size for any
+ associated models using the output of this function.
+
+#### `separators`
+
+(keyword) A list of strings used as possible split points when chunking text. Each string can be a plain string or a
+ regular expression (regex) pattern. The system tries each separator in order to split the text, starting from
+ the first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay
+ within the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the
+ `recursive` chunking strategy. When using the `recursive` chunking strategy one of `separators` or `separator_group`
+ must be specified.
+
+**Example**
+```
+stack: preview 9.3.0
+```
+
+```esql
+ROW result = CHUNK("It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief.", {"strategy": "word", "max_chunk_size": 10, "overlap": 1})
+| MV_EXPAND result
+```
+

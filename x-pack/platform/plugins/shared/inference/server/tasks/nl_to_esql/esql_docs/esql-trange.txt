@@ -1,0 +1,58 @@
+# TRANGE
+
+Filters data for the given time range using the @timestamp attribute.
+
+**Syntax**
+`TRANGE(start_time_or_offset, end_time)`
+
+### Parameters
+
+#### `start_time_or_offset`
+
+Offset from NOW for the single parameter mode. Start time for two parameter mode. In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds.
+
+#### `end_time`
+
+Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.
+
+**Supported types**
+
+**Examples**
+```esql
+FROM k8s
+| WHERE TRANGE(1h)
+| KEEP @timestamp
+```
+
+```esql
+FROM k8s
+| WHERE TRANGE("2024-05-10T00:17:14.000Z", "2024-05-10T00:18:33.000Z")
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+
+```esql
+FROM k8s
+| WHERE TRANGE(to_datetime("2024-05-10T00:17:14Z"), to_datetime("2024-05-10T00:18:33Z"))
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+
+```esql
+FROM k8s
+| WHERE TRANGE(to_datetime("2024-05-10T00:17:14.000Z"), to_datetime("2024-05-10T00:18:33.000Z"))
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+
+```esql
+FROM k8s
+| WHERE TRANGE(1715300236000, 1715300282000)
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+

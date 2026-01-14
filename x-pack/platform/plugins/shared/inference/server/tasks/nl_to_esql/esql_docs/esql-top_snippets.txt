@@ -1,0 +1,63 @@
+# TOP_SNIPPETS
+
+Use `TOP_SNIPPETS` to extract the best snippets for a given query string from a text field.
+TopSnippets can be used on fields from the text famiy like text and semantic_text.
+TopSnippets will extract the best snippets for a given query string.
+
+```
+stack: preview 9.3.0
+serverless: preview
+```
+
+**Syntax**
+`TOP_SNIPPETS(field, query, options, num_words, num_snippets)`
+
+### Parameters
+
+#### `field`
+
+The input to chunk.
+
+#### `query`
+
+The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.
+
+#### `options`
+
+(Optional) TopSnippets additional options as function named parameters.
+
+**Supported types**
+
+**Supported function named parameters**
+### Parameters
+
+#### `num_words`
+
+(integer) The maximum number of words to return in each snippet.
+ This allows better control of inference costs by limiting the size of tokens per snippet.
+
+#### `num_snippets`
+
+(integer) The maximum number of matching snippets to return.
+
+**Examples**
+```
+stack: preview 9.3.0
+```
+
+```esql
+FROM books
+| EVAL snippets = TOP_SNIPPETS(description, "Tolkien")
+```
+
+```
+stack: preview 9.3.0
+```
+
+```esql
+FROM books
+| WHERE MATCH(title, "Return")
+| EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 })
+```
+
+lists/search-functions.md
