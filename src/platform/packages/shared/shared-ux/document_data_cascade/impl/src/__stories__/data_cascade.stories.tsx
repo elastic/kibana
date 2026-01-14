@@ -283,6 +283,7 @@ export const CascadeNestedGridImplementation: StoryObj<
       ({ data }) => {
         return (
           <EuiBasicTable
+            tableCaption="nested groups with default header table"
             columns={[
               {
                 field: 'id',
@@ -552,6 +553,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
       ({ data }) => {
         return (
           <EuiBasicTable
+            tableCaption="custom header with one level of grouping table"
             columns={[
               {
                 field: 'id',
@@ -774,6 +776,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
       ({ data }) => {
         return (
           <EuiBasicTable
+            tableCaption="custom header with custom row actions table"
             columns={[
               {
                 field: 'id',
@@ -1046,6 +1049,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
       ({ data }) => {
         return (
           <EuiBasicTable
+            tableCaption="custom header with hidden row actions table"
             columns={[
               {
                 field: 'id',
@@ -1380,6 +1384,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
       ({ data }) => {
         return (
           <EuiBasicTable
+            tableCaption="custom header with row selection action enabled table"
             columns={[
               {
                 field: 'id',
