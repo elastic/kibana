@@ -1058,9 +1058,9 @@ x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
 x-pack/platform/plugins/shared/dashboard_agent @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
+x-pack/platform/plugins/shared/data_catalog @elastic/workchat-eng
 x-pack/platform/plugins/shared/data_quality @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/data_sources @elastic/workchat-eng
-x-pack/platform/plugins/shared/data_sources_registry @elastic/workchat-eng
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
