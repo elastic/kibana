@@ -24,7 +24,12 @@ export function parseCliOptions(): CliOptions {
       parseCliInt,
       DEFAULTS.EVENTS_PER_CYCLE
     )
-    .option('--payload-size <number>', 'The size of the ES bulk payload', DEFAULTS.PAYLOAD_SIZE)
+    .option(
+      '--payload-size <number>',
+      'The size of the ES bulk payload',
+      parseCliInt,
+      DEFAULTS.PAYLOAD_SIZE
+    )
     .option(
       '--concurrency <number>',
       'The number of concurrent connections to Elasticsearch',

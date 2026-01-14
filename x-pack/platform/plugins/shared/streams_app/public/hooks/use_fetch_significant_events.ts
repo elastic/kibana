@@ -14,7 +14,7 @@ import { useTimefilter } from './use_timefilter';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 
 export interface SignificantEventItem {
-  query: StreamQuery;
+  query: StreamQuery & { stream_name?: string };
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
 }
@@ -27,7 +27,10 @@ type SignificantEventsFetchResult =
       total_occurrences: number;
     };
 
-export const useFetchSignificantEvents = ({ name, query }: { name: string; query: string }) => {
+export const useFetchSignificantEvents = (
+  options: { name?: string; query?: string } | undefined = {}
+) => {
+  const { name, query } = options;
   const {
     dependencies: {
       start: {
@@ -62,48 +65,59 @@ export const useFetchSignificantEvents = ({ name, query }: { name: string; query
 
     const intervalString = `${bucketSize.asSeconds()}s`;
 
-    return await streamsRepositoryClient
-      .fetch('GET /api/streams/{name}/significant_events 2023-10-31', {
-        params: {
-          path: { name },
-          query: {
-            from: isoFrom,
-            to: isoTo,
-            bucketSize: intervalString,
-            query: query.trim(),
+    const requestPromise = name
+      ? streamsRepositoryClient.fetch('GET /api/streams/{name}/significant_events 2023-10-31', {
+          params: {
+            path: { name },
+            query: {
+              from: isoFrom,
+              to: isoTo,
+              bucketSize: intervalString,
+              query: query?.trim() ?? '',
+            },
           },
-        },
-        signal: signal ?? null,
-      })
-      .then(
-        ({
-          significant_events: significantEvents,
-          aggregated_occurrences: aggregatedOccurrences,
-        }) => {
-          return {
-            significant_events: significantEvents.map((series) => {
-              const { occurrences, change_points: changePoints, ...rest } = series;
-              return {
-                title: rest.title,
-                query: rest,
-                change_points: changePoints,
-                occurrences: occurrences.map((occurrence) => ({
-                  x: new Date(occurrence.date).getTime(),
-                  y: occurrence.count,
-                })),
-              };
-            }),
-            aggregated_occurrences: aggregatedOccurrences.map((occurrence) => ({
-              x: new Date(occurrence.date).getTime(),
-              y: occurrence.count,
-            })),
-            total_occurrences: aggregatedOccurrences.reduce(
-              (sum, occurrence) => sum + occurrence.count,
-              0
-            ),
-          };
-        }
-      );
+          signal: signal ?? null,
+        })
+      : streamsRepositoryClient.fetch('GET /internal/streams/_significant_events', {
+          params: {
+            query: {
+              from: isoFrom,
+              to: isoTo,
+              bucketSize: intervalString,
+              query: query?.trim() ?? '',
+            },
+          },
+          signal: signal ?? null,
+        });
+
+    return await requestPromise.then(
+      ({
+        significant_events: significantEvents,
+        aggregated_occurrences: aggregatedOccurrences,
+      }) => {
+        return {
+          significant_events: significantEvents.map((series) => {
+            const { occurrences, change_points: changePoints, stream_name, ...rest } = series;
+            return {
+              query: name ? rest : { ...rest, stream_name },
+              change_points: changePoints,
+              occurrences: occurrences.map((occurrence) => ({
+                x: new Date(occurrence.date).getTime(),
+                y: occurrence.count,
+              })),
+            };
+          }),
+          aggregated_occurrences: aggregatedOccurrences.map((occurrence) => ({
+            x: new Date(occurrence.date).getTime(),
+            y: occurrence.count,
+          })),
+          total_occurrences: aggregatedOccurrences.reduce(
+            (sum, occurrence) => sum + occurrence.count,
+            0
+          ),
+        };
+      }
+    );
   };
 
   return useQuery<SignificantEventsFetchResult, Error>({
