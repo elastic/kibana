@@ -58,7 +58,9 @@ export class StatsTelemetryService {
             query: { match_all: {} },
           });
 
-          const hits = resp.hits.hits as Array<{ _source?: Streams.all.Definition }>;
+          const hits = resp.hits.hits.filter(
+            ({ _source: definition }) => !('group' in definition) // Filter out old Group streams
+          ) as Array<{ _source?: Streams.all.Definition }>;
           if (hits.length === 0) {
             break;
           }

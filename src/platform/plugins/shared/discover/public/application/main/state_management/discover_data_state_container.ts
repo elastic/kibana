@@ -169,6 +169,7 @@ export function getDataStateContainer({
   const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
   let numberOfFetches = 0;
+  let unsubscribeIsRequested = false;
 
   /**
    * The observable to trigger data fetching in UI
@@ -257,6 +258,10 @@ export function getDataStateContainer({
       .pipe(
         mergeMap(async ({ options }) => {
           numberOfFetches += 1;
+          if (unsubscribeIsRequested) {
+            unsubscribeIsRequested = false;
+            subscription.unsubscribe();
+          }
 
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
@@ -438,7 +443,7 @@ export function getDataStateContainer({
         subscription.unsubscribe();
       } else {
         // to let the initial fetch to execute properly before unsubscribing
-        setTimeout(() => subscription.unsubscribe(), 200);
+        unsubscribeIsRequested = true;
       }
     };
   }
