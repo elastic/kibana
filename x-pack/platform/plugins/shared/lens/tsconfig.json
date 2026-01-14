@@ -134,7 +134,6 @@
     "@kbn/esql-composer",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/controls-constants",
     "@kbn/controls-renderer",
     "@kbn/react-env",
     "@kbn/core-base-browser-mocks",

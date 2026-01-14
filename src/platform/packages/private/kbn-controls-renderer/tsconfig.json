@@ -16,6 +16,11 @@
     "@kbn/controls-constants",
     "@kbn/i18n",
     "@kbn/controls-schemas",
-    "@kbn/presentation-containers"
+    "@kbn/presentation-containers",
+    "@kbn/es-query",
+    "@kbn/esql-utils",
+    "@kbn/utility-types",
+    "@kbn/control-group-renderer",
+    "@kbn/esql-types"
   ]
 }
