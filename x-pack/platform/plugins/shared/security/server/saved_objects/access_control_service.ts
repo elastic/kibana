@@ -20,6 +20,26 @@ import { SecurityAction } from '.';
 export const MANAGE_ACCESS_CONTROL_ACTION = 'manage_access_control';
 const UPDATE_ACTION = 'update';
 
+const buildAccessDeniedMessage = (rbacTypes: string[], accessControlTypes: string[]): string => {
+  const parts: string[] = ['Access denied:'];
+
+  if (rbacTypes.length > 0) {
+    const typeList = rbacTypes.join(', ');
+    parts.push(
+      `Unable to perform operation on [${typeList}]. You may have lost access to this space or required privileges have been revoked.`
+    );
+  }
+
+  if (accessControlTypes.length > 0) {
+    const typeList = accessControlTypes.join(', ');
+    parts.push(
+      `Unable to manage access control for [${typeList}]. The "manage_access_control" privilege is required to change access control of objects owned by another user.`
+    );
+  }
+
+  return parts.join(' ');
+};
+
 interface AccessControlServiceParams {
   typeRegistry?: ISavedObjectTypeRegistry;
 }
@@ -121,12 +141,12 @@ export class AccessControlService {
     addAuditEventFn?: (types: string[]) => void;
   }) {
     if (authorizationResult.status === 'unauthorized') {
-      const typeList = [...new Set([...typesRequiringAccessControl, ...typesRequiringRbac])].sort();
-      addAuditEventFn?.(typeList);
+      const rbacTypeList = [...typesRequiringRbac].sort();
+      const accessControlTypeList = [...typesRequiringAccessControl].sort();
+      const allTypes = [...new Set([...rbacTypeList, ...accessControlTypeList])].sort();
+      addAuditEventFn?.(allTypes);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(
-          `Access denied: Unable to manage access control for ${typeList}. The "manage_access_control" privilege is required to change access control of objects owned by another user.`
-        )
+        new Error(buildAccessDeniedMessage(rbacTypeList, accessControlTypeList))
       );
     }
 
@@ -173,26 +193,17 @@ export class AccessControlService {
       addUnauthorizedType(type, UPDATE_ACTION as A, unauthorizedRbacTypes);
     }
 
-    // Throw context-specific errors based on which authorization check failed.
-    // Owner RBAC errors are thrown first as they are typically more actionable for the user.
-    if (unauthorizedRbacTypes.size > 0) {
-      const typeList = [...unauthorizedRbacTypes].sort();
-      addAuditEventFn?.(typeList);
+    // Throw a unified error if any authorization checks failed.
+    // The error message includes context-specific details for each type of failure:
+    // - RBAC failures: owners who lost space access or RBAC privileges
+    // - Access control failures: non-owner users lacking manage_access_control privilege
+    if (unauthorizedRbacTypes.size > 0 || unauthorizedAccessControlTypes.size > 0) {
+      const rbacTypeList = [...unauthorizedRbacTypes].sort();
+      const accessControlTypeList = [...unauthorizedAccessControlTypes].sort();
+      const allUnauthorizedTypes = [...new Set([...rbacTypeList, ...accessControlTypeList])].sort();
+      addAuditEventFn?.(allUnauthorizedTypes);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(
-          `Access denied: Unable to perform operation on ${typeList}. You may have lost access to this space or required privileges have been revoked.`
-        )
-      );
-    }
-
-    // Non-owner users lacking manage_access_control privilege
-    if (unauthorizedAccessControlTypes.size > 0) {
-      const typeList = [...unauthorizedAccessControlTypes].sort();
-      addAuditEventFn?.(typeList);
-      throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(
-          `Access denied: Unable to manage access control for ${typeList}. The "manage_access_control" privilege is required to change access control of objects owned by another user.`
-        )
+        new Error(buildAccessDeniedMessage(rbacTypeList, accessControlTypeList))
       );
     }
   }
