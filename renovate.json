@@ -382,6 +382,24 @@
       "minimumReleaseAge": "14 days"
     },
     {
+      "matchDepNames": [
+        "decko"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
       "groupName": "classnames dependencies",
       "matchDepNames": [
         "classnames",
