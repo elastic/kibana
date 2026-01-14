@@ -103,7 +103,7 @@ describe('<Benchmarks />', () => {
     expect(screen.getByTestId(TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ)).toBeInTheDocument();
   });
 
-  it('does not render the "add integration" button if the user does not have the required privileges', () => {
+  it('does not render the "add integration" button if the user does not have integrations: readprivileges', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cloudSecurityPosture: {
@@ -118,6 +118,31 @@ describe('<Benchmarks />', () => {
           authz: {
             integrations: {
               all: false,
+            },
+          },
+        },
+      },
+    });
+    renderBenchmarks();
+
+    expect(screen.queryByTestId(TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ)).not.toBeInTheDocument();
+  });
+
+  it('does not render the "add integration" button if the user does not have integrations: read privilegs', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cloudSecurityPosture: {
+          isPrivileged: true,
+        },
+        http: {
+          basePath: {
+            prepend: (path: string) => path,
+          },
+        },
+        fleet: {
+          authz: {
+            integrations: {
+              read: false,
             },
           },
         },
