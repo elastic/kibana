@@ -10,6 +10,8 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   categorizeFieldTrigger,
   CATEGORIZE_FIELD_TRIGGER,
+  reverseCategorizeFieldTrigger,
+  REVERSE_CATEGORIZE_FIELD_TRIGGER,
 } from '@kbn/ml-ui-actions/src/aiops/ui_actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { AiopsPluginStartDeps } from '../types';
@@ -43,6 +45,17 @@ export function registerAiopsUiActions(
     const { createCategorizeFieldAction } = await import('./actions');
     return createCategorizeFieldAction(coreStart, pluginStart);
   });
+
+  uiActions.registerTrigger(reverseCategorizeFieldTrigger);
+
+  uiActions.addTriggerActionAsync(
+    REVERSE_CATEGORIZE_FIELD_TRIGGER,
+    'ACTION_REVERSE_CATEGORIZE_FIELD',
+    async () => {
+      const { createReverseCategorizeFieldAction } = await import('./actions');
+      return createReverseCategorizeFieldAction(coreStart, pluginStart);
+    }
+  );
 
   uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'open-change-point-in-ml-app', async () => {
     const { createOpenChangePointInMlAppAction } = await import('./actions');

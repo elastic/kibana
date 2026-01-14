@@ -22,6 +22,7 @@ import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
 import type { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
@@ -107,6 +108,7 @@ function buildEuiGridColumn({
   isSortEnabled,
   isPlainRecord,
   toastNotifications,
+  uiActions,
   hasEditDataViewPermission,
   valueToStringConverter,
   rowsCount,
@@ -133,6 +135,7 @@ function buildEuiGridColumn({
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
+  uiActions: UiActionsStart;
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
@@ -203,7 +206,8 @@ function buildEuiGridColumn({
             toastNotifications,
             valueToStringConverter,
             onFilter,
-            dataGridRef
+            dataGridRef,
+            uiActions
           )
         : EMPTY_CELL_ACTIONS;
 
@@ -370,6 +374,7 @@ export function getEuiGridColumns({
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
+    uiActions: UiActionsStart;
   };
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
@@ -400,6 +405,7 @@ export function getEuiGridColumns({
       isSortEnabled,
       isPlainRecord,
       toastNotifications: services.toastNotifications,
+      uiActions: services.uiActions,
       hasEditDataViewPermission,
       valueToStringConverter,
       rowsCount,
