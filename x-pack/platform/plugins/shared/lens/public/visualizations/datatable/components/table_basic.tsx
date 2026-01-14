@@ -25,7 +25,7 @@ import type {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, useEuiTheme } from '@elastic/eui';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -89,6 +89,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const isInteractive = props.interactive;
   const isDarkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
+  const { euiTheme } = useEuiTheme();
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -520,12 +521,24 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         id: 'rowNumber',
         headerCellRender: () => null,
         rowCellRender: function RowCellRender({ visibleRowIndex }) {
-          return <span data-test-subj="lnsDataTable-rowNumber">{visibleRowIndex + 1}</span>;
+          return (
+            <div
+              style={{
+                width: 38,
+                textAlign: 'center',
+                color: euiTheme.colors.backgroundFilledText,
+                fontSize: euiTheme.size.m,
+              }}
+              data-test-subj="lnsDataTable-rowNumber"
+            >
+              {visibleRowIndex + 1}
+            </div>
+          );
         },
         width: 50,
       },
     ];
-  }, [props.args.showRowNumbers]);
+  }, [euiTheme.colors.backgroundFilledText, euiTheme.size.xs, props.args.showRowNumbers]);
 
   if (isEmpty) {
     return (
