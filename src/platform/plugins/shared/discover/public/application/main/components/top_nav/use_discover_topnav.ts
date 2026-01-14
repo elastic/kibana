@@ -42,11 +42,9 @@ export const useDiscoverTopNav = ({
       getTopNavBadges({
         stateContainer,
         services,
-        hasUnsavedChanges,
-        topNavCustomization,
         isMobile,
       }),
-    [stateContainer, services, hasUnsavedChanges, topNavCustomization, isMobile]
+    [stateContainer, services, isMobile]
   );
 
   useEffect(() => {

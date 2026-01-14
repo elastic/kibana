@@ -7,29 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { AppMenuActionPrimary } from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+// import React from 'react';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { OpenSearchPanel } from '../open_search_panel';
+import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 
 export const getOpenSearchAppMenuItem = ({
   onOpenSavedSearch,
 }: {
   onOpenSavedSearch: (savedSearchId: string) => void;
-}): AppMenuActionPrimary => {
+}): AppMenuItemType => {
   return {
     id: AppMenuActionId.open,
-    type: AppMenuActionType.primary,
-    controlProps: {
-      label: i18n.translate('discover.localMenu.openDiscoverSessionTitle', {
-        defaultMessage: 'Open session',
-      }),
-      iconType: 'folderOpen',
-      testId: 'discoverOpenButton',
-      onClick: ({ onFinishAction }) => {
-        return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
-      },
+    order: 2,
+    label: i18n.translate('discover.localMenu.openDiscoverSessionTitle', {
+      defaultMessage: 'Open',
+    }),
+    iconType: 'folderOpen',
+    testId: 'discoverOpenButton',
+    run: () => {
+      // return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
     },
   };
 };

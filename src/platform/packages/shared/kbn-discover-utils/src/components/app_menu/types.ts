@@ -120,7 +120,6 @@ export interface AppMenuActionSubmenuBase<T = AppMenuActionSecondary | AppMenuAc
     ? AppMenuActionType.secondary
     : AppMenuActionType.custom;
   readonly label: TopNavMenuData['label'];
-  readonly description?: TopNavMenuData['description'];
   readonly testId?: TopNavMenuData['testId'];
   readonly actions: T extends AppMenuActionSecondary
     ? Array<

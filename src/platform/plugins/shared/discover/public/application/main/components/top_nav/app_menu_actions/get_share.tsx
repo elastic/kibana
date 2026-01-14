@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMenuActionPrimary } from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
@@ -40,7 +40,7 @@ export const getShareAppMenuItem = ({
   currentTab: TabState;
   persistedDiscoverSession: DiscoverSession | undefined;
   totalHitsState: DataTotalHitsMsg;
-}): AppMenuActionPrimary[] => {
+}): AppMenuItemType[] => {
   if (!services.share) {
     return [];
   }
@@ -161,20 +161,17 @@ export const getShareAppMenuItem = ({
     });
   };
 
-  const menuItems: AppMenuActionPrimary[] = [
+  const menuItems: AppMenuItemType[] = [
     {
       id: AppMenuActionId.share,
-      type: AppMenuActionType.primary,
-      controlProps: {
-        label: i18n.translate('discover.localMenu.shareTitle', {
-          defaultMessage: 'Share',
-        }),
-        description: i18n.translate('discover.localMenu.shareSearchDescription', {
-          defaultMessage: 'Share Discover session',
-        }),
-        iconType: 'share',
-        testId: 'shareTopNavButton',
-        onClick: ({ anchorElement }) => shareExecutor({ anchorElement }),
+      order: 3,
+      label: i18n.translate('discover.localMenu.shareTitle', {
+        defaultMessage: 'Share',
+      }),
+      iconType: 'share',
+      testId: 'shareTopNavButton',
+      run: () => {
+        // shareExecutor({ anchorElement });
       },
     },
   ];
@@ -182,17 +179,14 @@ export const getShareAppMenuItem = ({
   if (hasIntegrations) {
     menuItems.unshift({
       id: AppMenuActionId.export,
-      type: AppMenuActionType.primary,
-      controlProps: {
-        label: i18n.translate('discover.localMenu.exportTitle', {
-          defaultMessage: 'Export',
-        }),
-        description: i18n.translate('discover.localMenu.shareSearchDescription', {
-          defaultMessage: 'Export Discover session',
-        }),
-        iconType: 'download',
-        testId: 'exportTopNavButton',
-        onClick: ({ anchorElement }) => shareExecutor({ anchorElement, asExport: true }),
+      order: 8,
+      label: i18n.translate('discover.localMenu.exportTitle', {
+        defaultMessage: 'Export',
+      }),
+      iconType: 'download',
+      testId: 'exportTopNavButton',
+      run: () => {
+        // shareExecutor({ anchorElement, asExport: true })
       },
     });
   }
