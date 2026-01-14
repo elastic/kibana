@@ -228,7 +228,7 @@ export const EndpointHostExecutionResponseOutput = memo<EndpointHostExecutionRes
     );
 
     return (
-      <>
+      <div data-test-subj={dataTestSubj}>
         <EuiFlexItem>
           <ExecutionActionOutputAccordion
             content={contextContent}
@@ -263,7 +263,7 @@ export const EndpointHostExecutionResponseOutput = memo<EndpointHostExecutionRes
             type="output"
           />
         </EuiFlexItem>
-      </>
+      </div>
     );
   }
 );
