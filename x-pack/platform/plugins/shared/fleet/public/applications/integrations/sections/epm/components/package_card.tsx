@@ -70,7 +70,7 @@ export function PackageCard({
   titleLineClamp,
   titleBadge,
   titleSize = 'xs',
-  descriptionLineClamp,
+  descriptionLineClamp = 2,
   maxCardHeight,
   minCardHeight,
   showDescription = true,
