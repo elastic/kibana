@@ -22,9 +22,15 @@ export interface SystemIdentificationTaskParams {
   end: number;
 }
 
+export const SYSTEMS_IDENTIFICATION_TASK_TYPE = 'streams_systems_identification';
+
+export function getSystemsIdentificationTaskId(streamName: string) {
+  return `${SYSTEMS_IDENTIFICATION_TASK_TYPE}_${streamName}`;
+}
+
 export function createStreamsSystemIdentificationTask(taskContext: TaskContext) {
   return {
-    streams_systems_identification: {
+    [SYSTEMS_IDENTIFICATION_TASK_TYPE]: {
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(
