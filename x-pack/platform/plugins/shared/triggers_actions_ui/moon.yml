@@ -100,6 +100,7 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/actions-types'
   - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/deeplinks-observability'
 tags:
   - plugin
   - prod
