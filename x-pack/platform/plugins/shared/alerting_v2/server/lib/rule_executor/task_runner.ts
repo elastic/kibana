@@ -9,6 +9,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 
+import type { Container } from 'inversify';
 import type { PluginConfig } from '../../config';
 import type { AlertingServerStartDependencies } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -16,20 +17,20 @@ import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { spaceIdToNamespace } from '../space_id_to_namespace';
 import type { RuleExecutorTaskParams } from './types';
 import { executeEsqlRule } from './execute_esql';
-import { ALERT_EVENTS_INDEX } from './constants';
 import { writeEsqlAlerts } from './write_alerts';
-import type { AlertingResourcesService } from '../services/alerting_resources_service';
+import { ResourceManager } from '../services/resource_service/resource_manager';
+import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 
 export function createRuleExecutorTaskRunner({
   logger,
   coreStartServices,
   config,
-  resourcesService,
+  container,
 }: {
   logger: Logger;
   coreStartServices: Promise<[CoreStart, AlertingServerStartDependencies, unknown]>;
   config: PluginConfig;
-  resourcesService: AlertingResourcesService;
+  container: Container;
 }) {
   return ({ taskInstance, abortController, fakeRequest }: RunContext) => {
     return {
@@ -45,6 +46,7 @@ export function createRuleExecutorTaskRunner({
         }
 
         const params = taskInstance.params as RuleExecutorTaskParams;
+        const resourcesService = container.get(ResourceManager);
         // Wait for the plugin-wide resource initialization started during plugin setup.
         await resourcesService.waitUntilReady();
 
@@ -106,7 +108,7 @@ export function createRuleExecutorTaskRunner({
         );
 
         const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const targetDataStream = ALERT_EVENTS_INDEX;
+        const targetDataStream = ALERT_EVENTS_DATA_STREAM;
 
         const scheduledAt = taskInstance.scheduledAt;
         const scheduledTimestamp =

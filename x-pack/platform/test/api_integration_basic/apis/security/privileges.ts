@@ -86,6 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
             manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
+            alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
+            alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
@@ -460,6 +462,8 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
             apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
+            alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
+            alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
             discover: [
               'all',
               'read',
