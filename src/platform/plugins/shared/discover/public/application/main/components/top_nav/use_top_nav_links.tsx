@@ -20,6 +20,7 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import { useI18n } from '@kbn/i18n-react';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -74,6 +75,7 @@ export const useTopNavLinks = ({
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
 }): AppMenuConfig => {
+  const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -196,6 +198,7 @@ export const useTopNavLinks = ({
         currentTab,
         persistedDiscoverSession,
         totalHitsState,
+        intl,
       });
       items.push(...shareAppMenuItem);
     }
@@ -216,6 +219,7 @@ export const useTopNavLinks = ({
     hasShareIntegration,
     hasUnsavedChanges,
     totalHitsState,
+    intl,
   ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
