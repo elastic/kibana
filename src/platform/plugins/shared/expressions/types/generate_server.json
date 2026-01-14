@@ -1,0 +1,43 @@
+{
+  "compilationOptions": {
+    "preferredConfigPath": "./tsconfig.bundle.json"
+  },
+  "entries": [
+    {
+      "filePath": "../server/plugin.ts",
+      "outFile": "./plugin_server.d.ts",
+      "libraries": {
+        "inlinedLibraries": [],
+        "importedLibraries": [
+          "@elastic/ebt",
+          "@elastic/ecs",
+          "@elastic/elasticsearch",
+          "@elastic/eui",
+          "@elastic/transport",
+          "@hapi/boom",
+          "@hapi/hapi",
+          "@openfeature/core",
+          "@openfeature/server-sdk",
+          "elastic-apm-node",
+          "events",
+          "http",
+          "inversify",
+          "joi",
+          "lodash",
+          "moment",
+          "openapi-types",
+          "perf_hooks",
+          "rxjs",
+          "stream",
+          "tls"
+        ]
+      },
+      "output": {
+        "sortNodes": true,
+        "exportReferencedTypes": false,
+        "noBanner": true
+      },
+      "failOnClass": false
+    }
+  ]
+}
