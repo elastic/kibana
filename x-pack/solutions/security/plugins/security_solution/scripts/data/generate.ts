@@ -328,9 +328,10 @@ const ensurePreviewAlertsIndexBestEffort = async ({
     await esClient.indices.create({
       index: previewBackingIndex,
       settings: {
-        index: {
-          hidden: true,
-        },
+        // The alerts mapping is large; ensure we don't fail with:
+        // "Limit of total fields [1000] has been exceeded"
+        'index.mapping.total_fields.limit': '6000',
+        index: { hidden: true },
       },
       mappings: mapping,
       aliases: {
@@ -433,6 +434,7 @@ const bulkIndexStreamed = async ({
 
 export const cli = () => {
   run(
+    // eslint-disable-next-line complexity
     async (cliContext) => {
       const log = cliContext.log;
 
@@ -444,6 +446,13 @@ export const cli = () => {
       const hosts = Number(cliContext.flags.h ?? cliContext.flags.hosts ?? 5);
       const users = Number(cliContext.flags.u ?? cliContext.flags.users ?? 5);
       const clean = Boolean(cliContext.flags.clean);
+      const skipAlerts = Boolean(cliContext.flags['skip-alerts']);
+      const skipRulesetPreview = Boolean(cliContext.flags['skip-ruleset-preview']);
+      const skipAttackDiscoveries = Boolean(cliContext.flags['skip-attack-discoveries']);
+      const maxPreviewInvocations = Math.max(
+        1,
+        Number(cliContext.flags['max-preview-invocations'] ?? 12)
+      );
 
       assertPositiveInt('events', events);
       assertPositiveInt('hosts', hosts);
@@ -525,10 +534,10 @@ export const cli = () => {
       try {
         const previewInterval = (() => {
           const rangeMs = endMs - startMs;
-          // cap executor invocations for speed; this is a *generator* not a perfect scheduler simulator
-          const maxInvocations = 120;
-          const targetMs = Math.max(60 * 60 * 1000, Math.ceil(rangeMs / maxInvocations)); // at least 1h
-          const hours = Math.max(1, Math.round(targetMs / (60 * 60 * 1000)));
+          // Cap executor invocations for speed; this is a *generator* not a perfect scheduler simulator.
+          // Large windows (e.g. 60d) are extremely slow if we run many invocations per rule.
+          const targetMs = Math.max(60 * 60 * 1000, Math.ceil(rangeMs / maxPreviewInvocations)); // at least 1h
+          const hours = Math.max(1, Math.ceil(targetMs / (60 * 60 * 1000)));
           return `${hours}h`;
         })();
         const invocationCount = (() => {
@@ -537,6 +546,9 @@ export const cli = () => {
           const intervalMs = hours * 60 * 60 * 1000;
           return Math.max(1, Math.ceil(rangeMs / intervalMs));
         })();
+        log.info(
+          `Rule preview tuning: interval=${previewInterval}, invocations=${invocationCount} (max=${maxPreviewInvocations})`
+        );
 
         // Make the preview window wide enough that each invocation can find matches,
         // even if the underlying dataset is sparse within the time range.
@@ -615,6 +627,13 @@ export const cli = () => {
         // Ensure preview index exists (some dev clusters don't allow it to be recreated automatically if deleted).
         await ensurePreviewAlertsIndexBestEffort({ esClient, log, spaceId: effectiveSpaceId });
 
+        if (skipAlerts) {
+          log.warning(
+            `--skip-alerts enabled: skipping rule preview, copying alerts, and Attack Discoveries. Raw data was still indexed.`
+          );
+          return;
+        }
+
         // Baseline: generate a small set of detection alerts using the Insights-style query,
         // then attribute them across ALL rules in the ruleset. This ensures the UI shows alerts
         // tied to each installed+enabled rule, even if some of those rules don't match the dataset.
@@ -627,17 +646,21 @@ export const cli = () => {
           // Do not allow endpoint alert message to override rule name in generated detection alerts.
           delete (insightsRuleCreate as Record<string, unknown>).rule_name_override;
 
-          for (const ruleRef of resolvedRules) {
-            const { previewId } = await previewRule({
-              kbnClient,
-              log,
-              req: {
-                rule: insightsRuleCreate,
-                invocationCount,
-                timeframeEndIso: new Date(endMs).toISOString(),
-              },
-            });
+          // PERFORMANCE:
+          // Rule Preview is the slowest step. Instead of previewing the same Insights-style query
+          // once per rule, run it ONCE and then copy/attribute the resulting preview alerts to each
+          // ruleset rule (ids are namespaced during reindex to avoid collisions).
+          const { previewId } = await previewRule({
+            kbnClient,
+            log,
+            req: {
+              rule: insightsRuleCreate,
+              invocationCount,
+              timeframeEndIso: new Date(endMs).toISOString(),
+            },
+          });
 
+          for (const ruleRef of resolvedRules) {
             await copyPreviewAlertsToRealAlertsIndex({
               esClient,
               log,
@@ -649,46 +672,56 @@ export const cli = () => {
           }
         }
 
-        for (const ruleRef of resolvedRules) {
-          log.info(`Previewing ruleset rule: ${ruleRef.name} (${ruleRef.rule_id})`);
-          const fullRule = await fetchRuleById({ kbnClient, id: ruleRef.id });
-          const createProps = toRuleCreateProps(fullRule);
-          createProps.interval = previewInterval;
-          createProps.from = `now-${previewWindowSeconds}s`;
-          createProps.to = 'now';
+        if (!skipRulesetPreview) {
+          for (const ruleRef of resolvedRules) {
+            log.info(`Previewing ruleset rule: ${ruleRef.name} (${ruleRef.rule_id})`);
+            const fullRule = await fetchRuleById({ kbnClient, id: ruleRef.id });
+            const createProps = toRuleCreateProps(fullRule);
+            createProps.interval = previewInterval;
+            createProps.from = `now-${previewWindowSeconds}s`;
+            createProps.to = 'now';
 
-          const { previewId: rulesetPreviewId } = await previewRule({
-            kbnClient,
-            log,
-            req: {
-              rule: createProps,
-              invocationCount,
-              timeframeEndIso: new Date(endMs).toISOString(),
-            },
-          });
+            const { previewId: rulesetPreviewId } = await previewRule({
+              kbnClient,
+              log,
+              req: {
+                rule: createProps,
+                invocationCount,
+                timeframeEndIso: new Date(endMs).toISOString(),
+              },
+            });
 
-          await copyPreviewAlertsToRealAlertsIndex({
-            esClient,
-            log,
-            spaceId: effectiveSpaceId,
-            previewId: rulesetPreviewId,
-            targetRule: ruleRef,
-            timestampRange: { startMs, endMs },
-          });
+            await copyPreviewAlertsToRealAlertsIndex({
+              esClient,
+              log,
+              spaceId: effectiveSpaceId,
+              previewId: rulesetPreviewId,
+              targetRule: ruleRef,
+              timestampRange: { startMs, endMs },
+            });
+          }
+        } else {
+          log.warning(
+            `--skip-ruleset-preview enabled: skipping ruleset rule previews (baseline attribution only).`
+          );
         }
 
         log.info(`Done generating/copying canonical Security alerts for ruleset.`);
 
-        await generateAndIndexAttackDiscoveries({
-          esClient,
-          log,
-          spaceId: effectiveSpaceId,
-          alertsIndex: `.alerts-security.alerts-${effectiveSpaceId}`,
-          authenticatedUsername: username,
-          opts: { startMs, endMs },
-        });
+        if (!skipAttackDiscoveries) {
+          await generateAndIndexAttackDiscoveries({
+            esClient,
+            log,
+            spaceId: effectiveSpaceId,
+            alertsIndex: `.alerts-security.alerts-${effectiveSpaceId}`,
+            authenticatedUsername: username,
+            opts: { startMs, endMs },
+          });
 
-        log.info(`Done generating synthetic Attack Discoveries.`);
+          log.info(`Done generating synthetic Attack Discoveries.`);
+        } else {
+          log.warning(`--skip-attack-discoveries enabled: skipping Attack Discoveries.`);
+        }
       } catch (e) {
         log.warning(
           `Alert generation via Kibana APIs failed; raw data was still indexed. Error: ${String(
@@ -716,8 +749,9 @@ export const cli = () => {
           'end-date',
           'ruleset',
           'indexPrefix',
+          'max-preview-invocations',
         ],
-        boolean: ['clean'],
+        boolean: ['clean', 'skip-alerts', 'skip-ruleset-preview', 'skip-attack-discoveries'],
         alias: {
           n: 'events',
           h: 'hosts',
@@ -735,7 +769,11 @@ export const cli = () => {
           'end-date': 'now',
           ruleset: scriptsDataDir('rulesets', 'default_ruleset.yml'),
           indexPrefix: 'logs-endpoint',
+          'max-preview-invocations': '12',
           clean: false,
+          'skip-alerts': false,
+          'skip-ruleset-preview': false,
+          'skip-attack-discoveries': false,
         },
         allowUnexpected: false,
         help: `
@@ -749,6 +787,10 @@ export const cli = () => {
         --ruleset                        Path to ruleset file (Default: x-pack/solutions/security/plugins/security_solution/scripts/data/rulesets/default_ruleset.yml)
         --clean                          Delete previously generated data for the selected time range before generating new data
         --indexPrefix                    Prefix for endpoint event/alert indices (Default: logs-endpoint)
+        --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
+        --skip-alerts                     Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
+        --skip-ruleset-preview            Skip previews of the ruleset rules (baseline attribution only; faster)
+        --skip-attack-discoveries         Skip Attack Discovery generation (faster)
 
         --username                       Kibana/Elasticsearch username (Default: elastic)
         --password                       Kibana/Elasticsearch password (Default: changeme)

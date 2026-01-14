@@ -128,9 +128,23 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
               // This makes the UI look more realistic (alerts from different rules interleave).
               if (params.startMs != null && params.endMs != null && params.endMs > params.startMs) {
                 long rangeMs = params.endMs - params.startMs;
-                // hashCode() is an int; make it non-negative without risking MIN_VALUE overflow.
-                long h = (long)((newId).hashCode());
-                long uh = h & 0x7fffffffL;
+                // IMPORTANT:
+                // Don't use String.hashCode() directly for modulo against a large range (e.g. 60d),
+                // because hashCode is 32-bit and caps at ~2.1B. That only spans ~24.8 days in ms.
+                //
+                // Instead, derive a 64-bit value from the leading hex of the id (our ids are hex-prefixed).
+                long uh = 0;
+                try {
+                  String base = newId;
+                  if (base.length() >= 16) {
+                    String hex = base.substring(0, 16);
+                    uh = Long.parseUnsignedLong(hex, 16);
+                  } else {
+                    uh = ((long)(base.hashCode())) & 0x7fffffffL;
+                  }
+                } catch (Exception e) {
+                  uh = ((long)(newId.hashCode())) & 0x7fffffffL;
+                }
                 long tsMs = params.startMs + (uh % rangeMs);
                 def iso = java.time.Instant.ofEpochMilli(tsMs).toString();
                 ctx._source['@timestamp'] = iso;

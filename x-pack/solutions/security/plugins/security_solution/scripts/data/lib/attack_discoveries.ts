@@ -61,23 +61,37 @@ const fetchAlertSummaries = async ({
   endMs: number;
   maxAlerts: number;
 }): Promise<AlertSummary[]> => {
+  // IMPORTANT:
+  // Don't fetch "the first N alerts" in time order for large time ranges (e.g. 60d),
+  // because that biases toward the earliest part of the window and causes Attack Discoveries
+  // to cluster at the beginning of the range.
+  //
+  // Instead, sample alerts across the entire time range using a fixed number of time buckets.
   const results: AlertSummary[] = [];
-  let searchAfter: SortResults | undefined;
+  const rangeMs = endMs - startMs;
+  const dayMs = 24 * 60 * 60 * 1000;
+  const approxDays = Math.max(1, Math.ceil(rangeMs / dayMs));
+  const bucketCount = Math.min(30, approxDays); // cap query count for speed
+  const bucketMs = Math.max(1, Math.ceil(rangeMs / bucketCount));
+  const perBucket = Math.max(1, Math.ceil(maxAlerts / bucketCount));
 
-  while (results.length < maxAlerts) {
+  for (let i = 0; i < bucketCount && results.length < maxAlerts; i++) {
+    const bucketStartMs = startMs + i * bucketMs;
+    const bucketEndMs = Math.min(endMs, bucketStartMs + bucketMs);
+    const size = Math.min(perBucket, maxAlerts - results.length);
+
     const resp = await esClient.search<AlertSearchHitSource>({
       index: alertsIndex,
-      size: Math.min(1000, maxAlerts - results.length),
-      sort: [{ '@timestamp': 'asc' }, { _shard_doc: 'asc' }],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
+      size,
+      sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
       query: {
         bool: {
           filter: [
             {
               range: {
                 '@timestamp': {
-                  gte: new Date(startMs).toISOString(),
-                  lte: new Date(endMs).toISOString(),
+                  gte: new Date(bucketStartMs).toISOString(),
+                  lte: new Date(bucketEndMs).toISOString(),
                 },
               },
             },
@@ -87,10 +101,7 @@ const fetchAlertSummaries = async ({
       _source: ['@timestamp', 'host.name', 'user.name', 'kibana.alert.rule.name'],
     });
 
-    const hits = resp.hits.hits;
-    if (hits.length === 0) break;
-
-    for (const hit of hits) {
+    for (const hit of resp.hits.hits) {
       const id = hit._id;
       const src = hit._source;
       const timestamp = asString(src?.['@timestamp']);
@@ -103,10 +114,8 @@ const fetchAlertSummaries = async ({
           ruleName: asString(src?.kibana?.alert?.rule?.name),
         });
       }
+      if (results.length >= maxAlerts) break;
     }
-
-    searchAfter = hits[hits.length - 1].sort;
-    if (!searchAfter) break;
   }
 
   return results;

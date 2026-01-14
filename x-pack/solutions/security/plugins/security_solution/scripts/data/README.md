@@ -22,6 +22,16 @@ Episode fixtures live here:
 - `x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/`
 - `x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/noise/` (false positives / benign-but-suspicious)
 
+## Provenance & sanitization (vendored artifacts)
+
+The episode fixture files under `scripts/data/episodes/**` are **vendored artifacts** intended to make Security development/testing **fast and deterministic** without requiring external downloads.
+
+- **Stability**: these fixtures are expected to **rarely (if ever) change**.
+  - **Do not update casually**. Any change to these files can invalidate assumptions in demos, docs, and debugging workflows.
+- **Sanitization**: fixtures should contain **no sensitive or customer-identifying data**.
+  - Hostnames/users/IDs in the source telemetry should be **synthetic or anonymized**.
+  - When in doubt, treat fixture updates as a security review item and get confirmation that the data is safe to redistribute in-repo.
+
 ## How alerts are generated (“true Security detection alerts”)
 
 This script uses the **Rule Preview** API:
@@ -105,6 +115,15 @@ Ruleset entries are resolved **best-effort**:
 ### Reproducibility
 
 - `--seed`: Optional seed string used to make cloning/host-user assignment deterministic
+
+### Performance / speed
+
+Rule preview can be the slowest step for large time ranges (e.g. `--start-date 60d`) because it runs multiple executor invocations per rule.
+
+- `--max-preview-invocations`: Caps rule preview invocations per rule (lower is faster). Default: `12`
+- `--skip-alerts`: Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
+- `--skip-ruleset-preview`: Skip previews of the ruleset rules (baseline attribution only; faster)
+- `--skip-attack-discoveries`: Skip Attack Discovery generation (faster)
 
 ### Kibana/Elasticsearch connection
 
