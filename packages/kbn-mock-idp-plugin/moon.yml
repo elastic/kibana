@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/es'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-server-utils'
 tags:
   - plugin
   - dev

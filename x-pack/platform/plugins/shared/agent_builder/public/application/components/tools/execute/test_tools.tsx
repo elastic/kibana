@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFieldNumber,
   EuiFieldText,
@@ -15,7 +14,6 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
@@ -37,7 +35,6 @@ import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';
 import { useTool } from '../../../hooks/tools/use_tools';
-import { ToolFormMode } from '../form/tool_form';
 import { labels } from '../../../utils/i18n';
 
 const flyoutStyles = css`
@@ -203,6 +200,7 @@ const renderFormField = ({
             <EuiFieldNumber
               {...field}
               inputRef={ref}
+              data-test-subj={`agentBuilderToolTestInput-${name}`}
               value={(value as number) ?? ''}
               type="number"
               onChange={(e) => onChange(e.target.valueAsNumber || e.target.value)}
@@ -221,6 +219,7 @@ const renderFormField = ({
           render={({ field: { onChange, value, ref, ...field } }) => (
             <EuiSwitch
               {...field}
+              data-test-subj={`agentBuilderToolTestInput-${name}`}
               checked={Boolean(value)}
               onChange={(e) => onChange(e.target.checked)}
               label={label}
@@ -238,6 +237,7 @@ const renderFormField = ({
             <EuiFieldText
               {...field}
               inputRef={ref}
+              data-test-subj={`agentBuilderToolTestInput-${name}`}
               value={value as string}
               placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
@@ -251,10 +251,9 @@ const renderFormField = ({
 export interface ToolTestFlyoutProps {
   toolId: string;
   onClose: () => void;
-  formMode?: ToolFormMode;
 }
 
-export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose, formMode }) => {
+export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose }) => {
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
   const { docLinksService } = useAgentBuilderServices();
   const [response, setResponse] = useState<string>('{}');
@@ -300,7 +299,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
   if (!tool) return null;
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" css={flyoutStyles}>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="flyoutTitle"
+      css={flyoutStyles}
+      data-test-subj="agentBuilderToolTestFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
@@ -406,17 +410,6 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
           </FormProvider>
         )}
       </EuiFlyoutBody>
-      {formMode === ToolFormMode.Edit && (
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            aria-label={labels.tools.testTool.backToEditToolButton}
-            iconType="sortLeft"
-            onClick={onClose}
-          >
-            {labels.tools.testTool.backToEditToolButton}
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      )}
     </EuiFlyout>
   );
 };

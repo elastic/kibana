@@ -568,6 +568,19 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
   }
 
+  async fillGrokPatternDefinitionsInput(value: string) {
+    await this.page.getByRole('button', { name: 'Advanced settings' }).click();
+    // Clean previous content
+    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page
+      .getByTestId('streamsAppPatternDefinitionsEditor')
+      .getByRole('textbox')
+      .fill(value);
+  }
+
   async fillDateProcessorSourceFieldInput(value: string) {
     await this.page.getByLabel('Source Field').fill(value);
   }
@@ -617,6 +630,11 @@ export class StreamsApp {
   async removeProcessor(pos: number) {
     await this.clickEditProcessor(pos);
     await this.page.getByRole('button', { name: 'Delete processor' }).click();
+  }
+
+  async waitForModifiedFieldsDetection() {
+    const badge = this.page.getByTestId('streamsAppModifiedFieldsBadge');
+    await expect(badge).toBeVisible({ timeout: 30_000 });
   }
 
   async saveStepsListChanges() {
@@ -683,7 +701,9 @@ export class StreamsApp {
   }
 
   async confirmChangesInReviewModal() {
-    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
+    const submitButton = this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton');
+    await expect(submitButton).toBeEnabled({ timeout: 30_000 });
+    await submitButton.click();
   }
 
   /**

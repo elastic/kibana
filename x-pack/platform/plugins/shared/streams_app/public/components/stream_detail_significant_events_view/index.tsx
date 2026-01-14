@@ -7,7 +7,7 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams, StreamQueryKql, Feature } from '@kbn/streams-schema';
+import type { Streams, StreamQueryKql, System } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
 import { compact, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -31,10 +31,9 @@ import { useAIFeatures } from '../../hooks/use_ai_features';
 
 interface Props {
   definition: Streams.all.GetResponse;
-  refreshDefinition: () => void;
 }
 
-export function StreamDetailSignificantEventsView({ definition, refreshDefinition }: Props) {
+export function StreamDetailSignificantEventsView({ definition }: Props) {
   const { timeState, setTime, refresh } = useTimefilter();
   const {
     dependencies: {
@@ -49,7 +48,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   }, [timeState.start, timeState.end]);
 
   const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream.name);
-
   const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
@@ -60,7 +58,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
   const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
 
@@ -99,7 +97,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       setIsEditFlyoutOpen={setIsEditFlyoutOpen}
       isEditFlyoutOpen={isEditFlyoutOpen}
       definition={definition}
-      refreshDefinition={refreshDefinition}
       refresh={significantEventsFetchState.refetch}
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
@@ -181,6 +178,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
                 size="s"
                 color="primary"
                 onClick={() => {
+                  setSelectedFeatures([]);
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
@@ -251,7 +249,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout(false)}
+      {editFlyout(selectedFeatures.length > 0)}
     </>
   );
 }

@@ -12854,6 +12854,14 @@
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts"
               },
               {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/public/application/hooks/use_connectors.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/public/application/hooks/use_edit_active_source_flyout.ts"
+              },
+              {
                 "plugin": "maintenanceWindows",
                 "path": "x-pack/platform/plugins/shared/maintenance_windows/public/hooks/use_find_maintenance_windows.ts"
               },
@@ -12924,6 +12932,14 @@
               {
                 "plugin": "stackConnectors",
                 "path": "x-pack/platform/plugins/shared/stack_connectors/public/common/auth/use_secret_headers.tsx"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_features/stream_features/hooks/use_stream_features.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_significant_events.ts"
               },
               {
                 "plugin": "osquery",
