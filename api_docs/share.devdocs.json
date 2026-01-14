@@ -284,7 +284,7 @@
           "ExportShareDerivativesConfig",
           ", { shareType: T; }> | Extract<",
           "LegacyIntegrationConfig",
-          ", { shareType: T; }>; onClose: () => void; isSaving?: boolean | undefined; onSave?: (() => Promise<void>) | undefined; objectType: string; objectTypeAlias?: string | undefined; objectId?: string | undefined; shareableUrl?: string | undefined; shareableUrlForSavedObject?: string | undefined; shareableUrlLocatorParams?: { locator: ",
+          ", { shareType: T; }>; onClose: () => void; isSaving?: boolean | undefined; asExport?: boolean | undefined; anchorElement?: HTMLElement | undefined; objectType: string; objectTypeAlias?: string | undefined; objectId?: string | undefined; shareableUrl?: string | undefined; shareableUrlForSavedObject?: string | undefined; shareableUrlLocatorParams?: { locator: ",
           {
             "pluginId": "share",
             "scope": "common",
@@ -300,7 +300,7 @@
             "section": "def-public.ShareableUrlLocatorParams",
             "text": "ShareableUrlLocatorParams"
           },
-          "; } | undefined; sharingData: { [key: string]: unknown; }; isDirty: boolean; asExport?: boolean | undefined; anchorElement?: HTMLElement | undefined; allowShortUrl: boolean; publicAPIEnabled?: boolean | undefined; }"
+          "; } | undefined; sharingData: { [key: string]: unknown; }; isDirty: boolean; allowShortUrl: boolean; publicAPIEnabled?: boolean | undefined; onSave?: (() => Promise<void>) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
         "deprecated": false,
@@ -417,7 +417,7 @@
           },
           " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => Promise<{ label: React.FC<{ openFlyout: () => void; }>; toolTipContent?: React.ReactNode; flyoutContent: React.FC<{ closeFlyout: () => void; flyoutRef: React.RefObject<HTMLDivElement>; }>; flyoutSizing?: Pick<",
           "EuiFlyoutProps",
-          "<\"div\">, \"size\" | \"maxWidth\"> | undefined; shouldRender: ({ availableExportItems, }: { availableExportItems: ",
+          "<\"div\" | \"nav\">, \"size\" | \"maxWidth\"> | undefined; shouldRender: ({ availableExportItems, }: { availableExportItems: ",
           {
             "pluginId": "share",
             "scope": "public",
@@ -1831,7 +1831,25 @@
           "section": "def-public.ShowShareMenuOptions",
           "text": "ShowShareMenuOptions"
         },
-        ") => Promise<void>; } & { url: ",
+        ") => Promise<void>; getExportHandler: (options: Omit<",
+        {
+          "pluginId": "share",
+          "scope": "public",
+          "docId": "kibSharePluginApi",
+          "section": "def-public.ShowShareMenuOptions",
+          "text": "ShowShareMenuOptions"
+        },
+        ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+        "IntlShape",
+        ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
+        {
+          "pluginId": "share",
+          "scope": "public",
+          "docId": "kibSharePluginApi",
+          "section": "def-public.ShowShareMenuOptions",
+          "text": "ShowShareMenuOptions"
+        },
+        ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
         {
           "pluginId": "share",
           "scope": "public",
@@ -2270,7 +2288,9 @@
                     "section": "def-common.EncryptedSavedObjectsClient",
                     "text": "EncryptedSavedObjectsClient"
                   },
-                  ") => void; }"
+                  ") => void; registerApiKeyInvalidateFn: (fn?: ",
+                  "ApiKeyInvalidationFn",
+                  " | undefined) => void; }"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
                 "deprecated": false,

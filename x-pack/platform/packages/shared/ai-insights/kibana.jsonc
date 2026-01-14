@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/ai-insights",
-  "owner": ["@elastic/obs-ai-team"],
-  "group": "platform",
-  "visibility": "shared"
-}

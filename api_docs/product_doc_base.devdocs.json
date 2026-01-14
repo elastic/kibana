@@ -33,7 +33,7 @@
           "UseMutationResult",
           "<",
           "PerformInstallResponse",
-          ", ServerError, string | undefined, unknown>"
+          ", ServerError, InstallVars, unknown>"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_install_product_doc.ts",
         "deprecated": false,
@@ -113,6 +113,8 @@
           },
           ") => { status: ",
           "InstallationStatusResponse",
+          " | ",
+          "SecurityLabsInstallStatusResponse",
           " | undefined; refetch: <TPageData>(options?: (",
           "RefetchOptions",
           " & ",
@@ -121,6 +123,8 @@
           "QueryObserverResult",
           "<",
           "InstallationStatusResponse",
+          " | ",
+          "SecurityLabsInstallStatusResponse",
           ", unknown>>; isLoading: boolean; isRefetching: boolean; isSuccess: boolean; isError: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
@@ -203,7 +207,7 @@
           "UseMutationResult",
           "<",
           "UninstallResponse",
-          ", ServerError, string | undefined, unknown>"
+          ", ServerError, UninstallVars, unknown>"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_uninstall_product_doc.ts",
         "deprecated": false,
@@ -345,6 +349,29 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-public.UseProductDocStatusOptions.resourceType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "resourceType",
+            "description": [
+              "The resource type to check status for. Defaults to product docs."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/product-doc-common",
+                "scope": "common",
+                "docId": "kibKbnProductDocCommonPluginApi",
+                "section": "def-common.ResourceType",
+                "text": "ResourceType"
+              },
+              " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/hooks/use_product_doc_status.ts",
             "deprecated": false,
@@ -574,6 +601,29 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.DocSearchOptions.resourceTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "resourceTypes",
+            "description": [
+              "\nResource types to include in the search.\nDefaults to `['product_doc']`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/product-doc-common",
+                "scope": "common",
+                "docId": "kibKbnProductDocCommonPluginApi",
+                "section": "def-common.ResourceType",
+                "text": "ResourceType"
+              },
+              "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
             "deprecated": false,

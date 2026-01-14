@@ -6,10 +6,6 @@
       ],
       "help": "__flag__",
       "v": "__flag__",
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
       "bytes": [
         "b",
         "kb",
@@ -18,6 +14,19 @@
         "tb",
         "pb"
       ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "full_id": "__flag__",
       "include_unloaded_segments": "__flag__",
       "h": [
@@ -60,6 +69,7 @@
         "load_1m",
         "load_5m",
         "load_15m",
+        "available_processors",
         "mappings.total_count",
         "mappings.total_estimated_overhead_in_bytes",
         "master",
@@ -116,15 +126,6 @@
         "30s",
         "-1",
         "0"
-      ],
-      "time": [
-        "nanos",
-        "micros",
-        "ms",
-        "s",
-        "m",
-        "h",
-        "d"
       ]
     },
     "methods": [

@@ -17,7 +17,7 @@ import type {
   UnifiedHistogramFetchParams,
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField, Dimension } from '../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -43,10 +43,6 @@ const useMetricsExperienceStateMock =
   metricsExperienceStateProvider.useMetricsExperienceState as jest.MockedFunction<
     typeof metricsExperienceStateProvider.useMetricsExperienceState
   >;
-
-const useFilteredMetricFieldsMock = hooks.useFilteredMetricFields as jest.MockedFunction<
-  typeof hooks.useFilteredMetricFields
->;
 
 const usePaginationMock = hooks.usePagination as jest.MockedFunction<typeof hooks.usePagination>;
 
@@ -105,21 +101,13 @@ describe('MetricsExperienceGridContent', () => {
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
-      dimensions: [],
-      valueFilters: [],
+      selectedDimensions: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onValuesChange: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
-    });
-
-    useFilteredMetricFieldsMock.mockReturnValue({
-      fields: allFields,
-      filters: {},
-      isLoading: false,
     });
 
     usePaginationMock.mockReturnValue({
@@ -143,19 +131,13 @@ describe('MetricsExperienceGridContent', () => {
   });
 
   it('renders the no data state when filtered/paginated fields returns no fields', () => {
-    useFilteredMetricFieldsMock.mockReturnValue({
-      fields: [],
-      filters: {},
-      isLoading: false,
-    });
-
     usePaginationMock.mockReturnValue({
       currentPageItems: [],
       totalPages: 0,
       totalCount: 0,
     });
 
-    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} />, {
+    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} fields={[]} />, {
       wrapper: IntlProvider,
     });
 
@@ -173,11 +155,9 @@ describe('MetricsExperienceGridContent', () => {
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
-      dimensions: [],
-      valueFilters: [],
+      selectedDimensions: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
-      onValuesChange: jest.fn(),
       isFullscreen: false,
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
@@ -185,12 +165,6 @@ describe('MetricsExperienceGridContent', () => {
     });
 
     const cpuFields = allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu'));
-
-    useFilteredMetricFieldsMock.mockReturnValue({
-      fields: cpuFields,
-      filters: {},
-      isLoading: false,
-    });
 
     usePaginationMock.mockReturnValue({
       currentPageItems: cpuFields.slice(0, 5),
@@ -206,21 +180,6 @@ describe('MetricsExperienceGridContent', () => {
     );
 
     expect(getByText('10 metrics')).toBeInTheDocument();
-  });
-
-  it('displays loading state when filtering is in progress', () => {
-    useFilteredMetricFieldsMock.mockReturnValue({
-      fields: allFields,
-      filters: {},
-      isLoading: true,
-    });
-
-    const { getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    // Should still render the grid but show loading indicator
-    expect(getByTestId('metricsExperienceRendered')).toBeInTheDocument();
   });
 
   it('renders the <MetricsGrid />', () => {

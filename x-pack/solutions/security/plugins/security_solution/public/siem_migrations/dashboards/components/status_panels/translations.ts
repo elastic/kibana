@@ -9,18 +9,18 @@ import { i18n } from '@kbn/i18n';
 
 export const START_DASHBOARD_MIGRATION_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.dashboards.startMigration.title',
-  { defaultMessage: 'Migrate your existing Splunk® SIEM dashboards to Elastic' }
+  { defaultMessage: 'Migrate your existing SIEM dashboards to Elastic' }
 );
 export const START_DASHBOARD_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.dashboards.startMigration.upload.title',
-  { defaultMessage: 'Export your Splunk® dashboards to start translation.' }
+  { defaultMessage: 'Export your SIEM dashboards to start translation.' }
 );
 
 export const START_DASHBOARD_MIGRATION_CARD_UPLOAD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.dashboards.startMigration.upload.description',
   {
     defaultMessage:
-      'Export your Splunk® dashboards and upload them here to start the migrations. Click “Upload Dashboards” to view step-by-step instructions.',
+      'Export your SIEM dashboards and upload them here to start the migrations. Click “Upload Dashboards” to view step-by-step instructions.',
   }
 );
 

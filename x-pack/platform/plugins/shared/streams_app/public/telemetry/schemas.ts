@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { RootSchema, SchemaArray, SchemaObject } from '@elastic/ebt';
-import type { FeatureType } from '@kbn/streams-schema';
+import type { RootSchema, SchemaObject } from '@elastic/ebt';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
-  StreamsAIGrokSuggestionLatencyProps,
   StreamsAIDissectSuggestionAcceptedProps,
-  StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
   StreamsAttachmentLinkChangedProps,
@@ -25,11 +22,9 @@ import type {
   StreamsSignificantEventsCreatedProps,
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
-  StreamsFeatureIdentificationIdentifiedProps,
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsDescriptionGeneratedProps,
-  StreamsProcessingSimulationSamplesFetchLatencyProps,
   StreamsTabVisitedProps,
 } from './types';
 
@@ -160,53 +155,6 @@ const streamsAttachmentFlyoutActionSchema: RootSchema<StreamsAttachmentFlyoutAct
   },
 };
 
-const matchRate: SchemaArray<number, number> = {
-  type: 'array',
-  items: {
-    type: 'float',
-    _meta: {
-      description: 'The rate',
-    },
-  },
-  _meta: {
-    description: 'The success rate of each match',
-  },
-};
-
-const streamsAIGrokSuggestionLatencySchema: RootSchema<StreamsAIGrokSuggestionLatencyProps> = {
-  name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  field: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the field used.',
-    },
-  },
-  connector_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The ID of the LLM connector',
-    },
-  },
-  suggestion_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of suggestions in the response',
-    },
-  },
-  match_rate: matchRate,
-  duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the request',
-    },
-  },
-};
-
 const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionAcceptedProps> = {
   name: {
     type: 'keyword',
@@ -239,41 +187,6 @@ const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionA
     },
   },
 };
-
-const streamsAIDissectSuggestionLatencySchema: RootSchema<StreamsAIDissectSuggestionLatencyProps> =
-  {
-    name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-    field: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the field used.',
-      },
-    },
-    connector_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'The ID of the LLM connector',
-      },
-    },
-    suggestion_count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of suggestions in the response',
-      },
-    },
-    match_rate: matchRate,
-    duration_ms: {
-      type: 'long',
-      _meta: {
-        description: 'The duration of the request',
-      },
-    },
-  };
 
 const streamsAIDissectSuggestionAcceptedSchema: RootSchema<StreamsAIDissectSuggestionAcceptedProps> =
   {
@@ -331,6 +244,12 @@ const streamsProcessingSavedSchema: RootSchema<StreamsProcessingSavedProps> = {
       description: 'The type of the stream: wired or classic',
     },
   },
+  configuration_mode: {
+    type: 'keyword',
+    _meta: {
+      description: 'The mode used to configure the processors: interactive or yaml',
+    },
+  },
 };
 
 const streamsRetentionChangedSchema: RootSchema<StreamsRetentionChangedProps> = {
@@ -373,20 +292,6 @@ const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaUpdatedProps> = {
   },
 };
 
-const countByTypes: SchemaObject<{ [key in FeatureType]: number }> = {
-  _meta: {
-    description: 'The count of identified features grouped by type',
-  },
-  properties: {
-    system: {
-      type: 'long',
-      _meta: {
-        description: 'The count of identified system features',
-      },
-    },
-  },
-};
-
 const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSignificantEventsSuggestionsGeneratedEventProps> =
   {
     duration_ms: {
@@ -414,7 +319,6 @@ const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSign
         description: 'The number of significant event queries generated',
       },
     },
-    count_by_feature_type: countByTypes,
     features_selected: {
       type: 'long',
       _meta: {
@@ -448,7 +352,6 @@ const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEvents
       description: 'The number of significant events created',
     },
   },
-  count_by_feature_type: countByTypes,
   stream_type: {
     type: 'keyword',
     _meta: {
@@ -463,41 +366,6 @@ const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEvents
   },
 };
 
-const streamsFeatureIdentificationIdentifiedSchema: RootSchema<StreamsFeatureIdentificationIdentifiedProps> =
-  {
-    count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of features identified',
-      },
-    },
-    count_by_type: countByTypes,
-    input_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of input tokens used for the generation request',
-      },
-    },
-    output_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of output tokens used for the generation request',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-  };
-
 const streamsFeatureIdentificationSavedSchema: RootSchema<StreamsFeatureIdentificationSavedProps> =
   {
     count: {
@@ -506,7 +374,6 @@ const streamsFeatureIdentificationSavedSchema: RootSchema<StreamsFeatureIdentifi
         description: 'The number of features saved',
       },
     },
-    count_by_type: countByTypes,
     stream_type: {
       type: 'keyword',
       _meta: {
@@ -529,7 +396,6 @@ const streamsFeatureIdentificationDeletedSchema: RootSchema<StreamsFeatureIdenti
         description: 'The number of features deleted',
       },
     },
-    count_by_type: countByTypes,
     stream_type: {
       type: 'keyword',
       _meta: {
@@ -570,35 +436,6 @@ const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedP
     },
   },
 };
-
-const streamsProcessingSimulationSamplesFetchLatencySchema: RootSchema<StreamsProcessingSimulationSamplesFetchLatencyProps> =
-  {
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    data_source_type: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'The type of data source used for fetching simulation samples: latest-samples or kql-samples',
-      },
-    },
-    duration_ms: {
-      type: 'long',
-      _meta: {
-        description: 'The time (in milliseconds) it took to fetch simulation samples',
-      },
-    },
-  };
 
 const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
   stream_name: {
@@ -679,9 +516,7 @@ export {
   streamsAttachmentLinkChangedSchema,
   streamsAttachmentFlyoutOpenedSchema,
   streamsAttachmentFlyoutActionSchema,
-  streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
-  streamsAIDissectSuggestionLatencySchema,
   streamsAIDissectSuggestionAcceptedSchema,
   streamsRetentionChangedSchema,
   streamsProcessingSavedSchema,
@@ -690,10 +525,8 @@ export {
   streamsSignificantEventsSuggestionsGeneratedSchema,
   streamsSignificantEventsCreatedSchema,
   wiredStreamsStatusChangedSchema,
-  streamsFeatureIdentificationIdentifiedSchema,
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsDescriptionGeneratedSchema,
-  streamsProcessingSimulationSamplesFetchLatencySchema,
   streamsTabVisitedSchema,
 };

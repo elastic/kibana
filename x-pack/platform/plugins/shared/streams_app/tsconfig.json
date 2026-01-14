@@ -99,5 +99,12 @@
     "@kbn/tooling-log",
     "@kbn/inference-common",
     "@kbn/core-chrome-navigation",
+    "@kbn/classic-stream-flyout",
+    "@kbn/ebt-tools",
+    "@kbn/language-documentation",
+    "@kbn/shared-ux-markdown",
+    "@kbn/test-jest-helpers",
+    "@kbn/react-query",
+    "@kbn/timerange",
   ]
 }

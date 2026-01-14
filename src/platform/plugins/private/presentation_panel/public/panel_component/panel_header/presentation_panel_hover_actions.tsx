@@ -430,13 +430,19 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
-  const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
+  const hasHoverActions = useMemo(() => {
+    if (quickActionElements.length) return true;
+    return contextMenuPanels.every(({ items }) => items?.length);
+  }, [quickActionElements, contextMenuPanels]);
 
   return (
     <>
       {children}
       {api && hasHoverActions && (
-        <div className={classNames('embPanel__hoverActions', className)}>
+        <div
+          className={classNames('embPanel__hoverActions', className)}
+          data-test-subj={`hover-actions-${api.uuid}`}
+        >
           {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>

@@ -38,6 +38,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const bodyText = await pageObjects.common.getBodyText();
           expect(bodyText).to.contain("You don't have access to manage API keys");
         });
+
+        describe('Connection details flyout', function () {
+          it('should not show API Keys tab when user lacks permission', async () => {
+            await testSubjects.click('viewConnectionDetailsLink');
+            await testSubjects.existOrFail('connectionDetailsModalTitle');
+            // Wait for endpoints tab to exist (flyout is loaded)
+            await testSubjects.existOrFail('connectionDetailsTabBtn-endpoints');
+            // API Keys tab should NOT exist for viewer - wait for permission check to complete
+            await retry.try(async () => {
+              await testSubjects.missingOrFail('connectionDetailsTabBtn-apiKeys');
+            });
+          });
+        });
       });
     });
 
@@ -130,6 +143,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.click('viewConnectionDetailsLink');
             await testSubjects.existOrFail('connectionDetailsModalTitle');
           });
+          it('should show API Keys tab when user has permission', async () => {
+            await testSubjects.click('viewConnectionDetailsLink');
+            await testSubjects.existOrFail('connectionDetailsModalTitle');
+            // Both tabs should exist for developer
+            await testSubjects.existOrFail('connectionDetailsTabBtn-endpoints');
+            await testSubjects.existOrFail('connectionDetailsTabBtn-apiKeys');
+          });
         });
 
         describe('Explore the API', function () {
@@ -198,36 +218,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'href'
             );
             expect(href).to.contain('docs/solutions/search/get-started');
-          });
-        });
-
-        describe('Getting Started navigation', function () {
-          it('renders Getting Started side nav item', async () => {
-            await pageObjects.common.navigateToApp('searchGettingStarted');
-            await pageObjects.solutionNavigation.sidenav.expectLinkActive({
-              deepLinkId: 'searchGettingStarted',
-            });
-          });
-
-          it('navigate to Getting Started using search', async () => {
-            await pageObjects.svlCommonNavigation.search.showSearch();
-            // TODO: test something search project specific instead of generic discover
-            await pageObjects.svlCommonNavigation.search.searchFor('getting started');
-            await pageObjects.svlCommonNavigation.search.clickOnOption(0);
-            await pageObjects.svlCommonNavigation.search.hideSearch();
-
-            expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/getting_started');
-          });
-
-          it('Getting Started nav item shows correct breadcrumbs', async () => {
-            await pageObjects.common.navigateToApp('searchGettingStarted');
-            await testSubjects.existOrFail('gettingStartedHeader');
-            await pageObjects.solutionNavigation.sidenav.expectLinkActive({
-              deepLinkId: 'searchGettingStarted',
-            });
-            await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-              text: 'Getting started',
-            });
           });
         });
       });

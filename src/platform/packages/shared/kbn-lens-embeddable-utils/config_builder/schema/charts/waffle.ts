@@ -76,7 +76,6 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
 
 function validateGroupings({
   metrics,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   group_by,
 }: {
   metrics: Array<{}>;
@@ -106,12 +105,20 @@ export const waffleStateSchemaNoESQL = schema.object(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
       ),
-      { minSize: 1, meta: { description: 'Array of metric configurations (minimum 1)' } }
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
     ),
     group_by: schema.maybe(
       schema.arrayOf(
         mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
-        { minSize: 1, meta: { description: 'Array of breakdown dimensions (minimum 1)' } }
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
       )
     ),
   },
@@ -139,14 +146,19 @@ const waffleStateSchemaESQL = schema.object(
           esqlColumnSchema,
         ],
         { meta: { description: 'ES|QL column reference for primary metric' } }
-      )
+      ),
+      { maxSize: 100 }
     ),
     group_by: schema.maybe(
       schema.arrayOf(
         schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
           meta: { description: 'ES|QL column reference for breakdown dimension' },
         }),
-        { minSize: 1, meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' } }
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' },
+        }
       )
     ),
   },

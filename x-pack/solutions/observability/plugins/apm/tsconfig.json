@@ -84,7 +84,6 @@
     "@kbn/observability-alert-details",
     "@kbn/custom-integrations-plugin",
     "@kbn/dashboard-plugin",
-    "@kbn/controls-plugin",
     "@kbn/core-http-server",
     "@kbn/profiling-plugin",
     "@kbn/logs-shared-plugin",
@@ -148,13 +147,10 @@
     "@kbn/core-chrome-browser",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/zod",
-    "@kbn/onechat-server",
-    "@kbn/onechat-common",
-    "@kbn/onechat-plugin",
-    "@kbn/ai-insights",
+    "@kbn/control-group-renderer",
+    "@kbn/agent-builder-plugin",
     "@kbn/observability-agent-builder-plugin",
-    "@kbn/server-route-repository-client"
+    "@kbn/kql",
   ],
   "exclude": ["target/**/*"]
 }

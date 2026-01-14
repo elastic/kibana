@@ -118,8 +118,8 @@ export function TableGrid({
   }, [onRemoveColumn, onAddColumn, columns]);
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
-    [rows, isEsqlMode, filter, onToggleColumn]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn, columns }),
+    [rows, isEsqlMode, filter, onToggleColumn, columns]
   );
   const fieldValueCellActions = useMemo(
     () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
@@ -255,6 +255,7 @@ const componentStyles = {
   fieldsGrid: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
     const { fontSize } = euiFontSize(themeContext, 's');
+    const fieldNameTopPadding = `calc(${euiTheme.size.xs} * 1.5)`;
 
     return css({
       '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
@@ -275,7 +276,7 @@ const componentStyles = {
       },
 
       '.kbnDocViewer__fieldName': {
-        padding: euiTheme.size.xs,
+        paddingTop: fieldNameTopPadding,
         paddingLeft: 0,
         lineHeight: euiTheme.font.lineHeightMultiplier,
 
@@ -285,7 +286,7 @@ const componentStyles = {
       },
 
       '.kbnDocViewer__fieldName_icon': {
-        paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
+        paddingTop: fieldNameTopPadding,
         lineHeight: euiTheme.font.lineHeightMultiplier,
       },
 

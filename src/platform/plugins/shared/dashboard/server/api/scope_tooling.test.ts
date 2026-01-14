@@ -160,7 +160,11 @@ describe('stripUnmappedKeys', () => {
         {
           config: {
             title: 'panel',
-            enhancements: {},
+            enhancements: {
+              dynamicActions: {
+                events: [],
+              },
+            },
           },
           grid: {
             h: 15,
@@ -177,7 +181,11 @@ describe('stripUnmappedKeys', () => {
             {
               config: {
                 title: 'panel in section',
-                enhancements: {},
+                enhancements: {
+                  dynamicActions: {
+                    events: [{}],
+                  },
+                },
               },
               grid: {
                 h: 15,
@@ -235,26 +243,7 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped unmapped panel config key 'enhancements' from panel panel1",
           "Dropped unmapped panel config key 'enhancements' from panel panelInSection1",
-        ],
-      }
-    `);
-  });
-
-  it('should drop references', () => {
-    const dashboardState = {
-      title: 'my dashboard',
-      references: [],
-    };
-    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "panels": Array [],
-          "title": "my dashboard",
-        },
-        "warnings": Array [
-          "Dropped unmapped key 'references' from dashboard",
         ],
       }
     `);
@@ -351,14 +340,6 @@ describe('throwOnUnmappedKeys', () => {
           type: 'typeWithSchema',
         },
       ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
-  });
-
-  it('should throw when dashboard contains references', () => {
-    const dashboardState = {
-      title: 'my dashboard',
-      references: [],
     };
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });

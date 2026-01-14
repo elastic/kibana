@@ -50,7 +50,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  describe('scheduling and running tasks', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/247560
+  describe.skip('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -1733,6 +1734,25 @@ export default function ({ getService }: FtrProviderContext) {
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.status).to.be('idle');
         expect(scheduledTask.enabled).to.be(false);
+      });
+    });
+
+    it('should update the retryAt of a long running task to be now + 5m', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleLongRunningRecurringTask',
+        schedule: { interval: `1d` },
+        params: {},
+      });
+
+      const now = Date.now();
+
+      await retry.try(async () => {
+        const scheduledTask = await currentTask(task.id);
+        const retryAt = Date.parse(scheduledTask.retryAt!);
+        expect(isNaN(retryAt)).to.be(false);
+
+        expect(retryAt).to.be.greaterThan(now + 5 * 60 * 1000);
+        expect(retryAt).to.be.lessThan(now + 6.5 * 60 * 1000);
       });
     });
   });

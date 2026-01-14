@@ -858,6 +858,22 @@
           },
           {
             "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.EuiDataGridWrapper.ensureGridVisible",
+            "type": "Function",
+            "tags": [],
+            "label": "ensureGridVisible",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/data_grid.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
             "id": "def-common.EuiDataGridWrapper.doActionOnColumn",
             "type": "Function",
             "tags": [],
@@ -2253,7 +2269,7 @@
                   "- Optional log level string (highest priority)"
                 ],
                 "signature": [
-                  "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
+                  "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/common/services/logger.ts",
                 "deprecated": false,
@@ -2745,6 +2761,91 @@
       },
       {
         "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.getSynthtraceClient",
+        "type": "Function",
+        "tags": [],
+        "label": "getSynthtraceClient",
+        "description": [],
+        "signature": [
+          "(synthClient: TClient, { esClient, kbnUrl, log, config }: ",
+          "SynthtraceClientOptions",
+          ", overrides: { skipInstallation?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.GetClientsReturn",
+            "text": "GetClientsReturn"
+          },
+          "<TClient>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.getSynthtraceClient.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "synthClient",
+            "description": [],
+            "signature": [
+              "TClient"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.getSynthtraceClient.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ esClient, kbnUrl, log, config }",
+            "description": [],
+            "signature": [
+              "SynthtraceClientOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.getSynthtraceClient.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.getSynthtraceClient.$3.skipInstallation",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "skipInstallation",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
         "id": "def-common.globalSetupHook",
         "type": "Function",
         "tags": [],
@@ -2816,15 +2917,7 @@
             "section": "def-common.ApiServicesFixture",
             "text": "ApiServicesFixture"
           },
-          "; } & { samlAuth: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.SamlAuth",
-            "text": "SamlAuth"
-          },
-          "; preCreateSecurityIndexes: void; } & { uiSettings: ",
+          "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & { kbnUrl: ",
           {
@@ -3526,6 +3619,20 @@
             "description": [],
             "signature": [
               "CasesApiService"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ApiServicesFixture.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              "DataViewsApiService"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
             "deprecated": false,
@@ -4258,9 +4365,9 @@
               "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\nPassing argument to\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression):\n\n```js\nconst result = await page.getByTestId('myId').evaluate((element, [x, y]) => {\n  return element.textContent + ' ' + x * y;\n}, [7, 8]);\nconsole.log(result); // prints \"myId text 56\"\n```\n"
             ],
             "signature": [
-              "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "{ <R, Arg, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
-              "<E, Arg, R>, arg: Arg, options?: { timeout?: number | undefined; } | undefined): Promise<R>; <R, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "<E, Arg, R>, arg: Arg, options?: { timeout?: number | undefined; } | undefined): Promise<R>; <R, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
               "<E, void, R>, options?: { timeout?: number | undefined; } | undefined): Promise<R>; }"
             ],
@@ -4343,9 +4450,9 @@
               "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\nPassing argument to\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression):\n\n```js\nconst result = await page.getByTestId('myId').evaluate((element, [x, y]) => {\n  return element.textContent + ' ' + x * y;\n}, [7, 8]);\nconsole.log(result); // prints \"myId text 56\"\n```\n"
             ],
             "signature": [
-              "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "{ <R, Arg, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
-              "<E, Arg, R>, arg: Arg, options?: { timeout?: number | undefined; } | undefined): Promise<R>; <R, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "<E, Arg, R>, arg: Arg, options?: { timeout?: number | undefined; } | undefined): Promise<R>; <R, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
               "<E, void, R>, options?: { timeout?: number | undefined; } | undefined): Promise<R>; }"
             ],
@@ -4411,11 +4518,11 @@
               "\nExecute JavaScript code in the page, taking the matching element as an argument, and return a\n[JSHandle](https://playwright.dev/docs/api/class-jshandle) with the result.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle-option-expression) as\na[JSHandle](https://playwright.dev/docs/api/class-jshandle), called with the matching element as a first argument,\nand [`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle-option-arg) as a second argument.\n\nThe only difference between\n[locator.evaluate(pageFunction[, arg, options])](https://playwright.dev/docs/api/class-locator#locator-evaluate)\nand\n[locator.evaluateHandle(pageFunction[, arg, options])](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle)\nis that\n[locator.evaluateHandle(pageFunction[, arg, options])](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle)\nreturns [JSHandle](https://playwright.dev/docs/api/class-jshandle).\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle-option-expression)\nreturns a [Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle-option-expression) throws\nor rejects, this method throws.\n\nSee [page.evaluateHandle(pageFunction[, arg])](https://playwright.dev/docs/api/class-page#page-evaluate-handle) for\nmore details."
             ],
             "signature": [
-              "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "{ <R, Arg, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
               "<E, Arg, R>, arg: Arg): Promise<",
               "SmartHandle",
-              "<R>>; <R, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "<R>>; <R, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
               "<E, void, R>): Promise<",
               "SmartHandle",
@@ -4473,11 +4580,11 @@
               "\nExecute JavaScript code in the page, taking the matching element as an argument, and return a\n[JSHandle](https://playwright.dev/docs/api/class-jshandle) with the result.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle-option-expression) as\na[JSHandle](https://playwright.dev/docs/api/class-jshandle), called with the matching element as a first argument,\nand [`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle-option-arg) as a second argument.\n\nThe only difference between\n[locator.evaluate(pageFunction[, arg, options])](https://playwright.dev/docs/api/class-locator#locator-evaluate)\nand\n[locator.evaluateHandle(pageFunction[, arg, options])](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle)\nis that\n[locator.evaluateHandle(pageFunction[, arg, options])](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle)\nreturns [JSHandle](https://playwright.dev/docs/api/class-jshandle).\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle-option-expression)\nreturns a [Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle-option-expression) throws\nor rejects, this method throws.\n\nSee [page.evaluateHandle(pageFunction[, arg])](https://playwright.dev/docs/api/class-page#page-evaluate-handle) for\nmore details."
             ],
             "signature": [
-              "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "{ <R, Arg, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
               "<E, Arg, R>, arg: Arg): Promise<",
               "SmartHandle",
-              "<R>>; <R, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "<R>>; <R, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
               "<E, void, R>): Promise<",
               "SmartHandle",
@@ -4518,9 +4625,9 @@
               "\nExecute JavaScript code in the page, taking all matching elements as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-all-option-expression), called with\nan array of all matching elements as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-all-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-all-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-all-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\n```js\nconst locator = page.locator('div');\nconst moreThanTen = await locator.evaluateAll((divs, min) => divs.length > min, 10);\n```\n"
             ],
             "signature": [
-              "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "{ <R, Arg, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
-              "<E[], Arg, R>, arg: Arg): Promise<R>; <R, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "<E[], Arg, R>, arg: Arg): Promise<R>; <R, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
               "<E[], void, R>): Promise<R>; }"
             ],
@@ -4576,9 +4683,9 @@
               "\nExecute JavaScript code in the page, taking all matching elements as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-all-option-expression), called with\nan array of all matching elements as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-all-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-all-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-all-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\n```js\nconst locator = page.locator('div');\nconst moreThanTen = await locator.evaluateAll((divs, min) => divs.length > min, 10);\n```\n"
             ],
             "signature": [
-              "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "{ <R, Arg, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
-              "<E[], Arg, R>, arg: Arg): Promise<R>; <R, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
+              "<E[], Arg, R>, arg: Arg): Promise<R>; <R, E extends SVGElement | HTMLElement = SVGElement | HTMLElement>(pageFunction: ",
               "PageFunctionOn",
               "<E[], void, R>): Promise<R>; }"
             ],
@@ -4619,7 +4726,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<",
               "ElementHandle",
-              "<HTMLElement | SVGElement> | null>"
+              "<SVGElement | HTMLElement> | null>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
@@ -5102,7 +5209,7 @@
               "\nClick an element.\n\n**Details**\n\nThis method clicks the element by performing the following steps:\n1. Wait for [actionability](https://playwright.dev/docs/actionability) checks on the element, unless\n   [`force`](https://playwright.dev/docs/api/class-locator#locator-click-option-force) option is set.\n1. Scroll the element into view if needed.\n1. Use [page.mouse](https://playwright.dev/docs/api/class-page#page-mouse) to click in the center of the\n   element, or the specified\n   [`position`](https://playwright.dev/docs/api/class-locator#locator-click-option-position).\n1. Wait for initiated navigations to either succeed or fail, unless\n   [`noWaitAfter`](https://playwright.dev/docs/api/class-locator#locator-click-option-no-wait-after) option is\n   set.\n\nIf the element is detached from the DOM at any moment during the action, this method throws.\n\nWhen all steps combined have not finished during the specified\n[`timeout`](https://playwright.dev/docs/api/class-locator#locator-click-option-timeout), this method throws a\n[TimeoutError](https://playwright.dev/docs/api/class-timeouterror). Passing zero timeout disables this.\n\n**Usage**\n\nClick a button:\n\n```js\nawait page.getByRole('button').click();\n```\n\nShift-right-click at a specific position on a canvas:\n\n```js\nawait page.locator('canvas').click({\n  button: 'right',\n  modifiers: ['Shift'],\n  position: { x: 23, y: 32 },\n});\n```\n"
             ],
             "signature": [
-              "(options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
+              "(options?: { button?: \"middle\" | \"right\" | \"left\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
@@ -5129,7 +5236,7 @@
                       "\nDefaults to `left`."
                     ],
                     "signature": [
-                      "\"right\" | \"left\" | \"middle\" | undefined"
+                      "\"middle\" | \"right\" | \"left\" | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
@@ -5318,7 +5425,7 @@
               "\nDouble-click an element.\n\n**Details**\n\nThis method double clicks the element by performing the following steps:\n1. Wait for [actionability](https://playwright.dev/docs/actionability) checks on the element, unless\n   [`force`](https://playwright.dev/docs/api/class-locator#locator-dblclick-option-force) option is set.\n1. Scroll the element into view if needed.\n1. Use [page.mouse](https://playwright.dev/docs/api/class-page#page-mouse) to double click in the center of the\n   element, or the specified\n   [`position`](https://playwright.dev/docs/api/class-locator#locator-dblclick-option-position).\n\nIf the element is detached from the DOM at any moment during the action, this method throws.\n\nWhen all steps combined have not finished during the specified\n[`timeout`](https://playwright.dev/docs/api/class-locator#locator-dblclick-option-timeout), this method throws a\n[TimeoutError](https://playwright.dev/docs/api/class-timeouterror). Passing zero timeout disables this.\n\n**NOTE** `element.dblclick()` dispatches two `click` events and a single `dblclick` event.\n"
             ],
             "signature": [
-              "(options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
+              "(options?: { button?: \"middle\" | \"right\" | \"left\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
@@ -5345,7 +5452,7 @@
                       "\nDefaults to `left`."
                     ],
                     "signature": [
-                      "\"right\" | \"left\" | \"middle\" | undefined"
+                      "\"middle\" | \"right\" | \"left\" | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
@@ -6359,7 +6466,7 @@
               "\nAllows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),\n[ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and\n[accessible name](https://w3c.github.io/accname/#dfn-accessible-name).\n\n**Usage**\n\nConsider the following DOM structure.\n\n```html\n<h3>Sign up</h3>\n<label>\n  <input type=\"checkbox\" /> Subscribe\n</label>\n<br/>\n<button>Submit</button>\n```\n\nYou can locate each element by it's implicit role:\n\n```js\nawait expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();\n\nawait page.getByRole('checkbox', { name: 'Subscribe' }).check();\n\nawait page.getByRole('button', { name: /submit/i }).click();\n```\n\n**Details**\n\nRole selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback\nabout the ARIA guidelines.\n\nMany html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)\nthat is recognized by the role selector. You can find all the\n[supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**\nduplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values."
             ],
             "signature": [
-              "(role: \"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
+              "(role: \"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"alertdialog\" | \"application\" | \"article\" | \"banner\" | \"button\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"dialog\" | \"directory\" | \"document\" | \"feed\" | \"figure\" | \"form\" | \"grid\" | \"gridcell\" | \"group\" | \"heading\" | \"img\" | \"listbox\" | \"listitem\" | \"main\" | \"marquee\" | \"math\" | \"menu\" | \"menubar\" | \"menuitem\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"option\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"status\" | \"switch\" | \"tab\" | \"table\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"time\" | \"code\" | \"blockquote\" | \"caption\" | \"meter\" | \"strong\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
@@ -6376,7 +6483,7 @@
                   "Required aria role."
                 ],
                 "signature": [
-                  "\"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
+                  "\"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"alertdialog\" | \"application\" | \"article\" | \"banner\" | \"button\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"dialog\" | \"directory\" | \"document\" | \"feed\" | \"figure\" | \"form\" | \"grid\" | \"gridcell\" | \"group\" | \"heading\" | \"img\" | \"listbox\" | \"listitem\" | \"main\" | \"marquee\" | \"math\" | \"menu\" | \"menubar\" | \"menuitem\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"option\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"status\" | \"switch\" | \"tab\" | \"table\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"time\" | \"code\" | \"blockquote\" | \"caption\" | \"meter\" | \"strong\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
@@ -8414,6 +8521,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/page_objects/utils.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts"
               }
             ],
             "children": [
@@ -9287,6 +9398,83 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.SamlAuth.asInteractiveUser",
+            "type": "Function",
+            "tags": [],
+            "label": "asInteractiveUser",
+            "description": [
+              "\nGenerates a SAML session cookie for an interactive user with the specified role.\n\nThis method is ideal for testing internal APIs that are typically accessed via the UI.\nIt authenticates as an interactive user and returns session credentials including cookie\nheaders that can be used in API requests.\n"
+            ],
+            "signature": [
+              "(role: string | ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.KibanaRole",
+                "text": "KibanaRole"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ElasticsearchRoleDescriptor",
+                "text": "ElasticsearchRoleDescriptor"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.RoleSessionCredentials",
+                "text": "RoleSessionCredentials"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.SamlAuth.asInteractiveUser.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "role",
+                "description": [
+                  "- Either a built-in Kibana role name (e.g., 'admin', 'editor', 'viewer') or\n  a custom role descriptor with specific permissions (Kibana or Elasticsearch)"
+                ],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.KibanaRole",
+                    "text": "KibanaRole"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ElasticsearchRoleDescriptor",
+                    "text": "ElasticsearchRoleDescriptor"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "Promise resolving to credentials with cookieValue and cookieHeader properties"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -9337,9 +9525,9 @@
               "Response",
               " | null>; waitForLoadingIndicatorHidden: () => Promise<",
               "ElementHandle",
-              "<HTMLElement | SVGElement> | null>; keyTo: (selector: string, key: string, maxElementsToTraverse?: number | undefined) => Promise<void>; checkA11y: (options?: ",
+              "<SVGElement | HTMLElement> | null>; keyTo: (selector: string, key: string, maxElementsToTraverse?: number | undefined) => Promise<void>; checkA11y: (options?: ",
               "RunA11yScanOptions",
-              " | undefined) => Promise<{ violations: string[]; }>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isVisible: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
+              " | undefined) => Promise<{ violations: string[]; }>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"middle\" | \"right\" | \"left\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"middle\" | \"right\" | \"left\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isVisible: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
               "Locator",
               " | undefined; hasNot?: ",
               "Locator",
@@ -9347,7 +9535,7 @@
               "Locator",
               "; waitForSelector: (selector: string, options?: PageWaitForSelectorOptions | undefined) => Promise<",
               "ElementHandle",
-              "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
+              "<SVGElement | HTMLElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
             "deprecated": false,
@@ -9906,9 +10094,9 @@
               "Response",
               " | null>; waitForLoadingIndicatorHidden: () => Promise<",
               "ElementHandle",
-              "<HTMLElement | SVGElement> | null>; keyTo: (selector: string, key: string, maxElementsToTraverse?: number | undefined) => Promise<void>; checkA11y: (options?: ",
+              "<SVGElement | HTMLElement> | null>; keyTo: (selector: string, key: string, maxElementsToTraverse?: number | undefined) => Promise<void>; checkA11y: (options?: ",
               "RunA11yScanOptions",
-              " | undefined) => Promise<{ violations: string[]; }>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isVisible: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
+              " | undefined) => Promise<{ violations: string[]; }>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"middle\" | \"right\" | \"left\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"middle\" | \"right\" | \"left\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isVisible: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
               "Locator",
               " | undefined; hasNot?: ",
               "Locator",
@@ -9916,7 +10104,7 @@
               "Locator",
               "; waitForSelector: (selector: string, options?: PageWaitForSelectorOptions | undefined) => Promise<",
               "ElementHandle",
-              "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
+              "<SVGElement | HTMLElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
             "deprecated": false,
@@ -10013,6 +10201,20 @@
             "tags": [],
             "label": "[VALID_CONFIG_MARKER]",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ScoutTestOptions.runGlobalSetup",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "runGlobalSetup",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10418,9 +10620,9 @@
           "Response",
           " | null>; waitForLoadingIndicatorHidden: () => Promise<",
           "ElementHandle",
-          "<HTMLElement | SVGElement> | null>; keyTo: (selector: string, key: string, maxElementsToTraverse?: number | undefined) => Promise<void>; checkA11y: (options?: ",
+          "<SVGElement | HTMLElement> | null>; keyTo: (selector: string, key: string, maxElementsToTraverse?: number | undefined) => Promise<void>; checkA11y: (options?: ",
           "RunA11yScanOptions",
-          " | undefined) => Promise<{ violations: string[]; }>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isVisible: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
+          " | undefined) => Promise<{ violations: string[]; }>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"middle\" | \"right\" | \"left\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"middle\" | \"right\" | \"left\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isVisible: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
           "Locator",
           " | undefined; hasNot?: ",
           "Locator",
@@ -10428,7 +10630,7 @@
           "Locator",
           "; waitForSelector: (selector: string, options?: PageWaitForSelectorOptions | undefined) => Promise<",
           "ElementHandle",
-          "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
+          "<SVGElement | HTMLElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/test/scout_page/index.ts",
         "deprecated": false,

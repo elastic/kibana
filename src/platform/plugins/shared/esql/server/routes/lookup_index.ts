@@ -29,8 +29,8 @@ export const registerLookupIndexRoutes = (
           indexName: schema.string(),
         }),
         body: schema.object({
-          // maxSize fixes: Unbounded array in schema validation vulnerability,
-          operations: schema.arrayOf(schema.any(), { maxSize: 10000 }),
+          // maxSize is added here to prevent DoS vulnerabilities https://github.com/elastic/kibana/pull/245533,
+          operations: schema.arrayOf(schema.any(), { maxSize: 1000 }),
         }),
       },
       security: {

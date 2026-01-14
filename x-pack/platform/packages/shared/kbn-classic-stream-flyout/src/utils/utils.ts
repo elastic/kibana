@@ -6,9 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import {
+  IndexMode,
+  type TemplateListItem as IndexTemplate,
+} from '@kbn/index-management-shared-types';
 
-export const formatDataRetention = (template: TemplateDeserialized): string | undefined => {
+export const formatDataRetention = (template: IndexTemplate): string | undefined => {
   const { lifecycle } = template;
 
   if (!lifecycle?.enabled) {
@@ -27,22 +30,28 @@ export const formatDataRetention = (template: TemplateDeserialized): string | un
 };
 
 export const indexModeLabels = {
-  standard: i18n.translate(
+  [IndexMode.standard]: i18n.translate(
     'xpack.createClassicStreamFlyout.indexModeLabels.standardIndexModeLabel',
     {
       defaultMessage: 'Standard',
     }
   ),
-  logsdb: i18n.translate('xpack.createClassicStreamFlyout.indexModeLabels.logsdbIndexModeLabel', {
-    defaultMessage: 'LogsDB',
-  }),
-  time_series: i18n.translate(
+  [IndexMode.logsdb]: i18n.translate(
+    'xpack.createClassicStreamFlyout.indexModeLabels.logsdbIndexModeLabel',
+    {
+      defaultMessage: 'LogsDB',
+    }
+  ),
+  [IndexMode.time_series]: i18n.translate(
     'xpack.createClassicStreamFlyout.indexModeLabels.timeSeriesIndexModeLabel',
     {
       defaultMessage: 'Time series',
     }
   ),
-  lookup: i18n.translate('xpack.createClassicStreamFlyout.indexModeLabels.lookupIndexModeLabel', {
-    defaultMessage: 'Lookup',
-  }),
+  [IndexMode.lookup]: i18n.translate(
+    'xpack.createClassicStreamFlyout.indexModeLabels.lookupIndexModeLabel',
+    {
+      defaultMessage: 'Lookup',
+    }
+  ),
 };

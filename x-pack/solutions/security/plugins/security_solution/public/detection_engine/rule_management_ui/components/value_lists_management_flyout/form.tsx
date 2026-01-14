@@ -145,6 +145,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
           fullWidth={true}
           isLoading={importState.loading}
           isInvalid={!fileIsValid}
+          aria-label={i18n.FILE_PICKER_PROMPT}
         />
       </EuiFormRow>
       <EuiFormRow fullWidth>

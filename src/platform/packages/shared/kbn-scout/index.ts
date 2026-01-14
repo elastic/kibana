@@ -77,6 +77,13 @@ export type {
 
 // Authentication types
 export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
+export type {
+  RoleSessionCredentials,
+  CookieHeader,
+} from './src/playwright/fixtures/scope/worker/core_fixtures';
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
+
+// Utility for overriding synthtrace clients
+export { getSynthtraceClient } from './src/common/services/synthtrace';

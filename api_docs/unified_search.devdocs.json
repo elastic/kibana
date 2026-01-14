@@ -45,7 +45,7 @@
             "section": "def-public.ApplyGlobalFilterActionContext",
             "text": "ApplyGlobalFilterActionContext"
           },
-          ">>"
+          ", {}>>"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/index.ts",
         "deprecated": false,
@@ -613,7 +613,7 @@
               },
               "[] | undefined; iconType?: ",
               "IconType",
-              " | undefined; showQueryInput?: boolean | undefined; isLoading?: boolean | undefined; dataTestSubj?: string | undefined; minRefreshInterval?: number | undefined; isDisabled?: boolean | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; additionalQueryBarMenuItems?: ",
+              " | undefined; showQueryInput?: boolean | undefined; isLoading?: boolean | undefined; dataTestSubj?: string | undefined; placeholder?: string | undefined; minRefreshInterval?: number | undefined; isDisabled?: boolean | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; additionalQueryBarMenuItems?: ",
               "AdditionalQueryBarMenuItems",
               " | undefined; filtersForSuggestions?: ",
               {
@@ -713,7 +713,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; }) => void) | undefined; onRefreshChange?: (((options: { isPaused: boolean; refreshInterval: number; }) => void) & ((options: { isPaused: boolean; refreshInterval: number; }) => void)) | undefined; indicateNoData?: boolean | undefined; isAutoRefreshDisabled?: boolean | undefined; placeholder?: string | undefined; isClearable?: boolean | undefined; nonKqlMode?: \"text\" | \"lucene\" | undefined; disableQueryLanguageSwitcher?: boolean | undefined; displayStyle?: \"inPage\" | \"detached\" | \"withBorders\" | undefined; fillSubmitButton?: boolean | undefined; dataViewPickerComponentProps?: ",
+              "; }) => void) | undefined; onRefreshChange?: (((options: { isPaused: boolean; refreshInterval: number; }) => void) & ((options: { isPaused: boolean; refreshInterval: number; }) => void)) | undefined; indicateNoData?: boolean | undefined; isAutoRefreshDisabled?: boolean | undefined; isClearable?: boolean | undefined; nonKqlMode?: \"text\" | \"lucene\" | undefined; disableQueryLanguageSwitcher?: boolean | undefined; displayStyle?: \"inPage\" | \"detached\" | \"withBorders\" | undefined; fillSubmitButton?: boolean | undefined; dataViewPickerComponentProps?: ",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -721,7 +721,7 @@
                 "section": "def-public.DataViewPickerProps",
                 "text": "DataViewPickerProps"
               },
-              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
+              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"auto\" | \"full\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
               " | undefined; suggestionsAbstraction?: ",
               "SuggestionsAbstraction",
@@ -749,7 +749,7 @@
                 "section": "def-public.ESQLEditorRestorableState",
                 "text": "ESQLEditorRestorableState"
               },
-              ">) => void) | undefined; useBackgroundSearchButton?: boolean | undefined; timeHistory?: ",
+              ">) => void) | undefined; hasDirtyState?: boolean | undefined; useBackgroundSearchButton?: boolean | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -2502,7 +2502,7 @@
         "signature": [
           "Omit<",
           "SearchBarOwnProps",
-          "<QT>, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; allowSavingQueries?: boolean | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
+          "<QT>, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; disableSubscribingToGlobalDataServices?: boolean | undefined; savedQueryId?: string | undefined; allowSavingQueries?: boolean | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",

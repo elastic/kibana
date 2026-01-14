@@ -21,12 +21,14 @@ interface ServicesSectionProps {
   };
   onServiceUpdate: (serviceKey: ServiceType, enabled: boolean) => void;
   subscription?: string;
+  currentLicenseType?: string;
 }
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({
   services,
   onServiceUpdate,
   subscription,
+  currentLicenseType,
 }) => {
   const {
     loadingService,
@@ -73,6 +75,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       isLoading: loadingService === 'eis',
       subscriptionRequired: services.eis?.subscription?.required,
       hasActiveSubscription,
+      validLicenseTypes: services.eis?.support?.valid_license_types,
+      currentLicenseType,
     },
     {
       serviceKey: 'auto_ops',
@@ -108,6 +112,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       isLoading: loadingService === 'auto_ops',
       subscriptionRequired: services.auto_ops?.subscription?.required,
       hasActiveSubscription,
+      validLicenseTypes: services.auto_ops?.support?.valid_license_types,
+      currentLicenseType,
     },
   ];
 
@@ -120,12 +126,12 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   return (
     <>
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.services.title"
             defaultMessage="Services"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       {serviceCards.map((service, index) => (

@@ -166,7 +166,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; type: string; phase$: ",
+          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; isExpandable?: boolean | undefined; isCustomizable?: boolean | undefined; isDuplicable?: boolean | undefined; isPinnable?: boolean | undefined; type: string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -184,21 +184,13 @@
           },
           " | undefined>; serializeState: () => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<",
-          {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          ">; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -304,13 +296,13 @@
           },
           "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
           },
-          "<",
+          "; getSerializedStateByValue: () => ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
@@ -318,23 +310,7 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          ">; getSerializedStateByValue: () => ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/lens-common-2",
-            "scope": "common",
-            "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
-          },
-          ">; viewMode$: ",
+          "; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -358,7 +334,17 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; projectRoutingOverrides$: ",
+          "<string | undefined>; hasUnsavedChanges$: ",
+          "Observable",
+          "<boolean>; resetUnsavedChanges: () => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -448,7 +434,7 @@
             "section": "def-common.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -470,7 +456,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -566,7 +552,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
+          "<object, object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -589,7 +575,7 @@
         "label": "LensByRefSerializedAPIConfig",
         "description": [],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -611,7 +597,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -796,7 +782,7 @@
         "label": "LensByValueSerializedAPIConfig",
         "description": [],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -818,7 +804,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -1101,7 +1087,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; type: string; phase$: ",
+          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; isExpandable?: boolean | undefined; isCustomizable?: boolean | undefined; isDuplicable?: boolean | undefined; isPinnable?: boolean | undefined; type: string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1119,21 +1105,13 @@
           },
           " | undefined>; serializeState: () => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<",
-          {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          ">; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1239,13 +1217,13 @@
           },
           "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
           },
-          "<",
+          "; getSerializedStateByValue: () => ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
@@ -1253,23 +1231,7 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          ">; getSerializedStateByValue: () => ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/lens-common-2",
-            "scope": "common",
-            "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
-          },
-          ">; viewMode$: ",
+          "; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1293,7 +1255,17 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; projectRoutingOverrides$: ",
+          "<string | undefined>; hasUnsavedChanges$: ",
+          "Observable",
+          "<boolean>; resetUnsavedChanges: () => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<void>; projectRoutingOverrides$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1383,7 +1355,7 @@
             "section": "def-common.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -1405,7 +1377,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -1501,7 +1473,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
+          "<object, object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -1526,7 +1498,7 @@
           "\nCombined properties of API config used in dashboard API for lens panels\n\n Includes:\n- Lens document state (for by-value)\n- Panel settings\n- other props from the embeddable"
         ],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -1548,7 +1520,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -1718,7 +1690,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes?: undefined; } | { overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes?: undefined; } | { overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -1740,7 +1712,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",

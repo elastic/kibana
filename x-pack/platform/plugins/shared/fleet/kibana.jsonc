@@ -23,6 +23,7 @@
       "share",
       "security",
       "unifiedSearch",
+      "kql",
       "savedObjectsTagging",
       "taskManager",
       "files",
@@ -44,7 +45,8 @@
       "discover",
       "ingestPipelines",
       "automaticImport",
-      "alerting"
+      "alerting",
+      "sloShared"
     ],
     "requiredBundles": [
       "kibanaReact",
@@ -52,7 +54,6 @@
       "logsShared",
       "kibanaUtils",
       "usageCollection",
-      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"

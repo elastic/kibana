@@ -20,8 +20,7 @@ import { useLoadIndexMappings } from '../../../../services';
 export const DetailsPageMappings: FunctionComponent<{
   index?: Index;
   showAboutMappings?: boolean;
-  hasUpdateMappingsPrivilege?: boolean;
-}> = ({ index, showAboutMappings = true, hasUpdateMappingsPrivilege }) => {
+}> = ({ index, showAboutMappings = true }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index?.name || '');
   const [jsonError, setJsonError] = useState<boolean>(false);
 
@@ -97,7 +96,6 @@ export const DetailsPageMappings: FunctionComponent<{
       jsonData={data}
       showAboutMappings={showAboutMappings}
       refetchMapping={resendRequest}
-      hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
     />
   );
 };

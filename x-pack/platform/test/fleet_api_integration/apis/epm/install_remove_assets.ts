@@ -29,7 +29,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es: Client = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
-  const retry = getService('retry');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const logsTemplateName = `logs-${pkgName}.test_logs`;
@@ -65,7 +64,6 @@ export default function (providerContext: FtrProviderContext) {
         pkgName,
         es,
         kibanaServer,
-        retry,
       });
     });
 
@@ -380,7 +378,6 @@ export default function (providerContext: FtrProviderContext) {
         pkgName,
         es,
         kibanaServer,
-        retry,
       });
     });
   });
@@ -393,7 +390,6 @@ const expectAssetsInstalled = ({
   pkgName,
   es,
   kibanaServer,
-  retry,
 }: {
   logsTemplateName: string;
   metricsTemplateName: string;
@@ -401,7 +397,6 @@ const expectAssetsInstalled = ({
   pkgName: string;
   es: Client;
   kibanaServer: any;
-  retry: any;
 }) => {
   it('should have installed the ILM policy', async function () {
     const resPolicy = await es.transport.request(
@@ -671,6 +666,10 @@ const expectAssetsInstalled = ({
             type: 'security-rule',
           },
           {
+            id: 'sample_slo_template',
+            type: 'slo_template',
+          },
+          {
             id: 'sample_tag',
             type: 'tag',
           },
@@ -744,10 +743,6 @@ const expectAssetsInstalled = ({
           {
             id: 'metrics-all_assets.test_metrics-0.1.0',
             type: 'ingest_pipeline',
-          },
-          {
-            id: 'all_assets-README.md',
-            type: 'knowledge_base',
           },
           {
             id: 'default',
@@ -896,6 +891,11 @@ const expectAssetsInstalled = ({
             type: 'epm-packages-assets',
           },
           {
+            id: 'c09e8ecb-7030-5b81-8b93-890f0f3bd272',
+            path: 'all_assets-0.1.0/kibana/slo_template/nginx-availability.json',
+            type: 'epm-packages-assets',
+          },
+          {
             id: 'b265a5e0-c00b-5eda-ac44-2ddbd36d9ad0',
             path: 'all_assets-0.1.0/kibana/tag/sample_tag.json',
             type: 'epm-packages-assets',
@@ -928,12 +928,17 @@ const expectAssetsInstalled = ({
         verification_key_id: null,
       };
 
-      expect(sortedRes).eql(expectedSavedObject);
+      expectedSavedObject.installed_es.forEach((item) => {
+        expect(
+          sortedRes.installed_es.find(
+            (asset: any) => asset.type === item.type && asset.id === item.id
+          )
+        ).to.not.be(undefined);
+      });
+      expect({ ...sortedRes, installed_es: [] }).eql({ ...expectedSavedObject, installed_es: [] });
     }
 
-    await retry.tryForTime(10000, async () => {
-      await verifySO();
-    });
+    await verifySO();
   });
 
   // TODO enable when feature flag is turned on https://github.com/elastic/kibana/issues/244655

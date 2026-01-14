@@ -10,17 +10,16 @@ import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useFetchContext } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { BehaviorSubject } from 'rxjs';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
@@ -29,7 +28,6 @@ import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_f
 import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
 import { useInitializeChart } from './use_initialize_chart';
@@ -113,11 +111,7 @@ export function ESQLEditor({
 
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
-  const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi)
-      ? parentApi?.esqlVariables$
-      : new BehaviorSubject(undefined)
-  );
+  const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
 
   const dispatch = useLensDispatch();
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
 import type { ReactNode } from 'react';
@@ -208,6 +209,12 @@ export const RiskInputsTab = <T extends EntityType>({
         sorting
         selection={euiTableSelectionProps}
         itemId="_id"
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.riskInputs.alertsTableCaption',
+          {
+            defaultMessage: 'Alerts contributing to the risk score',
+          }
+        )}
       />
       <EuiSpacer size="s" />
       <ExtraAlertsMessage<T> riskScore={riskScore} alerts={alerts} entityType={entityType} />
@@ -329,6 +336,12 @@ const ContextsSection = <T extends EntityType>({
         data-test-subj="risk-input-contexts-table"
         columns={contextColumns}
         items={items}
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.riskInputs.contextsTableCaption',
+          {
+            defaultMessage: 'Contextual contributions to the risk score',
+          }
+        )}
       />
     </>
   );

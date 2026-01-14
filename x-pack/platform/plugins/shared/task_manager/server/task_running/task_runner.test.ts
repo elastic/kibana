@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { secondsFromNow } from '../lib/intervals';
+import { secondsFromNow, secondsFromDate } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import {
   createTaskRunError,
@@ -47,6 +47,7 @@ import { configMock } from '../config.mock';
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
+const minutesFromDate = (date: Date, mins: number): Date => secondsFromDate(date, mins * 60);
 const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
 
 jest.mock('uuid', () => ({
@@ -1774,6 +1775,79 @@ describe('TaskManagerRunner', () => {
       expect(instance.attempts).toBe(0);
       expect(logger.warn).not.toHaveBeenCalled();
       expect(result).toEqual(asOk({ state: { foo: 'bar' } }));
+    });
+
+    test('updates retryAt on an interval for long running tasks', async () => {
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      const now = new Date();
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+
+      const instance = store.partialUpdate.mock.calls[0][0];
+      expect(instance.retryAt?.getTime()).toBeGreaterThan(minutesFromDate(now, 5).getTime());
+      expect(instance.retryAt?.getTime()).toBeLessThan(minutesFromDate(now, 6.5).getTime());
+    });
+
+    test('stops the interval and cancels the task if there is 409 error updating retryAt for long running tasks', async () => {
+      let wasCancelled = false;
+      const { runner, store, logger } = await readyToRunStageSetup({
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                return { state: {} };
+              },
+              async cancel() {
+                wasCancelled = true;
+              },
+            }),
+          },
+        },
+      });
+      store.partialUpdate.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object [type/id] conflict'))
+      );
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Conflict error trying to update retryAt for a long-running task. Cancelling task: foo',
+        {
+          tags: ['foo', 'bar'],
+        }
+      );
+      expect(wasCancelled).toBeTruthy();
     });
 
     describe('TaskEvents', () => {

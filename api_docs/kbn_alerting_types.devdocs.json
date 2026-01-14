@@ -2244,7 +2244,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"unknown\" | \"ok\" | \"error\" | \"pending\" | \"active\" | \"warning\""
+              "\"unknown\" | \"ok\" | \"error\" | \"warning\" | \"pending\" | \"active\""
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
@@ -3035,6 +3035,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RuleSpecificFlappingProperties.enabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/alerting-types",
             "id": "def-common.RuleSpecificFlappingProperties.lookBackWindow",
@@ -4868,7 +4882,7 @@
         "label": "RuleExecutionStatuses",
         "description": [],
         "signature": [
-          "\"unknown\" | \"ok\" | \"error\" | \"pending\" | \"active\" | \"warning\""
+          "\"unknown\" | \"ok\" | \"error\" | \"warning\" | \"pending\" | \"active\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
@@ -5156,7 +5170,7 @@
         "label": "SummaryActionContextVariablesFlatten",
         "description": [],
         "signature": [
-          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
+          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
         "deprecated": false,

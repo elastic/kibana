@@ -2032,7 +2032,7 @@
               },
               "<Partial<",
               "GridLineStyle",
-              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
+              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -2054,7 +2054,7 @@
               "MakeOverridesSerializable",
               "<",
               "ExternalPointerEventsSettings",
-              " | undefined>; pointBuffer?: ",
+              " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
               "MarkBuffer",
               " | undefined; pointerUpdateTrigger?: ",
               "PointerUpdateTrigger",
@@ -2976,7 +2976,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
+          "\"auto\" | \"right\" | \"left\" | \"above\" | \"below\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -3183,7 +3183,7 @@
         "label": "PointVisibility",
         "description": [],
         "signature": [
-          "\"never\" | \"auto\" | \"always\""
+          "\"auto\" | \"never\" | \"always\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

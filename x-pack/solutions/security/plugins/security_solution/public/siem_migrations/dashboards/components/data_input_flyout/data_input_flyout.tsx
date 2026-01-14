@@ -28,10 +28,12 @@ import { useMigrationDataInputContext } from '../../../common/components/migrati
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import type { DashboardMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
-import type { MigrationSettingsBase, MissingResourcesIndexed } from '../../../common/types';
+import type { HandleMissingResourcesIndexed, MigrationSettingsBase } from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
-import { useMissingResources } from '../../../rules/components/data_input_flyout/steps/hooks/use_missing_resources';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
 import { STEP_COMPONENTS } from './configs';
+import { PanelText } from '../../../../common/components/panel_text';
+import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
 
 interface DashboardMigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -59,14 +61,14 @@ export const DashboardMigrationDataInputFlyout = React.memo(
       SplunkDataInputStep.Upload
     );
 
-    const setMissingResourcesStep = useCallback(
-      (newMissingResourcesIndexed: MissingResourcesIndexed) => {
-        if (newMissingResourcesIndexed.macros.length) {
+    const setMissingResourcesStep: HandleMissingResourcesIndexed = useCallback(
+      ({ newMissingResourcesIndexed }) => {
+        if (newMissingResourcesIndexed?.macros.length) {
           setDataInputStep(SplunkDataInputStep.Macros);
           return;
         }
 
-        if (newMissingResourcesIndexed.lookups.length) {
+        if (newMissingResourcesIndexed?.lookups.length) {
           setDataInputStep(SplunkDataInputStep.Lookups);
           return;
         }
@@ -77,8 +79,8 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     );
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
-      setDataInputStep,
       handleMissingResourcesIndexed: setMissingResourcesStep,
+      migrationSource: MigrationSource.SPLUNK,
     });
 
     const onMigrationCreated = useCallback(
@@ -91,15 +93,15 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
     const onStartMigrationWithSettings = useCallback(
       (settings: MigrationSettingsBase) => {
-        if (migrationStats?.id) {
+        if (migrationStats) {
           startMigration(
-            migrationStats.id,
+            migrationStats,
             isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
             settings
           );
         }
       },
-      [isRetry, migrationStats?.id, startMigration]
+      [isRetry, migrationStats, startMigration]
     );
     const { modal: startMigrationModal, showModal: showStartMigrationModal } =
       useStartDashboardsMigrationModal({
@@ -150,6 +152,11 @@ export const DashboardMigrationDataInputFlyout = React.memo(
                   </EuiFlexItem>
                 ))}
               </>
+              <EuiFlexItem>
+                <PanelText size="xs" subdued cursive>
+                  <p>{getCopyrightNoticeByVendor(MigrationSource.SPLUNK)}</p>
+                </PanelText>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>

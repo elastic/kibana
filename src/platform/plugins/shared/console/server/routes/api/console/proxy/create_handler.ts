@@ -9,7 +9,6 @@
 
 import type { Agent, IncomingMessage } from 'http';
 import { pick } from 'lodash';
-import type { SemVer } from 'semver';
 
 import type { KibanaRequest, RequestHandler } from '@kbn/core/server';
 
@@ -17,7 +16,6 @@ import type { KibanaRequest, RequestHandler } from '@kbn/core/server';
 // for forwarding.
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import type { ESConfigForProxy } from '../../../../types';
-import type { ProxyConfigCollection } from '../../../../lib';
 import { getElasticsearchProxyConfig, proxyRequest, setHeaders } from '../../../../lib';
 
 import type { RouteDependencies } from '../../..';
@@ -42,24 +40,10 @@ function filterHeaders(originalHeaders: object, headersToKeep: string[]): object
 
 export function getRequestConfig(
   headers: object,
-  esConfig: ESConfigForProxy,
-  uri: string,
-  kibanaVersion: SemVer,
-  proxyConfigCollection?: ProxyConfigCollection
-): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
+  esConfig: ESConfigForProxy
+): { agent: Agent; timeout: number; headers: object } {
   const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
   const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
-
-  if (kibanaVersion.major < 8) {
-    // In 7.x we still support the proxyConfig setting defined in kibana.yml
-    // From 8.x we don't support it anymore so we don't try to read it here.
-    if (proxyConfigCollection!.hasConfig()) {
-      return {
-        ...proxyConfigCollection!.configForUri(uri),
-        headers: newHeaders,
-      };
-    }
-  }
 
   return {
     ...getElasticsearchProxyConfig(esConfig),
@@ -95,25 +79,11 @@ function getProxyHeaders(req: KibanaRequest) {
 export const createHandler =
   ({
     log,
-    proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
-    kibanaVersion,
+    proxy: { readLegacyESConfig },
   }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
   async (ctx, request, response) => {
     const { body, query } = request;
     const { method, path, withProductOrigin, host: requestHost } = query;
-
-    if (kibanaVersion.major < 8) {
-      // The "console.proxyFilter" setting in kibana.yaml has been deprecated in 8.x
-      // We only read it on the 7.x branch
-      if (!pathFilters!.some((re) => re.test(path))) {
-        return response.forbidden({
-          body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-        });
-      }
-    }
 
     const legacyConfig = await readLegacyESConfig();
     const { hosts } = legacyConfig;
@@ -126,13 +96,7 @@ export const createHandler =
 
       // Because this can technically be provided by a settings-defined proxy config, we need to
       // preserve these property names to maintain BWC.
-      const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
-        request.headers,
-        legacyConfig,
-        uri.toString(),
-        kibanaVersion,
-        proxyConfigCollection
-      );
+      const { timeout, agent, headers } = getRequestConfig(request.headers, legacyConfig);
 
       const requestHeaders = {
         ...headers,
@@ -150,7 +114,6 @@ export const createHandler =
         uri,
         timeout,
         payload: body,
-        rejectUnauthorized,
         agent,
       });
     } catch (e) {

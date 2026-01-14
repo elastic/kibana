@@ -424,6 +424,87 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.trace",
+            "type": "Object",
+            "tags": [],
+            "label": "trace",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.span",
+            "type": "Object",
+            "tags": [],
+            "label": "span",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.transaction",
+            "type": "Object",
+            "tags": [],
+            "label": "transaction",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.service",
+            "type": "Object",
+            "tags": [],
+            "label": "service",
+            "description": [],
+            "signature": [
+              "{ name: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
             "id": "def-common.Error.eventName",
             "type": "string",
             "tags": [],
@@ -470,8 +551,7 @@
                 "docId": "kibKbnApmTypesPluginApi",
                 "section": "def-common.TimestampUs",
                 "text": "TimestampUs"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
             "deprecated": false,

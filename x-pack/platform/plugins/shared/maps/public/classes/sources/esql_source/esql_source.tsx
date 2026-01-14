@@ -278,6 +278,7 @@ export class ESQLSource
           { params },
           {
             strategy: 'esql',
+            projectRouting: requestMeta.projectRouting,
           }
         )
         .pipe(

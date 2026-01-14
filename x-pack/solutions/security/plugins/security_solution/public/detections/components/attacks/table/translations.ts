@@ -13,3 +13,10 @@ export const SHOW_ANONYMIZED_LABEL = i18n.translate(
     defaultMessage: 'Show anonymized values',
   }
 );
+
+export const EXPAND_BUTTON_ARIAL_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.tableSection.expandButtonArialLabel',
+  {
+    defaultMessage: 'Open attack details',
+  }
+);
