@@ -151,12 +151,19 @@ export const useEditActiveSourceFlyout = ({
   );
 
   const flyout = useMemo(() => {
-    if (!isOpen || !stackConnector || isLoadingConnector) {
+    if (!isOpen || !stackConnector || isLoadingConnector || !activeSource) {
       return null;
     }
 
+    // Override stack connector name with data source name
+    // This ensures the flyout shows the data source name, not the stack connector name
+    const connectorWithDataSourceName = {
+      ...stackConnector,
+      name: activeSource.name,
+    };
+
     return triggersActionsUi.getEditConnectorFlyout({
-      connector: stackConnector,
+      connector: connectorWithDataSourceName,
       onClose: closeFlyout,
       onConnectorUpdated: handleConnectorUpdated,
     });
@@ -164,6 +171,7 @@ export const useEditActiveSourceFlyout = ({
     isOpen,
     stackConnector,
     isLoadingConnector,
+    activeSource,
     closeFlyout,
     handleConnectorUpdated,
     triggersActionsUi,
