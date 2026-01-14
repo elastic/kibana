@@ -14,9 +14,11 @@ import { AppMenuActionId } from '@kbn/discover-utils';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { RuleFormFlyoutContent } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -33,7 +35,7 @@ interface EsQueryAlertMetaData extends RuleTypeMetaData {
   adHocDataViewList: DataView[];
 }
 
-const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
+const RuleFormFlyoutWithType = RuleFormFlyoutContent<EsQueryAlertMetaData>;
 
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
@@ -130,7 +132,7 @@ export const getAlertsAppMenuItem = ({
     // activeSpace.solution && activeSpace.solution !== 'classic' TODO handle this
     items.push({
       id: AppMenuActionId.manageRulesAndConnectors,
-      order: 2,
+      order: Number.MAX_SAFE_INTEGER,
       label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
         defaultMessage: 'Manage rules and connectors',
       }),
@@ -156,15 +158,20 @@ export const getAlertsAppMenuItem = ({
           : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
               defaultMessage: 'Data view does not have a time field.',
             }),
-        run: async () => {
-          // return (
-          //   <CreateAlertFlyout
-          //     {...params}
-          //     discoverParams={discoverParams}
-          //     services={services}
-          //     stateContainer={stateContainer}
-          //   />
-          // );
+        run: () => {
+          const overlay = services.core.overlays.openFlyout(
+            toMountPoint(
+              <KibanaContextProvider services={services}>
+                <CreateAlertFlyout
+                  discoverParams={discoverParams}
+                  services={services}
+                  onFinishAction={() => overlay.close()}
+                  stateContainer={stateContainer}
+                />
+              </KibanaContextProvider>,
+              services.core
+            )
+          );
         },
       });
     }

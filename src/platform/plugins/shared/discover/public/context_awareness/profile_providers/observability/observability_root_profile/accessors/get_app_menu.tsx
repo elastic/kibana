@@ -13,8 +13,10 @@ import { AppMenuActionId } from '@kbn/discover-utils';
 import type { DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { RuleFormFlyoutContent } from '@kbn/response-ops-rule-form/flyout';
 import { isOfQueryType } from '@kbn/es-query';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { RootProfileProvider } from '../../../../profiles';
@@ -69,8 +71,6 @@ const registerDatasetQualityLink = (
             },
           },
         });
-
-        // onFinishAction();
       },
     });
   }
@@ -78,14 +78,15 @@ const registerDatasetQualityLink = (
 
 const registerCustomThresholdRuleAction = (
   registry: AppMenuRegistry,
-  {
-    data,
-    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
-    ...services
-  }: ProfileProviderServices,
+  allServices: ProfileProviderServices,
   { dataView, authorizedRuleTypeIds }: AppMenuExtensionParams
 ) => {
   if (!authorizedRuleTypeIds.includes(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID)) return;
+
+  const {
+    data,
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+  } = allServices;
 
   registry.registerPopoverItem(AppMenuActionId.alerts, {
     id: 'custom-threshold-rule',
@@ -103,38 +104,42 @@ const registerCustomThresholdRuleAction = (
       // Some of the rule form's required plugins are from x-pack, so make sure they're defined before
       // rendering the flyout. The alerting plugin is also part of x-pack, so this check should probably never
       // return false. This is mostly here because Typescript requires us to mark x-pack plugins as optional.
-      const plugins = { ...services, data };
-      if (!isValidRuleFormPlugins(plugins)) return null;
+      if (!isValidRuleFormPlugins(allServices)) return;
 
-      return (
-        <RuleFormFlyout
-          plugins={{
-            ...plugins,
-            ruleTypeRegistry,
-            actionTypeRegistry,
-          }}
-          consumer={AlertConsumers.ALERTS}
-          validConsumers={[
-            AlertConsumers.LOGS,
-            AlertConsumers.INFRASTRUCTURE,
-            AlertConsumers.OBSERVABILITY,
-            AlertConsumers.STACK_ALERTS,
-            AlertConsumers.ALERTS,
-          ]}
-          multiConsumerSelection={AlertConsumers.ALERTS}
-          ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
-          initialValues={{
-            params: {
-              searchConfiguration: {
-                index,
-                query,
-                filter: filters,
-              },
-            },
-          }}
-          // onSubmit={onFinishAction}
-          // onCancel={onFinishAction}
-        />
+      const overlay = allServices.core.overlays.openFlyout(
+        toMountPoint(
+          <KibanaContextProvider services={allServices}>
+            <RuleFormFlyoutContent
+              plugins={{
+                ...allServices,
+                ruleTypeRegistry,
+                actionTypeRegistry,
+              }}
+              consumer={AlertConsumers.ALERTS}
+              validConsumers={[
+                AlertConsumers.LOGS,
+                AlertConsumers.INFRASTRUCTURE,
+                AlertConsumers.OBSERVABILITY,
+                AlertConsumers.STACK_ALERTS,
+                AlertConsumers.ALERTS,
+              ]}
+              multiConsumerSelection={AlertConsumers.ALERTS}
+              ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
+              initialValues={{
+                params: {
+                  searchConfiguration: {
+                    index,
+                    query,
+                    filter: filters,
+                  },
+                },
+              }}
+              onSubmit={() => overlay.close()}
+              onCancel={() => overlay.close()}
+            />
+          </KibanaContextProvider>,
+          allServices.core
+        )
       );
     },
   });
@@ -142,9 +147,10 @@ const registerCustomThresholdRuleAction = (
 
 const registerCreateSLOAction = (
   registry: AppMenuRegistry,
-  { data, discoverShared, application }: ProfileProviderServices,
+  allServices: ProfileProviderServices,
   { dataView, isEsqlMode }: AppMenuExtensionParams
 ) => {
+  const { data, discoverShared, application } = allServices;
   const sloFeature = discoverShared.features.registry.getById('observability-create-slo');
   const hasSloPermission = application.capabilities.slo?.write;
 
@@ -170,20 +176,28 @@ const registerCreateSLOAction = (
               filters: filters?.map(({ meta, query }) => ({ meta, query })),
             };
 
-        // onFinishAction was here
-        return sloFeature.createSLOFlyout({
-          initialValues: {
-            indicator: {
-              type: 'sli.kql.custom',
-              params: {
-                index,
-                timestampField,
-                filter,
-              },
-            },
-          },
-          onClose: () => {},
-        });
+        const sloFlyoutContent = sloFeature.createSLOFlyoutContent || sloFeature.createSLOFlyout;
+
+        const overlay = allServices.core.overlays.openFlyout(
+          toMountPoint(
+            <KibanaContextProvider services={allServices}>
+              {sloFlyoutContent({
+                initialValues: {
+                  indicator: {
+                    type: 'sli.kql.custom',
+                    params: {
+                      index,
+                      timestampField,
+                      filter,
+                    },
+                  },
+                },
+                onClose: () => overlay.close(),
+              })}
+            </KibanaContextProvider>,
+            allServices.core
+          )
+        );
       },
     });
   }

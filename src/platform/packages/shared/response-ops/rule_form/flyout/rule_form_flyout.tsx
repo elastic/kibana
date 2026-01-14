@@ -30,15 +30,23 @@ const inLineContainerCss = css`
 interface RuleFormFlyoutRendererProps<MetaData extends RuleTypeMetaData> {
   ruleFormProps: RuleFormProps<MetaData>;
   focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+  renderFlyout?: boolean;
+  onClose?: () => void;
 }
 
 const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>({
   ruleFormProps,
   focusTrapProps,
+  renderFlyout = true,
+  onClose: externalOnClose,
 }: RuleFormFlyoutRendererProps<MetaData>) => {
   const { onClickClose, hideCloseButton } = useRuleFlyoutUIContext();
 
   const onClose = useCallback(() => {
+    if (externalOnClose) {
+      externalOnClose();
+      return;
+    }
     // If onClickClose has been initialized, call it instead of onCancel. onClickClose should be used to
     // determine if the close confirmation modal should be shown. props.onCancel is passed down the component hierarchy
     // and will be called 1) by onClickClose, if the confirmation modal doesn't need to be shown, or 2) by the confirm
@@ -50,7 +58,24 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>({
       // This will only occur if the user tries to close the flyout while the Suspense fallback is still visible
       ruleFormProps.onCancel?.();
     }
-  }, [onClickClose, ruleFormProps]);
+  }, [onClickClose, ruleFormProps, externalOnClose]);
+
+  const content = (
+    <Suspense
+      fallback={
+        <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+          <EuiLoadingElastic size="xl" />
+        </RuleFormErrorPromptWrapper>
+      }
+    >
+      <RuleForm {...ruleFormProps} isFlyout focusTrapProps={focusTrapProps} />
+    </Suspense>
+  );
+
+  if (!renderFlyout) {
+    return content;
+  }
+
   return (
     <EuiFlyoutResizable
       ownFocus
@@ -62,30 +87,41 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>({
       hideCloseButton={hideCloseButton}
       focusTrapProps={focusTrapProps}
     >
-      <Suspense
-        fallback={
-          <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
-            <EuiLoadingElastic size="xl" />
-          </RuleFormErrorPromptWrapper>
-        }
-      >
-        <RuleForm {...ruleFormProps} isFlyout focusTrapProps={focusTrapProps} />
-      </Suspense>
+      {content}
     </EuiFlyoutResizable>
   );
 };
 
 interface RuleFormFlyoutProps<MetaData extends RuleTypeMetaData> extends RuleFormProps<MetaData> {
   focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+  renderFlyout?: boolean;
+  onClose?: () => void;
 }
 
 export const RuleFormFlyout = <MetaData extends RuleTypeMetaData>({
   focusTrapProps,
+  renderFlyout,
+  onClose,
   ...ruleFormProps
 }: RuleFormFlyoutProps<MetaData>) => {
   return (
     <RuleFlyoutUIContextProvider>
-      <RuleFormFlyoutRenderer ruleFormProps={ruleFormProps} focusTrapProps={focusTrapProps} />
+      <RuleFormFlyoutRenderer
+        ruleFormProps={ruleFormProps}
+        focusTrapProps={focusTrapProps}
+        renderFlyout={renderFlyout}
+        onClose={onClose}
+      />
     </RuleFlyoutUIContextProvider>
   );
+};
+
+/**
+ * RuleFormFlyout component without the flyout wrapper - for use with imperative mounting
+ * via overlays.openFlyout()
+ */
+export const RuleFormFlyoutContent = <MetaData extends RuleTypeMetaData>(
+  props: RuleFormFlyoutProps<MetaData>
+) => {
+  return <RuleFormFlyout {...props} renderFlyout={false} />;
 };

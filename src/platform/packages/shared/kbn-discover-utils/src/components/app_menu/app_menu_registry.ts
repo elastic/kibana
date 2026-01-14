@@ -27,7 +27,7 @@ export class AppMenuRegistry {
 
   /**
    * Register a menu item.
-   * @param item The menu item to register (run accepts params)
+   * @param item The menu item to register
    */
   public registerItem(item: AppMenuItemType) {
     this.items.set(item.id, item as AppMenuItemType);
@@ -35,7 +35,7 @@ export class AppMenuRegistry {
 
   /**
    * Register multiple menu items at once.
-   * @param items Array of menu items to register (run accepts params)
+   * @param items Array of menu items to register
    */
   public registerItems(items: AppMenuItemType[]) {
     items.forEach((item) => this.registerItem(item));
@@ -59,21 +59,22 @@ export class AppMenuRegistry {
 
   /**
    * Register a popover item for a specific parent menu item.
-   * Run function will be wrapped to handle parameters internally.
    * @param parentId The ID of the parent menu item
-   * @param popoverItem The popover item to register (run accepts params)
+   * @param popoverItem The popover item to register
    */
   public registerPopoverItem(parentId: string, popoverItem: AppMenuPopoverItem) {
     this.items.set(parentId, {
       ...this.items.get(parentId),
-      items: [...(this.items.get(parentId)?.items || []), popoverItem],
+      items: [...(this.items.get(parentId)?.items || []), popoverItem].sort(
+        (a, b) => (a.order || 0) - (b.order || 0)
+      ),
     } as AppMenuItemType);
   }
 
   /**
    * Register multiple popover items for a specific parent menu item.
    * @param parentId The ID of the parent menu item
-   * @param popoverItems Array of popover items to register (run accepts params)
+   * @param popoverItems Array of popover items to register
    */
   public registerPopoverItems(parentId: string, popoverItems: AppMenuPopoverItem[]) {
     popoverItems.forEach((item) => this.registerPopoverItem(parentId, item));

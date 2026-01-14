@@ -20,14 +20,16 @@ export const sloEditFormFooterPortal = createHtmlPortalNode();
 export default function CreateSLOFormFlyout({
   onClose,
   initialValues = {},
+  renderFlyout = true,
 }: {
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
+  renderFlyout?: boolean;
 }) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
-  return (
-    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" size="l" maxWidth={620} ownFocus>
+  const content = (
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
           <h3 id="flyoutTitle">
@@ -41,6 +43,23 @@ export default function CreateSLOFormFlyout({
       <EuiFlyoutFooter>
         <OutPortal node={sloEditFormFooterPortal} />
       </EuiFlyoutFooter>
+    </>
+  );
+
+  if (!renderFlyout) {
+    return content;
+  }
+
+  return (
+    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" size="l" maxWidth={620} ownFocus>
+      {content}
     </EuiFlyout>
   );
+}
+
+export function CreateSLOFormFlyoutContent(props: {
+  onClose: () => void;
+  initialValues: RecursivePartial<CreateSLOInput>;
+}) {
+  return <CreateSLOFormFlyout {...props} renderFlyout={false} />;
 }
