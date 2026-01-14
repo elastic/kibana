@@ -9,6 +9,27 @@ export const BIGGER_TIMEOUT = 20000 as const;
 export const SHORTER_TIMEOUT = 5000 as const;
 
 /**
+ * Constants for data-test-subj values used in alerts page tests
+ */
+export const ALERTS_PAGE_TEST_SUBJECTS = {
+  // Alerts Table
+  ALERTS_TABLE_LOADING: 'internalAlertsPageLoading',
+  ALERTS_TABLE_LOADED: 'alertsTableIsLoaded',
+  ALERTS_TABLE_EMPTY_STATE: 'alertsTableEmptyState',
+  ALERTS_TABLE_ROW_ACTION_MORE: 'alertsTableRowActionMore',
+  ALERTS_TABLE_ACTIONS_MENU: 'alertsTableActionsMenu',
+
+  // Case Actions
+  ADD_TO_NEW_CASE_ACTION: 'add-to-new-case-action',
+  ADD_TO_EXISTING_CASE_ACTION: 'add-to-existing-case-action',
+  CREATE_CASE_FLYOUT: 'create-case-flyout',
+  CREATE_CASE_MODAL: 'create-case-modal',
+  CREATE_CASE_CANCEL: 'create-case-cancel',
+  ALL_CASES_MODAL: 'all-cases-modal',
+  ALL_CASES_MODAL_CANCEL: 'all-cases-modal-cancel-button',
+} as const;
+
+/**
  * Constants for data-test-subj values used in rules settings flyout tests
  */
 export const RULES_SETTINGS_TEST_SUBJECTS = {
@@ -74,3 +95,7 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
   CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',
 } as const;
+
+export const GENERATED_METRICS = {
+  metricName: 'system.diskio.write.bytes',
+};

@@ -30,4 +30,4 @@ export const test = baseTest.extend<TriggersActionsTestFixtures, ScoutWorkerFixt
   },
 });
 
-export { RULES_SETTINGS_TEST_SUBJECTS } from './constants';
+export { RULES_SETTINGS_TEST_SUBJECTS, ALERTS_PAGE_TEST_SUBJECTS } from './constants';
