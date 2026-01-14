@@ -78,11 +78,16 @@ export function createGetIndexInfoTool({
       **When to use:**
       - Before calling tools with "kqlFilter" param to discover valid fields and values 
       - To discover custom fields available beyond standard ECS or OTel fields
-      - To understand which fields has data in the index
+      - To understand which fields have data in the index
       - To understand the sample values and ranges for fields
 
       **When NOT to use:**
       - When you already know the field names and values you need
+
+      **Examples:**
+      - getIndexInfo(operation: "get-index-patterns" )
+      - getIndexInfo(operation: "list-fields", index: "logs-*" )
+      - getIndexInfo(operation: "get-field-values", index: "logs-*", fields: ["host.name"] )
     `),
     schema: getIndexInfoSchema,
     tags: ['observability', 'index', 'fields'],
