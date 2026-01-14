@@ -19,6 +19,7 @@ export const indexNameValidator =
     }
 
     const invalidPrefixMatch = value.match(/^[-_+]/);
+    const invalidCharMatch = value.match(/[# ,]/);
 
     if (value !== value.toLowerCase()) {
       return {
@@ -40,13 +41,17 @@ export const indexNameValidator =
       };
     }
 
-    if (value.includes('#')) {
+    if (invalidCharMatch) {
       return {
         code: 'ERR_INVALID_CHARS',
         formatType: 'INDEX_PATTERN',
-        message: i18n.translate('xpack.stackConnectors.components.index.validation.wildcards', {
-          defaultMessage: 'The index pattern contains the invalid character #.',
-        }),
+        message: i18n.translate(
+          'xpack.stackConnectors.components.index.validation.invalidCharacter',
+          {
+            defaultMessage: 'The index pattern contains the invalid character {char}.',
+            values: { char: invalidCharMatch[0] },
+          }
+        ),
       };
     }
 

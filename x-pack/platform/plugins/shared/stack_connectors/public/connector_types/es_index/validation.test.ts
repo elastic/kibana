@@ -43,6 +43,15 @@ describe('indexNameValidator', () => {
     });
   });
 
+  test('fails if index name contains ,', () => {
+    const result = validate('test-index,');
+    expect(result).toMatchObject({
+      code: 'ERR_INVALID_CHARS',
+      formatType: 'INDEX_PATTERN',
+      message: 'The index pattern contains the invalid character ,.',
+    });
+  });
+
   test.each(['-index', '_index', '+index'])(
     'fails if index starts with invalid prefix: %s',
     (value) => {
