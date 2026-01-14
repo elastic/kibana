@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
 
@@ -20,9 +20,9 @@ interface SLODefinitionResult {
   };
 }
 
-export class SloDefinitionClient {
+export class SLODefinitionClient {
   constructor(
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private esClient: ElasticsearchClient,
     private logger: Logger
   ) {}

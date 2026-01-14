@@ -149,6 +149,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
   ): Promise<{
     traceItems: TraceItem[];
     errors: Error[];
+    agentMarks: Record<string, number>;
   }> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),
@@ -159,7 +160,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     const { traceId } = params.path;
     const { start, end, serviceName } = params.query;
 
-    const { traceItems, unifiedTraceErrors } = await getUnifiedTraceItems({
+    const { traceItems, agentMarks, unifiedTraceErrors } = await getUnifiedTraceItems({
       apmEventClient,
       logsClient,
       traceId,
@@ -174,6 +175,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
       traceItems,
       // For now we, we only return apm errors to show as marks in the waterfall
       errors: unifiedTraceErrors.apmErrors,
+      agentMarks,
     };
   },
 });

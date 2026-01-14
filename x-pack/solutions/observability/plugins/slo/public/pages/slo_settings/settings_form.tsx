@@ -26,6 +26,7 @@ import React, { useEffect, useState } from 'react';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../common/constants';
 import { useGetSettings } from './hooks/use_get_settings';
 import { usePutSloSettings } from './hooks/use_put_slo_settings';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export function SettingsForm() {
   const [useAllRemoteClusters, setUseAllRemoteClusters] = useState(false);
@@ -35,6 +36,7 @@ export function SettingsForm() {
   );
 
   const { http } = useKibana().services;
+  const { isServerless } = usePluginContext();
 
   const { data: currentSettings } = useGetSettings();
   const { mutateAsync: updateSettings, isLoading: isUpdating } = usePutSloSettings();
@@ -54,8 +56,7 @@ export function SettingsForm() {
   const onSubmit = async () => {
     updateSettings({
       settings: {
-        useAllRemoteClusters,
-        selectedRemoteClusters,
+        ...(!isServerless ? { useAllRemoteClusters, selectedRemoteClusters } : {}),
         staleThresholdInHours,
       },
     });
@@ -69,66 +70,72 @@ export function SettingsForm() {
   );
   return (
     <EuiForm component="form">
-      <EuiDescribedFormGroup
-        title={
-          <h3>
-            {i18n.translate('xpack.slo.settingsForm.h3.sourceSettingsLabel', {
-              defaultMessage: 'Source settings',
-            })}
-          </h3>
-        }
-        description={
-          <p>
-            {i18n.translate('xpack.slo.settingsForm.p.fetchSlosFromAllLabel', {
-              defaultMessage: 'Fetch SLOs from all remote clusters.',
-            })}
-          </p>
-        }
-      >
-        <EuiFormRow label={remoteClustersSwitchLabel}>
-          <EuiSwitch
-            label={remoteClustersSwitchLabel}
-            checked={useAllRemoteClusters}
-            onChange={(evt) => setUseAllRemoteClusters(evt.target.checked)}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
-        title={
-          <h3>
-            {i18n.translate('xpack.slo.settingsForm.h3.remoteSettingsLabel', {
-              defaultMessage: 'Remote clusters',
-            })}
-          </h3>
-        }
-        description={
-          <p>
-            {i18n.translate('xpack.slo.settingsForm.select.fetchSlosFromAllLabel', {
-              defaultMessage: 'Select remote clusters to fetch SLOs from.',
-            })}
-          </p>
-        }
-      >
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.slo.settingsForm.euiFormRow.select.selectRemoteClustersLabel',
-            { defaultMessage: 'Select remote clusters' }
-          )}
-        >
-          <EuiComboBox
-            options={data?.map((cluster) => ({ label: cluster.name, value: cluster.name })) || []}
-            selectedOptions={selectedRemoteClusters.map((cluster) => ({
-              label: cluster,
-              value: cluster,
-            }))}
-            onChange={(sels) => {
-              setSelectedRemoteClusters(sels.map((s) => s.value as string));
-            }}
-            isDisabled={useAllRemoteClusters}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-      </EuiDescribedFormGroup>
+      {!isServerless && (
+        <>
+          <EuiDescribedFormGroup
+            title={
+              <h3>
+                {i18n.translate('xpack.slo.settingsForm.h3.sourceSettingsLabel', {
+                  defaultMessage: 'Source settings',
+                })}
+              </h3>
+            }
+            description={
+              <p>
+                {i18n.translate('xpack.slo.settingsForm.p.fetchSlosFromAllLabel', {
+                  defaultMessage: 'Fetch SLOs from all remote clusters.',
+                })}
+              </p>
+            }
+          >
+            <EuiFormRow label={remoteClustersSwitchLabel}>
+              <EuiSwitch
+                label={remoteClustersSwitchLabel}
+                checked={useAllRemoteClusters}
+                onChange={(evt) => setUseAllRemoteClusters(evt.target.checked)}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+          <EuiDescribedFormGroup
+            title={
+              <h3>
+                {i18n.translate('xpack.slo.settingsForm.h3.remoteSettingsLabel', {
+                  defaultMessage: 'Remote clusters',
+                })}
+              </h3>
+            }
+            description={
+              <p>
+                {i18n.translate('xpack.slo.settingsForm.select.fetchSlosFromAllLabel', {
+                  defaultMessage: 'Select remote clusters to fetch SLOs from.',
+                })}
+              </p>
+            }
+          >
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.slo.settingsForm.euiFormRow.select.selectRemoteClustersLabel',
+                { defaultMessage: 'Select remote clusters' }
+              )}
+            >
+              <EuiComboBox
+                options={
+                  data?.map((cluster) => ({ label: cluster.name, value: cluster.name })) || []
+                }
+                selectedOptions={selectedRemoteClusters.map((cluster) => ({
+                  label: cluster,
+                  value: cluster,
+                }))}
+                onChange={(sels) => {
+                  setSelectedRemoteClusters(sels.map((s) => s.value as string));
+                }}
+                isDisabled={useAllRemoteClusters}
+              />
+            </EuiFormRow>
+            <EuiSpacer size="m" />
+          </EuiDescribedFormGroup>
+        </>
+      )}
       <EuiDescribedFormGroup
         title={
           <h3>

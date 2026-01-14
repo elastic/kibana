@@ -27,6 +27,7 @@ import { StepProgressPayloadRT } from '../types';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { hasFleetIntegrationPrivileges } from '../../lib/api_key/has_fleet_integration_privileges';
 import { makeTar, type Entry } from './make_tar';
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
@@ -311,6 +312,19 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     const coreStart = await core.start();
     const fleetStart = await plugins.fleet.start();
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
+
+    // Check Fleet integration privileges before attempting to install packages
+    const hasFleetPrivileges = await hasFleetIntegrationPrivileges(request, fleetStart);
+
+    if (!hasFleetPrivileges) {
+      return response.forbidden({
+        body: {
+          message:
+            "You don't have adequate permissions to install Fleet packages. Contact your system administrator to grant you the required 'Integrations All' privilege.",
+        },
+      });
+    }
+
     const packageClient = fleetStart.packageService.asScoped(request);
 
     const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({

@@ -43,24 +43,19 @@ export const getBurnRateEmbeddableFactory = ({
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const deps = { ...coreStart, ...pluginsStart };
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
-      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(
-        initialState.rawState,
-        {
-          sloId: '',
-          sloInstanceId: '',
-          duration: '',
-        }
-      );
+      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(initialState, {
+        sloId: '',
+        sloInstanceId: '',
+        duration: '',
+      });
       const reload$ = new Subject<boolean>();
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloBurnRateManager.getLatestState(),
-          },
+          ...titleManager.getLatestState(),
+          ...sloBurnRateManager.getLatestState(),
         };
       }
 
@@ -76,8 +71,8 @@ export const getBurnRateEmbeddableFactory = ({
           duration: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
-          sloBurnRateManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
+          sloBurnRateManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
         },
       });
 

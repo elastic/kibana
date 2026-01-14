@@ -69,6 +69,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -77,7 +78,7 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
@@ -167,6 +168,7 @@ export interface ObservabilityPublicPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
   aiops: AiopsPluginStart;
@@ -181,7 +183,7 @@ export interface ObservabilityPublicPluginsStart {
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
-  onechat?: OnechatPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;

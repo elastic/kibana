@@ -4166,7 +4166,7 @@
         "tags": [],
         "label": "sanitizeProjectRoutingForES",
         "description": [
-          "\nSanitizes project routing value for Elasticsearch API calls.\n\nApplication-level code may use special values like 'ALL' to represent \"all projects\"\nwith explicit state, but Elasticsearch only accepts specific routing values.\n"
+          "\nSanitizes project routing value for Elasticsearch API calls.\n"
         ],
         "signature": [
           "(value: ",
@@ -5531,6 +5531,20 @@
           },
           {
             "parentPluginId": "@kbn/es-query",
+            "id": "def-common.FilterCompareOptions.group",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/compare_filters.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
             "id": "def-common.FilterCompareOptions.state",
             "type": "CompoundType",
             "tags": [],
@@ -6425,7 +6439,7 @@
         "tags": [],
         "label": "ProjectRouting",
         "description": [
-          "\nProject routing configuration for cross-project search (CPS).\n\nUsed in serverless environments to control whether searches are scoped to a single project or span multiple projects.\n\nExamples:\n- undefined - Search across all projects (default)\n- '_alias:_origin' - Search only in the current project\n"
+          "\nProject routing configuration for cross-project search (CPS).\n\nUsed in serverless environments to control whether searches are scoped to a single project or span multiple projects.\n\nExamples:\n- undefined - Search across all projects (default)\n- '_alias:*' - Search across all projects\n- '_alias:_origin' - Search only in the current project\n"
         ],
         "signature": [
           "string | undefined"
@@ -6670,6 +6684,20 @@
             "type": "boolean",
             "tags": [],
             "label": "negate",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/compare_filters.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.COMPARE_ALL_OPTIONS.group",
+            "type": "boolean",
+            "tags": [],
+            "label": "group",
             "description": [],
             "signature": [
               "true"

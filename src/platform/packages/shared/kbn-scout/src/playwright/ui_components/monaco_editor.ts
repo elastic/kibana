@@ -107,4 +107,10 @@ export class KibanaCodeEditorWrapper {
     const selector = `[data-test-subj="${testSubjId}"] .cdr.squiggly-error`;
     return this.page.locator(selector);
   }
+
+  public getCodeEditorSuggestWidget() {
+    return this.page.locator(
+      '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
+    );
+  }
 }

@@ -35,7 +35,11 @@ export const ErrorRateChart = () => {
     filters,
   });
 
-  const chartLayers = useChartLayersFromEsql({
+  const {
+    layers: chartLayers,
+    loading: isLoadingColumns,
+    error: columnsError,
+  } = useChartLayersFromEsql({
     query: esqlQuery,
     seriesType,
     services,
@@ -59,6 +63,8 @@ export const ErrorRateChart = () => {
       syncCursor
       syncTooltips
       yBounds={ERROR_RATE_Y_BOUNDS}
+      isLoading={isLoadingColumns}
+      error={columnsError}
     />
   );
 };

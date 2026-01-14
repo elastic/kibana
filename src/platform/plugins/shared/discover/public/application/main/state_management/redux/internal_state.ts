@@ -55,7 +55,6 @@ const initialState: DiscoverInternalState = {
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
-  expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
@@ -152,20 +151,39 @@ export const internalStateSlice = createSlice({
       state.tabsBarVisibility = action.payload;
     },
 
+    markNonActiveTabsForRefetch: (state) => {
+      // Mark all non-active tabs to refetch on selection
+      // Used when projectRouting changes in CPS Manager
+      const currentTabId = state.tabs.unsafeCurrentId;
+      state.tabs.allIds.forEach((tabId) => {
+        if (tabId !== currentTabId && state.tabs.byId[tabId]) {
+          state.tabs.byId[tabId].forceFetchOnSelect = true;
+        }
+      });
+    },
+
     setExpandedDoc: (
       state,
-      action: PayloadAction<{
+      action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         initialDocViewerTabId?: string;
       }>
     ) => {
-      state.expandedDoc = action.payload.expandedDoc;
-      state.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+      withTab(state, action.payload, (tab) => {
+        tab.expandedDoc = action.payload.expandedDoc;
+        tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+      });
     },
 
-    discardFlyoutsOnTabChange: (state) => {
-      state.expandedDoc = undefined;
-      state.initialDocViewerTabId = undefined;
+    setInitialDocViewerTabId: (
+      state,
+      action: TabAction<{
+        initialDocViewerTabId: string | undefined;
+      }>
+    ) => {
+      withTab(state, action.payload, (tab) => {
+        tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+      });
     },
 
     setDataRequestParams: (state, action: TabAction<Pick<TabState, 'dataRequestParams'>>) =>
@@ -260,8 +278,8 @@ export const internalStateSlice = createSlice({
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
-        state.expandedDoc = undefined;
-        state.initialDocViewerTabId = undefined;
+        tab.expandedDoc = undefined;
+        tab.initialDocViewerTabId = undefined;
       }),
 
     setESQLEditorUiState: (
@@ -385,6 +403,8 @@ export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
   'internalState/syncLocallyPersistedTabState'
 );
 
+export const discardFlyoutsOnTabChange = createAction('internalState/discardFlyoutsOnTabChange');
+
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
   TPayload = TActionCreator extends PayloadActionCreator<infer T> ? T : never
@@ -442,9 +462,23 @@ const createMiddleware = (options: InternalStateDependencies) => {
   });
 
   startListening({
-    actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
+    actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
+    },
+  });
+
+  startListening({
+    actionCreator: initializeTabs.fulfilled,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+
+      // Initialize CPS manager with session-level projectRouting after state is updated
+      if (services.cps?.cpsManager) {
+        services.cps.cpsManager.setProjectRouting(
+          services.cps.cpsManager.getDefaultProjectRouting()
+        );
+      }
     },
   });
 

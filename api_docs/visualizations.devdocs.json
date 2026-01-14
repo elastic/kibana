@@ -3262,7 +3262,7 @@
                 "section": "def-common.ProjectRouting",
                 "text": "ProjectRouting"
               },
-              "; parent?: ",
+              "; timezone?: string | undefined; parent?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -6361,7 +6361,7 @@
             "section": "def-common.ErrorLike",
             "text": "ErrorLike"
           },
-          ", domNode: HTMLElement | Element) => any) | undefined; fatalError?: Error | undefined; getUpdated$: () => Readonly<",
+          ", domNode: Element | HTMLElement) => any) | undefined; fatalError?: Error | undefined; getUpdated$: () => Readonly<",
           "Observable",
           "<",
           {
@@ -7849,7 +7849,7 @@
                 "section": "def-common.ProjectRouting",
                 "text": "ProjectRouting"
               },
-              "; parent?: ",
+              "; timezone?: string | undefined; parent?: ",
               {
                 "pluginId": "data",
                 "scope": "common",

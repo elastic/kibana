@@ -6,108 +6,94 @@
  */
 
 import expect from '@kbn/expect';
+import { timerange } from '@kbn/synthtrace-client';
 import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
-import { isOtherResult } from '@kbn/onechat-common/tools';
-import type { ToolResult, OtherResult } from '@kbn/onechat-common';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+import { generateDataSourcesData, indexAll } from '@kbn/synthtrace';
+import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/server/agent/register_observability_agent';
-import {
-  LLM_PROXY_HANDOVER_INTERCEPTOR,
-  LLM_PROXY_FINAL_MESSAGE,
-} from '../utils/llm_proxy/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import type { AgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
-import { createSyntheticLogsData, createSyntheticApmData } from '../utils/synthtrace_scenarios';
-import {
-  createLlmProxyActionConnector,
-  deleteActionConnector,
-} from '../utils/llm_proxy/action_connectors';
 
-const LLM_EXPOSED_TOOL_NAME_FOR_GET_DATA_SOURCES = 'observability_get_data_sources';
-const USER_PROMPT = 'Do I have any data sources? ';
+interface GetDataSourcesToolResult extends OtherResult {
+  data: {
+    apm: {
+      indexPatterns: {
+        transaction: string;
+        span: string;
+        error: string;
+        metric: string;
+        onboarding: string;
+        sourcemap: string;
+      };
+    };
+    logs: {
+      indexPatterns: string[];
+    };
+    metrics: {
+      indexPatterns: string[];
+    };
+    alerts: {
+      indexPattern: string[];
+    };
+  };
+}
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID}`, function () {
-    // LLM Proxy is not yet supported in cloud environments
-    this.tags(['skipCloud']);
+    let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let logsSynthtraceEsClient: LogsSynthtraceEsClient;
 
-    let llmProxy: LlmProxy;
-    let connectorId: string;
-    let agentBuilderApiClient: AgentBuilderApiClient;
+    before(async () => {
+      const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
+      agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-    describe('POST /api/agent_builder/converse', () => {
-      let toolResponseContent: { results: ToolResult[] };
-      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-      let logsSynthtraceEsClient: LogsSynthtraceEsClient;
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+      logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+
+      await apmSynthtraceEsClient.clean();
+      await logsSynthtraceEsClient.clean();
+
+      const range = timerange('now-15m', 'now');
+
+      await indexAll(
+        generateDataSourcesData({
+          range,
+          logsEsClient: logsSynthtraceEsClient,
+          apmEsClient: apmSynthtraceEsClient,
+        })
+      );
+    });
+
+    after(async () => {
+      await apmSynthtraceEsClient.clean();
+      await logsSynthtraceEsClient.clean();
+    });
+
+    describe('when fetching data sources', () => {
+      let resultData: GetDataSourcesToolResult['data'];
 
       before(async () => {
-        llmProxy = await createLlmProxy(log);
-        connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
-
-        const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
-        agentBuilderApiClient = createAgentBuilderApiClient(scoped);
-
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsData({ getService }));
-
-        setupToolCallThenAnswer({
-          llmProxy,
-          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_DATA_SOURCES,
+        const results = await agentBuilderApiClient.executeTool<GetDataSourcesToolResult>({
+          id: OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
+          params: {},
         });
 
-        const body = await agentBuilderApiClient.converse({
-          input: USER_PROMPT,
-          connector_id: connectorId,
-          agent_id: OBSERVABILITY_AGENT_ID,
-        });
-
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        const responseMessage = body.response.message;
-        expect(responseMessage).to.be(LLM_PROXY_FINAL_MESSAGE);
-
-        const handoverRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === LLM_PROXY_HANDOVER_INTERCEPTOR
-        )!.requestBody;
-
-        const toolResponseMessage = handoverRequest.messages[handoverRequest.messages.length - 1]!;
-        toolResponseContent = JSON.parse(toolResponseMessage.content as string) as {
-          results: ToolResult[];
-        };
-      });
-
-      after(async () => {
-        await apmSynthtraceEsClient.clean();
-        await logsSynthtraceEsClient.clean();
-        await deleteActionConnector(getService, { actionId: connectorId });
-
-        llmProxy.close();
+        expect(results).to.have.length(1);
+        resultData = results[0].data;
       });
 
       it('returns the correct tool results structure', () => {
-        expect(toolResponseContent).to.have.property('results');
-        expect(Array.isArray(toolResponseContent.results)).to.be(true);
-
-        const toolResult = toolResponseContent.results[0] as OtherResult;
-        expect(isOtherResult(toolResult)).to.be(true);
-
-        const { data } = toolResult as OtherResult;
-        expect(data).to.have.property('apm');
-        expect(data).to.have.property('logs');
-        expect(data).to.have.property('metrics');
-        expect(data).to.have.property('alerts');
+        expect(resultData).to.have.property('apm');
+        expect(resultData).to.have.property('logs');
+        expect(resultData).to.have.property('metrics');
+        expect(resultData).to.have.property('alerts');
       });
 
       it('returns tool results with the relevant index patterns', () => {
-        const toolResult = toolResponseContent.results[0] as OtherResult;
-        const { data } = toolResult as OtherResult;
-
         const expectedIndexPatterns = {
           apm: {
             indexPatterns: {
@@ -130,7 +116,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         };
 
-        expect(data).to.eql(expectedIndexPatterns);
+        expect(resultData).to.eql(expectedIndexPatterns);
       });
     });
   });

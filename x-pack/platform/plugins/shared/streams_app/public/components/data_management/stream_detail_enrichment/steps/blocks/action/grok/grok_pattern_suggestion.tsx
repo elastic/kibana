@@ -100,6 +100,11 @@ export const GrokPatternAISuggestions = ({
               ),
               { shouldValidate: true }
             );
+            setValue(
+              'pattern_definitions',
+              suggestionsState.value.grokProcessor.pattern_definitions,
+              { shouldValidate: true }
+            );
           }
           refreshSuggestions(null);
         }}
