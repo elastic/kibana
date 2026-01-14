@@ -12,13 +12,14 @@ import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
+import { useLayoutConfig } from '@kbn/core-chrome-layout-components';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  euiScrollBarStyles,
   EuiTitle,
+  euiOverflowScroll,
   euiShadow,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -31,15 +32,19 @@ const sidebarWrapperStyles = (theme: UseEuiTheme) => css`
   width: 100%;
 `;
 
-const panelContainerStyles = (theme: UseEuiTheme) =>
+const panelContainerStyles = (isProjectStyle: boolean) => (theme: UseEuiTheme) =>
   css`
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     min-width: 0; // Allow panel to shrink
 
-    border: ${getHighContrastBorder(theme)};
-    ${euiShadow(theme, 'xs', { border: 'none' })};
+    ${isProjectStyle &&
+    css`
+      border-radius: ${theme.euiTheme.border.radius.medium};
+      border: ${getHighContrastBorder(theme)};
+      ${euiShadow(theme, 'xs', { border: 'none' })};
+    `}
   `;
 
 const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
@@ -54,11 +59,10 @@ const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 const scrollableContentStyles = (theme: UseEuiTheme) => {
-  const scrolling = euiScrollBarStyles(theme);
   const { euiTheme } = theme;
 
   return css`
-    ${scrolling};
+    ${euiOverflowScroll(theme, { direction: 'y' })};
     padding: ${euiTheme.size.m};
     flex-grow: 1;
   `;
@@ -71,10 +75,18 @@ export interface SidebarPanelProps {
 }
 
 export const SidebarPanel: FC<SidebarPanelProps> = ({ children, title, onClose }) => {
+  // TODO: Replace with context from Chrome when available
+  const { chromeStyle } = useLayoutConfig();
   return (
     <div css={sidebarWrapperStyles}>
       <PanelResizeHandle />
-      <EuiPanel paddingSize="none" css={panelContainerStyles} hasBorder={false}>
+      <EuiPanel
+        paddingSize="none"
+        css={panelContainerStyles(chromeStyle === 'project')}
+        hasBorder={false}
+        hasShadow={false}
+        borderRadius={'none'}
+      >
         <EuiFlexGroup css={headerStyles}>
           <EuiFlexItem>
             <EuiTitle size="xs">
