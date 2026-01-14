@@ -22,9 +22,19 @@ describe('extractWhereCommand', () => {
     ]);
   });
 
+  it('extracts multiple top-level WHERE commands', () => {
+    const query = 'FROM logs | WHERE x > 0 | WHERE y < 10';
+
+    expect(extractWhereCommand(query)).toEqual(['x > 0', 'y < 10']);
+  });
+
   it('extracts top-level WHERE commands even when not after source', () => {
     const query = 'FROM logs | EVAL x = 1 | WHERE x > 0';
 
     expect(extractWhereCommand(query)).toEqual(['x > 0']);
+  });
+
+  it('returns empty array for malformed ESQL', () => {
+    expect(extractWhereCommand('FROM logs | WHERE')).toEqual([]);
   });
 });

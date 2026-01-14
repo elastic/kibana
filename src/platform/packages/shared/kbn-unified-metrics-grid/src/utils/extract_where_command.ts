@@ -15,12 +15,15 @@ export const extractWhereCommand = (esql?: string): string[] => {
     return [];
   }
 
-  const { root } = Parser.parse(esql);
+  const { root, errors } = Parser.parse(esql);
+  if (errors.length > 0) {
+    return [];
+  }
   const whereConditions = root.commands.filter(
     (command): command is ESQLCommand => command.type === 'command' && command.name === 'where'
   );
 
-  const extractExpression = (node: unknown) => {
+  const serializeWhereExpression = (node: unknown) => {
     if (Array.isArray(node)) {
       const firstProperNode = node.find(isProperNode);
       return firstProperNode ? BasicPrettyPrinter.print(firstProperNode) : undefined;
@@ -29,6 +32,6 @@ export const extractWhereCommand = (esql?: string): string[] => {
   };
 
   return whereConditions
-    .map((cmd) => extractExpression(cmd.args[0]))
+    .map((cmd) => serializeWhereExpression(cmd.args[0]))
     .filter((expression): expression is string => Boolean(expression?.length));
 };

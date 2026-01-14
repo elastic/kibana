@@ -179,6 +179,20 @@ TS metrics-*
 `.trim()
     );
   });
+
+  it('should ignore empty WHERE statements', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      whereStatements: ['  ', '', '\n\t'],
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
   it('should handle undefined both dimensions and metrics dimensions without throwing error', () => {
     const query = createESQLQuery({
       metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
