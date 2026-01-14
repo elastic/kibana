@@ -41,7 +41,6 @@ import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 
 interface Props {
-  refreshDefinition: () => void;
   onClose: () => void;
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
@@ -56,7 +55,6 @@ interface Props {
 
 export function AddSignificantEventFlyout({
   generateOnMount,
-  refreshDefinition,
   query,
   onClose,
   definition,

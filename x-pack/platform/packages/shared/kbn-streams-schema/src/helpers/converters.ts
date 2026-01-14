@@ -23,14 +23,6 @@ export const convertUpsertRequestIntoDefinition = (
 ): Streams.all.Definition => {
   const now = new Date().toISOString();
 
-  if (Streams.GroupStream.UpsertRequest.is(request)) {
-    return {
-      ...request.stream,
-      name,
-      updated_at: now,
-    };
-  }
-
   if (Streams.WiredStream.UpsertRequest.is(request)) {
     return {
       ...request.stream,
@@ -79,15 +71,6 @@ export const convertUpsertRequestIntoDefinition = (
 export const convertGetResponseIntoUpsertRequest = (
   getResponse: Streams.all.GetResponse
 ): Streams.all.UpsertRequest => {
-  if (Streams.GroupStream.GetResponse.is(getResponse)) {
-    return {
-      dashboards: getResponse.dashboards,
-      queries: getResponse.queries,
-      rules: getResponse.rules,
-      stream: omit(getResponse.stream, ['name', 'updated_at']),
-    };
-  }
-
   if (Streams.WiredStream.GetResponse.is(getResponse)) {
     return {
       dashboards: getResponse.dashboards,
