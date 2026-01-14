@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { timerange } from '@kbn/synthtrace-client';
 import {
   type ApmSynthtraceEsClient,
