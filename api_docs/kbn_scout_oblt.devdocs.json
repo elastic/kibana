@@ -2761,6 +2761,91 @@
       },
       {
         "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.getSynthtraceClient",
+        "type": "Function",
+        "tags": [],
+        "label": "getSynthtraceClient",
+        "description": [],
+        "signature": [
+          "(synthClient: TClient, { esClient, kbnUrl, log, config }: ",
+          "SynthtraceClientOptions",
+          ", overrides: { skipInstallation?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.GetClientsReturn",
+            "text": "GetClientsReturn"
+          },
+          "<TClient>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.getSynthtraceClient.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "synthClient",
+            "description": [],
+            "signature": [
+              "TClient"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.getSynthtraceClient.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ esClient, kbnUrl, log, config }",
+            "description": [],
+            "signature": [
+              "SynthtraceClientOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.getSynthtraceClient.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.getSynthtraceClient.$3.skipInstallation",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "skipInstallation",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
         "id": "def-common.globalSetupHook",
         "type": "Function",
         "tags": [],
@@ -8436,6 +8521,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/page_objects/utils.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts"
               }
             ],
             "children": [
