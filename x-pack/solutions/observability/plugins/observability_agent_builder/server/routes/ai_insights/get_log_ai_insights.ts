@@ -16,7 +16,7 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { getToolHandler } from '../../tools/get_correlated_logs/handler';
+import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
 import { isWarningOrAbove } from './get_log_severity';
 
 export interface GetLogAiInsightsParams {
@@ -143,7 +143,7 @@ export async function getLogAiInsights({
             'container.id',
           ];
 
-          const { sequences } = await getToolHandler({
+          const { sequences } = await getCorrelatedLogs({
             core,
             logger,
             esClient,
