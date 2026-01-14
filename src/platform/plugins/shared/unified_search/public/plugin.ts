@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { createQueryStringInput } from './query_string_input/get_query_string_input';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
-import type { ConfigSchema } from '../server/config';
 import { setCoreStart, setIndexPatterns } from './services';
-import { AutocompleteService } from './autocomplete/autocomplete_service';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import type {
@@ -33,31 +30,21 @@ export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
 {
   private readonly storage: IStorageWrapper;
-  private readonly autocomplete: AutocompleteService;
   private usageCollection: UsageCollectionSetup | undefined;
 
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor() {
     this.storage = new Storage(window.localStorage);
-
-    this.autocomplete = new AutocompleteService(initializerContext);
   }
 
   public setup(
     core: CoreSetup<UnifiedSearchStartDependencies, UnifiedSearchPublicPluginStart>,
     { uiActions, data, usageCollection }: UnifiedSearchSetupDependencies
   ): UnifiedSearchPluginSetup {
-    const { query } = data;
-
     uiActions.registerTrigger(updateFilterReferencesTrigger);
 
     this.usageCollection = usageCollection;
 
-    return {
-      autocomplete: this.autocomplete.setup(core, {
-        timefilter: query.timefilter,
-        usageCollection,
-      }),
-    };
+    return {};
   }
 
   public start(
@@ -68,11 +55,11 @@ export class UnifiedSearchPublicPlugin
       uiActions,
       screenshotMode,
       cps: crossProjectSearch,
+      kql: { autocomplete: autocompleteStart },
     }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
     setCoreStart(core);
     setIndexPatterns(dataViews);
-    const autocompleteStart = this.autocomplete.start();
 
     /*
      *
@@ -90,7 +77,7 @@ export class UnifiedSearchPublicPlugin
         storage: this.storage,
         usageCollection: this.usageCollection,
         isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
-        unifiedSearch: {
+        kql: {
           autocomplete: autocompleteStart,
         },
         cps: crossProjectSearch,
@@ -119,24 +106,7 @@ export class UnifiedSearchPublicPlugin
         getCustomSearchBar,
         AggregateQuerySearchBar: SearchBar,
         FiltersBuilderLazy,
-        QueryStringInput: createQueryStringInput({
-          data,
-          dataViews,
-          docLinks: core.docLinks,
-          http: core.http,
-          notifications: core.notifications,
-          storage: this.storage,
-          uiSettings: core.uiSettings,
-          unifiedSearch: {
-            autocomplete: autocompleteStart,
-          },
-        }),
       },
-      autocomplete: autocompleteStart,
     };
-  }
-
-  public stop() {
-    this.autocomplete.clearProviders();
   }
 }
