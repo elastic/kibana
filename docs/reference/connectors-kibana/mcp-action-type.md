@@ -3,18 +3,18 @@ navigation_title: "MCP"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/mcp-action-type.html
 applies_to:
-  stack: all
-  serverless: all
+  stack: preview 9.3 
+  serverless: preview
 ---
 
 # MCP connector and action [mcp-action-type]
-todo
+The MCP connector communicates with remote MCP servers to retrieve and call their tools. 
 
 ## Create connectors in {{kib}} [define-mcp-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
+You can create an MCP connector in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
 
-:::{image} ../images/mcp-connector.png # TODO
+:::{image} ../images/mcp-connector.png
 :alt: MCP connector
 :screenshot:
 :::
@@ -30,7 +30,7 @@ Server URL
 :   The URL of the MCP server.
 
 HTTP headers (under Additional settings)
-:   A custom set of HTTP headers that you can user to connect to an MCP server.
+:   A custom set of HTTP headers that you can use to connect to an MCP server.
 
     Config
     :   If you choose the config type, values in headers will be sent as plain text in requests.   
