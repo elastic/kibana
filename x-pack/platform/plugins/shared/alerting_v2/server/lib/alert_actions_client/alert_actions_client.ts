@@ -43,7 +43,7 @@ export class AlertActionsClient {
     const [username, alertEvent, alertTransition] = await Promise.all([
       this.getUserName(),
       this.findLastAlertEventBySeriesIdOrThrow(params.alertSeriesId),
-      this.findLastAlertTransitionBySeriesIdOrThrow(params.alertSeriesId),
+      this.findLastAlertTransitionBySeriesIdOrThrow(params.alertSeriesId, params.action.episode_id),
     ]);
 
     await this.storageService.bulkIndexDocs({
@@ -57,7 +57,7 @@ export class AlertActionsClient {
           action_type: params.action.action_type,
           episode_id: alertTransition.episode_id,
           rule_id: alertEvent['rule.id'],
-          ...omit(params.action, 'action_type'),
+          ...omit(params.action, 'action_type', 'episode_id'),
         },
       ],
     });
@@ -81,14 +81,24 @@ export class AlertActionsClient {
   }
 
   private async findLastAlertTransitionBySeriesIdOrThrow(
-    alertSeriesId: string
+    alertSeriesId: string,
+    episodeId?: string
   ): Promise<AlertTransition> {
+    const criteria = [`alert_series_id == "${alertSeriesId}"`];
+    if (episodeId) {
+      criteria.push(`episode_id == "${episodeId}"`);
+    }
+
     const result = await this.queryService.executeQuery({
-      query: `FROM .alerts-transitions | WHERE alert_series_id == "${alertSeriesId}" | SORT @timestamp DESC | KEEP episode_id | LIMIT 1`,
+      query: `FROM .alerts-transitions | WHERE ${criteria.join(
+        ' AND '
+      )} | SORT @timestamp DESC | KEEP episode_id | LIMIT 1`,
     });
 
     if (result.values.length === 0) {
-      throw Boom.notFound(`Alert transition with series id [${alertSeriesId}] not found`);
+      throw Boom.notFound(
+        `Alert transition with series id [${alertSeriesId}] and optional episode id [${episodeId}] not found`
+      );
     }
 
     return alertTransitionSchema.parse(

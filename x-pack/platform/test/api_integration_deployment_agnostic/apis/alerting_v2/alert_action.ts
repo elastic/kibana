@@ -256,5 +256,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.status).to.be(404);
     });
+
+    it('should filter by episode_id when provided in request body', async () => {
+      const secondTransition = createAlertTransition({ episode_id: 'second-episode-id' });
+      await esClient.index({
+        index: ALERTS_TRANSITIONS_INDEX,
+        document: secondTransition,
+        refresh: 'wait_for',
+      });
+
+      // Send action with specific episode_id (from the first transition)
+      const response = await supertestWithoutAuth
+        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ action_type: 'ack', episode_id: 'test-episode-id' });
+
+      expect(response.status).to.be(204);
+
+      const action = await getLatestAction();
+      expect(action).to.be.ok();
+      expect(action!.alert_series_id).to.be('test-alert-series-id');
+      expect(action!.action_type).to.be('ack');
+      // Verify the action uses the episode_id from the first transition, not the second latest one
+      expect(action!.episode_id).to.be('test-episode-id');
+    });
   });
 }
