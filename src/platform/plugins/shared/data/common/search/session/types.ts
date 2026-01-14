@@ -130,13 +130,16 @@ export interface SearchSessionStatusResponse {
   errors?: string[];
 }
 
+export interface SearchSessionStatusesResponse {
+  /**
+   * Map containing calculated statuses of search sessions
+   */
+  statuses: Record<string, SearchSessionStatusResponse>;
+}
+
 /**
  * List of search session objects with on-the-fly calculated search session statuses
  */
 export interface SearchSessionsFindResponse
-  extends SavedObjectsFindResponse<SearchSessionSavedObjectAttributes> {
-  /**
-   * Map containing calculated statuses of search sessions from the find response
-   */
-  statuses: Record<string, SearchSessionStatusResponse>;
-}
+  extends SavedObjectsFindResponse<SearchSessionSavedObjectAttributes>,
+    SearchSessionStatusesResponse {}

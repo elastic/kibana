@@ -234,6 +234,7 @@ export type {
   SearchSessionRequestInfo,
   SearchSessionRequestStatus,
   SearchSessionStatusResponse,
+  SearchSessionStatusesResponse,
   SearchSessionsFindResponse,
   EqlRequestParams,
   EqlSearchStrategyRequest,

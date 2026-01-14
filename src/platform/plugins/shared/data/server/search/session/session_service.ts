@@ -27,6 +27,7 @@ import type {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
+  SearchSessionStatusesResponse,
   SearchSessionStatusResponse,
 } from '../../../common';
 import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE } from '../../../common';
@@ -150,14 +151,21 @@ export class SearchSessionService implements ISearchSessionService {
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
-    this.logger.debug(`get | ${sessionId}`);
-    const session = await savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
-      SEARCH_SESSION_TYPE,
-      sessionId
-    );
-    this.throwOnUserConflict(user, session);
+    const sessions = await this.bulkGet({ savedObjectsClient }, user, [sessionId]);
+    return sessions[0];
+  };
 
-    return session;
+  private bulkGet = async (
+    { savedObjectsClient }: SearchSessionDependencies,
+    user: AuthenticatedUser | null,
+    sessionIds: string[]
+  ) => {
+    this.logger.debug(`bulkGet | ${sessionIds}`);
+    const sessions = await savedObjectsClient.bulkGet<SearchSessionSavedObjectAttributes>(
+      sessionIds.map((id) => ({ id, type: SEARCH_SESSION_TYPE }))
+    );
+    sessions.saved_objects.forEach((session) => this.throwOnUserConflict(user, session));
+    return sessions.saved_objects;
   };
 
   public find = async (
@@ -384,23 +392,38 @@ export class SearchSessionService implements ISearchSessionService {
     return { status: sessionStatus.status, errors: sessionStatus.errors };
   }
 
-  public async updateStatus(
+  public async updateStatuses(
     deps: SearchSessionStatusDependencies,
     user: AuthenticatedUser | null,
-    sessionId: string
-  ): Promise<SearchSessionStatusResponse> {
-    this.logger.debug(`SearchSessionService: updateStatus | ${sessionId}`);
-    const session = await this.get(deps, user, sessionId);
+    sessionIds: string[]
+  ): Promise<SearchSessionStatusesResponse> {
+    this.logger.debug(`SearchSessionService: updateStatus | ${sessionIds}`);
+    const sessions = await this.bulkGet(deps, user, sessionIds);
 
-    const updatedSessionStatus = await updateSessionStatus(
-      {
-        esClient: deps.asCurrentUserElasticsearchClient,
-        savedObjectsClient: deps.savedObjectsClient,
-      },
-      session
+    const sessionStatuses = await Promise.all(
+      sessions.map(async (so) => {
+        const updatedSessionStatus = await updateSessionStatus(
+          {
+            esClient: deps.asCurrentUserElasticsearchClient,
+            savedObjectsClient: deps.savedObjectsClient,
+          },
+          so
+        );
+
+        return {
+          id: so.attributes.sessionId,
+          status: updatedSessionStatus.status,
+          errors: updatedSessionStatus.errors || [],
+        };
+      })
     );
 
-    return updatedSessionStatus;
+    const sessionStatusesRecord: Record<string, SearchSessionStatusResponse> = {};
+    sessionStatuses.forEach(({ id, status, errors }) => {
+      sessionStatusesRecord[id] = { status, errors };
+    });
+
+    return { statuses: sessionStatusesRecord };
   }
 
   /**
@@ -466,7 +489,7 @@ export class SearchSessionService implements ISearchSessionService {
         cancel: this.cancel.bind(this, deps, user),
         delete: this.delete.bind(this, deps, user),
         status: this.status.bind(this, deps, user),
-        updateStatus: this.updateStatus.bind(this, deps, user),
+        updateStatuses: this.updateStatuses.bind(this, deps, user),
         getConfig: () => this.config.search.sessions,
       };
     };

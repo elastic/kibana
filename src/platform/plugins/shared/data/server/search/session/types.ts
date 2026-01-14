@@ -19,6 +19,7 @@ import type {
   SearchSessionsFindResponse,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatusResponse,
+  SearchSessionStatusesResponse,
 } from '../../../common/search';
 import type { SearchSessionsConfigSchema } from '../../config';
 
@@ -45,7 +46,7 @@ export interface IScopedSearchSessionsClient {
     expires: Date
   ) => Promise<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>>;
   status: (sessionId: string) => Promise<SearchSessionStatusResponse>;
-  updateStatus: (sessionId: string) => Promise<SearchSessionStatusResponse>;
+  updateStatuses: (sessionIds: string[]) => Promise<SearchSessionStatusesResponse>;
   getConfig: () => SearchSessionsConfigSchema;
 }
 

@@ -16,10 +16,12 @@ import type {
   SearchSessionStatusRestResponse,
   SearchSessionsFindRestResponse,
   SearchSessionsUpdateRestResponse,
+  SearchSessionStatusesResponse,
 } from './response_types';
 import {
   searchSessionSchema,
   searchSessionStatusSchema,
+  searchSessionStatusesSchema,
   searchSessionsFindSchema,
   searchSessionsUpdateSchema,
 } from './response_schema';
@@ -175,7 +177,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
 
   router.versioned
     .post({
-      path: `${pathPrefix}/{id}/status`,
+      path: `${pathPrefix}/_status`,
       access,
       security: {
         authz: { requiredPrivileges },
@@ -186,23 +188,23 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         version,
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string(),
+            body: schema.object({
+              sessionIds: schema.arrayOf(schema.string()),
             }),
           },
           response: {
             200: {
-              body: searchSessionStatusSchema,
+              body: searchSessionStatusesSchema,
             },
           },
         },
       },
       async (context, request, res) => {
-        const { id } = request.params;
+        const { sessionIds } = request.body;
         try {
           const searchContext = await context.search;
-          const response: SearchSessionStatusRestResponse =
-            await searchContext!.updateSessionStatus(id);
+          const response: SearchSessionStatusesResponse =
+            await searchContext!.updateSessionStatuses(sessionIds);
 
           return res.ok({
             body: response,

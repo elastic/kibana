@@ -494,8 +494,11 @@ export class SearchService {
     return deps.searchSessionsClient.delete(sessionId);
   };
 
-  private updateSessionStatus = async (deps: SearchStrategyDependencies, sessionId: string) => {
-    return deps.searchSessionsClient.updateStatus(sessionId);
+  private updateSessionStatuses = async (
+    deps: SearchStrategyDependencies,
+    sessionIds: string[]
+  ) => {
+    return deps.searchSessionsClient.updateStatuses(sessionIds);
   };
 
   private extendSession = async (
@@ -558,7 +561,7 @@ export class SearchService {
         extendSession: this.extendSession.bind(this, deps),
         cancelSession: this.cancelSession.bind(this, deps),
         deleteSession: this.deleteSession.bind(this, deps),
-        updateSessionStatus: this.updateSessionStatus.bind(this, deps),
+        updateSessionStatuses: this.updateSessionStatuses.bind(this, deps),
         getSessionStatus: searchSessionsClient.status,
       };
     };

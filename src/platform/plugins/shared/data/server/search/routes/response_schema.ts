@@ -12,6 +12,8 @@ import { schema } from '@kbn/config-schema';
 const searchSessionRequestInfoSchema = schema.object({
   id: schema.string(),
   strategy: schema.string(),
+  status: schema.maybe(schema.string()),
+  completionTime: schema.maybe(schema.string()),
 });
 
 const serializeableSchema = schema.mapOf(schema.string(), schema.any());
@@ -19,6 +21,7 @@ const serializeableSchema = schema.mapOf(schema.string(), schema.any());
 const searchSessionAttrSchema = () =>
   schema.object({
     sessionId: schema.string(),
+    status: schema.maybe(schema.string()),
     name: schema.maybe(schema.string()),
     appId: schema.maybe(schema.string()),
     created: schema.string(),
@@ -40,16 +43,22 @@ export const searchSessionSchema = () =>
     attributes: searchSessionAttrSchema(),
   });
 
-export const searchSessionStatusSchema = () =>
+const status = schema.object({
+  status: schema.oneOf([
+    schema.literal('in_progress'),
+    schema.literal('error'),
+    schema.literal('complete'),
+    schema.literal('cancelled'),
+    schema.literal('expired'),
+  ]),
+  errors: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const searchSessionStatusSchema = () => status;
+
+export const searchSessionStatusesSchema = () =>
   schema.object({
-    status: schema.oneOf([
-      schema.literal('in_progress'),
-      schema.literal('error'),
-      schema.literal('complete'),
-      schema.literal('cancelled'),
-      schema.literal('expired'),
-    ]),
-    errors: schema.maybe(schema.arrayOf(schema.string())),
+    statuses: schema.recordOf(schema.string(), status),
   });
 
 export const searchSessionsFindSchema = () =>
