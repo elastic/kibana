@@ -58,8 +58,7 @@ describe('CSV Upload Service', () => {
   let csvService: ReturnType<typeof createPrivilegedUsersCsvService>;
 
   const mockIndex = 'test-privilege-monitoring-index';
-
-  // Helper function to create mock HapiReadableStream
+  
   const createMockStream = (data: string): HapiReadableStream => {
     const stream = new Readable() as HapiReadableStream;
     stream.push(data);
@@ -255,8 +254,7 @@ describe('CSV Upload Service', () => {
     });
   });
 
-  describe('Result Aggregation', () => {
-    // Helper function to create mock users
+  describe('Result Aggregation', () => {    
     const createMockUser = (
       username: string,
       index: number,
@@ -270,8 +268,7 @@ describe('CSV Upload Service', () => {
         source: 'csv',
       },
     });
-
-    // Helper function to create mock errors
+    
     const createMockError = (
       message: string,
       username: string | null,
@@ -281,16 +278,14 @@ describe('CSV Upload Service', () => {
       username,
       index,
     });
-
-    // Helper function to create initial empty results
+    
     const createEmptyResults = (): BulkProcessingResults => ({
       users: [],
       errors: [],
       failed: 0,
       successful: 0,
     });
-
-    // Helper function to create mock batch results
+    
     const createMockBatch = (
       uploaded: Array<
         ReturnType<typeof right<BulkPrivMonUser>> | ReturnType<typeof left<BulkProcessingError>>
@@ -308,19 +303,16 @@ describe('CSV Upload Service', () => {
     });
 
     describe('Accumulator Behavior', () => {
-      it('should accumulate results across multiple batches', () => {
-        // Create mock users
+      it('should accumulate results across multiple batches', () => {        
         const mockUser1 = createMockUser('user1', 0, 'admin');
         const mockUser2 = createMockUser('user2', 1, 'user');
         const mockUser3 = createMockUser('user3', 2, 'admin');
         const mockUser4 = createMockUser('user4', 3, 'user');
         const mockUser5 = createMockUser('user5', 4, 'admin');
-
-        // Create mock errors
+        
         const mockError1 = createMockError('Validation failed', 'user3', 2);
         const mockError2 = createMockError('Network timeout', 'user4', 3);
 
-        // Create mock batches
         const batch1 = createMockBatch([right(mockUser1), right(mockUser2)], 1, 2);
         const batch2 = createMockBatch([right(mockUser3), left(mockError1)], 1, 1);
         const batch3 = createMockBatch(
@@ -329,7 +321,7 @@ describe('CSV Upload Service', () => {
           2
         );
 
-        // Accumulate like the loop does
+        // Accumulate as the loop does
         let results = createEmptyResults();
         results = accumulateUpsertResults(results, batch1);
         results = accumulateUpsertResults(results, batch2);
