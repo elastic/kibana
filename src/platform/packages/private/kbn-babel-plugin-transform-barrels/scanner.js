@@ -116,7 +116,7 @@ function hasSubpathExports(exportsField) {
 
 /**
  * Find the containing @kbn/* package for a file path.
- * Walks up the directory tree to find the nearest package.json with an @kbn/* name.
+ * Walks up the directory tree to find the nearest package.json or kibana.jsonc with an @kbn/* name.
  *
  * @param {string} filePath - Absolute path to a file
  * @returns {{ name: string, root: string } | null}
@@ -126,6 +126,7 @@ function findContainingKbnPackage(filePath) {
   const root = path.parse(currentDir).root;
 
   while (currentDir !== root) {
+    // Check for package.json first (standard npm package)
     const pkgJsonPath = path.join(currentDir, 'package.json');
     try {
       if (fs.existsSync(pkgJsonPath)) {
@@ -134,13 +135,32 @@ function findContainingKbnPackage(filePath) {
         if (pkgJson.name && pkgJson.name.startsWith('@kbn/')) {
           return {
             name: pkgJson.name,
-            root: fs.realpathSync(currentDir),
+            root: currentDir,
+          };
+        }
+      }
+    } catch {
+      // Continue checking kibana.jsonc
+    }
+
+    // Check for kibana.jsonc (Kibana monorepo package manifest)
+    const kibanaJsoncPath = path.join(currentDir, 'kibana.jsonc');
+    try {
+      if (fs.existsSync(kibanaJsoncPath)) {
+        const content = fs.readFileSync(kibanaJsoncPath, 'utf-8');
+        // kibana.jsonc may have comments, use a simple regex to extract the id field
+        const idMatch = content.match(/"id"\s*:\s*"(@kbn\/[^"]+)"/);
+        if (idMatch && idMatch[1]) {
+          return {
+            name: idMatch[1],
+            root: currentDir,
           };
         }
       }
     } catch {
       // Continue walking up
     }
+
     currentDir = path.dirname(currentDir);
   }
   return null;

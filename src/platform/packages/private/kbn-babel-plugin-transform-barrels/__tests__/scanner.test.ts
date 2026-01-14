@@ -963,6 +963,103 @@ export const DefendInsightStatus = { Enum: { running: 'running' } };`
     });
   });
 
+  describe('symlinked @kbn package path consistency', () => {
+    let tempDir: string;
+    let nodeModulesDir: string;
+    let sourceDir: string;
+
+    beforeAll(async () => {
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-symlink-test-'));
+
+      // Create source directory (simulates src/platform/plugins/shared/my-plugin)
+      sourceDir = Path.join(tempDir, 'src', 'platform', 'plugins', 'shared', 'my-plugin');
+      await Fsp.mkdir(sourceDir, { recursive: true });
+
+      // Create kibana.jsonc in source dir (Kibana monorepo package manifest)
+      await Fsp.writeFile(
+        Path.join(sourceDir, 'kibana.jsonc'),
+        `{
+  "type": "plugin",
+  "id": "@kbn/my-plugin"
+}`
+      );
+
+      // Create public/index.ts barrel and source files
+      await Fsp.mkdir(Path.join(sourceDir, 'public', 'components'), { recursive: true });
+
+      await Fsp.writeFile(
+        Path.join(sourceDir, 'public', 'components', 'my_component.ts'),
+        `export const MyComponent = () => {};`
+      );
+
+      await Fsp.writeFile(
+        Path.join(sourceDir, 'public', 'index.ts'),
+        `export { MyComponent } from './components/my_component';`
+      );
+
+      // Create node_modules/@kbn/my-plugin as symlink to source
+      nodeModulesDir = Path.join(tempDir, 'node_modules', '@kbn', 'my-plugin');
+      await Fsp.mkdir(Path.dirname(nodeModulesDir), { recursive: true });
+      await Fsp.symlink(sourceDir, nodeModulesDir);
+    });
+
+    afterAll(async () => {
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('uses consistent paths for packageRoot and export paths within each entry', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+
+      // Both symlink and real paths may be indexed (from different scans)
+      // What matters is that each entry has CONSISTENT paths internally
+      const symlinkBarrelPath = Path.join(nodeModulesDir, 'public', 'index.ts');
+      const realBarrelPath = Path.join(sourceDir, 'public', 'index.ts');
+
+      // Check symlink path entry (from node_modules/@kbn scan)
+      if (barrelIndex[symlinkBarrelPath]) {
+        const symlinkEntry = barrelIndex[symlinkBarrelPath];
+
+        expect(symlinkEntry.packageName).toBe('@kbn/my-plugin');
+        expect(symlinkEntry.packageRoot).toBe(nodeModulesDir);
+
+        const myComponentExport = symlinkEntry.exports.MyComponent;
+        expect(myComponentExport).toBeDefined();
+
+        // Export path should use the SAME base path as packageRoot (symlink path)
+        expect(myComponentExport.path.startsWith(nodeModulesDir)).toBe(true);
+
+        // Verify relative path computation works correctly (no '..' prefix)
+        const relativePath = Path.relative(symlinkEntry.packageRoot, myComponentExport.path);
+        expect(relativePath).toBe(Path.join('public', 'components', 'my_component.ts'));
+        expect(relativePath.startsWith('..')).toBe(false);
+      }
+
+      // Check real path entry (from internal barrel scan)
+      if (barrelIndex[realBarrelPath]) {
+        const realEntry = barrelIndex[realBarrelPath];
+
+        expect(realEntry.packageName).toBe('@kbn/my-plugin');
+        expect(realEntry.packageRoot).toBe(sourceDir);
+
+        const myComponentExport = realEntry.exports.MyComponent;
+        expect(myComponentExport).toBeDefined();
+
+        // Export path should use the SAME base path as packageRoot (real path)
+        expect(myComponentExport.path.startsWith(sourceDir)).toBe(true);
+
+        // Verify relative path computation works correctly (no '..' prefix)
+        const relativePath = Path.relative(realEntry.packageRoot, myComponentExport.path);
+        expect(relativePath).toBe(Path.join('public', 'components', 'my_component.ts'));
+        expect(relativePath.startsWith('..')).toBe(false);
+      }
+
+      // At least one entry should exist
+      expect(
+        barrelIndex[symlinkBarrelPath] !== undefined || barrelIndex[realBarrelPath] !== undefined
+      ).toBe(true);
+    });
+  });
+
   describe('external package re-exports', () => {
     let tempDir: string;
 
