@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -29,10 +30,20 @@ export interface SLODetailsFlyoutProps {
   sloId: string;
   sloInstanceId?: string;
   onClose: () => void;
+  size?: EuiFlyoutProps['size'];
+  hideFooter?: boolean;
+  session?: 'start' | 'inherit';
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function SLODetailsFlyout({ sloId, sloInstanceId, onClose }: SLODetailsFlyoutProps) {
+export default function SLODetailsFlyout({
+  sloId,
+  sloInstanceId,
+  onClose,
+  size = 'm',
+  hideFooter = false,
+  session = 'inherit',
+}: SLODetailsFlyoutProps) {
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloDetailsFlyout',
   });
@@ -48,10 +59,8 @@ export default function SLODetailsFlyout({ sloId, sloInstanceId, onClose }: SLOD
     shouldRefetch: false,
   });
 
-  // Determine if SLO was not found (success but no data)
   const isNotFound = isSuccess && !slo;
 
-  // Determine the title based on state
   const getTitle = () => {
     if (isError) {
       return i18n.translate('xpack.slo.sloDetailsFlyout.errorTitle', {
@@ -71,7 +80,6 @@ export default function SLODetailsFlyout({ sloId, sloInstanceId, onClose }: SLOD
     return slo?.name ?? '';
   };
 
-  // Render the body content based on state
   const renderBody = () => {
     if (isError) {
       return (
@@ -122,11 +130,9 @@ export default function SLODetailsFlyout({ sloId, sloInstanceId, onClose }: SLOD
       return null;
     }
 
-    // Success state - use the shared content component
     return <SloOverviewDetailsContent slo={slo} />;
   };
 
-  // Render footer based on state
   const renderFooter = () => {
     if (isError || isNotFound || isLoading || !slo) {
       return (
@@ -138,19 +144,18 @@ export default function SLODetailsFlyout({ sloId, sloInstanceId, onClose }: SLOD
       );
     }
 
-    // Success state - use the shared footer component
     return <SloOverviewDetailsFlyoutFooter slo={slo} onClose={onClose} />;
   };
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
+    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId} size={size} session={session}>
       <EuiFlyoutHeader hasBorder={!slo}>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>{getTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
-      <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
+      {!hideFooter && <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>}
     </EuiFlyout>
   );
 }

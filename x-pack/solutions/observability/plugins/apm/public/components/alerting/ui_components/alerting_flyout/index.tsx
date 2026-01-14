@@ -23,7 +23,6 @@ interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   ruleType: ApmRuleType | null;
-  /** Optional service name override. If provided, will be used instead of the URL-based service name */
   serviceName?: string;
 }
 

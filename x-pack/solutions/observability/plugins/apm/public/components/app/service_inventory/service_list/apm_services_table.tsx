@@ -60,6 +60,7 @@ import type {
 import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
+import { SloOverviewFlyout } from '../slo_overview_flyout';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -126,7 +127,7 @@ export function getServiceColumns({
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   link: any;
   serviceOverflowCount: number;
-  onSloHealthyClick?: (serviceName: string) => void;
+  onSloHealthyClick?: (serviceName: string, agentName?: string) => void;
   basePath?: { prepend: (path: string) => string };
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
@@ -200,7 +201,7 @@ export function getServiceColumns({
             ),
             width: `${unit * 7}px`,
             render: (item: ServiceListItem) => {
-              const { serviceName } = item;
+              const { serviceName, agentName } = item;
               const { status: sloStatus, count: sloCount } = getSloStatusInfo(serviceName);
 
               const slosUrl = basePath?.prepend(
@@ -305,7 +306,7 @@ export function getServiceColumns({
                   <EuiBadge
                     data-test-subj="serviceInventorySloHealthyBadge"
                     color="success"
-                    onClick={() => onSloHealthyClick?.(serviceName)}
+                    onClick={() => onSloHealthyClick?.(serviceName, agentName)}
                     onClickAriaLabel={i18n.translate(
                       'xpack.apm.servicesTable.sloHealthyAriaLabel',
                       {
@@ -580,8 +581,17 @@ export function ApmServicesTable({
     });
   }, []);
 
-  const handleSloHealthyClick = useCallback((serviceName: string) => {
-    console.log(`SLO Healthy clicked for service: ${serviceName}`);
+  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
+    serviceName: string;
+    agentName?: string;
+  } | null>(null);
+
+  const handleSloHealthyClick = useCallback((serviceName: string, agentName?: string) => {
+    setSloOverviewFlyout({ serviceName, agentName });
+  }, []);
+
+  const closeSloOverviewFlyout = useCallback(() => {
+    setSloOverviewFlyout(null);
   }, []);
 
   const CreateSloFlyout =
@@ -876,6 +886,13 @@ export function ApmServicesTable({
         serviceName={alertFlyoutState.serviceName}
       />
       {CreateSloFlyout}
+      {sloOverviewFlyout && (
+        <SloOverviewFlyout
+          serviceName={sloOverviewFlyout.serviceName}
+          agentName={sloOverviewFlyout.agentName}
+          onClose={closeSloOverviewFlyout}
+        />
+      )}
     </EuiFlexGroup>
   );
 }
