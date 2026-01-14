@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { AGENT_BUILDER_TOUR_STORAGE_KEY } from '@kbn/onechat-plugin/public/application/storage_keys';
 import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
-import { setupAgentDirectAnswer } from '../../../onechat_api_integration/utils/proxy_scenario';
+import { setupAgentDirectAnswer, setupAgentDirectError } from '../../../onechat_api_integration/utils/proxy_scenario';
 import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
@@ -51,10 +51,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await onechat.navigateToApp('conversations/new');
 
-      // DON'T set up any interceptors for the first attempt - this will cause a 404 error
+      // setup interceptors to return 400 error
+      await setupAgentDirectError({
+        proxy: llmProxy,
+        error: { type: 'error', statusCode: 400, errorMsg: 'Some test error' },
+      });
 
       await onechat.typeMessage(MOCKED_INPUT);
       await onechat.sendMessage();
+
+      // Wait for all interceptors to be called (backend processing complete)
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       const isErrorVisible = await onechat.isErrorVisible();
       expect(isErrorVisible).to.be(true);
@@ -97,9 +104,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await onechat.navigateToApp('conversations/new');
 
-      // DON'T set up any interceptors for the first attempt - this will cause a 404 error
+      // setup interceptors to return 400 error
+      await setupAgentDirectError({
+        proxy: llmProxy,
+        error: { type: 'error', statusCode: 400, errorMsg: 'Some test error' },
+      });
+
       await onechat.typeMessage(MOCKED_INPUT);
       await onechat.sendMessage();
+
+      // Wait for all interceptors to be called (backend processing complete)
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Wait for error to appear
       const isErrorVisible = await onechat.isErrorVisible();
@@ -157,9 +172,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('agentBuilderWelcomePage');
       });
 
-      // DON'T set up any interceptors for the error conversation
+      // setup interceptors to return 400 error
+      await setupAgentDirectError({
+        proxy: llmProxy,
+        error: { type: 'error', statusCode: 400, errorMsg: 'Some test error' },
+      });
+
       await onechat.typeMessage(ERROR_INPUT);
       await onechat.sendMessage();
+
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       const isErrorVisible = await onechat.isErrorVisible();
       expect(isErrorVisible).to.be(true);
@@ -186,9 +208,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await onechat.navigateToApp('conversations/new');
 
-      // DON'T set up any interceptors for the first attempt - this will cause a 404 error
+      // setup interceptors to return 400 error
+      await setupAgentDirectError({
+        proxy: llmProxy,
+        error: { type: 'error', statusCode: 400, errorMsg: 'Some test error' },
+      });
+
       await onechat.typeMessage(ERROR_INPUT);
       await onechat.sendMessage();
+
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Assert error is visible
       const isErrorVisible = await onechat.isErrorVisible();
@@ -236,9 +265,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const firstResponseText = await firstResponseElement.getVisibleText();
       expect(firstResponseText).to.contain(FIRST_RESPONSE);
 
-      // Send a message that will cause an error (no interceptors set up)
+      // setup interceptors to return 400 error
+      await setupAgentDirectError({
+        proxy: llmProxy,
+        continueConversation: true,
+        error: { type: 'error', statusCode: 400, errorMsg: 'Some test error' },
+      });
+
       await onechat.typeMessage(ERROR_INPUT);
       await onechat.sendMessage();
+
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Assert error is visible
       const isErrorVisible = await onechat.isErrorVisible();

@@ -18,7 +18,6 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAgents } from './agent_builder/agents';
@@ -242,33 +241,16 @@ export class Plugin implements ISecuritySolutionPlugin {
       return;
     }
 
-    // The featureFlags service is not available in the core setup, so we need
-    // to wait for the start services to be available to read the feature flags.
-    core
-      .getStartServices()
-      .then(async ([{ featureFlags }]) => {
-        const isAiAgentsEnabled = await featureFlags.getBooleanValue(
-          AI_AGENTS_FEATURE_FLAG,
-          AI_AGENTS_FEATURE_FLAG_DEFAULT
-        );
 
-        if (!isAiAgentsEnabled) {
-          return;
-        }
-
-        registerTools(onechat, core, logger).catch((error) => {
-          this.logger.error(`Error registering security tools: ${error}`);
-        });
-        registerAttachments(onechat).catch((error) => {
-          this.logger.error(`Error registering security attachments: ${error}`);
-        });
-        registerAgents(onechat, core, logger).catch((error) => {
-          this.logger.error(`Error registering security agent: ${error}`);
-        });
-      })
-      .catch((error) => {
-        this.logger.error(`Error checking AI agents feature flag: ${error}`);
-      });
+    registerTools(onechat, core, logger).catch((error) => {
+      this.logger.error(`Error registering security tools: ${error}`);
+    });
+    registerAttachments(onechat).catch((error) => {
+      this.logger.error(`Error registering security attachments: ${error}`);
+    });
+    registerAgents(onechat, core, logger).catch((error) => {
+      this.logger.error(`Error registering security agent: ${error}`);
+    });
   }
 
   public setup(
