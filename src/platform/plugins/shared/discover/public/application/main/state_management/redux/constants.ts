@@ -34,5 +34,5 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     hideChart: false,
   },
   expandedDoc: undefined,
-  uiState: {},
+  uiState: { docViewer: { docViews: {} } },
 };

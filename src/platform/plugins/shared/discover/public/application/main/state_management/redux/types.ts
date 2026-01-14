@@ -165,6 +165,7 @@ export interface TabState extends TabItem {
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
+    docViewer?: { docViews: Record<string, unknown> };
   };
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;
