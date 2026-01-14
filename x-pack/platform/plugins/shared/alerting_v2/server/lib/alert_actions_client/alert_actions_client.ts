@@ -14,7 +14,6 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable, optional } from 'inversify';
 import { omit, zipObject } from 'lodash';
 import pLimit from 'p-limit';
-import type { AlertAction as AlertActionDocument } from '../../resources/alert_actions';
 import type {
   BulkAlertActionItemData,
   CreateAlertActionData,
@@ -22,6 +21,7 @@ import type {
 import { QueryService } from '../services/query_service/query_service';
 import type { StorageService } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
+import type { AlertAction as AlertActionDocument } from '../../resources/alert_actions';
 import {
   alertEventSchema,
   alertTransitionSchema,
@@ -42,10 +42,9 @@ export class AlertActionsClient {
     alertSeriesId: string;
     action: CreateAlertActionData;
   }): Promise<void> {
-    const [username, alertEvent, alertTransition] = await Promise.all([
+    const [username, { alertEvent, alertTransition }] = await Promise.all([
       this.getUserName(),
-      this.findLastAlertEventBySeriesIdOrThrow(params.alertSeriesId),
-      this.findLastAlertTransitionBySeriesIdOrThrow(params.alertSeriesId, params.action.episode_id),
+      this.getAlertContext(params.alertSeriesId, params.action.episode_id),
     ]);
 
     await this.storageService.bulkIndexDocs({
@@ -71,13 +70,10 @@ export class AlertActionsClient {
     const results = await Promise.allSettled(
       actions.map((action) =>
         limiter(async () => {
-          const [alertEvent, alertTransition] = await Promise.all([
-            this.findLastAlertEventBySeriesIdOrThrow(action.alert_series_id),
-            this.findLastAlertTransitionBySeriesIdOrThrow(
-              action.alert_series_id,
-              action.episode_id
-            ),
-          ]);
+          const { alertEvent, alertTransition } = await this.getAlertContext(
+            action.alert_series_id,
+            action.episode_id
+          );
 
           return this.buildAlertActionDocument({
             alertSeriesId: action.alert_series_id,
@@ -98,10 +94,7 @@ export class AlertActionsClient {
       .map((result) => result.value);
 
     if (docs.length > 0) {
-      await this.storageService.bulkIndexDocs({
-        index: '.alerts-actions',
-        docs,
-      });
+      await this.storageService.bulkIndexDocs({ index: '.alerts-actions', docs });
     }
 
     return { processed: docs.length, total: actions.length };
@@ -109,6 +102,18 @@ export class AlertActionsClient {
 
   private async getUserName(): Promise<string | null> {
     return this.security?.authc.getCurrentUser(this.request)?.username ?? null;
+  }
+
+  private async getAlertContext(
+    alertSeriesId: string,
+    episodeId?: string
+  ): Promise<{ alertEvent: AlertEvent; alertTransition: AlertTransition }> {
+    const [alertEvent, alertTransition] = await Promise.all([
+      this.findLastAlertEventBySeriesIdOrThrow(alertSeriesId),
+      this.findLastAlertTransitionBySeriesIdOrThrow(alertSeriesId, episodeId),
+    ]);
+
+    return { alertEvent, alertTransition };
   }
 
   private buildAlertActionDocument(params: {

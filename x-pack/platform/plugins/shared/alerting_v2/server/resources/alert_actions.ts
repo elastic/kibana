@@ -50,6 +50,8 @@ export const alertActionSchema = z.object({
   episode_id: z.string(),
   rule_id: z.string(),
   source: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  reason: z.string().optional(),
 });
 
 export type AlertAction = z.infer<typeof alertActionSchema>;
