@@ -20,11 +20,175 @@ jest.mock('../app_context', () => ({
   },
 }));
 
-import { getCommonAgentVersions } from './version_specific_policies';
+jest.mock('../agent_policy', () => ({
+  agentPolicyService: {
+    getFullAgentPolicy: jest.fn().mockImplementation(async (_, id, { agentVersion }) => ({
+      inputs: agentVersion.startsWith('9.')
+        ? [
+            {
+              type: 'cel',
+            },
+          ]
+        : [],
+    })),
+  },
+}));
+
+import { getCommonAgentVersions, getVersionSpecificPolicies } from './version_specific_policies';
 
 describe('getCommonAgentVersions', () => {
   it('should return the correct common agent versions', async () => {
     const result = await getCommonAgentVersions();
     expect(result).toEqual(['9.3', '9.2', '8.9']);
+  });
+});
+
+describe('getVersionSpecificPolicies', () => {
+  it('should create version specific policies with common agent versions and package level condition', async () => {
+    const policies = await getVersionSpecificPolicies(
+      undefined,
+      { data: { inputs: [] } },
+      {
+        id: 'policy1',
+        inputs: [
+          {
+            meta: { package: { agentVersion: '>=9.3.0' } },
+          },
+        ],
+      }
+    );
+    expect(policies).toEqual([
+      {
+        data: {
+          inputs: [
+            {
+              meta: {
+                package: {
+                  agentVersion: '>=9.3.0',
+                },
+              },
+            },
+          ],
+        },
+        policy_id: 'policy1#9.3',
+      },
+      {
+        data: {
+          inputs: [],
+        },
+        policy_id: 'policy1#9.2',
+      },
+      {
+        data: {
+          inputs: [],
+        },
+        policy_id: 'policy1#8.9',
+      },
+    ]);
+  });
+
+  it('should create version specific policies with custom agent versions and package level condition', async () => {
+    const policies = await getVersionSpecificPolicies(
+      undefined,
+      { data: { inputs: [] } },
+      {
+        id: 'policy1',
+        inputs: [
+          {
+            meta: { package: { agentVersion: '>=9.3.0' } },
+          },
+        ],
+      },
+      ['9.4', '9.1']
+    );
+    expect(policies).toEqual([
+      {
+        data: {
+          inputs: [
+            {
+              meta: {
+                package: {
+                  agentVersion: '>=9.3.0',
+                },
+              },
+            },
+          ],
+        },
+        policy_id: 'policy1#9.4',
+      },
+      {
+        data: {
+          inputs: [],
+        },
+        policy_id: 'policy1#9.1',
+      },
+    ]);
+  });
+
+  it('should create version specific policies with common agent versions and template level condition', async () => {
+    const policies = await getVersionSpecificPolicies(
+      undefined,
+      { data: { inputs: [] } },
+      { id: 'policy1', inputs: [{}] }
+    );
+    expect(policies).toEqual([
+      {
+        data: {
+          inputs: [
+            {
+              type: 'cel',
+            },
+          ],
+        },
+        policy_id: 'policy1#9.3',
+      },
+      {
+        data: {
+          inputs: [
+            {
+              type: 'cel',
+            },
+          ],
+        },
+        policy_id: 'policy1#9.2',
+      },
+      {
+        data: {
+          inputs: [],
+        },
+        policy_id: 'policy1#8.9',
+      },
+    ]);
+  });
+
+  it('should create version specific policies with custom agent versions and template level condition', async () => {
+    const policies = await getVersionSpecificPolicies(
+      undefined,
+      { data: { inputs: [] } },
+      { id: 'policy1', inputs: [{}] },
+      ['9.4', '9.1']
+    );
+    expect(policies).toEqual([
+      {
+        data: {
+          inputs: [
+            {
+              type: 'cel',
+            },
+          ],
+        },
+        policy_id: 'policy1#9.4',
+      },
+      {
+        data: {
+          inputs: [
+            {
+              type: 'cel',
+            },
+          ],
+        },
+        policy_id: 'policy1#9.1',
+      },
+    ]);
   });
 });
