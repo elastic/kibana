@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { drop, evaluate, stats, timeseries } from '@kbn/esql-composer';
+import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { MetricField, Dimension } from '../../../types';
@@ -17,6 +17,7 @@ import { createMetricAggregation, createTimeBucketAggregation } from './create_a
 interface CreateESQLQueryParams {
   metric: MetricField;
   dimensions?: Dimension[];
+  whereStatements?: string[];
 }
 
 const separator = '\u203A'.normalize('NFC');
@@ -58,11 +59,20 @@ function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): st
  * @param dimensions - An array of selected dimension names.
  * @returns A complete ESQL query string.
  */
-export function createESQLQuery({ metric, dimensions = [] }: CreateESQLQueryParams) {
+export function createESQLQuery({
+  metric,
+  dimensions = [],
+  whereStatements = [],
+}: CreateESQLQueryParams) {
   const { name: metricField, instrument, index } = metric;
   const source = timeseries(index);
 
+  const whereCommands = whereStatements
+    .filter((statement) => statement.trim().length > 0)
+    .map((statement) => where(statement));
+
   const queryPipeline = source.pipe(
+    ...whereCommands,
     stats(
       `${createMetricAggregation({
         instrument,

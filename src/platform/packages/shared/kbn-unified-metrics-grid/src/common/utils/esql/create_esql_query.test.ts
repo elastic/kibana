@@ -164,6 +164,21 @@ TS metrics-*
 `.trim()
     );
   });
+
+  it('should prepend WHERE commands before STATS', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      whereStatements: ['host.name == "host-01" AND system.cpu.user.pct IS NOT NULL'],
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.name == "host-01" AND system.cpu.user.pct IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
   it('should handle undefined both dimensions and metrics dimensions without throwing error', () => {
     const query = createESQLQuery({
       metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
