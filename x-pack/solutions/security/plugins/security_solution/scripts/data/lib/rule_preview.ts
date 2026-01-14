@@ -97,8 +97,7 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
         },
         dest: {
           index: destIndex,
-          // Use "index" so repeated runs can overwrite documents that share deterministic _ids.
-          op_type: 'index',
+          // Default op_type overwrites existing docs, which makes reruns idempotent.
         },
         script: targetRule
           ? {

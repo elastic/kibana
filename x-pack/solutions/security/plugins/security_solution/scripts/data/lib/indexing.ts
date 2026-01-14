@@ -9,7 +9,6 @@ import fs from 'fs';
 import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { Readable } from 'stream';
 
 const INDEX_FIELDS_LIMIT = 6000;
 
@@ -29,7 +28,7 @@ export const ensureIndex = async ({ esClient, index, mappingPath, log }: EnsureI
   await esClient.indices.create({
     index,
     settings: {
-      'index.mapping.total_fields.limit': String(INDEX_FIELDS_LIMIT),
+      'index.mapping.total_fields.limit': INDEX_FIELDS_LIMIT,
     },
     mappings: mapping,
   });

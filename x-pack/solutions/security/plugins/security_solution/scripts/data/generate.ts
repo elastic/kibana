@@ -11,10 +11,11 @@ import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import datemath from '@kbn/datemath';
 import type { Client } from '@elastic/elasticsearch';
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KbnClient } from '@kbn/test';
 
 import { createEsClient, createKbnClient } from './lib/clients';
-import type { EpisodeDocs, EpisodeFileSet } from './lib/episodes';
+import type { EpisodeDocs, EpisodeFileSet, ScaledDoc } from './lib/episodes';
 import { loadEpisode, scaleEpisodes } from './lib/episodes';
 import { ensureIndex, episodeIndexNames, scriptsDataDir } from './lib/indexing';
 import { ensurePrebuiltRulesInstalledBestEffort } from './lib/prebuilt_rules';
@@ -75,6 +76,12 @@ const listEpisodeFileSets = (selected: Set<string>): EpisodeFileSet[] => {
     });
   }
   return fileSets;
+};
+
+const assertPositiveInt = (name: string, value: number) => {
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value <= 0) {
+    throw new Error(`${name} must be a positive integer. Got: ${String(value)}`);
+  }
 };
 
 const parseEpisodesFlag = (value: string | undefined): Set<string> => {
@@ -164,21 +171,19 @@ const cleanGeneratedDataBestEffort = async ({
           index: alertsIndex,
           conflicts: 'proceed',
           refresh: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: new Date(startMs).toISOString(),
-                        lte: new Date(endMs).toISOString(),
-                      },
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: new Date(startMs).toISOString(),
+                      lte: new Date(endMs).toISOString(),
                     },
                   },
-                  { terms: { 'kibana.alert.rule.uuid': ruleUuids } },
-                ],
-              },
+                },
+                { terms: { 'kibana.alert.rule.uuid': ruleUuids } },
+              ],
             },
           },
         });
@@ -201,22 +206,20 @@ const cleanGeneratedDataBestEffort = async ({
         index: adhocDiscoveryAlias,
         conflicts: 'proceed',
         refresh: true,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: new Date(startMs).toISOString(),
-                      lte: new Date(endMs).toISOString(),
-                    },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: new Date(startMs).toISOString(),
+                    lte: new Date(endMs).toISOString(),
                   },
                 },
-                { term: { 'kibana.alert.attack_discovery.api_config.name': 'Synthetic (no-LLM)' } },
-                { term: { 'kibana.alert.attack_discovery.user.name': username } },
-              ],
-            },
+              },
+              { term: { 'kibana.alert.attack_discovery.api_config.name': 'Synthetic (no-LLM)' } },
+              { term: { 'kibana.alert.attack_discovery.user.name': username } },
+            ],
           },
         },
       });
@@ -263,7 +266,7 @@ const ensurePreviewAlertsIndexBestEffort = async ({
 
   try {
     const mappingResp = await esClient.indices.getMapping({ index: realAlertsBackingIndex });
-    const mapping = (mappingResp as any)?.[realAlertsBackingIndex]?.mappings;
+    const mapping = (mappingResp as IndicesGetMappingResponse)[realAlertsBackingIndex]?.mappings;
 
     log.info(`Recreating missing preview alerts backing index: ${previewBackingIndex}`);
     await esClient.indices.create({
@@ -299,11 +302,7 @@ const bulkIndexStreamed = async ({
   endMs: number;
   episodeIds: string[];
   log: ToolingLog;
-  docs: AsyncGenerator<{
-    episodeId: string;
-    kind: 'data' | 'endpoint_alert' | 'insights_alert';
-    doc: any;
-  }>;
+  docs: AsyncGenerator<ScaledDoc>;
 }) => {
   const buffers = new Map<string, Array<Record<string, unknown>>>();
   const indexedCounts = new Map<string, number>();
@@ -321,22 +320,23 @@ const bulkIndexStreamed = async ({
 
   const ensureBuf = (index: string) => {
     if (!buffers.has(index)) buffers.set(index, []);
-    return buffers.get(index)!;
+    return buffers.get(index) ?? [];
   };
 
   for await (const item of docs) {
-    if (!episodeIds.includes(item.episodeId)) continue;
-    const idx = episodeIndexNames({ episodeId: item.episodeId, endMs });
-    const index =
-      item.kind === 'data'
-        ? idx.endpointEvents
-        : item.kind === 'endpoint_alert'
-        ? idx.endpointAlerts
-        : idx.insightsAlerts;
+    if (episodeIds.includes(item.episodeId)) {
+      const idx = episodeIndexNames({ episodeId: item.episodeId, endMs });
+      const index =
+        item.kind === 'data'
+          ? idx.endpointEvents
+          : item.kind === 'endpoint_alert'
+          ? idx.endpointAlerts
+          : idx.insightsAlerts;
 
-    const buf = ensureBuf(index);
-    buf.push(item.doc as Record<string, unknown>);
-    if (buf.length >= 1000) await flush(index);
+      const buf = ensureBuf(index);
+      buf.push(item.doc as Record<string, unknown>);
+      if (buf.length >= 1000) await flush(index);
+    }
   }
 
   for (const index of buffers.keys()) {
@@ -363,6 +363,17 @@ export const cli = () => {
       const hosts = Number(cliContext.flags.h ?? cliContext.flags.hosts ?? 5);
       const users = Number(cliContext.flags.u ?? cliContext.flags.users ?? 5);
       const clean = Boolean(cliContext.flags.clean);
+
+      assertPositiveInt('events', events);
+      assertPositiveInt('hosts', hosts);
+      assertPositiveInt('users', users);
+      if (endMs <= startMs) {
+        throw new Error(
+          `Invalid time range: end-date must be after start-date. Got start=${new Date(
+            startMs
+          ).toISOString()} end=${new Date(endMs).toISOString()}`
+        );
+      }
 
       const episodes = parseEpisodesFlag(cliContext.flags.episodes as string | undefined);
       const episodeIds = [...episodes].sort();
@@ -500,7 +511,7 @@ export const cli = () => {
           endMs,
           episodeIds,
           log,
-          docs: scaled as any,
+          docs: scaled,
         });
 
         log.info(`Done indexing episode events/endpoint alerts (and insights-alerts copies).`);
@@ -521,7 +532,7 @@ export const cli = () => {
           insightsRuleCreate.from = `now-${previewWindowSeconds}s`;
           insightsRuleCreate.to = 'now';
           // Do not allow endpoint alert message to override rule name in generated detection alerts.
-          delete (insightsRuleCreate as any).rule_name_override;
+          delete (insightsRuleCreate as Record<string, unknown>).rule_name_override;
 
           for (const ruleRef of resolvedRules) {
             const { previewId } = await previewRule({

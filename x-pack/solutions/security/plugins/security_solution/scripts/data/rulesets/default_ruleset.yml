@@ -1,3 +1,26 @@
+# Default ruleset for the Security Solution data generator (`scripts/data/generate.ts`).
+#
+# What this does:
+# - The generator reads this file to decide WHICH prebuilt rules to install/enable (best-effort),
+#   and which rules to use when attributing generated detection alerts.
+#
+# Format:
+# - `rules` is a list of entries.
+# - Each entry has:
+#   - `id`: an internal label used only by the generator (not a Kibana rule id)
+#   - `match`: how to find an installed prebuilt rule
+#
+# Matching behavior:
+# - The generator searches installed (and/or installable) rules by name.
+# - `name_contains_any` is a list of case-insensitive substrings; a rule "matches" if its name
+#   contains ALL of the provided substrings.
+#
+# Example:
+# rules:
+#   - id: suspicious_powershell
+#     match:
+#       name_contains_any: ["powershell", "suspicious"]
+#
 rules:
   - id: failed_logins_then_success
     match:

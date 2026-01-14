@@ -19,22 +19,22 @@
       }
     },
     {
-        "winlog.event_data": {
-          "path_match": "winlog.user_data.*",
-          "mapping": {
-            "type": "keyword"
-          },
-          "match_mapping_type": "string"
-        }
-      },
-    {
-        "strings_as_keyword": {
-          "mapping": {
-            "type": "keyword"
-          },
-          "match_mapping_type": "string"
-        }
+      "winlog.event_data": {
+        "path_match": "winlog.event_data.*",
+        "mapping": {
+          "type": "keyword"
+        },
+        "match_mapping_type": "string"
       }
+    },
+    {
+      "strings_as_keyword": {
+        "mapping": {
+          "type": "keyword"
+        },
+        "match_mapping_type": "string"
+      }
+    }
   ],
   "properties": {
     "container": {
