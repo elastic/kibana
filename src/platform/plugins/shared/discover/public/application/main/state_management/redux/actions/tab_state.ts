@@ -15,6 +15,7 @@ import {
   type Query,
   isOfAggregateQueryType,
   isOfQueryType,
+  TimeRange,
 } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
@@ -32,8 +33,8 @@ import type {
   DiscoverAppState,
   DiscoverInternalState,
   TabState,
-  UpdateESQLQueryPayload,
-  OnQuerySubmitPayload,
+  UpdateESQLQueryActionPayload,
+  OnQuerySubmitActionPayload,
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
 
@@ -224,7 +225,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
 /**
  * Updates the ES|QL query string
  */
-export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryPayload]> = ({
+export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryActionPayload]> = ({
   tabId,
   queryOrUpdater,
 }) =>
@@ -249,11 +250,14 @@ export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryPa
 /**
  * Triggered when a user submits a query in the search bar
  */
-export const onQuerySubmit: InternalStateThunkActionCreator<[OnQuerySubmitPayload]> = ({
-  tabId,
-  payload,
-  isUpdate,
-}) =>
+export const onQuerySubmit: InternalStateThunkActionCreator<
+  [
+    TabActionPayload<{
+      payload: { dateRange: TimeRange; query?: Query | AggregateQuery };
+      isUpdate?: boolean;
+    }>
+  ]
+> = ({ tabId, payload, isUpdate }) =>
   async function onQuerySubmitThunkFn(
     dispatch,
     getState,

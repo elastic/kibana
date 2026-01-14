@@ -32,9 +32,11 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type { UpdateESQLQueryPayload } from '../application/main/state_management/redux/types';
+import type { UpdateESQLQueryActionPayload } from '../application/main/state_management/redux/types';
 
-export type UpdateESQLQueryFn = (queryOrUpdater: UpdateESQLQueryPayload['queryOrUpdater']) => void;
+export type UpdateESQLQueryFn = (
+  queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
+) => void;
 
 /**
  * Supports extending the Discover app menu

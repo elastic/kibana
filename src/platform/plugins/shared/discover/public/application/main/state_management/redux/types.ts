@@ -207,13 +207,7 @@ export interface DiscoverInternalState {
   };
 }
 
-export interface UpdateESQLQueryPayload {
+export interface UpdateESQLQueryActionPayload {
   tabId: string;
   queryOrUpdater: string | ((prevQuery: string) => string);
-}
-
-export interface OnQuerySubmitPayload {
-  tabId: string;
-  payload: { dateRange: TimeRange; query?: Query | AggregateQuery };
-  isUpdate?: boolean;
 }
