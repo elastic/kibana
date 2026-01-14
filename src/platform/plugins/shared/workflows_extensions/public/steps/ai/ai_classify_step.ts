@@ -9,27 +9,21 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  AiClassifyStepConfigSchema,
-  AiClassifyStepInputSchema,
-  AiClassifyStepOutputSchema,
-} from '../../../common/steps/ai';
+import type { z } from '@kbn/zod/v4';
 import {
   AiClassifyStepCommonDefinition,
+  type AiClassifyStepInputSchema,
   AiClassifyStepTypeId,
   buildStructuredOutputSchema,
 } from '../../../common/steps/ai';
 import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
 
-export const AiClassifyStepDefinition: PublicStepDefinition<
-  AiClassifyStepInputSchema,
-  AiClassifyStepOutputSchema,
-  AiClassifyStepConfigSchema
-> = {
+export const AiClassifyStepDefinition: PublicStepDefinition = {
   ...AiClassifyStepCommonDefinition,
   editorHandlers: {
     dynamicSchema: {
-      getOutputSchema: ({ input }) => buildStructuredOutputSchema(input),
+      getOutputSchema: ({ input }) =>
+        buildStructuredOutputSchema(input as z.infer<AiClassifyStepInputSchema>),
     },
   },
   icon: React.lazy(() =>
