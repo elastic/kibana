@@ -7,11 +7,13 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
-import { DATE_WITH_HOSTS_DATA, HOST1_NAME } from '../../fixtures/constants';
+import { DATE_WITH_HOSTS_DATA, HOST1_NAME, HOSTS_METADATA_FIELDS } from '../../fixtures/constants';
 
 test.use({
   timezoneId: 'GMT',
 });
+
+const METADATA_FIELD = HOSTS_METADATA_FIELDS[1];
 
 test.describe(
   'Infrastructure Inventory - Host Asset Details Flyout',
@@ -157,6 +159,58 @@ test.describe(
           'closed'
         );
         await expect(assetDetailsPage.overviewTab.metricsSectionGroup).toHaveAttribute('inert');
+      });
+    });
+
+    test('Metadata Tab', async ({ pageObjects: { assetDetailsPage } }) => {
+      await test.step('accessible from default tab', async () => {
+        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'false');
+        await assetDetailsPage.metadataTab.clickTab();
+        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
+      });
+
+      await test.step('render expected content', async () => {
+        await expect(assetDetailsPage.metadataTab.searchBar).toBeVisible();
+        await expect(assetDetailsPage.metadataTab.table).toBeVisible();
+        await expect(
+          assetDetailsPage.metadataTab.tableHeader.getByLabel('Pin fields')
+        ).toBeVisible();
+        await expect(assetDetailsPage.metadataTab.tableHeader.getByText('Field')).toBeVisible();
+        await expect(assetDetailsPage.metadataTab.tableHeader.getByText('Value')).toBeVisible();
+      });
+
+      await test.step('pin a metadata field row', async () => {
+        await assetDetailsPage.metadataTab.pinField(METADATA_FIELD);
+        const pinButtons = assetDetailsPage.metadataTab.getPinButtonsForField(METADATA_FIELD);
+        await expect(pinButtons.pin).toBeHidden();
+        await expect(pinButtons.unpin).toBeVisible();
+      });
+
+      await test.step('unpin a metadata field row', async () => {
+        await assetDetailsPage.metadataTab.unpinField(METADATA_FIELD);
+        const pinButtons = assetDetailsPage.metadataTab.getPinButtonsForField(METADATA_FIELD);
+        await expect(pinButtons.pin).toBeVisible();
+        await expect(pinButtons.unpin).toBeHidden();
+      });
+
+      await test.step('filter fields via search bar', async () => {
+        await assetDetailsPage.metadataTab.filterField(METADATA_FIELD);
+        await expect(assetDetailsPage.metadataTab.tableRows).toHaveCount(1);
+        const row = assetDetailsPage.metadataTab.getRowForField(METADATA_FIELD);
+        await expect(row).toBeVisible();
+      });
+    });
+
+    test('Metadata Tab - Is accessible from overview tab section show all', async ({
+      pageObjects: { assetDetailsPage },
+    }) => {
+      await test.step('is not selected as default tab', async () => {
+        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'false');
+      });
+
+      await test.step('loads after clicking show all in metadata section', async () => {
+        await assetDetailsPage.overviewTab.metadataShowAllButton.click();
+        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
       });
     });
   }

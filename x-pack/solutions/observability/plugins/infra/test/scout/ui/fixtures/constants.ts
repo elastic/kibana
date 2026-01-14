@@ -16,6 +16,8 @@ export const HOST4_NAME = 'host-4';
 export const HOST5_NAME = 'host-5';
 export const HOST6_NAME = 'host-6';
 
+export const HOSTS_METADATA_FIELDS = ['host.name', 'agent.name.text'];
+
 export const HOST_NAME_WITH_SERVICES = HOST1_NAME;
 export const SERVICE_PER_HOST_COUNT = 3;
 
