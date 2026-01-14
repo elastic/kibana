@@ -60,7 +60,11 @@ export function getLogDocumentOverview(
   const agentName = formatField(fieldConstants.AGENT_NAME_FIELD);
 
   // apm  log fields
-  const errorLogLevel = formatField(fieldConstants.ERROR_LOG_LEVEL_FIELD);
+  const errorLogLevelArray = doc.flattened[fieldConstants.ERROR_LOG_LEVEL_FIELD];
+  const errorLogLevel =
+    Array.isArray(errorLogLevelArray) && errorLogLevelArray.length > 0
+      ? errorLogLevelArray[0]
+      : errorLogLevelArray;
   const errorExceptionMessage = formatField(fieldConstants.ERROR_EXCEPTION_MESSAGE);
   const processorEvent = formatField(fieldConstants.PROCESSOR_EVENT_FIELD);
 

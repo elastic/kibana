@@ -18,10 +18,10 @@
         "tags": [],
         "label": "generateSignificantEvents",
         "description": [
-          "\nGenerate significant event definitions, based on:\n- the description of the feature (or stream if feature is undefined)\n- dataset analysis\n- for the given significant event types"
+          "\nGenerate significant event definitions, based on:\n- the description of the system (or stream if system is undefined)\n- dataset analysis\n- for the given significant event types"
         ],
         "signature": [
-          "({\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  sampleDocsSize,\n  // optional overrides for templates\n  systemPromptOverride,\n  logger,\n}: { stream: ",
+          "({\n  stream,\n  system,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  sampleDocsSize,\n  // optional overrides for templates\n  systemPromptOverride,\n  logger,\n}: { stream: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -29,13 +29,13 @@
             "section": "def-common.Streams",
             "text": "Streams"
           },
-          ".all.Definition; feature?: ",
+          ".all.Definition; system?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.SystemFeature",
-            "text": "SystemFeature"
+            "section": "def-common.System",
+            "text": "System"
           },
           " | undefined; start: number; end: number; esClient: ",
           "ElasticsearchClient",
@@ -74,7 +74,7 @@
             "id": "def-server.generateSignificantEvents.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  sampleDocsSize,\n  // optional overrides for templates\n  systemPromptOverride,\n  logger,\n}",
+            "label": "{\n  stream,\n  system,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  sampleDocsSize,\n  // optional overrides for templates\n  systemPromptOverride,\n  logger,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
             "deprecated": false,
@@ -99,18 +99,18 @@
               },
               {
                 "parentPluginId": "@kbn/streams-ai",
-                "id": "def-server.generateSignificantEvents.$1.feature",
-                "type": "CompoundType",
+                "id": "def-server.generateSignificantEvents.$1.system",
+                "type": "Object",
                 "tags": [],
-                "label": "feature",
+                "label": "system",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/streams-schema",
                     "scope": "common",
                     "docId": "kibKbnStreamsSchemaPluginApi",
-                    "section": "def-common.SystemFeature",
-                    "text": "SystemFeature"
+                    "section": "def-common.System",
+                    "text": "System"
                   },
                   " | undefined"
                 ],
@@ -1238,7 +1238,7 @@
           "\nGenerate a natural-language description"
         ],
         "signature": [
-          "({\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  logger,\n}: { stream: ",
+          "({\n  stream,\n  system,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  logger,\n  systemPromptOverride,\n}: { stream: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -1246,13 +1246,13 @@
             "section": "def-common.Streams",
             "text": "Streams"
           },
-          ".all.Definition; feature?: ",
+          ".all.Definition; system?: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.SystemFeature",
-            "text": "SystemFeature"
+            "section": "def-common.System",
+            "text": "System"
           },
           " | undefined; start: number; end: number; esClient: ",
           "ElasticsearchClient",
@@ -1272,7 +1272,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; }) => Promise<{ description: string; tokensUsed?: ",
+          "; systemPromptOverride?: string | undefined; }) => Promise<{ description: string; tokensUsed?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1291,7 +1291,7 @@
             "id": "def-server.generateStreamDescription.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  logger,\n}",
+            "label": "{\n  stream,\n  system,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  logger,\n  systemPromptOverride,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
             "deprecated": false,
@@ -1316,18 +1316,18 @@
               },
               {
                 "parentPluginId": "@kbn/streams-ai",
-                "id": "def-server.generateStreamDescription.$1.feature",
-                "type": "CompoundType",
+                "id": "def-server.generateStreamDescription.$1.system",
+                "type": "Object",
                 "tags": [],
-                "label": "feature",
+                "label": "system",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/streams-schema",
                     "scope": "common",
                     "docId": "kibKbnStreamsSchemaPluginApi",
-                    "section": "def-common.SystemFeature",
-                    "text": "SystemFeature"
+                    "section": "def-common.System",
+                    "text": "System"
                   },
                   " | undefined"
                 ],
@@ -2410,6 +2410,20 @@
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.generateStreamDescription.$1.systemPromptOverride",
+                "type": "string",
+                "tags": [],
+                "label": "systemPromptOverride",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2419,62 +2433,53 @@
       },
       {
         "parentPluginId": "@kbn/streams-ai",
-        "id": "def-server.identifySystemFeatures",
+        "id": "def-server.identifySystems",
         "type": "Function",
         "tags": [],
-        "label": "identifySystemFeatures",
+        "label": "identifySystems",
         "description": [
-          "\nIdentifies features in a stream, by:\n- describing the dataset (via sampled documents)\n- clustering docs together on similarity\n- asking the LLM to identify features by creating\nqueries and validating the resulting clusters"
+          "\nIdentifies systems in a stream, by:\n- describing the dataset (via sampled documents)\n- clustering docs together on similarity\n- asking the LLM to identify systems by creating\nqueries and validating the resulting clusters"
         ],
         "signature": [
-          "({\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n  signal,\n  analysis,\n  dropUnmapped = false,\n  maxSteps: initialMaxSteps,\n  systemPromptOverride,\n}: ",
+          "({\n  stream,\n  systems,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n  signal,\n  systemsPromptOverride,\n  maxSteps: initialMaxSteps,\n  dropUnmapped,\n}: ",
           {
             "pluginId": "@kbn/streams-ai",
             "scope": "server",
             "docId": "kibKbnStreamsAiPluginApi",
-            "section": "def-server.IdentifyFeaturesOptions",
-            "text": "IdentifyFeaturesOptions"
+            "section": "def-server.IdentifySystemsOptions",
+            "text": "IdentifySystemsOptions"
           },
-          " & { dropUnmapped?: boolean | undefined; maxSteps?: number | undefined; }) => Promise<{ features: ",
+          ") => Promise<",
           {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.SystemFeature",
-            "text": "SystemFeature"
+            "pluginId": "@kbn/streams-ai",
+            "scope": "server",
+            "docId": "kibKbnStreamsAiPluginApi",
+            "section": "def-server.IdentifySystemsResult",
+            "text": "IdentifySystemsResult"
           },
-          "[]; tokensUsed: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionTokenCount",
-            "text": "ChatCompletionTokenCount"
-          },
-          "; }>"
+          ">"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.identifySystemFeatures.$1",
-            "type": "CompoundType",
+            "id": "def-server.identifySystems.$1",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n  signal,\n  analysis,\n  dropUnmapped = false,\n  maxSteps: initialMaxSteps,\n  systemPromptOverride,\n}",
+            "label": "{\n  stream,\n  systems,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n  signal,\n  systemsPromptOverride,\n  maxSteps: initialMaxSteps,\n  dropUnmapped,\n}",
             "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/streams-ai",
                 "scope": "server",
                 "docId": "kibKbnStreamsAiPluginApi",
-                "section": "def-server.IdentifyFeaturesOptions",
-                "text": "IdentifyFeaturesOptions"
-              },
-              " & { dropUnmapped?: boolean | undefined; maxSteps?: number | undefined; }"
+                "section": "def-server.IdentifySystemsOptions",
+                "text": "IdentifySystemsOptions"
+              }
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5013,18 +5018,18 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/streams-ai",
-        "id": "def-server.IdentifyFeaturesOptions",
+        "id": "def-server.IdentifySystemsOptions",
         "type": "Interface",
         "tags": [],
-        "label": "IdentifyFeaturesOptions",
+        "label": "IdentifySystemsOptions",
         "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.stream",
+            "id": "def-server.IdentifySystemsOptions.stream",
             "type": "CompoundType",
             "tags": [],
             "label": "stream",
@@ -5035,56 +5040,56 @@
               "GroupStream",
               ".Definition"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.features",
+            "id": "def-server.IdentifySystemsOptions.systems",
             "type": "Array",
             "tags": [],
-            "label": "features",
+            "label": "systems",
             "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/streams-schema",
                 "scope": "common",
                 "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.SystemFeature",
-                "text": "SystemFeature"
+                "section": "def-common.System",
+                "text": "System"
               },
               "[] | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.start",
+            "id": "def-server.IdentifySystemsOptions.start",
             "type": "number",
             "tags": [],
             "label": "start",
             "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.end",
+            "id": "def-server.IdentifySystemsOptions.end",
             "type": "number",
             "tags": [],
             "label": "end",
             "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.esClient",
+            "id": "def-server.IdentifySystemsOptions.esClient",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -6078,13 +6083,13 @@
               "default",
               "; }"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.inferenceClient",
+            "id": "def-server.IdentifySystemsOptions.inferenceClient",
             "type": "Object",
             "tags": [],
             "label": "inferenceClient",
@@ -6098,13 +6103,13 @@
                 "text": "BoundInferenceClient"
               }
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.logger",
+            "id": "def-server.IdentifySystemsOptions.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -6118,13 +6123,13 @@
                 "text": "Logger"
               }
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.signal",
+            "id": "def-server.IdentifySystemsOptions.signal",
             "type": "Object",
             "tags": [],
             "label": "signal",
@@ -6132,41 +6137,118 @@
             "signature": [
               "AbortSignal"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.analysis",
-            "type": "Object",
-            "tags": [],
-            "label": "analysis",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/ai-tools",
-                "scope": "server",
-                "docId": "kibKbnAiToolsPluginApi",
-                "section": "def-server.DocumentAnalysis",
-                "text": "DocumentAnalysis"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.systemPromptOverride",
+            "id": "def-server.IdentifySystemsOptions.systemsPromptOverride",
             "type": "string",
             "tags": [],
-            "label": "systemPromptOverride",
+            "label": "systemsPromptOverride",
             "description": [],
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.IdentifySystemsOptions.descriptionPromptOverride",
+            "type": "string",
+            "tags": [],
+            "label": "descriptionPromptOverride",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.IdentifySystemsOptions.dropUnmapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dropUnmapped",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.IdentifySystemsOptions.maxSteps",
+            "type": "number",
+            "tags": [],
+            "label": "maxSteps",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.IdentifySystemsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "IdentifySystemsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.IdentifySystemsResult.systems",
+            "type": "Array",
+            "tags": [],
+            "label": "systems",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.System",
+                "text": "System"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.IdentifySystemsResult.tokensUsed",
+            "type": "Object",
+            "tags": [],
+            "label": "tokensUsed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompletionTokenCount",
+                "text": "ChatCompletionTokenCount"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -741,7 +741,7 @@
                     "section": "def-common.FieldFormatsRegistry",
                     "text": "FieldFormatsRegistry"
                   },
-                  ", \"init\" | \"register\"> & { deserialize: ",
+                  ", \"register\" | \"init\"> & { deserialize: ",
                   {
                     "pluginId": "fieldFormats",
                     "scope": "common",
@@ -1303,7 +1303,7 @@
             "label": "rowHeight",
             "description": [],
             "signature": [
-              "\"custom\" | \"auto\" | undefined"
+              "\"auto\" | \"custom\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
@@ -1342,7 +1342,7 @@
             "label": "onChangeRowHeight",
             "description": [],
             "signature": [
-              "(newHeightMode: \"custom\" | \"auto\" | undefined) => void"
+              "(newHeightMode: \"auto\" | \"custom\" | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
@@ -1356,7 +1356,7 @@
                 "label": "newHeightMode",
                 "description": [],
                 "signature": [
-                  "\"custom\" | \"auto\" | undefined"
+                  "\"auto\" | \"custom\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
                 "deprecated": false,
@@ -2006,7 +2006,7 @@
         "signature": [
           "(Omit<",
           "CommonProps",
-          " & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, \"type\" | \"disabled\" | \"onClick\"> & ",
+          " & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, \"type\" | \"onClick\" | \"disabled\"> & ",
           "EuiContextMenuItemProps",
           ", \"onClick\"> & { onClick: (payload: { selectedDocIds: string[]; }) => void; label: string | React.ReactElement<any, string | React.JSXElementConstructor<any>>; key: string; })[]"
         ],

@@ -78,3 +78,39 @@ export const getFieldsFromIndices = () => ({
     },
   ],
 });
+
+// Template create test data
+export const TEXT_MAPPING_FIELD = {
+  name: 'text_datatype',
+  type: 'text',
+};
+
+export const BOOLEAN_MAPPING_FIELD = {
+  name: 'boolean_datatype',
+  type: 'boolean',
+};
+
+export const KEYWORD_MAPPING_FIELD = {
+  name: 'keyword_datatype',
+  type: 'keyword',
+};
+
+export const componentTemplate1 = {
+  name: 'test_component_template_1',
+  hasMappings: true,
+  hasAliases: false,
+  hasSettings: false,
+  usedBy: [],
+  isManaged: false,
+};
+
+export const componentTemplate2 = {
+  name: 'test_component_template_2',
+  hasMappings: false,
+  hasAliases: false,
+  hasSettings: true,
+  usedBy: ['test_index_template_1'],
+  isManaged: false,
+};
+
+export const componentTemplates = [componentTemplate1, componentTemplate2];

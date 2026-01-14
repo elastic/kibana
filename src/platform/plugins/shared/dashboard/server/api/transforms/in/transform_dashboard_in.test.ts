@@ -7,32 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
+
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
     const dashboardState: DashboardState = {
       controlGroupInput: {
-        chainingSystem: 'NONE',
-        labelPosition: 'twoLine',
         controls: [
           {
-            controlConfig: { anyKey: 'some value' },
+            config: { anyKey: 'some value' },
             grow: false,
-            id: 'foo',
+            uid: 'foo',
             order: 0,
             type: 'type1',
             width: 'small',
-          },
+          } as unknown as PinnedControlState,
         ],
-        ignoreParentSettings: {
-          ignoreFilters: true,
-          ignoreQuery: true,
-          ignoreTimerange: true,
-          ignoreValidations: true,
-        },
-        autoApplySelections: false,
       },
       description: 'description',
       query: { query: 'test', language: 'KQL' },
@@ -42,6 +41,7 @@ describe('transformDashboardIn', () => {
         sync_colors: false,
         sync_tooltips: false,
         sync_cursor: false,
+        auto_apply_filters: true,
       },
       panels: [
         {
@@ -70,17 +70,13 @@ describe('transformDashboardIn', () => {
       Object {
         "attributes": Object {
           "controlGroupInput": Object {
-            "chainingSystem": "NONE",
-            "controlStyle": "twoLine",
-            "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
-            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
-            "showApplySelections": true,
+            "panelsJSON": "{\\"foo\\":{\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"grow\\":false,\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
           },
           "description": "description",
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
+          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false,\\"autoApplyFilters\\":true}",
           "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
           "refreshInterval": Object {
             "pause": true,
@@ -117,50 +113,6 @@ describe('transformDashboardIn', () => {
         },
         "error": null,
         "references": Array [],
-      }
-    `);
-  });
-
-  it('should return error when passed tag references', () => {
-    const dashboardState: DashboardState = {
-      title: 'title',
-      references: [
-        {
-          name: 'someTagRef',
-          type: 'tag',
-          id: '1',
-        },
-      ],
-    };
-
-    const output = transformDashboardIn(dashboardState);
-    expect(output).toMatchInlineSnapshot(`
-      Object {
-        "attributes": null,
-        "error": [Error: Tag references are not supported. Pass tags in with 'data.tags'],
-        "references": null,
-      }
-    `);
-  });
-
-  it('should return error when passed search source references', () => {
-    const dashboardState: DashboardState = {
-      title: 'title',
-      references: [
-        {
-          id: 'fizzle-1234',
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-          type: 'index-pattern',
-        },
-      ],
-    };
-
-    const output = transformDashboardIn(dashboardState);
-    expect(output).toMatchInlineSnapshot(`
-      Object {
-        "attributes": null,
-        "error": [Error: Search source references are not supported. Pass filters in with injected references'],
-        "references": null,
       }
     `);
   });

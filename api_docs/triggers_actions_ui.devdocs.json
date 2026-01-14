@@ -49,7 +49,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly alertDeletionSettingsEnabled: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly alertDeletionSettingsEnabled: boolean; readonly unifiedRulesPage: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
@@ -3123,8 +3123,9 @@
             "section": "def-public.ConfigFieldSchema",
             "text": "ConfigFieldSchema"
           },
-          " extends ",
-          "CommonFieldSchema"
+          "<T> extends ",
+          "CommonFieldSchema",
+          "<T>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
         "deprecated": false,
@@ -3161,12 +3162,12 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.ConfigFieldSchema.defaultValue",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "defaultValue",
             "description": [],
             "signature": [
-              "string | string[] | undefined"
+              "T | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
             "deprecated": false,
@@ -4570,7 +4571,8 @@
             "text": "SecretsFieldSchema"
           },
           " extends ",
-          "CommonFieldSchema"
+          "CommonFieldSchema",
+          "<any>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
         "deprecated": false,
@@ -5113,7 +5115,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",

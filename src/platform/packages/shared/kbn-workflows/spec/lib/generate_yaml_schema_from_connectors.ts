@@ -12,6 +12,7 @@ import { type ConnectorContractUnion } from '../..';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
   BaseConnectorStepSchema,
+  DataSetStepSchema,
   getForEachStepSchema,
   getHttpStepSchema,
   getIfStepSchema,
@@ -21,6 +22,7 @@ import {
   getWorkflowSettingsSchema,
   WaitStepSchema,
   WorkflowSchema,
+  WorkflowSettingsSchema,
 } from '../schema';
 
 export function getStepId(stepName: string): string {
@@ -40,6 +42,7 @@ export function generateYamlSchemaFromConnectors(
 
   if (loose) {
     return WorkflowSchema.partial().extend({
+      settings: WorkflowSettingsSchema.optional(),
       steps: z.array(recursiveStepSchema).optional(),
     });
   }
@@ -81,6 +84,7 @@ function createRecursiveStepSchema(
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
+      DataSetStepSchema,
       httpSchema,
       ...connectorSchemas,
       ...aliasSchemas,
@@ -102,6 +106,7 @@ function generateStepSchemaForConnector(
     'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+    ...(connector.configSchema && connector.configSchema.shape),
   });
 }
 

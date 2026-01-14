@@ -1871,7 +1871,7 @@
             "tags": [],
             "label": "lookup_join",
             "description": [
-              "\nAppends a `LOOKUP JOIN` command to perform a lookup join with another index.\nEquivalent to calling `.pipe` with a `LOOKUP JOIN` command.\n\nThe `LOOKUP JOIN` command allows you to enrich your query results by joining\ndata from another index based on matching field values. This is useful for\nadding context or related information from different datasets.\n\n```typescript\n// Basic usage - perform a lookup join with another index\nquery.lookup_join('other_index', 'user_id');\n// Result: ... | LOOKUP JOIN other_index ON user_id | ...\n\n// Join on multiple fields\nquery.lookup_join('other_index', 'user_id', 'session_id');\n// Result: ... | LOOKUP JOIN other_index ON user_id, session_id | ...\n\n// Join using a nested column\nquery.lookup_join('other_index', ['user', 'id']);\n// Result: ... | LOOKUP JOIN other_index ON user.id | ...\n\n// Join using a qualified column\nquery.lookup_join('other_index', ['usersIndex', ['id']]);\n// Result: ... | LOOKUP JOIN other_index ON [usersIndex].[id] | ...\n```\n"
+              "\nAppends a `LOOKUP JOIN` command to perform a lookup join with another index.\nEquivalent to calling `.pipe` with a `LOOKUP JOIN` command.\n\nThe `LOOKUP JOIN` command allows you to enrich your query results by joining\ndata from another index based on matching field values. This is useful for\nadding context or related information from different datasets.\n\n```typescript\n// Basic usage - perform a lookup join with another index\nquery.lookup_join('other_index', 'user_id');\n// Result: ... | LOOKUP JOIN other_index ON user_id | ...\n\n// Join on multiple fields\nquery.lookup_join('other_index', 'user_id', 'session_id');\n// Result: ... | LOOKUP JOIN other_index ON user_id, session_id | ...\n\n// Join using a nested column\nquery.lookup_join('other_index', ['user', 'id']);\n// Result: ... | LOOKUP JOIN other_index ON user.id | ...\n\n// Join with an alias\nquery.lookup_join({ index: 'other_index', alias: 'o' }, 'user_id');\n// Result: ... | LOOKUP JOIN other_index AS o ON user_id | ...\n\n// Join using a qualified column\nquery.lookup_join('other_index', ['usersIndex', ['id']]);\n// Result: ... | LOOKUP JOIN other_index ON [usersIndex].[id] | ...\n```\n"
             ],
             "signature": [
               "(lookupIndex: ",
@@ -1918,7 +1918,7 @@
                 "tags": [],
                 "label": "lookupIndex",
                 "description": [
-                  "The name of the index to join with."
+                  "The name of the index to join with, or an object with\nindex and alias properties."
                 ],
                 "signature": [
                   {
@@ -10512,6 +10512,44 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ComposerSourceWithAlias",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComposerSourceWithAlias",
+        "description": [
+          "\nA shorthand for specifying a source with an optional alias.\n\n```\n{ index: 'my_index', alias: 'i' }\n// Result: my_index AS i\n```"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerSourceWithAlias.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ComposerSourceWithAlias.alias",
+            "type": "string",
+            "tags": [],
+            "label": "alias",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.EditorError",
         "type": "Interface",
         "tags": [],
@@ -15514,6 +15552,14 @@
             "docId": "kibKbnEsqlAstPluginApi",
             "section": "def-common.ESQLSource",
             "text": "ESQLSource"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ComposerSourceWithAlias",
+            "text": "ComposerSourceWithAlias"
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",
@@ -16305,6 +16351,14 @@
                 "docId": "kibKbnEsqlAstPluginApi",
                 "section": "def-common.ESQLSource",
                 "text": "ESQLSource"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ComposerSourceWithAlias",
+                "text": "ComposerSourceWithAlias"
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/composer/types.ts",

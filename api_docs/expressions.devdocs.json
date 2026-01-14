@@ -7798,7 +7798,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"result\" | \"not-started\""
+              "\"error\" | \"result\" | \"pending\" | \"not-started\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -11988,7 +11988,7 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xl\" | \"xs\" | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false,
@@ -12850,7 +12850,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -19367,7 +19367,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"result\" | \"not-started\""
+              "\"error\" | \"result\" | \"pending\" | \"not-started\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -22840,7 +22840,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -31994,7 +31994,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"result\" | \"not-started\""
+              "\"error\" | \"result\" | \"pending\" | \"not-started\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -38518,7 +38518,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -40906,7 +40906,7 @@
                     "section": "def-common.ExpressionValueError",
                     "text": "ExpressionValueError"
                   },
-                  ", \"error\" | \"info\">>"
+                  ", \"info\" | \"error\">>"
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/error.ts",
                 "deprecated": false,
