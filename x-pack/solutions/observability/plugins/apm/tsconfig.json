@@ -150,6 +150,7 @@
     "@kbn/control-group-renderer",
     "@kbn/agent-builder-plugin",
     "@kbn/observability-agent-builder-plugin",
+    "@kbn/kql",
   ],
   "exclude": ["target/**/*"]
 }

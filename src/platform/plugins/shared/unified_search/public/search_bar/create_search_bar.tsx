@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -24,7 +25,6 @@ import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { canShowSavedQuery } from './lib/can_show_saved_query';
-import type { UnifiedSearchPublicPluginStart } from '../types';
 
 export interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -32,7 +32,7 @@ export interface StatefulSearchBarDeps {
   storage: IStorageWrapper;
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
-  unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
+  kql: { autocomplete: KqlPluginStart['autocomplete'] };
   cps: CPSPluginStart;
 }
 
@@ -166,7 +166,7 @@ export function createSearchBar({
   data,
   usageCollection,
   isScreenshotMode = false,
-  unifiedSearch,
+  kql,
   cps,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
@@ -239,7 +239,7 @@ export function createSearchBar({
           data,
           storage,
           usageCollection,
-          unifiedSearch,
+          kql,
           cps,
           ...core,
         }}

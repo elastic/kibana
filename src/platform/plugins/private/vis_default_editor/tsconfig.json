@@ -14,7 +14,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/unified-search-plugin",
     "@kbn/data-views-plugin",
     "@kbn/i18n",
     "@kbn/es-query",
@@ -34,6 +33,7 @@
     "@kbn/css-utils",
     "@kbn/visualizations-common",
     "@kbn/chart-expressions-common",
+    "@kbn/kql",
   ],
   "exclude": [
     "target/**/*",
