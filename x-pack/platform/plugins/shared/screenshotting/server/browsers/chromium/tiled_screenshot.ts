@@ -39,6 +39,11 @@ export async function getTiledScreenshotWrapped(
     return;
   }
 
+  if (tiles.length === 1) {
+    const screenshot = await getSingleScreenshot({ logger, page, rect });
+    return Buffer.from(screenshot);
+  }
+
   // 4 bytes for each pixel (RGBA), multiply by zoom (both dimensions)
   const bufferSize = 4 * ZOOM * ZOOM * rect.width * rect.height;
   const result = new Uint8Array(new ArrayBuffer(bufferSize));
@@ -61,7 +66,7 @@ export async function getTiledScreenshotWrapped(
 
   log(`new image; height: ${rect.height * ZOOM}; width: ${rect.width * ZOOM}`);
   const resultImage = UPNG.encode([result.buffer], rect.width * ZOOM, rect.height * ZOOM, 0);
-  return Buffer.from(new Uint8Array(resultImage));
+  return Buffer.from(resultImage);
 
   function log(message: string) {
     logger.debug(`getTiledScreenshot: ${message}`);
