@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { type CascadeSizing } from '../../types';
 import {
-  styles as cascadeRowHeaderSlotsRendererStyles,
+  useStyles as useCascadeRowHeaderSlotsRendererStyles,
   type ScrollState,
 } from './cascade_row_header_slots_renderer.styles';
 
@@ -47,10 +47,7 @@ const CascadeRowHeaderSlotsRenderer = ({
     canScrollRight: false,
   });
 
-  const styles = useMemo(
-    () => cascadeRowHeaderSlotsRendererStyles(euiTheme, scrollState),
-    [euiTheme, scrollState]
-  );
+  const styles = useCascadeRowHeaderSlotsRendererStyles(euiTheme, scrollState);
 
   const updateScrollState = useCallback(() => {
     setScrollState(calculateScrollState(containerRef.current));
@@ -103,6 +100,19 @@ const CascadeRowHeaderSlotsRenderer = ({
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+      {scrollState.isScrollable && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="arrowLeft"
+            color="text"
+            size="xs"
+            disabled={!scrollState.canScrollLeft}
+            aria-label={scrollLeftLabel}
+            onClick={scrollLeft}
+            data-test-subj="cascadeHeaderSlots-scrollLeft"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow ref={containerRef} onScroll={handleScroll} css={styles.slotsContainer}>
         <EuiFlexGroup
           css={styles.slotsContainerInner}
@@ -118,19 +128,6 @@ const CascadeRowHeaderSlotsRenderer = ({
           ))}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {scrollState.isScrollable && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="arrowLeft"
-            color="text"
-            size="xs"
-            disabled={!scrollState.canScrollLeft}
-            aria-label={scrollLeftLabel}
-            onClick={scrollLeft}
-            data-test-subj="cascadeHeaderSlots-scrollLeft"
-          />
-        </EuiFlexItem>
-      )}
       {scrollState.isScrollable && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon

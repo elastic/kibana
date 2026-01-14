@@ -33,6 +33,7 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   type HorizontalAlignment,
+  EuiTextColor,
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
@@ -208,6 +209,7 @@ export const CascadeNestedGridImplementation: StoryObj<
         return rowDepth === groupByFields.length - 1
           ? [
               <EuiStat
+                reverse
                 title={rowData.count}
                 textAlign="right"
                 description={
@@ -366,6 +368,9 @@ export const CascadeNestedGridImplementation: StoryObj<
   },
 };
 
+/**
+ * This story demonstrates a custom header with one level of grouping,
+ */
 export const CascadeCustomHeaderImplementation: StoryObj<
   { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
 > = {
@@ -489,6 +494,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
     >(({ rowData }) => {
       return [
         <EuiStat
+          reverse
           title={rowData.count}
           textAlign="right"
           description={
@@ -637,6 +643,326 @@ export const CascadeCustomHeaderImplementation: StoryObj<
 
 CascadeCustomHeaderImplementation.parameters = { docs: { disable: true } };
 
+/**
+ * This story demonstrates how multiple stats per row can be shown in the row header.
+ */
+export const CascadeMultipleStatsPerRow: StoryObj<
+  { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
+> = {
+  name: 'Show casing multiple stats per row',
+  render: function DataCascadeWrapper(args) {
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
+
+    const generateGroupFieldRecord = useCallback(
+      (nodePath?: string[], nodePathMap?: Record<string, string>) => {
+        return groupByFields.reduce<Record<string, string>>((acc, field) => {
+          return {
+            ...acc,
+            [field]:
+              nodePathMap && nodePath?.indexOf(field) !== -1
+                ? nodePathMap[field]
+                : /purchase_date/.test(field)
+                ? faker.date.past({ years: 2 }).toLocaleDateString()
+                : /order_value/.test(field)
+                ? faker.commerce.price({ min: 100, max: 10000, symbol: '$' })
+                : faker.person.fullName(),
+          };
+        }, {} as Record<string, string>);
+      },
+      [groupByFields]
+    );
+
+    const initData: MockGroupData[] = new Array(100).fill(null).map(() => {
+      return {
+        id: faker.string.uuid(),
+        count: faker.number.int({ min: 1, max: 100 }),
+        ...generateGroupFieldRecord(),
+      };
+    });
+
+    const customTableHeader = useCallback<
+      NonNullable<ComponentProps<typeof DataCascade<MockGroupData>>['customTableHeader']>
+    >(
+      ({ currentSelectedColumns, availableColumns, onGroupSelection }) => (
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="database" size="xl" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <EuiText>
+                  <h2>Customer Orders Overview</h2>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  <strong>Group by:</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonGroup
+                  legend="select columns"
+                  idSelected={currentSelectedColumns[0]}
+                  options={availableColumns.map((col) => ({ id: col, label: col }))}
+                  onChange={(id) => {
+                    onGroupSelection([id]);
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      []
+    );
+
+    const onCascadeGroupingChange = useCallback<
+      NonNullable<ComponentProps<typeof DataCascade<MockGroupData>>['onCascadeGroupingChange']>
+    >((groupBy) => {
+      // eslint-disable-next-line no-console -- Handle group by change if needed
+      console.log('Group By Changed:', groupBy);
+    }, []);
+
+    const onCascadeGroupNodeExpanded = useCallback<
+      DataCascadeRowProps<MockGroupData, LeafNode>['onCascadeGroupNodeExpanded']
+    >(
+      async ({ row, nodePath, nodePathMap }) => {
+        // Simulate a data fetch on row expansion
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(
+              new Array(row.count).fill(null).map(() => {
+                return {
+                  id: faker.string.uuid(),
+                  count: faker.number.int({ min: 1, max: row.count }),
+                  ...generateGroupFieldRecord(nodePath, nodePathMap),
+                };
+              })
+            );
+          }, 3000);
+        });
+      },
+      [generateGroupFieldRecord]
+    );
+
+    const rowHeaderTitleSlot = useCallback<
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderTitleSlot']>
+    >(({ rowData, nodePath }) => {
+      const rowGroup = nodePath[nodePath.length - 1];
+      return (
+        <EuiText>
+          <h2>{rowData[rowGroup]}</h2>
+        </EuiText>
+      );
+    }, []);
+
+    const rowHeaderMetaSlots = useCallback<
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderMetaSlots']>
+    >(({ rowData }) => {
+      return [
+        <EuiStat
+          reverse
+          title={rowData.count}
+          textAlign="right"
+          description={
+            <FormattedMessage
+              id="sharedUXPackages.data_cascade.demo.row.count"
+              defaultMessage="<indicator>record count</indicator>"
+              values={{
+                indicator: (chunks) => <EuiHealth color="subdued">{chunks}</EuiHealth>,
+              }}
+            />
+          }
+        />,
+        <EuiStat
+          title="2,000"
+          textAlign="left"
+          titleColor="accent"
+          description={
+            <EuiTextColor color="accent">
+              <span>
+                <EuiIcon type="clock" color="accent" /> 70,29%
+              </span>
+            </EuiTextColor>
+          }
+        >
+          Pending widget
+        </EuiStat>,
+        <EuiStat title="1,554" textAlign="left" titleColor="danger" description="Good news">
+          <EuiTextColor color="accent">
+            <span>
+              <EuiIcon type="error" color="danger" /> 66,55%
+            </span>
+          </EuiTextColor>
+        </EuiStat>,
+        <EuiStat
+          title="22,550"
+          textAlign="left"
+          titleColor="success"
+          description={
+            <EuiTextColor color="success">
+              <span>
+                <EuiIcon type="check" color="success" /> 88,88%
+              </span>
+            </EuiTextColor>
+          }
+        >
+          Success widget
+        </EuiStat>,
+        <EuiStat title="8,888" description="Great news" textAlign="left">
+          <EuiTextColor color="success">
+            <span>
+              <EuiIcon type="sortUp" /> 27,83%
+            </span>
+          </EuiTextColor>
+        </EuiStat>,
+      ];
+    }, []);
+
+    const rowHeaderActions = useCallback<
+      NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderActions']>
+    >(
+      () => [
+        {
+          iconType: 'arrowDown',
+          iconSide: 'right',
+          onClick: () => {
+            /** Noop click handler */
+          },
+          label: (
+            <FormattedMessage
+              id="sharedUXPackages.data_cascade.demo.row.action"
+              defaultMessage="Take action"
+            />
+          ),
+        },
+      ],
+      []
+    );
+
+    const onCascadeLeafNodeExpanded = useCallback<
+      DataCascadeRowCellProps<MockGroupData, LeafNode>['onCascadeLeafNodeExpanded']
+    >(
+      async ({ row, nodePathMap, nodePath }) => {
+        // Simulate a data fetch for the expanded leaf,
+        // ideally we'd want to use nodePath information to fetch this data
+        return new Promise<LeafNode[]>((resolve) => {
+          setTimeout(() => {
+            resolve(
+              new Array(row.count).fill(null).map(() => {
+                return {
+                  id: faker.string.uuid(),
+                  ...generateGroupFieldRecord(nodePath, nodePathMap),
+                };
+              })
+            );
+          }, 3000);
+        });
+      },
+      [generateGroupFieldRecord]
+    );
+
+    const cascadeLeafCellRenderer = useCallback<
+      DataCascadeRowCellProps<MockGroupData, LeafNode>['children']
+    >(
+      ({ data }) => {
+        return (
+          <EuiBasicTable
+            tableCaption="custom header with one level of grouping table"
+            columns={[
+              {
+                field: 'id',
+                name: 'ID',
+              },
+              ...groupByFields.map((field, index, groupArray) => ({
+                field,
+                name: field.replace(/_/g, ' '),
+                ...(index === groupArray.length - 1
+                  ? { align: 'right' as HorizontalAlignment }
+                  : {}),
+              })),
+            ]}
+            items={(data ?? []).map((datum) => ({
+              id: datum.id,
+              ...groupByFields.reduce(
+                (acc, field) => ({
+                  ...acc,
+                  [field]: datum[field],
+                }),
+                {} as Record<string, string>
+              ),
+            }))}
+          />
+        );
+      },
+      [groupByFields]
+    );
+
+    return (
+      <EuiFlexGroup direction="column" css={{ height: 'calc(100svh - 2rem)' }}>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <div>
+              <h1>Data Cascade</h1>
+              <p>ES|QL Query: {args.query}</p>
+            </div>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <DataCascade
+            size={args.size}
+            data={initData}
+            cascadeGroups={groupByFields}
+            customTableHeader={customTableHeader}
+            onCascadeGroupingChange={onCascadeGroupingChange}
+          >
+            <DataCascadeRow
+              onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
+              rowHeaderTitleSlot={rowHeaderTitleSlot}
+              rowHeaderMetaSlots={rowHeaderMetaSlots}
+              rowHeaderActions={rowHeaderActions}
+            >
+              <DataCascadeRowCell onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}>
+                {cascadeLeafCellRenderer}
+              </DataCascadeRowCell>
+            </DataCascadeRow>
+          </DataCascade>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  },
+  argTypes: {
+    query: {
+      type: 'string' as const,
+      description: 'Simulation of The ES|QL query that the user provided into the esql editor',
+    },
+    size: {
+      name: 'Size',
+      control: 'radio',
+      options: ['s', 'm', 'l'],
+      description: 'Size of the cascade rows',
+    },
+  },
+  args: {
+    query:
+      'FROM kibana_sample_data_ecommerce | STATS count = COUNT(*) by customer_full_name, purchase_date , order_value ',
+    size: 'm',
+  },
+};
+
+CascadeMultipleStatsPerRow.parameters = { docs: { disable: true } };
+
+/**
+ * This story demonstrates a custom header with custom row actions,
+ */
 export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
   { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
 > = {
@@ -733,6 +1059,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
     >(({ rowData }) => {
       return [
         <EuiStat
+          reverse
           title={rowData.count}
           textAlign="right"
           description={
@@ -913,6 +1240,9 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
 
 CascadeCustomHeaderWithCustomRowActionsImplementation.parameters = { docs: { disable: true } };
 
+/**
+ * This story demonstrates a custom header with hidden row actions,
+ */
 export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
   { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
 > = {
@@ -1006,6 +1336,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
     >(({ rowData }) => {
       return [
         <EuiStat
+          reverse
           title={rowData.count}
           textAlign="right"
           description={
@@ -1095,21 +1426,21 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.edit"
+              id="sharedUXPackages.data_cascade.demo.row.favorite"
               defaultMessage="Favorite"
             />
           ),
         },
         {
-          iconType: 'filter',
-          'aria-label': `filter for ${groupValue}`,
+          iconType: 'flag',
+          'aria-label': `flag ${groupValue}`,
           onClick: () => {
-            /** Noop Click handler for filter */
+            /** Noop Click handler for flagging */
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.edit"
-              defaultMessage="Filter"
+              id="sharedUXPackages.data_cascade.demo.row.flag"
+              defaultMessage="Flag"
             />
           ),
         },
@@ -1121,7 +1452,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.edit"
+              id="sharedUXPackages.data_cascade.demo.row.create_alerts"
               defaultMessage="Create alerts"
             />
           ),
@@ -1134,7 +1465,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.edit"
+              id="sharedUXPackages.data_cascade.demo.row.download"
               defaultMessage="Download"
             />
           ),
@@ -1196,6 +1527,11 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
 
 CascadeCustomHeaderWithHiddenRowActions.parameters = { docs: { disable: true } };
 
+/**
+ * This story demonstrates a custom header with row selection action enabled,
+ * this is useful for scenarios where one might want to select rows in the cascade component
+ * and perform actions on the selected rows.
+ */
 export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
   { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
 > = {
@@ -1341,6 +1677,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
     >(({ rowData }) => {
       return [
         <EuiStat
+          reverse
           title={rowData.count}
           textAlign="right"
           description={
@@ -1423,28 +1760,28 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
 
       return [
         {
-          iconType: 'starEmpty',
-          'aria-label': `favorite ${groupValue}`,
+          iconType: 'reporter',
+          'aria-label': `investigate ${groupValue}`,
           onClick: () => {
-            /** Noop Click handler for favorite */
+            /** Noop Click handler for starting an investigation */
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.edit"
-              defaultMessage="Favorite"
+              id="sharedUXPackages.data_cascade.demo.row.investigate"
+              defaultMessage="Investigate"
             />
           ),
         },
         {
-          iconType: 'filter',
-          'aria-label': `filter for ${groupValue}`,
+          iconType: 'flag',
+          'aria-label': `flag ${groupValue}`,
           onClick: () => {
-            /** Noop Click handler for filter */
+            /** Noop Click handler for flagging */
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.edit"
-              defaultMessage="Filter"
+              id="sharedUXPackages.data_cascade.demo.row.flag"
+              defaultMessage="Flag"
             />
           ),
         },
@@ -1456,7 +1793,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.edit"
+              id="sharedUXPackages.data_cascade.demo.row.create_alerts"
               defaultMessage="Create alerts"
             />
           ),
@@ -1469,7 +1806,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           },
           label: (
             <FormattedMessage
-              id="sharedUXPackages.data_cascade.demo.row.edit"
+              id="sharedUXPackages.data_cascade.demo.row.download"
               defaultMessage="Download"
             />
           ),

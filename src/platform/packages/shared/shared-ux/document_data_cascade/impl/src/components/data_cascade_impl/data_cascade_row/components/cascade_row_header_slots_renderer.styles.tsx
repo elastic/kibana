@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+import { type UseEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 
 export interface ScrollState {
   isScrollable: boolean;
@@ -16,47 +17,55 @@ export interface ScrollState {
   canScrollRight: boolean;
 }
 
-const getSlotContainerInnerStyles = (
+const useSlotContainerInnerStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
   scrollState: ScrollState
 ) => {
-  let maskImage = 'none';
-
   // Build gradient mask based on scroll position
-  if (scrollState.canScrollLeft && scrollState.canScrollRight) {
-    maskImage = `linear-gradient(
+  const maskImage = useMemo(() => {
+    let maskStyle = 'none';
+
+    if (scrollState.canScrollLeft && scrollState.canScrollRight) {
+      maskStyle = `linear-gradient(
         to right,
         transparent 0%,
         black ${euiTheme.size.m},
         black calc(100% - ${euiTheme.size.m}),
         transparent 100%
       )`;
-  } else if (scrollState.canScrollLeft) {
-    maskImage = `linear-gradient(
+    } else if (scrollState.canScrollLeft) {
+      maskStyle = `linear-gradient(
         to right,
         transparent 0%,
         black ${euiTheme.size.m}
       )`;
-  } else if (scrollState.canScrollRight) {
-    maskImage = `linear-gradient(
+    } else if (scrollState.canScrollRight) {
+      maskStyle = `linear-gradient(
         to right,
         black calc(100% - ${euiTheme.size.m}),
         transparent 100%
       )`;
-  }
+    }
+    return { 'mask-image': maskStyle };
+  }, [scrollState, euiTheme.size.m]);
+
+  const scrollOverflowStyles = useEuiOverflowScroll('x', true);
 
   return css`
     overflow-x: auto;
+    ${scrollOverflowStyles}
     scrollbar-width: none;
     scroll-behavior: smooth;
     &::-webkit-scrollbar {
       display: none;
     }
-    mask-image: ${maskImage};
+    ${maskImage};
   `;
 };
 
-export const styles = (euiTheme: UseEuiTheme['euiTheme'], scrollState: ScrollState) => {
+export const useStyles = (euiTheme: UseEuiTheme['euiTheme'], scrollState: ScrollState) => {
+  const slotContainerInnerStyles = useSlotContainerInnerStyles(euiTheme, scrollState);
+
   return {
     slotsContainer: css`
       min-width: 0;
@@ -69,7 +78,7 @@ export const styles = (euiTheme: UseEuiTheme['euiTheme'], scrollState: ScrollSta
       {
         width: 'max-content',
       },
-      getSlotContainerInnerStyles(euiTheme, scrollState),
+      slotContainerInnerStyles,
     ]),
     slotItemWrapper: css({
       justifyContent: 'center',
