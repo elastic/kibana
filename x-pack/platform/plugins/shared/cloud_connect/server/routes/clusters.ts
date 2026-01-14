@@ -255,10 +255,10 @@ export const registerClustersRoute = ({
 
         // Update cluster services via Cloud Connect API
         const cloudConnectClient = new CloudConnectClient(logger, cloudApiUrl);
-        const updatedCluster = await cloudConnectClient.updateClusterServices(
+        const updatedCluster = await cloudConnectClient.updateCluster(
           apiKeyData.apiKey,
           apiKeyData.clusterId,
-          request.body.services
+          { services: request.body.services }
         );
 
         logger.debug(`Successfully updated cluster services: ${updatedCluster.id}`);
@@ -279,13 +279,11 @@ export const registerClustersRoute = ({
             );
 
             try {
-              await cloudConnectClient.updateClusterServices(
-                apiKeyData.apiKey,
-                apiKeyData.clusterId,
-                {
+              await cloudConnectClient.updateCluster(apiKeyData.apiKey, apiKeyData.clusterId, {
+                services: {
                   eis: { enabled: false },
-                }
-              );
+                },
+              });
               logger.info('Successfully rolled back EIS enablement in Cloud API');
             } catch (rollbackError) {
               logger.error('Failed to rollback Cloud API changes', { error: rollbackError });
@@ -313,13 +311,11 @@ export const registerClustersRoute = ({
             // If enabling the inference CCM settings failed, we need to rollback the service state
             const rollbackEnabled = !eisRequest.enabled;
             try {
-              await cloudConnectClient.updateClusterServices(
-                apiKeyData.apiKey,
-                apiKeyData.clusterId,
-                {
+              await cloudConnectClient.updateCluster(apiKeyData.apiKey, apiKeyData.clusterId, {
+                services: {
                   eis: { enabled: rollbackEnabled },
-                }
-              );
+                },
+              });
               logger.info(
                 `Successfully rolled back EIS to enabled=${rollbackEnabled} in Cloud API`
               );

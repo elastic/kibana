@@ -46,7 +46,7 @@ describe('Clusters Routes', () => {
       getClusterDetails: jest.fn(),
       onboardCluster: jest.fn(),
       onboardClusterWithKeyGeneration: jest.fn(),
-      updateClusterServices: jest.fn(),
+      updateCluster: jest.fn(),
       deleteCluster: jest.fn(),
       getOrganizationSubscription: jest.fn(),
     } as any;
@@ -613,7 +613,7 @@ describe('Clusters Routes', () => {
         },
       };
 
-      mockCloudConnectInstance.updateClusterServices.mockResolvedValue(mockUpdatedCluster);
+      mockCloudConnectInstance.updateCluster.mockResolvedValue(mockUpdatedCluster);
 
       mockRequest = {
         body: {
@@ -625,11 +625,13 @@ describe('Clusters Routes', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockCloudConnectInstance.updateClusterServices).toHaveBeenCalledWith(
+      expect(mockCloudConnectInstance.updateCluster).toHaveBeenCalledWith(
         'test-api-key-123',
         'cluster-uuid-456',
         {
-          auto_ops: { enabled: true },
+          services: {
+            auto_ops: { enabled: true },
+          },
         }
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({
@@ -678,7 +680,7 @@ describe('Clusters Routes', () => {
         },
       };
 
-      mockCloudConnectInstance.updateClusterServices.mockResolvedValue(mockUpdatedCluster);
+      mockCloudConnectInstance.updateCluster.mockResolvedValue(mockUpdatedCluster);
       enableInferenceCCM.mockResolvedValue(undefined);
 
       mockRequest = {
@@ -691,7 +693,7 @@ describe('Clusters Routes', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockCloudConnectInstance.updateClusterServices).toHaveBeenCalled();
+      expect(mockCloudConnectInstance.updateCluster).toHaveBeenCalled();
       expect(enableInferenceCCM).toHaveBeenCalledWith(
         mockEsClient,
         'eis-inference-key-789',
@@ -760,7 +762,7 @@ describe('Clusters Routes', () => {
         },
       };
 
-      mockCloudConnectInstance.updateClusterServices
+      mockCloudConnectInstance.updateCluster
         .mockResolvedValueOnce(mockBadResponse)
         .mockResolvedValueOnce({} as any); // Rollback call
 
@@ -774,12 +776,12 @@ describe('Clusters Routes', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockCloudConnectInstance.updateClusterServices).toHaveBeenCalledTimes(2);
-      expect(mockCloudConnectInstance.updateClusterServices).toHaveBeenNthCalledWith(
+      expect(mockCloudConnectInstance.updateCluster).toHaveBeenCalledTimes(2);
+      expect(mockCloudConnectInstance.updateCluster).toHaveBeenNthCalledWith(
         2,
         'test-api-key-123',
         'cluster-uuid-456',
-        { eis: { enabled: false } }
+        { services: { eis: { enabled: false } } }
       );
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
@@ -826,7 +828,7 @@ describe('Clusters Routes', () => {
         },
       };
 
-      mockCloudConnectInstance.updateClusterServices
+      mockCloudConnectInstance.updateCluster
         .mockResolvedValueOnce(mockUpdatedCluster)
         .mockResolvedValueOnce({} as any); // Rollback call
 
@@ -842,12 +844,12 @@ describe('Clusters Routes', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockCloudConnectInstance.updateClusterServices).toHaveBeenCalledTimes(2);
-      expect(mockCloudConnectInstance.updateClusterServices).toHaveBeenNthCalledWith(
+      expect(mockCloudConnectInstance.updateCluster).toHaveBeenCalledTimes(2);
+      expect(mockCloudConnectInstance.updateCluster).toHaveBeenNthCalledWith(
         2,
         'test-api-key-123',
         'cluster-uuid-456',
-        { eis: { enabled: false } }
+        { services: { eis: { enabled: false } } }
       );
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
@@ -894,7 +896,7 @@ describe('Clusters Routes', () => {
         },
       };
 
-      mockCloudConnectInstance.updateClusterServices
+      mockCloudConnectInstance.updateCluster
         .mockResolvedValueOnce(mockUpdatedCluster)
         .mockRejectedValueOnce(new Error('Rollback failed'));
 
@@ -938,7 +940,7 @@ describe('Clusters Routes', () => {
         },
       };
 
-      mockCloudConnectInstance.updateClusterServices.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.updateCluster.mockRejectedValue(axiosError);
 
       mockRequest = {
         body: {
@@ -964,9 +966,7 @@ describe('Clusters Routes', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      mockCloudConnectInstance.updateClusterServices.mockRejectedValue(
-        new Error('Unexpected error')
-      );
+      mockCloudConnectInstance.updateCluster.mockRejectedValue(new Error('Unexpected error'));
 
       mockRequest = {
         body: {
