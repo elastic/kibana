@@ -17,12 +17,14 @@ import {
 } from '../lib/telemetry/events/workflows';
 import type {
   WorkflowEditorType,
-  WorkflowTriggerType,
   WorkflowUpdateType,
   WorkflowValidationErrorType,
 } from '../lib/telemetry/events/workflows/types';
 import type { TelemetryServiceStart } from '../lib/telemetry/types';
-import { extractWorkflowMetadata } from '../lib/telemetry/utils/extract_workflow_metadata';
+import {
+  extractStepInfoFromWorkflowYaml,
+  extractWorkflowMetadata,
+} from '../lib/telemetry/utils/extract_workflow_metadata';
 
 export class WorkflowsBaseTelemetry {
   constructor(protected readonly telemetryService: TelemetryServiceStart) {}
@@ -296,16 +298,25 @@ export class WorkflowsBaseTelemetry {
   /**
    * Reports a workflow step test run initiation.
    * Call this AFTER the step test run request completes (in both success and error cases).
+   *
+   * @param params.workflowYaml - The workflow YAML string to extract step information from
+   * @param params.stepId - The step ID (name) to find and report
    */
   reportWorkflowStepTestRunInitiated = (params: {
-    workflowId?: string;
+    workflowYaml?: string | null;
     stepId: string;
-    stepType: string;
-    connectorType?: string;
     error?: Error;
     editorType?: WorkflowEditorType;
   }) => {
-    const { workflowId, stepId, stepType, connectorType, error, editorType } = params;
+    const { workflowYaml, stepId, error, editorType } = params;
+
+    // Extract step information from workflow YAML
+    const stepInfo = workflowYaml ? extractStepInfoFromWorkflowYaml(workflowYaml, stepId) : null;
+
+    const stepType = stepInfo?.stepType || 'unknown';
+    const connectorType = stepInfo?.connectorType;
+    const workflowId = stepInfo?.workflowId;
+
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated],
       ...(workflowId && { workflowId }),
@@ -323,17 +334,15 @@ export class WorkflowsBaseTelemetry {
    */
   reportWorkflowRunInitiated = (params: {
     workflowId: string;
-    triggerType: WorkflowTriggerType;
     hasInputs: boolean;
     inputCount: number;
     error?: Error;
     editorType?: WorkflowEditorType;
   }) => {
-    const { workflowId, triggerType, hasInputs, inputCount, error, editorType } = params;
+    const { workflowId, hasInputs, inputCount, error, editorType } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunInitiated],
       workflowId,
-      triggerType,
       hasInputs,
       inputCount,
       ...(editorType && { editorType }),

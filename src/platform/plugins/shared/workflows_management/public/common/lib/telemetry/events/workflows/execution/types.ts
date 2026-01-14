@@ -89,10 +89,6 @@ export interface ReportWorkflowRunInitiatedActionParams extends BaseResultAction
    */
   workflowId: string;
   /**
-   * The trigger type for the run
-   */
-  triggerType: WorkflowTriggerType;
-  /**
    * Whether the run has inputs
    */
   hasInputs: boolean;

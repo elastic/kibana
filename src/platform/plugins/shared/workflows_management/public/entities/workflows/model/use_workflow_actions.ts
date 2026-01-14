@@ -197,11 +197,33 @@ export function useWorkflowActions() {
         body: JSON.stringify({ inputs }),
       });
     },
-    onSuccess: (_, { id }) => {
+    onSuccess: (_, { id, inputs }) => {
+      const inputCount = Object.keys(inputs || {}).length;
+
+      // Report telemetry for successful workflow run
+      telemetry.reportWorkflowRunInitiated({
+        workflowId: id,
+        hasInputs: inputCount > 0,
+        inputCount,
+        error: undefined,
+      });
+
       // FIX: ensure workflow execution document is created at the end of the mutation
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', id, 'executions'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', id] });
+    },
+    onError: (err, { id, inputs }) => {
+      const inputCount = Object.keys(inputs || {}).length;
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+
+      // Report telemetry for failed workflow run
+      telemetry.reportWorkflowRunInitiated({
+        workflowId: id,
+        hasInputs: inputCount > 0,
+        inputCount,
+        error: errorObj,
+      });
     },
   });
 
@@ -212,8 +234,27 @@ export function useWorkflowActions() {
         body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
       });
     },
-    onSuccess: ({ workflowExecutionId }) => {
+    onSuccess: ({ workflowExecutionId }, { stepId, workflowYaml }) => {
+      // Report telemetry for successful step test run
+      // The telemetry service extracts step information from workflowYaml
+      telemetry.reportWorkflowStepTestRunInitiated({
+        workflowYaml,
+        stepId,
+        error: undefined,
+      });
+
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
+    },
+    onError: (err, { stepId, workflowYaml }) => {
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+
+      // Report telemetry for failed step test run
+      // The telemetry service extracts step information from workflowYaml
+      telemetry.reportWorkflowStepTestRunInitiated({
+        workflowYaml,
+        stepId,
+        error: errorObj,
+      });
     },
   });
 

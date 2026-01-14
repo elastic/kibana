@@ -9,6 +9,8 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
+import type { TelemetryServiceStart } from '../../../../../common/lib/telemetry/types';
+import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { selectWorkflow, selectYamlString } from '../selectors';
@@ -29,6 +31,15 @@ export const testWorkflowThunk = createAsyncThunk<
   'detail/testWorkflowThunk',
   async ({ inputs }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
+    const workflowsManagement = (
+      services as WorkflowsServices & {
+        workflowsManagement?: { telemetry?: TelemetryServiceStart };
+      }
+    ).workflowsManagement;
+    const telemetry = workflowsManagement?.telemetry
+      ? new WorkflowsBaseTelemetry(workflowsManagement.telemetry)
+      : null;
+
     try {
       const yamlString = selectYamlString(getState());
       const workflow = selectWorkflow(getState());
@@ -51,6 +62,16 @@ export const testWorkflowThunk = createAsyncThunk<
         body: JSON.stringify(requestBody),
       });
 
+      // Report telemetry for successful test run
+      const inputCount = Object.keys(inputs).length;
+      telemetry?.reportWorkflowTestRunInitiated({
+        workflowId: workflow?.id,
+        hasInputs: inputCount > 0,
+        inputCount,
+        error: undefined,
+        editorType: 'yaml', // Test runs are always from YAML editor context
+      });
+
       // Show success notification
       notifications.toasts.addSuccess(
         i18n.translate('workflows.detail.testWorkflow.success', {
@@ -63,6 +84,20 @@ export const testWorkflowThunk = createAsyncThunk<
     } catch (error) {
       // Extract error message from HTTP error body if available
       const errorMessage = error.body?.message || error.message || 'Failed to test workflow';
+      const errorObj = error instanceof Error ? error : new Error(errorMessage);
+
+      const state = getState();
+      const workflow = selectWorkflow(state);
+      const inputCount = Object.keys(inputs).length;
+
+      // Report telemetry for failed test run
+      telemetry?.reportWorkflowTestRunInitiated({
+        workflowId: workflow?.id,
+        hasInputs: inputCount > 0,
+        inputCount,
+        error: errorObj,
+        editorType: 'yaml',
+      });
 
       notifications.toasts.addError(new Error(errorMessage), {
         title: i18n.translate('workflows.detail.testWorkflow.error', {

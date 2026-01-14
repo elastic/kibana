@@ -137,13 +137,6 @@ const workflowRunInitiatedSchema: RootSchema<ReportWorkflowRunInitiatedActionPar
       optional: false,
     },
   },
-  triggerType: {
-    type: 'keyword',
-    _meta: {
-      description: 'The trigger type for the run: manual, alert, or scheduled',
-      optional: false,
-    },
-  },
   hasInputs: {
     type: 'boolean',
     _meta: {

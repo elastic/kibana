@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import { parseWorkflowYamlForAutocomplete } from '../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete';
 
 /**
  * Determines if a step is a connector step by checking if it has a 'connector-id' field.
@@ -217,5 +218,117 @@ export function extractWorkflowMetadata(
     ...(concurrencyMax !== undefined && { concurrencyMax }),
     ...(concurrencyStrategy && { concurrencyStrategy }),
     hasOnFailure,
+  };
+}
+
+/**
+ * Step information extracted from a workflow definition for telemetry purposes
+ */
+export interface StepTelemetryInfo {
+  /**
+   * The type of the step (e.g., 'foreach', 'if', 'slack.webhook')
+   */
+  stepType: string;
+  /**
+   * The connector type if the step uses a connector, undefined otherwise
+   */
+  connectorType?: string;
+  /**
+   * The workflow ID if found in the workflow definition
+   */
+  workflowId?: string;
+}
+
+/**
+ * Recursively searches for a step by stepId in a workflow's steps array
+ */
+function findStepRecursive(
+  steps: WorkflowYaml['steps'],
+  stepId: string
+): { stepType: string; connectorType?: string } | null {
+  if (!Array.isArray(steps)) {
+    return null;
+  }
+
+  for (const step of steps) {
+    if (step && typeof step === 'object' && 'name' in step && step.name === stepId) {
+      if ('type' in step && typeof step.type === 'string') {
+        const stepType = step.type;
+        // Check if it's a connector step
+        const connectorType =
+          'connector-id' in step && step['connector-id'] !== undefined ? stepType : undefined;
+        return { stepType, connectorType };
+      }
+      return null;
+    }
+
+    // Recursively search nested steps
+    if ('steps' in step && Array.isArray(step.steps)) {
+      const found = findStepRecursive(step.steps, stepId);
+      if (found) return found;
+    }
+    if ('else' in step && Array.isArray(step.else)) {
+      const found = findStepRecursive(step.else, stepId);
+      if (found) return found;
+    }
+    if ('fallback' in step && Array.isArray(step.fallback)) {
+      const found = findStepRecursive(step.fallback, stepId);
+      if (found) return found;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Extracts step information from a workflow YAML string for telemetry purposes.
+ * This function parses the YAML and finds the step by stepId, extracting its type and connector type.
+ *
+ * @param workflowYaml - The workflow YAML string
+ * @param stepId - The step ID (name) to find
+ * @returns Step information object with stepType, connectorType, and workflowId, or null if not found
+ *
+ * @example
+ * ```typescript
+ * const stepInfo = extractStepInfoFromWorkflowYaml(workflowYaml, 'my-step');
+ * if (stepInfo) {
+ *   telemetry.reportWorkflowStepTestRunInitiated({
+ *     workflowId: stepInfo.workflowId,
+ *     stepId: 'my-step',
+ *     stepType: stepInfo.stepType,
+ *     connectorType: stepInfo.connectorType,
+ *   });
+ * }
+ * ```
+ */
+export function extractStepInfoFromWorkflowYaml(
+  workflowYaml: string | null | undefined,
+  stepId: string
+): StepTelemetryInfo | null {
+  if (!workflowYaml) {
+    return null;
+  }
+
+  const parseResult = parseWorkflowYamlForAutocomplete(workflowYaml);
+  if (!parseResult.success) {
+    return null;
+  }
+
+  const workflowDefinition = parseResult.data;
+  const workflowId = workflowDefinition.id;
+
+  // Find the step by stepId
+  const stepInfo = workflowDefinition.steps
+    ? findStepRecursive(workflowDefinition.steps, stepId)
+    : null;
+
+  if (!stepInfo) {
+    return { stepType: 'unknown', workflowId };
+  }
+
+  return {
+    stepType: stepInfo.stepType,
+    connectorType: stepInfo.connectorType,
+    workflowId,
   };
 }
