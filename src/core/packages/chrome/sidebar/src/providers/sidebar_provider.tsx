@@ -15,7 +15,10 @@ interface SidebarContextValue {
   sidebar: SidebarService;
 }
 
-const SidebarContext = getOrCreateContext<SidebarContextValue | null>('sidebar', null);
+const SidebarContext = getOrCreateContext<SidebarContextValue | null>(
+  '@kbn/core-chrome-sidebar/SidebarContext',
+  null
+);
 
 export interface SidebarProviderProps {
   children: ReactNode;
