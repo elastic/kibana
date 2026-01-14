@@ -19,6 +19,7 @@ import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
   ALERT_INDEX_PATTERN,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../../typings/alerts';
@@ -372,6 +373,60 @@ describe('useDiscoverUrl', () => {
         dataViewSpec: { title: expectedIndexPattern, timeFieldName: '@timestamp' },
         timeRange: expectedTimeRange,
       });
+    });
+  });
+
+  describe('APM transaction duration rule', () => {
+    it('builds Discover url when alert has index pattern', () => {
+      const expectedIndexPattern = 'traces-apm*';
+      const alertWithIndexPattern = {
+        ...MOCK_ALERT,
+        fields: {
+          [ALERT_INDEX_PATTERN]: expectedIndexPattern,
+        },
+      } as unknown as TopAlert;
+
+      const rule = {
+        ruleTypeId: ApmRuleType.TransactionDuration,
+        params: {},
+      } as unknown as Rule;
+
+      const expectedTimeRange = {
+        from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+        to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+      };
+
+      mockGetRedirectUrl.mockReturnValue('apm-discover-url');
+
+      const { result } = renderHook(() => useDiscoverUrl({ alert: alertWithIndexPattern, rule }));
+
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+        dataViewSpec: { title: expectedIndexPattern, timeFieldName: '@timestamp' },
+        timeRange: expectedTimeRange,
+      });
+      expect(result.current.discoverUrl).toBe('apm-discover-url');
+    });
+
+    it('returns null when alert has no index pattern', () => {
+      const alertWithoutIndexPattern = {
+        ...MOCK_ALERT,
+        fields: {},
+      } as unknown as TopAlert;
+
+      const rule = {
+        ruleTypeId: ApmRuleType.TransactionDuration,
+        params: {
+          serviceName: 'my-service',
+          transactionType: 'request',
+        },
+      } as unknown as Rule;
+
+      const { result } = renderHook(() =>
+        useDiscoverUrl({ alert: alertWithoutIndexPattern, rule })
+      );
+
+      expect(result.current.discoverUrl).toBeNull();
+      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
     });
   });
 });
