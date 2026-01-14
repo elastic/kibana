@@ -22,8 +22,6 @@ export interface DashboardCapabilities {
 
 export type DashboardLocatorParams = Partial<
   DashboardState & {
-    pinned_panels?: DashboardState['pinned_panels'];
-
     viewMode?: ViewMode;
 
     /**

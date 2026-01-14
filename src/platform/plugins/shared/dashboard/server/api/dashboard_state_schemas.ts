@@ -10,6 +10,10 @@
 import type { ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
+/**
+ * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
+ * get the pinned panel schema from a pinned panel registry **independent** from controls
+ */
 import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
 import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
@@ -160,7 +164,6 @@ export const accessControlSchema = schema.maybe(
 
 export function getDashboardStateSchema() {
   return schema.object({
-    // supported "as code" keys
     pinned_panels: schema.maybe(pinnedPanelsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
