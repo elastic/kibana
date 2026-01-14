@@ -18,8 +18,8 @@ import {
   EuiButton,
   EuiSpacer,
   EuiTablePagination,
-  EuiIcon,
   EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -67,6 +67,7 @@ const ActionsCell: React.FC<{
 }> = ({ source, onReconnect, onEdit, onClone, onDelete, disabled = false }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  // Menu items (ALL actions)
   const items = [
     onEdit && (
       <EuiContextMenuItem
@@ -133,11 +134,6 @@ const ActionsCell: React.FC<{
     ),
   ].filter((item): item is React.ReactElement => Boolean(item));
 
-  // Don't render actions button if no actions are available
-  if (items.length === 0) {
-    return null;
-  }
-
   const button = (
     <EuiButtonIcon
       iconType="boxesHorizontal"
@@ -151,15 +147,51 @@ const ActionsCell: React.FC<{
   );
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel items={items} />
-    </EuiPopover>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      {/* Edit icon button */}
+      {onEdit && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="pencil"
+            aria-label={i18n.translate('xpack.dataConnectors.activeSources.editAction', {
+              defaultMessage: 'Edit',
+            })}
+            onClick={() => onEdit(source)}
+            disabled={disabled}
+            data-test-subj={`editActiveSource-${source.id}`}
+          />
+        </EuiFlexItem>
+      )}
+      {/* Delete icon button */}
+      {onDelete && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={i18n.translate('xpack.dataConnectors.activeSources.deleteAction', {
+              defaultMessage: 'Delete',
+            })}
+            onClick={() => onDelete(source)}
+            disabled={disabled}
+            data-test-subj={`deleteActiveSource-${source.id}`}
+          />
+        </EuiFlexItem>
+      )}
+      {/* Action menu (Clone, Reconnect) */}
+      {items.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={() => setIsPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 
