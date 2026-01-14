@@ -64,6 +64,7 @@ mapped_pages:
 | [kibanaReact](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_react/README.md) | Tools for building React applications in Kibana. |
 | [kibanaUsageCollection](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/kibana_usage_collection/README.md) | This plugin registers the Platform Usage Collectors in Kibana. |
 | [kibanaUtils](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/README.md) | Utilities for building Kibana plugins. |
+| [kql](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kql/README.md) | This plugin contains the kql autocomplete service and the UI KQL searchbar. |
 | [links](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/links/README.md) | This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard. |
 | [management](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/management/README.md) | This plugins contains the "Stack Management" page framework. It offers navigation and an API to link individual management section into it. This plugin does not contain any individual management section itself. |
 | [mapsEms](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/maps_ems/README.md) | Utility plugin: |
@@ -152,6 +153,7 @@ mapped_pages:
 | [encryptedSavedObjects](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/encrypted_saved_objects/README.md) | The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with security and spaces filtering. |
 | [enterpriseSearch](https://github.com/elastic/kibana/blob/main/x-pack/solutions/search/plugins/enterprise_search/README.md) | This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search. |
 | [entityManager](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/entity_manager/README.md) | This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more. |
+| [entityStore](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/entity_store/README.md) | Central place for Entities management and logs extraction |
 | [eventLog](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/event_log/README.md) | The event log plugin provides a persistent history of alerting and action activities. |
 | [exploratoryView](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/exploratory_view/README.md) | A shared component for visualizing observability data types via lens embeddable. For further details. |
 | [features](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/features/README.md) | The features plugin enhance Kibana with a per-feature privilege system. |

@@ -8,6 +8,7 @@
 import React, { createContext, useContext } from 'react';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
+import { useResumeRoundMutation } from './use_resume_round_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
@@ -21,6 +22,8 @@ interface SendMessageState {
   canCancel: boolean;
   cancel: () => void;
   cleanConversation: () => void;
+  resumeRound: (opts: { promptId: string; confirm: boolean }) => void;
+  isResuming: boolean;
   connectorSelection: {
     selectedConnector: string | undefined;
     selectConnector: (connectorId: string) => void;
@@ -39,18 +42,29 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     pendingMessage,
     error,
     errorSteps,
-    agentReasoning,
+    agentReasoning: sendAgentReasoning,
     retry,
     canCancel,
     cancel,
     cleanConversation,
   } = useSendMessageMutation({ connectorId: connectorSelection.selectedConnector });
 
+  const {
+    resumeRound,
+    isResuming,
+    agentReasoning: resumeAgentReasoning,
+  } = useResumeRoundMutation({
+    connectorId: connectorSelection.selectedConnector,
+  });
+
+  // Combine agentReasoning from both mutations - use the one that's currently active
+  const agentReasoning = isResuming ? resumeAgentReasoning : sendAgentReasoning;
+
   return (
     <SendMessageContext.Provider
       value={{
         sendMessage,
-        isResponseLoading,
+        isResponseLoading: isResponseLoading || isResuming,
         pendingMessage,
         error,
         errorSteps,
@@ -59,6 +73,8 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
         canCancel,
         cancel,
         cleanConversation,
+        resumeRound,
+        isResuming,
         connectorSelection: {
           selectedConnector: connectorSelection.selectedConnector,
           selectConnector: connectorSelection.selectConnector,

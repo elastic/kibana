@@ -6,7 +6,6 @@
  */
 
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import { isValidLicense } from '../../common/license';
 import type { AgentBuilderHandlerContext } from '../request_handler_context';
@@ -14,7 +13,7 @@ import type { AgentBuilderHandlerContext } from '../request_handler_context';
 export interface RouteWrapConfig {
   /**
    * The feature flag to gate this route behind.
-   * Defaults to {AGENT_BUILDER_ENABLED_SETTING_ID}
+   * Defaults to false (no feature flag gating).
    */
   featureFlag?: string | false;
   /**
@@ -27,7 +26,7 @@ export const getHandlerWrapper =
   ({ logger }: { logger: Logger }) =>
   <P, Q, B, Context extends AgentBuilderHandlerContext>(
     handler: RequestHandler<P, Q, B, Context>,
-    { featureFlag = AGENT_BUILDER_ENABLED_SETTING_ID, ignoreLicense = false }: RouteWrapConfig = {}
+    { featureFlag = false, ignoreLicense = false }: RouteWrapConfig = {}
   ): RequestHandler<P, Q, B, Context> => {
     return async (ctx, req, res) => {
       if (featureFlag !== false) {
@@ -41,7 +40,12 @@ export const getHandlerWrapper =
       if (!ignoreLicense) {
         const { license } = await ctx.licensing;
         if (!isValidLicense(license)) {
-          return res.forbidden();
+          return res.forbidden({
+            body: {
+              message:
+                'Invalid license level. Agent Builder APIs require an Enterprise license or higher.',
+            },
+          });
         }
       }
 

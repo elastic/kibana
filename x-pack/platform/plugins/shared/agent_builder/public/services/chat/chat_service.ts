@@ -10,33 +10,48 @@ import { defer } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent, AgentCapabilities } from '@kbn/agent-builder-common';
-import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
+import {
+  getKibanaDefaultAgentCapabilities,
+  type PromptResponse,
+} from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
+import type { EventsService } from '../events';
+import { propagateEvents } from './propagate_events';
 
-export interface ChatParams {
+interface BaseConverseParams {
   signal?: AbortSignal;
   agentId?: string;
   connectorId?: string;
   conversationId?: string;
+  browserApiTools?: BrowserApiToolMetadata[];
   capabilities?: AgentCapabilities;
+}
+
+export type ChatParams = BaseConverseParams & {
   input: string;
   attachments?: AttachmentInput[];
-  browserApiTools?: BrowserApiToolMetadata[];
-}
+};
+
+export type ResumeRoundParams = BaseConverseParams & {
+  conversationId: string;
+  prompts: Record<string, PromptResponse>;
+};
 
 export class ChatService {
   private readonly http: HttpSetup;
+  private readonly events: EventsService;
 
-  constructor({ http }: { http: HttpSetup }) {
+  constructor({ http, events }: { http: HttpSetup; events: EventsService }) {
     this.http = http;
+    this.events = events;
   }
 
   chat(params: ChatParams): Observable<ChatEvent> {
-    const payload: ChatRequestBodyPayload = {
+    return this.converse(params.signal, {
       input: params.input,
       agent_id: params.agentId,
       conversation_id: params.conversationId,
@@ -44,11 +59,27 @@ export class ChatService {
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
       browser_api_tools: params.browserApiTools ?? [],
-    };
+    });
+  }
 
+  /**
+   * Resume a round that is awaiting a prompt response (e.g., confirmation).
+   */
+  resume(params: ResumeRoundParams): Observable<ChatEvent> {
+    return this.converse(params.signal, {
+      agent_id: params.agentId,
+      conversation_id: params.conversationId,
+      connector_id: params.connectorId,
+      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
+      prompts: params.prompts,
+      browser_api_tools: params.browserApiTools ?? [],
+    });
+  }
+
+  private converse(signal: AbortSignal | undefined, payload: ChatRequestBodyPayload) {
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {
-        signal: params.signal,
+        signal,
         asResponse: true,
         rawResponse: true,
         body: JSON.stringify(payload),
@@ -56,7 +87,8 @@ export class ChatService {
     }).pipe(
       // @ts-expect-error SseEvent mixin issue
       httpResponseIntoObservable<ChatEvent>(),
-      unwrapAgentBuilderErrors()
+      unwrapAgentBuilderErrors(),
+      propagateEvents({ eventsService: this.events })
     );
   }
 }

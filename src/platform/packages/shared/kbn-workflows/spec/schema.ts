@@ -56,7 +56,7 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
-export const CollisionStrategySchema = z.enum(['queue', 'drop', 'cancel-in-progress']);
+export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']); // 'queue' TBD
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
 export const ConcurrencySettingsSchema = z.object({
@@ -168,6 +168,17 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
+
+export const BuiltInStepProperties = [
+  'name',
+  'type',
+  'with',
+  'if',
+  'foreach',
+  'timeout',
+  'on-failure',
+];
+export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
@@ -622,6 +633,6 @@ export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
 export const BaseSerializedErrorSchema = z.object({
   type: z.string(),
   message: z.string(),
-  details: z.any().optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;

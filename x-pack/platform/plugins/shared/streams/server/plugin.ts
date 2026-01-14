@@ -47,6 +47,7 @@ import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/proc
 import { getDefaultFeatureRegistry } from './lib/streams/feature/feature_type_registry';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
+import { SystemService } from './lib/streams/system/system_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -109,6 +110,7 @@ export class StreamsPlugin
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger, getDefaultFeatureRegistry());
+    const systemService = new SystemService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
@@ -122,12 +124,14 @@ export class StreamsPlugin
         [coreStart, pluginsStart],
         attachmentClient,
         featureClient,
+        systemClient,
         contentClient,
         queryClient,
       ] = await Promise.all([
         core.getStartServices(),
         attachmentService.getClientWithRequest({ request }),
         featureService.getClientWithRequest({ request }),
+        systemService.getClientWithRequest({ request }),
         contentService.getClient(),
         queryService.getClientWithRequest({ request }),
       ]);
@@ -151,7 +155,7 @@ export class StreamsPlugin
         request,
         attachmentClient,
         queryClient,
-        featureClient,
+        systemClient,
       });
 
       return {
@@ -160,6 +164,7 @@ export class StreamsPlugin
         attachmentClient,
         streamsClient,
         featureClient,
+        systemClient,
         inferenceClient,
         contentClient,
         queryClient,
@@ -170,7 +175,13 @@ export class StreamsPlugin
       };
     };
 
-    taskService.registerTasks({ getScopedClients });
+    const telemetryClient = this.ebtTelemetryService.getClient();
+
+    taskService.registerTasks({
+      getScopedClients,
+      logger: this.logger,
+      telemetry: telemetryClient,
+    });
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -226,7 +237,7 @@ export class StreamsPlugin
       dependencies: {
         features: featureService,
         server: this.server,
-        telemetry: this.ebtTelemetryService.getClient(),
+        telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,
         getScopedClients,
       },
@@ -239,7 +250,7 @@ export class StreamsPlugin
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
-        createStreamsGlobalSearchResultProvider(core, this.logger)
+        createStreamsGlobalSearchResultProvider(this.logger)
       );
     }
 

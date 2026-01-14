@@ -35,7 +35,7 @@ import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 
 /**
  * The fetch status of a Unified Histogram request

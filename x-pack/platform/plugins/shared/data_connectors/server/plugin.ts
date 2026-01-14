@@ -43,7 +43,7 @@ export class DataConnectorsServerPlugin
     plugins: DataConnectorsServerSetupDependencies
   ): DataConnectorsServerSetup {
     const { savedObjects, uiSettings } = core;
-    const { dataSourcesRegistry } = plugins;
+    const { dataSourcesRegistry, workflowsManagement } = plugins;
 
     // Register WorkplaceAI-owned data sources
     registerDataSources(dataSourcesRegistry);
@@ -55,7 +55,12 @@ export class DataConnectorsServerPlugin
 
     // Register HTTP routes
     const router = core.http.createRouter();
-    registerRoutes(router, this.logger, core.getStartServices);
+    registerRoutes({
+      router,
+      logger: this.logger,
+      getStartServices: core.getStartServices,
+      workflowManagement: workflowsManagement,
+    });
 
     return {};
   }

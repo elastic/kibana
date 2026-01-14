@@ -10,6 +10,7 @@ import {
   isConversationCreatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
+  isPromptRequestEvent,
   isReasoningEvent,
   isRoundCompleteEvent,
   isToolCallEvent,
@@ -119,6 +120,12 @@ export const useSubscribeToChatEvents = ({
       conversationActions.setTimeToFirstToken({
         timeToFirstToken: event.data.time_to_first_token,
       });
+    } else if (isPromptRequestEvent(event)) {
+      conversationActions.setPendingPrompt({
+        prompt: event.data.prompt,
+      });
+      // Stop loading when a prompt is requested - the round is now awaiting user input
+      setIsResponseLoading(false);
     }
   };
 

@@ -14,8 +14,8 @@
 // import { evaluate } from '@marcbachmann/cel-js'
 import apm from 'elastic-apm-node';
 import type { SerializedError } from '@kbn/workflows';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { ConnectorExecutor } from '../connector_executor';
-import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 

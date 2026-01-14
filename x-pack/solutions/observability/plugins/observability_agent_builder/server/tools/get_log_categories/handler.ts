@@ -13,10 +13,10 @@ import type {
 } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTypedSearch } from '../../utils/get_typed_search';
-import { getHitsTotal } from '../../utils/get_hits_total';
-import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_not_exist_filter';
-import { timeRangeFilter } from '../../utils/dsl_filters';
+import { getTotalHits } from '../../utils/get_total_hits';
+import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
+import { warningAndAboveLogFilter } from '../../utils/ecs_otel_fields';
 
 export async function getToolHandler({
   core,
@@ -25,7 +25,9 @@ export async function getToolHandler({
   index,
   start,
   end,
-  terms,
+  kqlFilter: kuery,
+  fields,
+  messageField,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -36,65 +38,60 @@ export async function getToolHandler({
   index?: string;
   start: string;
   end: string;
-  terms?: Record<string, string>;
+  kqlFilter?: string;
+  fields: string[];
+  messageField: string;
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const boolFilters = [
     ...timeRangeFilter('@timestamp', {
-      ...getShouldMatchOrNotExistFilter(terms),
       start: parseDatemath(start),
       end: parseDatemath(end, { roundUp: true }),
     }),
-    { exists: { field: 'message' } },
-  ];
-
-  const lowSeverityLogLevels = [
-    {
-      terms: {
-        'log.level': ['trace', 'debug', 'info'].flatMap((level) => [
-          level.toLowerCase(),
-          level.toUpperCase(),
-        ]),
-      },
-    },
+    ...kqlFilter(kuery),
+    { exists: { field: messageField } },
   ];
 
   const [highSeverityCategories, lowSeverityCategories] = await Promise.all([
-    getFilteredLogCategories({
+    getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: boolFilters, must_not: lowSeverityLogLevels },
+      boolQuery: { filter: boolFilters, must: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 20,
-      terms,
+      fields,
+      messageField,
     }),
-    getFilteredLogCategories({
+    getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: boolFilters, must: lowSeverityLogLevels },
+      boolQuery: { filter: boolFilters, must_not: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 10,
-      terms,
+      fields,
+      messageField,
     }),
   ]);
 
   return { highSeverityCategories, lowSeverityCategories };
 }
 
-export async function getFilteredLogCategories({
+export async function getLogCategories({
   esClient,
   logsIndices,
   boolQuery,
   logger,
   categoryCount,
-  terms,
+  fields,
+  messageField,
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
   boolQuery: QueryDslBoolQuery;
   logger: Logger;
   categoryCount: number;
-  terms: Record<string, string> | undefined;
+  fields: string[];
+  messageField: string;
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
 
@@ -106,7 +103,7 @@ export async function getFilteredLogCategories({
     query: { bool: boolQuery },
   });
 
-  const totalHits = getHitsTotal(countResponse);
+  const totalHits = getTotalHits(countResponse);
   if (totalHits === 0) {
     logger.debug('No log documents found for the given query.');
     return undefined;
@@ -134,7 +131,7 @@ export async function getFilteredLogCategories({
         aggs: {
           categories: {
             categorize_text: {
-              field: 'message',
+              field: messageField,
               size: categoryCount,
               min_doc_count: 1,
             },
@@ -143,7 +140,7 @@ export async function getFilteredLogCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: ['message', '@timestamp', ...Object.keys(terms ?? {})],
+                  fields: [messageField, '@timestamp', ...fields],
                   sort: {
                     '@timestamp': { order: 'desc' },
                   },

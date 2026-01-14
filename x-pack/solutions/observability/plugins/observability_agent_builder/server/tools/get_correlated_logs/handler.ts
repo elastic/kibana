@@ -13,32 +13,25 @@ import type {
 } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { parseDatemath } from '../../utils/time';
-import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS, DEFAULT_LOG_SOURCE_FIELDS } from './constants';
+import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS } from './constants';
 import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
-import type { LogSequence } from './types';
 
-function getNoResultsMessage({
-  sequences,
+export function getNoResultsMessage({
   logId,
-  logsFilter,
-  interestingEventFilter,
+  kqlFilter,
+  errorLogsOnly,
   correlationFields,
   start,
   end,
 }: {
-  sequences: LogSequence[];
   logId: string | undefined;
-  logsFilter: string | undefined;
-  interestingEventFilter: string | undefined;
+  kqlFilter: string | undefined;
+  errorLogsOnly: boolean;
   correlationFields: string[];
   start: string;
   end: string;
-}): string | undefined {
-  if (sequences.length > 0) {
-    return undefined;
-  }
-
+}): string {
   const isUsingDefaultCorrelationFields =
     correlationFields === DEFAULT_CORRELATION_IDENTIFIER_FIELDS;
 
@@ -46,20 +39,18 @@ function getNoResultsMessage({
     ? 'Matching logs exist but lack the default correlation fields (trace.id, request.id, transaction.id, etc.). Try using `correlationFields` for specifying custom correlation fields.'
     : `Matching logs exist but lack the custom correlation fields: ${correlationFields.join(', ')}`;
 
-  const isUsingDefaultEventFilter = !interestingEventFilter;
-  const eventFilterDescription = isUsingDefaultEventFilter
-    ? 'The default `interestingEventFilter` (log.level: ERROR/WARN/FATAL, HTTP 5xx, syslog severity ≤3, etc.) did not match any documents.'
-    : `The 
-interestingEventFilter" option "${interestingEventFilter}" did not match any documents.`;
-
   if (logId) {
     return `The log ID "${logId}" was not found, or the log does not have any of the ${correlationFieldsDescription}.`;
   }
 
   const suggestions = [
     `No matching logs exist in this time range (${start} to ${end})`,
-    ...(logsFilter ? ['`logsFilter` is too restrictive'] : []),
-    eventFilterDescription,
+    ...(kqlFilter ? ['`kqlFilter` is too restrictive'] : []),
+    ...(errorLogsOnly
+      ? [
+          'No error logs found (errorLogsOnly=true filters for ERROR/WARN/FATAL, HTTP 5xx, etc.). Try errorLogsOnly=false to include all log levels.',
+        ]
+      : []),
     correlationFieldsDescription,
   ];
 
@@ -74,14 +65,14 @@ export async function getToolHandler({
   esClient,
   start,
   end,
-  logsFilter,
-  interestingEventFilter,
+  kqlFilter,
+  errorLogsOnly,
   index,
-  correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+  correlationFields,
   logId,
-  logSourceFields = DEFAULT_LOG_SOURCE_FIELDS,
-  maxSequences = 10,
-  maxLogsPerSequence = 200,
+  logSourceFields,
+  maxSequences,
+  maxLogsPerSequence,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -91,14 +82,14 @@ export async function getToolHandler({
   esClient: IScopedClusterClient;
   start: string;
   end: string;
-  logsFilter?: string;
-  interestingEventFilter?: string;
+  kqlFilter?: string;
+  errorLogsOnly: boolean;
   index?: string;
-  correlationFields?: string[];
+  correlationFields: string[];
   logId?: string;
-  logSourceFields?: string[];
-  maxSequences?: number;
-  maxLogsPerSequence?: number;
+  logSourceFields: string[];
+  maxSequences: number;
+  maxLogsPerSequence: number;
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const startTime = parseDatemath(start);
@@ -109,8 +100,8 @@ export async function getToolHandler({
     logsIndices,
     startTime,
     endTime,
-    logsFilter,
-    interestingEventFilter,
+    kqlFilter,
+    errorLogsOnly,
     correlationFields,
     logger,
     logId,
@@ -137,15 +128,5 @@ export async function getToolHandler({
     })
   );
 
-  const message = getNoResultsMessage({
-    sequences,
-    logId,
-    logsFilter,
-    interestingEventFilter,
-    correlationFields,
-    start,
-    end,
-  });
-
-  return { sequences, message };
+  return { sequences };
 }
