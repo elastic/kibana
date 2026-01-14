@@ -144,7 +144,7 @@ export interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
 
 export type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
 
-export type { DedotObject, DotObject } from './src/dot';
+export type { DedotObject, DotObject, DotKeysOf, PickDotted } from './src/dot';
 
 export type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never;
 

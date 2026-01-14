@@ -46,20 +46,15 @@ export const useStreamDescriptionApi = ({
     async (nextDescription: string) => {
       setIsUpdating(true);
 
-      let stream;
-      if (Streams.GroupStream.Definition.is(definition.stream)) {
-        stream = omit(definition.stream, ['name', 'updated_at']);
-      } else {
-        stream = {
-          ...omit(definition.stream, ['name', 'updated_at']),
-          ingest: {
-            ...definition.stream.ingest,
-            processing: {
-              ...omit(definition.stream.ingest.processing, ['updated_at']),
-            },
+      const stream = {
+        ...omit(definition.stream, ['name', 'updated_at']),
+        ingest: {
+          ...definition.stream.ingest,
+          processing: {
+            ...omit(definition.stream.ingest.processing, ['updated_at']),
           },
-        };
-      }
+        },
+      };
 
       return updateStream(
         Streams.all.UpsertRequest.parse({
