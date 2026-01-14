@@ -26,13 +26,13 @@ export const ThroughputChart = () => {
     onFilter,
   } = useTraceMetricsContext();
   const fieldName = dataSource === 'apm' ? TRANSACTION_ID : SPAN_ID;
-
-  const { esqlQuery, seriesType, unit, color, title } = getThroughputChart({
+  const throughputChart = getThroughputChart({
     dataSource,
     indexes,
     filters,
     fieldName,
   });
+  const { esqlQuery, seriesType, unit, color, title } = throughputChart || {};
 
   const chartLayers = useChartLayers({
     metric: {
@@ -47,6 +47,10 @@ export const ThroughputChart = () => {
     seriesType,
     customFunction: 'COUNT',
   });
+
+  if (!throughputChart) {
+    return null;
+  }
 
   return (
     <Chart

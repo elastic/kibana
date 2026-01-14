@@ -29,18 +29,20 @@ export const ErrorRateChart = () => {
   } = useTraceMetricsContext();
   const { abortController, timeRange } = fetchParams;
 
-  const { esqlQuery, seriesType, unit, color, title } = getErrorRateChart({
+  const errorRateChart = getErrorRateChart({
     dataSource,
     indexes,
     filters,
   });
+
+  const { esqlQuery, seriesType, unit, color, title } = errorRateChart || {};
 
   const {
     layers: chartLayers,
     loading: isLoadingColumns,
     error: columnsError,
   } = useChartLayersFromEsql({
-    query: esqlQuery,
+    query: esqlQuery || '',
     seriesType,
     services,
     timeRange,
@@ -48,6 +50,10 @@ export const ErrorRateChart = () => {
     color,
     abortController,
   });
+
+  if (!errorRateChart) {
+    return null;
+  }
 
   return (
     <Chart

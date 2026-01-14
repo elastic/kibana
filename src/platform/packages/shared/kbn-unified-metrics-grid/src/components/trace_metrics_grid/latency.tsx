@@ -25,11 +25,12 @@ export const LatencyChart = () => {
     onFilter,
   } = useTraceMetricsContext();
 
-  const { esqlQuery, seriesType, unit, color, title } = getLatencyChart({
+  const latencyChart = getLatencyChart({
     dataSource,
     indexes,
     filters,
   });
+  const { esqlQuery, seriesType, unit, color, title } = latencyChart || {};
 
   const chartLayers = useChartLayers({
     metric: {
@@ -43,6 +44,10 @@ export const LatencyChart = () => {
     color,
     seriesType,
   });
+
+  if (!latencyChart) {
+    return null;
+  }
 
   return (
     <Chart

@@ -13,6 +13,7 @@ import { chartPalette, type DataSource } from '.';
 describe('trace_charts_definition', () => {
   const mockIndexes = 'traces-*';
   const mockFilters = ['service.name == "test-service"', 'environment == "production"'];
+  const mockInvalidFilters = ['service.name:test-service'];
 
   describe('getErrorRateChart', () => {
     it('should return error rate chart configuration for APM data source', () => {
@@ -238,6 +239,45 @@ describe('trace_charts_definition', () => {
       // Verify basic ESQL structure
       expect(result.esqlQuery).toMatch(/FROM .+/);
       expect(result.esqlQuery).toContain('STATS');
+    });
+  });
+
+  describe('when invalid filters are provided', () => {
+    it('getErrorRateChart should return null', () => {
+      const dataSource: DataSource = 'apm';
+
+      const result = getErrorRateChart({
+        dataSource,
+        indexes: mockIndexes,
+        filters: mockInvalidFilters,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('getLatencyChart should return null', () => {
+      const dataSource: DataSource = 'apm';
+
+      const result = getLatencyChart({
+        dataSource,
+        indexes: mockIndexes,
+        filters: mockInvalidFilters,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('getThroughputChart should return null', () => {
+      const dataSource: DataSource = 'apm';
+
+      const result = getThroughputChart({
+        dataSource,
+        indexes: mockIndexes,
+        filters: mockInvalidFilters,
+        fieldName: 'transaction.id',
+      });
+
+      expect(result).toBeNull();
     });
   });
 });
