@@ -246,7 +246,7 @@ const CustomChartSectionWrapper = ({
   const metricsGridState = useCurrentTabSelector((state) => state.uiState.metricsGrid);
   const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
   const onInitialStateChange = useCallback(
-    (newMetricsGridState: Partial<UnifiedChartSectionViewerRestorableState>) => {
+    (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
       // Defer dispatch to next tick - ensures React render cycle is complete
       // setTimeout(() => {
       dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));

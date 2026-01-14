@@ -164,7 +164,7 @@ export interface TabState extends TabItem {
     fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
-    metricsGrid?: Partial<UnifiedChartSectionViewerRestorableState>;
+    metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
   };
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;
