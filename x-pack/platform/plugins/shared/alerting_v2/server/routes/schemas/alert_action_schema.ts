@@ -73,3 +73,13 @@ export const alertActionParamsSchema = z.object({
 });
 
 export type AlertActionParams = z.infer<typeof alertActionParamsSchema>;
+
+export const bulkAlertActionItemSchema = alertActionSchema.and(
+  z.object({ alert_series_id: z.string() })
+);
+
+export type BulkAlertActionItem = z.infer<typeof bulkAlertActionItemSchema>;
+
+export const bulkAlertActionBodySchema = z.array(bulkAlertActionItemSchema);
+
+export type BulkAlertActionBody = z.infer<typeof bulkAlertActionBodySchema>;
