@@ -13,7 +13,7 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
-import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
@@ -246,7 +246,7 @@ const CustomChartSectionWrapper = ({
   const metricsGridState = useCurrentTabSelector((state) => state.uiState.metricsGrid);
   const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
   const onInitialStateChange = useCallback(
-    (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
+    (newMetricsGridState: Partial<UnifiedChartSectionViewerRestorableState>) => {
       // Defer dispatch to next tick - ensures React render cycle is complete
       // setTimeout(() => {
       dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));

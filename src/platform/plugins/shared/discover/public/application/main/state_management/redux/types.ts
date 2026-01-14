@@ -25,7 +25,7 @@ import type {
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
-import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { SerializedError } from '@reduxjs/toolkit';
@@ -164,7 +164,7 @@ export interface TabState extends TabItem {
     fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
-    metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
+    metricsGrid?: Partial<UnifiedChartSectionViewerRestorableState>;
   };
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;

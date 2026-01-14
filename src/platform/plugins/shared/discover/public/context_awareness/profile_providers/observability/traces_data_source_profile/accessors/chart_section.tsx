@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TraceMetricsGrid, type DataSource } from '@kbn/unified-metrics-grid';
+import { TraceMetricsGrid, type DataSource } from '@kbn/unified-chart-section-viewer';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
