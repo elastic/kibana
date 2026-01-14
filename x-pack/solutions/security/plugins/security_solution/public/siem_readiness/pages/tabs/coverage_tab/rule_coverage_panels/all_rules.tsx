@@ -51,22 +51,20 @@ export const AllRuleCoveragePanel: React.FC = () => {
   );
 
   const installedIntegrationsOptions = useMemo(() => {
-    return (installedIntegrationRules.data?.analytics?.installedIntegrations || []).map(
+    return (installedIntegrationRules.analytics?.installedIntegrations || []).map(
       (integration) => ({
         label: getIntegrationDisplayName(integration),
         key: integration,
       })
     );
-  }, [getIntegrationDisplayName, installedIntegrationRules.data?.analytics?.installedIntegrations]);
+  }, [getIntegrationDisplayName, installedIntegrationRules.analytics?.installedIntegrations]);
 
   const missingIntegrationsOptions = useMemo(() => {
-    return (installedIntegrationRules.data?.analytics?.missingIntegrations || []).map(
-      (integration) => ({
-        label: getIntegrationDisplayName(integration),
-        key: integration,
-      })
-    );
-  }, [getIntegrationDisplayName, installedIntegrationRules.data?.analytics?.missingIntegrations]);
+    return (installedIntegrationRules.analytics?.missingIntegrations || []).map((integration) => ({
+      label: getIntegrationDisplayName(integration),
+      key: integration,
+    }));
+  }, [getIntegrationDisplayName, installedIntegrationRules.analytics?.missingIntegrations]);
 
   const onChangePopOver = (popoverOptions: EuiSelectableOption[]) => {
     // Find the selected option
@@ -170,8 +168,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
     },
   ];
 
-  const installedIntegrationAssociatedRulesCount =
-    installedIntegrationRules.data?.data?.length || 0;
+  const installedIntegrationAssociatedRulesCount = installedIntegrationRules.data?.length || 0;
 
   const missingIntegrationAssociatedRulesCount =
     (getDetectionRules.data?.data?.length || 0) - installedIntegrationAssociatedRulesCount;

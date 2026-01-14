@@ -5,82 +5,106 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { FleetPackage } from './types';
 
-export const useDetectionRulesByIntegration = (integrationPackages: string | string[]) => {
+export const useEnabledDetectionRules = () => {
   const { http } = useKibana<CoreStart>().services;
 
   return useQuery({
-    queryKey: ['detection-rules-by-integration', integrationPackages] as const,
-    queryFn: () => {
-      return http.get<{ data: FleetPackage[] }>('/api/detection_engine/rules/_find', {
+    queryKey: ['enabled-detection-rules'],
+    queryFn: () =>
+      http.get<{ data: FleetPackage[] }>('/api/detection_engine/rules/_find', {
         query: {
           filter: 'alert.attributes.enabled:true',
           per_page: 10000,
         },
-      });
-    },
-    select: (data: { data: FleetPackage[] }) => {
-      // Convert installed integrations to Set for O(1) lookups
-      const installedPackagesSet = new Set(
-        Array.isArray(integrationPackages) ? integrationPackages : [integrationPackages]
-      );
-
-      // Convert back to array for return value
-      const installedIntegrations = Array.from(installedPackagesSet);
-
-      // Collect all unique integration packages required by enabled rules
-      const requiredIntegrations = new Set<string>();
-      const rulesWithIntegrations: FleetPackage[] = [];
-      const rulesWithoutIntegrations: FleetPackage[] = [];
-
-      data.data?.forEach((rule: FleetPackage) => {
-        let hasInstalledIntegration = false;
-
-        // Check if rule has any related integrations
-        if (rule.related_integrations && rule.related_integrations.length > 0) {
-          rule.related_integrations.forEach((integration) => {
-            if (integration.package) {
-              requiredIntegrations.add(integration.package);
-
-              if (installedPackagesSet.has(integration.package)) {
-                hasInstalledIntegration = true;
-              }
-            }
-          });
-
-          // Categorize rules based on whether they have installed integrations
-          if (hasInstalledIntegration) {
-            rulesWithIntegrations.push(rule);
-          } else {
-            rulesWithoutIntegrations.push(rule);
-          }
-        } else {
-          // Rules with no related integrations are considered as having coverage
-          rulesWithIntegrations.push(rule);
-        }
-      });
-
-      // Find integrations that are required but not installed
-      const missingIntegrations = Array.from(requiredIntegrations).filter(
-        (packageName) => !installedPackagesSet.has(packageName)
-      );
-
-      return {
-        // Existing return value (for backward compatibility)
-        data: rulesWithIntegrations,
-
-        // Enhanced analytics
-        analytics: {
-          rulesWithIntegrations,
-          rulesWithoutIntegrations,
-          missingIntegrations,
-          installedIntegrations,
-        },
-      };
-    },
+      }),
   });
+};
+
+export interface RuleIntegrationCoverage {
+  coveredRules: FleetPackage[];
+  uncoveredRules: FleetPackage[];
+  missingIntegrations: string[];
+  installedIntegrations: string[];
+  relatedIntegrations: Array<{ package: string; version?: string; integration?: string }>;
+}
+
+export const getRuleIntegrationCoverage = (
+  rules: FleetPackage[],
+  installedIntegrationPackages: string[]
+): RuleIntegrationCoverage => {
+  const installedSet = new Set(installedIntegrationPackages);
+  const referencedIntegrations = new Set<string>();
+  const relatedIntegrationsMap = new Map<
+    string,
+    { package: string; version?: string; integration?: string }
+  >();
+
+  const coveredRules: FleetPackage[] = [];
+  const uncoveredRules: FleetPackage[] = [];
+
+  rules.forEach((rule) => {
+    const requiredIntegrations =
+      rule.related_integrations?.map((i) => i.package).filter(Boolean) ?? [];
+
+    rule.related_integrations?.forEach((integration) => {
+      if (integration.package) {
+        referencedIntegrations.add(integration.package);
+        relatedIntegrationsMap.set(integration.package, {
+          package: integration.package,
+          version: integration.version,
+        });
+      }
+    });
+
+    if (requiredIntegrations.length === 0) {
+      coveredRules.push(rule);
+      return;
+    }
+
+    // Current behavior: a rule is considered covered if ANY required integration is installed
+    const hasInstalledIntegration = requiredIntegrations.some((pkg) => installedSet.has(pkg));
+
+    if (hasInstalledIntegration) {
+      coveredRules.push(rule);
+    } else {
+      uncoveredRules.push(rule);
+    }
+  });
+
+  return {
+    coveredRules,
+    uncoveredRules,
+    missingIntegrations: Array.from(referencedIntegrations).filter((pkg) => !installedSet.has(pkg)),
+    installedIntegrations: Array.from(installedSet),
+    relatedIntegrations: Array.from(relatedIntegrationsMap.values()),
+  };
+};
+
+export const useDetectionRulesByIntegration = (integrationPackages: string | string[]) => {
+  const enabledRulesQuery = useEnabledDetectionRules();
+
+  const analytics = useMemo(() => {
+    if (!enabledRulesQuery.data?.data) {
+      return null;
+    }
+
+    const installedPackages = Array.isArray(integrationPackages)
+      ? integrationPackages
+      : [integrationPackages];
+
+    return getRuleIntegrationCoverage(enabledRulesQuery.data.data, installedPackages);
+  }, [enabledRulesQuery.data?.data, integrationPackages]);
+
+  return {
+    ...enabledRulesQuery,
+    analytics,
+    // Maintain backward compatibility
+    data: analytics?.coveredRules,
+  };
 };
