@@ -7,13 +7,34 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
+import type { Index } from '@kbn/index-management-plugin/common/types';
 import { PLUGIN } from '../common/constants';
 import type { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import type { IndexLifecycleManagementConfig } from './config';
 import { handleEsError } from './shared_imports';
+
+const indexLifecycleDataEnricher = async (
+  indicesList: Index[],
+  client: IScopedClusterClient
+): Promise<Index[]> => {
+  if (!indicesList || !indicesList.length) {
+    return [];
+  }
+
+  const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
+    index: '*,.*',
+  });
+  return indicesList.map((index: Index) => {
+    return {
+      ...index,
+      ilm: { ...(ilmIndicesData[index.name] || {}) },
+    };
+  });
+};
 
 export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, any, any> {
   private readonly config: IndexLifecycleManagementConfig;
@@ -26,7 +47,7 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
     this.license = new License();
   }
 
-  setup({ http }: CoreSetup, { licensing, features }: Dependencies): void {
+  setup({ http }: CoreSetup, { licensing, indexManagement, features }: Dependencies): void {
     const router = http.createRouter();
     const config = this.config;
 
@@ -70,6 +91,12 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
         handleEsError,
       },
     });
+
+    if (config.ui.enabled) {
+      if (indexManagement && indexManagement.indexDataEnricher) {
+        indexManagement.indexDataEnricher.add(indexLifecycleDataEnricher);
+      }
+    }
   }
 
   start() {}

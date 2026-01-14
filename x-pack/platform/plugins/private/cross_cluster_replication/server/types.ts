@@ -8,10 +8,14 @@
 import type { IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
+import type { RemoteClustersPluginSetup } from '@kbn/remote-clusters-plugin/server';
 import type { License, handleEsError } from './shared_imports';
 
 export interface SetupDependencies {
   licensing: LicensingPluginSetup;
+  indexManagement: IndexManagementPluginSetup;
+  remoteClusters: RemoteClustersPluginSetup;
   features: FeaturesPluginSetup;
 }
 

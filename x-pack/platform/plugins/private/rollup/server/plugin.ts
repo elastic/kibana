@@ -15,6 +15,7 @@ import type { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
+import { rollupDataEnricher } from './rollup_data_enricher';
 import type { RollupConfig } from './config';
 
 export class RollupPlugin implements Plugin<void, void, any, any> {
@@ -30,7 +31,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
 
   public setup(
     { http, uiSettings, getStartServices }: CoreSetup,
-    { features, licensing, usageCollection, dataViews, data }: Dependencies
+    { features, licensing, indexManagement, usageCollection, dataViews, data }: Dependencies
   ) {
     this.license.setup(
       {
@@ -101,6 +102,10 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     }
 
     if (this.config.ui.enabled) {
+      if (indexManagement && indexManagement.indexDataEnricher) {
+        indexManagement.indexDataEnricher.add(rollupDataEnricher);
+      }
+
       dataViews.enableRollups();
       data.search.enableRollups();
     }

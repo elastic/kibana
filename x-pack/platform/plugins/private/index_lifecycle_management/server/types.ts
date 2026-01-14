@@ -9,6 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
 import type { License } from './services';
 import type { IndexLifecycleManagementConfig } from './config';
 import type { handleEsError } from './shared_imports';
@@ -16,6 +17,7 @@ import type { handleEsError } from './shared_imports';
 export interface Dependencies {
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
+  indexManagement?: IndexManagementPluginSetup;
 }
 
 export interface RouteDependencies {
