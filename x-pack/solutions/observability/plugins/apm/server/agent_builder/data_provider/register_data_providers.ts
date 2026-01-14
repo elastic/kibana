@@ -54,7 +54,7 @@ export function registerDataProviders({
         logger,
         arguments: {
           'service.name': serviceName,
-          'service.environment': serviceEnvironment ? serviceEnvironment : ENVIRONMENT_ALL.value,
+          'service.environment': serviceEnvironment,
           start,
           end,
           'transaction.type': transactionType,
