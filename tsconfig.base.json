@@ -98,6 +98,8 @@
       "@kbn/ambient-emotion-types/*": ["src/platform/packages/shared/kbn-ambient-emotion-types/*"],
       "@kbn/ambient-ftr-types": ["src/platform/packages/private/kbn-ambient-ftr-types"],
       "@kbn/ambient-ftr-types/*": ["src/platform/packages/private/kbn-ambient-ftr-types/*"],
+      "@kbn/ambient-monaco-types": ["src/platform/packages/shared/kbn-ambient-monaco-types"],
+      "@kbn/ambient-monaco-types/*": ["src/platform/packages/shared/kbn-ambient-monaco-types/*"],
       "@kbn/ambient-storybook-types": ["src/platform/packages/shared/kbn-ambient-storybook-types"],
       "@kbn/ambient-storybook-types/*": ["src/platform/packages/shared/kbn-ambient-storybook-types/*"],
       "@kbn/ambient-ui-types": ["src/platform/packages/shared/kbn-ambient-ui-types"],
@@ -2579,8 +2581,10 @@
       "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
+      "@kbn/ambient-emotion-types",
       "@kbn/ambient-common-types",
-      "@kbn/ambient-storybook-types"
+      "@kbn/ambient-storybook-types",
+      "@kbn/ambient-monaco-types"
     ]
   }
 }

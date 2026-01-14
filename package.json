@@ -1523,6 +1523,7 @@
     "@kbn/ambient-common-types": "link:src/platform/packages/private/kbn-ambient-common-types",
     "@kbn/ambient-emotion-types": "link:src/platform/packages/shared/kbn-ambient-emotion-types",
     "@kbn/ambient-ftr-types": "link:src/platform/packages/private/kbn-ambient-ftr-types",
+    "@kbn/ambient-monaco-types": "link:src/platform/packages/shared/kbn-ambient-monaco-types",
     "@kbn/ambient-storybook-types": "link:src/platform/packages/shared/kbn-ambient-storybook-types",
     "@kbn/ambient-ui-types": "link:src/platform/packages/shared/kbn-ambient-ui-types",
     "@kbn/apm-ftr-e2e": "link:x-pack/solutions/observability/plugins/apm/ftr_e2e",

@@ -6,10 +6,10 @@
       "jest",
       "node",
       "react",
+      "@kbn/ambient-emotion-types",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop",
-      "../../../../../typings/emotion.d.ts"
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [

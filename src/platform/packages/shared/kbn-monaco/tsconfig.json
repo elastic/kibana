@@ -2,14 +2,24 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": [
+      "jest",
+      "node",
+      "@kbn/ambient-monaco-types"
+    ]
   },
-  "include": ["src/**/*", "**/*.ts", "src/languages/painless/autocomplete_definitions/*.json"],
+  "include": [
+    "src/**/*",
+    "**/*.ts",
+    "src/languages/painless/autocomplete_definitions/*.json"
+  ],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/repo-info",
     "@kbn/esql-language",
     "@kbn/esql-types",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
