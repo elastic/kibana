@@ -19,7 +19,6 @@ import {
   getExitSpanChangePoints,
   getServiceChangePoints,
 } from '../../routes/assistant_functions/get_changepoints';
-import { getTraceChangePoints } from '../tools/get_trace_change_points';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
@@ -181,31 +180,6 @@ export function registerDataProviders({
         rollupInterval: getRollupIntervalForTimeRange(startMs, endMs),
         useDurationSummary: true, // Note: This will not work for pre 8.7 data. See: https://github.com/elastic/kibana/issues/167578
         searchQuery,
-      });
-    }
-  );
-
-  observabilityAgentBuilder.registerDataProvider(
-    'traceChangePoints',
-    async ({ request, start, end, kqlFilter, groupBy, latencyType }) => {
-      const { apmEventClient, apmDataAccessServices } = await buildApmToolResources({
-        core,
-        plugins,
-        request,
-        logger,
-      });
-
-      const startMs = parseDatemath(start);
-      const endMs = parseDatemath(end);
-
-      return getTraceChangePoints({
-        apmEventClient,
-        apmDataAccessServices,
-        start: startMs,
-        end: endMs,
-        kqlFilter,
-        groupBy,
-        latencyType,
       });
     }
   );

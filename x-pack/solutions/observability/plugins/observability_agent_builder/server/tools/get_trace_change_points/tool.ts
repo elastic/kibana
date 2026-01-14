@@ -14,7 +14,6 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getToolHandler } from './handler';
 
@@ -47,7 +46,6 @@ const getTraceChangePointsSchema = z.object({
 
 export function createGetTraceChangePointsTool({
   core,
-  dataRegistry,
   plugins,
   logger,
 }: {
@@ -55,7 +53,6 @@ export function createGetTraceChangePointsTool({
     ObservabilityAgentBuilderPluginStartDependencies,
     ObservabilityAgentBuilderPluginStart
   >;
-  dataRegistry: ObservabilityAgentBuilderDataRegistry;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
@@ -81,8 +78,10 @@ When to use:
     ) => {
       try {
         const changePoints = await getToolHandler({
+          core,
+          plugins,
           request,
-          dataRegistry,
+          logger,
           start,
           end,
           kqlFilter,

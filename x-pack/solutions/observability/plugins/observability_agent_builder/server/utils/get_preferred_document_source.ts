@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { getPreferredBucketSizeAndDataSource } from '@kbn/apm-data-access-plugin/common';
 import type { ApmDataAccessServices } from '@kbn/apm-data-access-plugin/server';
-import { getBucketSize } from '../../../common/utils/get_bucket_size';
+import {
+  getPreferredBucketSizeAndDataSource,
+  getBucketSize,
+} from '@kbn/apm-data-access-plugin/common';
 
 /**
  * Gets the preferred document source based on groupBy, filter, and data availability.

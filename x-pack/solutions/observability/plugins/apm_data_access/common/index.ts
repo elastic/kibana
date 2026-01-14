@@ -17,6 +17,9 @@ export {
 
 export type { TimeRangeMetadata } from './time_range_metadata';
 
+export { LatencyAggregationType } from './latency_aggregation_types';
+export { getLatencyAggregationType } from './latency_aggregation_types';
+
 export { getPreferredBucketSizeAndDataSource } from './utils/get_preferred_bucket_size_and_data_source';
 export { getBucketSize } from './utils/get_bucket_size';
 

@@ -34,3 +34,5 @@ export {
   calculateFailedTransactionRate,
   type OutcomeAggregation,
 } from './transaction_error_rate';
+
+export { getLatencyAggregation } from './latency_aggregation_type';
