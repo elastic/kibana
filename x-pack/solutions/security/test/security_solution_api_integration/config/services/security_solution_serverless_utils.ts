@@ -12,8 +12,7 @@ import type { RoleCredentials } from '@kbn/test-suites-xpack-platform/serverless
 import type { SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureSearchSendOptions } from './search_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecuritySolutionServerlessUtilsInterface, Role, User } from './types';
-import { roles } from '../privileges/roles';
+import type { SecuritySolutionServerlessUtilsInterface, Role } from './types';
 
 export function SecuritySolutionServerlessUtils({
   getService,
@@ -86,22 +85,6 @@ export function SecuritySolutionServerlessUtils({
     createSuperTest,
 
     createSuperTestWithCustomRole,
-
-    createSuperTestWithUser: async (user: User) => {
-      if (user.roles.length > 1) {
-        throw new Error(
-          `This test service only supports authentication for users with a single role. Error for ${
-            user.username
-          } with roles ${user.roles.join(',')}.`
-        );
-      }
-      const userRoleName = user.roles[0];
-      const roleDefinition = roles.find((role) => role.name === userRoleName);
-      if (!roleDefinition) {
-        throw new Error(`Could not find a role definition for ${userRoleName}`);
-      }
-      return await createSuperTestWithCustomRole(roleDefinition);
-    },
 
     cleanUpCustomRole: async () => {
       await svlUserManager.deleteCustomRole();

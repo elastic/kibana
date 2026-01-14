@@ -56,10 +56,6 @@ export function SecuritySolutionESSUtils({
 
     createSuperTest,
 
-    createSuperTestWithUser: (user: User) => {
-      return createSuperTest(user.username, user.password);
-    },
-
     createSuperTestWithCustomRole,
 
     cleanUpCustomRole: () => {

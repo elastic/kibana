@@ -18,11 +18,6 @@ export interface SecuritySolutionServerlessSearch extends Omit<SearchSecureServi
 interface SecuritySolutionUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
 
-  // todo:
-  // - ESS: works with any user that's already created
-  // - serverless: works only with users from here: x-pack/solutions/security/test/security_solution_api_integration/config/privileges/roles.ts
-  createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
-
   createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
 
   cleanUpCustomRole: () => Promise<void>;
