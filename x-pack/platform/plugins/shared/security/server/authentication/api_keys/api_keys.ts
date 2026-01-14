@@ -11,7 +11,6 @@ import type { BuildFlavor } from '@kbn/config';
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
-  APIKeys as APIKeysType,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
@@ -19,6 +18,7 @@ import type {
   GrantAPIKeyResult,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
+  NativeAPIKeysType,
   ValidateAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
@@ -65,7 +65,7 @@ type GrantAPIKeyParams =
 /**
  * Class responsible for managing Elasticsearch API keys.
  */
-export class APIKeys implements APIKeysType {
+export class APIKeys implements NativeAPIKeysType {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;

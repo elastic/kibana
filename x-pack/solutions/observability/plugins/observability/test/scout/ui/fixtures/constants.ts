@@ -81,3 +81,29 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
   CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',
 } as const;
+
+/**
+ * Constants for data-test-subj values used in rule details page tests
+ */
+export const RULE_DETAILS_TEST_SUBJECTS = {
+  // Page elements
+  RULE_DETAILS: 'ruleDetails',
+  RULE_NAME: 'ruleName',
+  RULE_TYPE: 'ruleSummaryRuleType',
+  RULE_STATUS_PANEL: 'ruleStatusPanel',
+  RULE_DEFINITION: 'ruleSummaryRuleDefinition',
+
+  // Actions
+  ACTIONS_BUTTON: 'actions',
+  EDIT_RULE_BUTTON: 'editRuleButton',
+  DELETE_RULE_BUTTON: 'deleteRuleButton',
+
+  // Alert Summary Widget
+  ALERT_SUMMARY_WIDGET_COMPACT: 'alertSummaryWidgetCompact',
+  ACTIVE_ALERT_COUNT: 'activeAlertCount',
+  TOTAL_ALERT_COUNT: 'totalAlertCount',
+
+  // Rule Edit Form
+  RULE_DETAILS_NAME_INPUT: 'ruleDetailsNameInput',
+  DASHBOARDS_SELECTOR: 'dashboardsSelector',
+} as const;
