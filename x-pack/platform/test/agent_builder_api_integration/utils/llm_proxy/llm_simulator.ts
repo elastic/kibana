@@ -8,8 +8,8 @@
 import { once } from 'lodash';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { createOpenAiChunk } from './create_openai_chunk';
-import type { HttpResponse, ToolMessage } from './types';
+import { createOpenAiChunk, createOpenAIResponse } from './create_openai_chunk';
+import type { HttpResponse, LLMMessage, ToolMessage } from './types';
 
 /**
  * Formats a chunk for Server-Sent Events (SSE)
@@ -23,7 +23,8 @@ export class LlmSimulator {
     public readonly requestBody: ChatCompletionStreamParams,
     private readonly response: HttpResponse,
     private readonly log: ToolingLog,
-    private readonly name: string
+    private readonly name: string,
+    public readonly stream: boolean
   ) {}
 
   async writeChunk(msg: string | ToolMessage): Promise<void> {
@@ -34,23 +35,39 @@ export class LlmSimulator {
 
   async complete(): Promise<void> {
     this.log.debug(`Completed intercept for "${this.name}"`);
-    await this.write('data: [DONE]\n\n');
+    if (this.stream) {
+      await this.write('data: [DONE]\n\n');
+    }
     await this.end();
   }
 
-  async writeErrorChunk(code: number, error: Record<string, unknown>): Promise<void> {
+  async writeResponse(message: LLMMessage): Promise<void> {
+    this.status(200);
+    await this.write(JSON.stringify(createOpenAIResponse(message)));
+  }
+
+  async writeError(code: number, error: Record<string, unknown>): Promise<void> {
     this.status(code);
-    await this.write(sseEvent(error));
+    await this.write(this.stream ? sseEvent(error) : JSON.stringify(error));
     await this.end();
   }
 
   status = once((code: number) => {
-    this.response.writeHead(code, {
-      'Elastic-Interceptor': this.name.replace(/[^\x20-\x7E]/g, ' '), // Keeps only alphanumeric characters and spaces
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-    });
+    if (this.stream) {
+      this.response.writeHead(code, {
+        'Elastic-Interceptor': this.name.replace(/[^\x20-\x7E]/g, ' '), // Keeps only alphanumeric characters and spaces
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      });
+    } else {
+      this.response.writeHead(code, {
+        'Elastic-Interceptor': this.name.replace(/[^\x20-\x7E]/g, ' '), // Keeps only alphanumeric characters and spaces
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      });
+    }
   });
 
   private write(chunk: string): Promise<void> {

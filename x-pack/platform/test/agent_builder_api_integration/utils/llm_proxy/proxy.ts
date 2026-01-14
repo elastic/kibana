@@ -18,7 +18,8 @@ import type { HttpRequest, HttpResponse, LLMMessage, ToolMessage } from './types
 type RequestHandler = (
   request: HttpRequest,
   response: HttpResponse,
-  requestBody: ChatCompletionStreamParams
+  requestBody: ChatCompletionStreamParams,
+  options: { stream: boolean }
 ) => LLMMessage;
 
 interface RequestInterceptor {
@@ -44,6 +45,7 @@ export class LlmProxy {
       .createServer()
       .on('request', async (request, response) => {
         const requestBody = await getRequestBody(request);
+        const stream = requestBody.stream ?? false;
 
         const matchingInterceptor = this.requestInterceptors.find(({ when }) => when(requestBody));
         this.interceptedRequests.push({
@@ -64,7 +66,9 @@ export class LlmProxy {
         }
 
         if (matchingInterceptor) {
-          const mockedLlmResponse = matchingInterceptor.handle(request, response, requestBody);
+          const mockedLlmResponse = matchingInterceptor.handle(request, response, requestBody, {
+            stream,
+          });
           this.log.info(`Mocked LLM response: ${JSON.stringify(mockedLlmResponse, null, 2)}`);
           pull(this.requestInterceptors, matchingInterceptor);
           return;
@@ -83,8 +87,14 @@ export class LlmProxy {
           )}`
         );
 
-        const simulator = new LlmSimulator(requestBody, response, this.log, 'No interceptor found');
-        await simulator.writeErrorChunk(404, {
+        const simulator = new LlmSimulator(
+          requestBody,
+          response,
+          this.log,
+          'No interceptor found',
+          stream
+        );
+        await simulator.writeError(404, {
           errorMessage,
           availableInterceptors: this.requestInterceptors.map(({ name }) => name),
         });
@@ -162,8 +172,8 @@ export class LlmProxy {
         this.requestInterceptors.push({
           name,
           when,
-          handle: (request, response, requestBody) => {
-            const simulator = new LlmSimulator(requestBody, response, this.log, name);
+          handle: (request, response, requestBody, { stream }) => {
+            const simulator = new LlmSimulator(requestBody, response, this.log, name, stream);
             const llmMessage = getMockedLlmMessage(requestBody);
             outerResolve(simulator);
 
@@ -179,6 +189,7 @@ export class LlmProxy {
       waitForIntercept: () => waitForInterceptPromise,
       completeAfterIntercept: async () => {
         const simulator = await waitForInterceptPromise;
+        const stream = simulator.stream;
 
         function getParsedChunks(): Array<string | ToolMessage> {
           const llmMessage = getMockedLlmMessage(simulator.requestBody);
@@ -197,12 +208,18 @@ export class LlmProxy {
           return [llmMessage];
         }
 
-        const parsedChunks = getParsedChunks();
-        for (const chunk of parsedChunks) {
-          await simulator.writeChunk(chunk);
+        if (stream) {
+          const parsedChunks = getParsedChunks();
+          for (const chunk of parsedChunks) {
+            await simulator.writeChunk(chunk);
+          }
+        } else {
+          const llmMessage = getMockedLlmMessage(simulator.requestBody);
+          await simulator.writeResponse(llmMessage);
         }
 
         await simulator.complete();
+
         return simulator;
       },
     } as any;
