@@ -99,9 +99,9 @@ dependsOn:
   - '@kbn/router-utils'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/actions-types'
-  - '@kbn/kql'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/deeplinks-observability'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod
