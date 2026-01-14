@@ -44,11 +44,8 @@ export async function getIndexPatternsHandler({
   esClient: IScopedClusterClient;
   logger: Logger;
 }): Promise<IndexPatternsResult> {
-  // Get configured index patterns first (needed for data stream discovery)
   const dataSources = await getObservabilityDataSources({ core, plugins, logger });
-
-  // Discover data streams using the configured patterns
-  const dataStreams = await getDataStreamsHandler({ esClient, dataSources });
+  const dataStreams = await getDataStreamsHandler({ esClient, dataSources, logger });
 
   return {
     indexPatterns: {

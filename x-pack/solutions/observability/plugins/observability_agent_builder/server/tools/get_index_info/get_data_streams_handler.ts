@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { sortBy } from 'lodash';
 import type { ObservabilityDataSources } from '../../utils/get_observability_data_sources';
 
@@ -45,22 +45,29 @@ function extractDataset(name: string): string {
 export async function getDataStreamsHandler({
   esClient,
   dataSources,
+  logger,
 }: {
   esClient: IScopedClusterClient;
   dataSources: ObservabilityDataSources;
+  logger: Logger;
 }): Promise<DataStreamInfo[]> {
-  // Build pattern from configured observability index patterns (supports CCS)
-  const pattern = [
-    ...dataSources.logIndexPatterns,
-    ...dataSources.metricIndexPatterns,
-    dataSources.apmIndexPatterns.transaction,
-    dataSources.apmIndexPatterns.span,
-  ].join(',');
+  try {
+    // Build pattern from configured observability index patterns (supports CCS)
+    const indexPatterns = [
+      ...dataSources.logIndexPatterns,
+      ...dataSources.metricIndexPatterns,
+      dataSources.apmIndexPatterns.transaction,
+      dataSources.apmIndexPatterns.span,
+    ].join(',');
 
-  const response = await esClient.asCurrentUser.indices.getDataStream({ name: pattern });
+    const response = await esClient.asCurrentUser.indices.getDataStream({ name: indexPatterns });
 
-  return sortBy(
-    response.data_streams.map((ds) => ({ name: ds.name, dataset: extractDataset(ds.name) })),
-    'name'
-  );
+    return sortBy(
+      response.data_streams.map((ds) => ({ name: ds.name, dataset: extractDataset(ds.name) })),
+      'name'
+    );
+  } catch (error) {
+    logger.error(`Error retrieving data streams: ${error}`);
+    return [];
+  }
 }
