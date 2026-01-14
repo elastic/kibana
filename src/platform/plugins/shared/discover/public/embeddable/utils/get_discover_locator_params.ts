@@ -71,7 +71,7 @@ function getEsqlControls(
 
   const usedVariables = getESQLQueryVariables(query.esql);
   const controlsLayout = apiPublishesControlsLayout(presentationContainer)
-    ? presentationContainer.layout$.getValue().controls
+    ? presentationContainer.layout$.getValue().pinnedPanels
     : {};
 
   const esqlControlState = Object.values(presentationContainer.children$.getValue()).reduce(
