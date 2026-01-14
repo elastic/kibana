@@ -79,7 +79,7 @@
         "label": "AppMenuItem",
         "description": [],
         "signature": [
-          "({ run, id, htmlId, label, testId, iconType, disableButton, href, target, isLoading, tooltipContent, tooltipTitle, items, isPopoverOpen, hidden, popoverWidth, onPopoverToggle, onPopoverClose, }: AppMenuItemProps) => React.JSX.Element"
+          "({ run, id, htmlId, label, testId, iconType, disableButton, href, target, isLoading, tooltipContent, tooltipTitle, items, isPopoverOpen, hidden, popoverWidth, popoverTestId, onPopoverToggle, onPopoverClose, }: AppMenuItemProps) => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/components/app_menu_item.tsx",
         "deprecated": false,
@@ -90,7 +90,7 @@
             "id": "def-public.AppMenuItem.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  run,\n  id,\n  htmlId,\n  label,\n  testId,\n  iconType,\n  disableButton,\n  href,\n  target,\n  isLoading,\n  tooltipContent,\n  tooltipTitle,\n  items,\n  isPopoverOpen,\n  hidden,\n  popoverWidth,\n  onPopoverToggle,\n  onPopoverClose,\n}",
+            "label": "{\n  run,\n  id,\n  htmlId,\n  label,\n  testId,\n  iconType,\n  disableButton,\n  href,\n  target,\n  isLoading,\n  tooltipContent,\n  tooltipTitle,\n  items,\n  isPopoverOpen,\n  hidden,\n  popoverWidth,\n  popoverTestId,\n  onPopoverToggle,\n  onPopoverClose,\n}",
             "description": [],
             "signature": [
               "AppMenuItemProps"
@@ -145,7 +145,7 @@
         "label": "AppMenuPopover",
         "description": [],
         "signature": [
-          "({ items, anchorElement, tooltipContent, tooltipTitle, isOpen, popoverWidth, primaryActionItem, secondaryActionItem, anchorPosition, testId, onClose, }: AppMenuContextMenuProps) => React.JSX.Element | null"
+          "({ items, anchorElement, tooltipContent, tooltipTitle, isOpen, popoverWidth, primaryActionItem, secondaryActionItem, anchorPosition, popoverTestId, onClose, onCloseOverflowButton, }: AppMenuContextMenuProps) => React.JSX.Element | null"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/components/app_menu_popover.tsx",
         "deprecated": false,
@@ -156,7 +156,7 @@
             "id": "def-public.AppMenuPopover.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  items,\n  anchorElement,\n  tooltipContent,\n  tooltipTitle,\n  isOpen,\n  popoverWidth,\n  primaryActionItem,\n  secondaryActionItem,\n  anchorPosition,\n  testId,\n  onClose,\n}",
+            "label": "{\n  items,\n  anchorElement,\n  tooltipContent,\n  tooltipTitle,\n  isOpen,\n  popoverWidth,\n  primaryActionItem,\n  secondaryActionItem,\n  anchorPosition,\n  popoverTestId,\n  onClose,\n  onCloseOverflowButton,\n}",
             "description": [],
             "signature": [
               "AppMenuContextMenuProps"
@@ -178,7 +178,7 @@
         "label": "AppMenuPopoverActionButtons",
         "description": [],
         "signature": [
-          "({ primaryActionItem, secondaryActionItem, }: AppMenuPopoverActionButtonsProps) => React.JSX.Element | null"
+          "({ primaryActionItem, secondaryActionItem, onCloseOverflowButton, }: AppMenuPopoverActionButtonsProps) => React.JSX.Element | null"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/components/app_menu_popover_action_buttons.tsx",
         "deprecated": false,
@@ -189,7 +189,7 @@
             "id": "def-public.AppMenuPopoverActionButtons.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  primaryActionItem,\n  secondaryActionItem,\n}",
+            "label": "{\n  primaryActionItem,\n  secondaryActionItem,\n  onCloseOverflowButton,\n}",
             "description": [],
             "signature": [
               "AppMenuPopoverActionButtonsProps"
@@ -595,11 +595,11 @@
           "\nGenerate action items for the popover menu. This is only used below \"m\" breakpoint."
         ],
         "signature": [
-          "({ primaryActionItem, secondaryActionItem, }: { primaryActionItem?: ",
+          "({ primaryActionItem, secondaryActionItem, onCloseOverflowButton, }: { primaryActionItem?: ",
           "AppMenuPrimaryActionItem",
           " | undefined; secondaryActionItem?: ",
           "AppMenuSecondaryActionItem",
-          " | undefined; }) => ((",
+          " | undefined; onCloseOverflowButton?: (() => void) | undefined; }) => ((",
           "DisambiguateSet",
           "<(",
           "DisambiguateSet",
@@ -674,7 +674,7 @@
             "id": "def-public.getPopoverActionItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  primaryActionItem,\n  secondaryActionItem,\n}",
+            "label": "{\n  primaryActionItem,\n  secondaryActionItem,\n  onCloseOverflowButton,\n}",
             "description": [],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
             "deprecated": false,
@@ -709,6 +709,22 @@
                 "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-chrome-app-menu-components",
+                "id": "def-public.getPopoverActionItems.$1.onCloseOverflowButton",
+                "type": "Function",
+                "tags": [],
+                "label": "onCloseOverflowButton",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
               }
             ]
           }
@@ -726,13 +742,13 @@
           "\nRecursively generate EUI context menu panels from the provided menu items."
         ],
         "signature": [
-          "({ items, primaryActionItem, secondaryActionItem, startPanelId, }: { items: ",
+          "({ items, primaryActionItem, secondaryActionItem, startPanelId, onClose, onCloseOverflowButton, }: { items: ",
           "AppMenuPopoverItem",
           "[]; primaryActionItem?: ",
           "AppMenuPrimaryActionItem",
           " | undefined; secondaryActionItem?: ",
           "AppMenuSecondaryActionItem",
-          " | undefined; startPanelId?: number | undefined; }) => ",
+          " | undefined; startPanelId?: number | undefined; onClose?: (() => void) | undefined; onCloseOverflowButton?: (() => void) | undefined; }) => ",
           "EuiContextMenuPanelDescriptor",
           "[]"
         ],
@@ -745,7 +761,7 @@
             "id": "def-public.getPopoverPanels.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  items,\n  primaryActionItem,\n  secondaryActionItem,\n  startPanelId = 0,\n}",
+            "label": "{\n  items,\n  primaryActionItem,\n  secondaryActionItem,\n  startPanelId = 0,\n  onClose,\n  onCloseOverflowButton,\n}",
             "description": [],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
             "deprecated": false,
@@ -809,6 +825,38 @@
                 "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-chrome-app-menu-components",
+                "id": "def-public.getPopoverPanels.$1.onClose",
+                "type": "Function",
+                "tags": [],
+                "label": "onClose",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/core-chrome-app-menu-components",
+                "id": "def-public.getPopoverPanels.$1.onCloseOverflowButton",
+                "type": "Function",
+                "tags": [],
+                "label": "onCloseOverflowButton",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
               }
             ]
           }
@@ -978,7 +1026,7 @@
         "signature": [
           "(item: ",
           "AppMenuPopoverItem",
-          ", childPanelId?: number | undefined) => (",
+          ", childPanelId?: number | undefined, onClose?: (() => void) | undefined, onCloseOverflowButton?: (() => void) | undefined) => (",
           "DisambiguateSet",
           "<(",
           "DisambiguateSet",
@@ -1072,6 +1120,36 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-app-menu-components",
+            "id": "def-public.mapAppMenuItemToPanelItem.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-app-menu-components",
+            "id": "def-public.mapAppMenuItemToPanelItem.$4",
+            "type": "Function",
+            "tags": [],
+            "label": "onCloseOverflowButton",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
             "deprecated": false,
@@ -1231,7 +1309,7 @@
           "AppMenuItemType",
           ", \"hidden\" | \"iconType\" | \"popoverWidth\"> & { iconType?: ",
           "IconType",
-          " | undefined; seperator?: \"above\" | \"below\" | undefined; }"
+          " | undefined; separator?: \"above\" | \"below\" | undefined; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
         "deprecated": false,

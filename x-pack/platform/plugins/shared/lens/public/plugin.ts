@@ -78,6 +78,7 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
@@ -161,6 +162,7 @@ export interface LensPluginSetupDependencies {
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;
@@ -421,10 +423,8 @@ export class LensPlugin {
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                } satisfies LensByRefSerializedState,
-              },
+                savedObjectId: savedObject.id,
+              } satisfies LensByRefSerializedState,
             },
             {
               displaySuccessMessage: true,

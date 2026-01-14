@@ -25,7 +25,7 @@ import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
@@ -68,7 +68,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
   return {
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
 
       if (isOptionsListESQLControlState(state)) {
         throw new Error('ES|QL control state handling not yet implemented');
@@ -226,9 +226,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         });
 
       /** Output filters when selections and/or filter meta data changes */
-      const sectionId$ = apiHasSections(parentApi)
-        ? parentApi.getPanelSection$(uuid)
-        : of(undefined);
+      const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
       const outputFilterSubscription = combineLatest([
         dataControlManager.api.dataViews$,
@@ -255,16 +253,14 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): SerializedPanelState<OptionsListControlState> {
+      function serializeState(): OptionsListControlState {
         return {
-          rawState: {
-            ...dataControlManager.getLatestState(),
-            ...selectionsManager.getLatestState(),
-            ...editorStateManager.getLatestState(),
+          ...dataControlManager.getLatestState(),
+          ...selectionsManager.getLatestState(),
+          ...editorStateManager.getLatestState(),
 
-            // serialize state that cannot be changed to keep it consistent
-            displaySettings: state.displaySettings,
-          },
+          // serialize state that cannot be changed to keep it consistent
+          displaySettings: state.displaySettings,
         };
       }
 
@@ -293,12 +289,12 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           existsSelected: false,
         },
         onReset: (lastSaved) => {
-          if (isOptionsListESQLControlState(lastSaved?.rawState)) {
+          if (isOptionsListESQLControlState(lastSaved)) {
             throw new Error('ES|QL control state handling not yet implemented');
           }
-          dataControlManager.reinitializeState(lastSaved?.rawState);
-          selectionsManager.reinitializeState(lastSaved?.rawState);
-          editorStateManager.reinitializeState(lastSaved?.rawState);
+          dataControlManager.reinitializeState(lastSaved);
+          selectionsManager.reinitializeState(lastSaved);
+          editorStateManager.reinitializeState(lastSaved);
         },
       });
 
