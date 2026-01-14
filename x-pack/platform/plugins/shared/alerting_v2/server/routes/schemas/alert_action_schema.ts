@@ -7,38 +7,50 @@
 
 import { z } from '@kbn/zod';
 
+const baseActionSchema = z.object({
+  episode_id: z.string().optional(),
+});
+
 const ackActionSchema = z.object({
+  ...baseActionSchema.shape,
   action_type: z.literal('ack'),
 });
 
 const unackActionSchema = z.object({
+  ...baseActionSchema.shape,
   action_type: z.literal('unack'),
 });
 
 const tagActionSchema = z.object({
+  ...baseActionSchema.shape,
   action_type: z.literal('tag'),
   tags: z.array(z.string()),
 });
 
 const untagActionSchema = z.object({
+  ...baseActionSchema.shape,
   action_type: z.literal('untag'),
   tags: z.array(z.string()),
 });
 
 const snoozeActionSchema = z.object({
+  ...baseActionSchema.shape,
   action_type: z.literal('snooze'),
 });
 
 const unsnoozeActionSchema = z.object({
+  ...baseActionSchema.shape,
   action_type: z.literal('unsnooze'),
 });
 
 const activateActionSchema = z.object({
+  ...baseActionSchema.shape,
   action_type: z.literal('activate'),
   reason: z.string(),
 });
 
 const deactivateActionSchema = z.object({
+  ...baseActionSchema.shape,
   action_type: z.literal('deactivate'),
   reason: z.string(),
 });
