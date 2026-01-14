@@ -438,6 +438,7 @@ const myStepHandler: StepHandler = async (context) => {
 ### Error Handling
 
 Step handlers can return errors in their result, or throw errors directly. The workflow execution engine automatically catches thrown errors and converts them to `ExecutionError`, so you don't need to handle conversion manually.
+
 However, if you need to throw or return an error with a **custom error type** or **additional details** for better debugging and error categorization, you can use the `ExecutionError` class from `@kbn/workflows/server`.
 
 #### Standard Error Handling (No ExecutionError Required)

@@ -8,7 +8,6 @@
  */
 
 import axios from 'axios';
-import { ExecutionError } from '@kbn/workflows/common/errors';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { HttpStepImpl } from './http_step_impl';
