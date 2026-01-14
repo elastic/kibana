@@ -1,24 +1,23 @@
 # DAY_NAME
 
-Returns the name of the weekday for date based on the configured Locale.
+Returns the name of the weekday for a given date, based on the configured Locale.
 
-```
-stack: ga 9.2.0
-```
+## Syntax
 
-**Syntax**
 `DAY_NAME(date)`
 
 ### Parameters
 
-#### `date`
+#### date
 
 Date expression. If `null`, the function returns `null`.
 
-**Supported types**
+## Examples
 
-**Example**
+This query creates a row with a datetime value set to "1953-09-02T00:00:00.000Z" and then calculates the name of the weekday for that date, storing it in a new column called `weekday`.
+
 ```esql
 ROW dt = to_datetime("1953-09-02T00:00:00.000Z")
 | EVAL weekday = DAY_NAME(dt);
 ```
+This example returns the weekday name for the date "1953-09-02T00:00:00.000Z".

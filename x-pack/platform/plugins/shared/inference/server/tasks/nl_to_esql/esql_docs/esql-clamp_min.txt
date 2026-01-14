@@ -1,29 +1,30 @@
 # CLAMP_MIN
 
-Limits (or clamps) all input sample values to a lower bound of min. Any value below min is set to min.
+The CLAMP_MIN function limits all input sample values to a specified lower bound. Any value below the given minimum is set to that minimum.
 
-```
-stack: preview 9.3.0
-```
+## Syntax
 
-**Syntax**
 `CLAMP_MIN(field, min)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-field to clamp.
+The field to clamp.
 
-#### `min`
+#### min
 
-The min value to clamp data into.
+The minimum value to clamp data to.
 
-**Supported types**
+## Examples
 
-**Example**
+The following query calculates the sum of network cost values after applying different clamping functions, grouped by 1-minute time buckets. Specifically, it computes:
+- `full_clamped_cost`: the sum of network cost values clamped between 1 and 2,
+- `clamped_cost`: the sum of network cost values clamped to a maximum of 1,
+- `clamped_min_cost`: the sum of network cost values clamped to a minimum of 10.
+All results are grouped by 1-minute intervals based on the `@timestamp` field.
+
 ```esql
 FROM k8s
 | STATS full_clamped_cost=sum(clamp(network.cost, 1, 2)), clamped_cost=sum(clamp_max(network.cost, 1)), clamped_min_cost=sum(clamp_min(network.cost, 10)) BY time_bucket = bucket(@timestamp,1minute)
 ```
-

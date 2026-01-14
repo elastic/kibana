@@ -8,11 +8,13 @@ Removes trailing whitespaces from a string.
 
 ### Parameters
 
-#### `string`
+#### string
 
-String expression. If `null`, the function returns `null`.
+String expression to process. If `null`, the function returns `null`.
 
 ## Examples
+
+This query creates two columns, `message` and `color`, with leading and trailing spaces. It then removes trailing spaces from both columns using the `RTRIM` function, and finally wraps the cleaned values in single quotes for clarity.
 
 ```esql
 ROW message = "   some text  ",  color = " red "
@@ -22,4 +24,4 @@ ROW message = "   some text  ",  color = " red "
 | EVAL color = CONCAT("'", color, "'")
 ```
 
-This example removes trailing whitespaces from the `message` and `color` columns, then wraps the resulting strings in single quotes.
+Remove trailing spaces from the `message` and `color` columns, then wrap the results in single quotes.

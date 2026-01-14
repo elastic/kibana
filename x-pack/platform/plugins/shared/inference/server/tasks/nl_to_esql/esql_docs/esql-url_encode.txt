@@ -1,24 +1,24 @@
 # URL_ENCODE
 
-URL-encodes the input. All characters are percent-encoded except for alphanumerics, `.`, `-`, `_`, and `~`. Spaces are encoded as `+`.
+The URL_ENCODE function encodes a string for safe use in URLs by percent-encoding all characters except alphanumerics, `.`, `-`, `_`, and `~`. Spaces are encoded as `+`.
 
-```
-stack: ga 9.2.0
-```
+## Syntax
 
-**Syntax**
 `URL_ENCODE(string)`
 
 ### Parameters
 
-#### `string`
+#### string
 
-The URL to encode.
+The URL or string to encode.
 
-**Supported types**
+## Examples
 
-**Example**
+Encode a URL containing spaces and special characters:
+
+This query creates a row with a URL containing spaces and special characters, then encodes the URL so that spaces become `+` and special characters are percent-encoded for safe use in URLs.
+
 ```esql
 ROW u = "https://example.com/?x=foo bar&y=baz" | EVAL u = URL_ENCODE(u)
 ```
-
+This example encodes the URL, converting spaces to `+` and special characters to their percent-encoded form.

@@ -2,30 +2,26 @@
 
 Calculates the derivative over time of a numeric field using linear regression.
 
-```
-stack: preview 9.3.0
-serverless: preview
-```
+## Syntax
 
-**Syntax**
 `DERIV(field, window)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-the metric field to calculate the value for
+The metric field to calculate the derivative for.
 
-#### `window`
+#### window
 
-the time window over which to compute the derivative over time
+The time window over which to compute the derivative.
 
-**Supported types**
+## Examples
 
-**Example**
+The following query calculates the maximum rate of change (derivative) of the `network.cost` field for each 5-minute time bucket and pod named "three". It first selects data from the `datenanos-k8s` source, filters for records where the pod is "three", computes the derivative of `network.cost`, finds the maximum derivative value within each 5-minute interval and pod, and groups the results accordingly.
+
 ```esql
 TS datenanos-k8s
 | WHERE pod == "three"
 | STATS max_deriv = MAX(DERIV(network.cost)) BY time_bucket = BUCKET(@timestamp,5minute), pod
 ```
-

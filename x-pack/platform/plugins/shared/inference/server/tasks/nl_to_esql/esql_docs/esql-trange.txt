@@ -1,28 +1,32 @@
 # TRANGE
 
-Filters data for the given time range using the @timestamp attribute.
+The TRANGE function filters data based on a specified time range using the `@timestamp` attribute.
 
-**Syntax**
+## Syntax
+
 `TRANGE(start_time_or_offset, end_time)`
 
 ### Parameters
 
-#### `start_time_or_offset`
+#### start_time_or_offset
 
-Offset from NOW for the single parameter mode. Start time for two parameter mode. In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds.
+Offset from NOW when used as a single parameter. When used with two parameters, this is the start time, which can be a date string, date, date_nanos, or epoch milliseconds.
 
-#### `end_time`
+#### end_time
 
-Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.
+Explicit end time for the range. This can be a date string, date, date_nanos, or epoch milliseconds.
 
-**Supported types**
+## Examples
 
-**Examples**
+This query retrieves records from the `k8s` index that have a `@timestamp` within the last hour. Only the `@timestamp` field is kept in the results.
+
 ```esql
 FROM k8s
 | WHERE TRANGE(1h)
 | KEEP @timestamp
 ```
+
+This query selects records from the `k8s` index where the `@timestamp` falls between `"2024-05-10T00:17:14.000Z"` and `"2024-05-10T00:18:33.000Z"`. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
 
 ```esql
 FROM k8s
@@ -32,6 +36,8 @@ FROM k8s
 | LIMIT 10
 ```
 
+This query filters records from the `k8s` index where the `@timestamp` is between two specific times, using the `to_datetime` function to convert the date strings. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
+
 ```esql
 FROM k8s
 | WHERE TRANGE(to_datetime("2024-05-10T00:17:14Z"), to_datetime("2024-05-10T00:18:33Z"))
@@ -39,6 +45,8 @@ FROM k8s
 | KEEP @timestamp
 | LIMIT 10
 ```
+
+This query retrieves records from the `k8s` index where the `@timestamp` is between two specific times with millisecond precision, using `to_datetime` for conversion. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
 
 ```esql
 FROM k8s
@@ -48,6 +56,8 @@ FROM k8s
 | LIMIT 10
 ```
 
+This query filters records from the `k8s` index where the `@timestamp` is between two epoch millisecond values (`1715300236000` and `1715300282000`). The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
+
 ```esql
 FROM k8s
 | WHERE TRANGE(1715300236000, 1715300282000)
@@ -55,4 +65,3 @@ FROM k8s
 | KEEP @timestamp
 | LIMIT 10
 ```
-

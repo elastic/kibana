@@ -1,43 +1,23 @@
 # FORK
 
-The `FORK` processing command creates multiple execution branches to operate
-on the same input data and combines the results in a single output table. A discriminator column (`_fork`) is added to identify which branch each row came from.
-Together with the `FUSE` command, `FORK` enables hybrid search to combine and score results from multiple queries. To learn more about using ES|QL for search, refer to ES|QL for search.
+The FORK command creates multiple execution branches that operate on the same input data and combines their results into a single output table. A discriminator column named `_fork` is added to indicate which branch each row originated from. This command is useful for hybrid search scenarios, especially when used together with the FUSE command to combine and score results from multiple queries.
 
-The `FORK` processing command creates multiple execution branches to operate
-on the same input data and combines the results in a single output table.
-**Syntax**
-```esql
-FORK ( <processing_commands> ) ( <processing_commands> ) ... ( <processing_commands> )
-```
+## Syntax
 
-**Branch identification:**
-- The `_fork` column identifies each branch with values like `fork1`, `fork2`, `fork3`
-- Values correspond to the order branches are defined
-- `fork1` always indicates the first branch
+`FORK ( <processing_commands> ) ( <processing_commands> ) ... ( <processing_commands> )`
 
-**Column handling:**
-- `FORK` branches can output different columns
-- Columns with the same name must have the same data type across all branches
-- Missing columns are filled with `null` values
+### Parameters
 
-**Row ordering:**
-- `FORK` preserves row order within each branch
-- Rows from different branches may be interleaved
-- Use `SORT _fork` to group results by branch
+#### <processing_commands>
 
-<note>
-  `FORK` branches default to `LIMIT 1000` if no `LIMIT` is provided.
-</note>
+A sequence of processing commands to apply in each branch. Each set of commands is enclosed in parentheses and operates independently on the same input data.
 
-**Limitations**
-- `FORK` supports at most 8 execution branches.
-- In versions older than 9.3.0 using remote cluster references and `FORK` is not supported.
-- Using more than one `FORK` command in a query is not supported.
+## Examples
 
-**Examples**
-In the following example, each `FORK` branch returns one row.
-Notice how `FORK` adds a `_fork` column that indicates which row the branch originates from:
+In this example, each FORK branch returns one row. The `_fork` column indicates which branch each row comes from:
+
+This query selects employees with `emp_no` 10001 and 10002 in separate branches, adds the `_fork` column to identify the branch, and keeps only the `emp_no` and `_fork` columns, sorting the results by `emp_no`.
+
 ```esql
 FROM employees
 | FORK ( WHERE emp_no == 10001 )
@@ -46,3 +26,9 @@ FROM employees
 | SORT emp_no
 ```
 
+## Limitations
+
+- FORK supports a maximum of 8 execution branches.
+- In versions older than 9.3.0, using remote cluster references with FORK is not supported.
+- Using more than one FORK command in a query is not supported.
+- FORK branches default to `LIMIT 1000` if no LIMIT is provided.

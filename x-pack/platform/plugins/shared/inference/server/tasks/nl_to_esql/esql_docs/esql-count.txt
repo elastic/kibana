@@ -1,6 +1,6 @@
-## COUNT
+# COUNT
 
-The `COUNT` function returns the total number of input values. If no field is specified, it counts the number of rows.
+The COUNT function returns the total number of input values. If no field is specified, it counts the number of rows.
 
 ## Syntax
 
@@ -8,22 +8,24 @@ The `COUNT` function returns the total number of input values. If no field is sp
 
 ### Parameters
 
-#### `field`
+#### field
 
-An expression that outputs values to be counted. If omitted, the function is equivalent to `COUNT(*)`, which counts the number of rows.
+Expression that outputs values to be counted. If omitted, COUNT counts the number of rows, equivalent to `COUNT(*)`.
 
 ## Examples
 
-### Count specific field values
+Count the number of non-null values in the `height` field:
+
+This query retrieves all records from the `employees` index and counts how many of them have a non-null value in the `height` field.
 
 ```esql
 FROM employees
 | STATS COUNT(height)
 ```
 
-Count the number of non-null values in the `height` field.
+Count the number of rows per language using `COUNT(*)`:
 
-### Count the number of rows
+This query retrieves all records from the `employees` index, groups them by the `languages` field, and counts the total number of rows for each language. The results are then sorted in descending order by language.
 
 ```esql
 FROM employees
@@ -31,18 +33,18 @@ FROM employees
 | SORT languages DESC
 ```
 
-Count the total number of rows grouped by the `languages` field and sort the results in descending order.
+Count the number of values produced by splitting a string using the `SPLIT` function:
 
-### Count values using inline functions
+This query creates a single row with a field called `words` containing a semicolon-separated string. It splits the string into individual words using the `SPLIT` function and counts the number of resulting values.
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS word_count = COUNT(SPLIT(words, ";"))
 ```
 
-Count the number of elements in a string split by the `;` delimiter.
+Count the number of times an expression returns `TRUE` by filtering with `WHERE`:
 
-### Count values based on a condition
+This query creates a single row with the value `n=1`, filters the data to only include rows where `n < 0` (which will be none), and then counts the number of remaining rows (which will be zero).
 
 ```esql
 ROW n=1
@@ -50,13 +52,15 @@ ROW n=1
 | STATS COUNT(n)
 ```
 
-Count the number of rows where the value of `n` is less than 0.
+Count the same stream of data based on two different expressions using `COUNT(<expression> OR NULL)`:
 
-### Count based on two different expressions
+This query creates a single row with `n=1` and then counts how many times `n > 0` is true and how many times `n < 0` is true, using the `COUNT(<expression> OR NULL)` pattern. The result will show counts for both expressions.
 
 ```esql
 ROW n=1
 | STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)
 ```
 
-Count the number of rows where `n > 0` and `n < 0` separately.
+## Limitations
+
+No specific limitations are mentioned for the COUNT function.

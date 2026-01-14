@@ -1,31 +1,35 @@
 # MV_CONTAINS
 
-Checks if all values yielded by the second multivalue expression are present in the values yielded by the first multivalue expression. Returns a boolean. Null values are treated as an empty set.
+The MV_CONTAINS function checks if all values from the second multivalue expression are present in the values from the first multivalue expression. It returns a boolean result. Null values are treated as an empty set.
 
-```
-stack: preview 9.2.0
-```
+## Syntax
 
-**Syntax**
 `MV_CONTAINS(superset, subset)`
 
 ### Parameters
 
-#### `superset`
+#### superset
 
-Multivalue expression.
+A multivalue expression representing the set in which to check for the presence of all values from the subset.
 
-#### `subset`
+#### subset
 
-Multivalue expression.
+A multivalue expression representing the set of values to check for within the superset.
 
-**Supported types**
+## Examples
 
-**Examples**
+Check if a single element is present in a set:
+
+This query creates a row with a set containing "a", "b", and "c", and an element "a". It then checks if the element "a" is present in the set, returning a boolean result in the `set_contains_element` field.
+
 ```esql
 ROW set = ["a", "b", "c"], element = "a"
 | EVAL set_contains_element = mv_contains(set, element)
 ```
+
+Check if one set is a subset of another, and vice versa:
+
+This query creates two sets, `setA` and `setB`. It checks if all elements of `setA` are present in `setB` (i.e., if `setA` is a subset of `setB`), and also checks if all elements of `setB` are present in `setA` (i.e., if `setB` is a subset of `setA`). The results are stored in `a_subset_of_b` and `b_subset_of_a` respectively.
 
 ```esql
 ROW setA = ["a","c"], setB = ["a", "b", "c"]
@@ -33,9 +37,12 @@ ROW setA = ["a","c"], setB = ["a", "b", "c"]
 | EVAL b_subset_of_a = mv_contains(setA, setB)
 ```
 
+Filter airports where the type contains both "major" and "military", and scalerank is 9:
+
+This query retrieves records from the `airports` index where the `type` field contains both "major" and "military", and the `scalerank` field equals 9. It then keeps only the `scalerank`, `name`, and `country` fields in the output.
+
 ```esql
 FROM airports
 | WHERE mv_contains(type, ["major","military"]) AND scalerank == 9
 | KEEP scalerank, name, country
 ```
-

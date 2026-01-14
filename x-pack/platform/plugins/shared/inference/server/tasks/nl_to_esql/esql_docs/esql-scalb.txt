@@ -1,28 +1,25 @@
 # SCALB
 
-Returns the result of `d * 2 ^ scaleFactor`, Similar to Java's `scalb` function. Result is rounded as if performed by a single correctly rounded floating-point multiply to a member of the double value set.
+The SCALB function returns the result of multiplying a number by 2 raised to the power of a scale factor, equivalent to `d * 2 ^ scaleFactor`. The result is rounded as if performed by a single correctly rounded floating-point multiply to a member of the double value set.
 
-```
-stack: ga 9.1.0
-```
+## Syntax
 
-**Syntax**
 `SCALB(d, scaleFactor)`
 
 ### Parameters
 
-#### `d`
+#### d
 
 Numeric expression for the multiplier. If `null`, the function returns `null`.
 
-#### `scaleFactor`
+#### scaleFactor
 
 Numeric expression for the scale factor. If `null`, the function returns `null`.
 
-**Supported types**
+## Examples
 
-**Example**
+This query creates a row with two columns, `x` set to 3.0 and `y` set to 10, then calculates the value of `x` multiplied by 2 to the power of `y` using the `scalb` function. The result is stored in a new column named `z`.
+
 ```esql
 row x = 3.0, y = 10 | eval z = scalb(x, y)
 ```
-

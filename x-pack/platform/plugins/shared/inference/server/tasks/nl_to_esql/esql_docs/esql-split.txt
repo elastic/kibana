@@ -1,6 +1,6 @@
 # SPLIT
 
-The `SPLIT` function splits a single-valued string into multiple strings based on a specified delimiter.
+The SPLIT function divides a single string into multiple strings based on a specified delimiter.
 
 ## Syntax
 
@@ -8,19 +8,25 @@ The `SPLIT` function splits a single-valued string into multiple strings based o
 
 ### Parameters
 
-#### `string`
+#### string
 
-String expression. If `null`, the function returns `null`.
+String expression to be split. If the value is `null`, the function returns `null`.
 
-#### `delim`
+#### delim
 
-Delimiter used to split the string. Only single-byte delimiters are currently supported.
+Delimiter used to split the string. Only single byte delimiters are currently supported.
 
 ## Examples
+
+Split a semicolon-separated string into multiple values:
+
+This query creates a row with a column named `words` containing the string "foo;bar;baz;qux;quux;corge". It then uses the SPLIT function to break this string into an array of values wherever a semicolon appears, storing the result in a new column called `word`.
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;corge"
 | EVAL word = SPLIT(words, ";")
 ```
 
-This example splits the string `words` into multiple strings using the semicolon (`;`) as the delimiter.
+## Limitations
+
+Only single byte delimiters are supported.

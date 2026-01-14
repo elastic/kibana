@@ -1,7 +1,42 @@
 # UNARY OPERATORS
 
-The only unary operator is negation (`-`):
-**Syntax**
-`UNARY OPERATORS()`
+The only unary operator is negation (`-`). Negation is used to invert the sign of a numeric value.
 
-**Supported types**
+## Syntax
+
+`-value`
+
+### Parameters
+
+#### value
+
+The numeric value whose sign you want to invert.
+
+## Examples
+
+Negate a positive number:
+
+This query creates a row with a column `a` set to 5, then uses the negation operator to create a new column `b` with the value -5.
+
+```esql
+ROW a = 5
+| EVAL b = -a
+```
+
+Negate a negative number:
+
+This query creates a row with a column `a` set to -3, then uses the negation operator to create a new column `b` with the value 3.
+
+```esql
+ROW a = -3
+| EVAL b = -a
+```
+
+Negate a column value in a query:
+
+This query retrieves data from the `numbers` table and creates a new column `negated` that contains the negated value of the `number` column for each row.
+
+```esql
+FROM numbers
+| EVAL negated = -number
+```

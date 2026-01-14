@@ -10,13 +10,14 @@ Returns the hyperbolic sine of a number.
 
 #### number
 
-A numeric expression. If `null`, the function returns `null`.
+Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
+This query creates a single row with a column `a` set to 1.8, then calculates the hyperbolic sine of `a` and stores the result in a new column called `sinh`.
+
 ```esql
 ROW a=1.8
-| EVAL sinh = SINH(a)
+| EVAL sinh=SINH(a)
 ```
-
-Calculate the hyperbolic sine of the value `1.8`.
+Calculates the hyperbolic sine of the value 1.8 and stores the result in the column `sinh`.

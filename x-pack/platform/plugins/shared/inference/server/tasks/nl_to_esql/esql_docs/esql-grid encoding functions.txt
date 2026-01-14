@@ -1,34 +1,32 @@
 # GRID ENCODING FUNCTIONS
 
-Calculates the `geotile` of the supplied geo_point at the specified precision. The result is long encoded. Use TO_STRING to convert the result to a string, TO_LONG to convert it to a `long`, or TO_GEOSHAPE to calculate the `geo_shape` bounding geometry.  These functions are related to the `geo_grid` query and the `geotile_grid` aggregation.
+The GRID ENCODING FUNCTIONS calculate spatial grid encodings for a given geo_point at a specified precision. These include geotile, geohex (H3 cell-id), and geohash encodings. The result is long encoded and can be converted to a string, long, or geo_shape bounding geometry using TO_STRING, TO_LONG, or TO_GEOSHAPE. These functions are related to spatial grid queries and aggregations.
 
-### `ST_GEOTILE`
+## Syntax
 
-```
-stack: preview
-serverless: preview
-```
-
-**Syntax**
-`GRID ENCODING FUNCTIONS(geometry, precision, bounds, geometry, precision, bounds, geometry, precision, bounds)`
+`GRID ENCODING FUNCTIONS(geometry, precision, bounds)`
 
 ### Parameters
 
-#### `geometry`
+#### geometry
 
 Expression of type `geo_point`. If `null`, the function returns `null`.
 
-#### `precision`
+#### precision
 
-Expression of type `integer`. If `null`, the function returns `null`. Valid values are between 0 and 29.
+Expression of type `integer`. If `null`, the function returns `null`. Valid values depend on the function:
+- ST_GEOTILE: 0 to 29
+- ST_GEOHEX: 0 to 15
+- ST_GEOHASH: 1 to 12
 
-#### `bounds`
+#### bounds
 
-Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use `ST_ENVELOPE` if the `geo_shape` is of any other type.
+Optional. Bounds to filter the grid tiles, specified as a `geo_shape` of type `BBOX`. Use `ST_ENVELOPE` if the `geo_shape` is of any other type.
 
-**Supported types**
+## Examples
 
-**Example**
+The following query calculates the geotile grid encoding for each airport location at precision 2. It then aggregates the data by geotile, computing the count of airports and the centroid of their locations within each tile. The results are converted to string format, sorted by count (descending) and geotile string (ascending), and only the count, centroid, and geotile string are kept in the output.
+
 ```esql
 FROM airports
 | EVAL geotile = ST_GEOTILE(location, 2)
@@ -41,35 +39,8 @@ FROM airports
 | KEEP count, centroid, geotileString
 ```
 
-### `ST_GEOHEX`
+This query calculates the geohex (H3 cell-id) grid encoding for each airport location at precision 1. It aggregates the data by geohex, computing the count and centroid for each cell. Only cells with a count of 10 or more are included. The geohex values are converted to strings, and the results are sorted by count (descending) and geohex string (ascending), keeping only the count, centroid, and geohex string.
 
-```
-stack: preview
-serverless: preview
-```
-
-**Syntax**
-`GRID ENCODING FUNCTIONS(geometry, precision, bounds, geometry, precision, bounds, geometry, precision, bounds)`
-
-### Parameters
-
-#### `geometry`
-
-Expression of type `geo_point`. If `null`, the function returns `null`.
-
-#### `precision`
-
-Expression of type `integer`. If `null`, the function returns `null`. Valid values are between 0 and 15.
-
-#### `bounds`
-
-Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use `ST_ENVELOPE` if the `geo_shape` is of any other type.
-
-**Description**
-Calculates the `geohex`, the H3 cell-id, of the supplied geo_point at the specified precision. The result is long encoded. Use TO_STRING to convert the result to a string, TO_LONG to convert it to a `long`, or TO_GEOSHAPE to calculate the `geo_shape` bounding geometry.  These functions are related to the `geo_grid` query and the `geohex_grid` aggregation.
-**Supported types**
-
-**Example**
 ```esql
 FROM airports
 | EVAL geohex = ST_GEOHEX(location, 1)
@@ -83,35 +54,8 @@ FROM airports
 | SORT count DESC, geohexString ASC
 ```
 
-### `ST_GEOHASH`
+This query calculates the geohash grid encoding for each airport location at precision 1. It aggregates the data by geohash, computing the count and centroid for each geohash cell. Only cells with a count of 10 or more are included. The geohash values are converted to strings, and the results are sorted by count (descending) and geohash string (ascending), keeping only the count, centroid, and geohash string.
 
-```
-stack: preview
-serverless: preview
-```
-
-**Syntax**
-`GRID ENCODING FUNCTIONS(geometry, precision, bounds, geometry, precision, bounds, geometry, precision, bounds)`
-
-### Parameters
-
-#### `geometry`
-
-Expression of type `geo_point`. If `null`, the function returns `null`.
-
-#### `precision`
-
-Expression of type `integer`. If `null`, the function returns `null`. Valid values are between 1 and 12.
-
-#### `bounds`
-
-Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use `ST_ENVELOPE` if the `geo_shape` is of any other type.
-
-**Description**
-Calculates the `geohash` of the supplied geo_point at the specified precision. The result is long encoded. Use TO_STRING to convert the result to a string, TO_LONG to convert it to a `long`, or TO_GEOSHAPE to calculate the `geo_shape` bounding geometry.  These functions are related to the `geo_grid` query and the `geohash_grid` aggregation.
-**Supported types**
-
-**Example**
 ```esql
 FROM airports
 | EVAL geohash = ST_GEOHASH(location, 1)
@@ -124,4 +68,3 @@ FROM airports
 | KEEP count, centroid, geohashString
 | SORT count DESC, geohashString ASC
 ```
-

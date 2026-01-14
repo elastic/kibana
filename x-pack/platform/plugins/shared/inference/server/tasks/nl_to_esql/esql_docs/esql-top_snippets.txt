@@ -1,63 +1,46 @@
 # TOP_SNIPPETS
 
-Use `TOP_SNIPPETS` to extract the best snippets for a given query string from a text field.
-TopSnippets can be used on fields from the text famiy like text and semantic_text.
-TopSnippets will extract the best snippets for a given query string.
+The TOP_SNIPPETS function extracts the best matching snippets for a given query string from a text field. It works with fields from the text family, such as `text` and `semantic_text`, and allows you to control the number and length of the returned snippets.
 
-```
-stack: preview 9.3.0
-serverless: preview
-```
+## Syntax
 
-**Syntax**
 `TOP_SNIPPETS(field, query, options, num_words, num_snippets)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input to chunk.
+The input text field to extract snippets from.
 
-#### `query`
+#### query
 
 The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.
 
-#### `options`
+#### options
 
-(Optional) TopSnippets additional options as function named parameters.
+(Optional) Additional options for snippet extraction, provided as function named parameters.
 
-**Supported types**
+#### num_words
 
-**Supported function named parameters**
-### Parameters
+(integer) The maximum number of words to return in each snippet. This helps control the size of tokens per snippet and manage inference costs.
 
-#### `num_words`
-
-(integer) The maximum number of words to return in each snippet.
- This allows better control of inference costs by limiting the size of tokens per snippet.
-
-#### `num_snippets`
+#### num_snippets
 
 (integer) The maximum number of matching snippets to return.
 
-**Examples**
-```
-stack: preview 9.3.0
-```
+## Examples
+
+This query extracts the best matching snippets from the `description` field for each book, using the term "Tolkien" as the search query. The resulting snippets are stored in a new column called `snippets`.
 
 ```esql
 FROM books
 | EVAL snippets = TOP_SNIPPETS(description, "Tolkien")
 ```
 
-```
-stack: preview 9.3.0
-```
+This query filters the books to only those whose title contains the word "Return". For each of these books, it extracts up to 3 snippets from the `description` field, with each snippet containing a maximum of 25 words, using "Tolkien" as the search query. The extracted snippets are stored in the `snippets` column.
 
 ```esql
 FROM books
 | WHERE MATCH(title, "Return")
 | EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 })
 ```
-
-lists/search-functions.md

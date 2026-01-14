@@ -1,6 +1,6 @@
-## LIMIT
+# LIMIT
 
-The `LIMIT` command restricts the number of rows returned by a query.
+The LIMIT command restricts the number of rows returned by a query. It is useful for controlling the size of the result set, especially when you only need a subset of the data.
 
 ## Syntax
 
@@ -8,23 +8,15 @@ The `LIMIT` command restricts the number of rows returned by a query.
 
 ### Parameters
 
-#### `max_number_of_rows`
+#### max_number_of_rows
 
 The maximum number of rows to return.
 
-## Description
-
-The `LIMIT` command restricts the number of rows returned by a query. For example:
-
-```esql
-FROM index
-| WHERE field == "value"
-| LIMIT 1000
-```
-
 ## Examples
 
-Limit the result to the first 5 rows, sorted by `emp_no` in ascending order:
+Limit the result to the first 5 employees sorted by employee number:
+
+This query retrieves data from the `employees` index, sorts the employees in ascending order by their employee number, and then returns only the first 5 rows from the sorted results.
 
 ```esql
 FROM employees
@@ -34,9 +26,8 @@ FROM employees
 
 ## Limitations
 
-- Queries cannot return more than 10,000 rows, even if the `LIMIT` value exceeds this threshold.
+Queries do not return more than 10,000 rows, regardless of the value specified in the LIMIT command. This is a configurable upper limit. The default and maximum limits can be changed using the following dynamic cluster settings:
+- `esql.query.result_truncation_default_size`
+- `esql.query.result_truncation_max_size`
 
-To work around this limitation:
-  - Reduce the size of the result set by modifying the query to only return relevant data. This can be achieved by using the WHERE command to select a smaller subset of the data.
-  - Shift any post-query processing to the query itself. The ES|QL STATS ... BY command can be used to aggregate data within the query.
-
+The upper limit applies only to the number of rows output by the query, not to the number of documents processed. Increasing the limit may result in higher memory usage, longer processing times, and increased network traffic. These limitations are similar to those enforced by the search API for pagination.

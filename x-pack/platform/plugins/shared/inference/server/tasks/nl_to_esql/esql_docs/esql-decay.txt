@@ -1,59 +1,47 @@
 # DECAY
 
-Calculates a relevance score that decays based on the distance of a numeric, spatial or date type value from a target origin, using configurable decay functions.
-`DECAY` calculates a score between 0 and 1 based on how far a field value is from a specified origin point (called distance).
-The distance can be a numeric distance, spatial distance or temporal distance depending on the specific data type.
-`DECAY` can use function named parameters to specify additional `options`
-for the decay function.
-For spatial queries, scale and offset for geo points use distance units (e.g., "10km", "5mi"),
-while cartesian points use numeric values. For date queries, scale and offset use time_duration values.
-For numeric queries you also use numeric values.
+Calculates a relevance score that decreases based on the distance of a numeric, spatial, or date value from a target origin. The score ranges from 0 to 1, depending on how far the field value is from the specified origin. The function supports configurable decay types and options, allowing you to control how the score decays with distance. For spatial data, scale and offset use distance units (e.g., "10km", "5mi") for geo points and numeric values for cartesian points. For date data, scale and offset use time durations. For numeric data, numeric values are used.
 
-```
-stack: preview 9.3.0
-serverless: preview
-```
+## Syntax
 
-**Syntax**
 `DECAY(value, origin, scale, options, offset, type, decay)`
 
 ### Parameters
 
-#### `value`
+#### value
 
-The input value to apply decay scoring to.
+The input value to which decay scoring is applied.
 
-#### `origin`
+#### origin
 
-Central point from which the distances are calculated.
+The central point from which distances are calculated.
 
-#### `scale`
+#### scale
 
-Distance from the origin where the function returns the decay value.
+The distance from the origin where the function returns the specified decay value.
 
-#### `options`
+#### options
 
-**Supported types**
+Additional named parameters for the decay function.
 
-**Supported function named parameters**
-### Parameters
+#### offset
 
-#### `offset`
+(Optional) The distance from the origin where no decay occurs. Accepts double, integer, long, time_duration, keyword, or text.
 
-(double, integer, long, time_duration, keyword, text) Distance from the origin where no decay occurs.
+#### type
 
-#### `type`
+(Optional) The decay function to use. Supported values are: linear, exponential, or gaussian.
 
-(keyword) Decay function to use: linear, exponential or gaussian.
+#### decay
 
-#### `decay`
+(Optional) The multiplier value returned at the scale distance from the origin.
 
-(double) Multiplier value returned at the scale distance from the origin.
+## Examples
 
-**Example**
+The following query calculates a decay score for each employee's salary using a linear decay function. The decay score decreases as the salary moves further from the origin (0), with a scale of 100,000, an offset of 5, and a decay value of 0.5. The results are then sorted in descending order by the decay score, so employees with salaries closer to the origin appear first.
+
 ```esql
 FROM employees
 | EVAL decay_result = decay(salary, 0, 100000, {"offset": 5, "decay": 0.5, "type": "linear"})
 | SORT decay_result DESC
 ```
-

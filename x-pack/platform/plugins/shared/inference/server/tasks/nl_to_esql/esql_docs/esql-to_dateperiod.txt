@@ -8,15 +8,18 @@ Converts an input value into a `date_period` value.
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value. This must be a valid constant date period expression.
+Input value. The input must be a valid constant date period expression.
 
 ## Examples
 
+Convert a string representing a date period to a `date_period` value and use it in date arithmetic:
+
+This query creates a row with a datetime value (`x`), then calculates two new fields: `y`, which adds 3 days to `x`, and `z`, which subtracts a date period of 3 days from `x` using the `TO_DATEPERIOD` function.
+
 ```esql
 ROW x = "2024-01-01"::datetime
-| EVAL y = x + "3 DAYS"::date_period, z = x - TO_DATEPERIOD(`3 days`)
+| EVAL y = x + "3 DAYS"::date_period, z = x - TO_DATEPERIOD("3 days");
 ```
-
-This example demonstrates how to add and subtract a `date_period` value to/from a datetime field.
+This example adds and subtracts a date period of 3 days to and from a datetime value.

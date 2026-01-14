@@ -1,29 +1,28 @@
 # CONTAINS
 
-Returns a boolean that indicates whether a keyword substring is within another string. Returns `null` if either parameter is null.
+Returns a boolean value indicating whether a keyword substring exists within another string. If either parameter is null, the function returns `null`.
 
-```
-stack: ga 9.2.0
-```
+## Syntax
 
-**Syntax**
 `CONTAINS(string, substring)`
 
 ### Parameters
 
-#### `string`
+#### string
 
-String expression: input string to check against. If `null`, the function returns `null`.
+The input string to check against. If `null`, the function returns `null`.
 
-#### `substring`
+#### substring
 
-String expression: A substring to find in the input string. If `null`, the function returns `null`.
+The substring to search for within the input string. If `null`, the function returns `null`.
 
-**Supported types**
+## Examples
 
-**Example**
+This query creates a row with the value "hello" and then checks if the substring "ll" exists within that string. The result is stored in the column `has_ll` as a boolean value.
+
 ```esql
 ROW a = "hello"
 | EVAL has_ll = CONTAINS(a, "ll")
 ```
 
+Checks if the substring "ll" is present in the string "hello".

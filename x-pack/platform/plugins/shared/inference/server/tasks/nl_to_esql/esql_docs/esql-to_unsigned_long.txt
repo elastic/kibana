@@ -1,6 +1,6 @@
 # TO_UNSIGNED_LONG
 
-The TO_UNSIGNED_LONG function converts an input value into an unsigned long value.
+Converts an input value to an unsigned long value. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to unsigned long. Boolean `true` is converted to `1`, and `false` to `0`.
 
 ## Syntax
 
@@ -10,22 +10,14 @@ The TO_UNSIGNED_LONG function converts an input value into an unsigned long valu
 
 #### field
 
-The input value. This can be a single or multi-valued column or an expression.
+The input value to convert. This can be a single- or multi-valued column, or an expression.
 
 ## Examples
 
-The following example demonstrates the use of the TO_UNSIGNED_LONG function:
+The following query demonstrates how to convert string values to unsigned long values, and how conversion failures are handled:
 
 ```esql
 ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
 | EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)
 ```
-
-```esql
-ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
-| EVAL long_date1 = TO_UNSIGNED_LONG(date1), long_date2 = TO_UNSIGNED_LONG(date2)
-```
-
-## Notes
-
-If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch and then converted to an unsigned long. A boolean value of true will be converted to an unsigned long value of 1, and false will be converted to 0.
+This example converts three string values to unsigned long values using different function aliases. The first string (`"2147483648"`) is successfully converted to an unsigned long. The second string (`"2147483648.2"`) is a floating-point number in string form, which may result in a conversion failure or truncation. The third string (`"foo"`) cannot be converted, so the result is `null` and a warning header is added to the response with details about the failure.

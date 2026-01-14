@@ -1,32 +1,27 @@
 # V_L1_NORM
 
-Calculates the l1 norm between two dense_vectors.
+Calculates the l1 norm (Manhattan distance) between two dense_vectors.
 
-```
-stack: preview 9.3.0
-serverless: preview
-```
+## Syntax
 
-**Syntax**
 `V_L1_NORM(left, right)`
 
 ### Parameters
 
-#### `left`
+#### left
 
-first dense_vector to calculate l1 norm similarity
+First dense_vector to calculate l1 norm similarity.
 
-#### `right`
+#### right
 
-second dense_vector to calculate l1 norm similarity
+Second dense_vector to calculate l1 norm similarity.
 
-**Supported types**
+## Examples
 
-**Example**
+This query calculates the l1 norm similarity (Manhattan distance) between the `rgb_vector` column and the vector `[0, 255, 255]` for each row in the `colors` dataset. It then sorts the results by similarity in descending order (showing the most similar colors first) and by color name in ascending order.
+
 ```esql
 from colors
 | eval similarity = v_l1_norm(rgb_vector, [0, 255, 255])
 | sort similarity desc, color asc
 ```
-
-lists/dense-vector-functions.md

@@ -1,6 +1,15 @@
 # LOGICAL OPERATORS
 
-The following logical operators are supported:
-- `AND`
-- `OR`
-- `NOT`
+Logical operators are used to combine or modify boolean expressions in queries. The supported logical operators are:
+
+## Syntax
+
+`AND`, `OR`, `NOT`
+
+### Parameters
+
+None.
+
+## Examples
+
+No examples provided.

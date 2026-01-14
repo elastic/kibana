@@ -2,30 +2,26 @@
 
 Calculates the dot product between two dense_vectors.
 
-```
-stack: preview 9.3.0
-serverless: preview
-```
+## Syntax
 
-**Syntax**
 `V_DOT_PRODUCT(left, right)`
 
 ### Parameters
 
-#### `left`
+#### left
 
-first dense_vector to calculate dot product similarity
+First dense_vector to calculate dot product similarity.
 
-#### `right`
+#### right
 
-second dense_vector to calculate dot product similarity
+Second dense_vector to calculate dot product similarity.
 
-**Supported types**
+## Examples
 
-**Example**
+This query calculates the dot product similarity between the `rgb_vector` column and the vector `[0, 255, 255]` for each row in the `colors` table. It then sorts the results in descending order of similarity and, for rows with the same similarity, in ascending order of the `color` column.
+
 ```esql
 from colors
 | eval similarity = v_dot_product(rgb_vector, [0, 255, 255])
 | sort similarity desc, color asc
 ```
-

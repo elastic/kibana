@@ -1,30 +1,26 @@
 # MAX_OVER_TIME
 
-Calculates the maximum over time value of a field.
+Calculates the maximum value of a field within a specified time window.
 
-```
-stack: preview 9.2.0
-serverless: preview
-```
+## Syntax
 
-**Syntax**
 `MAX_OVER_TIME(field, window)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-the metric field to calculate the value for
+The metric field to calculate the maximum value for.
 
-#### `window`
+#### window
 
-the time window over which to compute the maximum
+The time window over which to compute the maximum.
 
-**Supported types**
+## Examples
 
-**Example**
+The following query calculates the maximum network cost per cluster in 1-minute time buckets. It first selects data from the `k8s` time series, then computes the sum of the maximum network cost over each 1-minute window, grouping the results by cluster and by each 1-minute time bucket.
+
 ```esql
 TS k8s
 | STATS cost=SUM(MAX_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)
 ```
-

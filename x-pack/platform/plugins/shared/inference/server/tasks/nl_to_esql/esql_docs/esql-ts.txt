@@ -1,100 +1,72 @@
 # TS
 
-The `TS` source command enables time series semantics and adds support for
-time series aggregation functions to the `STATS` command, such as
-`AVG_OVER_TIME()`,
-or `RATE`.
-These functions are implicitly evaluated per time series, then aggregated by group using a secondary aggregation
-function. For example:
+The TS source command enables time series semantics and allows the use of time series aggregation functions within the STATS command, such as AVG_OVER_TIME() or RATE. These functions are evaluated per time series and then aggregated by group using a secondary aggregation function. The TS command is similar to the FROM command but is specifically designed for time series indices and supports time series aggregation functions in STATS.
+
+## Syntax
+
+`TS index_pattern [METADATA fields]`
+
+### Parameters
+
+#### index_pattern
+
+A list of indices, data streams, or aliases. Supports wildcards and date math.
+
+#### fields
+
+A comma-separated list of metadata fields to retrieve.
+
+## Examples
+
+Calculate the total rate of search requests per host and hour, using the RATE function per time series in hourly buckets and summing rates for each host and hourly bucket:
+
+This query retrieves data from the `metrics` index for the past hour, calculates the rate of `search_requests` for each time series in hourly buckets, and then sums these rates for each host and hour.
+
 ```esql
 TS metrics
   | WHERE @timestamp >= now() - 1 hour
   | STATS SUM(RATE(search_requests)) BY TBUCKET(1 hour), host
 ```
 
-This query calculates the total rate of search requests (tracked by the `search_requests` counter) per host and hour. The `RATE()`
-function is applied per time series in hourly buckets. These rates are summed for each
-host and hourly bucket (since each host can map to multiple time series).
-This paradigm—a pair of aggregation functions—is standard for time series
-querying. For supported inner (time series) functions per
-metric type, refer to
-ES|QL time series aggregation functions. These functions also
-apply to downsampled data, with the same semantics as for raw data.
-<note>
-  If a query is missing an inner (time series) aggregation function,
-  `LAST_OVER_TIME()`
-  is assumed and used implicitly. For instance, the following two queries are
-  equivalent, returning the average of the last memory usage values per time series:
-  ```esql
-  TS metrics | STATS AVG(memory_usage)
+Return the average of the last memory usage values per time series:
 
-  TS metrics | STATS AVG(LAST_OVER_TIME(memory_usage))
-  ```
-  To calculate the average memory usage across per-time-series averages, use
-  the following query:
-  ```esql
-  TS metrics | STATS AVG(AVG_OVER_TIME(memory_usage))
-  ```
-</note>
+This query gets the average of the most recent `memory_usage` value for each time series in the `metrics` index.
 
-Use regular (non-time-series)
-aggregation functions,
-such as `SUM()`, as outer aggregation functions. Using a time series aggregation
-in combination with an inner function causes an error. For example, the
-following query is invalid:
 ```esql
-TS metrics | STATS AVG_OVER_TIME(RATE(memory_usage))
+TS metrics | STATS AVG(memory_usage)
 ```
 
-<note>
-  A time series
-  aggregation function must be wrapped inside a
-  regular
-  aggregation function. For instance, the following query is invalid:
-  ```esql
-  TS metrics | STATS RATE(search_requests)
-  ```
-</note>
+Return the average of the last memory usage values per time series, explicitly using LAST_OVER_TIME:
 
-**Brief description**
-The `TS` source command is similar to the `FROM`
-source command, with the following key differences:
-- Targets only time series indices
-- Enables the use of time series aggregation functions inside the
-  STATS command
+This query explicitly uses the `LAST_OVER_TIME` function to get the last `memory_usage` value for each time series, and then calculates the average of these values.
 
-**Syntax**
 ```esql
-TS index_pattern [METADATA fields]
+TS metrics | STATS AVG(LAST_OVER_TIME(memory_usage))
 ```
 
-### Parameters
+Calculate the average memory usage across per-time-series averages:
 
-#### `index_pattern`
+This query calculates the average of the average `memory_usage` values computed over time for each time series in the `metrics` index.
 
-A list of indices, data streams or aliases. Supports wildcards and date math.
+```esql
+TS metrics | STATS AVG(AVG_OVER_TIME(memory_usage))
+```
 
-#### `fields`
+Calculate the sum of average memory usage per host and hourly bucket for the last day:
 
-A comma-separated list of metadata fields to retrieve.
+This query retrieves data from the `metrics` index for the past day, calculates the average `memory_usage` over time for each time series, and then sums these averages for each host and hourly bucket.
 
-**Best practices**
-- Avoid aggregating multiple metrics in the same query when those metrics have different dimensional cardinalities.
-  For example, in `STATS max(rate(foo)) + rate(bar))`, if `foo` and `bar` don't share the same dimension values, the rate
-  for one metric will be null for some dimension combinations. Because the + operator returns null when either input
-  is null, the entire result becomes null for those dimensions. Additionally, queries that aggregate a single metric
-  can filter out null values more efficiently.
-- Use the `TS` command for aggregations on time series data, rather than `FROM`. The `FROM` command is still available
-  (for example, for listing document contents), but it's not optimized for procesing time series data and may produce
-  unexpected results.
-- The `TS` command can't be combined with certain operations (such as
-  `FORK`) before the `STATS` command is applied. Once `STATS` is
-  applied, you can process the tabular output with any applicable ES|QL operations.
-- Add a time range filter on `@timestamp` to limit the data volume scanned and improve query performance.
-
-**Examples**
 ```esql
 TS metrics
 | WHERE @timestamp >= now() - 1 day
 | STATS SUM(AVG_OVER_TIME(memory_usage)) BY host, TBUCKET(1 hour)
 ```
+
+## Limitations
+
+- If a query is missing an inner (time series) aggregation function, LAST_OVER_TIME() is assumed and used implicitly.
+- A time series aggregation function must be wrapped inside a regular aggregation function. Using a time series aggregation as the outer function causes an error.
+- The TS command cannot be combined with certain operations (such as FORK) before the STATS command is applied. Once STATS is applied, you can process the tabular output with any applicable operations.
+- Avoid aggregating multiple metrics with different dimensional cardinalities in the same query, as this can result in null values for some dimension combinations.
+- Use a time range filter on @timestamp to limit the data volume scanned and improve query performance.
+- The FROM command is not optimized for time series data and may produce unexpected results compared to TS.
