@@ -58,7 +58,7 @@ describe('CSV Upload Service', () => {
   let csvService: ReturnType<typeof createPrivilegedUsersCsvService>;
 
   const mockIndex = 'test-privilege-monitoring-index';
-  
+
   const createMockStream = (data: string): HapiReadableStream => {
     const stream = new Readable() as HapiReadableStream;
     stream.push(data);
@@ -254,7 +254,7 @@ describe('CSV Upload Service', () => {
     });
   });
 
-  describe('Result Aggregation', () => {    
+  describe('Result Aggregation', () => {
     const createMockUser = (
       username: string,
       index: number,
@@ -268,7 +268,7 @@ describe('CSV Upload Service', () => {
         source: 'csv',
       },
     });
-    
+
     const createMockError = (
       message: string,
       username: string | null,
@@ -278,14 +278,14 @@ describe('CSV Upload Service', () => {
       username,
       index,
     });
-    
+
     const createEmptyResults = (): BulkProcessingResults => ({
       users: [],
       errors: [],
       failed: 0,
       successful: 0,
     });
-    
+
     const createMockBatch = (
       uploaded: Array<
         ReturnType<typeof right<BulkPrivMonUser>> | ReturnType<typeof left<BulkProcessingError>>
@@ -303,13 +303,13 @@ describe('CSV Upload Service', () => {
     });
 
     describe('Accumulator Behavior', () => {
-      it('should accumulate results across multiple batches', () => {        
+      it('should accumulate results across multiple batches', () => {
         const mockUser1 = createMockUser('user1', 0, 'admin');
         const mockUser2 = createMockUser('user2', 1, 'user');
         const mockUser3 = createMockUser('user3', 2, 'admin');
         const mockUser4 = createMockUser('user4', 3, 'user');
         const mockUser5 = createMockUser('user5', 4, 'admin');
-        
+
         const mockError1 = createMockError('Validation failed', 'user3', 2);
         const mockError2 = createMockError('Network timeout', 'user4', 3);
 
