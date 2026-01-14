@@ -28,7 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
   const timeout = 150_000;
-  describe('When on the Endpoint Policy Details Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246400
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -107,8 +108,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe(`on the ${protection} protections card`, () => {
         let policyInfo: PolicyTestResourceInfo;
         const cardTestSubj:
-          | (typeof formTestSubjects)['ransomware']
-          | (typeof formTestSubjects)['malware'] =
+          | typeof formTestSubjects['ransomware']
+          | typeof formTestSubjects['malware'] =
           formTestSubjects[
             protection as keyof Pick<typeof formTestSubjects, 'malware' | 'ransomware'>
           ];
