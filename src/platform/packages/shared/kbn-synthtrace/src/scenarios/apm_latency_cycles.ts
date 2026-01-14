@@ -8,8 +8,8 @@
  */
 
 /**
- * Generates APM data with cyclic latency patterns.
- * High latency (≥1500ms) for 5 minutes, then low latency (≤700ms) for 5 minutes.
+ * Generates APM data with cyclic error rate patterns.
+ * High error rate (>0.2) for 2 minutes, then low error rate (<0.2) for 3 minutes.
  */
 
 import type { ApmFields } from '@kbn/synthtrace-client';
@@ -24,19 +24,19 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const service = apm.service('opbeans-node', 'production', 'nodejs');
       const instance = service.instance('instance-1');
 
-      // Cycle duration: 10 minutes (5 minutes high, 5 minutes low)
-      const CYCLE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
-      const HIGH_LATENCY_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+      // Cycle duration: 5 minutes (2 minutes high error rate, 3 minutes low error rate)
+      const CYCLE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+      const HIGH_ERROR_RATE_DURATION = 2 * 60 * 1000; // 2 minutes in milliseconds
 
-      function getLatency(timestamp: number): number {
+      function getErrorRate(timestamp: number): number {
         const cyclePosition = timestamp % CYCLE_DURATION;
 
-        if (cyclePosition < HIGH_LATENCY_DURATION) {
-          // High latency phase: 1500ms to 2000ms
-          return 1500 + Math.random() * 500;
+        if (cyclePosition < HIGH_ERROR_RATE_DURATION) {
+          // High error rate: 0.25 to 0.35 (above 0.2)
+          return 0.25 + Math.random() * 0.1;
         } else {
-          // Low latency phase: 400ms to 700ms
-          return 400 + Math.random() * 300;
+          // Low error rate: 0.05 to 0.15 (below 0.2)
+          return 0.05 + Math.random() * 0.1;
         }
       }
 
@@ -46,18 +46,19 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           .interval('30s')
           .rate(10) // 10 transactions every 30 seconds
           .generator((timestamp) => {
-            const latency = getLatency(timestamp);
+            const errorRate = getErrorRate(timestamp);
+            const shouldFail = Math.random() < errorRate;
 
             return instance
               .transaction('GET /api/products')
-              .duration(latency)
+              .duration(500 + Math.random() * 200)
               .timestamp(timestamp)
-              .outcome('success')
+              .outcome(shouldFail ? 'failure' : 'success')
               .children(
                 instance
                   .span('GET products', 'db', 'postgresql')
                   .timestamp(timestamp + 50)
-                  .duration(latency * 0.6)
+                  .duration(300 + Math.random() * 100)
                   .destination('postgresql')
                   .success()
               );
