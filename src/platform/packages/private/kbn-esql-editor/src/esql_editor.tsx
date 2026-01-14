@@ -706,7 +706,8 @@ const ESQLEditorInternal = function ESQLEditor({
     editorRef,
     editorModel,
     query,
-    esqlCallbacks?.getSources ? async () => (await esqlCallbacks.getSources?.()) ?? [] : undefined
+    () => setIsIndicesBrowserOpen(true),
+    esqlCallbacks?.getSources ? async () => (await esqlCallbacks.getSources?.()) ?? [] : undefined,
   );
 
   const queryRunButtonProperties = useMemo(() => {

@@ -26,6 +26,7 @@ export const useResourcesBadge = (
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>,
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>,
   query: AggregateQuery,
+  openIndicesBrowser: () => void,
   getSources?: () => Promise<ESQLSourceResult[]>
 ) => {
   const { euiTheme } = useEuiTheme();
@@ -145,10 +146,7 @@ export const useResourcesBadge = (
         editorRef.current?.setPosition(positionAfterCommand);
         editorRef.current?.revealPosition(positionAfterCommand);
 
-        // Trigger autocomplete suggestions
-        setTimeout(() => {
-          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-        }, 0);
+        openIndicesBrowser();
       }
       if (
         currentWord.word === 'TS' &&
@@ -166,10 +164,7 @@ export const useResourcesBadge = (
         editorRef.current?.setPosition(positionAfterCommand);
         editorRef.current?.revealPosition(positionAfterCommand);
 
-        // Trigger autocomplete suggestions
-        setTimeout(() => {
-          editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-        }, 0);
+        openIndicesBrowser();
       }
     },
     [editorModel, editorRef, query.esql]
