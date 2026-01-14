@@ -149,11 +149,11 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
       try {
         const { name, type, token, stack_connector_id } = request.body;
-        const [, { actions, dataSourcesRegistry, agentBuilder }] = await getStartServices();
+        const [, { actions, dataCatalog, agentBuilder }] = await getStartServices();
         const savedObjectsClient = coreContext.savedObjects.client;
 
         // Validate data source type exists
-        const dataCatalog = dataSourcesRegistry.getCatalog();
+        const dataCatalog = dataCatalog.getCatalog();
         const dataSource = dataCatalog.get(type);
         if (!dataSource) {
           return response.customError({

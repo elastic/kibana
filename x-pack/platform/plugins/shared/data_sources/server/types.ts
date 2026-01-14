@@ -9,9 +9,9 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
-  DataSourcesRegistryPluginSetup,
-  DataSourcesRegistryPluginStart,
-} from '@kbn/data-sources-registry-plugin/server';
+  DataCatalogPluginSetup,
+  DataCatalogPluginStart,
+} from '@kbn/data-catalog-plugin/server';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -29,14 +29,14 @@ export interface DataSourcesServerStart {}
 
 export interface DataSourcesServerSetupDependencies {
   actions: ActionsPluginSetup;
-  dataSourcesRegistry: DataSourcesRegistryPluginSetup;
+  dataCatalog: DataCatalogPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
 }
 
 export interface DataSourcesServerStartDependencies {
   actions: ActionsPluginStart;
-  dataSourcesRegistry: DataSourcesRegistryPluginStart;
+  dataCatalog: DataCatalogPluginStart;
   agentBuilder: AgentBuilderPluginStart;
   workflowsManagement: WorkflowsServerPluginStart;
 }

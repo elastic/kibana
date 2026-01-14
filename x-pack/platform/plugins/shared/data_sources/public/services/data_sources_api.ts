@@ -6,8 +6,8 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { DataSource } from '@kbn/data-sources-registry-plugin/common';
-import { API_BASE_PATH } from '@kbn/data-sources-registry-plugin/common';
+import type { DataSource } from '@kbn/data-catalog-plugin';
+import { API_BASE_PATH } from '@kbn/data-catalog-plugin';
 
 /**
  * Service for interacting with available Data Sources (from Data Catalog).

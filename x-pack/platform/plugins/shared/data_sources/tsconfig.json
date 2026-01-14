@@ -22,7 +22,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/management-settings-ids",
     "@kbn/config-schema",
-    "@kbn/data-sources-registry-plugin",
+    "@kbn/data-catalog-plugin",
     "@kbn/connector-specs",
     "@kbn/actions-plugin",
     "@kbn/core-saved-objects-common",

@@ -43,10 +43,10 @@ export class DataSourcesServerPlugin
     plugins: DataSourcesServerSetupDependencies
   ): DataSourcesServerSetup {
     const { savedObjects, uiSettings } = core;
-    const { dataSourcesRegistry, workflowsManagement } = plugins;
+    const { dataCatalog, workflowsManagement } = plugins;
 
     // Register WorkplaceAI-owned data sources
-    registerDataSources(dataSourcesRegistry);
+    registerDataSources(dataCatalog);
 
     registerUISettings({ uiSettings });
 

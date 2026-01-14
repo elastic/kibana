@@ -32,7 +32,7 @@ dependsOn:
   - '@kbn/actions-plugin'
   - '@kbn/features-plugin'
   - '@kbn/logging'
-  - '@kbn/data-sources-registry-plugin'
+  - '@kbn/data-catalog-plugin'
   - '@kbn/react-query'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/deeplinks-analytics'

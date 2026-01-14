@@ -10,7 +10,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { DataSource } from '@kbn/data-sources-registry-plugin/common';
+import type { DataSource } from '@kbn/data-catalog-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type {

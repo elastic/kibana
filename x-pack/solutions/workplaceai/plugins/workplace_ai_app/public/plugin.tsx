@@ -35,7 +35,7 @@ export class WorkplaceAIAppPlugin
 
   public setup(
     core: CoreSetup<WorkplaceAIAppPluginStartDependencies, WorkplaceAIAppPluginStart>,
-    { dataSourcesRegistry }: WorkplaceAIAppPluginSetupDependencies
+    { dataCatalog }: WorkplaceAIAppPluginSetupDependencies
   ): WorkplaceAIAppPluginSetup {
     registerApp({
       core,

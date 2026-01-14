@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataSource } from '../common/data_sources_spec';
+import type { DataSource } from '../common/data_source_spec';
 
 export interface DataCatalog {
   get(dataSourceId: string): DataSource | undefined;

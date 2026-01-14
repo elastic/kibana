@@ -6180,6 +6180,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-catalog-plugin@link:x-pack/platform/plugins/shared/data_catalog":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
   version "0.0.0"
   uid ""
@@ -6213,10 +6217,6 @@
   uid ""
 
 "@kbn/data-sources-plugin@link:x-pack/platform/plugins/shared/data_sources":
-  version "0.0.0"
-  uid ""
-
-"@kbn/data-sources-registry-plugin@link:x-pack/platform/plugins/shared/data_sources_registry":
   version "0.0.0"
   uid ""
 

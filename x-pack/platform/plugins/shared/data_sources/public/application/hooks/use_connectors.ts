@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import type { DataSource } from '@kbn/data-sources-registry-plugin/common';
+import type { DataSource } from '@kbn/data-catalog-plugin';
 import type { Connector } from '../../types/connector';
 import { AvailableDataSourcesService } from '../../services';
 import { useKibana } from './use_kibana';

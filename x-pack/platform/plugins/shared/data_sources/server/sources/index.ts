@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/server';
+import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
 import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
 
-export function registerDataSources(dataSourcesRegistry: DataSourcesRegistryPluginSetup) {
-  dataSourcesRegistry.register(notionDataSource);
-  dataSourcesRegistry.register(githubDataSource);
+export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
+  dataCatalog.register(notionDataSource);
+  dataCatalog.register(githubDataSource);
 }
