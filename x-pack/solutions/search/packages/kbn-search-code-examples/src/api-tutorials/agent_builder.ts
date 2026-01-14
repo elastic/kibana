@@ -342,6 +342,6 @@ DELETE /kibana_sample_data_agents
 # your own environment or visit the Agent Builder UI in Kibana: /app/agent_builder/agents/books-search-agent
 
 # 📖 For complete API details, refer to the Kibana API reference: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-agent-builder
-# 📖 Learn more about Agent Builder: https://www.elastic.co/docs/solutions/search/agent-builder
+# 📖 Learn more about Agent Builder: https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder
 # 🤖 Use the MCP server to build agents from your own client: https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server
 `;
