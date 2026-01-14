@@ -120,7 +120,9 @@ export class OverviewTab extends AssetDetailsTab {
     this.metricsCpuSection = this.metricsSection.getByTestId(
       'infraAssetDetailsHostChartsSectioncpu'
     );
-    this.metricsCpuSectionTitle = this.metricsCpuSection.getByText('CPU', { exact: true });
+    this.metricsCpuSectionTitle = this.metricsCpuSection.getByTestId(
+      'infraAssetDetailsHostChartsSectioncpuTitle'
+    );
     this.metricsCpuShowAllButton = this.metricsCpuSection.getByRole('button', { name: 'Show all' });
     this.metricsCpuUsageChart = this.metricsCpuSection.getByTestId(
       'infraAssetDetailsMetricChartcpuUsage'
@@ -132,7 +134,9 @@ export class OverviewTab extends AssetDetailsTab {
     this.metricsMemorySection = this.metricsSection.getByTestId(
       'infraAssetDetailsHostChartsSectionmemory'
     );
-    this.metricsMemorySectionTitle = this.metricsMemorySection.getByText('Memory', { exact: true });
+    this.metricsMemorySectionTitle = this.metricsMemorySection.getByTestId(
+      'infraAssetDetailsHostChartsSectionmemoryTitle'
+    );
     this.metricsMemoryShowAllButton = this.metricsMemorySection.getByRole('button', {
       name: 'Show all',
     });
@@ -143,9 +147,9 @@ export class OverviewTab extends AssetDetailsTab {
     this.metricsNetworkSection = this.metricsSection.getByTestId(
       'infraAssetDetailsHostChartsSectionnetwork'
     );
-    this.metricsNetworkSectionTitle = this.metricsNetworkSection.getByText('Network', {
-      exact: true,
-    });
+    this.metricsNetworkSectionTitle = this.metricsNetworkSection.getByTestId(
+      'infraAssetDetailsHostChartsSectionnetworkTitle'
+    );
     this.metricsNetworkShowAllButton = this.metricsNetworkSection.getByRole('button', {
       name: 'Show all',
     });
@@ -156,7 +160,9 @@ export class OverviewTab extends AssetDetailsTab {
     this.metricsDiskSection = this.metricsSection.getByTestId(
       'infraAssetDetailsHostChartsSectiondisk'
     );
-    this.metricsDiskSectionTitle = this.metricsDiskSection.getByText('Disk', { exact: true });
+    this.metricsDiskSectionTitle = this.metricsDiskSection.getByTestId(
+      'infraAssetDetailsHostChartsSectiondiskTitle'
+    );
     this.metricsDiskShowAllButton = this.metricsDiskSection.getByRole('button', {
       name: 'Show all',
     });
