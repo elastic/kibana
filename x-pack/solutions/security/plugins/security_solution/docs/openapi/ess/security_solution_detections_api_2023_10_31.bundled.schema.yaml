@@ -1637,8 +1637,8 @@ paths:
         gets deleted or the user becomes inactive, the rules will stop running.
 
 
-        >Invalidation of the old API key is dependent on the bulk action. Please
-        refer to the [API key
+        >Invalidation of the old API key is dependent on the bulk action.
+        Refer to the [API key
         behavior](https://www.elastic.co/guide/en/security/current/detections-api-key-behavior.html)
         for more details.
 
