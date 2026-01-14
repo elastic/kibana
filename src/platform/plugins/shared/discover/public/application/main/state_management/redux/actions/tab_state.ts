@@ -13,9 +13,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   type AggregateQuery,
   type Query,
+  type TimeRange,
   isOfAggregateQueryType,
   isOfQueryType,
-  TimeRange,
 } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
@@ -34,7 +34,6 @@ import type {
   DiscoverInternalState,
   TabState,
   UpdateESQLQueryActionPayload,
-  OnQuerySubmitActionPayload,
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
 
@@ -284,6 +283,6 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       addLog('onQuerySubmit triggers data fetching');
-      stateContainer$.getValue().fetch();
+      stateContainer$.getValue()?.dataState.fetch();
     }
   };

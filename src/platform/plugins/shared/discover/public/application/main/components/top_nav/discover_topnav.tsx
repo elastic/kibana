@@ -15,7 +15,13 @@ import {
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import { type Filter, type Query, type TimeRange, isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  type Filter,
+  type Query,
+  type TimeRange,
+  type AggregateQuery,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cloneDeep } from 'lodash';
@@ -107,7 +113,7 @@ export const DiscoverTopNav = ({
 
   const onQuerySubmitAction = useCurrentTabAction(internalStateActions.onQuerySubmit);
   const onQuerySubmit = useCallback(
-    (payload: { dateRange: TimeRange; query?: QT | Query }, isUpdate?: boolean) => {
+    (payload: { dateRange: TimeRange; query?: AggregateQuery | Query }, isUpdate?: boolean) => {
       dispatch(onQuerySubmitAction({ payload, isUpdate }));
     },
     [dispatch, onQuerySubmitAction]
