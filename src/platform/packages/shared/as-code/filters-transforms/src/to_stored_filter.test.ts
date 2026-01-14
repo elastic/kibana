@@ -11,8 +11,8 @@ import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type { StoredFilter } from './types';
 import { toStoredFilter } from './to_stored_filter';
 import { fromStoredFilter } from './from_stored_filter';
-import { isRangeConditionFilter } from './type_guards';
 import { FilterStateStore } from '@kbn/es-query-constants';
+import { FILTERS } from '@kbn/es-query';
 import { spatialFilterFixture } from './__fixtures__/spatial_filter';
 
 describe('toStoredFilter', () => {
@@ -84,6 +84,117 @@ describe('toStoredFilter', () => {
       const simplified = {} as AsCodeFilter;
 
       expect(toStoredFilter(simplified)).toBeUndefined();
+    });
+
+    it('should handle double negation (top-level negate + condition.negate)', () => {
+      // Edge case: both top-level negate and condition.negate are set with DIFFERENT values
+      // Behavior: Top-level negate takes precedence (more hierarchical - outer wrapper wins)
+
+      // Test 1: top-level=false, condition=true
+      // Top-level false should override condition true
+      const filter1: AsCodeFilter = {
+        negate: false, // Top-level negate (final say)
+        condition: {
+          field: 'status',
+          operator: 'is',
+          value: 'active',
+          negate: true, // Condition-level negate (suggestion)
+        },
+      };
+
+      const result1 = toStoredFilter(filter1) as StoredFilter;
+
+      // Top-level negate=false overrides condition.negate=true via spread operator
+      expect(result1.meta.negate).toBeUndefined(); // false is not preserved (no explicit negate property)
+      expect(result1.query).toEqual({
+        match_phrase: {
+          status: 'active',
+        },
+      });
+
+      // Test 2: top-level=true, condition=false (explicit)
+      // Top-level true should win
+      const filter2: AsCodeFilter = {
+        negate: true, // Top-level negate (final say)
+        condition: {
+          field: 'status',
+          operator: 'is',
+          value: 'active',
+          negate: false, // Condition-level negate (explicit false)
+        },
+      };
+
+      const result2 = toStoredFilter(filter2) as StoredFilter;
+
+      // Top-level negate=true wins (spread order: condition first, then baseMeta)
+      expect(result2.meta.negate).toBe(true);
+
+      // Test 3: Round-trip scenario - user can now "un-negate" a negated filter
+      // Start with a negated stored filter
+      const originalNegatedFilter: StoredFilter = {
+        meta: {
+          negate: true,
+          type: 'phrase',
+          key: 'status',
+          field: 'status',
+          params: { query: 'active' },
+        },
+        query: {
+          match_phrase: {
+            status: 'active',
+          },
+        },
+      };
+
+      // Convert to AsCode - should have condition.negate=true
+      const asCodeFromNegated = fromStoredFilter(originalNegatedFilter) as AsCodeFilter;
+      expect('condition' in asCodeFromNegated).toBe(true);
+      if ('condition' in asCodeFromNegated) {
+        expect(asCodeFromNegated.condition.negate).toBe(true);
+      }
+
+      // Now add top-level negate=false (user wants to "un-negate" the filter)
+      const unnegatedAsCode: AsCodeFilter = {
+        ...asCodeFromNegated,
+        negate: false, // Top-level should override condition.negate
+      };
+
+      // Convert back to stored
+      const result3 = toStoredFilter(unnegatedAsCode) as StoredFilter;
+
+      // Result: Top-level negate=false now wins! Filter is un-negated.
+      expect(result3.meta.negate).toBeUndefined(); // false doesn't create a negate property
+    });
+
+    it('should handle group filter with nested negate condition and top-level negate', () => {
+      // Test: group filter with top-level negate AND a nested condition with condition.negate
+      const filterWithGroupDoubleNegate: AsCodeFilter = {
+        negate: true, // Top-level negate on the group
+        group: {
+          type: 'and',
+          conditions: [
+            {
+              field: 'status',
+              operator: 'is',
+              value: 'active',
+              negate: true, // Nested condition-level negate
+            },
+          ],
+        },
+      };
+
+      const result = toStoredFilter(filterWithGroupDoubleNegate) as StoredFilter;
+
+      // Group filter becomes a combined filter with negate=true at the top level
+      expect(result.meta.type).toBe(FILTERS.COMBINED);
+      expect(result.meta.negate).toBe(true); // Top-level negate from the group
+
+      // The nested condition should have its own negate
+      const nestedFilter = result.meta.params?.[0];
+      expect(nestedFilter).toBeDefined();
+      expect(nestedFilter.meta.negate).toBe(true); // condition.negate from the nested condition
+
+      // So both negations are preserved independently in the output structure
     });
   });
 
@@ -460,12 +571,13 @@ describe('toStoredFilter', () => {
   });
 
   describe('Negated phrases filter conversion', () => {
-    it('should convert IS_NOT_ONE_OF condition to phrases filter with negate', () => {
+    it('should convert condition.negate with one_of to phrases filter with negate', () => {
       const asCodeFilter: AsCodeFilter = {
         condition: {
           field: 'Carrier',
-          operator: 'is_not_one_of',
+          operator: 'is_one_of',
           value: ['ES-Air', 'Kibana Airlines', 'Logstash Airways'],
+          negate: true,
         },
       };
 
@@ -486,7 +598,7 @@ describe('toStoredFilter', () => {
       expect(storedFilter.query?.bool?.minimum_should_match).toBe(1);
     });
 
-    it('should preserve "is not one of" filter through round-trip conversion', () => {
+    it('should preserve condition.negate true through round-trip conversion (phrases)', () => {
       // Original phrases filter with negation (like "Carrier is not one of...")
       const originalFilter: StoredFilter = {
         $state: { store: FilterStateStore.APP_STATE },
@@ -512,13 +624,14 @@ describe('toStoredFilter', () => {
         },
       };
 
-      // Convert to AsCodeFilter
+      // Convert to AsCodeFilter (should set condition.negate=true rather than negative operator)
       const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
 
       // Verify it converted to IS_NOT_ONE_OF
       expect('condition' in asCodeFilter).toBe(true);
       if ('condition' in asCodeFilter) {
-        expect(asCodeFilter.condition.operator).toBe('is_not_one_of');
+        expect(asCodeFilter.condition.operator).toBe('is_one_of');
+        expect(asCodeFilter.condition.negate).toBe(true);
         expect(asCodeFilter.condition.field).toBe('Carrier');
         if ('value' in asCodeFilter.condition) {
           expect(asCodeFilter.condition.value).toEqual([
@@ -542,7 +655,7 @@ describe('toStoredFilter', () => {
       ]);
     });
 
-    it('should convert OR group of IS_NOT conditions to phrases filter with negate', () => {
+    it('should convert OR group of negated phrase conditions to combined filter', () => {
       // Group filter like "Carrier is not A OR Carrier is not B OR Carrier is not C"
       const asCodeFilter: AsCodeFilter = {
         group: {
@@ -550,18 +663,21 @@ describe('toStoredFilter', () => {
           conditions: [
             {
               field: 'Carrier',
-              operator: 'is_not',
+              operator: 'is',
               value: 'ES-Air',
+              negate: true,
             },
             {
               field: 'Carrier',
-              operator: 'is_not',
+              operator: 'is',
               value: 'Kibana Airlines',
+              negate: true,
             },
             {
               field: 'Carrier',
-              operator: 'is_not',
+              operator: 'is',
               value: 'Logstash Airways',
+              negate: true,
             },
           ],
         },
@@ -569,18 +685,20 @@ describe('toStoredFilter', () => {
 
       const storedFilter = toStoredFilter(asCodeFilter) as StoredFilter;
 
-      // Should be converted to a phrases filter with negate
-      expect(storedFilter.meta.type).toBe('phrases');
-      expect(storedFilter.meta.negate).toBe(true);
-      expect(storedFilter.meta.key).toBe('Carrier');
-      expect(storedFilter.meta.params).toEqual(['ES-Air', 'Kibana Airlines', 'Logstash Airways']);
+      // Should be converted to a combined filter with OR relation
+      expect(storedFilter.meta.type).toBe('combined');
+      expect(storedFilter.meta.relation).toBe('OR');
+      expect(Array.isArray(storedFilter.meta.params)).toBe(true);
 
-      // Should have bool/should structure
-      expect(storedFilter.query).toHaveProperty('bool.should');
-      expect(storedFilter.query?.bool?.should).toHaveLength(3);
+      // Each nested condition should preserve its own negate
+      const params = storedFilter.meta.params as StoredFilter[];
+      expect(params).toHaveLength(3);
+      expect(params[0].meta.negate).toBe(true);
+      expect(params[1].meta.negate).toBe(true);
+      expect(params[2].meta.negate).toBe(true);
     });
 
-    it('should preserve negate property for negated range filters through round-trip', () => {
+    it('should preserve condition.negate for negated range filters through round-trip', () => {
       // Range filters do NOT have an opposition operator (unlike IS/IS_NOT, EXISTS/NOT_EXISTS)
       // so negate must be preserved through round-trip conversion
       const originalFilter: StoredFilter = {
@@ -606,8 +724,8 @@ describe('toStoredFilter', () => {
       expect(asCodeFilter).toBeDefined();
 
       // Verify negate is preserved
-      if (asCodeFilter && isRangeConditionFilter(asCodeFilter)) {
-        expect(asCodeFilter.negate).toBe(true);
+      if (asCodeFilter && 'condition' in asCodeFilter) {
+        expect(asCodeFilter.condition.negate).toBe(true);
       }
 
       // Verify it's a condition filter with range operator

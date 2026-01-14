@@ -206,7 +206,8 @@ describe('fromStoredFilter', () => {
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
-        expect(result.condition.operator).toBe('is_not');
+        expect(result.condition.operator).toBe('is');
+        expect(result.condition.negate).toBe(true);
       }
     });
 
@@ -236,9 +237,9 @@ describe('fromStoredFilter', () => {
 
       expect(result).toBeDefined();
       expect(isConditionFilter(result!)).toBe(true);
-      // CRITICAL: negate property MUST be preserved for range filters
+      // CRITICAL: condition.negate MUST be preserved for range filters
       if (isRangeConditionFilter(result!)) {
-        expect(result.negate).toBe(true);
+        expect(result.condition.negate).toBe(true);
       }
 
       if (isConditionFilter(result!)) {
@@ -246,6 +247,7 @@ describe('fromStoredFilter', () => {
           field: 'bytes',
           operator: 'range',
           value: { gte: 1000, lte: 5000 },
+          negate: true,
         });
         expect(result!.data_view_id).toBe('test-index');
       }
@@ -554,8 +556,9 @@ describe('fromStoredFilter', () => {
           conditions: [
             {
               field: 'machine.os.keyword',
-              operator: 'is_not',
+              operator: 'is',
               value: 'win 7',
+              negate: true,
             },
             {
               type: 'or',
@@ -646,10 +649,11 @@ describe('fromStoredFilter', () => {
 
       expect(result.disabled).toBe(true);
       expect(result.label).toBe('Status Filter');
-      // For condition filters, negate is encoded in the operator, not as a separate property
+      // For condition filters, negation is represented as condition.negate
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
-        expect(result.condition.operator).toBe('is_not');
+        expect(result.condition.operator).toBe('is');
+        expect(result.condition.negate).toBe(true);
       }
     });
   });

@@ -28,7 +28,6 @@ import {
   isDSLFilter,
   isNestedFilterGroup,
   isAsCodeFilter,
-  isAsCodeConditionFilter,
 } from './type_guards';
 
 /**
@@ -37,16 +36,26 @@ import {
 function getFilterTypeForOperator(operator: string): string {
   switch (operator) {
     case ASCODE_FILTER_OPERATOR.EXISTS:
-    case ASCODE_FILTER_OPERATOR.NOT_EXISTS:
       return FILTERS.EXISTS;
     case ASCODE_FILTER_OPERATOR.RANGE:
       return FILTERS.RANGE;
     case ASCODE_FILTER_OPERATOR.IS_ONE_OF:
-    case ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF:
       return FILTERS.PHRASES;
+    case ASCODE_FILTER_OPERATOR.IS:
+      return FILTERS.PHRASE;
     default:
       return FILTERS.PHRASE;
   }
+}
+
+/**
+ * Resolve whether a filter should be negated based on top-level and condition-level values.
+ *
+ * Hierarchical rule: top-level `negate` takes precedence when defined; otherwise
+ * fall back to `condition.negate`. Returns a boolean indicating final negation.
+ */
+function resolveNegate(baseNegate?: boolean, conditionNegate?: boolean): boolean {
+  return baseNegate ?? !!conditionNegate;
 }
 
 /**
@@ -120,33 +129,31 @@ function convertFromSimpleCondition(
   baseStored: StoredFilter
 ): StoredFilter {
   // Base meta that all operators share
+  // Extract negate from baseStored.meta to handle separately (for precedence)
+  const { negate: baseNegate, ...baseMetaWithoutNegate } = baseStored.meta;
   const baseMeta = {
-    ...baseStored.meta,
+    ...baseMetaWithoutNegate,
     key: condition.field,
     field: condition.field,
     type: getFilterTypeForOperator(condition.operator),
   };
 
-  // EXISTS / NOT_EXISTS
-  if (
-    condition.operator === ASCODE_FILTER_OPERATOR.EXISTS ||
-    condition.operator === ASCODE_FILTER_OPERATOR.NOT_EXISTS
-  ) {
+  const shouldNegate = resolveNegate(baseNegate, condition.negate);
+
+  // EXISTS
+  if (condition.operator === ASCODE_FILTER_OPERATOR.EXISTS) {
     return {
       ...baseStored,
       query: { exists: { field: condition.field } },
       meta: {
         ...baseMeta,
-        ...(condition.operator === ASCODE_FILTER_OPERATOR.NOT_EXISTS ? { negate: true } : {}),
+        ...(shouldNegate ? { negate: true } : {}),
       },
     };
   }
 
-  // IS / IS_NOT
-  if (
-    condition.operator === ASCODE_FILTER_OPERATOR.IS ||
-    condition.operator === ASCODE_FILTER_OPERATOR.IS_NOT
-  ) {
+  // IS
+  if (condition.operator === ASCODE_FILTER_OPERATOR.IS) {
     return {
       ...baseStored,
       query: {
@@ -157,16 +164,13 @@ function convertFromSimpleCondition(
       meta: {
         ...baseMeta,
         params: { query: condition.value },
-        ...(condition.operator === ASCODE_FILTER_OPERATOR.IS_NOT ? { negate: true } : {}),
+        ...(shouldNegate ? { negate: true } : {}),
       },
     };
   }
 
-  // IS_ONE_OF / IS_NOT_ONE_OF
-  if (
-    condition.operator === ASCODE_FILTER_OPERATOR.IS_ONE_OF ||
-    condition.operator === ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF
-  ) {
+  // IS_ONE_OF
+  if (condition.operator === ASCODE_FILTER_OPERATOR.IS_ONE_OF) {
     return {
       ...baseStored,
       query: {
@@ -185,7 +189,7 @@ function convertFromSimpleCondition(
         key: condition.field,
         field: condition.field,
         params: condition.value,
-        ...(condition.operator === ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF ? { negate: true } : {}),
+        ...(shouldNegate ? { negate: true } : {}),
       },
     };
   }
@@ -216,6 +220,7 @@ function convertFromSimpleCondition(
           ...(condition.value.lt !== undefined && { lt: condition.value.lt }),
           ...(format && { format }),
         },
+        ...(shouldNegate ? { negate: true } : {}),
       },
     };
   }
@@ -233,56 +238,6 @@ function convertFromFilterGroup(
   group: AsCodeGroupFilter['group'],
   baseStored: StoredFilter
 ): StoredFilter {
-  // Check if this should be a phrases filter (OR group with same-field conditions)
-  // Supports both positive (IS) and negated (IS_NOT) phrases filters
-  const firstCondition = group.conditions[0];
-  const shouldConvertToPhrasesFilter =
-    group.type === 'or' &&
-    group.conditions.length > 1 &&
-    isAsCodeConditionFilter(firstCondition) &&
-    group.conditions.every((condition) => {
-      return (
-        isAsCodeConditionFilter(condition) &&
-        condition.field === firstCondition.field &&
-        (condition.operator === ASCODE_FILTER_OPERATOR.IS ||
-          condition.operator === ASCODE_FILTER_OPERATOR.IS_NOT)
-      );
-    });
-
-  if (shouldConvertToPhrasesFilter) {
-    const field = firstCondition.field;
-    const isNegated = firstCondition.operator === ASCODE_FILTER_OPERATOR.IS_NOT;
-    const values = group.conditions
-      .map((condition) => {
-        return isAsCodeConditionFilter(condition) && 'value' in condition
-          ? condition.value
-          : undefined;
-      })
-      .filter(Boolean);
-
-    const boolQuery = {
-      should: values.map((value) => ({
-        match_phrase: {
-          [field]: value,
-        },
-      })),
-      minimum_should_match: 1,
-    };
-
-    return {
-      ...baseStored,
-      query: { bool: boolQuery },
-      meta: {
-        ...baseStored.meta,
-        key: field,
-        field, // Add field property for round-trip compatibility
-        type: FILTERS.PHRASES,
-        params: values,
-        negate: isNegated, // Preserve negation from operator
-      },
-    };
-  }
-
   // Standard group filter conversion - use combined filter format
   const filterParams = group.conditions.map((condition) => {
     const typedCondition = condition as

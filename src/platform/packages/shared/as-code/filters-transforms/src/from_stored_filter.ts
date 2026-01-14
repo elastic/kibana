@@ -135,7 +135,8 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
   if (hasExistsQuery(query)) {
     return {
       field,
-      operator: meta.negate ? ASCODE_FILTER_OPERATOR.NOT_EXISTS : ASCODE_FILTER_OPERATOR.EXISTS,
+      operator: ASCODE_FILTER_OPERATOR.EXISTS,
+      ...(meta.negate && { negate: true }),
     };
   }
 
@@ -151,6 +152,7 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
         ...(range.lt !== undefined && { lt: range.lt as number | string }),
         ...(range.format !== undefined && { format: range.format as string }),
       },
+      ...(meta.negate && { negate: true }),
     };
   }
 
@@ -176,10 +178,9 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
 
     return {
       field,
-      operator: meta.negate
-        ? ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF
-        : ASCODE_FILTER_OPERATOR.IS_ONE_OF,
+      operator: ASCODE_FILTER_OPERATOR.IS_ONE_OF,
       value: values as string[] | number[] | boolean[],
+      ...(meta.negate && { negate: true }),
     };
   }
 
@@ -187,8 +188,9 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
     const value = query.term[field];
     return {
       field,
-      operator: meta.negate ? ASCODE_FILTER_OPERATOR.IS_NOT : ASCODE_FILTER_OPERATOR.IS,
+      operator: ASCODE_FILTER_OPERATOR.IS,
       value,
+      ...(meta.negate && { negate: true }),
     };
   }
 
@@ -199,8 +201,9 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
 
     return {
       field: matchField, // Use the field from the query, not meta
-      operator: meta.negate ? ASCODE_FILTER_OPERATOR.IS_NOT : ASCODE_FILTER_OPERATOR.IS,
+      operator: ASCODE_FILTER_OPERATOR.IS,
       value,
+      ...(meta.negate && { negate: true }),
     };
   }
 
@@ -209,18 +212,19 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
     const value = query.match_phrase[phraseField];
     return {
       field: phraseField, // Use the field from the query, not meta
-      operator: meta.negate ? ASCODE_FILTER_OPERATOR.IS_NOT : ASCODE_FILTER_OPERATOR.IS,
+      operator: ASCODE_FILTER_OPERATOR.IS,
       value: typeof value === 'object' ? value.query : value,
+      ...(meta.negate && { negate: true }),
     };
   }
-
   // Fallback - try to extract from meta.params
   const params = meta.params as { query?: unknown } | undefined;
   if (params && typeof params === 'object' && 'query' in params && params.query !== undefined) {
     return {
       field,
-      operator: meta.negate ? ASCODE_FILTER_OPERATOR.IS_NOT : ASCODE_FILTER_OPERATOR.IS,
+      operator: ASCODE_FILTER_OPERATOR.IS,
       value: params.query as string | number | boolean,
+      ...(meta.negate && { negate: true }),
     };
   }
 
@@ -309,7 +313,7 @@ function extractFieldFromQuery(query: unknown): string | null {
 
 /**
  * Helper to remove negate property from base properties
- * For condition filters, negate is encoded in the operator (is_not, is_not_one_of, not_exists)
+ * For condition filters, negate is represented in the condition.negate flag, not a separate property
  */
 function stripNegateProperty(
   baseProperties: Partial<AsCodeFilter>
@@ -390,8 +394,8 @@ function convertRangeFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     // IMPORTANT: Range filters do NOT strip negate property
-    // Unlike IS/IS_NOT, EXISTS/NOT_EXISTS, IS_ONE_OF/IS_NOT_ONE_OF which have opposition operators,
-    // RANGE has no opposition operator, so negate must be preserved in base properties
+    // Unlike other conditions that encode negation in the operator,
+    // RANGE has no opposition operator, so negate must be preserved as condition.negate
     return {
       ...baseProperties,
       condition,
