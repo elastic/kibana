@@ -32,6 +32,7 @@ import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from '../synthetics_service/formatters/public_formatters/format_configs';
+import { monitorUsesGlobalParams } from '../synthetics_service/formatters/formatting_utils';
 
 interface SyncConfig {
   config: HeartbeatConfig;
@@ -186,12 +187,22 @@ export class DeployPrivateLocationMonitors {
       return;
     }
 
+    // Filter to only include monitors that use global parameters
+    // This avoids unnecessary updates for monitors that don't depend on global params
     const { configsBySpaces, paramsBySpace, monitorSpaceIds, maintenanceWindows } =
       await this.getAllMonitorConfigs({
         encryptedSavedObjects,
         soClient,
         spaceId: spaceIdToSync,
+        filterByGlobalParams: true,
       });
+
+    if (monitorSpaceIds.size === 0) {
+      this.debugLog(
+        'No monitors found that use global parameters, skipping sync of private location monitors'
+      );
+      return;
+    }
 
     return this.serverSetup.fleet.runWithCache(async () => {
       this.debugLog(
@@ -260,10 +271,16 @@ export class DeployPrivateLocationMonitors {
     soClient,
     encryptedSavedObjects,
     spaceId = ALL_SPACES_ID,
+    filterByGlobalParams = false,
   }: {
     soClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     spaceId?: string;
+    /**
+     * When true, only monitors that use global parameters will be included.
+     * This is used during global params sync to avoid unnecessary updates.
+     */
+    filterByGlobalParams?: boolean;
   }) {
     const { syntheticsService } = this.syntheticsMonitorClient;
     const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId });
@@ -284,7 +301,7 @@ export class DeployPrivateLocationMonitors {
     ]);
 
     return {
-      ...this.mixParamsWithMonitors(monitors, paramsBySpace),
+      ...this.mixParamsWithMonitors(monitors, paramsBySpace, { filterByGlobalParams }),
       paramsBySpace,
       maintenanceWindows,
     };
@@ -301,18 +318,29 @@ export class DeployPrivateLocationMonitors {
 
   mixParamsWithMonitors(
     monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
-    paramsBySpace: Record<string, Record<string, string>>
+    paramsBySpace: Record<string, Record<string, string>>,
+    options: { filterByGlobalParams?: boolean } = {}
   ) {
+    const { filterByGlobalParams = false } = options;
     const configsBySpaces: Record<string, HeartbeatConfig[]> = {};
     const monitorSpaceIds = new Set<string>();
+    let skippedMonitorsCount = 0;
 
     for (const monitor of monitors) {
       const spaceId = monitor.namespaces?.[0];
       if (!spaceId) {
         continue;
       }
-      monitorSpaceIds.add(spaceId);
+
       const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
+
+      // When syncing for global params changes, skip monitors that don't use any global parameters
+      if (filterByGlobalParams && !monitorUsesGlobalParams(normalizedMonitor)) {
+        skippedMonitorsCount++;
+        continue;
+      }
+
+      monitorSpaceIds.add(spaceId);
       const { str: paramsString } = mixParamsWithGlobalParams(
         paramsBySpace[spaceId],
         normalizedMonitor
@@ -331,6 +359,12 @@ export class DeployPrivateLocationMonitors {
           },
           paramsString
         )
+      );
+    }
+
+    if (filterByGlobalParams && skippedMonitorsCount > 0) {
+      this.debugLog(
+        `Filtered out ${skippedMonitorsCount} monitors that do not use global parameters`
       );
     }
 

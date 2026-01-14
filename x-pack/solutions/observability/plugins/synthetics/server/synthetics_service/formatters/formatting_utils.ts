@@ -8,10 +8,11 @@
 import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import type { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import type { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import type { ParsedVars } from './lightweight_param_formatter';
 import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
+import { PARAMS_KEYS_TO_SKIP } from './common';
 
 export type FormatterFn = (
   fields: Partial<MonitorFields>,
@@ -74,6 +75,57 @@ const SHELL_PARAMS_REGEX = /\$\{[a-zA-Z_][a-zA-Z0-9\._\-?:]*\}/g;
 
 export const hasNoParams = (strVal: string) => {
   return strVal.match(SHELL_PARAMS_REGEX) === null;
+};
+
+/**
+ * Checks if a value (string, object, or array) contains any global parameter references.
+ *
+ * @param value - The value to check for parameter references
+ * @returns true if the value contains at least one parameter reference
+ */
+export const valueContainsParams = (value: unknown): boolean => {
+  if (value === null || value === undefined) {
+    return false;
+  }
+
+  if (typeof value === 'string') {
+    return !hasNoParams(value);
+  }
+
+  if (typeof value === 'object') {
+    const strValue = JSON.stringify(value);
+    return !hasNoParams(strValue);
+  }
+
+  return false;
+};
+
+/**
+ * Checks if a monitor configuration uses any global parameters.
+ * This function examines all relevant fields in the monitor config that support
+ * parameter substitution (excluding fields in PARAMS_KEYS_TO_SKIP).
+ *
+ * Global parameters use the ${paramName} syntax (e.g., ${apiKey}, ${baseUrl}).
+ *
+ * @param monitor - The monitor configuration to check
+ * @returns true if the monitor uses at least one global parameter reference
+ */
+export const monitorUsesGlobalParams = (monitor: SyntheticsMonitor): boolean => {
+  const keysToCheck = Object.keys(monitor) as Array<keyof SyntheticsMonitor>;
+
+  for (const key of keysToCheck) {
+    // Skip fields that don't support parameter substitution
+    if (PARAMS_KEYS_TO_SKIP.includes(key as ConfigKey)) {
+      continue;
+    }
+
+    const value = monitor[key];
+    if (valueContainsParams(value)) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {
