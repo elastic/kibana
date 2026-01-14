@@ -13,6 +13,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_UPDATE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerPutUpdateWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.put(
@@ -27,7 +28,7 @@ export function registerPutUpdateWorkflowRoute({ router, api, logger, spaces }: 
         body: UpdateWorkflowCommandSchema.partial(),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
         const spaceId = spaces.getSpaceId(request);
@@ -41,6 +42,6 @@ export function registerPutUpdateWorkflowRoute({ router, api, logger, spaces }: 
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }
