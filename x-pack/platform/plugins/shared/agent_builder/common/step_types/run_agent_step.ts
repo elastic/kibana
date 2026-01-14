@@ -81,7 +81,7 @@ export const ConfigSchema = z.object({
   'create-conversation': z
     .boolean()
     .optional()
-    .describe('When true, creates (or auto-creates) a conversation for the step.'),
+    .describe('When true, creates a conversation for the step.'),
 });
 
 export type RunAgentStepInputSchema = typeof InputSchema;

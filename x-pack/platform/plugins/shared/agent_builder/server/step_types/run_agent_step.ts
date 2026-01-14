@@ -27,10 +27,11 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
       try {
         const { schema, message, conversation_id: conversationId } = context.input;
 
-        const config = context.config as Record<string, unknown>;
-        const agentId = config['agent-id'];
-        const connectorId = config['connector-id'];
-        const createConversation = Boolean(config['create-conversation']);
+        const {
+          'agent-id': agentId,
+          'connector-id': connectorId,
+          'create-conversation': createConversation,
+        } = context.config;
 
         context.logger.debug('ai.agent step started');
         const request = context.contextManager.getFakeRequest();
@@ -78,6 +79,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           ? JSON.stringify(round.response.structured_output)
           : round.response.message;
 
+        let outputConversationId: string | undefined;
         if (storeConversation) {
           const conversationEvent = events.find(
             (e) => isConversationCreatedEvent(e) || isConversationUpdatedEvent(e)
@@ -85,21 +87,14 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           if (!conversationEvent) {
             throw new Error('No conversation_created / conversation_updated event received');
           }
-          const convId = conversationEvent.data.conversation_id;
-
-          return {
-            output: {
-              message: outputMessage,
-              structured_output: round.response.structured_output,
-              conversation_id: convId,
-            },
-          };
+          outputConversationId = conversationEvent.data.conversation_id;
         }
 
         return {
           output: {
             message: outputMessage,
             structured_output: round.response.structured_output,
+            ...(outputConversationId && { conversation_id: outputConversationId }),
           },
         };
       } catch (error) {
