@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { pipe } from 'fp-ts/pipeable';
 import { map, getOrElse } from 'fp-ts/Option';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -49,6 +49,7 @@ export type TeamsConnectorType = ConnectorType<
   ActionParamsType,
   unknown
 >;
+
 export type TeamsConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
