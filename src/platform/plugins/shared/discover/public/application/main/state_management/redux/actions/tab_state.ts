@@ -10,7 +10,6 @@
 import { isFunction } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
 import {
   type AggregateQuery,
   type Query,
