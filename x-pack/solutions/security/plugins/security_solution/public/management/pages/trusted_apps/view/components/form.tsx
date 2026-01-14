@@ -408,7 +408,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             : undefined,
         });
       },
-      [conditionsState.areValid, item, onChange]
+      [conditionsState.areValid, hasFormChanged, item, onChange]
     );
 
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
@@ -638,7 +638,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isEqual(arg.exceptionItems[0]?.entries, item?.entries);
 
         if (isCalledWithoutChanges) {
-          console.log('called without changes');
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
 
           if (isProcessDescendantsSelected) {
@@ -649,10 +648,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             ...prev,
             hasDuplicateFields: computeHasDuplicateFields(getAddedFieldsCounts(addedFields)),
           }));
-          console.log('duplicatefield', conditionsState.hasDuplicateFields);
           return;
         } else {
-          console.log('called with changes and no duplicate field');
           setConditionsState((prev) => ({
             ...prev,
             hasDuplicateFields: false,
@@ -695,7 +692,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           setHasFormChanged(true);
         }
       },
-      [item, hasFormChanged, isProcessDescendantsSelected, processChanged]
+      [conditionsState.hasDuplicateFields, item, hasFormChanged, isProcessDescendantsSelected, processChanged]
     );
 
     // Stabilized memoization with minimal dependencies
