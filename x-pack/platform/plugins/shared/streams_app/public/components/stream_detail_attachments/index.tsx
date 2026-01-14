@@ -103,7 +103,7 @@ export function StreamDetailAttachments({
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_attachments] streamType: ${streamType}`,
         },
         customMetrics: {
           key1: 'attachment_count',
