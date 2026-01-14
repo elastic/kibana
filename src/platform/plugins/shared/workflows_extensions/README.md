@@ -349,6 +349,60 @@ Step type IDs must follow a namespaced format to avoid conflicts:
 - ✅ Good: `"myPlugin.myStep"`, `"custom.feature.step"`
 - ❌ Bad: `"myStep"`, `"step"` (too generic)
 
+### Config vs Inputs: Mental Model
+
+When designing a step, you need to decide which parameters should be **config** properties (step-level in YAML) and which should be **inputs** (in the `with` section). Here's the recommended mental model:
+
+**Config (step-level properties):**
+Use config to **control step behavior** - how/when/who the step executes:
+- Execution context (e.g., `connector-id: 'slack-webhook'`, `agent-id: 'agent-123'`)
+- Execution mode (e.g., `mode: 'batch'`, `strategy: 'parallel'`)
+
+**Built-in step-level config examples:**
+- `if`: Conditional execution (e.g., `if: '${{ steps.check.output.passed }}'`)
+- `foreach`: Iteration over collections (e.g., `foreach: '${{ steps.list.output.items }}'`)
+- `on-failure`: Error handling policy with `continue`, `retry`, or `fallback` strategies
+- `timeout`: Execution time limits (e.g., `timeout: 30s`)
+
+**Inputs (the `with` section):**
+Use inputs for **what/where to process** - the step's payload:
+- Target destinations (e.g., `index`, `channel`, `namespace`, `bucket`)
+- Data to process (e.g., `document`, `message`, `query`, `payload`)
+- Processing parameters (e.g., `severity`, `priority`, `format`, `options`)
+- Dynamic values from previous steps or context
+
+**Example:**
+
+```yaml
+# Config properties (step-level) - Control step behavior
+- name: send_notification
+  type: myPlugin.sendNotification
+  connector-id: slack-webhook                      # Config: which connector to use (controls behavior)
+  mode: async                                   # Config: execution mode (controls behavior)
+  timeout: 10s                                  # Config: time limit (controls behavior)
+  # Inputs (with section) - What/Where to process
+  with:
+    channel: "#alerts"                          # Input: WHERE - target destination
+    message: ${{ steps.process.output.alert }}  # Input: WHAT - data to send
+    priority: high                              # Input: WHAT - processing parameter
+
+- name: process_data
+  type: myPlugin.processData
+  if: steps.previous.output.data.length > 10    # Config: by which condition to run this step (control behavior)
+  agent-id: data-processor-1                     # Config: which agent to use (controls behavior)
+  strategy: parallel                            # Config: processing strategy (controls behavior)
+  # Inputs (with section) - What/Where to process
+  with:
+    index: logs-*                               # Input: WHERE - data source
+    query: "status:error"                       # Input: WHAT - data to process
+    outputIndex: processed-*                    # Input: WHERE - output destination
+    transform:                                  # Input: WHAT - transformation logic
+      field: timestamp
+      format: iso8601
+```
+
+**Note:** This mental model is a guideline, not a strict rule. Teams have flexibility in choosing what makes sense for their specific step types. The key is consistency within your plugin's step definitions.
+
 ### Type Safety
 
 The step type ID used in the server registry **must match** the one used in the public registry. TypeScript will help catch mismatches at compile time, but it's critical to use the same string value in both registrations.

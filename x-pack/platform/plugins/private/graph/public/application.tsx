@@ -22,7 +22,6 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import type { DataPlugin } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -37,6 +36,7 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
@@ -60,7 +60,7 @@ export interface GraphDependencies {
   toastNotifications: ToastsStart;
   dataViews: DataViewsContract;
   data: ReturnType<DataPlugin['start']>;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   contentClient: ContentClient;
   addBasePath: (url: string) => string;
   getBasePath: () => string;
