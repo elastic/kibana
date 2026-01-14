@@ -232,7 +232,6 @@ export class WorkflowExecutionRepository {
    * @param spaceId - The ID of the space associated with the workflow execution.
    * @param triggeredBy - Optional filter for the trigger type (e.g., 'scheduled').
    * @returns A promise that resolves to the list of search hits for running executions.
-   * @deprecated Use hasRunningExecution() for overlap checks - it's more efficient.
    */
   public async getRunningExecutionsByWorkflowId(
     workflowId: string,
