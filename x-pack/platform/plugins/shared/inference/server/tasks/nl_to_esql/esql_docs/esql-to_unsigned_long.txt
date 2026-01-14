@@ -1,24 +1,33 @@
 # TO_UNSIGNED_LONG
 
-Converts an input value to an unsigned long value. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to unsigned long. Boolean `true` is converted to `1`, and `false` to `0`.
+Converts an input value to an unsigned long value. If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long. Boolean `true` will be converted to unsigned long `1`, `false` to `0`.
 
-## Syntax
+```
+stack: preview
+serverless: preview
+```
 
+**Syntax**
 `TO_UNSIGNED_LONG(field)`
 
 ### Parameters
 
-#### field
+#### `field`
 
-The input value to convert. This can be a single- or multi-valued column or an expression.
+Input value. The input can be a single- or multi-valued column or an expression.
 
-## Examples
+**Supported types**
 
-Converts three string values to unsigned long, where valid numeric strings are converted successfully and a non-numeric string results in a null value with a warning.
-
+**Example**
 ```esql
 ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
 | EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)
 ```
 
-Convert string values to unsigned long. The last conversion (`str3 = "foo"`) is not possible and results in a `null` value, with a warning header in the response indicating the failure and its reason.
+Note that in this example, the last conversion of the string isn’t possible.
+When this happens, the result is a `null` value. In this case a _Warning_ header is added to the response.
+The header will provide information on the source of the failure:
+`"Line 1:133: evaluation of [TO_UL(str3)] failed, treating result as null. Only first 20 failures recorded."`
+A following header will contain the failure reason and the offending value:
+`"java.lang.NumberFormatException: Character f is neither a decimal digit number, decimal point,
+- "nor "e" notation exponential mark."`

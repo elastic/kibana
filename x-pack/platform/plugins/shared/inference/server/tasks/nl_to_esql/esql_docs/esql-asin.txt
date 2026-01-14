@@ -1,6 +1,21 @@
-Calculates the arcsine of 0.9 and adds the result as a new column named `asin`.
+# ASIN
 
+Returns the arcsine of the input numeric expression as an angle, expressed in radians.
+
+**Syntax**
+`ASIN(number)`
+
+### Parameters
+
+#### `number`
+
+Number between -1 and 1. If `null`, the function returns `null`.
+
+**Supported types**
+
+**Example**
 ```esql
 ROW a=.9
 | EVAL asin=ASIN(a)
 ```
+

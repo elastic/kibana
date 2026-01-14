@@ -1,37 +1,35 @@
 # POW
 
-The POW function returns the value of a base raised to the power of an exponent. If the calculation overflows the double result, null will be returned.
+Returns the value of `base` raised to the power of `exponent`.
+<note>
+  It is still possible to overflow a double result here; in that case, null will be returned.
+</note>
 
-## Syntax
-
+**Syntax**
 `POW(base, exponent)`
 
 ### Parameters
 
-#### base
+#### `base`
 
-Numeric expression for the base. If the value is null, the function returns null.
+Numeric expression for the base. If `null`, the function returns `null`.
 
-#### exponent
+#### `exponent`
 
-Numeric expression for the exponent. If the value is null, the function returns null.
+Numeric expression for the exponent. If `null`, the function returns `null`.
 
-## Examples
+**Supported types**
 
-Calculates the result of 2 raised to the power of 2 and stores it in the `result` field.
-
+**Examples**
 ```esql
 ROW base = 2.0, exponent = 2
 | EVAL result = POW(base, exponent)
 ```
 
-Calculates the square root of 4 by raising 4 to the power of 0.5 and stores it in the `s` field.
-
+The exponent can be a fraction, which is similar to performing a root.
+For example, the exponent of `0.5` will give the square root of the base:
 ```esql
 ROW base = 4, exponent = 0.5
 | EVAL s = POW(base, exponent)
 ```
 
-## Limitations
-
-It is possible to overflow a double result when using POW; in such cases, null will be returned.

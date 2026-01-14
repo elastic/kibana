@@ -1,6 +1,21 @@
-Calculates the cube root of 1000.0 and returns the result in the column `c`.
+# CBRT
 
+Returns the cube root of a number. The input can be any numeric value, the return value is always a double. Cube roots of infinities are null.
+
+**Syntax**
+`CBRT(number)`
+
+### Parameters
+
+#### `number`
+
+Numeric expression. If `null`, the function returns `null`.
+
+**Supported types**
+
+**Example**
 ```esql
 ROW d = 1000.0
 | EVAL c = CBRT(d)
 ```
+

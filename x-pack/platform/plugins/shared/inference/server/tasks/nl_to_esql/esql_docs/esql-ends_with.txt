@@ -1,27 +1,26 @@
 # ENDS_WITH
 
-Returns a boolean value indicating whether a keyword string ends with a specified suffix string.
+Returns a boolean that indicates whether a keyword string ends with another string.
 
-## Syntax
-
+**Syntax**
 `ENDS_WITH(str, suffix)`
 
 ### Parameters
 
-#### str
+#### `str`
 
-String expression to evaluate. If this value is `null`, the function returns `null`.
+String expression. If `null`, the function returns `null`.
 
-#### suffix
+#### `suffix`
 
-String expression representing the suffix to check for. If this value is `null`, the function returns `null`.
+String expression. If `null`, the function returns `null`.
 
-## Examples
+**Supported types**
 
-Checks whether each employee's last name ends with the letter "d" and adds the result as a new column.
-
+**Example**
 ```esql
 FROM employees
 | KEEP last_name
 | EVAL ln_E = ENDS_WITH(last_name, "d")
 ```
+

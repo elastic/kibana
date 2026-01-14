@@ -1,26 +1,25 @@
 # SPLIT
 
-The SPLIT function divides a single string into multiple strings based on a specified delimiter.
+Split a single valued string into multiple strings.
 
-## Syntax
-
+**Syntax**
 `SPLIT(string, delim)`
 
 ### Parameters
 
-#### string
+#### `string`
 
-String expression to be split. If the value is `null`, the function returns `null`.
+String expression. If `null`, the function returns `null`.
 
-#### delim
+#### `delim`
 
-Delimiter used to split the string. Only single byte delimiters are currently supported.
+Delimiter. Only single byte delimiters are currently supported.
 
-## Examples
+**Supported types**
 
-Splits the value in the `words` column into a list of strings using the semicolon (`;`) as the separator.
-
+**Example**
 ```esql
 ROW words="foo;bar;baz;qux;quux;corge"
 | EVAL word = SPLIT(words, ";")
 ```
+

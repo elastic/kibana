@@ -1,41 +1,49 @@
 # TO_INTEGER
 
-Converts an input value to an integer. If the input is a date type, it is interpreted as milliseconds since the Unix epoch and converted to an integer. Boolean `true` is converted to `1`, and `false` to `0`. When two arguments are provided—a string value and a whole number base—the string is parsed as an integer in the specified base. If parsing fails, a warning is generated and the result is `null`. A leading '0x' prefix is allowed for base 16.
+Converts an input value to an integer value. If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to integer. Boolean `true` will be converted to integer `1`, `false` to `0`.
+When given two arguments, a string value and a whole number base,
+the string is parsed as an integer in the given base.
+If parsing fails a warning is generated as described below and the result is null.
+A leading '0x' prefix is allowed for base 16.
+`stack: ga 9.3`
 
-## Syntax
-
+**Syntax**
 `TO_INTEGER(field, base)`
 
 ### Parameters
 
-#### field
+#### `field`
 
-The input value to convert. This can be a single- or multi-valued column or an expression.
+Input value. The input can be a single- or multi-valued column or an expression.
 
-#### base
+#### `base`
 
-(Optional) The radix or base used to convert the input value. When a base is specified, the input type must be `keyword` or `text`.
+(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.`stack: ga 9.3`
 
-## Examples
+**Supported types**
 
-Converts each value in the multi-valued field `long` to an integer, returning `null` and a warning for any value that cannot be converted.
-
+**Examples**
 ```esql
 ROW long = [5013792, 2147483647, 501379200000]
 | EVAL int = TO_INTEGER(long)
 ```
 
-Parses the string `str1` as a base 16 integer and `str2` as a base 13 integer, then keeps both the original strings and their converted integer values.
-
+Note that in this example, the last value of the multi-valued field cannot be converted as an integer.
+When this happens, the result is a `null` value. In this case a _Warning_ header is added to the response.
+The header will provide information on the source of the failure:
+`"Line 1:61: evaluation of [TO_INTEGER(long)] failed, treating result as null. Only first 20 failures recorded."`
+A following header will contain the failure reason and the offending value:
+`"org.elasticsearch.xpack.esql.core.InvalidArgumentException: [501379200000] out of [integer] range"`
 ```esql
 ROW str1 = "0x32", str2 = "31"
 | EVAL int1 = TO_INTEGER(str1, 16), int2 = TO_INTEGER(str2, 13)
 | KEEP str1, int1, str2, int2
 ```
 
-Attempts to parse the string `str1` as an integer in base 27 (which succeeds) and in base 10 (which fails, resulting in `null` and a warning).
-
+This example demonstrates parsing a base 16 value and a base 13 value. `stack: ga 9.3`
 ```esql
 ROW str1 = "Kona"
 | EVAL int1 = TO_INTEGER(str1, 27), fail1 = TO_INTEGER(str1, 10)
 ```
+
+This example demonstrates parsing a string that is valid in base 27 but invalid in base 10.Observe in the second case a warning is generated and null is returned. `stack: ga 9.3`

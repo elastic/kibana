@@ -1,27 +1,25 @@
 # MAX
 
-The MAX function returns the maximum value of a field.
+The maximum value of a field.
 
-## Syntax
-
+**Syntax**
 `MAX(field)`
 
 ### Parameters
 
-#### field
+#### `field`
 
-The field for which to find the maximum value.
+**Supported types**
 
-## Examples
-
-Finds the highest value present in the `languages` field across all employees.
+**Examples**
 ```esql
 FROM employees
 | STATS MAX(languages)
 ```
 
-Calculates the largest average salary change by first averaging multiple salary change values per employee and then finding the maximum of those averages.
+The expression can use inline functions. For example, to calculate the maximum over an average of a multivalued column, use `MV_AVG` to first average the multiple values per row, and use the result with the `MAX` function
 ```esql
 FROM employees
 | STATS max_avg_salary_change = MAX(MV_AVG(salary_change))
 ```
+

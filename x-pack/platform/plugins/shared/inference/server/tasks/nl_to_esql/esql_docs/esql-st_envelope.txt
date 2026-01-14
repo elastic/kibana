@@ -2,20 +2,23 @@
 
 Determines the minimum bounding box of the supplied geometry.
 
-## Syntax
+```
+stack: preview
+serverless: preview
+```
 
+**Syntax**
 `ST_ENVELOPE(geometry, point, point, point, point)`
 
 ### Parameters
 
-#### geometry
+#### `geometry`
 
-Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
 
-## Examples
+**Supported types**
 
-Calculates the minimum bounding box for the city boundary of Copenhagen Airport and displays the abbreviation, airport name, and the bounding box geometry.
-
+**Example**
 ```esql
 FROM airport_city_boundaries
 | WHERE abbrev == "CPH"
@@ -23,24 +26,27 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, envelope
 ```
 
-# ST_XMAX
+### `ST_XMAX`
 
-Extracts the maximum value of the `x` coordinates from the supplied geometry. For `geo_point` or `geo_shape`, this is equivalent to extracting the maximum longitude value.
+```
+stack: preview
+serverless: preview
+```
 
-## Syntax
-
-`ST_XMAX(geometry)`
+**Syntax**
+`ST_ENVELOPE(geometry, point, point, point, point)`
 
 ### Parameters
 
-#### geometry
+#### `point`
 
-Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
 
-## Examples
+**Description**
+Extracts the maximum value of the `x` coordinates from the supplied geometry. If the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `longitude` value.
+**Supported types**
 
-Retrieves the minimum and maximum x and y coordinates from the bounding box of Copenhagen Airport's city boundary and displays them along with the abbreviation and airport name.
-
+**Example**
 ```esql
 FROM airport_city_boundaries
 | WHERE abbrev == "CPH"
@@ -49,24 +55,27 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
 
-# ST_XMIN
+### `ST_XMIN`
 
-Extracts the minimum value of the `x` coordinates from the supplied geometry. For `geo_point` or `geo_shape`, this is equivalent to extracting the minimum longitude value.
+```
+stack: preview
+serverless: preview
+```
 
-## Syntax
-
-`ST_XMIN(geometry)`
+**Syntax**
+`ST_ENVELOPE(geometry, point, point, point, point)`
 
 ### Parameters
 
-#### geometry
+#### `point`
 
-Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
 
-## Examples
+**Description**
+Extracts the minimum value of the `x` coordinates from the supplied geometry. If the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `longitude` value.
+**Supported types**
 
-Retrieves the minimum and maximum x and y coordinates from the bounding box of Copenhagen Airport's city boundary and displays them along with the abbreviation and airport name.
-
+**Example**
 ```esql
 FROM airport_city_boundaries
 | WHERE abbrev == "CPH"
@@ -75,24 +84,27 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
 
-# ST_YMAX
+### `ST_YMAX`
 
-Extracts the maximum value of the `y` coordinates from the supplied geometry. For `geo_point` or `geo_shape`, this is equivalent to extracting the maximum latitude value.
+```
+stack: preview
+serverless: preview
+```
 
-## Syntax
-
-`ST_YMAX(geometry)`
+**Syntax**
+`ST_ENVELOPE(geometry, point, point, point, point)`
 
 ### Parameters
 
-#### geometry
+#### `point`
 
-Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
 
-## Examples
+**Description**
+Extracts the maximum value of the `y` coordinates from the supplied geometry. If the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `latitude` value.
+**Supported types**
 
-Retrieves the minimum and maximum x and y coordinates from the bounding box of Copenhagen Airport's city boundary and displays them along with the abbreviation and airport name.
-
+**Example**
 ```esql
 FROM airport_city_boundaries
 | WHERE abbrev == "CPH"
@@ -101,24 +113,27 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
 
-# ST_YMIN
+### `ST_YMIN`
 
-Extracts the minimum value of the `y` coordinates from the supplied geometry. For `geo_point` or `geo_shape`, this is equivalent to extracting the minimum latitude value.
+```
+stack: preview
+serverless: preview
+```
 
-## Syntax
-
-`ST_YMIN(geometry)`
+**Syntax**
+`ST_ENVELOPE(geometry, point, point, point, point)`
 
 ### Parameters
 
-#### geometry
+#### `point`
 
-Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
 
-## Examples
+**Description**
+Extracts the minimum value of the `y` coordinates from the supplied geometry. If the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `latitude` value.
+**Supported types**
 
-Retrieves the minimum and maximum x and y coordinates from the bounding box of Copenhagen Airport's city boundary and displays them along with the abbreviation and airport name.
-
+**Example**
 ```esql
 FROM airport_city_boundaries
 | WHERE abbrev == "CPH"
@@ -126,3 +141,4 @@ FROM airport_city_boundaries
 | EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
+

@@ -1,43 +1,49 @@
 # TO_IP
 
-Converts an input string to an IP value. If the conversion fails, the result is a `null` value and a warning header is added to the response with details about the failure.
+Converts an input string to an IP value.
 
-## Syntax
-
+**Syntax**
 `TO_IP(field, options, leading_zeros)`
 
 ### Parameters
 
-#### field
+#### `field`
 
 Input value. The input can be a single- or multi-valued column or an expression.
 
-#### options
+#### `options`
 
 (Optional) Additional options.
 
-#### leading_zeros
+**Supported types**
 
-(keyword) Specifies how to handle leading zeros in IPv4 addresses.
+**Supported function named parameters**
+### Parameters
 
-## Examples
+#### `leading_zeros`
 
-Convert two string values to IP addresses, where one is valid and the other is invalid, and filter for IPs matching the CIDR range "1.0.0.0/8".
+(keyword) What to do with leading 0s in IPv4 addresses.
+
+**Examples**
 ```esql
 ROW str1 = "1.1.1.1", str2 = "foo"
 | EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)
 | WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
 ```
-Convert valid and invalid IP strings. The invalid conversion returns `null` and triggers a warning header.
 
-Convert a string with leading zeros in the IPv4 address to an IP, interpreting the zeros as octal numbers.
+Note that in this example, the last conversion of the string isn’t possible.
+When this happens, the result is a `null` value. In this case a _Warning_ header is added to the response.
+The header will provide information on the source of the failure:
+`"Line 1:68: evaluation of [TO_IP(str2)] failed, treating result as null. Only first 20 failures recorded."`
+A following header will contain the failure reason and the offending value:
+`"java.lang.IllegalArgumentException: 'foo' is not an IP string literal."`
 ```esql
 ROW s = "1.1.010.1" | EVAL ip = TO_IP(s, {"leading_zeros":"octal"})
 ```
-Parse an IPv4 address with leading zeros as octal, similar to `ping` or `ftp`.
 
-Convert a string with leading zeros in the IPv4 address to an IP, interpreting the zeros as decimal numbers.
+Parse v4 addresses with leading zeros as octal. Like `ping` or `ftp`.
 ```esql
 ROW s = "1.1.010.1" | EVAL ip = TO_IP(s, {"leading_zeros":"decimal"})
 ```
-Parse an IPv4 address with leading zeros as decimal, following Java's `InetAddress.getByName`.
+
+Parse v4 addresses with leading zeros as decimal. Java's `InetAddress.getByName`.

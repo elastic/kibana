@@ -1,33 +1,31 @@
 # MV_CONCAT
 
-The MV_CONCAT function converts a multivalued string expression into a single value by concatenating all values, separated by a specified delimiter.
+Converts a multivalued string expression into a single valued column containing the concatenation of all values separated by a delimiter.
 
-## Syntax
-
+**Syntax**
 `MV_CONCAT(string, delim)`
 
 ### Parameters
 
-#### string
+#### `string`
 
-A multivalue expression containing the values to concatenate.
+Multivalue expression.
 
-#### delim
+#### `delim`
 
-The delimiter used to separate each value in the resulting string.
+Delimiter.
 
-## Examples
+**Supported types**
 
-Concatenates the values in the array `a` into a single string separated by a comma and space.
-
+**Examples**
 ```esql
 ROW a=["foo", "zoo", "bar"]
 | EVAL j = MV_CONCAT(a, ", ")
 ```
 
-Concatenates the numeric values in the array `a` into a single string, first converting them to strings, and separates them with a comma and space.
-
+To concat non-string columns, call `TO_STRING` first:
 ```esql
 ROW a=[10, 9, 8]
 | EVAL j = MV_CONCAT(TO_STRING(a), ", ")
 ```
+

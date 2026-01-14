@@ -1,27 +1,25 @@
 # REVERSE
 
-Returns a new string with the characters of the input string in reverse order.
+Returns a new string representing the input string in reverse order.
 
-## Syntax
-
+**Syntax**
 `REVERSE(str)`
 
 ### Parameters
 
-#### str
+#### `str`
 
-The string expression to reverse. If the value is `null`, the function returns `null`.
+String expression. If `null`, the function returns `null`.
 
-## Examples
+**Supported types**
 
-Reverses the value of the `message` field from "Some Text" to "txeT emoS".
-
+**Examples**
 ```esql
 ROW message = "Some Text" | EVAL message_reversed = REVERSE(message);
 ```
 
-Reverses the sequence of emoji characters in the `bending_arts` field, preserving each grapheme cluster.
-
+`REVERSE` works with unicode, too! It keeps unicode grapheme clusters together during reversal.
 ```esql
 ROW bending_arts = "💧🪨🔥💨" | EVAL bending_arts_reversed = REVERSE(bending_arts);
 ```
+

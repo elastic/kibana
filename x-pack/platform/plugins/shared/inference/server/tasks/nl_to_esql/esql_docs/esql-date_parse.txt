@@ -1,38 +1,40 @@
 # DATE_PARSE
 
-The DATE_PARSE function returns a date by parsing a string using the specified format pattern.
+Returns a date by parsing the second argument using the format specified in the first argument.
 
-## Syntax
-
+**Syntax**
 `DATE_PARSE(datePattern, dateString, options, time_zone, locale)`
 
 ### Parameters
 
-#### datePattern
+#### `datePattern`
 
-The date format pattern to use for parsing. Refer to the `DateTimeFormatter` documentation for the syntax. If this parameter is `null`, the function returns `null`.
+The date format. Refer to the `DateTimeFormatter` documentation for the syntax. If `null`, the function returns `null`.
 
-#### dateString
+#### `dateString`
 
-The string containing the date to be parsed. If this parameter is `null` or an empty string, the function returns `null`.
+Date expression as a string. If `null` or an empty string, the function returns `null`.
 
-#### options
+#### `options`
 
-Optional. Additional options for date parsing, allowing you to specify time zone and locale as named parameters.
+(Optional) Additional options for date parsing, specifying time zone and locale as function named parameters.
 
-#### time_zone
+**Supported types**
 
-Optional. Specifies the Coordinated Universal Time (UTC) offset or IANA time zone to convert date values in the query string to UTC.
+**Supported function named parameters**
+### Parameters
 
-#### locale
+#### `time_zone`
 
-Optional. Specifies the locale to use when parsing the date, which is relevant when parsing month names or week days.
+(keyword) Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.
 
-## Examples
+#### `locale`
 
-Parses the string "2022-05-06" into a date value using the "yyyy-MM-dd" format.
+(keyword) The locale to use when parsing the date, relevant when parsing month names or week days.
 
+**Example**
 ```esql
 ROW date_string = "2022-05-06"
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 ```
+

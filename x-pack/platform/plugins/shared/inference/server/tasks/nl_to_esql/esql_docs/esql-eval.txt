@@ -1,25 +1,31 @@
 # EVAL
 
-The EVAL command allows you to add new columns to your results with calculated values. You can use literals, expressions, or functions to define the values of these new columns.
+The `EVAL` processing command enables you to append new columns with calculated
+values. `EVAL` supports various functions for calculating values. Refer to
+Functions for more information.
 
-## Syntax
-
-`EVAL [column1 =] value1[, ..., [columnN =] valueN]`
+The `EVAL` processing command enables you to append new columns with calculated
+values.
+**Syntax**
+```esql
+EVAL [column1 =] value1[, ..., [columnN =] valueN]
+```
 
 ### Parameters
 
-#### columnX
+#### `columnX`
 
-The name of the column to add. If a column with the same name already exists, it will be replaced by the new column. If a column name is used more than once, only the rightmost one is kept.
+The column name.
+ If a column with the same name already exists, the existing column is dropped.
+ If a column name is used more than once, only the rightmost duplicate creates a column.
 
-#### valueX
+#### `valueX`
 
-The value to assign to the column. This can be a literal, an expression, or a function. You can reference columns defined to the left of the current one.
+The value for the column. Can be a literal, an expression, or a
+ function.
+ Can use columns defined left of this one.
 
-## Examples
-
-Adds two new columns to the results: one converting the `height` field to feet and another converting it to centimeters.
-
+**Examples**
 ```esql
 FROM employees
 | SORT emp_no
@@ -27,8 +33,8 @@ FROM employees
 | EVAL height_feet = height * 3.281, height_cm = height * 100
 ```
 
-Replaces the existing `height` column with its value converted to feet.
-
+If the specified column already exists, the existing column will be dropped, and
+the new column will be appended to the table:
 ```esql
 FROM employees
 | SORT emp_no
@@ -36,8 +42,9 @@ FROM employees
 | EVAL height = height * 3.281
 ```
 
-Adds a new column to the results containing the value of `height` converted to feet, with the column name automatically set to the expression.
-
+Specifying the output column name is optional. If not specified, the new column
+name is equal to the expression. The following query adds a column named
+`height*3.281`:
 ```esql
 FROM employees
 | SORT emp_no
@@ -45,10 +52,12 @@ FROM employees
 | EVAL height * 3.281
 ```
 
-Calculates a new column by converting `height` to feet, then computes the average of that new column, referencing it by quoting the expression.
-
+Because this name contains special characters,
+it needs to be quoted
+with backticks (```) when using it in subsequent commands:
 ```esql
 FROM employees
 | EVAL height * 3.281
 | STATS avg_height_feet = AVG(`height * 3.281`)
 ```
+

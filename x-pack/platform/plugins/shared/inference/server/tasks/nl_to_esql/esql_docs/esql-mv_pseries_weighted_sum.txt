@@ -1,7 +1,26 @@
-Calculates the weighted sum of the array `[70.0, 45.0, 21.0, 21.0, 21.0]` using a P-Series with `p = 1.5` and returns the result in the `sum` column.
+# MV_PSERIES_WEIGHTED_SUM
 
+Converts a multivalued expression into a single-valued column by multiplying every element on the input list by its corresponding term in P-Series and computing the sum.
+
+**Syntax**
+`MV_PSERIES_WEIGHTED_SUM(number, p)`
+
+### Parameters
+
+#### `number`
+
+Multivalue expression.
+
+#### `p`
+
+It is a constant number that represents the *p* parameter in the P-Series. It impacts every element’s contribution to the weighted sum.
+
+**Supported types**
+
+**Example**
 ```esql
 ROW a = [70.0, 45.0, 21.0, 21.0, 21.0]
 | EVAL sum = MV_PSERIES_WEIGHTED_SUM(a, 1.5)
 | KEEP sum
 ```
+

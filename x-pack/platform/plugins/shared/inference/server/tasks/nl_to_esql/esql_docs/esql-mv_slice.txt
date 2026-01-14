@@ -1,37 +1,38 @@
 # MV_SLICE
 
-The MV_SLICE function returns a subset of a multivalued field using specified start and end index values. This is especially useful when working with functions that produce multivalued columns in a known order, such as `SPLIT` or `MV_SORT`. The order in which multivalued fields are read from storage is not guaranteed and may frequently be ascending, but you should not rely on that.
+Returns a subset of the multivalued field using the start and end index values. This is most useful when reading from a function that emits multivalued columns in a known order like `SPLIT` or `MV_SORT`.
+The order that multivalued fields are read from
+underlying storage is not guaranteed. It is
 
-## Syntax
-
+**Syntax**
 `MV_SLICE(field, start, end)`
 
 ### Parameters
 
-#### field
+#### `field`
 
-The multivalue expression to slice. If this parameter is `null`, the function returns `null`.
+Multivalue expression. If `null`, the function returns `null`.
 
-#### start
+#### `start`
 
-The start position for the slice. If this parameter is `null`, the function returns `null`. The start argument can be negative; an index of -1 refers to the last value in the list.
+Start position. If `null`, the function returns `null`. The start argument can be negative. An index of -1 is used to specify the last value in the list.
 
-#### end
+#### `end`
 
-The end position (inclusive) for the slice. This parameter is optional; if omitted, only the value at the start position is returned. The end argument can be negative; an index of -1 refers to the last value in the list.
+End position(included). Optional; if omitted, the position at `start` is returned. The end argument can be negative. An index of -1 is used to specify the last value in the list.
 
-## Examples
+**frequently** ascending, but don’t
+rely on that.
+**Supported types**
 
-Extracts the value at index 1 and the values from index 2 to 3 from the array field `a`.
-
+**Examples**
 ```esql
 row a = [1, 2, 2, 3]
 | eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)
 ```
 
-Extracts the value at index -2 and the values from index -3 to -1 from the array field `a`.
-
 ```esql
 row a = [1, 2, 2, 3]
 | eval a1 = mv_slice(a, -2), a2 = mv_slice(a, -3, -1)
 ```
+

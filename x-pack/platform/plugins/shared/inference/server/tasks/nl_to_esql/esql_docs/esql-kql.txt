@@ -1,48 +1,57 @@
 # KQL
 
-The KQL function performs a KQL query and returns true if the provided KQL query string matches the row.
+Performs a KQL query. Returns true if the provided KQL query string matches the row.
 
-## Syntax
+```
+stack: preview 9.0.0, ga 9.1.0
+```
 
+**Syntax**
 `KQL(query, options, boost, time_zone, case_insensitive, default_field)`
 
 ### Parameters
 
-#### query
+#### `query`
 
 Query string in KQL query string format.
 
-#### options
+#### `options`
 
-Optional. KQL additional options as function named parameters. Available in stack version 9.3.0 and later.
+(Optional) KQL additional options as function named parameters. Available in stack version 9.3.0 and later.
 
-#### boost
+**Supported types**
 
-Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
+**Supported function named parameters**
+### Parameters
 
-#### time_zone
+#### `boost`
 
-UTC offset or IANA time zone used to interpret date literals in the query string.
+(float) Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
 
-#### case_insensitive
+#### `time_zone`
 
-If true, performs case-insensitive matching for keyword fields. Defaults to false.
+(keyword) UTC offset or IANA time zone used to interpret date literals in the query string.
 
-#### default_field
+#### `case_insensitive`
 
-Default field to search if no field is provided in the query string. Supports wildcards (*).
+(boolean) If true, performs case-insensitive matching for keyword fields. Defaults to false.
 
-## Examples
+#### `default_field`
 
-Filters the `books` dataset to include only rows where the `author` field is "Faulkner".
+(keyword) Default field to search if no field is provided in the query string. Supports wildcards (*).
 
+**Examples**
+Use KQL to filter by a specific field value
 ```esql
 FROM books
 | WHERE KQL("author: Faulkner")
 ```
 
-Filters the `employees` dataset to include only rows where the `first_name` field matches "mary", using case-insensitive matching and a custom boost value.
+```
+stack: ga 9.3.0
+```
 
+Use KQL with additional options for case-insensitive matching and custom settings
 ```esql
 FROM employees
 | WHERE KQL("mary", {"case_insensitive": true, "default_field": "first_name", "boost": 1.5})

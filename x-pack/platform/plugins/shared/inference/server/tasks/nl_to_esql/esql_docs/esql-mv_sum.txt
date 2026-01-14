@@ -1,6 +1,21 @@
-Calculates the sum of all numbers in the multivalued field `a` and stores the result in a new field `sum_a`.
+# MV_SUM
 
+Converts a multivalued field into a single valued field containing the sum of all of the values.
+
+**Syntax**
+`MV_SUM(number)`
+
+### Parameters
+
+#### `number`
+
+Multivalue expression.
+
+**Supported types**
+
+**Example**
 ```esql
 ROW a=[3, 5, 6]
 | EVAL sum_a = MV_SUM(a)
 ```
+

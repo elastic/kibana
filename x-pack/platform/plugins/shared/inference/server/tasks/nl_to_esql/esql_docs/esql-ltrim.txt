@@ -2,20 +2,18 @@
 
 Removes leading whitespaces from a string.
 
-## Syntax
-
+**Syntax**
 `LTRIM(string)`
 
 ### Parameters
 
-#### string
+#### `string`
 
-String expression to process. If the value is `null`, the function returns `null`.
+String expression. If `null`, the function returns `null`.
 
-## Examples
+**Supported types**
 
-Removes leading spaces from the `message` and `color` columns, then wraps the cleaned results in single quotes.
-
+**Example**
 ```esql
 ROW message = "   some text  ",  color = " red "
 | EVAL message = LTRIM(message)
@@ -23,3 +21,4 @@ ROW message = "   some text  ",  color = " red "
 | EVAL message = CONCAT("'", message, "'")
 | EVAL color = CONCAT("'", color, "'")
 ```
+

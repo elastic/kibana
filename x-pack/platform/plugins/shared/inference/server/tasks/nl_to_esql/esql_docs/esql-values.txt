@@ -1,21 +1,22 @@
 # VALUES
 
-The VALUES function returns the unique values from a field as a multivalued field. The order of the returned values is not guaranteed. To get values in a specific order, use the `MV_SORT` function.
+Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use `MV_SORT`.
 
-## Syntax
+```
+stack: preview
+serverless: preview
+```
 
+**Syntax**
 `VALUES(field)`
 
 ### Parameters
 
-#### field
+#### `field`
 
-The field from which to collect unique values.
+**Supported types**
 
-## Examples
-
-Calculates the unique first names for each initial letter, sorts the names alphabetically within each group, and then sorts the groups by the first letter.
-
+**Example**
 ```esql
 FROM employees
 | EVAL first_letter = SUBSTRING(first_name, 0, 1)
@@ -23,6 +24,15 @@ FROM employees
 | SORT first_letter
 ```
 
-## Limitations
+<tip>
+  Use `TOP`
+  if you need to keep repeated values.
+</tip>
 
-This function can use a significant amount of memory. Aggregations do not grow beyond available memory, so if the number of collected values exceeds memory limits, the query will fail with a Circuit Breaker Error. If you need to keep repeated values, use the `TOP` function instead.
+<warning>
+  This can use a significant amount of memory and ESQL doesn’t yet
+  grow aggregations beyond memory. So this aggregation will work until
+  it is used to collect more values than can fit into memory. Once it
+  collects too many values it will fail the query with
+  a Circuit Breaker Error.
+</warning>

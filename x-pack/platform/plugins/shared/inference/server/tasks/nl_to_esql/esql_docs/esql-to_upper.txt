@@ -1,6 +1,21 @@
-Converts the value in the `message` column to upper case and stores it in a new column called `message_upper`.
+# TO_UPPER
 
+Returns a new string representing the input string converted to upper case.
+
+**Syntax**
+`TO_UPPER(str)`
+
+### Parameters
+
+#### `str`
+
+String expression. If `null`, the function returns `null`. The input can be a single-valued column or expression, or a multi-valued column or expression `stack: ga 9.1.0`.
+
+**Supported types**
+
+**Example**
 ```esql
 ROW message = "Some Text"
 | EVAL message_upper = TO_UPPER(message)
 ```
+

@@ -2,20 +2,20 @@
 
 Returns the value of e raised to the power of the given number.
 
-## Syntax
-
+**Syntax**
 `EXP(number)`
 
 ### Parameters
 
-#### number
+#### `number`
 
-Numeric expression to use as the exponent. If `null`, the function returns `null`.
+Numeric expression. If `null`, the function returns `null`.
 
-## Examples
+**Supported types**
 
-Calculates e raised to the power of 5.0 and stores the result in column `s`.
+**Example**
 ```esql
 ROW d = 5.0
 | EVAL s = EXP(d)
 ```
+

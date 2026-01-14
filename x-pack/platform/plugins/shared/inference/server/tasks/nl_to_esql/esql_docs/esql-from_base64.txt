@@ -1,6 +1,21 @@
-Decodes the base64-encoded value in column `a` and stores the decoded result in a new column `d`.
+# FROM_BASE64
 
+Decode a base64 string.
+
+**Syntax**
+`FROM_BASE64(string)`
+
+### Parameters
+
+#### `string`
+
+A base64 string.
+
+**Supported types**
+
+**Example**
 ```esql
 ROW a = "ZWxhc3RpYw=="
 | EVAL d = FROM_BASE64(a)
 ```
+

@@ -1,34 +1,32 @@
 # MEDIAN_ABSOLUTE_DEVIATION
 
-Returns the median absolute deviation, a robust measure of variability that is useful for describing data with outliers or non-normal distributions. It is calculated as the median of the absolute deviations from the median of the entire sample: `median(|median(X) - X|)`. This function is usually approximate and non-deterministic, so results may vary slightly for the same data.
+Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.  It is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.
+<note>
+  Like `PERCENTILE`, `MEDIAN_ABSOLUTE_DEVIATION` is usually approximate.
+</note>
 
-## Syntax
-
+**Syntax**
 `MEDIAN_ABSOLUTE_DEVIATION(number)`
 
 ### Parameters
 
-#### number
+#### `number`
 
-The numeric column or expression for which to calculate the median absolute deviation.
+**Supported types**
 
-## Examples
-
-Calculates both the median and the median absolute deviation for the `salary` column in the `employees` dataset.
-
+**Examples**
 ```esql
 FROM employees
 | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
 ```
 
-Computes the median absolute deviation of the maximum value in the multivalued `salary_change` column, assigning the result to `m_a_d_max_salary_change`.
-
+The expression can use inline functions. For example, to calculate the median absolute deviation of the maximum values of a multivalued column, first use `MV_MAX` to get the maximum value per row, and use the result with the `MEDIAN_ABSOLUTE_DEVIATION` function
 ```esql
 FROM employees
 | STATS m_a_d_max_salary_change = MEDIAN_ABSOLUTE_DEVIATION(MV_MAX(salary_change))
 ```
 
-## Limitations
-
-- The result is usually approximate.
-- The function is non-deterministic, so repeated runs on the same data may yield slightly different results.
+<warning>
+  `MEDIAN_ABSOLUTE_DEVIATION` is also non-deterministic.
+  This means you can get slightly different results using the same data.
+</warning>

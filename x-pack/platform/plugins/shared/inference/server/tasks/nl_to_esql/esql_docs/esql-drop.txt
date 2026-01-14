@@ -1,28 +1,25 @@
 # DROP
 
-The DROP command removes one or more columns from the result set. You can specify columns by name or use wildcards to match multiple columns.
-
-## Syntax
-
-`DROP columns`
+The `DROP` processing command removes one or more columns.
+**Syntax**
+```esql
+DROP columns
+```
 
 ### Parameters
 
-#### columns
+#### `columns`
 
-A comma-separated list of columns to remove. Wildcards are supported to match multiple columns.
+A comma-separated list of columns to remove. Supports wildcards.
 
-## Examples
-
-Removes the column named `height` from the employees dataset.
-
+**Examples**
 ```esql
 FROM employees
 | DROP height
 ```
 
-Removes all columns from the employees dataset whose names start with `height` by using a wildcard.
-
+Rather than specify each column by name, you can use wildcards to drop all
+columns with a name that matches a pattern:
 ```esql
 FROM employees
 | DROP height*

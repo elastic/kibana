@@ -1,26 +1,27 @@
 # MV_EXPAND
 
-The MV_EXPAND command expands multivalued columns so that each value appears in its own row, duplicating the other columns for each expanded value.
-
-## Syntax
-
-`MV_EXPAND column`
+The `MV_EXPAND` processing command expands multivalued columns into one row per
+value, duplicating other columns.
+**Syntax**
+```esql
+MV_EXPAND column
+```
 
 ### Parameters
 
-#### column
+#### `column`
 
 The multivalued column to expand.
 
-## Examples
+<warning>
+  The output rows produced by `MV_EXPAND` can be in any order and may not respect
+  preceding `SORT`s. To guarantee a certain ordering, place a `SORT` after any
+  `MV_EXPAND`s.
+</warning>
 
-Expands each value in the multivalued column `a` into its own row, while duplicating the values of columns `b` and `j` for each expanded value.
-
+**Example**
 ```esql
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
 ```
 
-## Limitations
-
-The output rows produced by MV_EXPAND can be in any order and may not respect preceding SORT commands. To guarantee a specific ordering, place a SORT after any MV_EXPAND commands.

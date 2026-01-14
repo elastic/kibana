@@ -1,33 +1,30 @@
 # DATE_TRUNC
 
-The DATE_TRUNC function rounds down a date to the closest interval since the epoch, which starts at `0001-01-01T00:00:00Z`.
+Rounds down a date to the closest interval since epoch, which starts at `0001-01-01T00:00:00Z`.
 
-## Syntax
-
+**Syntax**
 `DATE_TRUNC(interval, date)`
 
 ### Parameters
 
-#### interval
+#### `interval`
 
-Interval expressed using the timespan literal syntax.
+Interval; expressed using the timespan literal syntax.
 
-#### date
+#### `date`
 
-Date expression.
+Date expression
 
-## Examples
+**Supported types**
 
-Rounds each employee's hire date down to the start of the year and displays their first name, last name, and original hire date.
-
+**Examples**
 ```esql
 FROM employees
 | KEEP first_name, last_name, hire_date
 | EVAL year_hired = DATE_TRUNC(1 year, hire_date)
 ```
 
-Counts how many employees were hired in each year by truncating hire dates to the year and grouping by year.
-
+Combine `DATE_TRUNC` with `STATS` to create date histograms. For example, the number of hires per year:
 ```esql
 FROM employees
 | EVAL year = DATE_TRUNC(1 year, hire_date)
@@ -35,8 +32,7 @@ FROM employees
 | SORT year
 ```
 
-Calculates the average error rate for each hour by flagging error messages, truncating timestamps to the hour, and aggregating the results.
-
+Or an hourly error rate:
 ```esql
 FROM sample_data
 | EVAL error = CASE(message LIKE "*error*", 1, 0)
@@ -44,3 +40,4 @@ FROM sample_data
 | STATS error_rate = AVG(error) by hour
 | SORT hour
 ```
+

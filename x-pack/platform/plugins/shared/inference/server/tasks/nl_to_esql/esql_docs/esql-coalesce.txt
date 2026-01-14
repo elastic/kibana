@@ -1,6 +1,25 @@
-Calculates the first non-null value between columns `a` and `b` for each row.
+# COALESCE
 
+Returns the first of its arguments that is not null. If all arguments are null, it returns `null`.
+
+**Syntax**
+`COALESCE(first, rest)`
+
+### Parameters
+
+#### `first`
+
+Expression to evaluate.
+
+#### `rest`
+
+Other expression to evaluate.
+
+**Supported types**
+
+**Example**
 ```esql
 ROW a=null, b="b"
 | EVAL COALESCE(a, b)
 ```
+

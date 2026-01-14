@@ -1,7 +1,26 @@
-Checks the `hosts` data for rows where the `ip1` address falls within either the `127.0.0.2/32` or `127.0.0.3/32` CIDR blocks, and then displays the `card`, `host`, `ip0`, and `ip1` columns.
+# CIDR_MATCH
 
+Returns true if the provided IP is contained in one of the provided CIDR blocks.
+
+**Syntax**
+`CIDR_MATCH(ip, blockX)`
+
+### Parameters
+
+#### `ip`
+
+IP address of type `ip` (both IPv4 and IPv6 are supported).
+
+#### `blockX`
+
+CIDR block to test the IP against.
+
+**Supported types**
+
+**Example**
 ```esql
 FROM hosts
 | WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
 | KEEP card, host, ip0, ip1
 ```
+

@@ -1,26 +1,25 @@
 # HYPOT
 
-The HYPOT function calculates the hypotenuse of two numeric values and always returns a double. If either input is infinity, the result is null.
+Returns the hypotenuse of two numbers. The input can be any numeric values, the return value is always a double. Hypotenuses of infinities are null.
 
-## Syntax
-
+**Syntax**
 `HYPOT(number1, number2)`
 
 ### Parameters
 
-#### number1
+#### `number1`
 
-Numeric expression. If this value is null, the function returns null.
+Numeric expression. If `null`, the function returns `null`.
 
-#### number2
+#### `number2`
 
-Numeric expression. If this value is null, the function returns null.
+Numeric expression. If `null`, the function returns `null`.
 
-## Examples
+**Supported types**
 
-Calculates the hypotenuse of the sides `a = 3.0` and `b = 4.0`, storing the result in column `c`.
-
+**Example**
 ```esql
 ROW a = 3.0, b = 4.0
 | EVAL c = HYPOT(a, b)
 ```
+

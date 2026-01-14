@@ -1,6 +1,21 @@
-Calculates the average of the numbers in the array field `a` and stores the result in a new field `avg_a`.
+# MV_AVG
 
+Converts a multivalued field into a single valued field containing the average of all of the values.
+
+**Syntax**
+`MV_AVG(number)`
+
+### Parameters
+
+#### `number`
+
+Multivalue expression.
+
+**Supported types**
+
+**Example**
 ```esql
 ROW a=[3, 5, 1, 6]
 | EVAL avg_a = MV_AVG(a)
 ```
+

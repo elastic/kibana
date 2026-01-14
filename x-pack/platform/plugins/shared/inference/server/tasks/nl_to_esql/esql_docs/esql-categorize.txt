@@ -1,46 +1,49 @@
 # CATEGORIZE
 
-The CATEGORIZE function groups text messages into categories based on similarly formatted text values. It is useful for identifying patterns and grouping similar log messages or textual data.
+Groups text messages into categories of similarly formatted text values.
+`CATEGORIZE` has the following limitations:
+- can’t be used within other expressions
+- can’t be used more than once in the groupings
+- can’t be used or referenced within aggregate functions and it has to be the first grouping
 
-## Syntax
+```
+stack: preview 9.0, ga 9.1
+```
 
+**Syntax**
 `CATEGORIZE(field, options, output_format, similarity_threshold, analyzer)`
 
 ### Parameters
 
-#### field
+#### `field`
 
-Expression to categorize.
+Expression to categorize
 
-#### options
+#### `options`
 
-(Optional) Additional options for categorization, provided as function named parameters.
+(Optional) Categorize additional options as function named parameters. `stack: ga 9.2`}
 
-#### output_format
+**Supported types**
 
-(keyword) Specifies the output format of the categories. Defaults to regex.
+**Supported function named parameters**
+### Parameters
 
-#### similarity_threshold
+#### `output_format`
 
-(integer) Sets the minimum percentage of token weight that must match for text to be added to a category bucket. Must be between 1 and 100. Higher values create narrower categories and increase memory usage. Defaults to 70.
+(keyword) The output format of the categories. Defaults to regex.
 
-#### analyzer
+#### `similarity_threshold`
+
+(integer) The minimum percentage of token weight that must match for text to be added to the category bucket. Must be between 1 and 100. The larger the value the narrower the categories. Larger values will increase memory usage and create narrower categories. Defaults to 70.
+
+#### `analyzer`
 
 (keyword) Analyzer used to convert the field into tokens for text categorization.
 
-## Examples
-
-Categorize server log messages and aggregate their counts:
-
-Groups log messages from the `sample_data` source into categories based on message similarity, then counts how many messages fall into each category.
-
+**Example**
+This example categorizes server logs messages into categories and aggregates their counts.
 ```esql
 FROM sample_data
 | STATS count=COUNT() BY category=CATEGORIZE(message)
 ```
 
-## Limitations
-
-- Cannot be used within other expressions.
-- Cannot be used more than once in the groupings.
-- Cannot be used or referenced within aggregate functions and must be the first grouping.

@@ -1,30 +1,29 @@
 # LOCATE
 
-Returns an integer indicating the position of a keyword substring within another string. Returns `0` if the substring is not found. String positions start from `1`.
+Returns an integer that indicates the position of a keyword substring within another string. Returns `0` if the substring cannot be found. Note that string positions start from `1`.
 
-## Syntax
-
+**Syntax**
 `LOCATE(string, substring, start)`
 
 ### Parameters
 
-#### string
+#### `string`
 
-The input string to search within.
+An input string
 
-#### substring
+#### `substring`
 
-The substring to locate in the input string.
+A substring to locate in the input string
 
-#### start
+#### `start`
 
-The start index from which to begin the search.
+The start index
 
-## Examples
+**Supported types**
 
-Finds the position of the substring "ll" within the string "hello".
-
+**Example**
 ```esql
 ROW a = "hello"
 | EVAL a_ll = LOCATE(a, "ll")
 ```
+

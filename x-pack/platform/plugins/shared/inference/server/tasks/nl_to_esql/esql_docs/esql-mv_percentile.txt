@@ -1,6 +1,25 @@
-Calculates the 50th percentile (median) of the array `[5, 5, 10, 12, 5000]` using `MV_PERCENTILE` and compares it to the result from `MV_MEDIAN`.
+# MV_PERCENTILE
 
+Converts a multivalued field into a single valued field containing the value at which a certain percentage of observed values occur.
+
+**Syntax**
+`MV_PERCENTILE(number, percentile)`
+
+### Parameters
+
+#### `number`
+
+Multivalue expression.
+
+#### `percentile`
+
+The percentile to calculate. Must be a number between 0 and 100. Numbers out of range will return a null instead.
+
+**Supported types**
+
+**Example**
 ```esql
 ROW values = [5, 5, 10, 12, 5000]
 | EVAL p50 = MV_PERCENTILE(values, 50), median = MV_MEDIAN(values)
 ```
+

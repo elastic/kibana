@@ -1,25 +1,27 @@
 # ROUND_TO
 
-The ROUND_TO function rounds a value down to the nearest fixed point from a specified list of constants.
+Rounds down to one of a list of fixed points.
 
-## Syntax
+```
+stack: preview 9.1.0
+```
 
+**Syntax**
 `ROUND_TO(field, points)`
 
 ### Parameters
 
-#### field
+#### `field`
 
-The numeric value to round. If the value is `null`, the function returns `null`.
+The numeric value to round. If `null`, the function returns `null`.
 
-#### points
+#### `points`
 
-A list of constant values that define the rounding points.
+Remaining rounding points. Must be constants.
 
-## Examples
+**Supported types**
 
-Groups employees by their birth date rounded down to the nearest specified date window, counts the number of employees in each group, and sorts the results by birth window in ascending order:
-
+**Example**
 ```esql
 FROM employees
 | STATS COUNT(*) BY birth_window=ROUND_TO(
@@ -34,3 +36,4 @@ FROM employees
 )
 | SORT birth_window ASC
 ```
+

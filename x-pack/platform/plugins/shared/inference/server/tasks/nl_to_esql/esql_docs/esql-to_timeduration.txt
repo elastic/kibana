@@ -2,23 +2,20 @@
 
 Converts an input value into a `time_duration` value.
 
-## Syntax
-
+**Syntax**
 `TO_TIMEDURATION(field)`
 
 ### Parameters
 
-#### field
+#### `field`
 
-Input value. The input must be a valid constant time duration expression.
+Input value. The input is a valid constant time duration expression.
 
-## Examples
+**Supported types**
 
-Calculate the difference between a datetime and a time duration:
-
-Adds and subtracts a three-hour time duration to a given datetime value, demonstrating both direct and function-based duration handling.
-
+**Example**
 ```esql
 ROW x = "2024-01-01"::datetime
 | EVAL y = x + "3 hours"::time_duration, z = x - TO_TIMEDURATION("3 hours");
 ```
+

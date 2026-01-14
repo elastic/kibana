@@ -1,37 +1,42 @@
 # DATE_DIFF
 
-The DATE_DIFF function subtracts the `startTimestamp` from the `endTimestamp` and returns the difference in multiples of the specified `unit`. If `startTimestamp` is later than `endTimestamp`, the result will be negative.
+Subtracts the `startTimestamp` from the `endTimestamp` and returns the difference in multiples of `unit`. If `startTimestamp` is later than the `endTimestamp`, negative values are returned.
 
-## Syntax
-
+**Syntax**
 `DATE_DIFF(unit, startTimestamp, endTimestamp)`
 
 ### Parameters
 
-#### unit
+#### `unit`
 
-Time difference unit.
+Time difference unit
 
-#### startTimestamp
+#### `startTimestamp`
 
-A string representing a start timestamp.
+A string representing a start timestamp
 
-#### endTimestamp
+#### `endTimestamp`
 
-A string representing an end timestamp.
+A string representing an end timestamp
 
-## Examples
+**Datetime difference units**
 
-Calculates the difference in microseconds between two timestamps, storing the result in the `dd_ms` field.
+Note that while there is an overlap between the function’s supported units and
+ES|QL’s supported time span literals, these sets are distinct and not
+interchangeable. Similarly, the supported abbreviations are conveniently shared
+with implementations of this function in other established products and not
+necessarily common with the date-time nomenclature used by Elasticsearch.
+**Supported types**
 
+**Examples**
 ```esql
 ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"),
     date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
 | EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
 ```
 
-Calculates the difference in years between several pairs of timestamps, showing how many full calendar years have elapsed between each pair.
-
+When subtracting in calendar units - like year, month a.s.o. - only the fully elapsed units are counted.
+To avoid this and obtain also remainders, simply switch to the next smaller unit and do the date math accordingly.
 ```esql
 ROW end_23 = TO_DATETIME("2023-12-31T23:59:59.999Z"),
   start_24 = TO_DATETIME("2024-01-01T00:00:00.000Z"),
@@ -40,3 +45,4 @@ ROW end_23 = TO_DATETIME("2023-12-31T23:59:59.999Z"),
 | EVAL end23_to_end24   = DATE_DIFF("year", end_23, end_24)
 | EVAL start_to_end_24  = DATE_DIFF("year", start_24, end_24)
 ```
+

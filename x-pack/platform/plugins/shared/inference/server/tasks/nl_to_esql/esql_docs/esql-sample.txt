@@ -1,21 +1,29 @@
-Collects up to 5 distinct sample values from the `gender` field in the `employees` dataset.
+# SAMPLE
 
+Collects sample values for a field.
+
+```
+stack: ga 9.1.0
+```
+
+**Syntax**
+`SAMPLE(field, limit)`
+
+### Parameters
+
+#### `field`
+
+The field to collect sample values for.
+
+#### `limit`
+
+The maximum number of values to collect.
+
+**Supported types**
+
+**Example**
 ```esql
 FROM employees
 | STATS sample = SAMPLE(gender, 5)
-```rs
-
-#### probability
-
-The probability that a row is included in the sample. The value must be between 0 and 1, exclusive.
-
-## Examples
-
-Selects only the `emp_no` column from the `employees` table and randomly returns about 5% of the rows.
-
-```esql
-FROM employees
-| KEEP emp_no
-| SAMPLE 0.05
 ```
-This example keeps only the `emp_no` column and randomly samples approximately 5% of the rows.
+

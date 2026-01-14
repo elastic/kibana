@@ -1,41 +1,50 @@
 # TO_LONG
 
-Converts the input value to a long integer. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to long. Boolean `true` is converted to `1`, and `false` to `0`. When two arguments are provided—a string value and a whole number base—the string is parsed as a long in the specified base. If parsing fails, a warning is generated and the result is `null`. A leading '0x' prefix is allowed for base 16.
+Converts the input value to a long. If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to long. Boolean `true` will be converted to long `1`, `false` to `0`.
+When given two arguments, a string value and a whole number base,
+the string is parsed as a long in the given base.
+If parsing fails a warning is generated as described below and the result is null.
+A leading '0x' prefix is allowed for base 16.
+`stack: ga 9.3`
 
-## Syntax
-
+**Syntax**
 `TO_LONG(field, base)`
 
 ### Parameters
 
-#### field
+#### `field`
 
-The input value to convert. This can be a single- or multi-valued column or an expression.
+Input value. The input can be a single- or multi-valued column or an expression.
 
-#### base
+#### `base`
 
-(Optional) The radix or base used to convert the input value. When a base is specified, the input type must be `keyword` or `text`.
+(Optional) Radix or base used to convert the input value.When a base is specified the input type must be `keyword` or `text`.`stack: ga 9.3`
 
-## Examples
+**Supported types**
 
-Converts three string values to long integers, showing successful conversion, conversion failure due to a decimal, and conversion failure due to a non-numeric string (resulting in null).
-
+**Examples**
 ```esql
 ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
 | EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)
 ```
 
-Parses a hexadecimal string and a base-13 string into long integers, and keeps both the original and converted values.
-
+Note in this example the last conversion of the string isn’t possible.
+When this happens, the result is a `null` value.
+In this case a _Warning_ header is added to the response.
+The header will provide information on the source of the failure:
+`"Line 1:113: evaluation of [TO_LONG(str3)] failed, treating result as null. Only first 20 failures recorded."`
+A following header will contain the failure reason and the offending value:
+`"java.lang.NumberFormatException: For input string: "foo""`
 ```esql
 ROW str1 = "0x32", str2 = "31"
 | EVAL long1 = TO_LONG(str1, 16), long2 = TO_LONG(str2, 13)
 | KEEP str1, long1, str2, long2
 ```
 
-Attempts to parse a string as a long integer in base 36 (succeeds) and base 10 (fails, returns null and a warning).
-
+This example demonstrates parsing a base 16 value and a base 13 value. `stack: ga 9.3`
 ```esql
 ROW str1 = "Hazelnut"
 | EVAL long1 = TO_LONG(str1, 36), fail1 = TO_LONG(str1, 10)
 ```
+
+This example demonstrates parsing a string that is valid in base 36 but invalid in base 10.Observe in the second case a warning is generated and null is returned. `stack: ga 9.3`

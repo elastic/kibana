@@ -1,68 +1,71 @@
 # KEEP
 
-The KEEP command lets you specify which columns are returned and the order in which they appear. When a field name matches multiple expressions, precedence rules determine which expression is used. Fields are added in the order they are listed. The precedence rules are:
+The `KEEP` processing command enables you to specify what columns are returned
+and the order in which they are returned.
+Precedence rules are applied when a field name matches multiple expressions.
+Fields are added in the order they appear. If one field matches multiple expressions, the following precedence rules apply (from highest to lowest priority):
 1. Complete field name (no wildcards)
-2. Partial wildcard expressions (e.g., `fieldNam*`)
+2. Partial wildcard expressions (for example: `fieldNam*`)
 3. Wildcard only (`*`)
 
-If a field matches two expressions with the same precedence, the rightmost expression takes priority.
+If a field matches two expressions with the same precedence, the rightmost expression wins.
+Refer to the examples for illustrations of these precedence rules.
 
-## Syntax
-
-`KEEP columns`
+The `KEEP` processing command enables you to specify what columns are returned
+and the order in which they are returned.
+**Syntax**
+```esql
+KEEP columns
+```
 
 ### Parameters
 
-#### columns
+#### `columns`
 
-A comma-separated list of columns to keep. Wildcards are supported. If a column matches multiple expressions, precedence rules determine which one is used.
+A comma-separated list of columns to keep. Supports wildcards.
+ See below for the behavior in case an existing column matches multiple
+ given wildcards or column names.
 
-## Examples
-
+**Examples**
 The columns are returned in the specified order:
-
 ```esql
 FROM employees
 | KEEP emp_no, first_name, last_name, height
 ```
-Returns only the `emp_no`, `first_name`, `last_name`, and `height` columns from the `employees` table, in that order.
 
-Use wildcards to return all columns matching a pattern:
-
+Rather than specify each column by name, you can use wildcards to return all
+columns with a name that matches a pattern:
 ```esql
 FROM employees
 | KEEP h*
 ```
-Returns all columns from the `employees` table whose names start with the letter `h`.
 
-The asterisk wildcard (`*`) by itself includes all columns not matched by other arguments. This query returns columns starting with `h`, followed by all other columns:
-
+The asterisk wildcard (`*`) by itself translates to all columns that do not
+match the other arguments.
+This query will first return all columns with a name
+that starts with `h`, followed by all other columns:
 ```esql
 FROM employees
 | KEEP h*, *
 ```
-Returns columns from the `employees` table that start with `h` first, then includes all remaining columns.
 
+The following examples show how precedence rules work when a field name matches multiple expressions.
 Complete field name has precedence over wildcard expressions:
-
 ```esql
 FROM employees
 | KEEP first_name, last_name, first_name*
 ```
-Ensures that the `first_name` column is selected based on its exact name, taking precedence over the `first_name*` wildcard.
 
-When wildcard expressions have the same priority, the rightmost one wins:
-
+Wildcard expressions have the same priority, but last one wins (despite being less specific):
 ```esql
 FROM employees
 | KEEP first_name*, last_name, first_na*
 ```
-Uses the rightmost wildcard expression (`first_na*`) to match columns when multiple wildcards have the same precedence.
 
-A simple wildcard expression `*` has the lowest precedence. Output order is determined by the other arguments:
-
+A simple wildcard expression `*` has the lowest precedence.
+Output order is determined by the other arguments:
 ```esql
 FROM employees
 | KEEP *, first_name
 ```
-Returns all columns from the `employees` table, with `first_name` appearing last in the output.
+

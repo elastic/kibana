@@ -1,34 +1,35 @@
 # ROW
 
-The ROW command creates a row with one or more columns and values that you specify. This is useful for testing or generating sample data.
-
-## Syntax
-
-`ROW column1 = value1[, ..., columnN = valueN]`
+The `ROW` source command produces a row with one or more columns with values
+that you specify. This can be useful for testing.
+**Syntax**
+```esql
+ROW column1 = value1[, ..., columnN = valueN]
+```
 
 ### Parameters
 
-#### columnX
+#### `columnX`
 
-The column name. If there are duplicate column names, only the rightmost duplicate creates a column.
+The column name.
+ In case of duplicate column names, only the rightmost duplicate creates a column.
 
-#### valueX
+#### `valueX`
 
-The value for the column. This can be a literal, an expression, or a function.
+The value for the column. Can be a literal, an expression, or a
+ function.
 
-## Examples
-
-Creates a row with three columns: `a` with value 1, `b` with value "two", and `c` with a null value.
+**Examples**
 ```esql
 ROW a = 1, b = "two", c = null
 ```
 
-Creates a row with column `a` containing a multi-value array [2, 1].
+Use square brackets to create multi-value columns:
 ```esql
 ROW a = [2, 1]
 ```
 
-Creates a row with column `a` set to the result of the ROUND function applied to 1.23 with 0 decimal places.
+`ROW` supports the use of functions:
 ```esql
 ROW a = ROUND(1.23, 0)
 ```

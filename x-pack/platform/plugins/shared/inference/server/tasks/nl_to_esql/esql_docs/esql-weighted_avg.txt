@@ -1,5 +1,23 @@
-Calculates the weighted average salary for each language group, using employee height as the weighting factor, rounds the result, and displays the average alongside the language.
+# WEIGHTED_AVG
 
+The weighted average of a numeric expression.
+
+**Syntax**
+`WEIGHTED_AVG(number, weight)`
+
+### Parameters
+
+#### `number`
+
+A numeric value.
+
+#### `weight`
+
+A numeric weight.
+
+**Supported types**
+
+**Example**
 ```esql
 FROM employees
 | STATS w_avg = WEIGHTED_AVG(salary, height) BY languages
@@ -7,3 +25,4 @@ FROM employees
 | KEEP w_avg, languages
 | SORT languages
 ```
+
