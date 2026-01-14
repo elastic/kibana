@@ -601,3 +601,64 @@ describe('encode', () => {
     });
   });
 });
+
+describe('satisfies', () => {
+  it('should render the block when the agent version satisfies the condition', () => {
+    const streamTemplate = `
+    {{#satisfies _meta.agent.version "^9.3.0"}}
+    supported: true
+    {{/satisfies}}
+    {{#satisfies _meta.agent.version "<9.3.0"}}
+    supported: false
+    {{/satisfies}}`;
+
+    const vars = {};
+
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      supported: true,
+    });
+  });
+
+  it('should not render the block when the agent version does not satisfy the condition', () => {
+    const streamTemplate = `
+    field: "value"
+    {{#satisfies _meta.agent.version ">=10.0.0"}}
+    supported: true
+    {{/satisfies}}`;
+
+    const vars = {};
+
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      field: 'value',
+    });
+  });
+
+  it('should not render any blocks when the agent version variable is not set', () => {
+    const streamTemplate = `
+    field: "value"
+    {{#satisfies _meta.agent.version "^9.3.0"}}
+    supported: true
+    {{/satisfies}}
+    {{#satisfies _meta.agent.version "<9.3.0"}}
+    supported: false
+    {{/satisfies}}`;
+
+    const vars = {};
+
+    const output = compileTemplate(
+      vars,
+      {
+        ...getMockedMetaVariable(),
+        agent: {
+          version: undefined,
+        },
+      },
+      streamTemplate
+    );
+    expect(output).toEqual({
+      field: 'value',
+    });
+  });
+});
