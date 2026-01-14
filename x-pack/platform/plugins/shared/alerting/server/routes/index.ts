@@ -8,7 +8,7 @@
 import type { CoreSetup, DocLinksServiceSetup, IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
+import type { ConfigSchema } from '@kbn/kql/server/config';
 import type { Observable } from 'rxjs';
 import type { AlertingConfig } from '../config';
 import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
