@@ -33,6 +33,7 @@ toc:
     children:
       - file: connectors-kibana/gen-ai-connectors.md
         children:
+          - file: connectors-kibana/mcp-action-type.md
           - file: connectors-kibana/ai-connector.md
           - file: connectors-kibana/bedrock-action-type.md
           - file: connectors-kibana/elastic-managed-llm.md
