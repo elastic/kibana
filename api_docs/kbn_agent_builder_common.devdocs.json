@@ -2166,6 +2166,48 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentBuilderTelemetryEventsMap.AGENT_BUILDER_EVENT_TYPES.AgentCreated",
+            "type": "Object",
+            "tags": [],
+            "label": "[AGENT_BUILDER_EVENT_TYPES.AgentCreated]",
+            "description": [],
+            "signature": [
+              "ReportAgentCreatedParams"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentBuilderTelemetryEventsMap.AGENT_BUILDER_EVENT_TYPES.AgentUpdated",
+            "type": "Object",
+            "tags": [],
+            "label": "[AGENT_BUILDER_EVENT_TYPES.AgentUpdated]",
+            "description": [],
+            "signature": [
+              "ReportAgentUpdatedParams"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentBuilderTelemetryEventsMap.AGENT_BUILDER_EVENT_TYPES.ToolCreated",
+            "type": "Object",
+            "tags": [],
+            "label": "[AGENT_BUILDER_EVENT_TYPES.ToolCreated]",
+            "description": [],
+            "signature": [
+              "ReportToolCreatedParams"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
             "id": "def-common.AgentBuilderTelemetryEventsMap.AGENT_BUILDER_EVENT_TYPES.RoundComplete",
             "type": "Object",
             "tags": [],
@@ -4957,7 +4999,7 @@
         "label": "AgentBuilderEventTypes",
         "description": [],
         "signature": [
-          "\"agent_builder_opt_in_action\" | \"agent_builder_opt_out\" | \"agent_builder_add_to_chat_clicked\" | \"agent_builder_round_complete\" | \"agent_builder_round_error\""
+          "\"agent_builder_opt_in_action\" | \"agent_builder_opt_out\" | \"agent_builder_add_to_chat_clicked\" | \"agent_builder_agent_created\" | \"agent_builder_agent_updated\" | \"agent_builder_tool_created\" | \"agent_builder_round_complete\" | \"agent_builder_round_error\""
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
         "deprecated": false,
@@ -6462,7 +6504,7 @@
         "label": "AGENT_BUILDER_EVENT_TYPES",
         "description": [],
         "signature": [
-          "{ readonly OptInAction: \"agent_builder_opt_in_action\"; readonly OptOut: \"agent_builder_opt_out\"; readonly AddToChatClicked: \"agent_builder_add_to_chat_clicked\"; readonly RoundComplete: \"agent_builder_round_complete\"; readonly RoundError: \"agent_builder_round_error\"; }"
+          "{ readonly OptInAction: \"agent_builder_opt_in_action\"; readonly OptOut: \"agent_builder_opt_out\"; readonly AddToChatClicked: \"agent_builder_add_to_chat_clicked\"; readonly AgentCreated: \"agent_builder_agent_created\"; readonly AgentUpdated: \"agent_builder_agent_updated\"; readonly ToolCreated: \"agent_builder_tool_created\"; readonly RoundComplete: \"agent_builder_round_complete\"; readonly RoundError: \"agent_builder_round_error\"; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
         "deprecated": false,

@@ -14,7 +14,6 @@ import {
   mergeGrokProcessors,
   groupMessagesByPattern,
   extractGrokPatternDangerouslySlow,
-  unwrapPatternDefinitions,
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
 import { lastValueFrom } from 'rxjs';
@@ -105,13 +104,7 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
             }
           )
         ).then((reviewResult) => {
-          const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult.grokProcessor);
-
-          return {
-            ...grokProcessor,
-            patterns: unwrapPatternDefinitions(grokProcessor), // NOTE: Inline patterns until we support custom pattern definitions in Streamlang
-            pattern_definitions: {},
-          };
+          return getGrokProcessor(grokPatternNodes, reviewResult.grokProcessor);
         });
       })
     );
@@ -164,6 +157,7 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
                   customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
                   from: params.fieldName,
                   patterns: combinedGrokProcessor.patterns,
+                  pattern_definitions: combinedGrokProcessor.pattern_definitions,
                 },
               ],
             },
