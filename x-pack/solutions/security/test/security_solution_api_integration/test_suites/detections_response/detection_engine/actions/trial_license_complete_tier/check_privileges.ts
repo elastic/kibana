@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
             `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/`
           );
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            '/alerting-setup.html#alerting-authorization.'
+            '/explore-analyze/alerts-cases/alerts/alerting-setup#alerting-authorization'
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
@@ -173,7 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
             `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/`
           );
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            '/alerting-setup.html#alerting-authorization.'
+            '/explore-analyze/alerts-cases/alerts/alerting-setup#alerting-authorization'
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
