@@ -169,6 +169,7 @@ describe('enableSpaceAwareness', () => {
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           revision: 1,
           updated_at: new Date().toISOString(),
+          namespace: 'default',
         },
       })),
       {
