@@ -522,7 +522,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerEndpointRoutes(router, this.endpointContext);
     registerEndpointSuggestionsRoutes(
       router,
-      plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
+      plugins.kql.autocomplete.getInitializerContextConfig().create(),
       this.endpointContext
     );
     registerLimitedConcurrencyRoutes(core);
