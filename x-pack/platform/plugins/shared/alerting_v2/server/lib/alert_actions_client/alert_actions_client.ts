@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { from, where, sort, keep, limit, SortOrder } from '@kbn/esql-composer';
 import Boom from '@hapi/boom';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
@@ -64,9 +65,13 @@ export class AlertActionsClient {
   }
 
   private async findLastAlertEventBySeriesIdOrThrow(alertSeriesId: string): Promise<AlertEvent> {
-    const result = await this.queryService.executeQuery({
-      query: `FROM .alerts-events | WHERE alert_series_id == "${alertSeriesId}" | SORT @timestamp DESC | KEEP @timestamp, rule.id | LIMIT 1`,
-    });
+    const query = from('.alerts-events').pipe(
+      where(`alert_series_id == ?alertSeriesId`, { alertSeriesId }),
+      sort({ '@timestamp': SortOrder.Desc }),
+      keep(['@timestamp', 'rule.id']),
+      limit(1)
+    );
+    const result = await this.queryService.executeQuery({ query: query.toString() });
 
     if (result.values.length === 0) {
       throw Boom.notFound(`Alert event with series id [${alertSeriesId}] not found`);
@@ -84,16 +89,18 @@ export class AlertActionsClient {
     alertSeriesId: string,
     episodeId?: string
   ): Promise<AlertTransition> {
-    const criteria = [`alert_series_id == "${alertSeriesId}"`];
+    let whereCriteria = 'alert_series_id == ?alertSeriesId';
     if (episodeId) {
-      criteria.push(`episode_id == "${episodeId}"`);
+      whereCriteria += ' AND episode_id == ?episodeId';
     }
 
-    const result = await this.queryService.executeQuery({
-      query: `FROM .alerts-transitions | WHERE ${criteria.join(
-        ' AND '
-      )} | SORT @timestamp DESC | KEEP episode_id | LIMIT 1`,
-    });
+    const query = from('.alerts-transitions').pipe(
+      where(whereCriteria, { alertSeriesId, episodeId }),
+      sort({ '@timestamp': SortOrder.Desc }),
+      keep(['episode_id']),
+      limit(1)
+    );
+    const result = await this.queryService.executeQuery({ query: query.toString() });
 
     if (result.values.length === 0) {
       throw Boom.notFound(
