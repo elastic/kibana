@@ -44,9 +44,10 @@ describe('getCommonAgentVersions', () => {
 });
 
 describe('getVersionSpecificPolicies', () => {
+  const soClient = {} as any;
   it('should create version specific policies with common agent versions and package level condition', async () => {
     const policies = await getVersionSpecificPolicies(
-      undefined,
+      soClient,
       { data: { inputs: [] } },
       {
         id: 'policy1',
@@ -89,7 +90,7 @@ describe('getVersionSpecificPolicies', () => {
 
   it('should create version specific policies with custom agent versions and package level condition', async () => {
     const policies = await getVersionSpecificPolicies(
-      undefined,
+      soClient,
       { data: { inputs: [] } },
       {
         id: 'policy1',
@@ -127,7 +128,7 @@ describe('getVersionSpecificPolicies', () => {
 
   it('should create version specific policies with common agent versions and template level condition', async () => {
     const policies = await getVersionSpecificPolicies(
-      undefined,
+      soClient,
       { data: { inputs: [] } },
       { id: 'policy1', inputs: [{}] }
     );
@@ -163,7 +164,7 @@ describe('getVersionSpecificPolicies', () => {
 
   it('should create version specific policies with custom agent versions and template level condition', async () => {
     const policies = await getVersionSpecificPolicies(
-      undefined,
+      soClient,
       { data: { inputs: [] } },
       { id: 'policy1', inputs: [{}] },
       ['9.4', '9.1']

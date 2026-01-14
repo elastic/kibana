@@ -2293,7 +2293,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         | undefined;
 
       if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-        packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient, true);
+        const agentPoliciesWithPackagePolicies = await agentPolicyService.getByIds(
+          soClient,
+          uniquePolicyIdsR,
+          { withPackagePolicies: true }
+        );
+        const packagePoliciesToCheck = agentPoliciesWithPackagePolicies.flatMap(
+          (agentPolicy) => agentPolicy.package_policies || []
+        );
+
+        packageInfos = await getPackageInfoForPackagePolicies(
+          packagePoliciesToCheck,
+          soClient,
+          true
+        );
         packageInfosandAssetsMap = await getPkgInfoAssetsMap({
           logger,
           packageInfos: [...packageInfos.values()],

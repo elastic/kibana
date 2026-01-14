@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupMockServer } from '../agents/helpers/mock_agentless_api';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -17,30 +16,13 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
-  const mockAgentlessApiService = setupMockServer();
-  const logger = getService('log');
-
-  const getPackage = async (pkgName: string) => {
-    const getPkgRes = await supertest
-      .get(`/api/fleet/epm/packages/${pkgName}`)
-      .set('kbn-xsrf', 'xxxx')
-      .expect(200);
-    return getPkgRes;
-  };
-  const epmInstall = async (pkgName: string, pkgVersion: string) => {
-    const getPkgRes = await supertest
-      .post(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
-      .set('kbn-xsrf', 'xxxx')
-      .send({ force: true })
-      .expect(200);
-    return getPkgRes;
-  };
 
   describe('fleet_version_specific_policies', () => {
     skipIfNoDockerRegistry(providerContext);
 
     describe('package level agent version condition', () => {
       let agentPolicyWithPPId: string;
+      let packagePolicyId: string;
 
       async function createAgentPolicyWithPackagePolicy() {
         const { body: agentPolicyResponse } = await supertest
@@ -54,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         agentPolicyWithPPId = agentPolicyResponse.item.id;
 
-        await supertest
+        const { body: packagePolicyResponse } = await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -76,6 +58,7 @@ export default function (providerContext: FtrProviderContext) {
               version: '1.12.0',
             },
           });
+        packagePolicyId = packagePolicyResponse.item.id;
       }
 
       before(async () => {
@@ -117,10 +100,23 @@ export default function (providerContext: FtrProviderContext) {
           }
         });
       });
+
+      it('should set has_agent_version_conditions to false when package policy is deleted', async () => {
+        await supertest
+          .delete(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyWithPPId}`)
+          .expect(200);
+        expect(body.item.has_agent_version_conditions).to.eql(false);
+      });
     });
 
     describe('template level agent version condition', () => {
       let agentPolicyWithPPId: string;
+      let packagePolicyId: string;
 
       async function createAgentPolicyWithPackagePolicy() {
         const { body: agentPolicyResponse } = await supertest
@@ -134,7 +130,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         agentPolicyWithPPId = agentPolicyResponse.item.id;
 
-        await supertest
+        const { body: packagePolicyResponse } = await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -202,6 +198,7 @@ export default function (providerContext: FtrProviderContext) {
               version: '1.26.0',
             },
           });
+        packagePolicyId = packagePolicyResponse.item.id;
       }
 
       before(async () => {
@@ -246,6 +243,18 @@ export default function (providerContext: FtrProviderContext) {
             expect(source.data.inputs[0].streams[0].program).to.be(undefined);
           }
         });
+      });
+
+      it('should set has_agent_version_conditions to false when package policy is deleted', async () => {
+        await supertest
+          .delete(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyWithPPId}`)
+          .expect(200);
+        expect(body.item.has_agent_version_conditions).to.eql(false);
       });
     });
   });
