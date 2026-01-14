@@ -66,5 +66,22 @@ export function isWarningOrAbove(logEntry: Record<string, unknown>): boolean {
     }
   }
 
+  // 5. Check message and body.text fields for error/exception keywords
+  const message = logEntry.message;
+  if (typeof message === 'string') {
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes('error') || lowerMessage.includes('exception')) {
+      return true;
+    }
+  }
+
+  const bodyText = (logEntry.body as { text?: string } | undefined)?.text;
+  if (typeof bodyText === 'string') {
+    const lowerBodyText = bodyText.toLowerCase();
+    if (lowerBodyText.includes('error') || lowerBodyText.includes('exception')) {
+      return true;
+    }
+  }
+
   return false;
 }

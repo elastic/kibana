@@ -47,42 +47,6 @@ export async function getLogAiInsights({
   plugins,
   logger,
 }: GetLogAiInsightsParams): Promise<{ summary: string; context: string }> {
-  const systemPrompt = dedent(`
-    You are an expert SRE assistant helping a user analyze a log entry in Kibana. Your goal is to provide actionable insights tailored to the log's severity and content.
-
-    ## Analysis Approach
-
-    1. **Classify the log by log.level**: Determine the log level from the log.level field (error, warning, info, debug, trace, fatal, critical, alert, emergency).
-       **Important**: Even if log.level is "info", "debug", or "trace", if the log mentions error messages, error fields, or exception fields, treat it as an error-level log.
-
-    2. **Respond based on log level:**
-
-    ### Error/Fatal/Critical/Alert/Emergency Logs (or logs with error/exception fields)
-    Provide a thorough investigation:
-    - **What happened**: Summarize the error in plain language
-    - **Where it originated**: Identify the service, component, or code path
-    - **Root cause**: Analyze using CorrelatedLogSequence (chronological sequence of related logs). The CorrelatedLogSequence shows what happened before and after the error.
-    - **Impact**: Note any affected downstream services or dependencies
-    - **Next steps**: Suggest specific actions for investigation or remediation
-
-    ### Warning Logs
-    - Assess whether the warning indicates an emerging problem or is purely informational
-    - If it signals a potential issue, analyze it like an error log (see above)
-    - If it's routine, provide a brief explanation of what triggered it
-
-    ### Info/Debug/Trace Logs
-    Keep it concise:
-    - Explain what the log message means in context
-    - Identify the source (service, host, container)
-    - Use ServiceSummary if available to provide service context
-    - Only flag concerns if the content unexpectedly suggests a problem
-
-    ## Important Notes
-    - Base your analysis strictly on the provided data (**DO NOT** speculate beyond what the evidence shows)
-    - Be specific: reference actual field values, timestamps, and service names from the log entry
-    - Prioritize actionable information over generic advice
-  `);
-
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,
     index,
@@ -94,6 +58,29 @@ export async function getLogAiInsights({
   }
 
   const isErrorOrWarning = isWarningOrAbove(logEntry);
+
+  const systemPrompt = isErrorOrWarning
+    ? dedent(`
+        You are an expert SRE assistant analyzing an error or warning log entry. Provide a thorough investigation:
+
+        - **What happened**: Summarize the error in plain language
+        - **Where it originated**: Identify the service, component, or code path
+        - **Root cause**: Analyze using CorrelatedLogSequence to understand what happened before and after the error
+        - **Impact**: Note any affected downstream services or dependencies
+        - **Next steps**: Suggest specific actions for investigation or remediation
+
+        Base your analysis strictly on the provided data.
+      `)
+    : dedent(`
+        You are an expert SRE assistant analyzing an info, debug, or trace log entry. Keep it concise:
+
+        - Explain what the log message means in context
+        - Identify the source (service, host, container)
+        - Use ServiceSummary if available to provide service context
+
+        Base your analysis strictly on the provided data. Be specific and reference actual field values.
+      `);
+
   let context = dedent(`
     <LogEntryIndex>
     ${index}
@@ -199,20 +186,17 @@ export async function getLogAiInsights({
     })
   );
 
-  const contextPartsStrings: string[] = [];
-
-  results.forEach((result) => {
-    if (result.status === 'rejected') {
-      logger.debug(`Log AI Insight: fetch failed: ${result.reason}`);
-      return;
-    }
-
-    const { part, data } = result.value;
-    if (!data || (Array.isArray(data) && data.length === 0)) {
-      return;
-    }
-
-    contextPartsStrings.push(
+  const contextPartsStrings = results
+    .filter((result): result is PromiseFulfilledResult<{ part: ContextPart; data: unknown }> => {
+      if (result.status === 'rejected') {
+        logger.debug(`Log AI Insight: fetch failed: ${result.reason}`);
+        return false;
+      }
+      return true;
+    })
+    .map((result) => result.value)
+    .filter(({ data }) => data && (!Array.isArray(data) || data.length > 0))
+    .map(({ part, data }) =>
       dedent(`
         <${part.name}>
         Time window: ${windowStart} to ${windowEnd}
@@ -222,7 +206,6 @@ export async function getLogAiInsights({
         </${part.name}>
       `)
     );
-  });
 
   if (contextPartsStrings.length > 0) {
     context += contextPartsStrings.join('\n\n');
@@ -238,8 +221,7 @@ export async function getLogAiInsights({
           <LogContext>
           ${context}
           </LogContext>
-          Analyze this log entry and generate a summary explaining what it means, whether this is expected behavior or indicates an issue (e.g., error, warning, exception, service failure, etc.).
-          If it indicates an issue, explain the likely root cause if determinable and recommended actions or steps for further investigation.
+          Analyze this log entry and generate a summary explaining what it means.
           Follow your system instructions. Ensure the analysis is grounded in the provided context, and concise.
         `),
       },
