@@ -72,21 +72,23 @@ export const ConsoleTutorialsGroup = () => {
         image: `${assetBasePath}/search_observe_illustration.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
       },
-      {
-        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.agentBuilderTitle', {
-          defaultMessage: 'Agent builder',
-        }),
-        dataTestSubj: 'console_tutorials_agent_builder',
-        description: i18n.translate(
-          'xpack.searchGettingStarted.consoleTutorials.agentBuilderDescription',
-          {
-            defaultMessage: 'Learn how to use the Agent Builder to create and manage agents.',
-          }
-        ),
-        request: consoleTutorials.agentBuilder,
-        image: `${assetBasePath}/search_agent_builder_illustration.svg`,
-        buttonRef: React.createRef<HTMLButtonElement>(),
-      },
+      // TODO:  uncomment below lines when we are ready to show agent builder tutorial
+      // After https://github.com/elastic/search-team/issues/12027#top
+      // {
+      //   title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.agentBuilderTitle', {
+      //     defaultMessage: 'Agent builder',
+      //   }),
+      //   dataTestSubj: 'console_tutorials_agent_builder',
+      //   description: i18n.translate(
+      //     'xpack.searchGettingStarted.consoleTutorials.agentBuilderDescription',
+      //     {
+      //       defaultMessage: 'Learn how to use the Agent Builder to create and manage agents.',
+      //     }
+      //   ),
+      //   request: consoleTutorials.agentBuilder,
+      //   image: `${assetBasePath}/search_agent_builder_illustration.svg`,
+      //   buttonRef: React.createRef<HTMLButtonElement>(),
+      // },
       // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
       // {
       //   title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
