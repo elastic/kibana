@@ -8,12 +8,17 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from './constants';
-import { EntityType } from '../domain/definitions/entity_type';
 import type { EntityStorePluginRouter } from '../types';
+import { ALL_ENTITY_TYPES, EntityType } from '../domain/definitions/entity_type';
+import { scheduleExtractEntityTasks } from '../tasks/extract_entity_task';
 import { wrapMiddlewares } from './middleware';
 
 const bodySchema = z.object({
-  entityType: z.array(EntityType).optional(),
+  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+  logExtractionFrequency: z
+    .string()
+    .regex(/^\d+[smdh]$/)
+    .optional(),
 });
 
 export function registerInstall(router: EntityStorePluginRouter) {
@@ -37,11 +42,20 @@ export function registerInstall(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res) => {
         const entityStoreCtx = await ctx.entityStore;
-        const logger = entityStoreCtx.logger;
-        const resourcesService = entityStoreCtx.getResourcesService();
+        const { logger, resourcesService, taskManagerStart } = entityStoreCtx;
+        const { entityTypes, logExtractionFrequency } = req.body;
         logger.debug('Install api called');
+        resourcesService.install(entityTypes);
 
-        resourcesService.install(req.body.entityType);
+        await scheduleExtractEntityTasks({
+          taskManager: taskManagerStart,
+          entityTypes,
+          resourcesService,
+          logger,
+          frequency: logExtractionFrequency,
+        });
+
+        resourcesService.install(entityTypes);
         return res.ok({
           body: {
             ok: true,
