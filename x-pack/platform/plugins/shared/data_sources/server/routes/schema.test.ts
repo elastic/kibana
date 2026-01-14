@@ -6,12 +6,12 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import type { DataConnectorAttributes } from '../saved_objects';
+import type { DataSourceAttributes } from '../saved_objects';
 import { convertSOtoAPIResponse } from './schema';
 
 describe('convertSOtoAPIResponse', () => {
   it('should convert SavedObject to API response format', () => {
-    const savedObject: SavedObject<DataConnectorAttributes> = {
+    const savedObject: SavedObject<DataSourceAttributes> = {
       id: 'connector-123',
       type: 'data_connector',
       references: [],
@@ -42,7 +42,7 @@ describe('convertSOtoAPIResponse', () => {
   });
 
   it('should handle empty arrays', () => {
-    const savedObject: SavedObject<DataConnectorAttributes> = {
+    const savedObject: SavedObject<DataSourceAttributes> = {
       id: 'connector-empty',
       type: 'data_connector',
       references: [],
@@ -73,7 +73,7 @@ describe('convertSOtoAPIResponse', () => {
   });
 
   it('should handle minimal required fields', () => {
-    const savedObject: SavedObject<DataConnectorAttributes> = {
+    const savedObject: SavedObject<DataSourceAttributes> = {
       id: 'minimal-connector',
       type: 'data_connector',
       references: [],
@@ -104,7 +104,7 @@ describe('convertSOtoAPIResponse', () => {
   });
 
   it('should handle connectors with multiple stack connectors', () => {
-    const savedObject: SavedObject<DataConnectorAttributes> = {
+    const savedObject: SavedObject<DataSourceAttributes> = {
       id: 'multi-connector',
       type: 'data_connector',
       references: [],
@@ -135,7 +135,7 @@ describe('convertSOtoAPIResponse', () => {
   });
 
   it('should use timestamps from attributes', () => {
-    const savedObject: SavedObject<DataConnectorAttributes> = {
+    const savedObject: SavedObject<DataSourceAttributes> = {
       id: 'connector-with-timestamps',
       type: 'data_connector',
       references: [],

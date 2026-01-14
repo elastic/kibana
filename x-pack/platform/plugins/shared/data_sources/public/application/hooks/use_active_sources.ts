@@ -12,7 +12,7 @@ import type { ActiveSource } from '../../types/connector';
 import { queryKeys } from '../query_keys';
 
 interface ListDataSourcesResponse {
-  connectors: ActiveSource[];
+  dataSources: ActiveSource[];
   total: number;
 }
 
@@ -26,7 +26,7 @@ export const useActiveSources = () => {
   });
 
   return {
-    activeSources: data?.connectors ?? [],
+    activeSources: data?.dataSources ?? [],
     isLoading,
     error,
   };

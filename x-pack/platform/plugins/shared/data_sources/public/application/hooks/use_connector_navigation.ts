@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { DATA_CONNECTORS_APP_ID } from '../../../common/constants';
+import { DATA_SOURCES_APP_ID } from '../../../common/constants';
 import { useKibana } from './use_kibana';
 
 export const useConnectorNavigation = () => {
@@ -18,13 +18,13 @@ export const useConnectorNavigation = () => {
   const currentPath = location.pathname;
 
   const navigateToConnectors = useCallback(() => {
-    application.navigateToApp(DATA_CONNECTORS_APP_ID, {
+    application.navigateToApp(DATA_SOURCES_APP_ID, {
       path: '/connectors',
     });
   }, [application]);
 
   const navigateToActiveSources = useCallback(() => {
-    application.navigateToApp(DATA_CONNECTORS_APP_ID, {
+    application.navigateToApp(DATA_SOURCES_APP_ID, {
       path: '/active-sources',
     });
   }, [application]);
