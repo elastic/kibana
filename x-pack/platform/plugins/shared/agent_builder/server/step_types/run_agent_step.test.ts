@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { of } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { getRunAgentStepDefinition } from './run_agent_step';
+import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
 describe('ai.agent workflow step (Agent Builder)', () => {
   const createContext = (overrides: Partial<any> = {}) => {
@@ -33,7 +34,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       stepId: 'test-step',
       stepType: 'ai.agent',
       ...overrides,
-    };
+    } as StepHandlerContext;
   };
 
   it('creates and persists a conversation when create_conversation is true, and emits conversation_id', async () => {
@@ -67,21 +68,20 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     } as any;
 
     const step = getRunAgentStepDefinition(serviceManager);
-    const res = await step.handler(
-      createContext({
-        input: {
-          message: 'hello',
-        },
-        config: {
-          'create-conversation': true,
-        },
-      })
-    );
+    const context = createContext({
+      input: {
+        message: 'hello',
+      },
+      config: {
+        'create-conversation': true,
+      },
+    });
+    const res = await step.handler(context);
 
     expect(chat.converse).toHaveBeenCalledTimes(1);
     expect(runner.runAgent).not.toHaveBeenCalled();
     expect(res).toHaveProperty('output.conversation_id');
-    expect(res.output.conversation_id).toBe('c-1');
+    expect(res.output?.conversation_id).toBe('c-1');
   });
 
   it('uses conversation_id from input (with:) and create-conversation from config (static)', async () => {
@@ -172,7 +172,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
     expect(chat.converse).toHaveBeenCalledTimes(1);
     expect(runner.runAgent).not.toHaveBeenCalled();
-    expect(res.output.conversation_id).toBe('c-1');
+    expect(res.output?.conversation_id).toBe('c-1');
   });
 
   it('does not create a conversation when create_conversation is false and no conversation_id is provided', async () => {
@@ -207,7 +207,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     );
 
     expect(serviceManager.internalStart.chat.converse).toHaveBeenCalledTimes(1);
-    expect(res.output.conversation_id).toBeUndefined();
+    expect(res.output?.conversation_id).toBeUndefined();
     expect(runner.runAgent).not.toHaveBeenCalled();
   });
 });
