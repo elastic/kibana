@@ -46,19 +46,12 @@ export async function getToolHandler({
   // Filters for standard logs with message field
   const messageFilters = [...baseFilters, { exists: { field: 'message' } }];
 
-  // Filters for OTel span exceptions. No body.text(~message) field, use exception.message
+  // Filters for OTel exceptions without a message field (e.g., span exception events).
+  // These have exception.message but no body.text/message, so we categorize on exception.message.
   const spanExceptionFilters = [
     ...baseFilters,
-    // Span exception/error events per OTel (should be "exception", but some use "error")
-    {
-      bool: {
-        should: [{ term: { event_name: 'exception' } }, { term: { event_name: 'error' } }],
-        minimum_should_match: 1,
-      },
-    },
-    // defensive: span exception events should have exception.message
     { exists: { field: 'exception.message' } },
-    // defensive: so we dont process same doc. span exception events should not have body.text(~message)
+    // Exclude docs with message field - those are handled by messageFilters
     { bool: { must_not: { exists: { field: 'message' } } } },
   ];
 
@@ -81,10 +74,9 @@ export async function getToolHandler({
       fields,
       field: 'message',
     }),
-    // OTel span exception events: Unlike ECS, OTel has no "error" document type. Exceptions are
-    // recorded as span events (via span.RecordException()) identified by event_name, not severity
-    // fields. Therefore there is no alias from `message` to `exception.message`, so we must query
-    // and categorize on `exception.message` explicitly.
+    // OTel exceptions without a message field (e.g., span exception events created via
+    // span.RecordException()). These have exception.message but no body.text/message field,
+    // so we must categorize on exception.message explicitly.
     // https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/
     getLogCategories({
       esClient,
