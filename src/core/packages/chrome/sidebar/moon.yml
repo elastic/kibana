@@ -18,9 +18,12 @@ project:
   metadata:
     sourceRoot: src/core/packages/chrome/sidebar
 dependsOn:
+  - '@kbn/i18n'
   - '@kbn/react-context-registry'
   - '@kbn/use-observable'
   - '@kbn/zod'
+  - '@kbn/core-chrome-layout-utils'
+  - '@kbn/core-chrome-layout-components'
 tags:
   - shared-browser
   - package
