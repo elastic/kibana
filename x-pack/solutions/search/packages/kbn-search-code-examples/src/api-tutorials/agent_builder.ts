@@ -53,12 +53,12 @@ POST /_bulk
 
 GET kbn://api/agent_builder/tools
 
-# ✅ The response includes a list of all available tools, including platform tools.
+# ✅ The response includes a list of all available tools, including builtin tools.
 
-# Tool configuration values help your agents understand how and when to use various tools.
-
-# NEW STEP
-# Here we are using one of the built in tools to generate an ES|QL query against our sample data
+# -----------------------------------------------
+# Step 2: Execute a builtin tool 🚀
+# -----------------------------------------------
+# Execute a builtin tool to generate an ES|QL query against our sample data
 
 POST kbn://api/agent_builder/tools/_execute
 {
@@ -69,29 +69,22 @@ POST kbn://api/agent_builder/tools/_execute
   }
 }
 
-# The response includes the ES|QL query that can be used to create a custom tool:
-#"results": [
-#  {
-#    "type": "query",
-#    "data": {
-#      "esql": """FROM kibana_sample_data_agents
-#| SORT page_count DESC
-#| LIMIT 1"""
-#    },
-#    "tool_result_id": "cqoOIt"
-#  },
-#]
+# ✅ The response includes the ES|QL query that can be used to create a custom tool
 
+# -----------------------------------------------
+# Step 2: Create a custom ES|QL tool ✍️
+# -----------------------------------------------
 # Tools can be created to best fit common use cases with your agent interactions.
 # Using the query from the previous step, we are creating a tool that gets the book with the most pages.
 
 POST kbn://api/agent_builder/tools
 {
-  "id": "most-pages-esql-tool",
+  "id": "example-books-esql-tool",
   "type": "esql",
   "description": "An ES|QL query tool for getting the book with the most pages",
   "configuration": {
-    "query": "FROM kibana_sample_data_agents | SORT page_count DESC | LIMIT 1"
+    "query": "FROM kibana_sample_data_agents | SORT page_count DESC | LIMIT 1",
+    "params": {}
   }
 }
 
@@ -101,40 +94,12 @@ POST kbn://api/agent_builder/tools
 
 POST kbn://api/agent_builder/tools/_execute
 {
-    "tool_id": "most-pages-esql-tool",
+    "tool_id": "example-books-esql-tool",
     "tool_params": {}
 }
 
-# Here's a more complex tool that leverages parameters and 
+# ✅ The response includes a result with the "tabular_data" type showing the query's output
 
-# -----------------------------------------------
-# Step 2: Create a custom ES|QL tool ✍️
-# -----------------------------------------------
-# Create a new tool that queries our sample books data using ES|QL.
-
-POST kbn://api/agent_builder/tools
-{
-  "id": "example-books-esql-tool",
-  "type": "esql",
-  "description": "An ES|QL query tool for analyzing books with page count filtering",
-  "tags": ["books", "analytics", "sample"],
-  "configuration": {
-    "query": "FROM kibana_sample_data_agents | WHERE page_count >= ?minPages | STATS book_count=COUNT(*), avg_pages=AVG(page_count) BY author | SORT book_count DESC | LIMIT ?limit",
-    "params": {
-      "minPages": {
-        "type": "integer",
-        "description": "Minimum number of pages to filter books"
-      },
-      "limit": {
-        "type": "integer",
-        "description": "Maximum number of results to return"
-      }
-    }
-  }
-}
-
-# ✅ The response confirms the tool was created with its full configuration.
-# TODO: show how to generate the esql query with the built in tool
 
 # -----------------------------------------------
 # Step 3: Get a tool by ID 🔍
@@ -150,18 +115,17 @@ GET kbn://api/agent_builder/tools/example-books-esql-tool
 # -----------------------------------------------
 # Modify an existing tool's configuration, description, or tags.
 
-# TODO: outline what we are changing and why and how it impacts result
+# Let's update the tool to include parameters.
 
 PUT kbn://api/agent_builder/tools/example-books-esql-tool
 {
-  "description": "Updated ES|QL query tool for analyzing books with enhanced filtering",
-  "tags": ["books", "analytics", "sample", "updated"],
+  "description": "An ES|QL query tool for finding the longest books published before a certain year",
   "configuration": {
-    "query": "FROM kibana_sample_data_agents | WHERE page_count >= ?minPages | STATS book_count=COUNT(*), avg_pages=AVG(page_count) BY author | SORT book_count DESC | LIMIT ?limit",
+    "query": "FROM kibana_sample_data_agents | WHERE DATE_EXTRACT(\\"year\\", release_date) < ?maxYear | SORT page_count DESC | LIMIT ?limit",
     "params": {
-      "minPages": {
+      "maxYear": {
         "type": "integer",
-        "description": "Minimum number of pages to filter books"
+        "description": "Minimum year to filter books (exclusive)"
       },
       "limit": {
         "type": "integer",
@@ -173,20 +137,19 @@ PUT kbn://api/agent_builder/tools/example-books-esql-tool
 
 # ✅ The response confirms the tool was updated.
 
-# -----------------------------------------------
-# Step 5: Run a tool 🚀
-# -----------------------------------------------
-# Execute a tool directly using the execute API.
+# Let's run the updated tool to get the 2 longest books published before 1960
 
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "platform.core.search",
-  "tool_params": {
-    "query": "can you find books by Neal Stephenson from the kibana_sample_data_agents index?"
-  }
+    "tool_id": "example-books-esql-tool",
+    "tool_params": {
+      "maxYear": 1960,
+      "limit": 2
+    }
 }
 
-# ✅ The response includes the tool execution results.
+# ✅ The response includes a result with the "tabular_data" showing the query's output
+
 
 # ===============================================
 # AGENTS 🤖
@@ -205,6 +168,7 @@ GET kbn://api/agent_builder/agents
 # Step 7: Create a custom agent ✍️
 # -----------------------------------------------
 # Create an agent that helps users search our books index.
+# Notice how we include the custom tool we created in the agent's tools configuration.
 
 POST kbn://api/agent_builder/agents
 {
@@ -219,10 +183,11 @@ POST kbn://api/agent_builder/agents
     "tools": [
       {
         "tool_ids": [
+          "example-books-esql-tool"
           "platform.core.search",
           "platform.core.list_indices",
           "platform.core.get_index_mapping",
-          "platform.core.get_document_by_id"
+          "platform.core.get_document_by_id",
         ]
       }
     ]
@@ -249,20 +214,7 @@ PUT kbn://api/agent_builder/agents/books-search-agent
 {
   "name": "Books Search Helper",
   "description": "Updated - Search and analyze our sample books collection with ease!",
-  "labels": ["books", "sample-data", "search", "updated"],
-  "avatar_color": "#BFDBFF",
-  "avatar_symbol": "📚",
-  "configuration": {
-    "instructions": "You are a helpful agent that assists users in searching and analyzing book data from the kibana_sample_data_agents index. Help users find books by author, title, release date, or analyze reading patterns based on page counts.",
-    "tools": [{
-      "tool_ids": [
-        "platform.core.search",
-        "platform.core.list_indices",
-        "platform.core.get_index_mapping",
-        "platform.core.get_document_by_id"
-      ]
-    }]
-  }
+  "labels": ["books", "sample-data", "search", "updated"]
 }
 
 # ✅ The response confirms the agent was updated.
@@ -283,6 +235,7 @@ POST kbn://api/agent_builder/converse
 }
 
 # ✅ The response includes the agent's reply and creates a new conversation.
+# Note the "conversation_id" at the top of the response which we will use in the next step.
 
 # -----------------------------------------------
 # Step 11: Chat with streaming events 🌊
@@ -290,14 +243,19 @@ POST kbn://api/agent_builder/converse
 # For real-time responses, use the async converse API which streams events.
 # Replace <CONVERSATION_ID> with the ID from the previous response.
 
-POST kbn://api/agent_builder/converse/async
+POST kbn://api/agent_builder/converse
 {
-  "input": "Can you find the longest book by page count?",
+  "input": "Can you find the longest book published before 1960?",
   "agent_id": "books-search-agent",
   "conversation_id": "<CONVERSATION_ID>"
 }
 
-# ✅ The response streams events as the agent processes your request.
+# ✅ Notice how the agent is able to match our specific query with the custom tool we created.
+# Instead of multiple reasoning and tool call steps, the agent completes the task in a single step.
+# Optimizing tools for common use cases is a key to building efficient agents.
+
+# You can also receive realtime chat responses through streaming via the async converse API:
+# https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-converse-async
 
 # -----------------------------------------------
 # Step 12: List all conversations 📋
@@ -332,7 +290,7 @@ GET kbn://api/agent_builder/a2a/books-search-agent.json
 # ✅ The response includes the A2A agent card for use with external A2A clients.
 
 # ===============================================
-# CLEANUP 🧹
+# CLEANUP (optional) 🧹
 # ===============================================
 
 # -----------------------------------------------
@@ -375,8 +333,13 @@ DELETE /kibana_sample_data_agents
 # -----------------------------------------------
 # Conclusion 🎓
 # -----------------------------------------------
+# 🎉 Congratulations on building your first agent!
 # In this tutorial, you learned how to work with the Elastic Agent Builder APIs.
 # You covered creating and managing tools, agents, and conversations.
+
+# Use your kibana API key and the endpoints we've covered to build and test your agents in
+# your own environment or visit the Agent Builder UI in Kibana: /app/agent_builder/agents/books-search-agent
+
 # 📖 For complete API details, refer to the Kibana API reference: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-agent-builder
 # 📖 Learn more about Agent Builder: https://www.elastic.co/docs/solutions/search/agent-builder
 `;
