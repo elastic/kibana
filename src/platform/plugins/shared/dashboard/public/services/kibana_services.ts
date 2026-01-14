@@ -29,6 +29,7 @@ import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin'
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import type { DashboardStartDependencies } from '../plugin';
 
@@ -50,6 +51,7 @@ export let serverlessService: ServerlessPluginStart | undefined;
 export let shareService: SharePluginStart | undefined;
 export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
+export let unifiedSearchService: UnifiedSearchPublicPluginStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
 
@@ -74,6 +76,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   shareService = deps.share;
   spacesService = deps.spaces;
   uiActionsService = deps.uiActions;
+  unifiedSearchService = deps.unifiedSearch;
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
 
