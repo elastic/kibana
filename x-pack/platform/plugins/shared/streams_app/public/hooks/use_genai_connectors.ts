@@ -150,8 +150,12 @@ export function useGenAIConnectors({
   useEffect(() => {
     const availableConnectors = connectors?.map((connector) => connector.id);
 
-    if (selectedConnector && availableConnectors && !availableConnectors.includes(selectedConnector)) {
-        setLastUsedConnector(availableConnectors[0]); // First or undefined if empty
+    if (
+      selectedConnector &&
+      availableConnectors &&
+      !availableConnectors.includes(selectedConnector)
+    ) {
+      setLastUsedConnector(availableConnectors[0]); // First or undefined if empty
     }
   }, [connectors, setLastUsedConnector, selectedConnector]);
 
