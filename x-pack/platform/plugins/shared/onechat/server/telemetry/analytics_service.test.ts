@@ -168,7 +168,7 @@ describe('AnalyticsService', () => {
   describe('reportAgentCreated', () => {
     it('reports the AgentCreated event', () => {
       service.reportAgentCreated({
-        agentId: agentBuilderDefaultAgentId,
+        agentId: oneChatDefaultAgentId,
         toolSelection: [
           {
             tool_ids: ['my_custom_tool', 'my_custom_tool'],
@@ -177,7 +177,7 @@ describe('AnalyticsService', () => {
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AgentCreated, {
-        agent_id: agentBuilderDefaultAgentId,
+        agent_id: oneChatDefaultAgentId,
         tool_ids: ['custom-3c9388baa67aef90'],
       });
     });
@@ -202,7 +202,7 @@ describe('AnalyticsService', () => {
   describe('reportAgentUpdated', () => {
     it('reports the AgentUpdated event', () => {
       service.reportAgentUpdated({
-        agentId: agentBuilderDefaultAgentId,
+        agentId: oneChatDefaultAgentId,
         toolSelection: [
           {
             tool_ids: ['my_custom_tool', 'my_custom_tool'],
@@ -211,7 +211,7 @@ describe('AnalyticsService', () => {
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AgentUpdated, {
-        agent_id: agentBuilderDefaultAgentId,
+        agent_id: oneChatDefaultAgentId,
         tool_ids: ['custom-3c9388baa67aef90'],
       });
     });
