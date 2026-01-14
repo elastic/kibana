@@ -43,6 +43,7 @@ export async function generateTransformSecondaryAuthHeaders({
   username,
   pkgName,
   pkgVersion,
+  request,
 }: {
   authorizationHeader: HTTPAuthorizationHeader | null | undefined;
   logger: Logger;
@@ -50,12 +51,13 @@ export async function generateTransformSecondaryAuthHeaders({
   username?: string;
   pkgName?: string;
   pkgVersion?: string;
+  request?: any;
 }): Promise<SecondaryAuthorizationHeader | undefined> {
   if (!authorizationHeader) {
     return;
   }
 
-  const fakeKibanaRequest = createKibanaRequestFromAuth(authorizationHeader);
+  const fakeKibanaRequest = request ?? createKibanaRequestFromAuth(authorizationHeader);
 
   const user = username ?? authorizationHeader.getUsername();
 
