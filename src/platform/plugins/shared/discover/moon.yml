@@ -129,6 +129,8 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/zod'
   - '@kbn/cps'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-chrome-app-menu'
 tags:
   - plugin
   - prod
