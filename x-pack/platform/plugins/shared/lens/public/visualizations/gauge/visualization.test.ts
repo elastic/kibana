@@ -8,7 +8,8 @@
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from './visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { DEFAULT_PALETTE, GROUP_ID } from './constants';
+import { GROUP_ID } from './constants';
+import { DEFAULT_PALETTE } from './palette_config';
 import type { DatasourceLayers, OperationDescriptor } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';

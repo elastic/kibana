@@ -9,7 +9,7 @@ import type { Accessors } from '@kbn/expression-gauge-plugin/common';
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { applyPaletteParams } from '@kbn/coloring';
 import type { GaugeVisualizationState } from './constants';
-import { DEFAULT_PALETTE } from './constants';
+import { DEFAULT_PALETTE } from './palette_config';
 
 export const getAccessorsFromState = (state?: GaugeVisualizationState): Accessors | undefined => {
   const { minAccessor, maxAccessor, goalAccessor, metricAccessor } = state ?? {};

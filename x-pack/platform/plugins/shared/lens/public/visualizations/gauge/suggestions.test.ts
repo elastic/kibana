@@ -16,7 +16,7 @@ import {
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import type { GaugeVisualizationState } from './constants';
-import { DEFAULT_PALETTE } from './constants';
+import { DEFAULT_PALETTE } from './palette_config';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 const stops = [
