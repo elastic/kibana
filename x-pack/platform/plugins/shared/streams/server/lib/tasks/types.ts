@@ -7,6 +7,22 @@
 
 import type { TaskStatus } from '@kbn/streams-schema';
 
+/**
+ * Generic result type for task status/actions endpoints.
+ * Uses discriminated union based on status to properly type the payload.
+ */
+export type TaskResult<TPayload> =
+  | {
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
+    }
+  | { status: TaskStatus.Failed; error: string }
+  | ({ status: TaskStatus.Completed | TaskStatus.Acknowledged } & TPayload);
+
 interface PersistedTaskBase<TParams extends {} = {}> {
   id: string;
   type: string;

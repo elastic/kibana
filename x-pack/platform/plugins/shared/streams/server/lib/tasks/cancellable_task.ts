@@ -9,6 +9,7 @@ import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { RunFunction } from '@kbn/task-manager-plugin/server/task';
 import { TaskStatus } from '@kbn/streams-schema';
 import type { TaskContext } from './task_definitions';
+import type { TaskParams } from './types';
 
 export function cancellableTask(
   run: RunFunction,
@@ -35,10 +36,7 @@ export function cancellableTask(
           );
           if (task.status === TaskStatus.BeingCanceled) {
             runContext.abortController.abort();
-            await taskClient.update({
-              ...task,
-              status: TaskStatus.Canceled,
-            });
+            await taskClient.markCanceled(task);
             resolve('canceled' as const);
           }
         }, 5000);
@@ -62,18 +60,8 @@ export function cancellableTask(
       taskContext.logger.error(`Task ${runContext.taskInstance.id} failed unexpectedly`, { error });
 
       try {
-        await taskClient.update({
-          id: runContext.taskInstance.id,
-          status: TaskStatus.Failed,
-          task: {
-            params: {},
-            error: error.message,
-          },
-          created_at: new Date().toISOString(),
-          space: '',
-          type: '',
-          stream: '',
-        });
+        const { _task, ...params } = runContext.taskInstance.params as TaskParams;
+        await taskClient.fail(_task, params, error.message);
       } catch (updateError) {
         taskContext.logger.error('Failed to update task status after error', {
           error: updateError,
