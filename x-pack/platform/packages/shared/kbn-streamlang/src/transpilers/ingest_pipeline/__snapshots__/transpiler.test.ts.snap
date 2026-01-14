@@ -255,6 +255,17 @@ if (false || allPresent) {
       },
     },
     Object {
+      "set": Object {
+        "description": undefined,
+        "field": "full_name",
+        "if": undefined,
+        "ignore_empty_value": undefined,
+        "ignore_failure": undefined,
+        "tag": undefined,
+        "value": "{{{first_name}}} {{{last_name}}}",
+      },
+    },
+    Object {
       "uppercase": Object {
         "field": "message",
         "target_field": "message_uppercase",
