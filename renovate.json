@@ -2929,6 +2929,7 @@
         "@types/extract-zip",
         "@types/pdfmake",
         "extract-zip",
+        "@pdf-lib/upng",
         "pdfmake"
       ],
       "reviewers": [
