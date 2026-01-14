@@ -24,7 +24,7 @@ describe('Breadcrumbs', () => {
   test('should set breadcrumbs with title', () => {
     setBreadcrumbs({ services: discoverServiceMock, titleBreadcrumbText: 'Saved Search' });
     expect(discoverServiceMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Discover', href: '#/', deepLinkId: 'discover' },
+      { text: 'Discover', href: '#/', deepLinkId: 'discover', onClick: expect.any(Function) },
       { text: 'Saved Search' },
     ]);
   });
@@ -36,7 +36,12 @@ describe('Breadcrumbs', () => {
       rootBreadcrumbPath: '#/custom-path',
     });
     expect(discoverServiceMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Discover', href: '#/custom-path', deepLinkId: 'discover' },
+      {
+        text: 'Discover',
+        href: '#/custom-path',
+        deepLinkId: 'discover',
+        onClick: expect.any(Function),
+      },
       { text: 'Saved Search' },
     ]);
   });
