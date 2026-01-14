@@ -26,6 +26,7 @@ import type {
   DataConnectorsServerStartDependencies,
 } from '../types';
 import { convertSOtoAPIResponse, createDataSourceRequestSchema } from './schema';
+import { API_BASE_PATH } from '../../common/constants';
 
 // Constants
 const DEFAULT_PAGE_SIZE = 100;
@@ -60,12 +61,12 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // List all data sources
   router.get(
     {
-      path: DATA_SOURCES_ROUTE,
+      path: API_BASE_PATH,
       validate: false,
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -105,7 +106,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -132,14 +133,14 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Create data source
   router.post(
     {
-      path: DATA_SOURCES_ROUTE,
+      path: API_BASE_PATH,
       validate: {
         body: createDataSourceRequestSchema,
       },
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -147,7 +148,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       const coreContext = await context.core;
 
       try {
-        const { name, type, token } = request.body;
+        const { name, type, token, stack_connector_id } = request.body;
         const [, { actions, dataSourcesRegistry, agentBuilder }] = await getStartServices();
         const savedObjectsClient = coreContext.savedObjects.client;
 
@@ -158,15 +159,25 @@ export function registerRoutes(dependencies: RouteDependencies) {
           return response.customError({
             statusCode: 400,
             body: {
-              message: `Data source of type "${request.body.type}" not found`,
+              message: `Data source of type "${type}" not found`,
+            },
+          });
+        }
+
+        // Validate required fields based on pattern
+        if (!stack_connector_id && (!name || !token)) {
+          return response.badRequest({
+            body: {
+              message: 'name and token are required when stack_connector_id is not provided',
             },
           });
         }
 
         const dataSourceId = await createDataSourceAndRelatedResources({
-          name,
+          name: name || `Data source for ${type}`,
           type,
-          token,
+          token: token || '',
+          stackConnectorId: stack_connector_id,
           savedObjectsClient,
           request,
           logger,
@@ -189,15 +200,83 @@ export function registerRoutes(dependencies: RouteDependencies) {
     }
   );
 
+  // Update data source by ID
+  router.put(
+    {
+      path: `${API_BASE_PATH}/{id}`,
+      validate: {
+        params: schema.object({ id: schema.string() }),
+        body: schema.object({
+          name: schema.maybe(schema.string()),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization is delegated to underlying service plugins',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+
+      try {
+        const { name } = request.body;
+        const savedObjectsClient = coreContext.savedObjects.client;
+
+        // Get existing data connector
+        const savedObject: SavedObject<DataSourceAttributes> = await savedObjectsClient.get(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          request.params.id
+        );
+
+        // Update only if name is provided
+        if (name !== undefined) {
+          await savedObjectsClient.update<DataSourceAttributes>(
+            DATA_SOURCE_SAVED_OBJECT_TYPE,
+            request.params.id,
+            {
+              ...savedObject.attributes,
+              name,
+              updatedAt: new Date().toISOString(),
+            }
+          );
+
+          // Fetch the updated saved object
+          const updatedSavedObject: SavedObject<DataSourceAttributes> =
+            await savedObjectsClient.get(DATA_SOURCE_SAVED_OBJECT_TYPE, request.params.id);
+
+          logger.info(`Successfully updated data connector ${request.params.id}`);
+          return response.ok({
+            body: convertSOtoAPIResponse(updatedSavedObject),
+          });
+        }
+
+        // If no updates provided, return current state
+        return response.ok({
+          body: convertSOtoAPIResponse(savedObject),
+        });
+      } catch (error) {
+        logger.error(`Failed to update data connector: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to update data connector: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
   // Delete all data sources
   router.delete(
     {
-      path: DATA_SOURCES_ROUTE,
+      path: API_BASE_PATH,
       validate: false,
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -271,12 +350,12 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Delete data source by ID
   router.delete(
     {
-      path: `${DATA_SOURCES_ROUTE}/{id}`,
+      path: `${API_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },

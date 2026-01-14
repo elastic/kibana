@@ -10,7 +10,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { DataSource } from '@kbn/data-sources-registry-plugin/server';
+import type { DataSource } from '@kbn/data-sources-registry-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type {
@@ -69,6 +69,7 @@ interface CreateDataSourceAndResourcesParams {
   name: string;
   type: string;
   token: string;
+  stackConnectorId?: string;
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
   logger: Logger;
@@ -78,8 +79,21 @@ interface CreateDataSourceAndResourcesParams {
   agentBuilder: DataConnectorsServerStartDependencies['agentBuilder'];
 }
 
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFD') // split accented characters
+    .replace(/[\u0300-\u036f]/g, '') // remove accents
+    .replace(/[^a-z0-9]+/g, '-') // replace non-alphanumerics with -
+    .replace(/^-+|-+$/g, ''); // trim leading/trailing -
+}
+
 /**
  * Creates data source Saved Object, as well as all related resources (stack connectors, tools, workflows)
+ *
+ * Supports two patterns:
+ * 1. Reuse existing stack connector: Pass stackConnectorId (e.g., from UI flyout)
+ * 2. Create new stack connector: Omit stackConnectorId, provide name and token
  */
 export async function createDataSourceAndRelatedResources(
   params: CreateDataSourceAndResourcesParams
@@ -88,6 +102,7 @@ export async function createDataSourceAndRelatedResources(
     name,
     type,
     token,
+    stackConnectorId,
     savedObjectsClient,
     request,
     logger,
@@ -96,26 +111,34 @@ export async function createDataSourceAndRelatedResources(
     dataSource,
     agentBuilder,
   } = params;
+  let finalStackConnectorId: string;
 
-  // Create stack connector - for now our spec only supports the case
-  // where there's exactly one KSC type per data connector type
-  const connectorType = dataSource.stackConnector.type;
-  const secrets = buildSecretsFromConnectorSpec(connectorType, token);
+  // Pattern 1: Reuse existing stack connector (from flyout)
+  if (stackConnectorId) {
+    logger.info(`Reusing existing stack connector: ${stackConnectorId}`);
+    finalStackConnectorId = stackConnectorId;
+  }
+  // Pattern 2: Create new stack connector (direct API call)
+  else {
+    const connectorType = dataSource.stackConnector.type;
+    const secrets = buildSecretsFromConnectorSpec(connectorType, token);
 
-  logger.info(`Creating Kibana stack connector for data connector '${name}'`);
-  const actionsClient = await actions.getActionsClientWithRequest(request);
-  const stackConnector = await actionsClient.create({
-    action: {
-      name: `${type} stack connector for data source '${name}'`,
-      actionTypeId: connectorType,
-      config: {},
-      secrets,
-    },
-  });
+    logger.info(`Creating Kibana stack connector for data connector '${name}'`);
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    const stackConnector = await actionsClient.create({
+      action: {
+        name: `${type} stack connector for data connector '${name}'`,
+        actionTypeId: connectorType,
+        config: {},
+        secrets,
+      },
+    });
+    finalStackConnectorId = stackConnector.id;
+  }
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
-  const workflowInfos = dataSource.generateWorkflows(stackConnector.id);
+  const workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
@@ -133,7 +156,7 @@ export async function createDataSourceAndRelatedResources(
 
     if (workflowInfo.shouldGenerateABTool) {
       const tool = await toolRegistry.create({
-        id: `${type}-${workflow.id}`,
+        id: `${type}.${slugify(workflow.name)}`,
         type: ToolType.workflow,
         description: `Workflow tool for ${type} data source`,
         tags: ['data-source', type],
@@ -152,11 +175,12 @@ export async function createDataSourceAndRelatedResources(
   const savedObject = await savedObjectsClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, {
     name,
     type,
+    config: {},
     createdAt: now,
     updatedAt: now,
     workflowIds,
     toolIds,
-    kscIds: [stackConnector.id],
+    kscIds: [finalStackConnectorId],
   });
 
   return savedObject.id;

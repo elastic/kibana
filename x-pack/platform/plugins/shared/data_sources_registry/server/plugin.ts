@@ -14,7 +14,8 @@ import type {
 } from '@kbn/core/server';
 
 import type { DataSourcesRegistryPluginSetup, DataSourcesRegistryPluginStart } from './types';
-import type { DataCatalog, DataSource } from './data_catalog';
+import type { DataCatalog } from './data_catalog';
+import type { DataSource } from '../common/data_types';
 import { createDataCatalog } from './data_catalog';
 import { registerRoutes } from './routes';
 

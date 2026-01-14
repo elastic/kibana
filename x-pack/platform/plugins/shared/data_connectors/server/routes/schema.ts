@@ -13,11 +13,11 @@ export interface DataSourceAPIResponse {
   id: string;
   name: string;
   type: string;
-  createdAt: string;
-  updatedAt: string;
   stackConnectors: string[];
   agentTools: string[];
   workflows: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export function convertSOtoAPIResponse(
@@ -27,16 +27,17 @@ export function convertSOtoAPIResponse(
     id: savedObject.id,
     name: savedObject.attributes.name,
     type: savedObject.attributes.type,
-    createdAt: savedObject.attributes.createdAt,
-    updatedAt: savedObject.attributes.updatedAt,
     stackConnectors: savedObject.attributes.kscIds,
     agentTools: savedObject.attributes.toolIds,
     workflows: savedObject.attributes.workflowIds,
+    createdAt: savedObject.attributes.createdAt,
+    updatedAt: savedObject.attributes.updatedAt,
   };
 }
 
 export const createDataSourceRequestSchema = schema.object({
   type: schema.string({ minLength: 1 }),
-  name: schema.string({ minLength: 1 }),
-  token: schema.string({ minLength: 1 }), // in the future, this can be either token or username&password
+  name: schema.maybe(schema.string({ minLength: 1 })),
+  token: schema.maybe(schema.string({ minLength: 1 })),
+  stack_connector_id: schema.maybe(schema.string({ minLength: 1 })),
 });

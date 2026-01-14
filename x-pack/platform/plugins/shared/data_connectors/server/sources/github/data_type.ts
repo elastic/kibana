@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataSource } from '@kbn/data-sources-registry-plugin/server';
-import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
+import type { DataSource } from '@kbn/data-sources-registry-plugin';
+import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin';
 import {
   generateGithubSearchIssuesWorkflow,
   generateGithubGetDocsWorkflow,
