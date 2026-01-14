@@ -37,6 +37,10 @@ export class PrecommitCheck {
     throw new Error('execute() must be implemented by check class');
   }
 
+  shouldExecute() {
+    return true;
+  }
+
   async runSafely(log, files, options) {
     const result = new CheckResult(this.name);
     try {

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extname } from 'path';
 import { readFile } from 'fs/promises';
 import { load as yamlLoad } from 'js-yaml';
 import { PrecommitCheck } from './precommit_check';
@@ -17,13 +16,8 @@ export class YamlLintCheck extends PrecommitCheck {
     super('YAML Lint');
   }
 
-  isYamlFile(filePath) {
-    const ext = extname(filePath).toLowerCase();
-    return ext === '.yml' || ext === '.yaml';
-  }
-
   async execute(log, files) {
-    const yamlFiles = files.filter((file) => this.isYamlFile(file.getRelativePath()));
+    const yamlFiles = files.filter((file) => file.isYaml() && file.getGitStatus() !== 'deleted');
 
     if (yamlFiles.length === 0) {
       log.verbose('No YAML files to check');
