@@ -16,7 +16,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
 import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
@@ -206,7 +206,7 @@ export class SpacesPlugin
       getFeatures: async () => (await core.getStartServices())[1].features,
     });
 
-    setupCapabilities(core, getSpacesService, this.log);
+    setupCapabilities(core, plugins.cps, getSpacesService, this.log);
 
     if (plugins.usageCollection) {
       const getIndexForType = (type: string) =>

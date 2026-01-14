@@ -9,8 +9,6 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
-import type { CPSPluginStart } from '@kbn/cps/public';
-import type { ProjectRouting } from '@kbn/es-query';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -40,13 +38,13 @@ interface Props {
   reloadWindow: () => void;
 }
 
-interface KibanaServices {
-  cps?: CPSPluginStart;
-}
-
 export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history, ...props }) => {
   const imageAvatarSelected = Boolean(space.imageUrl);
-  const { services } = useKibana<KibanaServices>();
+
+  const {
+    services: { application },
+  } = useKibana();
+
   const [formValues, setFormValues] = useState<CustomizeSpaceFormValues>({
     ...space,
     avatarType: imageAvatarSelected ? 'image' : 'initials',
@@ -67,10 +65,6 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     useEditSpaceServices();
 
   const [solution, setSolution] = useState<typeof space.solution | undefined>(space.solution);
-
-  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(
-    services.cps?.cpsManager?.getProjectRouting()
-  );
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: isDirty,
@@ -122,7 +116,6 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   const onProjectRoutingChange = useCallback(
     (updatedSpace: Partial<Space>) => {
-      setProjectRouting(updatedSpace.projectRouting);
       onChangeFeatures(updatedSpace);
     },
     [onChangeFeatures]
@@ -141,6 +134,10 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const onClickDeleteSpace = useCallback(() => {
     setShowConfirmDeleteModal(true);
   }, []);
+
+  const canReadProjectRouting = () => {
+    return application?.capabilities?.management?.kibana.read_project_routing ?? false;
+  };
 
   const performSave = useCallback(
     async ({ requiresReload = false }) => {
@@ -329,13 +326,17 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         validator={validator}
       />
 
-      <EuiSpacer />
-      <CustomizeCps
-        validator={validator}
-        space={getSpaceFromFormValues(formValues)}
-        editingExistingSpace={true}
-        onChange={onProjectRoutingChange}
-      />
+      {canReadProjectRouting() && (
+        <>
+          <EuiSpacer />
+          <CustomizeCps
+            space={getSpaceFromFormValues(formValues)}
+            editingExistingSpace={true}
+            onChange={onProjectRoutingChange}
+          />
+        </>
+      )}
+
       {doShowUserImpactWarning()}
 
       <EuiSpacer />

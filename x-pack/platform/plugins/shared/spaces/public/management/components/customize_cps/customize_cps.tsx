@@ -16,12 +16,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { SpaceValidator } from '../../lib';
 import type { CustomizeSpaceFormValues } from '../../types';
 import { SectionPanel } from '../section_panel';
 
 interface Props {
-  validator: SpaceValidator;
   space: CustomizeSpaceFormValues;
   editingExistingSpace: boolean;
   onChange: (space: CustomizeSpaceFormValues) => void;
@@ -32,24 +30,14 @@ interface KibanaServices {
   cps?: CPSPluginStart;
 }
 
-export const CustomizeCps: FC<Props> = ({ space, validator, title, onChange }) => {
-  const { services } = useKibana<KibanaServices>();
-  console.log('services.cps?.cpsManager', services.cps?.cpsManager);
-
-  //TODO use the validator
+export const CustomizeCps: FC<Props> = ({ space, title, onChange }) => {
+  const {
+    services: { cps, application },
+  } = useKibana<KibanaServices>();
 
   const fetchProjects = useCallback(() => {
-    return services.cps?.cpsManager?.fetchProjects() ?? Promise.resolve(null);
-  }, [services.cps?.cpsManager]);
-
-  // let [projectRouting] = useState<ProjectRouting | undefined>(
-  //   services.cps?.cpsManager?.getProjectRouting()
-  // );
-
-  // Only render the section if CPS service with cpsManager exists
-  if (!services.cps?.cpsManager) {
-    return null;
-  }
+    return cps?.cpsManager?.fetchProjects() ?? Promise.resolve(null);
+  }, [cps?.cpsManager]);
 
   const updateProjectRouting = (newRouting: ProjectRouting) => {
     onChange({
@@ -59,16 +47,8 @@ export const CustomizeCps: FC<Props> = ({ space, validator, title, onChange }) =
   };
 
   const canEdit = () => {
-    return true;
+    return application?.capabilities?.management?.kibana.manage_project_routing ?? false;
   };
-
-  const canRead = () => {
-    return true;
-  };
-
-  if (!canEdit() && !canRead()) {
-    return null;
-  }
 
   return (
     <SectionPanel title={title} dataTestSubj="cpsDefaultScopePanel">
@@ -93,8 +73,12 @@ export const CustomizeCps: FC<Props> = ({ space, validator, title, onChange }) =
         )}
         fullWidth
       >
-        {/*TODO i18n for the label*/}
-        <EuiFormRow fullWidth label={'Cross-project search default scope'}>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.spaces.management.manageSpacePage.cpsDefaultScopeLabel', {
+            defaultMessage: 'Cross-project search default scope',
+          })}
+        >
           <ProjectPickerContent
             projectRouting={space.projectRouting}
             onProjectRoutingChange={updateProjectRouting}

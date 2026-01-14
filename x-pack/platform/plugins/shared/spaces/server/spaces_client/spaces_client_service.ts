@@ -14,12 +14,12 @@ import type {
   KibanaRequest,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import type { ISpacesClient } from './spaces_client';
 import { SpacesClient } from './spaces_client';
 import type { ConfigType } from '../config';
-import { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
 
 /**
  * For consumption by the security plugin only.

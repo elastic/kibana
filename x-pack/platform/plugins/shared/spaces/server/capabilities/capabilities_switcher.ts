@@ -7,8 +7,16 @@
 
 import _ from 'lodash';
 
-import type { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
+import type {
+  Capabilities,
+  CapabilitiesSwitcher,
+  CoreSetup,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import type { Space } from '../../common';
 import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
@@ -17,6 +25,7 @@ import type { SpacesServiceStart } from '../spaces_service';
 
 export function setupCapabilitiesSwitcher(
   core: CoreSetup<PluginsStart>,
+  cps: CPSServerSetup,
   getSpacesService: () => SpacesServiceStart,
   logger: Logger
 ): CapabilitiesSwitcher {
@@ -37,7 +46,13 @@ export function setupCapabilitiesSwitcher(
       const registeredFeatures = features.getKibanaFeatures();
 
       // try to retrieve capabilities for authenticated or "maybe authenticated" users
-      return toggleCapabilities(registeredFeatures, capabilities, activeSpace);
+      capabilities = toggleCapabilities(registeredFeatures, capabilities, activeSpace);
+
+      if (cps.getCpsEnabled()) {
+        await setProjectRoutingCapabilities(core, request, capabilities);
+      }
+
+      return capabilities;
     } catch (e) {
       logger.debug(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
       return capabilities;
@@ -140,5 +155,33 @@ function toggleDisabledFeatures(
         capability[featureKey] = false;
       });
     }
+  }
+}
+
+async function setProjectRoutingCapabilities(
+  core: CoreSetup<PluginsStart>,
+  request: KibanaRequest,
+  capabilities: Capabilities
+) {
+  const { security } = await core.plugins.onStart<{ security: SecurityPluginStart }>('security');
+
+  if (security.found) {
+    const checkPrivileges = security.contract.authz.checkPrivilegesWithRequest(request);
+    const response = await checkPrivileges.globally({
+      elasticsearch: {
+        cluster: ['manage', 'monitor'],
+        index: {},
+      },
+    });
+
+    capabilities.management.kibana!.manage_project_routing =
+      response.privileges.elasticsearch.cluster.some(
+        (privilege) => privilege.privilege === 'manage' && privilege.authorized
+      );
+
+    capabilities.management.kibana!.read_project_routing =
+      response.privileges.elasticsearch.cluster.some(
+        (privilege) => privilege.privilege === 'monitor' && privilege.authorized
+      );
   }
 }
