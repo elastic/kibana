@@ -45,11 +45,11 @@ export const alertActionSchema = z.object({
   '@timestamp': z.string(),
   alert_series_id: z.string(),
   last_series_event_timestamp: z.string(),
-  actor: z.string(),
+  actor: z.string().nullable(),
   action_type: z.string(),
   episode_id: z.string(),
   rule_id: z.string(),
-  source: z.string(),
+  source: z.string().optional(),
 });
 
 export type AlertAction = z.infer<typeof alertActionSchema>;

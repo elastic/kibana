@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { from, where, sort, keep, limit, SortOrder } from '@kbn/esql-composer';
 import Boom from '@hapi/boom';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { from, keep, limit, sort, SortOrder, where } from '@kbn/esql-composer';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable, optional } from 'inversify';
 import { omit, zipObject } from 'lodash';
 import pLimit from 'p-limit';
+import type { AlertAction as AlertActionDocument } from '../../resources/alert_actions';
 import type { AlertAction, BulkAlertActionItem } from '../../routes/schemas/alert_action_schema';
 import { QueryService } from '../services/query_service/query_service';
 import type { StorageService } from '../services/storage_service/storage_service';
@@ -61,10 +62,6 @@ export class AlertActionsClient {
   public async executeBulkActions(
     actions: BulkAlertActionItem[]
   ): Promise<{ processed: number; total: number }> {
-    if (actions.length === 0) {
-      return { processed: 0, total: 0 };
-    }
-
     const username = await this.getUserName();
     const limiter = pLimit(10);
 
@@ -92,7 +89,7 @@ export class AlertActionsClient {
 
     const docs = results
       .filter(
-        (result): result is PromiseFulfilledResult<Record<string, unknown>> =>
+        (result): result is PromiseFulfilledResult<AlertActionDocument> =>
           result.status === 'fulfilled'
       )
       .map((result) => result.value);
@@ -117,7 +114,7 @@ export class AlertActionsClient {
     alertEvent: AlertEvent;
     alertTransition: AlertTransition;
     username: string | null;
-  }): Record<string, unknown> {
+  }): AlertActionDocument {
     const { action, alertEvent, alertSeriesId, alertTransition, username } = params;
 
     return {
