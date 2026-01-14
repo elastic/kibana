@@ -41,7 +41,6 @@ const RulesPage = () => {
     notifications: { toasts },
   } = useKibana().services;
   const currentAppId = useObservable(currentAppId$, undefined);
-  const isInRulesApp = currentAppId === 'rules';
 
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
 
@@ -101,8 +100,7 @@ const RulesPage = () => {
         },
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [history, navigateToApp, isInRulesApp, currentAppId]
+    [navigateToApp]
   );
 
   const navigateToCreateRuleForm = useCallback(
@@ -110,25 +108,15 @@ const RulesPage = () => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
 
-      if (isInRulesApp) {
-        history.push({
-          pathname: getCreateRuleRoute(ruleTypeId),
-          state: {
-            returnApp: 'rules',
-            returnPath,
-          },
-        });
-      } else {
-        navigateToApp(currentAppId || 'management', {
-          path: getCreateRuleRoute(ruleTypeId),
-          state: {
-            returnApp: currentAppId || 'management',
-            returnPath,
-          },
-        });
-      }
+      navigateToApp(currentAppId || 'management', {
+        path: getCreateRuleRoute(ruleTypeId),
+        state: {
+          returnApp: currentAppId || 'management',
+          returnPath,
+        },
+      });
     },
-    [history, navigateToApp, isInRulesApp, currentAppId]
+    [navigateToApp, currentAppId]
   );
 
   const renderRulesList = useCallback(() => {
