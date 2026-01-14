@@ -7220,6 +7220,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kql@link:src/platform/plugins/shared/kql":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
   version "0.0.0"
   uid ""

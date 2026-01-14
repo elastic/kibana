@@ -6,6 +6,7 @@
  */
 
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -33,6 +34,7 @@ export const createStartDepsMock = () => {
     data: dataPluginMock.createStartContract(),
     dataViews: dataViewPluginMocks.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    kql: kqlPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),
     customIntegrations: customIntegrationsMock.createStart(),
     share: sharePluginMock.createStartContract(),

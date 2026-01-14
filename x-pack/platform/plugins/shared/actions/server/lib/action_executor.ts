@@ -12,7 +12,7 @@ import {
   type SecurityServiceStart,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, startsWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -20,7 +20,7 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -705,6 +705,16 @@ export interface ActionInfo {
   actionId: string;
   isInMemory?: boolean;
   rawAction: RawAction;
+}
+
+function getErrorSource(error: Error): TaskErrorSource | undefined {
+  const SOCKET_DISCONNECTED_ERROR_MESSAGE = 'Client network socket disconnected';
+
+  if (startsWith(error.message, SOCKET_DISCONNECTED_ERROR_MESSAGE)) {
+    return TaskErrorSource.USER;
+  }
+
+  return getTaskManagerErrorSource(error);
 }
 
 function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): string {
