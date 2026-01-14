@@ -195,47 +195,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(action!.action_type).to.be('unsnooze');
     });
 
-    it('should return 204 for set_severity action with sev_level and write action document', async () => {
-      const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({ action_type: 'set_severity', sev_level: 1 });
-
-      expect(response.status).to.be(204);
-
-      const action = await getLatestAction();
-      expect(action).to.be.ok();
-      expect(action!.alert_series_id).to.be('test-alert-series-id');
-      expect(action!.action_type).to.be('set_severity');
-      expect(action!.sev_level).to.be(1);
-    });
-
-    it('should return 400 for set_severity action without sev_level', async () => {
-      const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({ action_type: 'set_severity' });
-
-      expect(response.status).to.be(400);
-    });
-
-    it('should return 204 for clear_severity action and write action document', async () => {
-      const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({ action_type: 'clear_severity' });
-
-      expect(response.status).to.be(204);
-
-      const action = await getLatestAction();
-      expect(action).to.be.ok();
-      expect(action!.alert_series_id).to.be('test-alert-series-id');
-      expect(action!.action_type).to.be('clear_severity');
-    });
-
     it('should return 204 for activate action with reason and write action document', async () => {
       const response = await supertestWithoutAuth
         .post(`${ALERT_ACTION_API_PATH}/test-alert-series-id/action`)

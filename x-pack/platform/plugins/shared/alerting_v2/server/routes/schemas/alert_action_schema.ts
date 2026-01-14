@@ -33,15 +33,6 @@ const unsnoozeActionSchema = z.object({
   action_type: z.literal('unsnooze'),
 });
 
-const setSeverityActionSchema = z.object({
-  action_type: z.literal('set_severity'),
-  sev_level: z.number(),
-});
-
-const clearSeverityActionSchema = z.object({
-  action_type: z.literal('clear_severity'),
-});
-
 const activateActionSchema = z.object({
   action_type: z.literal('activate'),
   reason: z.string(),
@@ -59,8 +50,6 @@ export const alertActionSchema = z.discriminatedUnion('action_type', [
   untagActionSchema,
   snoozeActionSchema,
   unsnoozeActionSchema,
-  setSeverityActionSchema,
-  clearSeverityActionSchema,
   activateActionSchema,
   deactivateActionSchema,
 ]);
