@@ -65,7 +65,7 @@ export function StreamDetailReferencesView({
 
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_references] streamType: ${streamType}`,
         },
         customMetrics: {
           key1: 'total_streams_count',

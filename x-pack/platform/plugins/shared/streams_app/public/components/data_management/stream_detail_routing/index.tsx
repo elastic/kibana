@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
@@ -34,6 +35,7 @@ import {
   StreamRoutingContextProvider,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
+  selectHasRoutingChanges,
 } from './state_management/stream_routing_state_machine';
 import { buildRoutingSaveRequestPayload, routingConverter } from './utils';
 
@@ -73,25 +75,30 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
 }
 
 export function StreamDetailRoutingImpl() {
-  const { appParams, core } = useKibana();
-  const { onPageReady } = usePerformanceContext();
-
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { cancelChanges, saveChanges } = useStreamRoutingEvents();
-
-  const definition = routingSnapshot.context.definition;
-
-  const shouldDisplayBottomBar =
-    routingSnapshot.matches({ ready: { reorderingRules: 'reordering' } }) &&
-    routingSnapshot.can({ type: 'routingRule.save' });
-
   const {
+    appParams,
+    core,
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
+
+  const { onPageReady } = usePerformanceContext();
+  const { timeState } = useTimefilter();
+
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { cancelChanges, saveChanges } = useStreamRoutingEvents();
+
+  const definition = routingSnapshot.context.definition;
+
+  const hasRoutingChanges = selectHasRoutingChanges(routingSnapshot.context);
+
+  const shouldDisplayBottomBar =
+    routingSnapshot.matches({ ready: { reorderingRules: 'reordering' } }) &&
+    routingSnapshot.can({ type: 'routingRule.save' }) &&
+    hasRoutingChanges;
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -101,21 +108,25 @@ export function StreamDetailRoutingImpl() {
     [streamsRepositoryClient, definition] // Refetch streams when the definition changes
   );
 
+  const queryRangeSeconds = getTimeDifferenceInSeconds(timeState.timeRange);
+
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_partitioning] streamType: ${streamType}`,
         },
         customMetrics: {
           key1: 'available_streams_count',
           value1: streamsListFetch.value?.streams?.length ?? 0,
+          key2: 'queryRangeSeconds',
+          value2: queryRangeSeconds,
         },
       });
     }
-  }, [streamsListFetch, onPageReady, definition.stream]);
+  }, [streamsListFetch, onPageReady, definition.stream, queryRangeSeconds]);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
