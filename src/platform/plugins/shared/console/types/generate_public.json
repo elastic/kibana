@@ -1,0 +1,43 @@
+{
+  "compilationOptions": {
+    "preferredConfigPath": "./tsconfig.bundle.json"
+  },
+  "entries": [
+    {
+      "filePath": "../public/plugin.ts",
+      "outFile": "./plugin_public.d.ts",
+      "libraries": {
+        "inlinedLibraries": [],
+        "importedLibraries": [
+          "@elastic/ebt",
+          "@elastic/ecs",
+          "@elastic/elasticsearch",
+          "@elastic/eui",
+          "@elastic/transport",
+          "@openfeature/core",
+          "@openfeature/web-sdk",
+          "events",
+          "history",
+          "http",
+          "inversify",
+          "joi",
+          "moment",
+          "openapi-types",
+          "react",
+          "react-dom",
+          "react-intl",
+          "react-router-dom",
+          "rxjs",
+          "tls",
+          "utility-types"
+        ]
+      },
+      "output": {
+        "sortNodes": true,
+        "exportReferencedTypes": false,
+        "noBanner": true
+      },
+      "failOnClass": false
+    }
+  ]
+}
