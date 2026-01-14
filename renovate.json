@@ -20,8 +20,7 @@
     "9.3",
     "9.2",
     "9.1",
-    "8.19",
-    "7.17"
+    "8.19"
   ],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -1290,27 +1289,6 @@
         "backport:skip",
         "Team:Operations",
         "Team:Core"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "@elastic/elasticsearch",
-      "matchDepNames": [
-        "@elastic/elasticsearch"
-      ],
-      "reviewers": [
-        "team:kibana-operations",
-        "team:kibana-core"
-      ],
-      "allowedVersions": "<8.0.0",
-      "matchBaseBranches": [
-        "7.17"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Operations",
-        "Team:Core",
-        "backport:skip"
       ],
       "enabled": true
     },
