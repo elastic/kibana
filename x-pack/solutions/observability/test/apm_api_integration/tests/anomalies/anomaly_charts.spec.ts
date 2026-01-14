@@ -317,6 +317,58 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               )
             );
           });
+
+          it('ensures anomaly scores are never null in timeseries (fixes #167400)', () => {
+            // Validates that the record_results filter aggregation in get_anomaly_timeseries
+            // prevents model_plot docs with null record_score from being returned
+
+            // We know anomalies should exist during the spike window
+            const spikeAnomalies = allAnomalyTimeseries.flatMap((series) =>
+              series.anomalies.filter(
+                (a) => a.x >= spikeStart.valueOf() && a.x < spikeEnd.valueOf()
+              )
+            );
+
+            // Critical: During the spike, we should have detected anomalies with scores > 0
+            const spikeAnomaliesWithScores = spikeAnomalies.filter((a) => (a.y ?? 0) > 0);
+            expect(spikeAnomaliesWithScores.length).to.be.greaterThan(0);
+
+            // ALL anomalies with scores during the spike MUST have valid actual values
+            // This proves they came from 'record' docs, not 'model_plot' docs with null record_score
+            spikeAnomaliesWithScores.forEach((anomaly) => {
+              // The bug would cause: anomaly.y could be null OR anomaly.actual could be null
+              // because top_metrics on mixed docs can return model_plot with null fields
+              expect(anomaly.y).to.not.be(null);
+              expect(typeof anomaly.y).to.equal('number');
+              expect(Number.isFinite(anomaly.y)).to.be(true);
+              expect(anomaly.y).to.be.greaterThan(0);
+
+              expect(anomaly.actual).to.not.be(null);
+              expect(anomaly.actual).to.not.be(undefined);
+              expect(typeof anomaly.actual).to.equal('number');
+              expect(Number.isFinite(anomaly.actual)).to.be(true);
+            });
+
+            // Verify all series have valid structure
+            allAnomalyTimeseries.forEach((series) => {
+              // Check timestamps are valid
+              series.anomalies.forEach((anomaly) => {
+                expect(typeof anomaly.x).to.equal('number');
+                expect(Number.isFinite(anomaly.x)).to.be(true);
+              });
+
+              // Check model bounds are valid when present
+              series.bounds.forEach((bound) => {
+                expect(typeof bound.x).to.equal('number');
+                if (bound.y0 !== null && bound.y0 !== undefined) {
+                  expect(Number.isFinite(bound.y0)).to.be(true);
+                }
+                if (bound.y1 !== null && bound.y1 !== undefined) {
+                  expect(Number.isFinite(bound.y1)).to.be(true);
+                }
+              });
+            });
+          });
         });
       });
     }
