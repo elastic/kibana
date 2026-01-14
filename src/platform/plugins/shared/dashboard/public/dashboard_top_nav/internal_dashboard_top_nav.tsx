@@ -59,6 +59,8 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { arePinnedPanelLayoutsEqual } from '../dashboard_api/layout_manager/are_layouts_equal';
+import { DashboardLayout } from '../dashboard_api/layout_manager';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -380,13 +382,27 @@ export function InternalDashboardTopNav({
   }, [dashboardApi]);
 
   useEffect(() => {
-    const keepLayoutsInSyncSubscription = dashboardWithControlsApi.layout$.subscribe(
+    const syncControlsWithPinnedPanels = dashboardWithControlsApi.layout$.subscribe(
       ({ controls }) => {
-        dashboardApi.layout$.next({ ...dashboardApi.layout$.getValue(), pinnedPanels: controls });
+        const currentLayout = dashboardApi.layout$.getValue();
+        if (
+          !arePinnedPanelLayoutsEqual({ pinnedPanels: controls } as DashboardLayout, currentLayout)
+        ) {
+          dashboardApi.layout$.next({ ...currentLayout, pinnedPanels: controls });
+        }
       }
     );
+    const syncPinnedPanelsWithControls = dashboardApi.layout$.subscribe((layout) => {
+      const { controls: currentControls } = dashboardWithControlsApi.layout$.getValue();
+      if (!deepEqual(currentControls, layout.pinnedPanels)) {
+        dashboardWithControlsApi.layout$.next({
+          controls: layout.pinnedPanels,
+        });
+      }
+    });
     return () => {
-      keepLayoutsInSyncSubscription.unsubscribe();
+      syncControlsWithPinnedPanels.unsubscribe();
+      syncPinnedPanelsWithControls.unsubscribe();
     };
   }, [dashboardWithControlsApi, dashboardApi.layout$]);
 
