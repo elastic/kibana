@@ -1775,7 +1775,11 @@ class AgentPolicyService {
       }, [] as BulkResponseItem[]);
 
       logger.warn(
-        `Failed to index documents during policy deployment: ${JSON.stringify(erroredDocuments)}`
+        `Failed to index documents with ids ${erroredDocuments
+          .map((doc) => doc._id)
+          .join(', ')} during policy deployment: ${erroredDocuments
+          .map((doc) => doc.error?.reason)
+          .join(', ')}`
       );
     }
 
