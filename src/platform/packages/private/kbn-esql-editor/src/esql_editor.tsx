@@ -959,11 +959,6 @@ const ESQLEditorInternal = function ESQLEditor({
               text: indexName,
             },
           ]);
-          editorRef.current.setPosition({
-            lineNumber: position.lineNumber,
-            column: position.column,
-          });
-          editorRef.current.focus();
         }
       }
     },
@@ -1063,11 +1058,6 @@ const ESQLEditorInternal = function ESQLEditor({
               text: fieldName,
             },
           ]);
-          editorRef.current.setPosition({
-            lineNumber: position.lineNumber,
-            column: position.column,
-          });
-          editorRef.current.focus();
         }
       }
     },

@@ -19,7 +19,6 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useMemo, useCallback, useRef, ReactNode } from 'react';
 
 const POPOVER_WIDTH = 400;
