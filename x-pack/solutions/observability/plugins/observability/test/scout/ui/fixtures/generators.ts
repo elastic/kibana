@@ -16,6 +16,7 @@ export const TEST_END_DATE = '2024-01-01T01:00:00.000Z';
 // Make sure you have a prefix that makes sure that rules show up first in the list.
 export const RULE_NAMES = {
   FIRST_RULE_TEST: '!!! - Scout - First Rule Test',
+  RULE_DETAILS_TEST: '!!! - Scout - Rule Details Test',
 } as const;
 
 /**
