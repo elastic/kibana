@@ -6,7 +6,7 @@
  */
 
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
-import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { AIMessage, ToolMessage, SystemMessage } from '@langchain/core/messages';
 import type { AssistantResponse, ToolCallWithResult } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, isToolCallStep } from '@kbn/agent-builder-common';
 import {
@@ -21,6 +21,7 @@ import type {
   ProcessedConversationRound,
   ProcessedRoundInput,
 } from './prepare_conversation';
+import { getAttachmentSystemPrompt } from './attachment_presentation';
 
 /**
  * Converts a conversation to langchain format
@@ -33,6 +34,15 @@ export const conversationToLangchainMessages = ({
   ignoreSteps?: boolean;
 }): BaseMessage[] => {
   const messages: BaseMessage[] = [];
+
+  // Versioned conversation-level attachments are injected as a system message so the model
+  // can access them even when legacy per-round attachments are stripped.
+  const presentation = conversation.versionedAttachmentPresentation;
+  if (presentation && presentation.activeCount > 0) {
+    messages.push(
+      new SystemMessage(`${presentation.content}\n\n${getAttachmentSystemPrompt(presentation)}`)
+    );
+  }
 
   let rounds = conversation.previousRounds;
   let input = conversation.nextInput;
