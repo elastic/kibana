@@ -8,12 +8,15 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type {
+  TransformEnhancementsIn,
+  TransformEnhancementsOut,
+} from '@kbn/embeddable-plugin/common';
 import type { ImageEmbeddableState } from '../server';
 
 export function getTransforms(
-  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn'],
-  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
+  transformEnhancementsIn: TransformEnhancementsIn,
+  transformEnhancementsOut: TransformEnhancementsOut
 ) {
   return {
     transformIn: (state: ImageEmbeddableState) => {

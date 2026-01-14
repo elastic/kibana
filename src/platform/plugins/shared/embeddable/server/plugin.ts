@@ -8,7 +8,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type { Reference } from '@kbn/content-management-utils';
 import { identity } from 'lodash';
 import type {
   PersistableStateService,
@@ -17,7 +16,6 @@ import type {
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
 import type { ObjectType } from '@kbn/config-schema';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -27,7 +25,7 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import type { EmbeddableTransforms } from '../common';
+import type { EmbeddableTransforms, TransformEnhancementsIn, TransformEnhancementsOut } from '../common';
 import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
@@ -42,14 +40,8 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    */
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   getAllMigrations: () => MigrateFunctionsObject;
-  transformEnhancementsIn: (enhancementsState: SerializableRecord) => {
-    state: SerializableRecord;
-    references: Reference[];
-  };
-  transformEnhancementsOut: (
-    enhancementsState: SerializableRecord,
-    references: Reference[]
-  ) => SerializableRecord;
+  transformEnhancementsIn: TransformEnhancementsIn;
+  transformEnhancementsOut: TransformEnhancementsOut;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
