@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { type ConnectorContractUnion } from '../..';
+import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -21,18 +22,6 @@ import {
   WaitStepSchema,
   WorkflowSchema,
 } from '../schema';
-
-/**
- * Backward compatibility: Map old type names to new cleaner type names.
- * These aliases are accepted in schema validation but not shown in autocomplete.
- * The key is the old type name, the value is the new type name.
- */
-const KIBANA_TYPE_ALIASES: Record<string, string> = {
-  'kibana.createCaseDefaultSpace': 'kibana.createCase',
-  'kibana.getCaseDefaultSpace': 'kibana.getCase',
-  'kibana.updateCaseDefaultSpace': 'kibana.updateCase',
-  'kibana.addCaseCommentDefaultSpace': 'kibana.addCaseComment',
-};
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior

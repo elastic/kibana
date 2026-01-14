@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Re-export from the single source of truth
+export { OPERATION_TYPE_OVERRIDES } from '../../spec/kibana/aliases';
+
 /**
  * List of OpenAPI operation IDs to include in the generated Kibana connectors.
  */
@@ -19,16 +22,3 @@ export const INCLUDED_OPERATIONS = [
   'SetAlertsStatus',
   'SetAlertTags',
 ];
-
-/**
- * Display name overrides for connector types.
- * Maps OpenAPI operation IDs to cleaner type names used in workflows.
- * If an operation ID is not in this map, the default naming convention is used.
- */
-export const OPERATION_TYPE_OVERRIDES: Record<string, string> = {
-  // Cases API - remove "DefaultSpace" suffix for cleaner workflow syntax
-  createCaseDefaultSpace: 'createCase',
-  getCaseDefaultSpace: 'getCase',
-  updateCaseDefaultSpace: 'updateCase',
-  addCaseCommentDefaultSpace: 'addCaseComment',
-};

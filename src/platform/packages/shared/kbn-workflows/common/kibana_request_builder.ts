@@ -8,19 +8,7 @@
  */
 
 import { getKibanaConnectors } from '../spec/kibana';
-
-// Lazy import to avoid bundling large generated file in main plugin bundle
-
-/**
- * Backward compatibility: Map old type names to new cleaner type names.
- * This allows existing workflows using the old names to continue working.
- */
-const KIBANA_TYPE_ALIASES: Record<string, string> = {
-  'kibana.createCaseDefaultSpace': 'kibana.createCase',
-  'kibana.getCaseDefaultSpace': 'kibana.getCase',
-  'kibana.updateCaseDefaultSpace': 'kibana.updateCase',
-  'kibana.addCaseCommentDefaultSpace': 'kibana.addCaseComment',
-};
+import { KIBANA_TYPE_ALIASES } from '../spec/kibana/aliases';
 
 /**
  * Builds a Kibana HTTP request from connector definitions
