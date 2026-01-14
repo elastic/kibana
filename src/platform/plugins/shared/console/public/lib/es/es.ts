@@ -53,17 +53,10 @@ export async function send({
     const httpMethod = method.toLowerCase() as Method;
     const url = new URL(kibanaRequestUrl);
     const { pathname, searchParams } = url;
-
-    // Build query object preserving repeated params as arrays
-    const query: Record<string, string | string[]> = {};
-    new Set(searchParams.keys()).forEach((key) => {
-      const values = searchParams.getAll(key);
-      query[key] = values.length === 1 ? values[0] : values;
-    });
-    if (isPackagedEnvironment) {
-      query.isKibanaRequest = 'true';
-    }
-
+    const query = {
+      ...Object.fromEntries(searchParams.entries()),
+      ...(isPackagedEnvironment && { isKibanaRequest: 'true' }),
+    };
     const body = ['post', 'put', 'patch'].includes(httpMethod) ? data : null;
 
     return await http[httpMethod]<HttpResponse>(pathname, {
