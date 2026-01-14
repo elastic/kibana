@@ -25,7 +25,7 @@ export const GroupStreamDetailView = ({ stream }: { stream: Streams.GroupStream.
     if (stream) {
       onPageReady({
         meta: {
-          description: '[ttfmp_streams] streamType: group',
+          description: '[ttfmp_streams_detail_processing] streamType: group',
         },
         customMetrics: {
           key1: 'member_count',

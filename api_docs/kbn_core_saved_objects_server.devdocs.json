@@ -10682,6 +10682,10 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/zdt/utils/outdated_documents_query.test.ts"
+              },
+              {
+                "plugin": "@kbn/check-saved-objects-cli",
+                "path": "packages/kbn-check-saved-objects-cli/src/commands/test/types/migrations.ts"
               }
             ]
           },
