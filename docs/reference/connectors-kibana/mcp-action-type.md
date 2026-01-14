@@ -35,7 +35,7 @@ HTTP headers (under Additional settings)
     Config
     :   If you choose the config type, values in headers will be sent as plain text in requests.   
 
-    Secret {applies_to}`stack: ga 9.2` 
+    Secret
     :   If you choose the secret type, values in your headers will be encrypted in requests. 
 
 ## Test connectors [mcp-action-configuration]
