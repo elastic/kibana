@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { APIKeysService } from '@kbn/core-security-server';
+import type { APIKeysType } from '@kbn/core-security-server';
 import { lazyObject } from '@kbn/lazy-object';
 
 export const apiKeysMock = {
-  create: (): jest.MockedObjectDeep<APIKeysService> =>
+  create: (): jest.MockedObjectDeep<APIKeysType> =>
     lazyObject({
       areAPIKeysEnabled: jest.fn(),
       areCrossClusterAPIKeysEnabled: jest.fn(),
@@ -21,5 +21,10 @@ export const apiKeysMock = {
       validate: jest.fn(),
       invalidate: jest.fn(),
       invalidateAsInternalUser: jest.fn(),
+      uiam: {
+        grant: jest.fn(),
+        invalidate: jest.fn(),
+        getScopedClusterClientWithApiKey: jest.fn(),
+      },
     }),
 };
