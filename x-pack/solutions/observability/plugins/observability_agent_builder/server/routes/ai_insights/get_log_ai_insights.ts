@@ -16,9 +16,8 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { getApmIndices } from '../../utils/get_apm_indices';
-import { fetchDistributedTrace } from './apm_error/fetch_distributed_trace';
-import { parseDatemath } from '../../utils/time';
+import { getToolHandler } from '../../tools/get_correlated_logs/handler';
+import { isWarningOrAbove } from './get_log_severity';
 
 export interface GetLogAiInsightsParams {
   index: string;
@@ -62,7 +61,7 @@ export async function getLogAiInsights({
     Provide a thorough investigation:
     - **What happened**: Summarize the error in plain language
     - **Where it originated**: Identify the service, component, or code path
-    - **Root cause**: Analyze using ServiceSummary, DownstreamDependencies, TraceDocuments, and TraceServices if available
+    - **Root cause**: Analyze using CorrelatedLogSequence (chronological sequence of related logs). The CorrelatedLogSequence shows what happened before and after the error.
     - **Impact**: Note any affected downstream services or dependencies
     - **Next steps**: Suggest specific actions for investigation or remediation
 
@@ -75,6 +74,7 @@ export async function getLogAiInsights({
     Keep it concise:
     - Explain what the log message means in context
     - Identify the source (service, host, container)
+    - Use ServiceSummary if available to provide service context
     - Only flag concerns if the content unexpectedly suggests a problem
 
     ## Important Notes
@@ -93,14 +93,7 @@ export async function getLogAiInsights({
     throw new Error('Log entry not found');
   }
 
-  const resourceAttributes = logEntry.resource?.attributes;
-
-  const serviceName =
-    logEntry.service?.name ?? (resourceAttributes?.['service.name'] as string) ?? '';
-
-  const serviceEnvironment =
-    logEntry.service?.environment ?? (resourceAttributes?.['service.environment'] as string) ?? '';
-
+  const isErrorOrWarning = isWarningOrAbove(logEntry);
   let context = dedent(`
     <LogEntryIndex>
     ${index}
@@ -115,105 +108,126 @@ export async function getLogAiInsights({
     </LogEntryFields>
   `);
 
-  if (serviceName) {
-    const logTimestamp = logEntry['@timestamp'] as string;
-    const start = moment(logTimestamp).subtract(24, 'hours').toISOString();
-    const end = moment(logTimestamp).add(24, 'hours').toISOString();
+  const logTimestamp = logEntry['@timestamp'] as string;
+  const windowStart = moment(logTimestamp).subtract(1, 'hours').toISOString();
+  const windowEnd = moment(logTimestamp).add(1, 'hours').toISOString();
 
-    interface ContextPart {
-      name: string;
-      handler: () => Promise<unknown>;
+  const resourceAttributes = logEntry.resource?.attributes;
+  const serviceName =
+    logEntry.service?.name ?? (resourceAttributes?.['service.name'] as string) ?? '';
+  const serviceEnvironment =
+    logEntry.service?.environment ?? (resourceAttributes?.['service.environment'] as string) ?? '';
+
+  interface ContextPart {
+    name: string;
+    handler: () => Promise<unknown>;
+  }
+
+  const contextParts: ContextPart[] = [];
+
+  if (isErrorOrWarning) {
+    contextParts.push({
+      name: 'CorrelatedLogSequence',
+      handler: async () => {
+        try {
+          const logSourceFields = [
+            '@timestamp',
+            'message',
+            'log.level',
+            'level',
+            'severity',
+            'service.name',
+            'service.environment',
+            'trace.id',
+            'trace_id',
+            'request.id',
+            'request_id',
+            'error.*',
+            'exception.*',
+            'event.name',
+            'event_name',
+            'event.message',
+            'event.type',
+            'event.action',
+            'event.dataset',
+            'event.*',
+            'attributes.*', // OpenTelemetry attributes (contains nested fields like attributes.message, attributes.service.name, etc.)
+            'host.name',
+            'container.id',
+          ];
+
+          const { sequences } = await getToolHandler({
+            core,
+            logger,
+            esClient,
+            start: windowStart,
+            end: windowEnd,
+            logId: id,
+            errorLogsOnly: false,
+            maxSequences: 1,
+            maxLogsPerSequence: 50,
+            logSourceFields,
+          });
+
+          return sequences[0] || null;
+        } catch (error) {
+          logger.debug(`Failed to fetch correlated logs: ${error.message}`);
+          return null;
+        }
+      },
+    });
+  }
+
+  if (!isErrorOrWarning && serviceName) {
+    contextParts.push({
+      name: 'ServiceSummary',
+      handler: () =>
+        dataRegistry.getData('apmServiceSummary', {
+          request,
+          serviceName,
+          serviceEnvironment,
+          start: windowStart,
+          end: windowEnd,
+        }),
+    });
+  }
+
+  const results = await Promise.allSettled(
+    contextParts.map(async (part) => {
+      const data = await part.handler();
+      return { part, data };
+    })
+  );
+
+  const contextPartsStrings: string[] = [];
+
+  results.forEach((result) => {
+    if (result.status === 'rejected') {
+      logger.debug(`Log AI Insight: fetch failed: ${result.reason}`);
+      return;
     }
 
-    const contextParts: ContextPart[] = [
-      {
-        name: 'ServiceSummary',
-        handler: () =>
-          dataRegistry.getData('apmServiceSummary', {
-            request,
-            serviceName,
-            serviceEnvironment,
-            start,
-            end,
-          }),
-      },
-      {
-        name: 'DownstreamDependencies',
-        handler: () =>
-          dataRegistry.getData('apmDownstreamDependencies', {
-            request,
-            serviceName,
-            serviceEnvironment,
-            start,
-            end,
-          }),
-      },
-    ];
-
-    const traceId = (logEntry.trace_id as string) || (logEntry.trace as { id?: string })?.id;
-
-    if (traceId) {
-      const parsedStart = parseDatemath(start, { roundUp: false });
-      const parsedEnd = parseDatemath(end, { roundUp: true });
-      const traceContextPromise = (async () => {
-        const apmIndices = await getApmIndices({ core, plugins, logger });
-        return fetchDistributedTrace({
-          esClient,
-          apmIndices,
-          traceId,
-          start: parsedStart,
-          end: parsedEnd,
-          logger,
-        });
-      })();
-
-      contextParts.push({
-        name: 'TraceDocuments',
-        handler: async () => (await traceContextPromise).traceDocuments,
-      });
-
-      contextParts.push({
-        name: 'TraceServices',
-        handler: async () => (await traceContextPromise).services,
-      });
+    const { part, data } = result.value;
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      return;
     }
 
-    const results = await Promise.allSettled(
-      contextParts.map(async (part) => {
-        const data = await part.handler();
-        return { part, data };
-      })
-    );
-
-    const contextPartsStrings: string[] = [];
-
-    results.forEach((result) => {
-      if (result.status === 'rejected') {
-        logger.debug(`Log AI Insight: fetch failed: ${result.reason}`);
-        return;
-      }
-
-      const { part, data } = result.value;
-      if (!data || (Array.isArray(data) && data.length === 0)) {
-        return;
-      }
-
-      contextPartsStrings.push(
-        dedent(`
+    contextPartsStrings.push(
+      dedent(`
         <${part.name}>
-        Time window: ${start} to ${end}
+        Time window: ${windowStart} to ${windowEnd}
         \`\`\`json
         ${safeJsonStringify(data)}
         \`\`\`
         </${part.name}>
       `)
-      );
-    });
+    );
+  });
 
-    if (contextPartsStrings.length > 0) {
-      context += contextPartsStrings.join('\n\n');
-    }
+  if (contextPartsStrings.length > 0) {
+    context += contextPartsStrings.join('\n\n');
   }
+
   const response = await inferenceClient.chatComplete({
     connectorId,
     system: systemPrompt,
