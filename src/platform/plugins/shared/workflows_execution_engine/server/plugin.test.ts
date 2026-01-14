@@ -106,21 +106,25 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [
+            filter: [
               { term: { workflowId: workflow.id } },
               { term: { spaceId } },
-              { term: { triggeredBy: 'scheduled' } },
-            ],
-            must_not: [
               {
                 terms: {
-                  status: TerminalExecutionStatuses,
+                  status: [
+                    ExecutionStatus.PENDING,
+                    ExecutionStatus.WAITING,
+                    ExecutionStatus.WAITING_FOR_INPUT,
+                    ExecutionStatus.RUNNING,
+                  ],
                 },
               },
+              { term: { triggeredBy: 'scheduled' } },
             ],
           },
         },
         size: 1,
+        terminate_after: 1,
       });
       expect(esClient.index).not.toHaveBeenCalled();
       expect(logger.info).not.toHaveBeenCalled();
