@@ -19,6 +19,8 @@ export interface ServiceMapEdgeData {
 /**
  * Transform Cytoscape elements to React Flow format
  * Converts nodes and edges from Cytoscape's data structure to React Flow's format
+ * Ideally this should be done on the server side to avoid the need to transform the data in the browser
+ * If we proceed with this POC, we should move this to the server side and remove this function
  */
 export function transformElements(
   elements: cytoscape.ElementDefinition[],
@@ -65,8 +67,8 @@ export function transformElements(
 
       const markerEnd: EdgeMarker = {
         type: MarkerType.ArrowClosed,
-        width: 15,
-        height: 15,
+        width: 20,
+        height: 20,
         color: defaultColor,
       };
 
@@ -78,7 +80,7 @@ export function transformElements(
         style: { stroke: defaultColor, strokeWidth: 1 },
         markerEnd,
         markerStart: isBidirectional
-          ? { type: MarkerType.ArrowClosed, width: 15, height: 15, color: defaultColor }
+          ? { type: MarkerType.ArrowClosed, width: 20, height: 20, color: defaultColor }
           : undefined,
         data: { isBidirectional },
       });

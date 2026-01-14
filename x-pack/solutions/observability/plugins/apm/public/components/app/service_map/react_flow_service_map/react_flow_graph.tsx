@@ -11,6 +11,7 @@ import {
   Background,
   Controls,
   Panel,
+  MarkerType,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -84,17 +85,25 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
         const isConnected = nodeId !== null && (edge.source === nodeId || edge.target === nodeId);
         const color = isConnected ? primaryColor : EDGE_COLOR_DEFAULT;
         const strokeWidth = isConnected ? 3 : 1;
+        const markerSize = isConnected ? 24 : 20;
+
+        // Always create complete marker objects to ensure arrows render in all layouts
+        const markerEnd: EdgeMarker = {
+          type: MarkerType.ArrowClosed,
+          width: markerSize,
+          height: markerSize,
+          color,
+        };
+
+        const markerStart: EdgeMarker | undefined = edge.data?.isBidirectional
+          ? { type: MarkerType.ArrowClosed, width: markerSize, height: markerSize, color }
+          : undefined;
 
         return {
           ...edge,
           style: { stroke: color, strokeWidth },
-          markerEnd: {
-            ...(edge.markerEnd as EdgeMarker),
-            color,
-          },
-          markerStart: edge.data?.isBidirectional
-            ? { ...(edge.markerStart as EdgeMarker), color }
-            : undefined,
+          markerEnd,
+          markerStart,
           zIndex: isConnected ? 1000 : 0,
         };
       });

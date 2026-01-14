@@ -15,9 +15,14 @@ import type { SpanType, SpanSubtype } from '../../../../../common/es_fields/apm'
 interface DependencyMapNodeData {
   id: string;
   label: string;
-  spanType: SpanType;
-  spanSubtype: SpanSubtype;
+  spanType?: SpanType;
+  spanSubtype?: SpanSubtype;
 }
+
+// Diamond dimensions
+const DIAMOND_SIZE = 48;
+// When rotated 45deg, the diagonal becomes the width/height: size * sqrt(2)
+const DIAMOND_VISUAL_SIZE = Math.ceil(DIAMOND_SIZE * Math.SQRT2);
 
 export const DependencyNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<Node<DependencyMapNodeData>>) => {
@@ -34,51 +39,71 @@ export const DependencyNode = memo(
 
     return (
       <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
-        <Handle
-          type="target"
-          position={targetPosition ?? Position.Left}
-          css={css`
-            visibility: hidden;
-          `}
-        />
+        {/* Container sized for the rotated diamond visual */}
         <EuiFlexItem
           grow={false}
           css={css`
-            width: 48px;
-            height: 48px;
-            transform: rotate(45deg);
-            border: ${euiTheme.border.width.medium} solid ${borderColor};
-            background: ${euiTheme.colors.backgroundBasePlain};
+            position: relative;
+            width: ${DIAMOND_VISUAL_SIZE}px;
+            height: ${DIAMOND_VISUAL_SIZE}px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
-            box-sizing: border-box;
-            cursor: pointer;
           `}
         >
+          <Handle
+            type="target"
+            position={targetPosition ?? Position.Left}
+            css={css`
+              visibility: hidden;
+            `}
+          />
+          {/* Diamond shape - using div to avoid EuiFlexGroup padding affecting the shape */}
           <div
             css={css`
-              transform: rotate(-45deg);
+              width: ${DIAMOND_SIZE}px;
+              height: ${DIAMOND_SIZE}px;
+              transform: rotate(45deg);
+              border: ${euiTheme.border.width.medium} solid ${borderColor};
+              background: ${euiTheme.colors.backgroundBasePlain};
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+              box-sizing: border-box;
+              cursor: pointer;
             `}
           >
-            {iconUrl && (
-              <img
-                src={iconUrl}
-                alt={data.spanSubtype || data.spanType}
-                css={css`
-                  width: 20px;
-                  height: 20px;
-                  object-fit: contain;
-                `}
-              />
-            )}
+            <div
+              css={css`
+                transform: rotate(-45deg);
+              `}
+            >
+              {iconUrl && (
+                <img
+                  src={iconUrl}
+                  alt={data.spanSubtype || data.spanType || 'dependency'}
+                  css={css`
+                    width: 20px;
+                    height: 20px;
+                    object-fit: contain;
+                  `}
+                />
+              )}
+            </div>
           </div>
+          <Handle
+            type="source"
+            position={sourcePosition ?? Position.Right}
+            css={css`
+              visibility: hidden;
+            `}
+          />
         </EuiFlexItem>
+        {/* Label */}
         <EuiFlexItem
           grow={false}
           css={css`
-            margin-top: 16px;
             font-size: ${euiTheme.size.s};
             color: ${selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
             font-family: ${euiTheme.font.family};
@@ -90,19 +115,12 @@ export const DependencyNode = memo(
             background-color: ${selected
               ? transparentize(euiTheme.colors.primary, 0.1)
               : 'transparent'};
-            padding: ${euiTheme.size.xs} ${euiTheme.size.xs};
+            padding: ${euiTheme.size.xs};
             border-radius: ${euiTheme.border.radius.medium};
           `}
         >
           {data.label}
         </EuiFlexItem>
-        <Handle
-          type="source"
-          position={sourcePosition ?? Position.Right}
-          css={css`
-            visibility: hidden;
-          `}
-        />
       </EuiFlexGroup>
     );
   }
