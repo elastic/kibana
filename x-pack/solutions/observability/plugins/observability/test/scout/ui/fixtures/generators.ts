@@ -25,10 +25,12 @@ export async function generateLogsData({
   from,
   to,
   client,
+  opts,
 }: {
   from: number;
   to: number;
   client: Pick<SynthtraceEsClient<LogDocument>, 'index'>;
+  opts?: { dataset?: string };
 }): Promise<void> {
   const range = timerange(from, to);
 
@@ -40,7 +42,7 @@ export async function generateLogsData({
         .create()
         .message('Test log message')
         .timestamp(timestamp)
-        .dataset('synth.test')
+        .dataset(opts?.dataset ?? 'synth.test')
         .namespace('default')
         .logLevel(Math.random() > 0.5 ? 'info' : 'warn')
         .defaults({
@@ -113,7 +115,7 @@ export async function generateRulesData(apiServices: ApiServicesFixture) {
         alertOnGroupDisappear: false,
         searchConfiguration: {
           query: { query: '', language: 'kuery' },
-          index: 'remote_cluster:logs-*',
+          index: 'default-alerts-data-view',
         },
       },
       schedule: { interval: '1m' },

@@ -72,15 +72,26 @@ export const MyStepTypeId = 'myPlugin.myCustomStep';
 export const InputSchema = z.object({
   message: z.string(),
   count: z.number().optional(),
+  mode: z.enum(['partial', 'full'])
 });
 
 /**
  * Output schema for the step.
- * Defines what the step returns.
+ * 
+ * Defines the structure and types of data that this step will return.
+ * This schema is used for validation and type checking to ensure data consistency
+ * across workflow steps.
  */
-export const OutputSchema = z.object({
-  result: z.string(),
-});
+ * Defines all possible structures the step returns.
+ */
+export const OutputSchema = z.union([
+    z.object({
+    result: z.string(),
+  }),
+  z.object({
+    partialResult: z.string(),
+  })
+]);
 
 export type MyStepInput = z.infer<typeof InputSchema>;
 export type MyStepOutput = z.infer<typeof OutputSchema>;
@@ -186,6 +197,65 @@ export const myStepDefinition: PublicStepDefinition = {
 
 **Important**: Icons must be custom components or images imported from EUI, not passed as strings. The workflows app does not fully support built-in `EuiIconType` strings (e.g., `'star'`) yet. See [EUI icon consumption guide](https://github.com/elastic/eui/blob/main/wiki/consuming-eui/README.md#failing-icon-imports) for details.
 
+
+#### Advanced Example with Dynamic Output Schema
+
+For steps that need different output schemas based on input parameters, you can use `dynamicOutputSchema`. This function is evaluated **in the workflows editor UI** to provide real-time schema validation and autocomplete based on the current step configuration. Here's an example of a data transformation step:
+
+
+```typescript
+import React from 'react';
+import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { i18n } from '@kbn/i18n';
+import { MyStepTypeId, myStepCommonDefinition } from '../../common/step_types/my_step';
+
+import { StepMenuCatalog } from '@kbn/workflows-extensions/public';
+
+export const myStepDefinition: PublicStepDefinition = {
+  ...myStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
+  ),
+  label: i18n.translate('myPlugin.myStep.label', {
+    defaultMessage: 'My Custom Step',
+  }),
+  description: i18n.translate('myPlugin.myStep.description', {
+    defaultMessage: 'Performs a custom action in workflows',
+  }),
+  documentation: {
+    details: i18n.translate('myPlugin.myStep.documentation.details', {
+      defaultMessage: 'This step processes messages and returns results.',
+    }),
+    examples: [
+      `## Basic usage
+\`\`\`yaml
+- name: process_message
+  type: ${MyStepTypeId}
+  with:
+    message: "Hello World"
+\`\`\``,
+    ],
+  },
+  actionsMenuCatalog: StepMenuCatalog.kibana, // Optional: determines which catalog the step appears under in the actions menu
+  editorHandlers: {
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => {
+        if (input.mode == 'partial') {
+          return z.object({
+            partialResult: z.string()
+          });
+        }
+
+        return z.object({
+            result: z.string()
+          });
+      }
+    }
+  }
+};
+```
+
+
 ### Step 4: Register in Plugin Setup
 
 Register the step definitions in both server and public plugin setup:
@@ -278,6 +348,60 @@ Step type IDs must follow a namespaced format to avoid conflicts:
 
 - ✅ Good: `"myPlugin.myStep"`, `"custom.feature.step"`
 - ❌ Bad: `"myStep"`, `"step"` (too generic)
+
+### Config vs Inputs: Mental Model
+
+When designing a step, you need to decide which parameters should be **config** properties (step-level in YAML) and which should be **inputs** (in the `with` section). Here's the recommended mental model:
+
+**Config (step-level properties):**
+Use config to **control step behavior** - how/when/who the step executes:
+- Execution context (e.g., `connector-id: 'slack-webhook'`, `agent-id: 'agent-123'`)
+- Execution mode (e.g., `mode: 'batch'`, `strategy: 'parallel'`)
+
+**Built-in step-level config examples:**
+- `if`: Conditional execution (e.g., `if: '${{ steps.check.output.passed }}'`)
+- `foreach`: Iteration over collections (e.g., `foreach: '${{ steps.list.output.items }}'`)
+- `on-failure`: Error handling policy with `continue`, `retry`, or `fallback` strategies
+- `timeout`: Execution time limits (e.g., `timeout: 30s`)
+
+**Inputs (the `with` section):**
+Use inputs for **what/where to process** - the step's payload:
+- Target destinations (e.g., `index`, `channel`, `namespace`, `bucket`)
+- Data to process (e.g., `document`, `message`, `query`, `payload`)
+- Processing parameters (e.g., `severity`, `priority`, `format`, `options`)
+- Dynamic values from previous steps or context
+
+**Example:**
+
+```yaml
+# Config properties (step-level) - Control step behavior
+- name: send_notification
+  type: myPlugin.sendNotification
+  connector-id: slack-webhook                      # Config: which connector to use (controls behavior)
+  mode: async                                   # Config: execution mode (controls behavior)
+  timeout: 10s                                  # Config: time limit (controls behavior)
+  # Inputs (with section) - What/Where to process
+  with:
+    channel: "#alerts"                          # Input: WHERE - target destination
+    message: ${{ steps.process.output.alert }}  # Input: WHAT - data to send
+    priority: high                              # Input: WHAT - processing parameter
+
+- name: process_data
+  type: myPlugin.processData
+  if: steps.previous.output.data.length > 10    # Config: by which condition to run this step (control behavior)
+  agent-id: data-processor-1                     # Config: which agent to use (controls behavior)
+  strategy: parallel                            # Config: processing strategy (controls behavior)
+  # Inputs (with section) - What/Where to process
+  with:
+    index: logs-*                               # Input: WHERE - data source
+    query: "status:error"                       # Input: WHAT - data to process
+    outputIndex: processed-*                    # Input: WHERE - output destination
+    transform:                                  # Input: WHAT - transformation logic
+      field: timestamp
+      format: iso8601
+```
+
+**Note:** This mental model is a guideline, not a strict rule. Teams have flexibility in choosing what makes sense for their specific step types. The key is consistency within your plugin's step definitions.
 
 ### Type Safety
 

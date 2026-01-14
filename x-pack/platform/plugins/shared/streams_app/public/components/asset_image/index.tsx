@@ -140,5 +140,6 @@ export function AssetImage({ type = 'welcome', ...props }: AssetImageProps) {
     };
   }, [colorMode, dark, light]);
 
-  return imageSrc ? <EuiImage size="m" {...props} alt={alt} src={imageSrc} /> : null;
+  const { size = 'm', ...restProps } = props;
+  return imageSrc ? <EuiImage size={size} {...restProps} alt={alt} src={imageSrc} /> : null;
 }
