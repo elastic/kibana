@@ -152,6 +152,25 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'concat') {
+      let mustacheString = '';
+      for (const from of step.from) {
+        if (from.type === 'field') {
+          mustacheString += `{{${from.value}}}`;
+        } else {
+          mustacheString += from.value;
+        }
+      }
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.concatProcessorDescription',
+        {
+          defaultMessage: 'Concatenates via pattern "{pattern}" to "{to}" field',
+          values: {
+            pattern: mustacheString,
+            to: step.to,
+          },
+        }
+      );
     } else {
       const { action, parentId, customIdentifier, ignore_failure, ...rest } = step;
       // Remove 'where' if it exists (some processors have it, some don't)
