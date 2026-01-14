@@ -108,9 +108,7 @@ function getAllServices(
       serviceNodes.set(toId, {
         ...to,
         id: toId,
-        ...(anomaliesByServiceName.get(to.id)
-          ? { serviceAnomalyStats: anomaliesByServiceName.get(to.id) }
-          : null),
+        serviceAnomalyStats: anomaliesByServiceName.get(to.id),
       });
     }
   }
@@ -119,9 +117,7 @@ function getAllServices(
     if (!isExitSpan(node)) {
       serviceNodes.set(node.id, {
         ...node,
-        ...(anomaliesByServiceName.get(node.id)
-          ? { serviceAnomalyStats: anomaliesByServiceName.get(node.id) }
-          : null),
+        serviceAnomalyStats: anomaliesByServiceName.get(node.id),
       });
     }
   }
