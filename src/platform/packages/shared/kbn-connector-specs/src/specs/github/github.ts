@@ -61,14 +61,14 @@ export const GithubConnector: ConnectorSpec = {
           size?: number;
         };
 
-        const query = `repo:${typedInput.owner}/${typedInput.repo} is:${typedInput.type} is:open ${
-          typedInput.query || ''
-        }`;
+        const query =
+          `repo:${typedInput.owner}/${typedInput.repo} is:${typedInput.type} is:open` +
+          (typedInput.query ? ` ${typedInput.query}` : '');
 
         const response = await ctx.client.get('https://api.github.com/search/issues', {
           params: {
             q: query,
-            per_page: typedInput.size,
+            per_page: typedInput.size || 10,
           },
           headers: {
             Accept: 'application/vnd.github.v3+json',
