@@ -64,7 +64,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % Removed the "Supporting visualization" section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under "Appearance". The "Type" field has been renamed to "Background chart" and the "Panel" option has been renamed to "None".
 * Updates the color settings in the Primary Metric editor.  [#243608]({{kib-pull}}243608).
 % !!TODO!! The above PR had a lengthy release note description:
-% The color settings in the Primary Metric editor have been reorganized and renamed. For numeric metrics, the "Color by value" and "Color mapping" / "Color" settings are now located under the chart type field. The settings have been renamed as follows: "Color by value" is now "Color mode", "Color mapping" is now "Dynamic color mapping", and "Color" is now "Select color".
+% Reorganizes and renames color settings in the Primary Metric dimension editor. For numeric metrics, the "Color by value" and "Color mapping"/"Color" settings are now located under the "Background chart" field. The settings have been renamed as follows: "Color by value" is now "Color mode," and "Color mapping" is now "Dynamic color mapping".
 * Enables the flyout toolbar for visualization configuration: appearance, titles and text, axis, and legend settings in Lens. [#240804]({{kib-pull}}240804).
 % !!TODO!! The above PR had a lengthy release note description:
 % In **dashboard visualization in-line editing** and **Lens workspace**, the 'Appearance', 'Titles and text', 'Axis', and 'Legend' settings have been moved from a popover into a dedicated flyout panel.
@@ -279,17 +279,17 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
  [#242442]({{kib-pull}}242442).
 * Fixes an error with deselecting a (blank) option from an options list. [#242036]({{kib-pull}}242036).
 * Fixes layout issues for Markdown embeddables in small dashboard panels using CSS container queries. When a markdown panel is shorter than 120px, the UI now adapts to a compact layout that maximizes usable space. [#240806]({{kib-pull}}240806).
-* Labels in the **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after save), without requiring a scaling toggle. (… [#240728]({{kib-pull}}240728).
+* Labels in the **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after save), without requiring a scaling toggle. [#240728]({{kib-pull}}240728).
 % !!TODO!! The above PR had a lengthy release note description:
 % **Fix:** Labels in the **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after save), without requiring a scaling toggle.
 * Fixes unable to reset unsaved change when enabling timeRestore and setting time range [#239992]({{kib-pull}}239992).
 * Fixes search session restoration bug [#239822]({{kib-pull}}239822).
-* Fixes error when selecting "(blank)" value in options list [#239791]({{kib-pull}}239791).
-* Fixes a bug in *Lens* that incorrectly assigned unsaved (ad-hoc) dataview references [#239431]({{kib-pull}}239431).
-* Pause fetch until initialized [#239228]({{kib-pull}}239228).
-* Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula. in *Lens* [#239222]({{kib-pull}}239222).
+* Fixes an error in the Options list control when selecting a "(blank)" value. [#239791]({{kib-pull}}239791).
+* Fixes a bug in the `LensConfigBuilder` that treated all dataview references the same, causing the UI to throw an error attempting to find an ad-hoc dataview that does not exist as a `SavedObject`. [#239431]({{kib-pull}}239431).
+* To prevent double refetches, the rendered panels will now have their fetches paused until all controls and their initial values are ready. [#239228]({{kib-pull}}239228).
+* Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula. [#239222]({{kib-pull}}239222).
 * Fixes metric color assignment when breakdown and a max dimension are defined in Lens. [#238901]({{kib-pull}}238901).
-* Fixes Adhoc dataviews from ES|QL charts are being filtered out in the KQL search bar [#238731]({{kib-pull}}238731).
+* Fixes an issue where controls were getting created with ad-hoc data views. [#238731]({{kib-pull}}238731).
 * Fixes an error in the **Visualize Listing** page in which an error in the visualization could cause the entire page to error. This improves the error handling to make it easier to identify which visualization is causing the problem in order to address it. [#238355]({{kib-pull}}238355).
 % !!TODO!! The above PR had a lengthy release note description:
 % Fixes an error in the **Visualize Listing** page in which an error in the vis could cause the entire page to error. This improves the error handling to make it easier to identity which visualization is causing the problem in order to address it.
