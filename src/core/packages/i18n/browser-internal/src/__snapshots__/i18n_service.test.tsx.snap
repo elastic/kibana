@@ -9,6 +9,8 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiBasicTable.selectAllRows\\": \\"Select all rows\\",
     \\"euiBasicTable.noItemsMessage\\": \\"No items found\\",
     \\"euiBasicTable.deselectRows\\": \\"Deselect rows\\",
+    \\"euiBasicTable.caption.tableName\\": \\"Data table\\",
+    \\"euiBasicTable.caption.emptyState\\": \\"(empty)\\",
     \\"euiBottomBar.screenReaderAnnouncement\\": \\"There is a new region landmark with page level controls at the end of the document.\\",
     \\"euiBottomBar.screenReaderHeading\\": \\"Page level controls\\",
     \\"euiBreadcrumb.popoverAriaLabel\\": \\"Clicking this button will toggle a popover dialog.\\",

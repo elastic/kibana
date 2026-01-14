@@ -16,7 +16,6 @@ import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 export const EditSignificantEventFlyout = ({
-  refreshDefinition,
   queryToEdit,
   definition,
   isEditFlyoutOpen,
@@ -31,7 +30,6 @@ export const EditSignificantEventFlyout = ({
   generateOnMount,
   aiFeatures,
 }: {
-  refreshDefinition: () => void;
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
@@ -64,7 +62,6 @@ export const EditSignificantEventFlyout = ({
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
       generateOnMount={generateOnMount}
-      refreshDefinition={refreshDefinition}
       refreshFeatures={refreshFeatures}
       definition={definition}
       query={queryToEdit}
@@ -122,7 +119,7 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
-                setIsEditFlyoutOpen(false);
+                onCloseFlyout();
                 refresh();
 
                 telemetryClient.trackSignificantEventsCreated({
