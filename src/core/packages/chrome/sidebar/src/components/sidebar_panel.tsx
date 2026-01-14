@@ -90,8 +90,8 @@ export const SidebarPanel: FC<SidebarPanelProps> = ({ children, title, onClose }
                   iconType="cross"
                   onClick={onClose}
                   aria-label={i18n.translate('core.ui.chrome.sidebar.closeSidebarAriaLabel', {
-                  defaultMessage: 'Close Sidebar',
-                })}
+                    defaultMessage: 'Close Sidebar',
+                  })}
                   color="text"
                 />
               </EuiFlexItem>
