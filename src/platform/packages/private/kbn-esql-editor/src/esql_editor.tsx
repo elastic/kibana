@@ -34,6 +34,7 @@ import {
   getEditorExtensions,
   fixESQLQueryWithVariables,
   prettifyQuery,
+  hasOnlySourceCommand,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -122,6 +123,7 @@ const ESQLEditorInternal = function ESQLEditor({
   formLabel,
   mergeExternalMessages,
   hideQuickSearch,
+  openVisorOnSourceCommands,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -193,6 +195,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
   const isVisorOpenRef = useRef(isVisorOpen);
+  const hasOpenedVisorOnMount = useRef(false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -202,6 +205,20 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+
+  // Open visor on initial render if query has only source commands
+  useEffect(() => {
+    if (
+      openVisorOnSourceCommands &&
+      !hasOpenedVisorOnMount.current &&
+      code &&
+      hasOnlySourceCommand(code)
+    ) {
+      setIsVisorOpen(true);
+      hasOpenedVisorOnMount.current = true;
+    }
+  }, [code, openVisorOnSourceCommands]);
+
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -1137,7 +1154,8 @@ const ESQLEditorInternal = function ESQLEditor({
                     editor.onDidFocusEditorText(() => {
                       // Skip triggering suggestions on initial focus to avoid interfering
                       // with editor initialization and automated tests
-                      if (!isFirstFocusRef.current) {
+                      // Also skip when date picker is open to prevent overlap
+                      if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
                         triggerSuggestions();
                       }
 
@@ -1281,7 +1299,9 @@ const ESQLEditorInternal = function ESQLEditor({
                     lineContent.length + 1
                   );
 
-                  const addition = `"${date.toISOString()}"${contentAfterCursor}`;
+                  const dateString = `"${date.toISOString()}"`;
+                  const addition = `${dateString}${contentAfterCursor}`;
+
                   editorRef.current?.executeEdits('time', [
                     {
                       range: {
@@ -1302,7 +1322,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   // move the cursor past the date we just inserted
                   editorRef.current?.setPosition({
                     lineNumber: currentCursorPosition?.lineNumber ?? 0,
-                    column: (currentCursorPosition?.column ?? 0) + addition.length - 1,
+                    column: (currentCursorPosition?.column ?? 0) + dateString.length,
                   });
                   // restore focus to the editor
                   editorRef.current?.focus();

@@ -18,7 +18,8 @@
     "@kbn/core",
     "@kbn/workflows-extensions",
     "@kbn/zod",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/workflows"
   ]
 }
 

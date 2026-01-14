@@ -7,6 +7,7 @@
 
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { RunFunction } from '@kbn/task-manager-plugin/server/task';
+import { TaskStatus } from '@kbn/streams-schema';
 import type { TaskContext } from './task_definitions';
 
 export function cancellableTask(
@@ -32,11 +33,11 @@ export function cancellableTask(
           taskContext.logger.trace(
             `Cancellable task check loop for task ${runContext.taskInstance.id}: status is ${task.status}`
           );
-          if (task.status === 'being_canceled') {
+          if (task.status === TaskStatus.BeingCanceled) {
             runContext.abortController.abort();
             await taskClient.update({
               ...task,
-              status: 'canceled',
+              status: TaskStatus.Canceled,
             });
             resolve('canceled' as const);
           }
@@ -63,7 +64,7 @@ export function cancellableTask(
       try {
         await taskClient.update({
           id: runContext.taskInstance.id,
-          status: 'failed',
+          status: TaskStatus.Failed,
           task: {
             params: {},
             error: error.message,

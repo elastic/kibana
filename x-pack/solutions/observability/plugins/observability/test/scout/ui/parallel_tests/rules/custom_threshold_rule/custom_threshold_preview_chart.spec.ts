@@ -7,7 +7,8 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../../fixtures';
 
-test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/247632
+test.describe.skip('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, () => {
   const previewChartDataTestSubj = 'thresholdRulePreviewChart';
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -43,6 +44,8 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
     await customEquationField.click();
     await customEquationField.fill('A');
     await page.testSubj.click('o11yClosablePopoverTitleButton');
-    await expect(lensFailure).toBeHidden();
+
+    // Wait for the chart to re-render after fixing the equation
+    await expect(lensFailure).toBeHidden({ timeout: 15000 });
   });
 });
