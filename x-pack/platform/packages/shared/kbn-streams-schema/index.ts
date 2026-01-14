@@ -10,7 +10,6 @@ export { IngestBase } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
-export { Group } from './src/models/group';
 
 export {
   type RoutingDefinition,
@@ -134,6 +133,8 @@ export type {
   SignificantEventsPreviewResponse,
   SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';

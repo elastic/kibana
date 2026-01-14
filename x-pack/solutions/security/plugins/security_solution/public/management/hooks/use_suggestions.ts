@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import type { AutocompleteStart } from '@kbn/unified-search-plugin/public/autocomplete';
-import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import type { AutocompleteStart } from '@kbn/kql/public/autocomplete';
+import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
 
 /**
  * Hook to get a memoized suggestions interface
