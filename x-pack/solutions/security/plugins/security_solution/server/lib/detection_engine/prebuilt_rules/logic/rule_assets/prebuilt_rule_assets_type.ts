@@ -11,6 +11,14 @@ import type { SavedObjectsType } from '@kbn/core/server';
 
 export const PREBUILT_RULE_ASSETS_SO_TYPE = 'security-rule';
 
+const securityRuleV1 = schema.object(
+  {
+    rule_id: schema.string(),
+    version: schema.number(),
+  },
+  { unknowns: 'allow' }
+);
+
 const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
@@ -37,14 +45,8 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
     '1': {
       changes: [],
       schemas: {
-        forwardCompatibility: schema.object(
-          {
-            rule_id: schema.string(),
-            version: schema.number(),
-          },
-          { unknowns: 'allow' }
-        ),
-        create: schema.object({}, { unknowns: 'allow' }),
+        forwardCompatibility: securityRuleV1,
+        create: securityRuleV1,
       },
     },
   },
