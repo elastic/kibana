@@ -20,10 +20,12 @@ import {
 import type { InfraDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { Readable } from 'stream';
 import { InventoryPage } from './page_objects/inventory';
+import { AssetDetailsPage } from './page_objects/asset_details/asset_details';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     inventoryPage: InventoryPage;
+    assetDetailsPage: AssetDetailsPage;
   };
 }
 
@@ -43,6 +45,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
     const extendedPageObjects = {
       ...pageObjects,
       inventoryPage: createLazyPageObject(InventoryPage, page, kbnUrl),
+      assetDetailsPage: createLazyPageObject(AssetDetailsPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);

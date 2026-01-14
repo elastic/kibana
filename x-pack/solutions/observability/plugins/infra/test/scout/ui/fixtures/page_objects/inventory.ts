@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -116,6 +116,11 @@ export class InventoryPage {
       name: container.getByTestId('nodeName'),
       value: container.getByTestId('nodeValue'),
     };
+  }
+
+  public async clickWaffleNode(nodeName: string) {
+    const node = await this.getWaffleNode(nodeName);
+    await node.container.click();
   }
 
   public async showHosts() {
