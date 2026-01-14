@@ -38,7 +38,6 @@ export function registerGetInferenceEndpointsRoute({
         const inferenceEndpoints = (endpoints || []).map(
           (endpoint: { inference_id: string; service: string; task_type: string }) => ({
             id: endpoint.inference_id,
-            name: endpoint.inference_id,
             service: endpoint.service,
             task_type: endpoint.task_type,
           })

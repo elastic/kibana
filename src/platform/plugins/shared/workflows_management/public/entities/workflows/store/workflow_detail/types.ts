@@ -16,13 +16,14 @@ import type { LoadingStates } from './utils/loading_states';
 import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
 
+export interface InferenceEndpoint {
+  id: string;
+  service: string;
+  task_type: string;
+}
+
 export interface InferenceEndpointsResponse {
-  endpoints: Array<{
-    id: string;
-    name: string;
-    service: string;
-    task_type: string;
-  }>;
+  endpoints: InferenceEndpoint[];
   total: number;
 }
 

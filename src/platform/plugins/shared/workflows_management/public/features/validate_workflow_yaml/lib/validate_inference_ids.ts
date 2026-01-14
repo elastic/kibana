@@ -8,13 +8,7 @@
  */
 
 import type { InferenceIdItem, YamlValidationResult } from '../model/types';
-
-export interface InferenceEndpoint {
-  id: string;
-  name: string;
-  service: string;
-  task_type: string;
-}
+import type { InferenceEndpoint } from '../../../entities/workflows/store/workflow_detail/types';
 
 export function validateInferenceIds(
   inferenceIdItems: InferenceIdItem[],
@@ -27,14 +21,12 @@ export function validateInferenceIds(
   }
 
   // Filter out template variables like ${{vars.inference_id}}
-  const notReferenceInferenceIds = inferenceIdItems.filter(
+  const filteredInferenceIds = inferenceIdItems.filter(
     (item) => !item.key?.startsWith('${{') || !item.key.endsWith('}}')
   );
 
-  for (const inferenceIdItem of notReferenceInferenceIds) {
-    const endpoint = inferenceEndpoints.find(
-      (ep) => ep.id === inferenceIdItem.key || ep.name === inferenceIdItem.key
-    );
+  for (const inferenceIdItem of filteredInferenceIds) {
+    const endpoint = inferenceEndpoints.find((ep) => ep.id === inferenceIdItem.key);
 
     if (!endpoint) {
       const availableIds = inferenceEndpoints.map((ep) => ep.id).join(', ');

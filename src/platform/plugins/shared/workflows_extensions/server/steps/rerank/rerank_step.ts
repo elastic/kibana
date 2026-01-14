@@ -110,7 +110,7 @@ export const rerankStepDefinition = createServerStepDefinition({
 
       context.logger.debug('Rerank step started', {
         dataLength: Array.isArray(context.input.data) ? context.input.data.length : 0,
-        inferenceId: context.input.inference_id,
+        inferenceId: context.config?.inference_id,
         hasFieldExtraction: !!context.input.fields,
         rankWindowSize: context.input.rank_window_size,
       });
@@ -150,7 +150,7 @@ export const rerankStepDefinition = createServerStepDefinition({
         });
       }
 
-      let inferenceId: string | null | undefined = context.input.inference_id;
+      let inferenceId: string | null | undefined = context.config?.inference_id;
       if (!inferenceId) {
         context.logger.info('No inference_id provided, discovering available rerank endpoints');
         inferenceId = await discoverRerankEndpoint(esClient, context.logger);

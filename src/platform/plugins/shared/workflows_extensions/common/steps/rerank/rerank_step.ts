@@ -12,7 +12,7 @@ import { z } from '@kbn/zod/v4';
 /**
  * Step type ID for the rerank workflow step
  */
-export const RerankStepTypeId = 'workflows.rerank';
+export const RerankStepTypeId = 'elasticsearch.rerank';
 
 /**
  * Default values for rerank step parameters
@@ -32,13 +32,7 @@ const RerankInputSchema = z.object({
     .array(z.array(z.string()))
     .optional()
     .describe(
-      'Optional field paths to extract from each document for reranking. E.g., [["title"], ["content"]] extracts item.title and item.content'
-    ),
-  inference_id: z
-    .string()
-    .optional()
-    .describe(
-      'Rerank inference endpoint ID. If not provided, automatically selects the first available rerank endpoint from Elasticsearch, prioritizing Elastic-hosted models over self-hosted Elasticsearch models.'
+      'Optional field paths to extract from each document for reranking. E.g., [["title"], ["content"], ["user", "name"]] extracts item.title, item.content, and item.user.name'
     ),
   rank_window_size: z
     .number()
@@ -60,11 +54,25 @@ const RerankInputSchema = z.object({
     ),
 });
 
+/**
+ * Config schema for the rerank step
+ * Defines step-level configuration that controls execution behavior
+ */
+const RerankConfigSchema = z.object({
+  inference_id: z
+    .string()
+    .optional()
+    .describe(
+      'Rerank inference endpoint ID. If not provided, automatically selects the first available rerank endpoint from Elasticsearch, prioritizing Elastic-hosted models over self-hosted Elasticsearch models.'
+    ),
+});
+
 const RerankOutputSchema = z
   .array(z.any())
   .describe('Array of reranked documents in descending relevance order');
 
 export type RerankInput = z.infer<typeof RerankInputSchema>;
+export type RerankConfig = z.infer<typeof RerankConfigSchema>;
 export type RerankOutput = z.infer<typeof RerankOutputSchema>;
 
 /**
@@ -74,5 +82,6 @@ export type RerankOutput = z.infer<typeof RerankOutputSchema>;
 export const rerankStepCommonDefinition = {
   id: RerankStepTypeId,
   inputSchema: RerankInputSchema,
+  configSchema: RerankConfigSchema,
   outputSchema: RerankOutputSchema,
 } as const;

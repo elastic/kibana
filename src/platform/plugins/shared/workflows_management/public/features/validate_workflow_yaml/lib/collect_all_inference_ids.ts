@@ -58,7 +58,7 @@ export function collectAllInferenceIds(
                 item.key.value === 'type' &&
                 isScalar(item.value)
               ) {
-                if (item.value.value === 'workflows.rerank') {
+                if (item.value.value === 'elasticsearch.rerank') {
                   isRerankStep = true;
                   break;
                 }

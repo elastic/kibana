@@ -12,16 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { setInferenceEndpoints } from '../slice';
-
-export interface InferenceEndpointsResponse {
-  endpoints: Array<{
-    id: string;
-    name: string;
-    service: string;
-    task_type: string;
-  }>;
-  total: number;
-}
+import type { InferenceEndpointsResponse } from '../types';
 
 export type LoadInferenceEndpointsParams = void;
 export type LoadInferenceEndpointsResponse = InferenceEndpointsResponse;

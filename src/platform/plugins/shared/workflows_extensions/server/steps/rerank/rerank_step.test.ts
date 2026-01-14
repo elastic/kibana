@@ -415,6 +415,8 @@ describe('rerankStepDefinition', () => {
         input: {
           rerank_text: 'Test query',
           data: [{ id: 1 }],
+        },
+        config: {
           inference_id: 'test-model',
         },
         logger: mockLogger as any,
@@ -485,6 +487,8 @@ describe('rerankStepDefinition', () => {
         input: {
           rerank_text: 'Test query',
           data: [{ id: 1 }],
+        },
+        config: {
           inference_id: 'custom-rerank-model',
         },
         logger: mockLogger as any,
@@ -579,7 +583,7 @@ describe('rerankStepDefinition', () => {
 
   describe('schema validation', () => {
     it('should have correct step type ID', () => {
-      expect(rerankStepDefinition.id).toBe('workflows.rerank');
+      expect(rerankStepDefinition.id).toBe('elasticsearch.rerank');
     });
 
     it('should validate valid input', () => {
@@ -599,7 +603,6 @@ describe('rerankStepDefinition', () => {
       };
 
       const result = rerankStepDefinition.inputSchema.parse(input);
-      expect(result.inference_id).toBeUndefined(); // Optional, discovered at runtime
       expect(result.rank_window_size).toBe(100); // Has default value
       expect(result.max_input_field_length).toBe(1000); // Has default value
       expect(result.max_input_total_length).toBe(2000); // Has default value

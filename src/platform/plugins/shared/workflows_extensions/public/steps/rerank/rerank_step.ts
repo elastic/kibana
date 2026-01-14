@@ -24,11 +24,11 @@ export const rerankStepDefinition: PublicStepDefinition = {
   }),
   description: i18n.translate('workflowsExtensions.rerankStep.description', {
     defaultMessage:
-      'Rerank documents using Elasticsearch inference rerank endpoint for improved relevance ordering',
+      'Rerank documents using a rerank inference endpoint for improved relevance ordering',
   }),
   documentation: {
     details: i18n.translate('workflowsExtensions.rerankStep.documentation.details', {
-      defaultMessage: `The rerank step calls the Elasticsearch rerank inference endpoint to reorder documents based on relevance to the provided text.
+      defaultMessage: `The rerank step calls a rerank inference endpoint to reorder documents based on relevance to the provided text.
 
 **How it works:**
 • Takes an array of documents and rerank text
@@ -46,9 +46,9 @@ export const rerankStepDefinition: PublicStepDefinition = {
 • Always returns original full documents in reranked order
 
 **Inference endpoint selection:**
-• If inference_id provided: uses the specified endpoint
+• If inference_id provided: uses the specified endpoint (can be Elastic-hosted, self-hosted Elasticsearch, or any other rerank endpoint)
 • If inference_id omitted: automatically discovers and selects the first available rerank endpoint, prioritizing Elastic-hosted models over self-hosted Elasticsearch models
-• At least one rerank inference endpoint must exist in Elasticsearch
+• At least one rerank inference endpoint must be configured in Elasticsearch
 
 This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
     }),
@@ -58,11 +58,11 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
 # Rerank only top 50 results to save on inference costs
 - name: rerank_search_results
   type: ${RerankStepTypeId}
+  inference_id: "my-rerank-model"
   with:
     rerank_text: "What is the best laptop?"
     data: \${{ steps.search.output }}
     rank_window_size: 50
-    inference_id: "my-rerank-model"
 \`\`\``,
       `## Reranking with field extraction
 \`\`\`yaml
@@ -83,19 +83,20 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
 # Omit rank_window_size to use default of 100 documents
 - name: rerank_messages
   type: ${RerankStepTypeId}
+  inference_id: "my-rerank-model"
   with:
     rerank_text: "Find messages about deployment"
     data: \${{ steps.slack.output }}
     fields:
       - ["user", "name"]
       - ["text"]
-    inference_id: "my-rerank-model"
 \`\`\``,
       `## Rerank with custom truncation limits
 \`\`\`yaml
 # Limit each field to 500 chars, total concatenated text to 1500 chars
 - name: rerank_large_docs
   type: ${RerankStepTypeId}
+  inference_id: "my-rerank-model"
   with:
     rerank_text: "Technical documentation about APIs"
     data: \${{ steps.load_docs.output }}
@@ -105,7 +106,6 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
       - ["content"]
     max_input_field_length: 500
     max_input_total_length: 1500
-    inference_id: "my-rerank-model"
 \`\`\``,
     ],
   },
