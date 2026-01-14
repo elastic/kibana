@@ -16,6 +16,8 @@
  * peggy grammars are built automatically on import in both browser/server
  */
 declare module '*.peggy' {
+  import type { ParserTracer } from 'peggy';
+
   export interface ParserOptions {
     [key: string]: any;
     /**
