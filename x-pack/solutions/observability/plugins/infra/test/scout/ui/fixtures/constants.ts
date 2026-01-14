@@ -18,6 +18,12 @@ export const HOST6_NAME = 'host-6';
 
 export const HOSTS_METADATA_FIELDS = ['host.name', 'agent.name.text'];
 
+export const HOST_LOGS = [
+  { message: 'A simple log', level: 'info' },
+  { message: 'Yet another debug log', level: 'debug' },
+  { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
+];
+
 export const HOST_NAME_WITH_SERVICES = HOST1_NAME;
 export const SERVICE_PER_HOST_COUNT = 3;
 

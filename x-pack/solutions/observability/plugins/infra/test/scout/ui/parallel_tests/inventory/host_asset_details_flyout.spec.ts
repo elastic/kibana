@@ -7,7 +7,12 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
-import { DATE_WITH_HOSTS_DATA, HOST1_NAME, HOSTS_METADATA_FIELDS } from '../../fixtures/constants';
+import {
+  DATE_WITH_HOSTS_DATA,
+  HOST1_NAME,
+  HOST_LOGS,
+  HOSTS_METADATA_FIELDS,
+} from '../../fixtures/constants';
 import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asset_details/metrics_tab';
 
 test.use({
@@ -304,6 +309,30 @@ test.describe(
         await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.metricsTab.diskSectionTitle).toBeInViewport();
         await goBackToOverviewTab();
+      });
+    });
+
+    test('Logs Tab', async ({ page, pageObjects: { assetDetailsPage } }) => {
+      await test.step('accessible from default tab', async () => {
+        await expect(assetDetailsPage.logsTag.tab).toHaveAttribute('aria-selected', 'false');
+        await assetDetailsPage.logsTag.clickTab();
+        await expect(assetDetailsPage.logsTag.tab).toHaveAttribute('aria-selected', 'true');
+      });
+
+      await test.step('render expected content', async () => {
+        await expect(assetDetailsPage.logsTag.searchBar).toBeVisible();
+        await expect(assetDetailsPage.logsTag.openInDiscoverButton).toBeVisible();
+        await expect(assetDetailsPage.logsTag.table).toBeVisible();
+        await expect(assetDetailsPage.logsTag.tableTotalDocumentsLabel).toBeVisible();
+      });
+
+      await test.step('filter logs via search bar and open the query in discover', async () => {
+        await assetDetailsPage.logsTag.filterTable(`"${HOST_LOGS[0].message}"`);
+
+        const discoverQuery = `(host.name: ${HOST1_NAME}) and ("${HOST_LOGS[0].message}")`;
+
+        await assetDetailsPage.logsTag.openInDiscoverButton.click();
+        await expect(page.getByTestId('queryInput')).toHaveValue(discoverQuery);
       });
     });
   }

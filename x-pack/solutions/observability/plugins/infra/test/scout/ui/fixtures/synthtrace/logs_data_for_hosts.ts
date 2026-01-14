@@ -6,6 +6,7 @@
  */
 
 import { generateShortId, log, timerange } from '@kbn/synthtrace-client';
+import { HOST_LOGS } from '../constants';
 
 export function generateLogsDataForHosts({
   from,
@@ -19,11 +20,6 @@ export function generateLogsDataForHosts({
   const range = timerange(from, to);
 
   // Logs Data logic
-  const MESSAGE_LOG_LEVELS = [
-    { message: 'A simple log', level: 'info' },
-    { message: 'Yet another debug log', level: 'debug' },
-    { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
-  ];
   const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
   const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
 
@@ -38,11 +34,11 @@ export function generateLogsDataForHosts({
     .rate(1)
     .generator((timestamp) =>
       hosts.flatMap(({ hostName }) => {
-        const index = Math.floor(Math.random() * MESSAGE_LOG_LEVELS.length);
+        const index = Math.floor(Math.random() * HOST_LOGS.length);
         return log
           .create()
-          .message(MESSAGE_LOG_LEVELS[index].message)
-          .logLevel(MESSAGE_LOG_LEVELS[index].level)
+          .message(HOST_LOGS[index].message)
+          .logLevel(HOST_LOGS[index].level)
           .hostName(hostName)
           .defaults({
             'trace.id': generateShortId(),
