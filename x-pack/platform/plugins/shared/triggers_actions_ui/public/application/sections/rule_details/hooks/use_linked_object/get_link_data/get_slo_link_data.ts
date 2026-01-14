@@ -13,9 +13,12 @@ const getSLOLinkData = (rule: Rule) => {
   return typeof rule.params.sloId === 'string'
     ? {
         urlParams: { sloId: rule.params.sloId },
-        buttonText: i18n.translate('xpack.observability.ruleDetails.viewLinkedSLOButton', {
-          defaultMessage: 'View linked SLO',
-        }),
+        buttonText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.viewLinkedSloButtonText',
+          {
+            defaultMessage: 'View linked SLO',
+          }
+        ),
         locatorId: sloDetailsLocatorID,
       }
     : { urlParams: undefined, buttonText: '', locatorId: '' };
