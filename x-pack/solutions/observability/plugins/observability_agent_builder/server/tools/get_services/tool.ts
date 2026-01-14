@@ -66,12 +66,7 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        environment,
-        healthStatus,
-      } = toolParams;
+      const { start, end, environment, healthStatus } = toolParams;
       const { request } = context;
 
       try {

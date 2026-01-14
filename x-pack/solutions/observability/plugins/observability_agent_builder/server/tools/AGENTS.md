@@ -263,6 +263,26 @@ curl -X POST http://localhost:5601/api/agent_builder/tools/_execute \
   }'
 ```
 
+### Chatting with the Observability Agent
+
+Test your tools end-to-end by chatting with the Observability agent:
+
+```bash
+curl -X POST http://localhost:5601/api/agent_builder/converse \
+  -u elastic:changeme \
+  -H 'kbn-xsrf: true' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "input": "What services are experiencing issues?",
+    "agent_id": "observability.agent"
+  }'
+```
+
+Notes:
+
+- To continue a conversation, include the `conversation_id` from the previous response
+- For streaming responses (SSE), use the `/api/agent_builder/converse/async` endpoint
+
 ### API Integration Tests
 
 The Kibana API test server: http://elastic:changeme@localhost:5620

@@ -17,7 +17,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   ...Object.values(platformCoreTools),
 
   // Observability
-  `${internalNamespaces.observability}.get_data_sources`,
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
   `${internalNamespaces.observability}.run_log_rate_analysis`,
   `${internalNamespaces.observability}.get_log_categories`,
@@ -28,6 +27,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.observability}.get_hosts`,
   `${internalNamespaces.observability}.get_log_change_points`,
   `${internalNamespaces.observability}.get_metric_change_points`,
+  `${internalNamespaces.observability}.get_index_info`,
 
   // Dashboards
   'platform.dashboard.create_dashboard',
