@@ -1289,7 +1289,7 @@
             "section": "def-public.EmbeddablePackageState",
             "text": "EmbeddablePackageState"
           },
-          "<SerializedStateType>"
+          "<SerializedState>"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
         "deprecated": false,
@@ -1309,19 +1309,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.EmbeddablePackageState.serializedState",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "serializedState",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<SerializedStateType>"
+              "SerializedState"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
             "deprecated": false,
@@ -2399,7 +2392,7 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[] | undefined) => object) | undefined>) => void"
+            "[] | undefined, id?: string | undefined) => object) | undefined>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
@@ -2444,7 +2437,7 @@
                   "section": "def-server.Reference",
                   "text": "Reference"
                 },
-                "[] | undefined) => object) | undefined>"
+                "[] | undefined, id?: string | undefined) => object) | undefined>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
               "deprecated": false,
@@ -2723,7 +2716,7 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[] | undefined) => object) | undefined>"
+            "[] | undefined, id?: string | undefined) => object) | undefined>"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
           "deprecated": false,
@@ -3488,7 +3481,7 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[] | undefined) => EmbeddableState) | undefined; transformIn?: ((state: EmbeddableState) => { state: StoredEmbeddableState; references?: ",
+          "[] | undefined, id?: string | undefined) => EmbeddableState) | undefined; transformIn?: ((state: EmbeddableState) => { state: StoredEmbeddableState; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

@@ -237,7 +237,6 @@ export class ESQLService extends FtrService {
 
         await this.testSubjects.waitForDeleted(suggestionToSelect);
       },
-      // -- On failure -- In very weird ocations the suggestion list is rendered outside of the viewport,
       // we need to hit escape to close the widget before we try again.
       async () => {
         const editor = await this.testSubjects.find(editorSubjId);
