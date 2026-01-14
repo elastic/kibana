@@ -49,16 +49,15 @@ export async function checkAndSkipIfExistingScheduledExecution(
 ): Promise<boolean> {
   // Check if there's already a scheduled workflow execution in non-terminal state
   // Uses optimized hasRunningExecution which uses filter context + terminate_after
-  const hasExisting = await workflowExecutionRepository.hasRunningExecution(
+  const runningExecutions = await workflowExecutionRepository.getRunningExecutionsByWorkflowId(
     workflow.id,
     spaceId,
     'scheduled'
   );
 
-  if (hasExisting) {
-    // There's already a non-terminal scheduled execution - create SKIPPED execution
-  if (existingExecutions.length > 0) {
-    const existingExecution = existingExecutions[0]?._source;
+  // There's already a non-terminal scheduled execution - create SKIPPED execution
+  if (runningExecutions.length > 0) {
+    const existingExecution = runningExecutions[0]?._source;
     if (!existingExecution) {
       return false;
     }
