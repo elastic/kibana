@@ -77,6 +77,31 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
 
   const primaryColor = euiTheme.colors.primary;
 
+  // Helper to apply edge highlighting based on selected node
+  const applyEdgeHighlighting = useCallback(
+    (edgesToHighlight: Edge<ServiceMapEdgeData>[], nodeId: string | null) => {
+      return edgesToHighlight.map((edge) => {
+        const isConnected = nodeId !== null && (edge.source === nodeId || edge.target === nodeId);
+        const color = isConnected ? primaryColor : EDGE_COLOR_DEFAULT;
+        const strokeWidth = isConnected ? 3 : 1;
+
+        return {
+          ...edge,
+          style: { stroke: color, strokeWidth },
+          markerEnd: {
+            ...(edge.markerEnd as EdgeMarker),
+            color,
+          },
+          markerStart: edge.data?.isBidirectional
+            ? { ...(edge.markerStart as EdgeMarker), color }
+            : undefined,
+          zIndex: isConnected ? 1000 : 0,
+        };
+      });
+    },
+    [primaryColor]
+  );
+
   // Transform and layout elements when they change or layout direction changes
   useEffect(() => {
     if (elements.length === 0) {
@@ -96,74 +121,39 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
     );
 
     setNodes(layoutedNodes);
-    setEdges(layoutedEdges);
+    // Preserve highlighting if a node is selected
+    setEdges(applyEdgeHighlighting(layoutedEdges, selectedNodeId));
     // Fit view after layout change with a small delay to ensure nodes are rendered
     setTimeout(() => fitView({ padding: 0.2, duration: 200 }), 50);
-  }, [elements, layoutDirection, setNodes, setEdges, fitView]);
+  }, [
+    elements,
+    layoutDirection,
+    selectedNodeId,
+    applyEdgeHighlighting,
+    setNodes,
+    setEdges,
+    fitView,
+  ]);
 
   const handleLayoutDirectionChange = useCallback((optionId: string) => {
     setLayoutDirection(optionId as LayoutDirection);
   }, []);
 
-  // Handle node click - update edges with highlight colors (GitHub discussion approach: https://github.com/xyflow/xyflow/discussions/3176)
+  // Handle node click - update edges with highlight colors
   const handleNodeClick: NodeMouseHandler<Node<ServiceMapNodeData>> = useCallback(
     (_, node) => {
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
-
-      // Update all edges based on selection to mark them blue if they are connected to the selected node
-      setEdges((currentEdges) =>
-        currentEdges.map((edge) => {
-          const isConnected =
-            newSelectedId !== null &&
-            (edge.source === newSelectedId || edge.target === newSelectedId);
-          const color = isConnected ? primaryColor : EDGE_COLOR_DEFAULT;
-          const strokeWidth = isConnected ? 3 : 1;
-
-          return {
-            ...edge,
-            style: { stroke: color, strokeWidth },
-            markerEnd: {
-              ...(edge.markerEnd as EdgeMarker),
-              color,
-            },
-            markerStart: edge.data?.isBidirectional
-              ? {
-                  ...(edge.markerStart as EdgeMarker),
-                  color,
-                }
-              : undefined,
-            zIndex: isConnected ? 1000 : 0,
-          };
-        })
-      );
+      setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
     },
-    [selectedNodeId, setEdges, primaryColor]
+    [selectedNodeId, setEdges, applyEdgeHighlighting]
   );
 
   // Handle pane click to deselect
   const handlePaneClick = useCallback(() => {
     setSelectedNodeId(null);
-
-    // Reset all edges to default
-    setEdges((currentEdges) =>
-      currentEdges.map((edge) => ({
-        ...edge,
-        style: { stroke: EDGE_COLOR_DEFAULT, strokeWidth: 1 },
-        markerEnd: {
-          ...(edge.markerEnd as EdgeMarker),
-          color: EDGE_COLOR_DEFAULT,
-        },
-        markerStart: edge.data?.isBidirectional
-          ? {
-              ...(edge.markerStart as EdgeMarker),
-              color: EDGE_COLOR_DEFAULT,
-            }
-          : undefined,
-        zIndex: 0,
-      }))
-    );
-  }, [setEdges]);
+    setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
+  }, [setEdges, applyEdgeHighlighting]);
 
   const containerStyle = useMemo(
     () => ({
