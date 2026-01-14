@@ -40,11 +40,11 @@ export const enrichDocumentationPrompt: PromptTemplate<{
 
       Instructions:
 
-      - For each ES|QL example (surrounded by \`\`\`esql code blocks), add a natural language
-        description explaining what the query is doing.
+      - For each ES|QL example (surrounded by \`\`\`esql code blocks), add a short, concise
+        description explaining what the query is doing in a single sentence.
 
-      - The description should be clear, concise, and explain the purpose and behavior
-        of the query in plain language.
+      - The description should be clear, succint, and explain the purpose and behavior
+        of the query in plain language. Do not prefix with 'This query'.
 
       - Place the description immediately before or after the code block, whichever makes
         more sense in the context.
