@@ -38,11 +38,11 @@ test.describe.serial('Custom links template validation', { tag: ['@ess', '@svlOb
     await customLinksPage.fillLabel(uniqueLabel);
     await customLinksPage.fillUrl(templateUrl);
 
-    // Add service.name filter
-    await customLinksPage.addFilter('service.name', SERVICE_OPBEANS_JAVA);
+    // Add first filter (uses existing empty filter row)
+    await customLinksPage.addFirstFilter('service.name', SERVICE_OPBEANS_JAVA);
 
-    // Add service.environment filter
-    await customLinksPage.addFilter('service.environment', PRODUCTION_ENVIRONMENT);
+    // Add additional filter (explicitly adds new filter row)
+    await customLinksPage.addAdditionalFilter('service.environment', PRODUCTION_ENVIRONMENT);
 
     await expect(page.getByTestId('preview-url')).toContainText(expectedUrl);
 

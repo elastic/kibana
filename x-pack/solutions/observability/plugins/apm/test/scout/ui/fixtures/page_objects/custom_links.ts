@@ -79,37 +79,52 @@ export class CustomLinksPage {
     await editButton.click();
   }
 
-  async addFilter(key: string, value: string) {
-    // Check if we need to add a new filter row
+  /**
+   * Explicitly adds a new filter row by clicking the "Add another filter" button.
+   * Throws an error if the button is disabled.
+   */
+  async addNewFilterRow() {
     const addFilterButton = this.page.getByTestId(
       'apmCustomLinkAddFilterButtonAddAnotherFilterButton'
     );
-    const isDisabled = await addFilterButton.getAttribute('disabled');
+    await addFilterButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await expect(addFilterButton).toBeEnabled();
+    await addFilterButton.click();
+  }
 
-    if (isDisabled === null) {
-      await addFilterButton.click();
-    }
-
-    // Find the newly added empty select (value is empty or DEFAULT)
-    const allSelects = this.page.locator('select[data-test-subj]');
-    const emptySelectTestSubj = await allSelects.evaluateAll((selects) => {
-      for (let i = selects.length - 1; i >= 0; i--) {
-        const select = selects[i] as HTMLSelectElement;
-        if (select.value === '' || select.value === 'DEFAULT') {
-          return select.getAttribute('data-test-subj');
-        }
-      }
-      return null;
-    });
-
-    if (emptySelectTestSubj) {
-      await this.page.getByTestId(emptySelectTestSubj).selectOption(key);
-    }
+  /**
+   * Fills an existing empty filter row with the given key and value.
+   * Uses the explicit data-test-subj attribute for empty filter rows.
+   * Throws an error if no empty filter row is found.
+   */
+  async fillEmptyFilter(key: string, value: string) {
+    const emptyFilterSelect = this.page.getByTestId('apmCustomLinkFilterSelectEmpty');
+    await emptyFilterSelect.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await emptyFilterSelect.selectOption(key);
 
     const valueInput = this.page.getByTestId(`${key}.value`);
     await valueInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
     const valueComboBox = new EuiComboBoxWrapper(this.page, { dataTestSubj: `${key}.value` });
     await valueComboBox.selectSingleOption(value);
+  }
+
+  /**
+   * Adds the first filter by filling the existing empty filter row.
+   * Use this when the form has just been opened and contains one empty filter row.
+   * This method does NOT click the "Add another filter" button.
+   */
+  async addFirstFilter(key: string, value: string) {
+    await this.fillEmptyFilter(key, value);
+  }
+
+  /**
+   * Adds an additional filter by explicitly clicking the "Add another filter" button,
+   * then filling the newly created empty filter row.
+   * Use this when you need to add a second, third, etc. filter.
+   */
+  async addAdditionalFilter(key: string, value: string) {
+    await this.addNewFilterRow();
+    await this.fillEmptyFilter(key, value);
   }
 }
