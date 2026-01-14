@@ -42,7 +42,11 @@ describe('IngestionCard', () => {
   describe('daily period', () => {
     it('renders daily average with stats and privileges', () => {
       renderWithI18n(
-        <IngestionCard period="daily" hasMonitorPrivileges={true} stats={createMockStats(1048576)} />
+        <IngestionCard
+          period="daily"
+          hasMonitorPrivileges={true}
+          stats={createMockStats(1048576)}
+        />
       ); // 1MB per day
 
       expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent(/1(\.0)?\s?MB/);
