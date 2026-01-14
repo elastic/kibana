@@ -97,10 +97,7 @@ export const processRouter = async ({
                   'public',
                   contentType
                 )]: {
-                  schema: converter.convert(
-                    validationSchemas.body,
-                    `${route.method}-${route.path}-request`
-                  ),
+                  schema: converter.convert(validationSchemas.body),
                 },
               },
             }
@@ -146,10 +143,7 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
                 'public',
                 schema.bodyContentType ? [schema.bodyContentType] : contentType
               )]: {
-                schema: converter.convert(
-                  schema.body(),
-                  `${route.method}-${route.path}-${statusCode}-response`
-                ),
+                schema: converter.convert(schema.body()),
               },
             }
           : undefined;
