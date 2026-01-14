@@ -355,7 +355,7 @@ When designing a step, you need to decide which parameters should be **config** 
 
 **Config (step-level properties):**
 Use config to **control step behavior** - how/when/who the step executes:
-- Execution context (e.g., `connector: 'slack-webhook'`, `agentId: 'agent-123'`)
+- Execution context (e.g., `connector-id: 'slack-webhook'`, `agent-id: 'agent-123'`)
 - Execution mode (e.g., `mode: 'batch'`, `strategy: 'parallel'`)
 
 **Built-in step-level config examples:**
@@ -377,7 +377,7 @@ Use inputs for **what/where to process** - the step's payload:
 # Config properties (step-level) - Control step behavior
 - name: send_notification
   type: myPlugin.sendNotification
-  connector: slack-webhook                      # Config: which connector to use (controls behavior)
+  connector-id: slack-webhook                      # Config: which connector to use (controls behavior)
   mode: async                                   # Config: execution mode (controls behavior)
   timeout: 10s                                  # Config: time limit (controls behavior)
   # Inputs (with section) - What/Where to process
@@ -389,7 +389,7 @@ Use inputs for **what/where to process** - the step's payload:
 - name: process_data
   type: myPlugin.processData
   if: steps.previous.output.data.length > 10    # Config: by which condition to run this step (control behavior)
-  agentId: data-processor-1                     # Config: which agent to use (controls behavior)
+  agent-id: data-processor-1                     # Config: which agent to use (controls behavior)
   strategy: parallel                            # Config: processing strategy (controls behavior)
   # Inputs (with section) - What/Where to process
   with:
