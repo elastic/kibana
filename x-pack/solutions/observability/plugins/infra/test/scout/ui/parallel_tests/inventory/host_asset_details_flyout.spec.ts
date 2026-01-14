@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import { DATE_WITH_HOSTS_DATA, HOST1_NAME, HOSTS_METADATA_FIELDS } from '../../fixtures/constants';
+import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asset_details/metrics_tab';
 
 test.use({
   timezoneId: 'GMT',
@@ -204,13 +205,105 @@ test.describe(
     test('Metadata Tab - Is accessible from overview tab section show all', async ({
       pageObjects: { assetDetailsPage },
     }) => {
-      await test.step('is not selected as default tab', async () => {
-        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'false');
+      await assetDetailsPage.overviewTab.metadataShowAllButton.click();
+      await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
+    });
+
+    test('Metrics Tab', async ({ pageObjects: { assetDetailsPage } }) => {
+      await test.step('accessible from default tab', async () => {
+        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'false');
+        await assetDetailsPage.metricsTab.clickTab();
+        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
       });
 
-      await test.step('loads after clicking show all in metadata section', async () => {
-        await assetDetailsPage.overviewTab.metadataShowAllButton.click();
-        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
+      await test.step('quick access menu renders expected content', async () => {
+        const quickAccessItems: MetricsTabQuickAccessItem[] = [
+          'CPU',
+          'Memory',
+          'Network',
+          'Disk',
+          'Log Rate',
+        ];
+
+        await expect(assetDetailsPage.metricsTab.quickAccessItems).toHaveText(quickAccessItems);
+      });
+
+      await test.step('navigate to CPU metrics via quick access menu and render expected content', async () => {
+        await assetDetailsPage.metricsTab.clickQuickAccessItem('CPU');
+        await expect(assetDetailsPage.metricsTab.cpuSectionTitle).toBeInViewport();
+
+        await expect(assetDetailsPage.metricsTab.cpuUsageChart).toBeVisible();
+        await expect(assetDetailsPage.metricsTab.cpuUsageBreakdownChart).toBeVisible();
+        await expect(assetDetailsPage.metricsTab.cpuNormalizedLoadChart).toBeVisible();
+        await expect(assetDetailsPage.metricsTab.cpuLoadBreakdownChart).toBeVisible();
+      });
+
+      await test.step('navigate to Memory metrics via quick access menu and render expected content', async () => {
+        await assetDetailsPage.metricsTab.clickQuickAccessItem('Memory');
+        await expect(assetDetailsPage.metricsTab.memorySectionTitle).toBeInViewport();
+
+        await expect(assetDetailsPage.metricsTab.memoryUsageChart).toBeVisible();
+        await expect(assetDetailsPage.metricsTab.memoryUsageBreakdownChart).toBeVisible();
+      });
+
+      await test.step('navigate to Network metrics via quick access menu and render expected content', async () => {
+        await assetDetailsPage.metricsTab.clickQuickAccessItem('Network');
+        await expect(assetDetailsPage.metricsTab.networkSectionTitle).toBeInViewport();
+
+        await expect(assetDetailsPage.metricsTab.networkChart).toBeVisible();
+      });
+
+      await test.step('navigate to Disk metrics via quick access menu and render expected content', async () => {
+        await assetDetailsPage.metricsTab.clickQuickAccessItem('Disk');
+        await expect(assetDetailsPage.metricsTab.diskSectionTitle).toBeInViewport();
+
+        await expect(assetDetailsPage.metricsTab.diskUsageChart).toBeVisible();
+        await expect(assetDetailsPage.metricsTab.diskIOChart).toBeVisible();
+        await expect(assetDetailsPage.metricsTab.diskThroughputChart).toBeVisible();
+      });
+
+      await test.step('navigate to Log metrics via quick access menu and render expected content', async () => {
+        await assetDetailsPage.metricsTab.clickQuickAccessItem('Log Rate');
+        await expect(assetDetailsPage.metricsTab.logSectionTitle).toBeInViewport();
+
+        await expect(assetDetailsPage.metricsTab.logRateChart).toBeVisible();
+      });
+    });
+
+    test('Metrics Tab - Sections are accessible from overview tab section show all', async ({
+      pageObjects: { assetDetailsPage },
+    }) => {
+      const goBackToOverviewTab = async () => {
+        await assetDetailsPage.overviewTab.tab.click();
+        await expect(assetDetailsPage.overviewTab.tab).toHaveAttribute('aria-selected', 'true');
+      };
+
+      await test.step('cpu section', async () => {
+        await assetDetailsPage.overviewTab.metricsCpuShowAllButton.click();
+        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.metricsTab.cpuSectionTitle).toBeInViewport();
+        await goBackToOverviewTab();
+      });
+
+      await test.step('memory section', async () => {
+        await assetDetailsPage.overviewTab.metricsMemoryShowAllButton.click();
+        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.metricsTab.memorySectionTitle).toBeInViewport();
+        await goBackToOverviewTab();
+      });
+
+      await test.step('network section', async () => {
+        await assetDetailsPage.overviewTab.metricsNetworkShowAllButton.click();
+        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.metricsTab.networkSectionTitle).toBeInViewport();
+        await goBackToOverviewTab();
+      });
+
+      await test.step('disk section', async () => {
+        await assetDetailsPage.overviewTab.metricsDiskShowAllButton.click();
+        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.metricsTab.diskSectionTitle).toBeInViewport();
+        await goBackToOverviewTab();
       });
     });
   }

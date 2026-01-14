@@ -8,13 +8,16 @@
 import { createLazyPageObject, type KibanaUrl, type ScoutPage } from '@kbn/scout-oblt';
 import { OverviewTab } from './overview_tab';
 import { MetadataTab } from './metadata_tab';
+import { MetricsTab } from './metrics_tab';
 
 export class AssetDetailsPage {
   public readonly overviewTab: OverviewTab;
   public readonly metadataTab: MetadataTab;
+  public readonly metricsTab: MetricsTab;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.overviewTab = createLazyPageObject(OverviewTab, this.page, this.kbnUrl);
     this.metadataTab = createLazyPageObject(MetadataTab, this.page, this.kbnUrl);
+    this.metricsTab = createLazyPageObject(MetricsTab, this.page, this.kbnUrl);
   }
 }
