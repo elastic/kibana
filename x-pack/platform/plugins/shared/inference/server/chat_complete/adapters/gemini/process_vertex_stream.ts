@@ -39,7 +39,7 @@ export function processVertexStream(model?: string) {
 }
 
 export function processVertexResponse(model?: string) {
-  return (source: Observable<GenerateContentResponseChunk>) =>
+  return (source: Observable<GenerateContentResponse>) =>
     new Observable<ChunkEvent>((subscriber) => {
       source.subscribe({
         next: (chunk) => {
