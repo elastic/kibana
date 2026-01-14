@@ -27,6 +27,7 @@ import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_st
 import { WorkflowList } from '../../features/workflow_list';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
 import { useKibana } from '../../hooks/use_kibana';
+import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
@@ -36,6 +37,7 @@ export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
   const { euiTheme } = useEuiTheme();
+  const telemetry = useTelemetry();
   const [search, setSearch] = useState<WorkflowsSearchParams>({
     size: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
     page: 1,
@@ -48,6 +50,20 @@ export function WorkflowsPage() {
 
   const { data: workflows } = useWorkflows(search);
   useWorkflowsBreadcrumbs();
+
+  // Report search telemetry when search results are available
+  useEffect(() => {
+    if (workflows) {
+      telemetry.reportWorkflowSearched({
+        search,
+        resultCount: workflows.results.length,
+      });
+    }
+  }, [workflows, search, telemetry]);
+
+  const handleSearch = useCallback((query: string) => {
+    setSearch((prevState) => ({ ...prevState, query }));
+  }, []);
 
   const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
   const isExecutionStatsBarEnabled = featureFlags?.getBooleanValue(
@@ -100,14 +116,7 @@ export function WorkflowsPage() {
           <>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem>
-                <WorkflowSearchField
-                  initialValue={search.query || ''}
-                  onSearch={(query) =>
-                    setSearch((prevState) => {
-                      return { ...prevState, query };
-                    })
-                  }
-                />
+                <WorkflowSearchField initialValue={search.query || ''} onSearch={handleSearch} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFilterGroup>

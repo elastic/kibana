@@ -46,18 +46,18 @@ const workflowValidationErrorSchema: RootSchema<ReportWorkflowValidationErrorAct
       optional: true,
     },
   },
-  errorType: {
+  errorTypes: {
     type: 'keyword',
     _meta: {
       description:
-        'The type of validation error: schema, step_name_duplicate, invalid_yaml, missing_connector, invalid_step_config, or other',
+        'Unique validation error types (e.g., ["step-name-validation", "connector-id-validation"])',
       optional: false,
     },
   },
-  errorMessage: {
-    type: 'text',
+  errorCount: {
+    type: 'integer',
     _meta: {
-      description: 'The validation error message',
+      description: 'Total number of validation errors',
       optional: false,
     },
   },

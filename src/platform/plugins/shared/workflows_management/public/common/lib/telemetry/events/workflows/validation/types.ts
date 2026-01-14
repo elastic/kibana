@@ -19,11 +19,13 @@ export enum WorkflowValidationEventTypes {
 
 export type WorkflowValidationErrorType =
   | 'schema'
-  | 'step_name_duplicate'
+  | 'step-name-validation'
+  | 'connector-id-validation'
+  | 'variable-validation'
+  | 'liquid-template-validation'
   | 'invalid_yaml'
-  | 'missing_connector'
-  | 'invalid_step_config'
-  | 'other';
+  | 'other'
+  | string; // Allow any string to accommodate future validation types
 
 /**
  * Parameters for workflow validation error telemetry.
@@ -35,13 +37,13 @@ export interface ReportWorkflowValidationErrorActionParams {
    */
   workflowId?: string;
   /**
-   * The type of validation error
+   * Unique validation error types
    */
-  errorType: WorkflowValidationErrorType;
+  errorTypes: WorkflowValidationErrorType[];
   /**
-   * The error message
+   * Total number of validation errors
    */
-  errorMessage: string;
+  errorCount: number;
   /**
    * Editor context if error occurred on workflow detail page
    */

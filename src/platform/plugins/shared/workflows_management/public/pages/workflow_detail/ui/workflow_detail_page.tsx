@@ -22,6 +22,7 @@ import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
+  selectWorkflowId,
   selectWorkflowName,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
@@ -29,6 +30,7 @@ import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_de
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
@@ -38,15 +40,31 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     useAsyncThunkState(loadConnectorsThunk);
   const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
     useAsyncThunkState(loadWorkflowThunk);
+  const telemetry = useTelemetry();
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
   const activeTabInStore = useSelector(selectActiveTab);
+  const workflowId = useSelector(selectWorkflowId);
   const workflowName = useSelector(selectWorkflowName);
 
   useWorkflowsBreadcrumbs(workflowName);
 
   const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+
+  // Report detail viewed telemetry when page is ready
+  useEffect(() => {
+    if (isReady && workflowId && activeTab) {
+      // Map activeTab to telemetry tab type
+      const tab: 'workflow' | 'executions' | 'logs' =
+        activeTab === 'executions' ? 'executions' : activeTab === 'workflow' ? 'workflow' : 'logs';
+      telemetry.reportWorkflowDetailViewed({
+        workflowId,
+        tab,
+        editorType: activeTab === 'workflow' ? 'yaml' : undefined, // Default to yaml for workflow tab
+      });
+    }
+  }, [isReady, workflowId, activeTab, telemetry]);
 
   useEffect(() => {
     loadConnectors(); // dispatch load connectors on mount
