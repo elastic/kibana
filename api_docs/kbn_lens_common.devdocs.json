@@ -18733,7 +18733,7 @@
             "label": "severity",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"warning\""
+              "\"info\" | \"error\" | \"warning\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,
@@ -18836,7 +18836,7 @@
             "label": "severity",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"warning\""
+              "\"info\" | \"error\" | \"warning\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,
@@ -18928,7 +18928,7 @@
             "label": "severity",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"warning\" | undefined"
+              "\"info\" | \"error\" | \"warning\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,
@@ -18970,7 +18970,7 @@
             "label": "severity",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"warning\" | undefined"
+              "\"info\" | \"error\" | \"warning\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "deprecated": false,

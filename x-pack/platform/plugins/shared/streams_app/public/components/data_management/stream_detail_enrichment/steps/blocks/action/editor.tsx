@@ -21,7 +21,7 @@ import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate5/react';
 import { isEmpty, isEqual } from 'lodash';
 import React, { forwardRef, useEffect, useState } from 'react';
-import type { SubmitHandler } from 'react-hook-form';
+import type { DefaultValues, SubmitHandler } from 'react-hook-form';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import type { ActionBlockProps } from '.';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
@@ -80,8 +80,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
   });
 
   const methods = useForm<ProcessorFormState>({
-    // TODO: See if this can be stricter, DeepPartial<ProcessorFormState> doesn't work
-    defaultValues: defaultValues as any,
+    defaultValues: defaultValues as DefaultValues<ProcessorFormState>,
     mode: 'onChange',
   });
 
