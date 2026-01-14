@@ -6,7 +6,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
     class="css-ned1bf-Breadcrumb"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
@@ -126,7 +126,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
     class="css-ned1bf-Breadcrumb"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
@@ -246,7 +246,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
     class="css-ned1bf-Breadcrumb"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
@@ -388,7 +388,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
     class="css-ned1bf-Breadcrumb"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"

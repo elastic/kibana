@@ -15,6 +15,7 @@ import https from 'https';
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/common/errors';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { z } from '@kbn/zod/v4';
 import type { UrlValidator } from '../../lib/url_validator';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
