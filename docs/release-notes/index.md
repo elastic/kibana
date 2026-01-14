@@ -282,19 +282,19 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Labels in the **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after save), without requiring a scaling toggle. [#240728]({{kib-pull}}240728).
 % !!TODO!! The above PR had a lengthy release note description:
 % **Fix:** Labels in the **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after save), without requiring a scaling toggle.
-* Fixes unable to reset unsaved change when enabling timeRestore and setting time range [#239992]({{kib-pull}}239992).
+* Fixes an issue where users could not reset unsaved changes after enabling time restore and changing dashboard time range. [#239992]({{kib-pull}}239992).
 * Fixes search session restoration bug [#239822]({{kib-pull}}239822).
 * Fixes an error in the Options list control when selecting a "(blank)" value. [#239791]({{kib-pull}}239791).
 * Fixes a bug in the `LensConfigBuilder` that treated all dataview references the same, causing the UI to throw an error attempting to find an ad-hoc dataview that does not exist as a `SavedObject`. [#239431]({{kib-pull}}239431).
 * To prevent double refetches, the rendered panels will now have their fetches paused until all controls and their initial values are ready. [#239228]({{kib-pull}}239228).
 * Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula. [#239222]({{kib-pull}}239222).
 * Fixes metric color assignment when breakdown and a max dimension are defined in Lens. [#238901]({{kib-pull}}238901).
-* Fixes an issue where controls were getting created with ad-hoc data views. [#238731]({{kib-pull}}238731).
+* Fixes an issue where ad-hoc data views were not providing suggestions in the global search bar. [#238731]({{kib-pull}}238731).
 * Fixes an error in the **Visualize Listing** page in which an error in the visualization could cause the entire page to error. This improves the error handling to make it easier to identify which visualization is causing the problem in order to address it. [#238355]({{kib-pull}}238355).
 % !!TODO!! The above PR had a lengthy release note description:
 % Fixes an error in the **Visualize Listing** page in which an error in the vis could cause the entire page to error. This improves the error handling to make it easier to identity which visualization is causing the problem in order to address it.
 * Fixes a bug where dashboards can not be saved when a filter pill has a combined filter using OR or AND operations. [#237477]({{kib-pull}}237477).
-* Fixes panels in sections from URL state are not transformed [#237382]({{kib-pull}}237382).
+* Fixes an issue where panels in sections are not displayed when opening the dashboard from a shared link. [#237382]({{kib-pull}}237382).
 * Prevents a double fetch when panels would fetch data while controls were building filters and then fetch data again once controls filters are available. [#237169]({{kib-pull}}237169).
 
 **Data ingestion and Fleet**:
