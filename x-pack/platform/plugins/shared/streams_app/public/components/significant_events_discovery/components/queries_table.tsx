@@ -35,11 +35,8 @@ export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
   const { unifiedSearch } = useKibana().dependencies.start;
   const [searchQuery, setSearchQuery] = useState('');
-  // TODO: the endpoint should support search queries
-  const significantEventsFetch = useFetchSignificantEvents({ query: searchQuery });
+  const { data, isLoading: loading } = useFetchSignificantEvents({ query: searchQuery });
   const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
-
-  const { data, isLoading: loading } = significantEventsFetch;
 
   if (loading && !data) {
     return <LoadingPanel size="l" />;
@@ -72,11 +69,13 @@ export function QueriesTable() {
       ),
     },
     {
+      field: 'query.stream_name',
       name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.streamColumn', {
         defaultMessage: 'Stream',
       }),
-      // TODO: the endpoint should return the stream name
-      render: () => <EuiBadge color="hollow">{'--'}</EuiBadge>,
+      render: (_: unknown, item: SignificantEventItem) => (
+        <EuiBadge color="hollow">{item.query.stream_name || '--'}</EuiBadge>
+      ),
     },
     {
       field: 'query.feature',

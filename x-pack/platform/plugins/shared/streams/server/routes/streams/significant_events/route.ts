@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { conditionSchema } from '@kbn/streamlang';
 import {
   systemSchema,
   type SignificantEventsGenerateResponse,
@@ -11,18 +12,17 @@ import {
   type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { conditionSchema } from '@kbn/streamlang';
-import { from as fromRxjs, map, catchError } from 'rxjs';
-import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
-import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../utils/resolve_connector_id';
+import { catchError, from as fromRxjs, map } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
+import { resolveConnectorId } from '../../utils/resolve_connector_id';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -142,7 +142,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize, query } = params.query;
 
-    return await readSignificantEventsFromAlertsIndices(
+    return readSignificantEventsFromAlertsIndices(
       {
         name,
         from,

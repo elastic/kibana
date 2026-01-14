@@ -14,7 +14,7 @@ import { useTimefilter } from './use_timefilter';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 
 export interface SignificantEventItem {
-  query: StreamQuery;
+  query: StreamQuery & { stream_name?: string };
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
 }
@@ -84,6 +84,7 @@ export const useFetchSignificantEvents = (
               from: isoFrom,
               to: isoTo,
               bucketSize: intervalString,
+              query: query?.trim() ?? '',
             },
           },
           signal: signal ?? null,
@@ -96,10 +97,9 @@ export const useFetchSignificantEvents = (
       }) => {
         return {
           significant_events: significantEvents.map((series) => {
-            const { occurrences, change_points: changePoints, ...rest } = series;
+            const { occurrences, change_points: changePoints, stream_name, ...rest } = series;
             return {
-              title: rest.title,
-              query: rest,
+              query: name ? rest : { ...rest, stream_name },
               change_points: changePoints,
               occurrences: occurrences.map((occurrence) => ({
                 x: new Date(occurrence.date).getTime(),

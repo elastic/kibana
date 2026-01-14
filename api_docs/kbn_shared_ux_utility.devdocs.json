@@ -154,6 +154,32 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.getPlatform",
+        "type": "Function",
+        "tags": [],
+        "label": "getPlatform",
+        "description": [
+          "\nGets the current platform as a standardized string."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.Platform",
+            "text": "Platform"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
         "id": "def-common.hasActiveModifierKey",
         "type": "Function",
         "tags": [],
@@ -316,7 +342,65 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.isLinux",
+        "type": "boolean",
+        "tags": [],
+        "label": "isLinux",
+        "description": [
+          "\nChecks if the current platform is Linux."
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.isMac",
+        "type": "boolean",
+        "tags": [],
+        "label": "isMac",
+        "description": [
+          "\nChecks if the current platform is macOS."
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.isWindows",
+        "type": "boolean",
+        "tags": [],
+        "label": "isWindows",
+        "description": [
+          "\nChecks if the current platform is Windows."
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.Platform",
+        "type": "Type",
+        "tags": [],
+        "label": "Platform",
+        "description": [],
+        "signature": [
+          "\"other\" | \"windows\" | \"linux\" | \"mac\""
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }
