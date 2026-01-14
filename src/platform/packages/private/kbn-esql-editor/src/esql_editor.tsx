@@ -206,6 +206,7 @@ const ESQLEditorInternal = function ESQLEditor({
     undefined
   );
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<{ top?: number; left?: number }>({});
+  const browserCursorPositionRef = useRef<monaco.Position | null>(null);
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
@@ -905,6 +906,9 @@ const ESQLEditorInternal = function ESQLEditor({
     if (editorRef.current) {
       const cursorPosition = editorRef.current.getPosition();
       if (cursorPosition) {
+        // Save the cursor position for use in handleIndexSelect
+        browserCursorPositionRef.current = cursorPosition;
+
         const editorCoords = editorRef.current.getDomNode()?.getBoundingClientRect();
         const editorPosition = editorRef.current.getScrolledVisiblePosition(cursorPosition);
         if (editorCoords && editorPosition) {
@@ -945,22 +949,20 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const handleIndexSelect = useCallback(
     (indexName: string, oldLength: number) => {
-      if (editorRef.current && editorModel.current) {
-        const position = editorRef.current.getPosition();
-        if (position) {
-          const range = {
-            startLineNumber: position.lineNumber,
-            startColumn: position.column,
-            endLineNumber: position.lineNumber,
-            endColumn: position.column + oldLength,
-          };
-          editorRef.current.executeEdits('indicesBrowser', [
-            {
-              range,
-              text: indexName,
-            },
-          ]);
-        }
+      if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
+        const initialCursorPosition = browserCursorPositionRef.current;
+        const range = {
+          startLineNumber: initialCursorPosition.lineNumber,
+          startColumn: initialCursorPosition.column,
+          endLineNumber: initialCursorPosition.lineNumber,
+          endColumn: initialCursorPosition.column + oldLength,
+        };
+        editorRef.current.executeEdits('indicesBrowser', [
+          {
+            range,
+            text: indexName,
+          },
+        ]);
       }
     },
     []
@@ -970,6 +972,9 @@ const ESQLEditorInternal = function ESQLEditor({
     if (editorRef.current && editorModel.current) {
       const position = editorRef.current.getPosition();
       if (position) {
+        // Save the cursor position for use in handleFieldSelect
+        browserCursorPositionRef.current = position;
+
         // Use the same logic as autocomplete to get fields
         const fullText = editorModel.current.getValue() || '';
         const offset = editorModel.current.getOffsetAt(position) || 0;
@@ -1044,22 +1049,20 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const handleFieldSelect = useCallback(
     (fieldName: string, oldLength: number) => {
-      if (editorRef.current && editorModel.current) {
-        const position = editorRef.current.getPosition();
-        if (position) {
-          const range = {
-            startLineNumber: position.lineNumber,
-            startColumn: position.column,
-            endLineNumber: position.lineNumber,
-            endColumn: position.column + oldLength,
-          };
-          editorRef.current.executeEdits('fieldsBrowser', [
-            {
-              range,
-              text: fieldName,
-            },
-          ]);
-        }
+      if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
+        const initialCursorPosition = browserCursorPositionRef.current;
+        const range = {
+          startLineNumber: initialCursorPosition.lineNumber,
+          startColumn: initialCursorPosition.column,
+          endLineNumber: initialCursorPosition.lineNumber,
+          endColumn: initialCursorPosition.column + oldLength,
+        };
+        editorRef.current.executeEdits('fieldsBrowser', [
+          {
+            range,
+            text: fieldName,
+          },
+        ]);
       }
     },
     []

@@ -194,10 +194,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
 
       const oldLength = selectedItems.join(',').length;
       setSelectedItems(newlySelected);
-
-      if (newlySelected.length > 0) {
-        onSelect(newlySelected.join(','), oldLength);
-      }
+      onSelect(newlySelected.join(','), oldLength);
     },
     [onSelect, selectedItems]
   );
