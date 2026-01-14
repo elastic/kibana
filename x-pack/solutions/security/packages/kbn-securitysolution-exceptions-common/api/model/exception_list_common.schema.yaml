@@ -17,7 +17,17 @@ components:
       type: string
       minLength: 1
       format: nonempty
-      description: The exception list's human readable string identifier, `endpoint_list`.
+      description: |
+        The exception list's human-readable string identifier.
+
+        For endpoint artifacts, use one of the following values:
+
+        * `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+        * `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+        * `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+        * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+        * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
       example: 'simple_list'
 
     ExceptionListType:
@@ -59,6 +69,8 @@ components:
 
         - `single`: Only available in the Kibana space in which it is created.
         - `agnostic`: Available in all Kibana spaces.
+
+        For endpoint artifacts, the `namespace_type` must always be `agnostic`. Space awareness for endpoint artifacts is enforced based on Elastic Defend policy assignments.
 
     ExceptionListTags:
       type: array
@@ -190,6 +202,308 @@ components:
         format: nonempty
         description: String array containing words and phrases to help categorize exception items.
 
+    EndpointArtifactTags:
+      type: array
+      items:
+        type: string
+      default: []
+      description: |
+        Tags for categorization. Special tags for scope control:
+        * `"policy:all"` - Global artifact (applies to all Elastic Defend policies)
+        * `"policy:<policy_id>"` - Private artifact (applies to specific Elastic Defend policy only, where `<policy_id>` is the Elastic Defend integration policy ID)
+
+    EndpointTrustedDeviceOsTypes:
+      type: array
+      items:
+        type: string
+        enum: [windows, macos]
+      minItems: 1
+      description: Operating system types for trusted devices (Windows and macOS only - Linux not supported)
+
+    TrustedDeviceCommonFieldsEntry:
+      type: object
+      required: [field, type, value, operator]
+      properties:
+        field:
+          type: string
+          enum:
+            - device.serial_number
+            - device.type
+            - host.name
+            - device.vendor.name
+            - device.vendor.id
+            - device.product.id
+            - device.product.name
+          description: Device field to match against (available on all OS)
+        type:
+          type: string
+          enum: [match, wildcard, match_any]
+          description: Entry match type
+        value:
+          oneOf:
+            - type: string
+              description: Single value (used with match or wildcard)
+            - type: array
+              items:
+                type: string
+              minItems: 1
+              description: Array of values (used with match_any)
+        operator:
+          type: string
+          enum: [included]
+          description: Must be the value "included"
+
+    TrustedDeviceUsernameEntry:
+      type: object
+      required: [field, type, value, operator]
+      properties:
+        field:
+          type: string
+          enum: [user.name]
+          description: Username field (Windows-only, requires os_types to be exclusively Windows)
+        type:
+          type: string
+          enum: [match, wildcard, match_any]
+          description: Entry match type
+        value:
+          oneOf:
+            - type: string
+              description: Single value (used with match or wildcard)
+            - type: array
+              items:
+                type: string
+              minItems: 1
+              description: Array of values (used with match_any)
+        operator:
+          type: string
+          enum: [included]
+          description: Must be the value "included"
+
+    BlocklistHashOrPathEntry:
+      type: object
+      required: [field, type, value, operator]
+      properties:
+        field:
+          type: string
+          enum:
+            - file.hash.md5
+            - file.hash.sha1
+            - file.hash.sha256
+            - file.path
+            - file.path.caseless
+          description: File hash or path field
+        type:
+          type: string
+          enum: [match_any]
+          description: Must be match_any for blocklists
+        value:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: Array of hash values or file paths
+        operator:
+          type: string
+          enum: [included]
+          description: Must be the value "included"
+
+    BlocklistWindowsCodeSignatureEntry:
+      type: object
+      required: [field, type, entries]
+      properties:
+        field:
+          type: string
+          enum: [file.Ext.code_signature]
+          description: Windows code signature field
+        type:
+          type: string
+          enum: [nested]
+          description: Must be nested for Windows code signature
+        entries:
+          type: array
+          minItems: 1
+          description: Nested subject_name entries
+          items:
+            type: object
+            required: [field, type, value, operator]
+            properties:
+              field:
+                type: string
+                enum: [subject_name]
+                description: Certificate subject name
+              type:
+                type: string
+                enum: [match, match_any]
+                description: Match type for subject name
+              value:
+                oneOf:
+                  - type: string
+                    description: Single subject name (used with match)
+                  - type: array
+                    items:
+                      type: string
+                    minItems: 1
+                    description: Array of subject names (used with match_any)
+              operator:
+                type: string
+                enum: [included]
+                description: Must be the value "included"
+
+    TrustedAppHashEntry:
+      type: object
+      required:
+        - field
+        - type
+        - value
+        - operator
+      properties:
+        field:
+          type: string
+          enum:
+            - process.hash.md5
+            - process.hash.sha1
+            - process.hash.sha256
+          description: Process hash field
+        type:
+          type: string
+          enum: [match]
+          description: Hash entries only support match type
+        value:
+          type: string
+          description: Hash value (MD5, SHA1, or SHA256)
+        operator:
+          type: string
+          enum: [included]
+
+    TrustedAppPathEntry:
+      type: object
+      required:
+        - field
+        - type
+        - value
+        - operator
+      properties:
+        field:
+          type: string
+          enum: [process.executable.caseless]
+          description: Process executable path field
+        type:
+          type: string
+          enum: [match, wildcard]
+          description: Path supports both match and wildcard types
+        value:
+          type: string
+          description: Executable path
+        operator:
+          type: string
+          enum: [included]
+
+    TrustedAppWindowsCodeSignatureEntry:
+      type: object
+      required:
+        - field
+        - type
+        - entries
+      properties:
+        field:
+          type: string
+          enum: [process.Ext.code_signature]
+          description: Windows code signature field
+        type:
+          type: string
+          enum: [nested]
+        entries:
+          type: array
+          minItems: 2
+          maxItems: 2
+          description: Must include exactly 2 entries - one for subject_name and one for trusted
+          items:
+            oneOf:
+              - type: object
+                required: [field, type, value, operator]
+                properties:
+                  field:
+                    type: string
+                    enum: [subject_name]
+                  type:
+                    type: string
+                    enum: [match]
+                  value:
+                    type: string
+                    description: Certificate subject name
+                  operator:
+                    type: string
+                    enum: [included]
+              - type: object
+                required: [field, type, value, operator]
+                properties:
+                  field:
+                    type: string
+                    enum: [trusted]
+                  type:
+                    type: string
+                    enum: [match]
+                  value:
+                    type: string
+                    enum: ['true']
+                    description: Must be the string 'true'
+                  operator:
+                    type: string
+                    enum: [included]
+
+    TrustedAppMacCodeSignatureEntry:
+      type: object
+      required:
+        - field
+        - type
+        - entries
+      properties:
+        field:
+          type: string
+          enum: [process.code_signature]
+          description: macOS code signature field
+        type:
+          type: string
+          enum: [nested]
+        entries:
+          type: array
+          minItems: 2
+          maxItems: 2
+          description: Must include exactly 2 entries - one for subject_name and one for trusted
+          items:
+            oneOf:
+              - type: object
+                required: [field, type, value, operator]
+                properties:
+                  field:
+                    type: string
+                    enum: [subject_name]
+                  type:
+                    type: string
+                    enum: [match]
+                  value:
+                    type: string
+                    description: Certificate subject name
+                  operator:
+                    type: string
+                    enum: [included]
+              - type: object
+                required: [field, type, value, operator]
+                properties:
+                  field:
+                    type: string
+                    enum: [trusted]
+                  type:
+                    type: string
+                    enum: [match]
+                  value:
+                    type: string
+                    enum: ['true']
+                    description: Must be the string 'true'
+                  operator:
+                    type: string
+                    enum: [included]
+
     ExceptionListItemOsType:
       type: string
       enum:
@@ -235,6 +549,460 @@ components:
         - comment (string): Comments about the exception item.
       items:
         $ref: '#/components/schemas/ExceptionListItemComment'
+
+    # ============================================
+    # Shared Endpoint Artifact Properties
+    # Used by both Create and Update schemas
+    # ============================================
+
+    EndpointListProperties:
+      type: object
+      description: Elastic Endpoint exception list item properties.
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_list]
+          example: endpoint_list
+        entries:
+          $ref: './exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+          description: |
+            Exception entries for endpoint security exceptions (used to prevent detection rule alerts).
+
+            **Fully flexible:** Supports any field name for maximum compatibility with detection rules. No field restrictions are enforced.
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    TrustedAppsWindowsProperties:
+      type: object
+      description: Trusted applications list item properties (Windows).
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_trusted_apps]
+          example: endpoint_trusted_apps
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [windows]
+          minItems: 1
+          maxItems: 1
+          description: Must be Windows only
+        entries:
+          type: array
+          minItems: 1
+          description: Process hash, executable path, or code signature entries
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/TrustedAppHashEntry'
+              - $ref: '#/components/schemas/TrustedAppPathEntry'
+              - $ref: '#/components/schemas/TrustedAppWindowsCodeSignatureEntry'
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    TrustedAppsMacProperties:
+      type: object
+      description: Trusted applications list item properties (macOS).
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_trusted_apps]
+          example: endpoint_trusted_apps
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [macos]
+          minItems: 1
+          maxItems: 1
+          description: Must be macOS only
+        entries:
+          type: array
+          minItems: 1
+          description: Process hash, executable path, or code signature entries
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/TrustedAppHashEntry'
+              - $ref: '#/components/schemas/TrustedAppPathEntry'
+              - $ref: '#/components/schemas/TrustedAppMacCodeSignatureEntry'
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    TrustedAppsLinuxProperties:
+      type: object
+      description: Trusted applications list item properties (Linux).
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_trusted_apps]
+          example: endpoint_trusted_apps
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [linux]
+          minItems: 1
+          maxItems: 1
+          description: Must be Linux only
+        entries:
+          type: array
+          minItems: 1
+          description: Process hash or executable path entries (code signature not supported on Linux)
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/TrustedAppHashEntry'
+              - $ref: '#/components/schemas/TrustedAppPathEntry'
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    TrustedDevicesWindowsProperties:
+      type: object
+      description: Trusted devices list item properties (Windows-only, allows username field).
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_trusted_devices]
+          example: endpoint_trusted_devices
+        entries:
+          type: array
+          minItems: 1
+          description: Exception entries for the trusted device (duplicate field entries are not allowed)
+          items:
+            type: object
+            required: [field, type, value, operator]
+            properties:
+              field:
+                type: string
+                enum:
+                  - device.serial_number
+                  - device.type
+                  - host.name
+                  - device.vendor.name
+                  - device.vendor.id
+                  - device.product.id
+                  - device.product.name
+                  - user.name
+                description: Device field to match against (user.name is Windows-only)
+              type:
+                type: string
+                enum: [match, wildcard, match_any]
+                description: Entry match type
+              value:
+                oneOf:
+                  - type: string
+                    description: Single value (used with match or wildcard)
+                  - type: array
+                    items:
+                      type: string
+                    minItems: 1
+                    description: Array of values (used with match_any)
+              operator:
+                type: string
+                enum: [included]
+                description: Must be the value "included"
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [windows]
+          minItems: 1
+          maxItems: 1
+          description: Must be Windows-only to allow username field
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    TrustedDevicesMacProperties:
+      type: object
+      description: Trusted devices list item properties (macOS-only, username not supported).
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_trusted_devices]
+          example: endpoint_trusted_devices
+        entries:
+          type: array
+          minItems: 1
+          description: Exception entries for the trusted device (duplicate field entries are not allowed)
+          items:
+            type: object
+            required: [field, type, value, operator]
+            properties:
+              field:
+                type: string
+                enum:
+                  - device.serial_number
+                  - device.type
+                  - host.name
+                  - device.vendor.name
+                  - device.vendor.id
+                  - device.product.id
+                  - device.product.name
+                description: Device field to match against
+              type:
+                type: string
+                enum: [match, wildcard, match_any]
+                description: Entry match type
+              value:
+                oneOf:
+                  - type: string
+                    description: Single value (used with match or wildcard)
+                  - type: array
+                    items:
+                      type: string
+                    minItems: 1
+                    description: Array of values (used with match_any)
+              operator:
+                type: string
+                enum: [included]
+                description: Must be the value "included"
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [macos]
+          minItems: 1
+          maxItems: 1
+          description: macOS-only
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    TrustedDevicesWindowsMacProperties:
+      type: object
+      description: Trusted devices list item properties (Windows + macOS, username not supported).
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_trusted_devices]
+          example: endpoint_trusted_devices
+        entries:
+          type: array
+          minItems: 1
+          description: Exception entries for the trusted device (duplicate field entries are not allowed, username not available when targeting both OS)
+          items:
+            type: object
+            required: [field, type, value, operator]
+            properties:
+              field:
+                type: string
+                enum:
+                  - device.serial_number
+                  - device.type
+                  - host.name
+                  - device.vendor.name
+                  - device.vendor.id
+                  - device.product.id
+                  - device.product.name
+                description: Device field to match against (username not available for multi-OS)
+              type:
+                type: string
+                enum: [match, wildcard, match_any]
+                description: Entry match type
+              value:
+                oneOf:
+                  - type: string
+                    description: Single value (used with match or wildcard)
+                  - type: array
+                    items:
+                      type: string
+                    minItems: 1
+                    description: Array of values (used with match_any)
+              operator:
+                type: string
+                enum: [included]
+                description: Must be the value "included"
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [windows, macos]
+          minItems: 2
+          maxItems: 2
+          description: Must include both Windows and macOS (username field not allowed)
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    EventFiltersProperties:
+      type: object
+      description: Event filters list item properties.
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_event_filters]
+          example: endpoint_event_filters
+        entries:
+          $ref: './exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+          description: |
+            Exception entries for the event filter.
+
+            **Flexible field support:** Any event field name is allowed (e.g., `process.name`, `file.path`, `event.action`, `dns.question.name`, etc.)
+
+            **Minimum requirement:** At least 1 entry required
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    HostIsolationProperties:
+      type: object
+      description: Host isolation exceptions list item properties.
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_host_isolation_exceptions]
+          example: endpoint_host_isolation_exceptions
+        entries:
+          type: array
+          minItems: 1
+          maxItems: 1
+          description: Exactly one entry allowed for host isolation exceptions
+          items:
+            type: object
+            required:
+              - field
+              - type
+              - value
+              - operator
+            properties:
+              field:
+                type: string
+                enum: [destination.ip]
+                description: Must be destination.ip
+              type:
+                type: string
+                enum: [match]
+                description: Must be match
+              value:
+                type: string
+                description: Valid IPv4 address or CIDR notation (e.g., "192.168.1.1" or "10.0.0.0/8")
+              operator:
+                type: string
+                enum: [included]
+                description: Must be the value "included"
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [windows, linux, macos]
+          minItems: 3
+          maxItems: 3
+          description: Must include all three operating systems (windows, linux, macos)
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    BlocklistWindowsProperties:
+      type: object
+      description: Blocklist list item properties (Windows, supports code signature).
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_blocklists]
+          example: endpoint_blocklists
+        entries:
+          type: array
+          minItems: 1
+          description: |
+            **Validation rules:**
+            * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
+            * Path entry: only 1 allowed
+            * Code signature entry: only 1 allowed
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+              - $ref: '#/components/schemas/BlocklistWindowsCodeSignatureEntry'
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [windows]
+          minItems: 1
+          maxItems: 1
+          description: Windows-only
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    BlocklistLinuxProperties:
+      type: object
+      description: Blocklist list item properties (Linux, code signature not supported).
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_blocklists]
+          example: endpoint_blocklists
+        entries:
+          type: array
+          minItems: 1
+          description: |
+            **Validation rules:**
+            * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
+            * Path entry: only 1 allowed
+          items:
+            $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [linux]
+          minItems: 1
+          maxItems: 1
+          description: Linux-only
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
+
+    BlocklistMacProperties:
+      type: object
+      description: Blocklist list item properties (macOS, code signature not supported).
+      properties:
+        list_id:
+          type: string
+          enum: [endpoint_blocklists]
+          example: endpoint_blocklists
+        entries:
+          type: array
+          minItems: 1
+          description: |
+            **Validation rules:**
+            * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
+            * Path entry: only 1 allowed
+          items:
+            $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+        os_types:
+          type: array
+          items:
+            type: string
+            enum: [macos]
+          minItems: 1
+          maxItems: 1
+          description: macOS-only
+        tags:
+          $ref: '#/components/schemas/EndpointArtifactTags'
+      required:
+        - list_id
 
     ExceptionListItem:
       type: object
