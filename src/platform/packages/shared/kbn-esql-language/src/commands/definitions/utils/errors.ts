@@ -392,6 +392,17 @@ Expected one of:
         ),
         type: 'error',
       };
+    case 'invalidSettingValueType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValueType', {
+          defaultMessage: 'Invalid value "{value}" for setting "{setting}".',
+          values: {
+            value: out.value,
+            setting: out.setting,
+          },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }

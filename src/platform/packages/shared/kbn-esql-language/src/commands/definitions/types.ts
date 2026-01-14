@@ -378,6 +378,10 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  invalidSettingValueType: {
+    message: string;
+    type: { value: string; setting: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;
