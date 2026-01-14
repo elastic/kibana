@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '@kbn/kql/public/components/typeahead/suggestions_component';
 
 export const enhanceSuggestionAbstractionFields = (
   enhanceSuggestionsAbstraction: SuggestionsAbstraction
