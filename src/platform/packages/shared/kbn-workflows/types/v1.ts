@@ -92,6 +92,7 @@ export interface EsWorkflowExecution {
   cancelledBy?: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  taskRunAt?: string | null; // Task's runAt timestamp to link execution to specific scheduled run
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
