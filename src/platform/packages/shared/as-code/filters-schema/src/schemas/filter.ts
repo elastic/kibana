@@ -60,8 +60,16 @@ const rangeSchema = schema.object({
 // ====================================================================
 
 /**
- * Common base properties shared by all filters (without negate)
- * Used as foundation for condition filters where negation is encoded in the operator
+ * Negation property that can be used at the top-level of all filters or inside condition filters
+ */
+const negatePropertySchema = schema.maybe(
+  schema.boolean({
+    meta: { description: 'Whether to negate the filter.' },
+  })
+);
+
+/**
+ * Common top-level properties shared by all as code filters
  */
 const commonBasePropertiesSchema = schema.object({
   disabled: schema.maybe(
@@ -69,6 +77,7 @@ const commonBasePropertiesSchema = schema.object({
       meta: { description: 'Whether the filter is disabled' },
     })
   ),
+  negate: negatePropertySchema,
   controlled_by: schema.maybe(
     schema.string({
       meta: {
@@ -118,21 +127,6 @@ const commonBasePropertiesSchema = schema.object({
   ),
 });
 
-/**
- * Base properties for range, DSL and group filters (includes negate)
- * Negate is semantically meaningful for DSL/group filters where it applies to the entire filter/group
- */
-const basePropertiesWithNegateSchema = commonBasePropertiesSchema.extends({
-  negate: schema.maybe(
-    schema.boolean({
-      meta: {
-        description:
-          'Whether to negate the entire filter/group. For condition filters, use negation operators (is_not, is_not_one_of, not_exists) instead.',
-      },
-    })
-  ),
-});
-
 // ====================================================================
 // FILTER CONDITION SCHEMAS
 // ====================================================================
@@ -140,38 +134,26 @@ const basePropertiesWithNegateSchema = commonBasePropertiesSchema.extends({
 /**
  * Common field property for all filter conditions
  */
-const conditionFieldSchema = schema.object({
+const baseConditionSchema = schema.object({
   field: schema.string({ meta: { description: 'Field the filter applies to' } }),
+  negate: negatePropertySchema,
 });
 
 /**
- * Schema for 'is' and 'is_not' operators with single value
+ * Schema for 'is' operator with single value
  */
-const singleConditionSchema = conditionFieldSchema.extends({
-  operator: schema.oneOf(
-    [schema.literal(ASCODE_FILTER_OPERATOR.IS), schema.literal(ASCODE_FILTER_OPERATOR.IS_NOT)],
-    {
-      meta: { description: 'Single value comparison operators' },
-    }
-  ),
+const singleConditionSchema = baseConditionSchema.extends({
+  operator: schema.literal(ASCODE_FILTER_OPERATOR.IS),
   value: schema.oneOf([schema.string(), schema.number(), schema.boolean()], {
     meta: { description: 'Single value for comparison' },
   }),
 });
 
 /**
- * Schema for 'is_one_of' and 'is_not_one_of' operators with array values
+ * Schema for 'is_one_of' operator with array values
  */
-const oneOfConditionSchema = conditionFieldSchema.extends({
-  operator: schema.oneOf(
-    [
-      schema.literal(ASCODE_FILTER_OPERATOR.IS_ONE_OF),
-      schema.literal(ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF),
-    ],
-    {
-      meta: { description: 'Array value comparison operators' },
-    }
-  ),
+const oneOfConditionSchema = baseConditionSchema.extends({
+  operator: schema.literal(ASCODE_FILTER_OPERATOR.IS_ONE_OF),
   value: schema.oneOf(
     [
       schema.arrayOf(schema.string()),
@@ -185,38 +167,21 @@ const oneOfConditionSchema = conditionFieldSchema.extends({
 /**
  * Schema for 'range' operator with range value
  */
-const rangeConditionSchema = conditionFieldSchema.extends({
+const rangeConditionSchema = baseConditionSchema.extends({
   operator: schema.literal(ASCODE_FILTER_OPERATOR.RANGE),
   value: rangeSchema,
 });
 
 /**
- * Schema for 'exists' and 'not_exists' operators without value
+ * Schema for 'exists' operator without value
  */
-const existsConditionSchema = conditionFieldSchema.extends({
-  operator: schema.oneOf(
-    [
-      schema.literal(ASCODE_FILTER_OPERATOR.EXISTS),
-      schema.literal(ASCODE_FILTER_OPERATOR.NOT_EXISTS),
-    ],
-    {
-      meta: { description: 'Field existence check operators' },
-    }
-  ),
-  // value is intentionally omitted for exists/not_exists operators
+const existsConditionSchema = baseConditionSchema.extends({
+  operator: schema.literal(ASCODE_FILTER_OPERATOR.EXISTS),
+  // value is intentionally omitted for exists operator
 });
 
 /**
- * Discriminated union schema for simple filter conditions
- * These operators encode negation in the operator itself (is_not, not_exists, is_not_one_of)
- */
-const standardConditionSchema = schema.oneOf(
-  [singleConditionSchema, oneOfConditionSchema, existsConditionSchema],
-  { meta: { description: 'A filter condition with negation encoded in the operator' } }
-);
-
-/**
- * Full condition schema including range (for internal use in groups)
+ * Discriminated union schema for filter conditions
  */
 const conditionSchema = schema.oneOf(
   [singleConditionSchema, oneOfConditionSchema, rangeConditionSchema, existsConditionSchema],
@@ -233,42 +198,21 @@ interface RecursiveType {
 }
 
 /**
- * Schema for condition filters with operators that have opposition operators
- * These use negation operators (is_not, is_not_one_of, not_exists) instead of negate property
- */
-const asCodeStandardConditionFilterSchema = commonBasePropertiesSchema.extends(
-  {
-    condition: standardConditionSchema,
-  },
-  { meta: { description: 'Standard condition filter' } }
-);
-
-/**
- * Schema for range condition filters
- * Range filters need negate property since RANGE operator has no opposition operator
- */
-const asCodeRangeConditionFilterSchema = basePropertiesWithNegateSchema.extends(
-  {
-    condition: rangeConditionSchema,
-  },
-  { meta: { description: 'Range condition filter with optional negate property' } }
-);
-
-/**
  * Discriminated union schema combining all condition filter types
  */
-export const asCodeConditionFilterSchema = schema.oneOf(
-  [asCodeStandardConditionFilterSchema, asCodeRangeConditionFilterSchema],
+export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
+  {
+    condition: conditionSchema,
+  },
   { meta: { description: 'Condition filter' } }
 );
 
 /**
  * Schema for logical filter groups with recursive structure
  * Uses lazy schema to handle recursive references
- * Note: Uses basePropertiesWithNegateSchema to allow negating entire group
  */
 const GROUP_FILTER_ID = '@kbn/as-code-filters-schema_groupFilter'; // package prefix for global uniqueness in OAS specs
-export const asCodeGroupFilterSchema = basePropertiesWithNegateSchema.extends(
+export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
   {
     group: schema.object(
       {
@@ -291,7 +235,7 @@ export const asCodeGroupFilterSchema = basePropertiesWithNegateSchema.extends(
  * Includes field and params properties specific to DSL filters for preserving metadata
  * Note: Uses basePropertiesWithNegateSchema to allow negating entire DSL filter
  */
-export const asCodeDSLFilterSchema = basePropertiesWithNegateSchema.extends({
+export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
   dsl: schema.recordOf(schema.string(), schema.any(), {
     meta: { description: 'Elasticsearch Query DSL object' },
   }),
