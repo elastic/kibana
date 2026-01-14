@@ -58,6 +58,7 @@ test.describe.serial('Custom links template validation', { tag: ['@ess', '@svlOb
 
   test('Verify template variables are populated correctly in custom link URLs', async ({
     pageObjects: { transactionDetailsPage },
+    page,
     browserAuth,
   }) => {
     await browserAuth.loginAsPrivilegedUser();
@@ -68,6 +69,10 @@ test.describe.serial('Custom links template validation', { tag: ['@ess', '@svlOb
       start: testData.START_DATE,
       end: testData.END_DATE,
     });
+
+    await page
+      .getByRole('switch', { name: 'Show critical path' })
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
     // Open action menu and verify template population
     await transactionDetailsPage.openActionMenu();
@@ -111,6 +116,10 @@ test.describe.serial('Custom links template validation', { tag: ['@ess', '@svlOb
       start: testData.START_DATE,
       end: testData.END_DATE,
     });
+
+    await page
+      .getByRole('switch', { name: 'Show critical path' })
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await transactionDetailsPage.openActionMenu();
 
     // Click the create custom link button from action menu
@@ -155,7 +164,10 @@ test.describe.serial('Custom links template validation', { tag: ['@ess', '@svlOb
     await expect(customLinksPage.saveButton).toBeEnabled();
     await customLinksPage.clickSave();
 
-    // Open the investigation button again and verify the link is there
+    await page
+      .getByRole('switch', { name: 'Show critical path' })
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+
     await transactionDetailsPage.openActionMenu();
     await expect(page.getByRole('link', { name: defaultLabel })).toBeVisible({
       timeout: EXTENDED_TIMEOUT,

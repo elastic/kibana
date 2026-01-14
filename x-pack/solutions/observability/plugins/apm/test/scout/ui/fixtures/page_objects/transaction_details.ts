@@ -110,7 +110,6 @@ export class TransactionDetailsPage {
   async openActionMenu() {
     const investigateButton = this.page.getByTestId('apmActionMenuButtonInvestigateButton');
     await investigateButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await investigateButton.waitFor({ state: 'enabled', timeout: EXTENDED_TIMEOUT });
     await investigateButton.scrollIntoViewIfNeeded();
     await investigateButton.click();
     // Wait for the popup to be visible
