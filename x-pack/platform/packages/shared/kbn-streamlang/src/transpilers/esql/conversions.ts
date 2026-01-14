@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLAstCommand } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
+import type { ESQLAstCommand } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import { conditionToESQLAst } from './condition_to_esql';
 
 import type { ESQLTranspilationOptions } from '.';
@@ -23,6 +23,9 @@ import type {
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  UppercaseProcessor,
+  LowercaseProcessor,
+  TrimProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -37,6 +40,7 @@ import { convertRemoveProcessorToESQL } from './processors/remove';
 import { convertDropDocumentProcessorToESQL } from './processors/drop_document';
 import { convertReplaceProcessorToESQL } from './processors/replace';
 import { convertMathProcessorToESQL } from './processors/math';
+import { createTransformStringESQL } from './transform_string';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -75,6 +79,18 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'replace':
       return convertReplaceProcessorToESQL(processor as ReplaceProcessor);
+
+    case 'uppercase':
+      const convertUppercaseProcessorToESQL = createTransformStringESQL('TO_UPPER');
+      return convertUppercaseProcessorToESQL(processor as UppercaseProcessor);
+
+    case 'lowercase':
+      const convertLowercaseProcessorToESQL = createTransformStringESQL('TO_LOWER');
+      return convertLowercaseProcessorToESQL(processor as LowercaseProcessor);
+
+    case 'trim':
+      const convertTrimProcessorToESQL = createTransformStringESQL('TRIM');
+      return convertTrimProcessorToESQL(processor as TrimProcessor);
 
     case 'manual_ingest_pipeline':
       return [

@@ -13,6 +13,7 @@ import { DeleteStreamPanel } from './delete_stream';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamFeatureConfiguration } from '../../../stream_detail_features/stream_feature_configuration';
+import { useAIFeatures } from '../../../../hooks/use_ai_features';
 
 export function ClassicAdvancedView({
   definition,
@@ -24,14 +25,19 @@ export function ClassicAdvancedView({
   const {
     features: { significantEvents },
   } = useStreamsPrivileges();
+  const aiFeatures = useAIFeatures();
 
   return (
     <>
       {significantEvents?.enabled ? (
         <>
-          <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
+          <StreamDescription
+            definition={definition}
+            refreshDefinition={refreshDefinition}
+            aiFeatures={aiFeatures}
+          />
           <EuiSpacer />
-          <StreamFeatureConfiguration definition={definition.stream} />
+          <StreamFeatureConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
           <EuiSpacer />
         </>
       ) : null}

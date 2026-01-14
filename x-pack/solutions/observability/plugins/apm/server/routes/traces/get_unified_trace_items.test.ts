@@ -19,17 +19,20 @@ import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { getTraceItemIcon } from './get_unified_trace_items';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
+  AGENT_NAME,
   AT_TIMESTAMP,
   EVENT_OUTCOME,
   KIND,
   OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
+  PROCESSOR_EVENT,
   SERVICE_NAME,
   SPAN_DURATION,
   SPAN_ID,
   SPAN_LINKS_TRACE_ID,
   SPAN_NAME,
   SPAN_SUBTYPE,
+  SPAN_SYNC,
   SPAN_TYPE,
   STATUS_CODE,
   TIMESTAMP_US,
@@ -37,6 +40,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  FAAS_COLDSTART,
 } from '../../../common/es_fields/apm';
 
 describe('getErrorsByDocId', () => {
@@ -128,6 +132,112 @@ describe('getUnifiedTraceItems', () => {
   });
 
   describe('basic functionality', () => {
+    it('should return trace items and unified trace without agent marks', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              _source: {},
+              fields: {
+                ...defaultSearchFields,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result).toEqual({
+        traceItems: [
+          {
+            icon: 'merge',
+            id: 'span-1',
+            name: 'Test Span',
+            timestampUs: 1672531200000000,
+            traceId: 'test-trace-id',
+            duration: 1000,
+            status: undefined,
+            errors: [{ errorDocId: 'error-1' }],
+            parentId: undefined,
+            serviceName: 'test-service',
+            type: undefined,
+            spanLinksCount: {
+              incoming: 0,
+              outgoing: 0,
+            },
+          },
+        ],
+        agentMarks: {},
+        unifiedTraceErrors: mockUnifiedTraceErrors,
+      });
+    });
+    it('should return trace items and unified trace with agent marks', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              _source: {
+                transaction: {
+                  marks: {
+                    agent: {
+                      domInteractive: 117,
+                      timeToFirstByte: 10,
+                      domComplete: 118,
+                    },
+                  },
+                },
+              },
+              fields: {
+                ...defaultSearchFields,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result).toEqual({
+        traceItems: [
+          {
+            icon: 'merge',
+            id: 'span-1',
+            name: 'Test Span',
+            timestampUs: 1672531200000000,
+            traceId: 'test-trace-id',
+            duration: 1000,
+            status: undefined,
+            errors: [{ errorDocId: 'error-1' }],
+            parentId: undefined,
+            serviceName: 'test-service',
+            type: undefined,
+            spanLinksCount: {
+              incoming: 0,
+              outgoing: 0,
+            },
+          },
+        ],
+        agentMarks: {
+          domInteractive: 117,
+          timeToFirstByte: 10,
+          domComplete: 118,
+        },
+        unifiedTraceErrors: mockUnifiedTraceErrors,
+      });
+    });
     it('should return trace items and unified trace errors', async () => {
       const mockSearchResponse = {
         hits: {
@@ -167,6 +277,7 @@ describe('getUnifiedTraceItems', () => {
             },
           },
         ],
+        agentMarks: {},
         unifiedTraceErrors: mockUnifiedTraceErrors,
       });
     });
@@ -444,6 +555,202 @@ describe('getUnifiedTraceItems', () => {
 
       // 2023-01-01T00:00:00.000Z in microseconds
       expect(result.traceItems[0].timestampUs).toBe(1672531200000000);
+    });
+
+    it('should include agentName when present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [AGENT_NAME]: ['nodejs'],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].agentName).toBe('nodejs');
+    });
+
+    it('should return undefined agentName when not present (OTEL without processing)', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].agentName).toBeUndefined();
+    });
+
+    it('should include sync field when present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [SPAN_SYNC]: [true],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].sync).toBe(true);
+    });
+
+    it('should return undefined sync when not present (OTEL without processing)', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].sync).toBeUndefined();
+    });
+
+    it('should handle OTEL documents without agentName and sync fields', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['otel-span-1'],
+                [SPAN_NAME]: ['OTEL Unprocessed Span'],
+                [SPAN_DURATION]: [1500],
+                [KIND]: ['client'],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0]).toMatchObject({
+        id: 'otel-span-1',
+        name: 'OTEL Unprocessed Span',
+        duration: 1500,
+        type: 'client',
+        agentName: undefined,
+        sync: undefined,
+      });
+    });
+
+    it('should include coldstart field when present and true', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [FAAS_COLDSTART]: [true],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].coldstart).toBe(true);
+    });
+
+    it('should include coldstart field when present and false', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [FAAS_COLDSTART]: [false],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].coldstart).toBe(false);
+    });
+
+    it('should return undefined coldstart when not present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].coldstart).toBeUndefined();
     });
   });
 

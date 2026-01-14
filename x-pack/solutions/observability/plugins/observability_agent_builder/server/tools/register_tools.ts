@@ -6,8 +6,8 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { platformCoreTools } from '@kbn/onechat-common';
-import type { StaticToolRegistration } from '@kbn/onechat-server';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -15,35 +15,41 @@ import type {
 } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import {
-  OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
-  createGetDataSourcesTool,
-} from './get_data_sources/get_data_sources';
-import {
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   createRunLogRateAnalysisTool,
-} from './run_log_rate_analysis/run_log_rate_analysis';
+} from './run_log_rate_analysis/tool';
 import {
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   createGetAnomalyDetectionJobsTool,
-} from './get_anomaly_detection_jobs/get_anomaly_detection_jobs';
-import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/get_alerts';
+} from './get_anomaly_detection_jobs/tool';
+import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/tool';
 import {
   OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
   createGetLogCategoriesTool,
-} from './get_log_categories/get_log_categories';
+} from './get_log_categories/tool';
 import {
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   createGetCorrelatedLogsTool,
-} from './get_correlated_logs/get_correlated_logs';
-import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/get_hosts';
-import {
-  createGetServicesTool,
-  OBSERVABILITY_GET_SERVICES_TOOL_ID,
-} from './get_services/get_services';
+} from './get_correlated_logs/tool';
+import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/tool';
+import { createGetServicesTool, OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/tool';
 import {
   createDownstreamDependenciesTool,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-} from './get_downstream_dependencies/get_downstream_dependencies';
+} from './get_downstream_dependencies/tool';
+import {
+  createGetTraceMetricsTool,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+} from './get_trace_metrics/tool';
+import {
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  createGetLogChangePointsTool,
+} from './get_log_change_points/tool';
+import {
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  createGetMetricChangePointsTool,
+} from './get_metric_change_points/tool';
+import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -54,7 +60,6 @@ const PLATFORM_TOOL_IDS = [
 ];
 
 const OBSERVABILITY_TOOL_IDS = [
-  OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
@@ -63,6 +68,10 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -82,18 +91,21 @@ export async function registerTools({
   logger: Logger;
 }) {
   const observabilityTools: StaticToolRegistration<any>[] = [
-    createGetDataSourcesTool({ core, plugins, logger }),
     createRunLogRateAnalysisTool({ core, logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
     createGetLogCategoriesTool({ core, logger }),
-    createGetServicesTool({ core, dataRegistry, logger }),
+    createGetServicesTool({ core, plugins, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
+    createGetTraceMetricsTool({ core, plugins, logger }),
+    createGetLogChangePointsTool({ core, plugins, logger }),
+    createGetMetricChangePointsTool({ core, plugins, logger }),
+    createGetIndexInfoTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {
-    plugins.onechat.tools.register(tool);
+    plugins.agentBuilder.tools.register(tool);
   }
 }

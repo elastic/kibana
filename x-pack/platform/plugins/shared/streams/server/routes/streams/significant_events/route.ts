@@ -4,25 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { conditionSchema } from '@kbn/streamlang';
 import {
-  featureSchema,
-  featureTypeSchema,
+  systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { conditionSchema } from '@kbn/streamlang';
-import { from as fromRxjs, map, catchError } from 'rxjs';
-import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
-import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
+import { catchError, from as fromRxjs, map } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
+import { resolveConnectorId } from '../../utils/resolve_connector_id';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -39,7 +39,7 @@ const previewSignificantEventsRoute = createServerRoute({
           .object({
             name: z.string(),
             filter: conditionSchema,
-            type: featureTypeSchema,
+            type: z.literal('system'),
           })
           .optional(),
         kql: z.object({
@@ -97,7 +97,7 @@ const previewSignificantEventsRoute = createServerRoute({
   },
 });
 
-const readSignificantEventsRoute = createServerRoute({
+const readStreamSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
@@ -132,7 +132,7 @@ const readSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, assetClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { streamsClient, queryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -142,7 +142,7 @@ const readSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize, query } = params.query;
 
-    return await readSignificantEventsFromAlertsIndices(
+    return readSignificantEventsFromAlertsIndices(
       {
         name,
         from,
@@ -150,7 +150,7 @@ const readSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
       },
-      { assetClient, scopedClusterClient }
+      { queryClient, scopedClusterClient }
     );
   },
 });
@@ -160,7 +160,12 @@ const generateSignificantEventsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
       sampleDocsSize: z
@@ -171,7 +176,7 @@ const generateSignificantEventsRoute = createServerRoute({
         ),
     }),
     body: z.object({
-      feature: featureSchema.optional(),
+      system: systemSchema.optional(),
     }),
   }),
   options: {
@@ -207,13 +212,19 @@ const generateSignificantEventsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
+    const connectorId = await resolveConnectorId({
+      connectorId: params.query.connectorId,
+      uiSettingsClient,
+      logger,
+    });
+
     const promptsConfigService = new PromptsConfigService({
       soClient,
       logger,
     });
 
     // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(params.query.connectorId);
+    const connector = await inferenceClient.getConnectorById(connectorId);
 
     const definition = await streamsClient.getStream(params.path.name);
 
@@ -223,8 +234,8 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          feature: params.body?.feature,
-          connectorId: params.query.connectorId,
+          system: params.body?.system,
+          connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
           sampleDocsSize: params.query.sampleDocsSize,
@@ -251,7 +262,7 @@ const generateSignificantEventsRoute = createServerRoute({
 });
 
 export const significantEventsRoutes = {
-  ...readSignificantEventsRoute,
+  ...readStreamSignificantEventsRoute,
   ...previewSignificantEventsRoute,
   ...generateSignificantEventsRoute,
 };

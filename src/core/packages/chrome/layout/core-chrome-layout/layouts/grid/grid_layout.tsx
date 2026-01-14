@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { map } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import type { ChromeLayoutConfig } from '@kbn/core-chrome-layout-components';
 import {
   ChromeLayout,
@@ -28,6 +28,7 @@ import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
 const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig } = {
   classic: {
+    chromeStyle: 'classic',
     headerHeight: 96,
     bannerHeight: 32,
 
@@ -37,12 +38,16 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
     navigationWidth: 48,
   },
   project: {
+    chromeStyle: 'project',
     headerHeight: 48,
     bannerHeight: 32,
 
     /** The application top bar renders the app specific menu */
     /** we use it only in project style, because in classic it is included as part of the global header */
     applicationTopBarHeight: 48,
+
+    applicationMarginRight: 8,
+    applicationMarginBottom: 8,
 
     /** for debug for now */
     sidebarWidth: 48,
@@ -82,7 +87,9 @@ export class GridLayout implements LayoutService {
 
     // in project style, the project app menu is displayed at the top of application area
     const projectAppMenu = chrome.getProjectAppMenuComponent();
-    const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
+    const hasAppMenu$ = combineLatest([application.currentActionMenu$, chrome.getAppMenu$()]).pipe(
+      map(([menu, appMenu]) => !!menu || !!appMenu)
+    );
 
     const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
 

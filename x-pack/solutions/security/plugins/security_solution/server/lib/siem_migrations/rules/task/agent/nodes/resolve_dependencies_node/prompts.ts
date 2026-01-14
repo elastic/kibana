@@ -103,7 +103,7 @@ Dependencies can be found in multiple ways. We list down certain guidelines to c
 
 <objective>
 
-Your primary objective is to create a natural language description of the rule by going through all of its dependencies.  The response should follow the <example_response> format below.
+Your primary objective is to create a natural language description of the rule by going through all of its dependencies.  The response should follow the <example_response> format below. The final response, once you have tried to resolve all dependencies, should strongly match <example_response> format.
 
 </objective>
 

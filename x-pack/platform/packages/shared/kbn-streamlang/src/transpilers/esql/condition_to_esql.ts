@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Builder, type ESQLAstItem, type ESQLSingleAstItem } from '@kbn/esql-ast';
+import { Builder, type ESQLAstItem, type ESQLSingleAstItem } from '@kbn/esql-language';
 import {
   type Condition,
   isAlwaysCondition,

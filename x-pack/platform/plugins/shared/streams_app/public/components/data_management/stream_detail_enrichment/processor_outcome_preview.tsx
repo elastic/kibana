@@ -255,19 +255,18 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     const isInteractiveMode = selectIsInteractiveMode(state);
     if (!isInteractiveMode || !state.context.interactiveModeRef) return undefined;
 
-    const currentProcessorRef = state.context.interactiveModeRef
-      .getSnapshot()
-      .context.stepRefs.find(
-        (stepRef) =>
-          isActionBlock(stepRef.getSnapshot().context.step) &&
-          isStepUnderEdit(stepRef.getSnapshot())
-      );
+    const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
 
-    if (!currentProcessorRef) return undefined;
+    for (const stepRef of stepRefs) {
+      const snapshot = stepRef.getSnapshot();
+      const step = snapshot.context.step;
 
-    const step = currentProcessorRef.getSnapshot().context.step;
+      if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
+        return getSourceField(step);
+      }
+    }
 
-    if (isActionBlock(step)) return getSourceField(step);
+    return undefined;
   });
 
   const docViewsRegistry = useDocViewerSetup(true);

@@ -131,8 +131,18 @@ export class FunctionalTestRunner {
     try {
       esInfo = await es.info();
     } catch (error) {
+      const isStandaloneRunner = process.argv[1]?.includes('functional_test_runner');
+      const hint = isStandaloneRunner
+        ? `You are running the standalone functional test runner which requires ` +
+          `Elasticsearch and Kibana to already be running.\n\n` +
+          `To start the test servers, run in a separate terminal:\n\n` +
+          `  yarn test:ftr:server --config <your-config-file>\n\n` +
+          `Or use the following command to start Elasticsearch and Kibana automatically:\n\n` +
+          `  yarn test:ftr --config <your-config-file>`
+        : `Ensure Elasticsearch is running and accessible.`;
+
       throw new Error(
-        `attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ${error.stack}`
+        `Unable to reach Elasticsearch to fetch version info.\n\n${hint}\n\nOriginal error: ${error.message}`
       );
     } finally {
       try {

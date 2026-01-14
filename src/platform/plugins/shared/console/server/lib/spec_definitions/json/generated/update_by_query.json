@@ -36,7 +36,7 @@
       "requests_per_second": [
         "-1"
       ],
-      "routing": "",
+      "routing": [],
       "scroll": [
         "5m",
         "-1",

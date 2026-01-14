@@ -94,6 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(userActionTotals.total).to.equal(3);
       expect(userActionTotals.total_comments).to.equal(0);
       expect(userActionTotals.total_other_actions).to.equal(3);
+      expect(userActionTotals.total_hidden_comment_updates).to.equal(0);
       expect(userActionTotals.total).to.equal(
         userActionTotals.total_comments + userActionTotals.total_other_actions
       );
@@ -126,6 +127,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(userActionTotals.total).to.equal(2);
       expect(userActionTotals.total_comments).to.equal(0);
       expect(userActionTotals.total_other_actions).to.equal(2);
+      expect(userActionTotals.total_hidden_comment_updates).to.equal(0);
       expect(userActionTotals.total).to.equal(
         userActionTotals.total_comments + userActionTotals.total_other_actions
       );

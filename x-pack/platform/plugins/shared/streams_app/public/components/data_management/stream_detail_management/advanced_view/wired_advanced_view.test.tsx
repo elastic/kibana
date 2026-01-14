@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import type { Streams } from '@kbn/streams-schema';
 import { I18nProvider } from '@kbn/i18n-react';
 import { WiredAdvancedView } from './wired_advanced_view';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 
 jest.mock('@kbn/ebt-tools', () => ({
   usePerformanceContext: () => ({ onPageReady: jest.fn() }),
@@ -21,7 +22,6 @@ jest.mock('../../../../hooks/use_ai_features', () => ({
 
 // Mock the useStreamsPrivileges hook
 jest.mock('../../../../hooks/use_streams_privileges');
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 
 // Mock hooks used by StreamDescription
 jest.mock('../../../stream_detail_features/stream_description/use_stream_description_api', () => ({
@@ -48,18 +48,21 @@ jest.mock('../../../stream_detail_features/stream_features/hooks/use_stream_feat
   }),
 }));
 
-jest.mock(
-  '../../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features',
-  () => ({
-    useAIFeatures: () => ({
-      genAiConnectors: { selectedConnector: null },
-    }),
-  })
-);
+jest.mock('../../../../hooks/use_ai_features', () => ({
+  useAIFeatures: () => ({
+    genAiConnectors: { selectedConnector: null },
+  }),
+}));
 
 jest.mock('../../../../hooks/use_stream_features_api', () => ({
   useStreamFeaturesApi: () => ({
-    identifyFeatures: jest.fn(),
+    getSystemIdentificationStatus: jest.fn().mockResolvedValue({ status: 'idle' }),
+    scheduleSystemIdentificationTask: jest.fn(),
+    cancelSystemIdentificationTask: jest.fn(),
+    acknowledgeSystemIdentificationTask: jest.fn(),
+    addSystemsToStream: jest.fn(),
+    removeSystemsFromStream: jest.fn(),
+    upsertSystem: jest.fn(),
     abort: jest.fn(),
   }),
 }));
@@ -74,13 +77,16 @@ jest.mock('../../../../hooks/use_stream_detail', () => ({
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     isServerless: false,
+    appParams: { history: {} },
     core: {
       notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
-      application: { navigateToApp: jest.fn() },
+      application: { navigateToApp: jest.fn(), navigateToUrl: jest.fn() },
       pricing: { isFeatureAvailable: jest.fn(() => false) },
       uiSettings: {
         get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue),
       },
+      overlays: { openConfirm: jest.fn() },
+      http: {},
     },
     dependencies: {
       start: {
@@ -103,6 +109,9 @@ jest.mock('../../../../hooks/use_kibana', () => ({
 // Mock ConnectorListButton used in StreamDescription
 jest.mock('../../../connector_list_button/connector_list_button', () => ({
   ConnectorListButton: ({ buttonProps }: { buttonProps: { children: React.ReactNode } }) => (
+    <button type="button">{buttonProps.children}</button>
+  ),
+  ConnectorListButtonBase: ({ buttonProps }: { buttonProps: { children: React.ReactNode } }) => (
     <button type="button">{buttonProps.children}</button>
   ),
 }));
@@ -222,8 +231,6 @@ describe('WiredAdvancedView', () => {
 
       // Check the Feature identification panel title is rendered
       expect(screen.getByText('Feature identification')).toBeInTheDocument();
-      // Check the Identify features button is rendered
-      expect(screen.getByRole('button', { name: /identify features/i })).toBeInTheDocument();
     });
 
     it('should NOT render Stream description or Feature identification when significantEvents is disabled', () => {

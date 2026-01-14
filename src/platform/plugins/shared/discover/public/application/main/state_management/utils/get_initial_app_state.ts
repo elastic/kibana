@@ -8,28 +8,42 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  getDefaultSort,
+  getSortArray,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
+import { getChartHidden } from '@kbn/unified-histogram';
+import { cloneDeep } from 'lodash';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState } from '../redux';
-import { isEsqlSource, createEsqlDataSource } from '../../../../../common/data_sources';
+import {
+  isEsqlSource,
+  createEsqlDataSource,
+  createDataSource,
+} from '../../../../../common/data_sources';
 import { handleSourceColumnState } from '../../../../utils/state_helpers';
-import { getStateDefaults } from './get_state_defaults';
+import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
 export function getInitialAppState({
   initialUrlState,
-  savedSearch,
-  overrideDataView,
+  persistedTab,
+  dataView,
   services,
 }: {
   initialUrlState: DiscoverAppState | undefined;
-  savedSearch: SavedSearch | undefined;
-  overrideDataView?: DataView | undefined;
+  persistedTab: DiscoverSessionTab | undefined;
+  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
 }) {
-  const defaultAppState = getStateDefaults({
-    savedSearch,
-    overrideDataView,
+  const defaultAppState = getDefaultAppState({
+    persistedTab,
+    dataView,
     services,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
@@ -45,4 +59,113 @@ export function getInitialAppState({
   }
 
   return handleSourceColumnState(mergedState, services.uiSettings);
+}
+
+function getDefaultColumns(
+  persistedTab: DiscoverSessionTab | undefined,
+  uiSettings: IUiSettingsClient
+) {
+  if (persistedTab?.columns && persistedTab.columns.length > 0) {
+    return [...persistedTab.columns];
+  }
+  const defaultColumnsFromConfig = uiSettings.get(DEFAULT_COLUMNS_SETTING);
+  const hasPersistedEmptyColumns = persistedTab?.columns && persistedTab.columns.length === 0;
+  return defaultColumnsFromConfig?.length
+    ? [...defaultColumnsFromConfig]
+    : hasPersistedEmptyColumns
+    ? []
+    : undefined;
+}
+
+function getDefaultAppState({
+  persistedTab,
+  dataView,
+  services,
+}: {
+  persistedTab: DiscoverSessionTab | undefined;
+  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
+  services: DiscoverServices;
+}) {
+  const { data, uiSettings, storage } = services;
+  const query =
+    persistedTab?.serializedSearchSource.query || data.query.queryString.getDefaultQuery();
+  const isEsqlQuery = isOfAggregateQueryType(query);
+  // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
+  // we assume the sort array is valid since we can't know for sure
+  const sort =
+    dataView && 'getFieldByName' in dataView
+      ? getSortArray(persistedTab?.sort ?? [], dataView, isEsqlQuery)
+      : persistedTab?.sort ?? [];
+  const columns = getDefaultColumns(persistedTab, uiSettings);
+  const chartHidden = getChartHidden(storage, 'discover');
+  const dataSource = createDataSource({
+    dataView: dataView ?? persistedTab?.serializedSearchSource.index,
+    query,
+  });
+
+  const defaultState: DiscoverAppState = {
+    query,
+    sort: !sort.length
+      ? getDefaultSort(
+          dataView,
+          uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+          uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+          isEsqlQuery
+        )
+      : sort,
+    columns,
+    dataSource,
+    interval: 'auto',
+    filters: cloneDeep(persistedTab?.serializedSearchSource.filter),
+    hideChart: chartHidden,
+    viewMode: undefined,
+    hideAggregatedPreview: undefined,
+    savedQuery: undefined,
+    rowHeight: undefined,
+    headerRowHeight: undefined,
+    rowsPerPage: undefined,
+    sampleSize: undefined,
+    grid: undefined,
+    breakdownField: undefined,
+    density: undefined,
+  };
+
+  if (persistedTab?.grid) {
+    defaultState.grid = persistedTab.grid;
+  }
+  if (persistedTab?.hideChart !== undefined) {
+    defaultState.hideChart = persistedTab.hideChart;
+  }
+  if (persistedTab?.rowHeight !== undefined) {
+    defaultState.rowHeight = persistedTab.rowHeight;
+  }
+  if (persistedTab?.headerRowHeight !== undefined) {
+    defaultState.headerRowHeight = persistedTab.headerRowHeight;
+  }
+  if (persistedTab?.viewMode) {
+    defaultState.viewMode = getValidViewMode({
+      viewMode: persistedTab.viewMode,
+      isEsqlMode: isEsqlQuery,
+    });
+  }
+  if (persistedTab?.hideAggregatedPreview) {
+    defaultState.hideAggregatedPreview = persistedTab.hideAggregatedPreview;
+  }
+  if (persistedTab?.rowsPerPage) {
+    defaultState.rowsPerPage = persistedTab.rowsPerPage;
+  }
+  if (persistedTab?.sampleSize) {
+    defaultState.sampleSize = persistedTab.sampleSize;
+  }
+  if (persistedTab?.breakdownField) {
+    defaultState.breakdownField = persistedTab.breakdownField;
+  }
+  if (persistedTab?.chartInterval) {
+    defaultState.interval = persistedTab.chartInterval;
+  }
+  if (persistedTab?.density) {
+    defaultState.density = persistedTab.density;
+  }
+
+  return defaultState;
 }

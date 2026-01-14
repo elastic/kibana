@@ -51,7 +51,7 @@ The callbacks in this directory are designed to:
 
 ```typescript
 import { getESQLSources, getEsqlColumns, getJoinIndices } from '@kbn/esql-utils';
-import { validateQuery } from '@kbn/esql-ast';
+import { validateQuery } from '@kbn/esql-language';
 
 // Usage for validating FROM sources and columns
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
