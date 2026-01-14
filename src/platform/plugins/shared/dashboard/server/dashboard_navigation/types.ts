@@ -8,8 +8,8 @@
  */
 
 // TODO derive type from schema and make keys snake_case
-export type DashboardNavigationOptions = {
+export interface DashboardNavigationOptions {
   useCurrentFilters: boolean;
   useCurrentDateRange: boolean;
   openInNewTab: boolean;
-};
+}

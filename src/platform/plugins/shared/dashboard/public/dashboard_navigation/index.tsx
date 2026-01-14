@@ -13,15 +13,15 @@ import React, { Suspense } from 'react';
 import type { Props } from './options_editor';
 
 const LazyDashboardNavigationOptionsEditor = React.lazy(async () => {
-  const { DashboardNavigationOptionsEditor } = await import('../dashboard_renderer/dashboard_module');
+  const { DashboardNavigationOptionsEditor } = await import(
+    '../dashboard_renderer/dashboard_module'
+  );
   return { default: DashboardNavigationOptionsEditor };
 });
 
 export const DashboardNavigationOptionsEditor = (props: Props) => {
   return (
-    <Suspense fallback={
-      <EuiSkeletonText />
-    }>
+    <Suspense fallback={<EuiSkeletonText />}>
       <LazyDashboardNavigationOptionsEditor {...props} />
     </Suspense>
   );

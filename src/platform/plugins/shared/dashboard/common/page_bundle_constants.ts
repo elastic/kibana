@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardNavigationOptions } from "../server";
+import type { DashboardNavigationOptions } from '../server';
 
 export const LANDING_PAGE_PATH = '/list';
 export const DASHBOARD_APP_ID = 'dashboards';

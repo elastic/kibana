@@ -16,13 +16,16 @@ import {
   DEFAULT_URL_DRILLDOWN_OPTIONS,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 
+import {
+  DashboardNavigationOptionsEditor,
+  DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+} from '@kbn/dashboard-plugin/public';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
 import type { LinkType } from '../../../common/content_management';
 import { EXTERNAL_LINK_TYPE, DASHBOARD_LINK_TYPE } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
 import type { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import type { LinkOptions } from '../../../server';
-import { DashboardNavigationOptionsEditor, DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
-import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
 
 export const LinkOptionsComponent = ({
   link,

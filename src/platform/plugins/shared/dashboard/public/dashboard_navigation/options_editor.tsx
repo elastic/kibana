@@ -10,29 +10,23 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
+import type { DashboardNavigationOptions } from '../../server';
 
 export interface Props {
   options: DashboardNavigationOptions;
   onOptionChange: (newOptions: Partial<DashboardNavigationOptions>) => void;
 }
 
-export const DashboardNavigationOptionsEditor = ({
-  options,
-  onOptionChange,
-}: Props) => {
+export const DashboardNavigationOptionsEditor = ({ options, onOptionChange }: Props) => {
   return (
     <EuiFormRow data-test-subj="dashboardNavigationOptions">
       <div>
         <EuiSwitch
           compressed
           name="useCurrentFilters"
-          label={i18n.translate(
-            'dashboard.navigationOptions.useCurrentFiltersLabel',
-            {
-              defaultMessage: 'Use filters and query from origin dashboard',
-            }
-          )}
+          label={i18n.translate('dashboard.navigationOptions.useCurrentFiltersLabel', {
+            defaultMessage: 'Use filters and query from origin dashboard',
+          })}
           checked={options.useCurrentFilters}
           onChange={() => onOptionChange({ useCurrentFilters: !options.useCurrentFilters })}
           data-test-subj="dashboardNavigationOptions--useCurrentFilters--checkbox"
