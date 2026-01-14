@@ -334,6 +334,7 @@ DELETE /kibana_sample_data_agents
 # Conclusion 🎓
 # -----------------------------------------------
 # 🎉 Congratulations on building your first agent!
+
 # In this tutorial, you learned how to work with the Elastic Agent Builder APIs.
 # You covered creating and managing tools, agents, and conversations.
 
@@ -342,4 +343,5 @@ DELETE /kibana_sample_data_agents
 
 # 📖 For complete API details, refer to the Kibana API reference: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-agent-builder
 # 📖 Learn more about Agent Builder: https://www.elastic.co/docs/solutions/search/agent-builder
+# 🤖 Use the MCP server to build agents from your own client: https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server
 `;
