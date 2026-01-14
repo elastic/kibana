@@ -8,16 +8,16 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
+import { getIdFromRefString } from './mutations/utils';
 
 export interface IContext {
   addSharedSchema: (id: string, schema: OpenAPIV3.SchemaObject) => void;
+  derefSharedSchema: (id: string) => OpenAPIV3.SchemaObject | undefined;
   getSharedSchemas: () => { [id: string]: OpenAPIV3.SchemaObject };
-  getNamespace: () => string | undefined;
 }
 
 interface Options {
   sharedSchemas?: Map<string, OpenAPIV3.SchemaObject>;
-  namespace?: string;
 }
 
 class Context implements IContext {
@@ -25,10 +25,15 @@ class Context implements IContext {
   private readonly namespace?: string;
   constructor(opts: Options) {
     this.sharedSchemas = opts.sharedSchemas ?? new Map();
-    this.namespace = opts.namespace;
   }
+
   public addSharedSchema(id: string, schema: OpenAPIV3.SchemaObject): void {
     this.sharedSchemas.set(id, schema);
+  }
+
+  /** Assumes id is in the form of "#/components/schemas/my-schema-my-team" */
+  public derefSharedSchema(id: string) {
+    return this.sharedSchemas.get(getIdFromRefString(id));
   }
 
   public getSharedSchemas() {
