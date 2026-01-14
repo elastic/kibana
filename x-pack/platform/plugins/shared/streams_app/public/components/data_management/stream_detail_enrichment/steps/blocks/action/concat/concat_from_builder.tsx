@@ -28,11 +28,10 @@ import { SortableList } from '../../../../sortable_list';
 import type { ConcatFormState } from '../../../../types';
 
 interface DraggableConcatInputProps {
-  id: string;
   index: number;
 }
 
-const DraggableConcatFieldInput = ({ id, index }: DraggableConcatInputProps) => {
+const DraggableConcatFieldInput = ({ index }: DraggableConcatInputProps) => {
   const { control } = useFormContext();
   const fieldSuggestions = useEnrichmentFieldSuggestions();
   const options = fieldSuggestions.map((suggestion) => ({
@@ -76,7 +75,7 @@ const DraggableConcatFieldInput = ({ id, index }: DraggableConcatInputProps) => 
   );
 };
 
-const DraggableConcatTextInput = ({ id, index }: DraggableConcatInputProps) => {
+const DraggableConcatTextInput = ({ index }: DraggableConcatInputProps) => {
   const { control } = useFormContext();
 
   return (
@@ -84,19 +83,11 @@ const DraggableConcatTextInput = ({ id, index }: DraggableConcatInputProps) => {
       control={control}
       name={`from.${index}.value`}
       rules={{
-        minLength: {
-          value: 1,
+        required: {
+          value: true,
           message: i18n.translate('xpack.streams.draggableConcatTextInput.textRequiredError', {
-            defaultMessage: 'Text cannot be empty.',
+            defaultMessage: 'Text is required.',
           }),
-        },
-        validate: (value) => {
-          if (value === '') {
-            return i18n.translate('xpack.streams.draggableConcatTextInput.textRequiredError', {
-              defaultMessage: 'Text cannot be empty.',
-            });
-          }
-          return true;
         },
       }}
       render={({ field, fieldState }) => (
