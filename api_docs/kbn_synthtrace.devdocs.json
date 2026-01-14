@@ -450,6 +450,123 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.createLogSequence",
+        "type": "Function",
+        "tags": [],
+        "label": "createLogSequence",
+        "description": [
+          "\nCreates a sequence of correlated log events with shared fields.\nReduces boilerplate in API tests by applying common fields to all logs.\n"
+        ],
+        "signature": [
+          "({\n  service,\n  correlation,\n  logs,\n  defaults = {},\n}: { service: string; correlation: Record<string, string>; logs: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogEntry",
+            "text": "LogEntry"
+          },
+          "[]; defaults?: Record<string, unknown> | undefined; }) => ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.CorrelatedLogEvent",
+            "text": "CorrelatedLogEvent"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.createLogSequence.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  service,\n  correlation,\n  logs,\n  defaults = {},\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.createLogSequence.$1.service",
+                "type": "string",
+                "tags": [],
+                "label": "service",
+                "description": [
+                  "Service name (maps to service.name)"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.createLogSequence.$1.correlation",
+                "type": "Object",
+                "tags": [],
+                "label": "correlation",
+                "description": [
+                  "Correlation field(s) shared by all logs, e.g. { 'trace.id': 'abc' } or { order_id: '123' }"
+                ],
+                "signature": [
+                  "{ [x: string]: string; }"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.createLogSequence.$1.logs",
+                "type": "Array",
+                "tags": [],
+                "label": "logs",
+                "description": [
+                  "Log entries - each must have `message`, other fields are optional"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogEntry",
+                    "text": "LogEntry"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.createLogSequence.$1.defaults",
+                "type": "Object",
+                "tags": [],
+                "label": "defaults",
+                "description": [
+                  "Additional fields to apply to all logs"
+                ],
+                "signature": [
+                  "Record<string, unknown> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.deleteSummaryFieldTransform",
         "type": "Function",
         "tags": [],
@@ -977,7 +1094,7 @@
         "tags": [],
         "label": "generateCorrelatedLogsData",
         "description": [
-          "\nGenerates correlated log data with trace.id and custom correlation fields.\nCan be used both by CLI (via default export) and by API tests (via direct import)."
+          "\nGenerates correlated log data.\n"
         ],
         "signature": [
           "({\n  range,\n  logsEsClient,\n  logs,\n}: { range: ",
@@ -2728,23 +2845,12 @@
         "tags": [],
         "label": "CorrelatedLogEvent",
         "description": [
-          "\nConfiguration for a log event in a correlated sequence"
+          "\nA log event with any fields. Minimal required field is `message`.\nAll other fields (severity, correlation IDs, service info) are optional."
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "@kbn/synthtrace",
-            "id": "def-server.CorrelatedLogEvent.level",
-            "type": "string",
-            "tags": [],
-            "label": "level",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "@kbn/synthtrace",
             "id": "def-server.CorrelatedLogEvent.message",
@@ -2819,6 +2925,47 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.LogEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogEntry",
+        "description": [
+          "\nA minimal log entry for use with createLogSequence.\nOnly requires message; all other fields are optional."
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogEntry.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LogEntry.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
