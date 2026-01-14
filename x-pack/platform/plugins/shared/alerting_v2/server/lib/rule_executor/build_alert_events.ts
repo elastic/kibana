@@ -113,4 +113,3 @@ export function buildAlertEventsFromEsqlResponse({
     return { id: alertUuid, doc };
   });
 }
-

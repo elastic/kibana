@@ -75,4 +75,3 @@ describe('buildAlertEventsFromEsqlResponse', () => {
     expect(doc2.data).toEqual({ 'host.name': 'host-b', count: 5 });
   });
 });
-
