@@ -5,25 +5,19 @@ The generated documentation is validated and will emit warnings when invalid que
 
 ## Requirements
 
-- checked out `built-docs` repo in the same folder as the `kibana` repository
 - a running Kibana instance
-- an installed Generative AI connector
 
 ### Run script to generate ES|QL docs and verify syntax
 
-To deterministically get the ES|QL docs from the built markdown files, without modification from LLMs, you can run:
+To deterministically get the ES|QL docs from the Elastic's documentation markdown files, without modification from LLMs, you can run:
 ```
 node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js
-
-or
-
-npx tsx x-pack/platform/plugins/shared/inference/scripts/generate_esql_docs/index.ts
 ```
 
-To use an LLM to read the built docs, and then generate docs, you can pass in the connectorId.
+To connect to a connector/LLM to read the built docs and then enrich the extracted docs, you must first have an installed Generative AI connector. Then, pass in the connectorId. Enrichment involves explaining in natural language what the ES|QL examples are doing.
 
 ```
-npx tsx x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/generate_esql_docs.ts --connectorId example-connector-id
+node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --connectorId example-connector-id
 ```
 
 
