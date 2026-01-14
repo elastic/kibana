@@ -377,33 +377,34 @@ describe('useDiscoverUrl', () => {
   });
 
   describe('APM rules', () => {
-    it.each([ApmRuleType.TransactionDuration, ApmRuleType.TransactionErrorRate])(
-      'builds Discover url for APM rule type %s when alert has index pattern',
-      (ruleTypeId) => {
-        const expectedIndexPattern = 'apm-*-transaction*';
-        const alertWithIndexPattern = {
-          ...MOCK_ALERT,
-          fields: {
-            [ALERT_INDEX_PATTERN]: expectedIndexPattern,
-          },
-        } as unknown as TopAlert;
-        const rule = {
-          ruleTypeId,
-          params: {},
-        } as unknown as Rule;
+    it.each([
+      ApmRuleType.TransactionDuration,
+      ApmRuleType.TransactionErrorRate,
+      ApmRuleType.ErrorCount,
+    ])('builds Discover url for APM rule type %s when alert has index pattern', (ruleTypeId) => {
+      const expectedIndexPattern = 'apm-*-transaction*';
+      const alertWithIndexPattern = {
+        ...MOCK_ALERT,
+        fields: {
+          [ALERT_INDEX_PATTERN]: expectedIndexPattern,
+        },
+      } as unknown as TopAlert;
+      const rule = {
+        ruleTypeId,
+        params: {},
+      } as unknown as Rule;
 
-        const expectedTimeRange = {
-          from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
-          to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
-        };
+      const expectedTimeRange = {
+        from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+        to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+      };
 
-        renderHook(() => useDiscoverUrl({ alert: alertWithIndexPattern, rule }));
+      renderHook(() => useDiscoverUrl({ alert: alertWithIndexPattern, rule }));
 
-        expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-          dataViewSpec: { title: expectedIndexPattern, timeFieldName: '@timestamp' },
-          timeRange: expectedTimeRange,
-        });
-      }
-    );
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+        dataViewSpec: { title: expectedIndexPattern, timeFieldName: '@timestamp' },
+        timeRange: expectedTimeRange,
+      });
+    });
   });
 });

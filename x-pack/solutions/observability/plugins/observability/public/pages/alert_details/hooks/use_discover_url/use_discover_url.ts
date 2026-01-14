@@ -41,6 +41,7 @@ const viewInDiscoverSupportedRuleTypes = [
   LOG_THRESHOLD_ALERT_TYPE_ID,
   ApmRuleType.TransactionDuration,
   ApmRuleType.TransactionErrorRate,
+  ApmRuleType.ErrorCount,
 ] as const;
 
 type ViewInDiscoverSupportedRuleType = (typeof viewInDiscoverSupportedRuleTypes)[number];
@@ -71,6 +72,7 @@ const getLocatorParamsMap: Record<
   [LOG_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
   [ApmRuleType.TransactionDuration]: getAlertsIndexPatternRuleData,
   [ApmRuleType.TransactionErrorRate]: getAlertsIndexPatternRuleData,
+  [ApmRuleType.ErrorCount]: getAlertsIndexPatternRuleData,
 };
 
 export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?: Rule }) => {
