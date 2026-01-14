@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState, useEffect, memo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import type { AutocompleteStart } from '@kbn/kql/public';
 
 import { uniq } from 'lodash';
 
