@@ -72,7 +72,7 @@ describe('bedrockClaudeAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'converseStream',
+        subAction: 'converse',
         subActionParams: {
           messages: [
             {
@@ -563,7 +563,7 @@ Human:`,
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'converseStream',
+        subAction: 'converse',
         subActionParams: expect.objectContaining({
           signal: abortController.signal,
         }),
@@ -582,7 +582,7 @@ Human:`,
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'converseStream',
+        subAction: 'converse',
         subActionParams: expect.objectContaining({
           temperature: 0.9,
         }),
@@ -601,7 +601,7 @@ Human:`,
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'converseStream',
+        subAction: 'converse',
         subActionParams: expect.objectContaining({
           model: 'claude-opus-3.5',
         }),
@@ -630,6 +630,42 @@ Human:`,
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Error calling connector: something went wrong"`
+      );
+    });
+  });
+
+  describe('streaming mode', () => {
+    it('calls the right sub action', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          stream: true,
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({ subAction: 'converseStream' })
+      );
+    });
+  });
+
+  describe('non-streaming mode', () => {
+    it('calls the right sub action', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          stream: false,
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({ subAction: 'converse' })
       );
     });
   });
