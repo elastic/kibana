@@ -9,4 +9,3 @@
 
 export { WorkflowExecutionNotFoundError } from './workflow_execution_not_found_error';
 export { WorkflowNotFoundError } from './workflow_not_found_error';
-export { ExecutionError } from './execution_error';
