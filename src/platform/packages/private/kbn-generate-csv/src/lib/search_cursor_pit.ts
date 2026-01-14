@@ -16,15 +16,18 @@ import { i18nTexts } from './i18n_texts';
 
 export class SearchCursorPit extends SearchCursor {
   private searchAfter: estypes.SortResults | undefined;
+  private useInternalUser: boolean;
 
   constructor(
     indexPatternTitle: string,
     settings: SearchCursorSettings,
     clients: SearchCursorClients,
     abortController: AbortController,
-    logger: Logger
+    logger: Logger,
+    useInternalUser: boolean = false
   ) {
     super(indexPatternTitle, settings, clients, abortController, logger);
+    this.useInternalUser = useInternalUser;
   }
 
   /**
@@ -42,7 +45,10 @@ export class SearchCursorPit extends SearchCursor {
     this.logger.debug(`Requesting PIT for: [${this.indexPatternTitle}]...`);
     try {
       // NOTE: if ES is overloaded, this request could time out
-      const response = await this.clients.es.asCurrentUser.openPointInTime(
+      const esClient = this.useInternalUser
+        ? this.clients.es.asInternalUser
+        : this.clients.es.asCurrentUser;
+      const response = await esClient.openPointInTime(
         {
           index: this.indexPatternTitle,
           keep_alive: scroll.duration(taskInstanceFields),
