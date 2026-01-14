@@ -30,6 +30,25 @@ export function SecuritySolutionESSUtils({
     return supertest.agent(kbnUrl).auth(role, password);
   };
 
+  const createUser = async (user: User): Promise<void> => {
+    const { username, roles, password } = user;
+    await security.user.create(username, { roles, password: password ?? 'changeme' });
+  };
+
+  const createRole = async (name: string, role: Role) => {
+    return await security.role.create(name, role.privileges);
+  };
+
+  const createSuperTestWithCustomRole = async (roleDefinition: Role) => {
+    await createRole(roleDefinition.name, roleDefinition);
+    await createUser({
+      username: roleDefinition.name,
+      password: 'changeme',
+      roles: [roleDefinition.name],
+    });
+    return createSuperTest(roleDefinition.name);
+  };
+
   return {
     getUsername: (_role?: string) =>
       Promise.resolve(config.get('servers.kibana.username') as string),
@@ -41,15 +60,14 @@ export function SecuritySolutionESSUtils({
       return createSuperTest(user.username, user.password);
     },
 
+    createSuperTestWithCustomRole,
+
     cleanUpCustomRole: () => {
       // In ESS this is a no-op
       return Promise.resolve();
     },
 
-    async createUser(user: User): Promise<void> {
-      const { username, roles, password } = user;
-      await security.user.create(username, { roles, password: password ?? 'changeme' });
-    },
+    createUser,
 
     /**
      * Deletes specified users by username
@@ -61,9 +79,7 @@ export function SecuritySolutionESSUtils({
       }
     },
 
-    async createRole(name: string, role: Role) {
-      return await security.role.create(name, role.privileges);
-    },
+    createRole,
 
     /**
      * Deletes specified roles by name

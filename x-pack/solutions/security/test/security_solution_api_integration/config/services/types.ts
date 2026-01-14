@@ -26,10 +26,11 @@ interface SecuritySolutionUtilsInterface {
   createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
 
   cleanUpCustomRole: () => Promise<void>;
+
+  createSuperTestWithCustomRole: (role: Role) => Promise<TestAgent<any>>;
 }
 
 export interface SecuritySolutionServerlessUtilsInterface extends SecuritySolutionUtilsInterface {
-  createSuperTestWithCustomRole: (role: Role) => Promise<TestAgent<any>>;
   createSearch: (role?: string) => Promise<SecuritySolutionServerlessSearch>;
 }
 
