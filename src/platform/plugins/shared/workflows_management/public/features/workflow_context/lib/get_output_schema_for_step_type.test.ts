@@ -285,14 +285,14 @@ describe('getOutputSchemaForStepType', () => {
       const result = getOutputSchemaForStepType(mockNode);
 
       // Should call getOutputSchema first
-      expect(mockStepDefinition.editorHandlers?.dynamicSchema.getOutputSchema).toHaveBeenCalledWith(
-        {
-          input: {
-            param: 'value',
-          },
-          config: mockNode.configuration,
-        }
-      );
+      expect(
+        mockStepDefinition.editorHandlers?.dynamicSchema?.getOutputSchema
+      ).toHaveBeenCalledWith({
+        input: {
+          param: 'value',
+        },
+        config: mockNode.configuration,
+      });
 
       // Should fallback to static schema when dynamic throws
       expect(result).toBe(mockStaticSchema);
