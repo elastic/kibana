@@ -58,7 +58,7 @@ export class ResourceInitializer implements IResourceInitializer {
     const indexTemplate: IndicesPutIndexTemplateRequest = {
       name: indexTemplateName,
       index_patterns: [this.resourceDefinition.dataStreamName],
-      data_stream: {},
+      data_stream: { hidden: true },
       composed_of: [componentTemplateName],
       priority: 500,
       template: {
