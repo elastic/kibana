@@ -146,7 +146,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
       const coreContext = await context.core;
 
       try {
-        const { name, type, token } = request.body;
+        const { name, type, credentials } = request.body;
         const [, { actions, dataSourcesRegistry, agentBuilder }] = await getStartServices();
         const savedObjectsClient = coreContext.savedObjects.client;
 
@@ -165,7 +165,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const dataConnectorId = await createConnectorAndRelatedResources({
           name,
           type,
-          token,
+          credentials,
           savedObjectsClient,
           request,
           logger,
@@ -224,6 +224,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
             },
           });
         }
+
         // Delete all related resources and saved objects for each connector
         const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);

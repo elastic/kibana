@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
 import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
+import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 
 export const githubDataSource: DataTypeDefinition = {
   id: 'github',
@@ -28,28 +29,29 @@ export const githubDataSource: DataTypeDefinition = {
     config: {
       serverUrl: 'https://api.githubcopilot.com/mcp/',
       hasAuth: true,
+      authType: MCPAuthType.Bearer,
     },
+    importedTools: [
+      'get_commit',
+      'get_file_contents',
+      'get_label',
+      'get_latest_release',
+      'get_me',
+      'get_tag',
+      'get_team_members',
+      'get_teams',
+      'list_branches',
+      'list_commits',
+      'list_issue_types',
+      'list_issues',
+      'list_pull_requests',
+      'list_releases',
+      'list_tags',
+      'pull_request_read',
+    ],
   },
 
-  importedTools: [
-    'get_commit',
-    'get_file_contents',
-    'get_label',
-    'get_latest_release',
-    'get_me',
-    'get_tag',
-    'get_team_members',
-    'get_teams',
-    'list_branches',
-    'list_commits',
-    'list_issue_types',
-    'list_issues',
-    'list_pull_requests',
-    'list_releases',
-    'list_tags',
-    'pull_request_read',
-  ],
-
+  // TODO: Implement searching workflows once we have a way to call a mcp connector tool in a workflow
   generateWorkflows(stackConnectorId: string) {
     return [];
   },

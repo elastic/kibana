@@ -73,7 +73,7 @@ async function getMcpToolInputSchema({
  * Retrieves a specific MCP tool by name by calling listTools on the connector.
  * Returns undefined if the connector or tool is not found.
  */
-export async function getMcpTools({
+export async function getNamedMcpTools({
   actions,
   request,
   connectorId,
@@ -83,7 +83,7 @@ export async function getMcpTools({
   request: KibanaRequest;
   connectorId: string;
   toolNames: string[];
-}): Promise<Array<{ name: string; description?: string }> | undefined> {
+}): Promise<Array<{ name: string; description?: string }>> {
   try {
     const { tools } = await listMcpTools({ actions, request, connectorId });
     return tools
@@ -91,7 +91,7 @@ export async function getMcpTools({
       .map((tool) => ({ name: tool.name, description: tool.description }));
   } catch (error) {
     // Connector not found or other error - return undefined
-    return undefined;
+    throw new Error('Error getting MCP tools: ', error);
   }
 }
 

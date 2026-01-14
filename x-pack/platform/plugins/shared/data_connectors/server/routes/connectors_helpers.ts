@@ -9,68 +9,21 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { connectorsSpecs } from '@kbn/connector-specs';
-import type { ActionResult } from '@kbn/actions-plugin/server';
 import type {
   DataConnectorsServerSetupDependencies,
   DataConnectorsServerStartDependencies,
 } from '../types';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE, type DataConnectorAttributes } from '../saved_objects';
-import { createMcpConnector } from '../utils/create_mcp_connector';
-
-/**
- * Builds the secrets object for a connector based on its spec
- * @param connectorType - The connector type ID (e.g., '.notion')
- * @param token - The authentication token
- * @returns The secrets object to pass to the actions client
- * @throws Error if the connector spec is not found
- */
-export function buildSecretsFromConnectorSpec(
-  connectorType: string,
-  token: string
-): Record<string, string> {
-  const connectorSpec = Object.values(connectorsSpecs).find(
-    (spec) => spec.metadata.id === connectorType
-  );
-  if (!connectorSpec) {
-    throw new Error(`Stack connector spec not found for type "${connectorType}"`);
-  }
-
-  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'bearer';
-  });
-
-  const secrets: Record<string, string> = {};
-  if (hasBearerAuth) {
-    secrets.authType = 'bearer';
-    secrets.token = token;
-  } else {
-    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
-      const typeId = typeof authType === 'string' ? authType : authType.type;
-      return typeId === 'api_key_header';
-    });
-
-    const headerField =
-      typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
-        ? String(apiKeyHeaderAuth.defaults.headerField)
-        : 'ApiKey'; // default fallback
-
-    secrets.authType = 'api_key_header';
-    secrets.apiKey = token;
-    secrets.headerField = headerField;
-  }
-
-  return secrets;
-}
+import { createStackConnector } from '../utils/create_stack_connector';
 
 interface CreateConnectorAndResourcesParams {
   name: string;
   type: string;
-  token: string;
+  credentials: string;
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
   logger: Logger;
@@ -89,7 +42,7 @@ export async function createConnectorAndRelatedResources(
   const {
     name,
     type,
-    token,
+    credentials,
     savedObjectsClient,
     request,
     logger,
@@ -99,47 +52,26 @@ export async function createConnectorAndRelatedResources(
     agentBuilder,
   } = params;
 
-  // Create stack connector - for now our spec only supports the case
-  // where there's exactly one KSC type per data connector type
-  const connectorType = dataConnectorTypeDef.stackConnector.type;
-
-  let stackConnector: ActionResult;
   const workflowIds: string[] = [];
   const toolIds: string[] = [];
+  const toolRegistry = await agentBuilder.tools.getRegistry({ request });
+  const stackConnectorConfig = dataConnectorTypeDef.stackConnector;
+  const stackConnector: ActionResult = await createStackConnector(
+    toolRegistry,
+    actions,
+    request,
+    stackConnectorConfig,
+    name,
+    toolIds,
+    credentials,
+    logger
+  );
 
-  if (connectorType === '.mcp') {
-    const registry = await agentBuilder.tools.getRegistry({ request });
-    stackConnector = await createMcpConnector(
-      registry,
-      actions,
-      request,
-      dataConnectorTypeDef,
-      name,
-      token,
-      logger
-    );
-    toolIds.push(
-      ...(dataConnectorTypeDef.importedTools ?? []).map((tool) => `${name}.${tool.toLowerCase()}`)
-    );
-    logger.info(`Imported tools for MCP connector: ${JSON.stringify(toolIds)}`);
-  } else {
-    const secrets = buildSecretsFromConnectorSpec(connectorType, token);
-    logger.info(`Creating Kibana stack connector for data connector '${name}'`);
-    const actionsClient = await actions.getActionsClientWithRequest(request);
-    stackConnector = await actionsClient.create({
-      action: {
-        name: `${type} stack connector for data connector '${name}'`,
-        actionTypeId: connectorType,
-        config: {},
-        secrets,
-      },
-    });
-  }
+  logger.info(`Imported tools in createConnectorAndRelatedResources: ${JSON.stringify(toolIds)}`);
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
   const workflowInfos = dataConnectorTypeDef.generateWorkflows(stackConnector.id);
-  const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data connector '${name}'`);
 

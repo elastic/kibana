@@ -9,12 +9,18 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
-  buildSecretsFromConnectorSpec,
   createConnectorAndRelatedResources,
   deleteConnectorAndRelatedResources,
 } from './connectors_helpers';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import * as connectorSpecsModule from '@kbn/connector-specs';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import {
+  createToolRegistryMock,
+  createMockedTool,
+} from '@kbn/agent-builder-plugin/server/test_utils/tools';
+import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server/types';
 
 const mockConnectorSpecs = {
   customConnectorWithBearerType: {
@@ -77,76 +83,16 @@ const mockConnectorSpecs = {
     },
     actions: {},
   },
+  notionConnector: {
+    metadata: {
+      id: '.notion',
+    },
+    auth: {
+      types: ['bearer'],
+    },
+    actions: {},
+  },
 };
-
-describe('buildSecretsFromConnectorSpec', () => {
-  beforeAll(() => {
-    jest.replaceProperty(connectorSpecsModule, 'connectorsSpecs', mockConnectorSpecs as any);
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
-  describe('bearer auth', () => {
-    it('should return bearer auth secrets', () => {
-      const actual = buildSecretsFromConnectorSpec('.bearer_connector', 'test-token-123');
-
-      expect(actual).toEqual({
-        authType: 'bearer',
-        token: 'test-token-123',
-      });
-    });
-
-    it('should handle bearer auth with string type definition', () => {
-      const actual = buildSecretsFromConnectorSpec('.bearer_string_connector', 'my-bearer-token');
-
-      expect(actual).toEqual({
-        authType: 'bearer',
-        token: 'my-bearer-token',
-      });
-    });
-  });
-
-  describe('api_key_header auth', () => {
-    it('should return api_key_header secrets with custom headerField when present in the spec', () => {
-      const actual = buildSecretsFromConnectorSpec(
-        '.apikey_custom_header_connector',
-        'api-key-456'
-      );
-
-      expect(actual).toEqual({
-        authType: 'api_key_header',
-        apiKey: 'api-key-456',
-        headerField: 'Key',
-      });
-    });
-
-    it('should use default fallback headerField when not specified in connector spec', () => {
-      const expectedSecret = {
-        authType: 'api_key_header',
-        apiKey: 'test-key',
-        headerField: 'ApiKey',
-      };
-      const actualFromType = buildSecretsFromConnectorSpec('.apikey_header_connector', 'test-key');
-      const actualFromString = buildSecretsFromConnectorSpec(
-        '.apikey_header_string_connector',
-        'test-key'
-      );
-
-      expect(actualFromType).toEqual(expectedSecret);
-      expect(actualFromString).toEqual(expectedSecret);
-    });
-  });
-
-  describe('error cases', () => {
-    it('should throw error for non-existent connector type', () => {
-      expect(() => {
-        buildSecretsFromConnectorSpec('.nonexistent', 'some-token');
-      }).toThrow('Stack connector spec not found for type ".nonexistent"');
-    });
-  });
-});
 
 describe('createConnectorAndRelatedResources', () => {
   const mockLogger = loggerMock.create();
@@ -154,9 +100,7 @@ describe('createConnectorAndRelatedResources', () => {
   const mockActionsClient = {
     create: jest.fn(),
   };
-  const mockToolRegistry = {
-    create: jest.fn(),
-  };
+  const mockToolRegistry = createToolRegistryMock();
   const mockWorkflowManagement = {
     management: {
       createWorkflow: jest.fn(),
@@ -165,13 +109,25 @@ describe('createConnectorAndRelatedResources', () => {
   const mockActions = {
     getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
   };
-  const mockAgentBuilder = {
+  const mockAgentBuilder: AgentBuilderPluginStart = {
+    agents: {
+      runAgent: jest.fn(),
+    },
     tools: {
+      execute: jest.fn(),
       getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
     },
   };
 
   const mockRequest = httpServerMock.createKibanaRequest();
+
+  beforeAll(() => {
+    jest.replaceProperty(connectorSpecsModule, 'connectorsSpecs', mockConnectorSpecs as any);
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -189,10 +145,9 @@ describe('createConnectorAndRelatedResources', () => {
       id: 'workflow-1',
       name: 'Test Workflow',
     };
-    const mockTool = {
+    const mockTool = createMockedTool({
       id: 'tool-1',
-      type: 'workflow',
-    };
+    });
     const mockSavedObject = {
       id: 'connector-1',
       type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -204,38 +159,43 @@ describe('createConnectorAndRelatedResources', () => {
         kscIds: ['ksc-1'],
       },
     };
-    const mockDataConnectorTypeDef = {
-      stackConnector: { type: actionTypeId },
+    const mockDataConnectorTypeDef: DataTypeDefinition = {
+      id: 'test_type',
+      name: 'Test Type',
+      stackConnector: {
+        type: actionTypeId,
+        config: {},
+      },
       generateWorkflows: jest.fn().mockReturnValue([
         {
           content: 'workflow yaml content',
           shouldGenerateABTool: true,
         },
       ]),
-    };
+    } as DataTypeDefinition;
 
     mockActionsClient.create.mockResolvedValue(mockStackConnector);
     mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
     mockToolRegistry.create.mockResolvedValue(mockTool);
-    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as any);
+    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as SavedObject);
 
     const result = await createConnectorAndRelatedResources({
       name: 'My Test Connector',
       type: 'test_type',
-      token: 'secret-token-123',
+      credentials: 'secret-token-123',
       savedObjectsClient: mockSavedObjectsClient,
       request: mockRequest,
       logger: mockLogger,
       workflowManagement: mockWorkflowManagement as any,
       actions: mockActions as any,
-      dataConnectorTypeDef: mockDataConnectorTypeDef as any,
-      agentBuilder: mockAgentBuilder as any,
+      dataConnectorTypeDef: mockDataConnectorTypeDef as DataTypeDefinition,
+      agentBuilder: mockAgentBuilder,
     });
 
     expect(result).toBe('connector-1');
     expect(mockActionsClient.create).toHaveBeenCalledWith({
       action: expect.objectContaining({
-        name: "test_type stack connector for data connector 'My Test Connector'",
+        name: ".notion stack connector for data connector 'My Test Connector'",
         actionTypeId,
         secrets: expect.objectContaining({
           authType: 'bearer',
@@ -279,15 +239,20 @@ describe('createConnectorAndRelatedResources', () => {
       id: 'connector-1',
       attributes: { workflowIds: ['workflow-1'], toolIds: [], kscIds: ['ksc-1'] },
     };
-    const mockDataConnectorTypeDef = {
-      stackConnector: { type: actionTypeId },
+    const mockDataConnectorTypeDef: DataTypeDefinition = {
+      id: 'test',
+      name: 'Test',
+      stackConnector: {
+        type: actionTypeId,
+        config: {},
+      },
       generateWorkflows: jest.fn().mockReturnValue([
         {
           content: 'workflow yaml content',
           shouldGenerateABTool: false,
         },
       ]),
-    };
+    } as DataTypeDefinition;
 
     mockActionsClient.create.mockResolvedValue(mockStackConnector);
     mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
@@ -296,14 +261,14 @@ describe('createConnectorAndRelatedResources', () => {
     await createConnectorAndRelatedResources({
       name: 'Test',
       type: 'test',
-      token: 'token',
+      credentials: 'token',
       savedObjectsClient: mockSavedObjectsClient,
       request: mockRequest,
       logger: mockLogger,
       workflowManagement: mockWorkflowManagement as any,
       actions: mockActions as any,
-      dataConnectorTypeDef: mockDataConnectorTypeDef as any,
-      agentBuilder: mockAgentBuilder as any,
+      dataConnectorTypeDef: mockDataConnectorTypeDef as DataTypeDefinition,
+      agentBuilder: mockAgentBuilder,
     });
 
     expect(mockToolRegistry.create).not.toHaveBeenCalled();
@@ -316,9 +281,7 @@ describe('deleteConnectorAndRelatedResources', () => {
   const mockActionsClient = {
     delete: jest.fn(),
   };
-  const mockToolRegistry = {
-    delete: jest.fn(),
-  };
+  const mockToolRegistry = createToolRegistryMock();
   const mockWorkflowManagement = {
     management: {
       deleteWorkflows: jest.fn(),
@@ -346,7 +309,7 @@ describe('deleteConnectorAndRelatedResources', () => {
     };
 
     mockActionsClient.delete.mockResolvedValue(undefined);
-    mockToolRegistry.delete.mockResolvedValue(undefined);
+    mockToolRegistry.delete.mockResolvedValue(true);
     mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue({
       total: 1,
       deleted: 1,
@@ -387,7 +350,7 @@ describe('deleteConnectorAndRelatedResources', () => {
     };
 
     mockActionsClient.delete.mockRejectedValue(new Error('KSC deletion failed'));
-    mockToolRegistry.delete.mockResolvedValue(undefined);
+    mockToolRegistry.delete.mockResolvedValue(true);
     mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue({
       total: 1,
       deleted: 1,
