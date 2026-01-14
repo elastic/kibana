@@ -11,7 +11,6 @@ import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
@@ -20,13 +19,11 @@ import type { PublicDrilldownManagerComponent } from './drilldowns';
 import { createPublicDrilldownManager } from './drilldowns';
 
 interface SetupDependencies {
-  embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
   uiActions: UiActionsSetup;
   licensing?: LicensingPluginSetup;
 }
 
 export interface StartDependencies {
-  embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   licensing?: LicensingPluginStart;
 }
@@ -63,7 +60,7 @@ export class AdvancedUiActionsPublicPlugin
 
   public setup(
     core: CoreSetup<StartDependencies>,
-    { embeddable, uiActions, licensing }: SetupDependencies
+    { uiActions, licensing }: SetupDependencies
   ): SetupContract {
     const startServices = createStartServicesGetter(core.getStartServices);
     this.enhancements = new UiActionsServiceEnhancements({
