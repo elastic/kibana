@@ -9,13 +9,16 @@
 
 import { isDashboardSection } from '../../common';
 import { embeddableService } from '../kibana_services';
-import type { DashboardPanel, DashboardPinnedPanel, DashboardState } from './types';
+import type { DashboardPanel, DashboardState } from './types';
 
 export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
-  const { panels, pinned_panels, ...rest } = dashboardState;
+  const { pinned_panels, panels, ...rest } = dashboardState;
+  if (pinned_panels) {
+    warnings.push(`Dropped unmapped key 'pinned_panels' from dashboard`);
+  }
 
-  function isMappedPanelType(panel: DashboardPanel | DashboardPinnedPanel) {
+  function isMappedPanelType(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
     if (transforms?.throwOnUnmappedPanel) {
       try {
@@ -53,7 +56,7 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     };
   }
 
-  const mappedPanels = [...(panels ?? []), ...(pinned_panels ?? [])]
+  const mappedPanels = (panels ?? [])
     .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
     .map((panel) => {
       if (!isDashboardSection(panel)) return removeEnhancements(panel);
@@ -74,6 +77,10 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
 }
 
 export function throwOnUnmappedKeys(dashboardState: DashboardState) {
+  if (dashboardState.pinned_panels) {
+    throw new Error('pinned_panels key is not supported by dashboard REST endpoints.');
+  }
+
   function throwOnUnmappedPanelKeys(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
     if (!transforms?.schema) {
