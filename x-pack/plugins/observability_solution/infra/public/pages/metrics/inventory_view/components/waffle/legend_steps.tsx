@@ -55,6 +55,9 @@ function ColorCell({ color, onChange }: ColorCellProps) {
 }
 
 export function LegendSteps({ steps, onChange }: LegendStepsProps) {
+  const minSteps = 2;
+  const maxSteps = 18; // Same values as color palette selector in LegendControls.
+
   const { euiTheme } = useEuiTheme();
 
   const updateStep = useCallback(
@@ -151,7 +154,7 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
             iconType="trash"
             size="xs"
             onClick={() => handleDeleteStep(item)}
-            disabled={steps.length <= 1}
+            disabled={steps.length <= minSteps}
             data-test-subj="infraLegendStepsDeleteStepButton"
           />
         ),
@@ -181,6 +184,7 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
         onClick={handleAddStep}
         iconType="plus"
         data-test-subj="infraLegendStepsAddStepButton"
+        disabled={steps.length >= maxSteps}
       >
         {i18n.translate('xpack.infra.legendSteps.addStepButtonLabel', {
           defaultMessage: 'Add step',
