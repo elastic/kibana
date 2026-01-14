@@ -8,7 +8,7 @@ applies_to:
 ---
 
 # MCP connector and action [mcp-action-type]
-The MCP connector communicates with remote MCP servers to retrieve and call their tools. 
+The Model Context Protocol (MCP) connector communicates with remote [MCP](https://modelcontextprotocol.io/docs/getting-started/intro) servers to retrieve and call their tools. 
 
 ## Create connectors in {{kib}} [define-mcp-ui]
 
