@@ -6,10 +6,7 @@
  */
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import type {
-  ResponseActionExecuteOutputContent,
-  DeepMutable,
-} from '../../../../common/endpoint/types';
+import type { DeepMutable } from '../../../../common/endpoint/types';
 import React from 'react';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { getEmptyValue } from '@kbn/cases-plugin/public/components/empty_value';
@@ -28,12 +25,8 @@ describe('When using the `EndpointHostExecutionResponseOutput` component', () =>
   beforeEach(() => {
     const appTestContext = createAppRootMockRenderer();
 
-    outputContent = new EndpointActionGenerator(
-      'seed'
-    ).generateActionDetails<ResponseActionExecuteOutputContent>({
-      command: 'execute',
-      agents: ['agent-a'],
-    }).outputs?.['agent-a'].content!;
+    outputContent = new EndpointActionGenerator('seed').generateExecuteActionResponseOutput()
+      .content;
 
     renderProps = {
       outputContent,
