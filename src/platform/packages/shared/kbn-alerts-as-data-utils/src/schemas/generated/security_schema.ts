@@ -232,6 +232,7 @@ const SecurityAlertOptional = rt.partial({
   'service.risk.calculated_level': schemaString,
   'service.risk.calculated_score_norm': schemaNumber,
   tags: schemaStringArray,
+  'threat.enrichments': schemaUnknown,
   'user.asset.criticality': schemaString,
 });
 
