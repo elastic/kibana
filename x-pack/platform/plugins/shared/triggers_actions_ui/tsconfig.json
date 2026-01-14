@@ -94,7 +94,7 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/actions-types",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
     "@kbn/kql",
   ],
   "exclude": ["target/**/*"]
