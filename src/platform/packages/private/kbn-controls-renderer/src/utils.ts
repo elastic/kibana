@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import { apiHasSerializableState, apiHasType, apiHasUniqueId } from '@kbn/presentation-publishing';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { ESQLControlState } from '@kbn/esql-types';
+import { omit } from 'lodash';
 import type { HasPrependWrapperRef, PublishesControlsLayout } from './types';
 
 export const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout => {
@@ -18,3 +28,52 @@ export const apiPublishesControlsLayout = (api: unknown): api is PublishesContro
 
 export const apiHasPrependWrapperRef = (api: unknown): api is HasPrependWrapperRef =>
   Boolean((api as HasPrependWrapperRef).prependWrapperRef);
+
+export function getEsqlControls(
+  presentationContainer: PresentationContainer,
+  query: AggregateQuery | Query | undefined
+) {
+  if (!isOfAggregateQueryType(query)) return;
+
+  const usedVariables = getESQLQueryVariables(query.esql);
+  const controlsLayout = apiPublishesControlsLayout(presentationContainer)
+    ? presentationContainer.layout$.getValue().controls
+    : {};
+
+  const esqlControlState = Object.values(presentationContainer.children$.getValue()).reduce(
+    (acc: { [uuid: string]: Serializable }, api, index) => {
+      if (
+        !(
+          apiHasType(api) &&
+          api.type === ESQL_CONTROL &&
+          apiHasUniqueId(api) &&
+          apiHasSerializableState(api)
+        )
+      ) {
+        return acc;
+      }
+
+      const controlState = api.serializeState() as ESQLControlState;
+      const variableName = 'variableName' in controlState && (controlState.variableName as string);
+      if (!variableName) return acc;
+      const isUsed = usedVariables.includes(variableName);
+      if (!isUsed) return acc;
+
+      return {
+        ...acc,
+        [api.uuid]: {
+          type: api.type,
+          ...controlState,
+          ...(controlsLayout[api.uuid]
+            ? {
+                ...omit(controlsLayout[api.uuid], 'type'),
+              }
+            : { order: index }),
+        },
+      };
+    },
+    {}
+  );
+
+  return esqlControlState as ControlPanelsState<ESQLControlState> & SerializableRecord;
+}
