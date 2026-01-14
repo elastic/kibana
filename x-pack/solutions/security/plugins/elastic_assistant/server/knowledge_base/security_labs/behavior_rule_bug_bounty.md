@@ -107,7 +107,7 @@ For this offering, here are additional details to further scope down submissions
 * **Scenario**
     * Goal: Gain execution of an arbitrary attacker delivered executable on a system protected by Elastic Defend without triggering any alerts
     * Story: User downloads a single non-executable file from their web browser and opens it. They may click through any security warnings that are displayed by the operating system
-    * Extensions in scope: lnk, js, jse, wsf, wsh, msc, vsc1, rdp
+    * Extensions in scope: Extensions in scope: lnk, js, jse, wsf, wsh, msc, vbs, vbe, chm, psc1, rdp
     * Entire scenario must occur within 5 minutes, but a reboot is allowed
 * **Relevant MITRE Techniques:** 
     * [Process Injection, Technique T1055 - Enterprise | MITRE ATT&CK®](https://attack.mitre.org/techniques/T1055) into Windows processes 
