@@ -167,7 +167,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "search-telemetry": "c152fc7e66d5ac7907e81c0926be9c219a15181e10b418b2fbb86bab2760627c",
         "search_playground": "8facc7ad66d9ca130f71168704cb1d01bb3a9763125e6c42e3053de4502fd94e",
         "security-ai-prompt": "ba1b779e1a4d20f9c3fbe9355cfbabf0fc6a3f4cf7a2f2ad36d2450528d3b7f6",
-        "security-rule": "42386e82e49a8f487a6ec5715fd6fb2297bd0b94c6d21932e3f4b4e334927f9c",
+        "security-rule": "cb86cb2db6f6143080a887aa3e934b46cab273ce9fe5ef24347fc586bd15b6ab",
         "security-solution-signals-migration": "738346c46260f118506c15a154adb6ef33a57290d8d6dac8340209e8ca33bdd4",
         "security:reference-data": "3b76b7adf1799ba3420c34081145c3529113fb04e7e5a48e81d4ac412cf8d73a",
         "siem-detection-engine-rule-actions": "4980ff33eb0061a925b702fb4fe41e3310da094765d8b49edcf1a7516abeb57c",
@@ -1090,7 +1090,12 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "security-rule|global: 95bb9ee9aa1f0169245c05491ea1ecdebbcfcb29",
         "security-rule|mappings: c4f3e2b47d2f27c79852ccf284ab93042abd31d8",
         "security-rule|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+<<<<<<< HEAD
         "security-rule|10.1.0: a1f44f69103ca110acc0af7f4da117a75f6f3a32b64b7ac71c9761dec406f7fe",
+=======
+        "security-rule|10.2.0: a1ff965e4fb87179e598dbc3f4f10f2939d47bc1c72567bd7d953c73de0b1eb0",
+        "security-rule|10.1.0: 842af22e9a7c710dcbcd3411473b1c2f9baa4012c0d3058e2313fe43bf23a2e1",
+>>>>>>> a35c01f7a408 (Update schemas to include mapped types)
         "======================================================================================",
         "security-solution-signals-migration|global: 34c65c8a9d3df15c397fcf0e029df6b4211897c2",
         "security-solution-signals-migration|mappings: 0fcac70734e9b58e72d63b9994c132dde151f00a",
