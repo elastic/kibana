@@ -63,16 +63,16 @@ describe('getSearchStatus', () => {
           search: getSearch({
             strategy,
             status: SearchStatus.COMPLETE,
-            startTime: '2023-01-01T00:00:00.000Z',
-            completionTime: '2023-01-01T01:00:00.000Z',
+            startedAt: '2023-01-01T00:00:00.000Z',
+            completedAt: '2023-01-01T01:00:00.000Z',
           }),
         });
 
         // Then
         expect(res).toEqual({
           status: SearchStatus.COMPLETE,
-          startTime: '2023-01-01T00:00:00.000Z',
-          completionTime: '2023-01-01T01:00:00.000Z',
+          startedAt: '2023-01-01T00:00:00.000Z',
+          completedAt: '2023-01-01T01:00:00.000Z',
         });
         expect(mockFunctions[expectedFunctionCall]).not.toHaveBeenCalledWith();
       });
@@ -101,8 +101,8 @@ describe('getSearchStatus', () => {
         // Then
         expect(res).toEqual({
           status: SearchStatus.ERROR,
-          startTime: '2023-01-01T00:00:00.000Z',
-          completionTime: '2023-01-01T01:00:00.000Z',
+          startedAt: '2023-01-01T00:00:00.000Z',
+          completedAt: '2023-01-01T01:00:00.000Z',
           error: 'Search 123 completed with a 500 status',
         });
         expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
@@ -135,8 +135,8 @@ describe('getSearchStatus', () => {
         // Then
         expect(res).toEqual({
           status: SearchStatus.COMPLETE,
-          startTime: '2023-01-01T00:00:00.000Z',
-          completionTime: '2023-01-01T01:00:00.000Z',
+          startedAt: '2023-01-01T00:00:00.000Z',
+          completedAt: '2023-01-01T01:00:00.000Z',
           error: undefined,
         });
         expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
@@ -167,8 +167,8 @@ describe('getSearchStatus', () => {
         // Then
         expect(res).toEqual({
           status: SearchStatus.IN_PROGRESS,
-          startTime: '2023-01-01T00:00:00.000Z',
-          completionTime: undefined,
+          startedAt: '2023-01-01T00:00:00.000Z',
+          completedAt: undefined,
           error: undefined,
         });
         expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(

@@ -71,14 +71,6 @@ export interface SearchSessionSavedObjectAttributes {
    * Search status - used to avoid extra calls to ES when tracking search IDs
    */
   status?: SearchSessionStatus;
-  /**
-   * Start time of the search request in ISO format
-   */
-  startTime?: string;
-  /**
-   * Completion time of the search request in ISO format
-   */
-  completionTime?: string;
 }
 
 export interface SearchSessionRequestInfo {
@@ -97,11 +89,11 @@ export interface SearchSessionRequestInfo {
   /**
    * Start time of the search request in ISO format
    */
-  startTime?: string;
+  startedAt?: string;
   /**
    * Completion time of the search request in ISO format
    */
-  completionTime?: string;
+  completedAt?: string;
   /**
    * An optional error. Set if status is set to error.
    */
@@ -110,11 +102,15 @@ export interface SearchSessionRequestInfo {
 
 export interface SearchSessionRequestStatus {
   status: SearchStatus;
-  startTime?: string;
+
+  /**
+   * Optional start time. May be undefined if ES doesn't return it.
+   */
+  startedAt?: string;
   /**
    * Optional completion time. May be undefined if the search is still in progress
    */
-  completionTime?: string;
+  completedAt?: string;
   /**
    * An optional error. Set if status is set to error.
    */

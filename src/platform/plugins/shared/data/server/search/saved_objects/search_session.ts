@@ -45,8 +45,6 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
     '8.8.0': schema.object({
       sessionId: schema.string(),
       status: schema.maybe(schema.string()),
-      startTime: schema.maybe(schema.string()),
-      completionTime: schema.maybe(schema.string()),
       name: schema.maybe(schema.string()),
       created: schema.string(),
       expires: schema.string(),
@@ -60,7 +58,8 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
           id: schema.string(),
           strategy: schema.string(),
           status: schema.maybe(schema.string()),
-          completionTime: schema.maybe(schema.string()),
+          startedAt: schema.maybe(schema.string()),
+          completedAt: schema.maybe(schema.string()),
         })
       ),
       realmType: schema.maybe(schema.string()),

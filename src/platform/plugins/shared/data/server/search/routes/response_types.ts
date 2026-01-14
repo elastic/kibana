@@ -24,11 +24,15 @@ interface SearchSessionAttrRestResponse {
   username?: string;
   version: string;
   isCanceled?: boolean;
+  status?: StatusRestRespone;
 }
 
 interface SearchSessionRequestInfoRestResponse {
   id: string;
   strategy: string;
+  startedAt?: string;
+  completedAt?: string;
+  status?: string;
 }
 
 export interface SearchSessionRestResponse {

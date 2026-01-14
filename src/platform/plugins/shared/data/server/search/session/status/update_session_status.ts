@@ -75,7 +75,8 @@ function getUpdatedIdMappings(
     idMapping[requestHash] = {
       ...search,
       status: searchStatus.status,
-      completionTime: searchStatus.completionTime,
+      completedAt: searchStatus.completedAt,
+      startedAt: searchStatus.startedAt,
     };
     hasUpdated = true;
   }

@@ -49,8 +49,8 @@ export async function getSearchStatus({
     if (search.status === SearchStatus.COMPLETE) {
       return {
         status: SearchStatus.COMPLETE,
-        startTime: search.startTime,
-        completionTime: search.completionTime,
+        startedAt: search.startedAt,
+        completedAt: search.completedAt,
       };
     }
 
@@ -61,11 +61,11 @@ export async function getSearchStatus({
     });
 
     const response = apiResponse.body;
-    const startTime =
+    const startedAt =
       'start_time_in_millis' in response
         ? moment(response.start_time_in_millis).toISOString()
         : undefined;
-    const completionTime =
+    const completedAt =
       'completion_time_in_millis' in response && response.completion_time_in_millis
         ? moment(response.completion_time_in_millis).toISOString()
         : undefined;
@@ -73,8 +73,8 @@ export async function getSearchStatus({
     if ('completion_status' in response && response.completion_status! >= 400) {
       return {
         status: SearchStatus.ERROR,
-        startTime,
-        completionTime,
+        startedAt,
+        completedAt,
         error: i18n.translate('data.search.statusError', {
           defaultMessage: `Search {searchId} completed with a {errorCode} status`,
           values: { searchId: asyncId, errorCode: response.completion_status },
@@ -85,14 +85,14 @@ export async function getSearchStatus({
     if (!response.is_running) {
       return {
         status: SearchStatus.COMPLETE,
-        startTime,
-        completionTime,
+        startedAt,
+        completedAt,
       };
     }
 
     return {
       status: SearchStatus.IN_PROGRESS,
-      startTime,
+      startedAt,
     };
   } catch (e) {
     return {
