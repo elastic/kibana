@@ -1,4 +1,24 @@
-Calculates the maximum presence of the `events_received` field for each pod within 2-minute time buckets, filtering for pods named "two" in the "prod" cluster.
+# PRESENT_OVER_TIME
+
+Calculates the presence of a field in the output result over a specified time range.
+
+## Syntax
+
+`PRESENT_OVER_TIME(field, window)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the presence for.
+
+#### window
+
+The time window over which to compute the presence.
+
+## Examples
+
+The following query calculates the maximum presence of the `events_received` field for each pod named "two" in the "prod" cluster, grouping the results into 2-minute time buckets. This helps you understand how often the `events_received` field is present for each pod over time.
 
 ```esql
 TS k8s

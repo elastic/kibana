@@ -1,3 +1,5 @@
+# COPY_SIGN
+
 Calculates a new field `cs1` for each employee, combining the magnitude of their `salary` with the sign of the smallest value in their `salary_change`.
 
 ```esql

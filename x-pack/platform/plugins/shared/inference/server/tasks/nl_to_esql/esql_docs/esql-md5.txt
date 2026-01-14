@@ -1,4 +1,20 @@
-Compute the MD5 hash of the `message` column for all rows where the message is not "Connection error", and display both the original message and its hash.
+# MD5
+
+The MD5 command computes the MD5 hash of the input value, if the MD5 hash function is available on the JVM.
+
+## Syntax
+
+`MD5(input)`
+
+### Parameters
+
+#### input
+
+The value to hash.
+
+## Examples
+
+This query selects all rows from the `sample_data` index where the `message` column does not equal "Connection error". For each of these rows, it calculates the MD5 hash of the `message` column and stores the result in a new column called `md5`. Finally, it keeps only the `message` and `md5` columns in the output.
 
 ```esql
 FROM sample_data

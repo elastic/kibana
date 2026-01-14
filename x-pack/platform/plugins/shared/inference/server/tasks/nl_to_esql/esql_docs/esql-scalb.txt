@@ -1,4 +1,24 @@
-Calculates the value of 3.0 multiplied by 2 raised to the power of 10, and stores the result in the column `z`.
+# SCALB
+
+The SCALB function returns the result of multiplying a number by 2 raised to the power of a scale factor, equivalent to `d * 2 ^ scaleFactor`. The result is rounded as if performed by a single correctly rounded floating-point multiply to a member of the double value set.
+
+## Syntax
+
+`SCALB(d, scaleFactor)`
+
+### Parameters
+
+#### d
+
+Numeric expression for the multiplier. If `null`, the function returns `null`.
+
+#### scaleFactor
+
+Numeric expression for the scale factor. If `null`, the function returns `null`.
+
+## Examples
+
+The following query creates a row with two columns, `x` set to 3.0 and `y` set to 10, then calculates a new column `z` as the result of multiplying `x` by 2 raised to the power of `y` (i.e., `3.0 * 2^10`).
 
 ```esql
 row x = 3.0, y = 10 | eval z = scalb(x, y)
