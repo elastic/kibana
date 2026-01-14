@@ -86,12 +86,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
 
       h.state(this.cookieOptions.name, sessionValue, {
         isSecure,
-        isSameSite: sameSite ?? false,
-        path: this.basePath === undefined ? '/' : this.basePath,
-        isHttpOnly: true,
-        clearInvalid: false,
-        encoding: 'iron',
-        password: this.cookieOptions.encryptionKey,
+        isSameSite: sameSite,
       });
     } else {
       // Use default cookie auth
