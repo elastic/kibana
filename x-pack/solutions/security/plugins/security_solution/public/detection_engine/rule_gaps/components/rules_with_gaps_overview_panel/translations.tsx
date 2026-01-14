@@ -17,6 +17,34 @@ export const RULE_GAPS_OVERVIEW_PANEL_LABEL = i18n.translate(
 export const RULE_GAPS_OVERVIEW_PANEL_TOOLTIP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleGaps.overviewPanel.tooltip',
   {
-    defaultMessage: 'Total rules with gaps / rules that currently have in-progress gaps',
+    defaultMessage: 'Rules with gaps / rules with gaps being filled',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusLabel',
+  {
+    defaultMessage: 'Auto gap fill status:',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_ON = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_OFF = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LOADING = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusLoading',
+  {
+    defaultMessage: 'Loading',
   }
 );

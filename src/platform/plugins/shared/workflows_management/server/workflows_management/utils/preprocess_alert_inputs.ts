@@ -8,39 +8,17 @@
  */
 
 import { get, isString } from 'lodash';
-import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { set } from '@kbn/safer-lodash-set';
-import signalAadMapping from './signal_aad_mapping.json';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
   AlertEventRule,
   AlertSelection,
   AlertTriggerInput,
 } from '../../../common/types/alert_types';
 import { buildAlertEvent } from '../../../common/utils/build_alert_event';
-
-/**
- * Constructs the signal object from kibana.alert fields (legacy format for security alerts).
- * Mirrors the logic in convertToLegacyAlert from the security solution plugin.
- * Since we can't import from the security solution plugin, we maintain our own copy
- * of signal_aad_mapping.json and reimplement the same transformation logic.
- */
-function constructSignalObject(
-  expandedAlert: Record<string, unknown>
-): Record<string, unknown> | undefined {
-  const signal: Record<string, unknown> = {};
-
-  for (const [signalPath, alertPath] of Object.entries(signalAadMapping)) {
-    const value = get(expandedAlert, alertPath);
-    if (value !== undefined) {
-      set(signal, signalPath, value);
-    }
-  }
-
-  return Object.keys(signal).length > 0 ? signal : undefined;
-}
+import type { WorkflowsRequestHandlerContext } from '../../types';
 
 /**
  * Extracts rule information from an alert's _source
@@ -114,39 +92,39 @@ function selectPrimaryRule(
  * Fetches full alert documents from Elasticsearch using alert IDs and indices
  */
 async function fetchAlerts(
-  esClient: ElasticsearchClient,
   alertIds: AlertSelection[],
+  context: WorkflowsRequestHandlerContext,
   logger: Logger
 ): Promise<AlertHit[]> {
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const ruleTypeRegistryMap = (await context.alerting).listTypes();
+
   if (alertIds.length === 0) {
     return [];
   }
 
   try {
     const body: Record<string, unknown> = {
-      docs: alertIds.map(({ _id, _index }) => ({
-        _id,
-        _index,
-      })),
+      docs: alertIds.map(({ _id, _index }) => ({ _id, _index })),
     };
 
-    const response = await esClient.mget(body);
+    const response = await esClient.mget<Alert>(body);
 
     const alerts: AlertHit[] = [];
     for (let i = 0; i < response.docs.length; i++) {
       const doc = response.docs[i];
       if ('found' in doc && doc.found && '_source' in doc && doc._source) {
-        const source = doc._source as Record<string, unknown>;
-        const expandedSource = expandFlattenedAlert(source);
-        const signalObject = constructSignalObject(expandedSource);
+        let alert = doc._source;
 
-        const alertHit = {
-          _id: alertIds[i]._id,
-          _index: alertIds[i]._index,
-          ...(signalObject ? signalObject : {}),
-          ...expandedSource,
-        } as AlertHit;
-        alerts.push(alertHit);
+        const ruleTypeId = get(alert, 'kibana.alert.rule.rule_type_id') as string;
+
+        const registeredRuleType = ruleTypeRegistryMap.get(ruleTypeId || QUERY_RULE_TYPE_ID); // Default to 'siem.queryRule' if undefined
+        // Format alert using the registered rule type's formatAlert function if available, use the raw source otherwise
+        if (registeredRuleType?.alerts?.formatAlert) {
+          alert = registeredRuleType.alerts.formatAlert(alert) as Alert;
+        }
+
+        alerts.push({ _id: doc._id, _index: doc._index, ...alert });
       } else {
         logger.warn(`Alert not found: ${alertIds[i]._id} in index ${alertIds[i]._index}`);
       }
@@ -167,10 +145,9 @@ async function fetchAlerts(
  */
 export async function preprocessAlertInputs(
   inputs: Record<string, unknown>,
+  context: WorkflowsRequestHandlerContext,
   spaceId: string,
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  workflowId?: string
+  logger: Logger
 ): Promise<Record<string, unknown>> {
   const event = inputs.event as AlertTriggerInput['event'] | undefined;
   if (!event || event.triggerType !== 'alert' || !event.alertIds || event.alertIds.length === 0) {
@@ -179,7 +156,7 @@ export async function preprocessAlertInputs(
 
   logger.debug(`Preprocessing ${event.alertIds.length} alert(s) for workflow execution`);
 
-  const alertHits = await fetchAlerts(esClient, event.alertIds, logger);
+  const alertHits = await fetchAlerts(event.alertIds, context, logger);
 
   if (alertHits.length === 0) {
     throw new Error('No alerts found with the provided IDs');

@@ -98,4 +98,67 @@ export class AutomaticImportSamplesIndexService {
     );
     return samples;
   }
+
+  /**
+   * Deletes all samples for a data stream
+   * @param integrationId - The integration ID
+   * @param dataStreamId - The data stream ID
+   * @param esClient - The Elasticsearch client to use (scoped to the user)
+   * @returns The number of deleted samples
+   */
+  public async deleteSamplesForDataStream(
+    integrationId: string,
+    dataStreamId: string,
+    esClient: ElasticsearchClient
+  ) {
+    // Create adapter with the scoped ES client for this request
+    const samplesIndexAdapter = createIndexAdapter({
+      logger: this.logger,
+      esClient,
+    });
+
+    let deletedCount = 0;
+    let hasMore = true;
+
+    // Delete in batches since storage adapter delete only works with IDs
+    while (hasMore) {
+      const searchResponse = await samplesIndexAdapter.getClient().search({
+        query: {
+          bool: {
+            must: [
+              { term: { integration_id: integrationId } },
+              { term: { data_stream_id: dataStreamId } },
+            ],
+          },
+        },
+        size: 1000, // Process in batches of 1000
+        track_total_hits: false,
+      });
+
+      const hits = searchResponse.hits.hits;
+      if (hits.length === 0) {
+        hasMore = false;
+        break;
+      }
+
+      // Delete each document by ID
+      for (const hit of hits) {
+        if (hit._id) {
+          await samplesIndexAdapter.getClient().delete({ id: hit._id });
+          deletedCount++;
+        }
+      }
+
+      // If we got fewer than the batch size, we're done
+      if (hits.length < 1000) {
+        hasMore = false;
+      }
+    }
+
+    this.logger.debug(
+      `Deleted ${deletedCount} samples for data stream ${dataStreamId} in integration ${integrationId}`
+    );
+
+    return { deleted: deletedCount };
+  }
 }

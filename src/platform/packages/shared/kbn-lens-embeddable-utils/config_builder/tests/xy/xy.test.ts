@@ -119,11 +119,9 @@ describe('XY', () => {
       'bar_horizontal_percentage',
     ] as const;
     const anyType = [...universalTypes, ...typesWithBreakdown];
-    // const anyType = ['bar'] as const;
     it.each(universalTypes)('should work for for a minimal %s', (type) => {
       validateAPIConverter(
         {
-          // @ts-expect-error upgrade typescript v5.9.3
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -143,7 +141,6 @@ describe('XY', () => {
     it.each(anyType)('should work for ES|QL mode for a minimal %s chart with breakdown', (type) => {
       validateAPIConverter(
         {
-          // @ts-expect-error upgrade typescript v5.9.3
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -171,7 +168,6 @@ describe('XY', () => {
       (type1, type2) => {
         validateAPIConverter(
           {
-            // @ts-expect-error upgrade typescript v5.9.3
             type: 'xy',
             title: `Mixed Chart`,
             layers: [

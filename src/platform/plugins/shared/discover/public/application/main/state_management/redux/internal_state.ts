@@ -36,8 +36,9 @@ import {
   type DiscoverInternalState,
   type TabState,
   type RecentlyClosedTabState,
+  TabInitializationStatus,
 } from './types';
-import { loadDataViewList, initializeTabs } from './actions';
+import { loadDataViewList, initializeTabs, initializeSingleTab } from './actions';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
@@ -54,7 +55,6 @@ const initialState: DiscoverInternalState = {
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
-  expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
@@ -72,12 +72,12 @@ export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabI
 
 type TabAction<T extends { [key: string]: unknown } = {}> = PayloadAction<TabActionPayload<T>>;
 
-const withTab = <TAction extends TabAction>(
+const withTab = <TPayload extends TabActionPayload>(
   state: DiscoverInternalState,
-  action: TAction,
+  payload: TPayload,
   fn: (tab: TabState) => void
 ) => {
-  const tab = selectTab(state, action.payload.tabId);
+  const tab = selectTab(state, payload.tabId);
 
   if (tab) {
     fn(tab);
@@ -134,12 +134,12 @@ export const internalStateSlice = createSlice({
     },
 
     setForceFetchOnSelect: (state, action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
       }),
 
     setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.isDataViewLoading = action.payload.isDataViewLoading;
       }),
 
@@ -151,24 +151,43 @@ export const internalStateSlice = createSlice({
       state.tabsBarVisibility = action.payload;
     },
 
+    markNonActiveTabsForRefetch: (state) => {
+      // Mark all non-active tabs to refetch on selection
+      // Used when projectRouting changes in CPS Manager
+      const currentTabId = state.tabs.unsafeCurrentId;
+      state.tabs.allIds.forEach((tabId) => {
+        if (tabId !== currentTabId && state.tabs.byId[tabId]) {
+          state.tabs.byId[tabId].forceFetchOnSelect = true;
+        }
+      });
+    },
+
     setExpandedDoc: (
       state,
-      action: PayloadAction<{
+      action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         initialDocViewerTabId?: string;
       }>
     ) => {
-      state.expandedDoc = action.payload.expandedDoc;
-      state.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+      withTab(state, action.payload, (tab) => {
+        tab.expandedDoc = action.payload.expandedDoc;
+        tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+      });
     },
 
-    discardFlyoutsOnTabChange: (state) => {
-      state.expandedDoc = undefined;
-      state.initialDocViewerTabId = undefined;
+    setInitialDocViewerTabId: (
+      state,
+      action: TabAction<{
+        initialDocViewerTabId: string | undefined;
+      }>
+    ) => {
+      withTab(state, action.payload, (tab) => {
+        tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+      });
     },
 
     setDataRequestParams: (state, action: TabAction<Pick<TabState, 'dataRequestParams'>>) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.dataRequestParams = action.payload.dataRequestParams;
       }),
 
@@ -176,7 +195,7 @@ export const internalStateSlice = createSlice({
      * Set the tab global state, overwriting existing state and pushing to URL history
      */
     setGlobalState: (state, action: TabAction<Pick<TabState, 'globalState'>>) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.globalState = action.payload.globalState;
       }),
 
@@ -184,7 +203,7 @@ export const internalStateSlice = createSlice({
      * Set the tab app state, overwriting existing state and pushing to URL history
      */
     setAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         let appState = action.payload.appState;
 
         // When updating to an ES|QL query, sync the data source
@@ -200,7 +219,7 @@ export const internalStateSlice = createSlice({
      * Set the tab app state and previous app state, overwriting existing state and pushing to URL history
      */
     resetAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.previousAppState = action.payload.appState;
         tab.appState = action.payload.appState;
       }),
@@ -209,7 +228,7 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<Pick<TabState, 'overriddenVisContextAfterInvalidation'>>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation =
           action.payload.overriddenVisContextAfterInvalidation;
       }),
@@ -220,7 +239,7 @@ export const internalStateSlice = createSlice({
         controlGroupState: TabState['controlGroupState'];
       }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.controlGroupState = action.payload.controlGroupState;
       }),
 
@@ -228,7 +247,7 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{ esqlVariables: ESQLControlVariable[] | undefined }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.esqlVariables = action.payload.esqlVariables;
       }),
 
@@ -251,23 +270,23 @@ export const internalStateSlice = createSlice({
         },
       }),
       reducer: (state, action: TabAction<Pick<TabState, 'resetDefaultProfileState'>>) =>
-        withTab(state, action, (tab) => {
+        withTab(state, action.payload, (tab) => {
           tab.resetDefaultProfileState = action.payload.resetDefaultProfileState;
         }),
     },
 
     resetOnSavedSearchChange: (state, action: TabAction) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
-        state.expandedDoc = undefined;
-        state.initialDocViewerTabId = undefined;
+        tab.expandedDoc = undefined;
+        tab.initialDocViewerTabId = undefined;
       }),
 
     setESQLEditorUiState: (
       state,
       action: TabAction<{ esqlEditorUiState: Partial<TabState['uiState']['esqlEditor']> }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.uiState.esqlEditor = action.payload.esqlEditorUiState;
       }),
 
@@ -275,7 +294,7 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{ dataGridUiState: Partial<TabState['uiState']['dataGrid']> }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.uiState.dataGrid = action.payload.dataGridUiState;
       }),
 
@@ -283,7 +302,7 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{ fieldListUiState: Partial<TabState['uiState']['fieldList']> }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.uiState.fieldList = action.payload.fieldListUiState;
       }),
 
@@ -293,7 +312,7 @@ export const internalStateSlice = createSlice({
         fieldListExistingFieldsInfo: TabState['uiState']['fieldListExistingFieldsInfo'];
       }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.uiState.fieldListExistingFieldsInfo = action.payload.fieldListExistingFieldsInfo;
       }),
 
@@ -314,7 +333,7 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{ layoutUiState: Partial<TabState['uiState']['layout']> }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.uiState.layout = action.payload.layoutUiState;
       }),
 
@@ -322,14 +341,15 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{ searchDraftUiState: Partial<TabState['uiState']['searchDraft']> }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.uiState.searchDraft = action.payload.searchDraftUiState;
       }),
+
     setMetricsGridState: (
       state,
       action: TabAction<{ metricsGridState: Partial<TabState['uiState']['metricsGrid']> }>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.uiState.metricsGrid = action.payload.metricsGridState;
       }),
   },
@@ -348,6 +368,31 @@ export const internalStateSlice = createSlice({
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
     });
 
+    builder.addCase(initializeSingleTab.pending, (state, action) =>
+      withTab(state, action.meta.arg, (tab) => {
+        tab.initializationState = { initializationStatus: TabInitializationStatus.InProgress };
+      })
+    );
+
+    builder.addCase(initializeSingleTab.fulfilled, (state, action) =>
+      withTab(state, action.meta.arg, (tab) => {
+        tab.initializationState = {
+          initializationStatus: action.payload.showNoDataPage
+            ? TabInitializationStatus.NoData
+            : TabInitializationStatus.Complete,
+        };
+      })
+    );
+
+    builder.addCase(initializeSingleTab.rejected, (state, action) =>
+      withTab(state, action.meta.arg, (tab) => {
+        tab.initializationState = {
+          initializationStatus: TabInitializationStatus.Error,
+          error: action.error,
+        };
+      })
+    );
+
     builder.addMatcher(isAnyOf(initializeTabs.fulfilled, initializeTabs.rejected), (state) => {
       state.tabs.areInitializing = false;
     });
@@ -357,6 +402,8 @@ export const internalStateSlice = createSlice({
 export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
   'internalState/syncLocallyPersistedTabState'
 );
+
+export const discardFlyoutsOnTabChange = createAction('internalState/discardFlyoutsOnTabChange');
 
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
@@ -401,7 +448,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
       (action, listenerApi) => {
         const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
-        withTab(listenerApi.getState(), action, (tab) => {
+        withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
             internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
             appState: tab.appState,
@@ -415,9 +462,23 @@ const createMiddleware = (options: InternalStateDependencies) => {
   });
 
   startListening({
-    actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
+    actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
+    },
+  });
+
+  startListening({
+    actionCreator: initializeTabs.fulfilled,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+
+      // Initialize CPS manager with session-level projectRouting after state is updated
+      if (services.cps?.cpsManager) {
+        services.cps.cpsManager.setProjectRouting(
+          services.cps.cpsManager.getDefaultProjectRouting()
+        );
+      }
     },
   });
 

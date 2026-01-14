@@ -48,7 +48,7 @@ import type {
   IEventLogClientService,
 } from '@kbn/event-log-plugin/server';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { PluginSetup as KQLPluginSetup } from '@kbn/kql/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
@@ -193,7 +193,7 @@ export interface AlertingPluginsSetup {
   monitoringCollection: MonitoringCollectionSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
-  unifiedSearch: UnifiedSearchServerPluginSetup;
+  kql: KQLPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -448,7 +448,7 @@ export class AlertingPlugin {
       usageCounter: this.usageCounter,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       encryptedSavedObjects: plugins.encryptedSavedObjects,
-      config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
+      config$: plugins.kql.autocomplete.getInitializerContextConfig().create(),
       isServerless: this.isServerless,
       docLinks: core.docLinks,
       alertingConfig: this.config,
@@ -671,11 +671,11 @@ export class AlertingPlugin {
       return rulesSettingsClientFactory!.create(request);
     };
 
-    const getMaintenanceWindowClientInternal = (request: KibanaRequest) => {
+    const getMaintenanceWindowClient = (request: KibanaRequest) => {
       if (!plugins.maintenanceWindows) {
         return;
       }
-      return plugins.maintenanceWindows.getMaintenanceWindowClientInternal(request);
+      return plugins.maintenanceWindows.getMaintenanceWindowClientWithoutAuth(request);
     };
 
     taskRunnerFactory.initialize({
@@ -697,7 +697,7 @@ export class AlertingPlugin {
       maintenanceWindowsService: new MaintenanceWindowsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
         logger,
-        getMaintenanceWindowClientInternal,
+        getMaintenanceWindowClient,
       }),
       maxAlerts: this.config.rules.run.alerts.max,
       ruleTypeRegistry: this.ruleTypeRegistry!,

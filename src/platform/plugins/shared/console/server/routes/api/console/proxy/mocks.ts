@@ -7,21 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SemVer } from 'semver';
-
 jest.mock('../../../../lib/proxy_request', () => ({
   proxyRequest: jest.fn(),
 }));
 
 import { duration } from 'moment';
 import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { MAJOR_VERSION } from '../../../../../common/constants';
-import { ProxyConfigCollection } from '../../../../lib';
 import type { RouteDependencies, ProxyDependencies } from '../../..';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../services';
 import { handleEsError } from '../../../../shared_imports';
-
-const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 const readLegacyESConfig = async () => ({
   requestTimeout: duration(30000),
@@ -30,18 +24,9 @@ const readLegacyESConfig = async () => ({
   hosts: ['http://localhost:9200'],
 });
 
-let defaultProxyValue = Object.freeze({
+const defaultProxyValue = Object.freeze({
   readLegacyESConfig,
 });
-
-if (kibanaVersion.major < 8) {
-  // In 7.x we still support the "pathFilter" and "proxyConfig" kibana.yml settings
-  defaultProxyValue = Object.freeze({
-    readLegacyESConfig,
-    pathFilters: [/.*/],
-    proxyConfigCollection: new ProxyConfigCollection([]),
-  });
-}
 
 interface MockDepsArgument extends Partial<Omit<RouteDependencies, 'proxy'>> {
   proxy?: Partial<ProxyDependencies>;
@@ -67,7 +52,6 @@ export const getProxyRouteHandlerDeps = ({
         }
       : defaultProxyValue,
     log,
-    kibanaVersion,
     lib: { handleEsError },
   };
 };

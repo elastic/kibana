@@ -38,6 +38,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         supported_feature_ids: ['alerting'],
         is_system_action_type: false,
         is_deprecated: true,
+        source: 'stack',
       });
 
       const { body: createdConnector } = await supertest

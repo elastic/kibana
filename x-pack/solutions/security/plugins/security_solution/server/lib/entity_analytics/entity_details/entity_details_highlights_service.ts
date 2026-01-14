@@ -41,13 +41,14 @@ import type { AssetCriticalityDataClient, IdentifierValuesByField } from '../ass
 import { buildCriticalitiesQuery } from '../asset_criticality';
 import type { AggregationBucket } from '../../asset_inventory/telemetry/type';
 
-const EMPTY_VULNERABILITIES_TOTAL: Record<string, number> = {
+// Always return a new object to prevent mutation
+const getEmptyVulnerabilitiesTotal = (): Record<string, number> => ({
   [VULNERABILITIES_RESULT_EVALUATION.NONE]: 0,
   [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: 0,
   [VULNERABILITIES_RESULT_EVALUATION.HIGH]: 0,
   [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: 0,
   [VULNERABILITIES_RESULT_EVALUATION.LOW]: 0,
-};
+});
 
 interface EntityDetailsHighlightsServiceFactoryOptions {
   riskEngineClient: RiskEngineDataClient;
@@ -108,12 +109,14 @@ export const entityDetailsHighlightsServiceFactory = ({
             {
               score: [latestRiskScore.calculated_score_norm],
               id_field: [latestRiskScore.id_field],
-              inputs: latestRiskScore.inputs.map((input) => ({
+              alert_inputs: latestRiskScore.inputs.map((input) => ({
                 risk_score: [input.risk_score?.toString() ?? ''],
                 contribution_score: [input.contribution_score?.toString() ?? ''],
                 description: [input.description ?? ''],
                 timestamp: [input.timestamp ?? ''],
               })),
+              asset_criticality_contribution_score:
+                latestRiskScore.category_2_score?.toString() ?? '0',
             },
           ]
         : [];
@@ -235,9 +238,9 @@ export const entityDetailsHighlightsServiceFactory = ({
               acc[key] = value.doc_count;
               return acc;
             },
-            EMPTY_VULNERABILITIES_TOTAL
+            getEmptyVulnerabilitiesTotal()
           )
-        : EMPTY_VULNERABILITIES_TOTAL;
+        : getEmptyVulnerabilitiesTotal();
 
       const vulnerabilitiesAnonymized = vulnerabilities?.hits.hits.map((hit) =>
         transformRawDataToRecord({

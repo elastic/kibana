@@ -523,6 +523,46 @@
           },
           {
             "parentPluginId": "inspector",
+            "id": "def-public.RequestAdapter.getRequestsSince",
+            "type": "Function",
+            "tags": [],
+            "label": "getRequestsSince",
+            "description": [],
+            "signature": [
+              "(time: number) => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              "[]"
+            ],
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-public.RequestAdapter.getRequestsSince.$1",
+                "type": "number",
+                "tags": [],
+                "label": "time",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
             "id": "def-public.RequestAdapter.getRequestEntries",
             "type": "Function",
             "tags": [],
@@ -2065,6 +2105,46 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-common.RequestAdapter.getRequestsSince",
+            "type": "Function",
+            "tags": [],
+            "label": "getRequestsSince",
+            "description": [],
+            "signature": [
+              "(time: number) => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Request",
+                "text": "Request"
+              },
+              "[]"
+            ],
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inspector",
+                "id": "def-common.RequestAdapter.getRequestsSince.$1",
+                "type": "number",
+                "tags": [],
+                "label": "time",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {

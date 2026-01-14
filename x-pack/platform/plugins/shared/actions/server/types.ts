@@ -20,7 +20,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
-import type { ActionTypeExecutorResult, SubFeature } from '../common';
+import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsClient } from './actions_client';
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -182,24 +182,27 @@ export interface PostDeleteConnectorHookParams<
   services: HookServices;
 }
 
-export interface ActionType<
+export type ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
+> =
+  | ClassicActionType<Config, Secrets, Params, ExecutorResultData>
+  | WorkflowActionType<Config, Secrets, Params, ExecutorResultData>;
+
+export interface ActionTypeCoreFields<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
 > {
   id: string;
   name: string;
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
-  validate: {
-    params: ValidatorType<Params>;
-    config: ValidatorType<Config>;
-    secrets: ValidatorType<Secrets>;
-    connector?: (config: Config, secrets: Secrets) => string | null;
-  };
   isSystemActionType?: boolean;
+  source?: ActionTypeSource;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
@@ -227,12 +230,41 @@ export interface ActionType<
   // Headers that should be added to every Axios request made by this action type
   globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
-  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
 }
+
+export type WorkflowActionType<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+> = ActionTypeCoreFields<Config, Secrets, Params> & {
+  executor?: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  validate: {
+    params?: ValidatorType<Params>;
+    config: ValidatorType<Config>;
+    secrets: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
+  };
+};
+
+export type ClassicActionType<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+> = ActionTypeCoreFields<Config, Secrets, Params> & {
+  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  validate: {
+    params: ValidatorType<Params>;
+    config: ValidatorType<Config>;
+    secrets: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
+  };
+};
 
 export interface RawAction extends Record<string, unknown> {
   actionTypeId: string;
@@ -259,26 +291,9 @@ export interface ActionTaskExecutorParams {
   actionTaskParamsId: string;
 }
 
-export interface ProxySettings {
-  proxyUrl: string;
-  proxyBypassHosts: Set<string> | undefined;
-  proxyOnlyHosts: Set<string> | undefined;
-  proxyHeaders?: Record<string, string>;
-  proxySSLSettings: SSLSettings;
-}
-
 export interface ResponseSettings {
   maxContentLength: number;
   timeout: number;
-}
-
-export interface SSLSettings {
-  verificationMode?: 'none' | 'certificate' | 'full';
-  pfx?: Buffer;
-  cert?: Buffer;
-  key?: Buffer;
-  passphrase?: string;
-  ca?: Buffer;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {

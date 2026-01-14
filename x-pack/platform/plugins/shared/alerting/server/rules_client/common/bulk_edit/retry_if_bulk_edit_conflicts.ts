@@ -57,7 +57,7 @@ export const retryIfBulkEditConflicts = async (
   logger: Logger,
   name: string,
   bulkEditOperation: BulkEditOperation,
-  filter: KueryNode | null,
+  filter: KueryNode | null = null,
   retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accApiKeysToInvalidate: string[] = [],
   accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],

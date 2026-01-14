@@ -332,6 +332,19 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleLongRunningRecurringTask: {
+        title: 'Sample Long Running Recurring Task',
+        description: 'A sample long running task that hangs for 1m 30s.',
+        timeout: '365d',
+        createTaskRunner: () => ({
+          async run() {
+            await new Promise((resolve) => setTimeout(resolve, 90000));
+            return {
+              state: {},
+            };
+          },
+        }),
+      },
       sampleOneTimeTaskThrowingError: {
         title: 'Sample One-Time Task that throws an error',
         description: 'A sample task that throws an error each run.',

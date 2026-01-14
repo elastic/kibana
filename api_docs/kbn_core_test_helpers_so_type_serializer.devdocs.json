@@ -251,7 +251,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,

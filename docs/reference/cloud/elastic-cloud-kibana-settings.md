@@ -94,6 +94,9 @@ stack: ga 9.3
 `xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run`
 : The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.
 
+`xpack.reporting.csv.maxRows`
+:    The maximum number of rows in a CSV report. Reports longer than maximum limit will be truncated. The default is 10,000. The minimum is 1.
+
 ### Version 9.2+ [ec_version_9_2]
 ```{applies_to}
 stack: ga 9.2

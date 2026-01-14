@@ -6,7 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
 export const createGenerateConfigPrompt = ({
   nlQuery,
@@ -30,20 +30,18 @@ export const createGenerateConfigPrompt = ({
 
 Schema for ${chartType}:
 <schema type="${chartType}">
-${JSON.stringify(schema, null, 2)}
+${JSON.stringify(schema)}
 </schema>
 
 ${
   existingConfig
-    ? `Existing configuration to modify: 
+    ? `Existing configuration to modify:
   <existing_configuration>
   ${existingConfig}
   </existing_configuration>
   `
     : ''
 }
-  
-${existingConfig ? `Existing configuration to modify: ${existingConfig}` : ''}
 
 ${additionalInstructions}
 
@@ -64,5 +62,7 @@ IMPORTANT: Return ONLY the JSON configuration wrapped in a markdown code block l
 
 ${additionalContext}`,
     ],
+    // Human message required for Bedrock to work properly
+    ['human', 'Generate the visualization configuration.'],
   ];
 };

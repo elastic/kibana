@@ -18,7 +18,7 @@ import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/tele
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { DefineStepRule } from '../../../common/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
@@ -100,20 +100,26 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
   }, [getFields]);
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const attachmentData = useMemo(() => {
     const queryField = getFields().queryBar;
     const { query } = (queryField.value as DefineStepRule['queryBar']).query;
-    return { text: JSON.stringify({ query: query ?? '', queryLanguage: language }) };
-  }, [getFields, language]);
+    return {
+      attachmentType: SecurityAgentBuilderAttachments.rule,
+      attachmentData: {
+        text: JSON.stringify({ query: query ?? '', queryLanguage: language }),
+        attachmentLabel: languageName,
+      },
+      attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT(languageName),
+    };
+  }, [getFields, language, languageName]);
 
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.rule,
-    attachmentData,
-    attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT(languageName),
-  });
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(attachmentData);
 
-  if (!hasAssistantPrivilege) {
+  if (
+    (isAgentChatExperienceEnabled && !hasAgentBuilderPrivilege) ||
+    (!isAgentChatExperienceEnabled && !hasAssistantPrivilege)
+  ) {
     return null;
   }
 
@@ -125,11 +131,14 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
         id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantHelpText"
         defaultMessage="{AiAssistantNewChatLink} to help resolve this error."
         values={{
-          AiAssistantNewChatLink: isAgentBuilderEnabled ? (
+          AiAssistantNewChatLink: isAgentChatExperienceEnabled ? (
             <NewAgentBuilderAttachment
               onClick={openAgentBuilderFlyout}
-              text={i18n.ASK_AGENT_ERROR_BUTTON}
               size="xs"
+              telemetry={{
+                pathway: 'rule_creation',
+                attachments: ['rule'],
+              }}
             />
           ) : (
             <NewChat

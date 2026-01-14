@@ -80,7 +80,13 @@ export class OtelFieldsRepository {
   }
 
   getByName(fieldName: OtelFieldName | AnyFieldName): FieldMetadata | undefined {
-    // Strip OTel prefixes before looking up the field
+    // First, try to find the field directly (handles native prefixed fields)
+    const directMatch = this.otelFields[fieldName as OtelFieldName];
+    if (directMatch) {
+      return directMatch;
+    }
+
+    // If not found, strip OTel prefixes and try again (handles base fields with prefix lookups)
     const strippedFieldName = stripOtelPrefixes(fieldName as string);
     return this.otelFields[strippedFieldName as OtelFieldName];
   }

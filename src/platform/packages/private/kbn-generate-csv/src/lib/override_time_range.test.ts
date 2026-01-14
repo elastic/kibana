@@ -561,6 +561,42 @@ describe('overrideTimeRange', () => {
     expect(updated).toBeUndefined();
   });
 
+  it('should use timeFieldName if no meta field found', () => {
+    const filter = [
+      {
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2025-01-01T19:38:24.286Z',
+              lte: '2025-01-01T20:03:24.286Z',
+            },
+          },
+        },
+      },
+    ];
+
+    const updated = overrideTimeRange({
+      // @ts-expect-error missing meta field
+      currentFilters: filter,
+      forceNow: '2025-06-18T19:55:00.000Z',
+      timeFieldName: '@timestamp',
+    });
+    expect(updated).toEqual([
+      {
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2025-06-18T19:30:00.000Z',
+              lte: '2025-06-18T19:55:00.000Z',
+            },
+          },
+        },
+      },
+    ]);
+  });
+
   it('should return undefined if invalid time', () => {
     const filter = [
       {

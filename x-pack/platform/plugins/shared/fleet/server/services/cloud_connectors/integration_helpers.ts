@@ -9,9 +9,64 @@ import {
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
 } from '../../../common/services/cloud_connector_helpers';
+import {
+  AWS_ACCOUNT_TYPE_VAR_NAME,
+  AZURE_ACCOUNT_TYPE_VAR_NAME,
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+} from '../../../common/constants/cloud_connector';
 
-import type { CloudProvider, CloudConnectorVars } from '../../../common/types';
+import type { CloudProvider, CloudConnectorVars, AccountType } from '../../../common/types';
 import type { NewPackagePolicy } from '../../types';
+
+/**
+ * Extracts the account type from package policy variables
+ *
+ * @param cloudProvider - The cloud provider (aws, azure, gcp)
+ * @param packagePolicy - The package policy containing account type vars
+ * @returns Account type ('single-account' or 'organization-account') or undefined if not found
+ */
+export function extractAccountType(
+  cloudProvider: CloudProvider,
+  packagePolicy: NewPackagePolicy
+): AccountType | undefined {
+  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+  if (!vars) {
+    return undefined;
+  }
+
+  let rawAccountType: string | undefined;
+
+  if (cloudProvider === 'aws') {
+    rawAccountType = vars[AWS_ACCOUNT_TYPE_VAR_NAME]?.value;
+  } else if (cloudProvider === 'azure') {
+    rawAccountType = vars[AZURE_ACCOUNT_TYPE_VAR_NAME]?.value;
+  }
+
+  return validateAccountType(rawAccountType);
+}
+
+/**
+ * Validates that the account type value is one of the standardized values
+ *
+ * All cloud providers use the same standardized values: 'single-account' or 'organization-account'
+ *
+ * @param accountType - The account type value from package policy
+ * @returns Valid account type or undefined if not recognized
+ */
+export function validateAccountType(accountType: string | undefined): AccountType | undefined {
+  if (!accountType) {
+    return undefined;
+  }
+
+  // Validate against standardized values
+  if (accountType === SINGLE_ACCOUNT || accountType === ORGANIZATION_ACCOUNT) {
+    return accountType as AccountType;
+  }
+
+  return undefined;
+}
 
 /**
  * Updates package policy inputs with cloud connector secret references

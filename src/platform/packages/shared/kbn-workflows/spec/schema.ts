@@ -56,10 +56,21 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
+export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']); // 'queue' TBD
+export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
+
+export const ConcurrencySettingsSchema = z.object({
+  key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
+  strategy: CollisionStrategySchema.optional(), // 'queue', 'drop', or 'cancel-in-progress'
+  max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
+});
+export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
+
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
+  concurrency: ConcurrencySettingsSchema.optional(),
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -158,6 +169,17 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
+export const BuiltInStepProperties = [
+  'name',
+  'type',
+  'with',
+  'if',
+  'foreach',
+  'timeout',
+  'on-failure',
+];
+export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
+
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
   with: z.object({
@@ -165,6 +187,12 @@ export const WaitStepSchema = BaseStepSchema.extend({
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
+
+export const DataSetStepSchema = BaseStepSchema.extend({
+  type: z.literal('data.set'),
+  with: z.record(z.string(), z.unknown()),
+});
+export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
 export const FetcherConfigSchema = z
@@ -174,6 +202,7 @@ export const FetcherConfigSchema = z
     max_redirects: z.number().optional(),
     keep_alive: z.boolean().optional(),
   })
+  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
 
 export const HttpStepSchema = BaseStepSchema.extend({
@@ -441,6 +470,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    DataSetStepSchema,
     HttpStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
@@ -456,6 +486,7 @@ export const BuiltInStepTypes = [
   IfStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
+  DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   HttpStepSchema.shape.type.value,
 ];
@@ -588,6 +619,7 @@ export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(z.string(), StepDataSchema),
   foreach: ForEachContextSchema.optional(),
+  variables: z.record(z.string(), z.unknown()).optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
 
@@ -601,6 +633,6 @@ export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
 export const BaseSerializedErrorSchema = z.object({
   type: z.string(),
   message: z.string(),
-  details: z.any().optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;

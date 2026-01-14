@@ -9,35 +9,35 @@ import type {
   IndicesDataStream,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { isNotFoundError } from '@kbn/es-errors';
 import type {
   FailureStore,
   IngestStreamLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
-import _, { cloneDeep } from 'lodash';
-import { isNotFoundError } from '@kbn/es-errors';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import _, { cloneDeep } from 'lodash';
+import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { StatusError } from '../../errors/status_error';
+import { validateClassicFields, validateSimulation } from '../../helpers/validate_fields';
+import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
 import { getDataStreamSettings, getUnmanagedElasticsearchAssets } from '../../stream_crud';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
-import type { StateDependencies, StreamChange } from '../types';
 import type {
-  StreamChangeStatus,
   StreamChanges,
+  StreamChangeStatus,
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
-import { validateClassicFields } from '../../helpers/validate_fields';
-import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
-import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
+import type { StateDependencies, StreamChange } from '../types';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
 
 interface ClassicStreamChanges extends StreamChanges {
@@ -233,6 +233,8 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     validateSettings(this._definition, this.dependencies.isServerless);
 
+    await validateSimulation(this._definition, this.dependencies.scopedClusterClient);
+
     return { isValid: true, errors: [] };
   }
 
@@ -343,18 +345,19 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         },
       });
 
-      const pipelineTargets = await this.getPipelineTargets();
-      if (!pipelineTargets) {
-        throw new StatusError('Could not find pipeline targets', 500);
+      // Only generate delete action if a pipeline actually exists
+      // Don't use fallback names for deletion - can't delete from non-existent pipelines
+      const pipelineTargets = await this.getPipelineTargets({ useFallbackName: false });
+      if (pipelineTargets) {
+        const { pipeline, template } = pipelineTargets;
+        actions.push({
+          type: 'delete_processor_from_ingest_pipeline',
+          pipeline,
+          template,
+          dataStream: this._definition.name,
+          referencePipeline: streamManagedPipelineName,
+        });
       }
-      const { pipeline, template } = pipelineTargets;
-      actions.push({
-        type: 'delete_processor_from_ingest_pipeline',
-        pipeline,
-        template,
-        dataStream: this._definition.name,
-        referencePipeline: streamManagedPipelineName,
-      });
     }
 
     if (this._changes.lifecycle) {
@@ -448,7 +451,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       },
     };
 
-    const pipelineTargets = await this.getPipelineTargets();
+    const pipelineTargets = await this.getPipelineTargets({ useFallbackName: true });
     if (!pipelineTargets) {
       throw new StatusError('Could not find pipeline targets', 500);
     }
@@ -492,7 +495,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         },
       },
       {
-        type: 'unlink_features',
+        type: 'unlink_systems',
         request: {
           name: this._definition.name,
         },
@@ -507,7 +510,9 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
           name: streamManagedPipelineName,
         },
       });
-      const pipelineTargets = await this.getPipelineTargets();
+      // Only generate delete action if a pipeline actually exists
+      // Don't use fallback names for deletion - can't delete from non-existent pipelines
+      const pipelineTargets = await this.getPipelineTargets({ useFallbackName: false });
       if (pipelineTargets) {
         const { pipeline, template } = pipelineTargets;
         actions.push({
@@ -523,7 +528,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     return actions;
   }
 
-  private async getPipelineTargets() {
+  private async getPipelineTargets({ useFallbackName }: { useFallbackName: boolean }) {
     let dataStream: IndicesDataStream;
     try {
       dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
@@ -538,8 +543,21 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       scopedClusterClient: this.dependencies.scopedClusterClient,
     });
 
+    // For deletion operations, only return if there's an actual pipeline configured
+    // Don't invent pipeline names - can't delete from non-existent pipelines
+    if (!unmanagedAssets.ingestPipeline) {
+      if (!useFallbackName) {
+        return undefined;
+      }
+      // For append/create operations, use a fallback name if needed
+      return {
+        pipeline: `${dataStream.template}-pipeline`,
+        template: dataStream.template,
+      };
+    }
+
     return {
-      pipeline: unmanagedAssets.ingestPipeline ?? `${dataStream.template}-pipeline`,
+      pipeline: unmanagedAssets.ingestPipeline,
       template: dataStream.template,
     };
   }

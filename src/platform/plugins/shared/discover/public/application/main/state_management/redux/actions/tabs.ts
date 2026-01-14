@@ -16,12 +16,13 @@ import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
-import type { OpenInNewTabParams } from '../../../../../context_awareness';
+import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
+  discardFlyoutsOnTabChange,
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
@@ -148,7 +149,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           },
         },
         ...existingTab,
-        ...item,
+        ...omit(item, 'initializationState'),
       };
 
       if (existingTab) {
@@ -213,15 +214,19 @@ export const updateTabs: InternalStateThunkActionCreator<
     });
 
     const selectedTab = selectedItem ?? currentTab;
+    const selectedTabHasChanged = selectedTab.id !== currentTab.id;
+
+    // If changing tabs, stop syncing the current tab before updating any URL state
+    if (selectedTabHasChanged) {
+      currentTabStateContainer?.actions.stopSyncing();
+    }
 
     // Push the selected tab ID to the URL, which creates a new browser history entry.
     // This must be done before setting other URL state, which replace the history entry
     // in order to avoid creating multiple browser history entries when switching tabs.
     await tabsStorageManager.pushSelectedTabIdToUrl(selectedTab.id);
 
-    if (selectedTab.id !== currentTab.id) {
-      currentTabStateContainer?.actions.stopSyncing();
-
+    if (selectedTabHasChanged) {
       const nextTab = updatedTabs.find((tab) => tab.id === selectedTab.id);
       const nextTabRuntimeState = selectTabRuntimeState(runtimeStateManager, selectedTab.id);
       const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
@@ -285,7 +290,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         services.data.search.session.reset();
       }
 
-      dispatch(internalStateSlice.actions.discardFlyoutsOnTabChange());
+      dispatch(discardFlyoutsOnTabChange());
     }
 
     dispatch(

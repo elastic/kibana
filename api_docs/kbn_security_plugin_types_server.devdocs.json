@@ -592,12 +592,12 @@
                 "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.ts"
               },
               {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
               },
               {
                 "plugin": "fleet",
@@ -4315,6 +4315,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
               }
             ]
           },
@@ -4433,6 +4437,10 @@
                 "path": "x-pack/platform/plugins/private/reindex_service/server/src/lib/credential_store.ts"
               },
               {
+                "plugin": "taskManagerDependencies",
+                "path": "x-pack/platform/plugins/private/task_manager_dependencies/server/plugin.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
               },
@@ -4463,6 +4471,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/lib/get_user_info.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",

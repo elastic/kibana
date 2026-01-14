@@ -40,13 +40,19 @@ describe('grouping accordion panel', () => {
     const { getByTestId } = render(<GroupPanel {...testProps} />);
     expect(getByTestId('grouping-accordion')).toBeInTheDocument();
     expect(renderChildComponent).toHaveBeenCalledWith(
-      createGroupFilter(testProps.selectedGroup, [ruleName])
+      createGroupFilter(testProps.selectedGroup, [ruleName]),
+      testProps.selectedGroup,
+      testProps.groupBucket
     );
   });
   it('creates the query for the selectedGroup attribute when the group is null', () => {
     const { getByTestId } = render(<GroupPanel {...testProps} isNullGroup />);
     expect(getByTestId('grouping-accordion')).toBeInTheDocument();
-    expect(renderChildComponent).toHaveBeenCalledWith(getNullGroupFilter(testProps.selectedGroup));
+    expect(renderChildComponent).toHaveBeenCalledWith(
+      getNullGroupFilter(testProps.selectedGroup),
+      testProps.selectedGroup,
+      testProps.groupBucket
+    );
   });
   it('does not render accordion or create query without a valid groupFieldValue', () => {
     const { queryByTestId } = render(

@@ -77,7 +77,7 @@ export const ReferenceLinePanel = (
   );
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <TextDecorationSetting
         idPrefix={idPrefix}
         setConfig={setConfig}
@@ -106,7 +106,7 @@ export const ReferenceLinePanel = (
           defaultMessage: 'Color',
         })}
       />
-    </>
+    </div>
   );
 };
 

@@ -83,7 +83,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               steps: [
                 // Set up some failed documents
                 {
-                  where: {
+                  condition: {
                     field: 'attributes.user.name',
                     eq: 'user1',
                     steps: [

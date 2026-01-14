@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import {
   getTranslatableValueFromString,
   geti18nIdentifierFromString,
+  getStringValue,
+  getValueFromJSXAttribute,
   lowerCaseFirstLetter,
   upperCaseFirstLetter,
 } from './utils';
@@ -114,6 +118,119 @@ describe('Utils', () => {
       expect(geti18nIdentifierFromString('Hey?')).toBe('hey');
       expect(geti18nIdentifierFromString('Hey, this is great! Success.')).toBe('heyThisIsGreat');
       expect(geti18nIdentifierFromString('1Hey, this is great! Success.')).toBe('heyThisIsGreat');
+    });
+  });
+
+  describe('getStringValue', () => {
+    it('should return the string value from a string Literal node', () => {
+      const node = {
+        type: AST_NODE_TYPES.Literal,
+        value: 'hello world',
+      } as TSESTree.StringLiteral;
+
+      expect(getStringValue(node)).toBe('hello world');
+    });
+
+    it('should return false for a number Literal node', () => {
+      const node = {
+        type: AST_NODE_TYPES.Literal,
+        value: 42,
+      } as TSESTree.NumberLiteral;
+
+      expect(getStringValue(node)).toBe(false);
+    });
+
+    it('should return false for a boolean Literal node', () => {
+      const node = {
+        type: AST_NODE_TYPES.Literal,
+        value: true,
+      } as TSESTree.BooleanLiteral;
+
+      expect(getStringValue(node)).toBe(false);
+    });
+
+    it('should return false for non-Literal nodes', () => {
+      const identifierNode = {
+        type: AST_NODE_TYPES.Identifier,
+        name: 'myVar',
+      } as TSESTree.Identifier;
+
+      expect(getStringValue(identifierNode)).toBe(false);
+
+      const callExpressionNode = {
+        type: AST_NODE_TYPES.CallExpression,
+      } as TSESTree.CallExpression;
+
+      expect(getStringValue(callExpressionNode)).toBe(false);
+    });
+  });
+
+  describe('getValueFromJSXAttribute', () => {
+    it('should return empty string for null value', () => {
+      expect(getValueFromJSXAttribute(null)).toBe('');
+    });
+
+    it('should extract string from direct string literal (label="foo")', () => {
+      const attrValue = {
+        type: AST_NODE_TYPES.Literal,
+        value: 'hello world',
+      } as TSESTree.StringLiteral;
+
+      expect(getValueFromJSXAttribute(attrValue)).toBe('hello world');
+    });
+
+    it("should extract string from JSX expression container with string literal (label={'foo'})", () => {
+      const attrValue = {
+        type: AST_NODE_TYPES.JSXExpressionContainer,
+        expression: {
+          type: AST_NODE_TYPES.Literal,
+          value: 'hello world',
+        },
+      } as TSESTree.JSXExpressionContainer;
+
+      expect(getValueFromJSXAttribute(attrValue)).toBe('hello world');
+    });
+
+    it('should return empty string for JSX expression container with non-string literal', () => {
+      const attrValue = {
+        type: AST_NODE_TYPES.JSXExpressionContainer,
+        expression: {
+          type: AST_NODE_TYPES.Literal,
+          value: 42,
+        },
+      } as TSESTree.JSXExpressionContainer;
+
+      expect(getValueFromJSXAttribute(attrValue)).toBe('');
+    });
+
+    it('should return empty string for JSX expression container with identifier', () => {
+      const attrValue = {
+        type: AST_NODE_TYPES.JSXExpressionContainer,
+        expression: {
+          type: AST_NODE_TYPES.Identifier,
+          name: 'myVar',
+        },
+      } as TSESTree.JSXExpressionContainer;
+
+      expect(getValueFromJSXAttribute(attrValue)).toBe('');
+    });
+
+    it('should escape single quotes in the extracted string', () => {
+      const attrValue = {
+        type: AST_NODE_TYPES.Literal,
+        value: "it's working",
+      } as TSESTree.StringLiteral;
+
+      expect(getValueFromJSXAttribute(attrValue)).toBe("it\\'s working");
+    });
+
+    it('should return empty string for single character strings', () => {
+      const attrValue = {
+        type: AST_NODE_TYPES.Literal,
+        value: 'x',
+      } as TSESTree.StringLiteral;
+
+      expect(getValueFromJSXAttribute(attrValue)).toBe('');
     });
   });
 });

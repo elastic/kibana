@@ -43,6 +43,36 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'uppercase') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.uppercaseProcessorDescription',
+        {
+          defaultMessage: 'Uppercases the value of "{from}"',
+          values: {
+            from: step.from,
+          },
+        }
+      );
+    } else if (step.action === 'lowercase') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.lowercaseProcessorDescription',
+        {
+          defaultMessage: 'Lowercases the value of "{from}"',
+          values: {
+            from: step.from,
+          },
+        }
+      );
+    } else if (step.action === 'trim') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.trimProcessorDescription',
+        {
+          defaultMessage: 'Trims whitespace from "{from}"',
+          values: {
+            from: step.from,
+          },
+        }
+      );
     } else if (step.action === 'rename') {
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.renameProcessorDescription',
@@ -111,8 +141,18 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'math') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.mathProcessorDescription',
+        {
+          defaultMessage: '{to} = {expression}',
+          values: {
+            to: step.to,
+            expression: step.expression,
+          },
+        }
+      );
     } else {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { action, parentId, customIdentifier, ignore_failure, ...rest } = step;
       // Remove 'where' if it exists (some processors have it, some don't)
       const { where, ...restWithoutWhere } = rest;

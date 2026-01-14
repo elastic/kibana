@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_RULES_WITH_GAPS_TO_FETCH } from '../../../common/constants';
 
 export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
@@ -598,6 +599,15 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_TITLE = i18n.transla
   }
 );
 
+export const RULES_TABLE_MAX_RULES_WITH_GAPS_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.rulesTable.maxRulesWithGapsWarningMessage',
+  {
+    values: { maxRules: MAX_RULES_WITH_GAPS_TO_FETCH },
+    defaultMessage:
+      'Showing up to the first {maxRules} rules with gaps in the selected time range. Adjust your filters to narrow down the selection.',
+  }
+);
+
 export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxLabel',
   {
@@ -662,6 +672,13 @@ export const CLEAR_SELECTION = i18n.translate(
   }
 );
 
+export const RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tableCaption',
+  {
+    defaultMessage: 'Detection rules',
+  }
+);
+
 export const SELECTED_RULES = (selectedRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectedRulesTitle', {
     values: { selectedRules },
@@ -682,10 +699,10 @@ export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
   }
 );
 
-export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
+export const LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaRulesFeaturePrivileges',
   {
-    defaultMessage: 'You do not have Kibana Security privileges',
+    defaultMessage: 'You do not have Kibana Rules privileges',
   }
 );
 
@@ -1657,9 +1674,9 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
   }
 );
 
-export const CHAT_IN_AGENT_BUILDER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.chatInAgentBuilder',
+export const RULE_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleSettingsTitle',
   {
-    defaultMessage: 'Chat in Agent Builder',
+    defaultMessage: 'Settings',
   }
 );

@@ -7,29 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
-import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
-import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import type {
-  UnifiedFieldListRestorableState,
-  UnifiedFieldListSidebarContainerProps,
-} from '@kbn/unified-field-list';
-import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import type { TabItem } from '@kbn/unified-tabs';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type {
   DiscoverGridSettings,
   DiscoverSession,
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
-import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type {
+  UnifiedFieldListRestorableState,
+  UnifiedFieldListSidebarContainerProps,
+} from '@kbn/unified-field-list';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import type { TabItem } from '@kbn/unified-tabs';
+import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
+import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -115,7 +116,19 @@ export interface DiscoverAppState {
   density?: DataGridDensity;
 }
 
+export enum TabInitializationStatus {
+  NotStarted = 'NotStarted',
+  InProgress = 'InProgress',
+  Complete = 'Complete',
+  NoData = 'NoData',
+  Error = 'Error',
+}
+
 export interface TabState extends TabItem {
+  initializationState:
+    | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
+    | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
+
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
@@ -153,6 +166,8 @@ export interface TabState extends TabItem {
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
   };
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId?: string;
 }
 
 export interface RecentlyClosedTabState extends TabState {
@@ -172,8 +187,6 @@ export interface DiscoverInternalState {
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
-  expandedDoc: DataTableRecord | undefined;
-  initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {

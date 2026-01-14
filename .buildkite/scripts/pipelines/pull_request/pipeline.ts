@@ -23,6 +23,7 @@ import {
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
+  prHasFIPSLabel,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -36,7 +37,6 @@ if (!prConfig) {
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
-const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true';
 
 (async () => {
   const pipeline: string[] = [];
@@ -67,11 +67,14 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
     }
 
-    if (FTR_ENABLE_FIPS_AGENT || GITHUB_PR_LABELS.includes('ci:enable-fips-agent')) {
+    if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
+
+    // A temporary pipeline for UIAM tests that should be removed when the main Scout pipeline supports custom configs.
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_uiam_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
@@ -144,8 +147,8 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
       /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/inference/,
     ];
     const agentBuilderPaths = [
-      /^x-pack\/platform\/plugins\/shared\/onechat/,
-      /^x-pack\/platform\/packages\/shared\/onechat/,
+      /^x-pack\/platform\/plugins\/shared\/agent_builder/,
+      /^x-pack\/platform\/packages\/shared\/agent_builder/,
     ];
 
     if (
@@ -465,6 +468,21 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
         getPipeline(
           '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml'
         )
+      );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/fleet/,
+        /^x-pack\/packages\/kbn-cloud-security-posture/,
+        /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/custom\/cspm_agentless/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:cloud-security-posture-scout')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml')
       );
     }
 

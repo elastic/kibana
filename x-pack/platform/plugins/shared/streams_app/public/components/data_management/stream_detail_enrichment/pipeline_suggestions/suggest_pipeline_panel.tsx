@@ -28,6 +28,7 @@ export function SuggestPipelinePanel({ children }: React.PropsWithChildren) {
         text-align: left;
       `}
       paddingSize="l"
+      data-test-subj="streamsAppSuggestPipelinePanel"
     >
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>

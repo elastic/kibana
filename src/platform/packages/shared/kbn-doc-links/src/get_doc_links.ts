@@ -40,6 +40,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
 
   return deepFreeze({
     settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference`,
+    aiAssistantSettings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/ai-assistant-settings`,
     elasticStackGetStarted: isServerless
       ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
       : `${ELASTIC_DOCS}get-started`,
@@ -71,6 +72,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       beatsAndLogstashConfiguration: `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/find-cloud-id`,
       elasticsearchBillingManagingCosts: `${ELASTIC_DOCS}deploy-manage/cloud-organization/billing/elasticsearch-billing-dimensions#elasticsearch-billing-managing-elasticsearch-costs`,
       indexManagement: `${ELASTIC_DOCS}manage-data/lifecycle/index-lifecycle-management/migrate-index-management`,
+      cloudConnect: `${ELASTIC_DOCS}deploy-manage/cloud-connect`,
+      connectToAutoops: `${ELASTIC_DOCS}deploy-manage/monitor/autoops/cc-autoops-as-cloud-connected`,
+      deploymentSignup: `${ELASTIC_WEBSITE_URL}cloud/elasticsearch-service/signup`,
+      cloudPricing: `${ELASTIC_WEBSITE_URL}pricing`,
     },
     console: {
       guide: `${ELASTIC_DOCS}explore-analyze/query-filter/tools/console`,
@@ -159,6 +164,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       documentLevelSecurity: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/controlling-access-at-document-field-level`,
       e5Model: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-e5`,
       elasticInferenceService: `${ELASTIC_DOCS}explore-analyze/elastic-inference/eis`,
+      elasticInferenceServicePricing: `${ELASTIC_DOCS}explore-analyze/elastic-inference/eis#pricing`,
       elser: `${ELASTIC_DOCS}solutions/search/semantic-search/semantic-search-semantic-text`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: isServerless
@@ -202,6 +208,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
       customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
       elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
+      elasticCloud: `${ELASTIC_WEBSITE_URL}cloud/`,
     },
     searchGettingStarted: {
       visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
@@ -853,9 +860,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       lowercase: `${ELASTIC_DOCS}reference/enrich-processor/lowercase-processor`,
       network: `${ELASTIC_DOCS}reference/enrich-processor/network-direction-processor`,
       pipeline: `${ELASTIC_DOCS}reference/enrich-processor/pipeline-processor`,
-      pipelines: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines`,
+      pipelines: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/readable-maintainable-ingest-pipelines`,
+      pipelineCreate: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/readable-maintainable-ingest-pipelines`,
       csvPipelines: `${ELASTIC_DOCS}reference/ecs/ecs-converting`,
-      pipelineFailure: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#handling-pipeline-failures`,
+      pipelineFailure: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/error-handling`,
       conditionalProcessor: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#conditionally-run-processor`,
       processors: `${ELASTIC_DOCS}reference/enrich-processor`,
       arrayOrJson: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-array-json-handling`,
@@ -1044,17 +1052,18 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       hiddenFields: `${ELASTIC_DOCS}solutions/search/rag/playground-query#playground-hidden-fields`,
     },
     agentBuilder: {
-      agentBuilder: `${ELASTIC_DOCS}solutions/search/elastic-agent-builder`,
-      getStarted: `${ELASTIC_DOCS}solutions/search/agent-builder/get-started`,
-      models: `${ELASTIC_DOCS}solutions/search/agent-builder/models`,
-      chat: `${ELASTIC_DOCS}solutions/search/agent-builder/chat`,
-      agentBuilderAgents: `${ELASTIC_DOCS}solutions/search/agent-builder/agent-builder-agents`,
-      tools: `${ELASTIC_DOCS}solutions/search/agent-builder/tools`,
-      programmaticAccess: `${ELASTIC_DOCS}solutions/search/agent-builder/programmatic-access`,
-      kibanaApi: `${ELASTIC_DOCS}solutions/search/agent-builder/kibana-api`,
-      mcpServer: `${ELASTIC_DOCS}solutions/search/agent-builder/mcp-server`,
-      a2aServer: `${ELASTIC_DOCS}solutions/search/agent-builder/a2a-server`,
-      limitationsKnownIssues: `${ELASTIC_DOCS}solutions/search/agent-builder/limitations-known-issues`,
+      agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,
+      getStarted: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/get-started`,
+      models: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/models`,
+      chat: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/chat`,
+      agentBuilderAgents: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/agent-builder-agents`,
+      tools: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/tools`,
+      programmaticAccess: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/programmatic-access`,
+      kibanaApi: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/kibana-api`,
+      mcpServer: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/mcp-server`,
+      a2aServer: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/a2a-server`,
+      limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
+      learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-agent-or-ai-assistant`,
     },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless
@@ -1077,6 +1086,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     indexManagement: {
       componentTemplate: `${ELASTIC_DOCS}manage-data/data-store/templates#component-templates`,
       indexAlias: `${ELASTIC_DOCS}manage-data/data-store/aliases`,
+    },
+    subscriptions: `${ELASTIC_WEBSITE_URL}subscriptions`,
+    cases: {
+      casesPermissions: `${ELASTIC_DOCS}solutions/security/investigate/cases-requirements`,
     },
   });
 };

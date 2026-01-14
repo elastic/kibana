@@ -30,6 +30,10 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/projects-solutions-groups'
   - '@kbn/react-query'
+  - '@kbn/search-api-panels'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/cloud-plugin'
+  - '@kbn/deeplinks-management'
 tags:
   - shared-browser
   - package

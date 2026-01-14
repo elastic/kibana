@@ -71,6 +71,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
             "rowsPerPage": undefined,
@@ -87,6 +88,7 @@ describe('tab mapping utils', () => {
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
+          "expandedDoc": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -107,6 +109,9 @@ describe('tab mapping utils', () => {
             "visContext": Object {
               "bar": "foo",
             },
+          },
+          "initializationState": Object {
+            "initializationStatus": "NotStarted",
           },
           "isDataViewLoading": false,
           "label": "Tab 2",
@@ -147,6 +152,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
             "rowsPerPage": undefined,
@@ -163,6 +169,7 @@ describe('tab mapping utils', () => {
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
+          "expandedDoc": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -183,6 +190,9 @@ describe('tab mapping utils', () => {
             "visContext": Object {
               "bar": "foo",
             },
+          },
+          "initializationState": Object {
+            "initializationStatus": "NotStarted",
           },
           "isDataViewLoading": false,
           "label": "Tab 2",
@@ -220,6 +230,7 @@ describe('tab mapping utils', () => {
       expect(savedSearch).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -290,6 +301,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -323,6 +335,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -371,6 +384,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "default_column",
           ],

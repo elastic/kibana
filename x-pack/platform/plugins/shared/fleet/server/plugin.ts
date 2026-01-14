@@ -160,6 +160,11 @@ import {
   registerAgentlessDeploymentSyncTask,
   scheduleAgentlessDeploymentSyncTask,
 } from './tasks/agentless/deployment_sync_task';
+import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
+import {
+  type AgentlessPoliciesService,
+  AgentlessPoliciesServiceImpl,
+} from './services/agentless/agentless_policies';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -264,6 +269,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  agentlessPoliciesService: AgentlessPoliciesService;
   runWithCache: typeof runWithCache;
   agentPolicyService: AgentPolicyServiceInterface;
   cloudConnectorService: CloudConnectorServiceInterface;
@@ -664,6 +670,7 @@ export class FleetPlugin
     registerPackagesBulkOperationTask(deps.taskManager);
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
+    registerReindexIntegrationKnowledgeTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
@@ -933,6 +940,12 @@ export class FleetPlugin
       ),
       agentPolicyService,
       packagePolicyService,
+      agentlessPoliciesService: new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        internalSoClient,
+        core.elasticsearch.client.asInternalUser,
+        logger
+      ),
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
         return appContextService.addExternalCallback(type, callback);
       },

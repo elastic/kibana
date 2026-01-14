@@ -19,11 +19,11 @@ jest.mock('..', () => {
   return {
     ...actual,
     getOrder: jest.fn((tourId: TourId) => {
-      const TOUR_REGISTRY = {
-        [TOUR_1]: 1,
-        [TOUR_2]: 2,
-      } as const;
-      return TOUR_REGISTRY[tourId as string];
+      const TOUR_REGISTRY: Record<string, number> = {
+        tour1: 1,
+        tour2: 2,
+      };
+      return TOUR_REGISTRY[tourId];
     }),
   };
 });

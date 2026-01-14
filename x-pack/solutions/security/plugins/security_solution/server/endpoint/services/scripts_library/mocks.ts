@@ -15,6 +15,7 @@ import { createHapiReadableStreamMock } from '../actions/mocks';
 import type {
   CreateScriptRequestBody,
   ListScriptsRequestQuery,
+  PatchUpdateRequestBody,
 } from '../../../../common/api/endpoint/scripts_library';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
@@ -27,6 +28,11 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
     id: '1-2-3',
     name: 'script one',
     platform: ['linux', 'macos'],
+    tags: ['dataCollection'],
+    fileId: 'file-1-2-3',
+    fileName: 'my_script.sh',
+    fileSize: 12098,
+    fileHash: 'e5441eb2bb',
     requiresInput: false,
     downloadUri: SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE.replace('{script_id}', '1-2-3'),
     description: 'does some stuff',
@@ -52,7 +58,18 @@ const generateCreateScriptBodyMock = (
     instructions: 'just execute it',
     example: 'bash -c script_one.sh',
     requiresInput: false,
+    tags: ['dataCollection'],
     file: createHapiReadableStreamMock(),
+    ...overrides,
+  };
+};
+
+const generateUpdateScriptBodyMock = (
+  overrides: Partial<PatchUpdateRequestBody> = {}
+): PatchUpdateRequestBody => {
+  return {
+    ...generateCreateScriptBodyMock(),
+    version: 'soVersionHere==',
     ...overrides,
   };
 };
@@ -66,7 +83,10 @@ const generateSavedObjectScriptEntryMock = (
     namespaces: ['default'],
     attributes: {
       id: '1-2-3',
-      hash: 'e5441eb2bb',
+      file_id: 'file-1-2-3',
+      file_size: 12098,
+      file_name: 'my_script.sh',
+      file_hash_sha256: 'e5441eb2bb',
       name: 'my script',
       platform: ['macos', 'linux'],
       requires_input: undefined,
@@ -165,6 +185,8 @@ export const ScriptsLibraryMock = Object.freeze({
   getMockedClient: getScriptsLibraryClientMock,
   generateScriptEntry: generateScriptEntryMock,
   generateCreateScriptBody: generateCreateScriptBodyMock,
+  generateUpdateScriptBody: generateUpdateScriptBodyMock,
+  generateSavedObjectScriptEntry: generateSavedObjectScriptEntryMock,
   createFilesPluginClient: createFilesPluginClientMock,
   applyMocksToSoClient: applySoClientMocks,
 });

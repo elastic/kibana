@@ -257,6 +257,7 @@ export class IndicesMetadataService {
     this.logger.debug('Indices settings sent', { count: indicesSettings.items.length } as LogMeta);
     return indicesSettings.items.length;
   }
+
   private async publishIlmStats(indices: string[]): Promise<Set<string>> {
     const ilmNames = new Set<string>();
     const ilmsStats: IlmsStats = {

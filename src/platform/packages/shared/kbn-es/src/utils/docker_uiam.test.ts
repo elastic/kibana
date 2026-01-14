@@ -80,7 +80,7 @@ describe(`#runUiamContainer()`, () => {
             "curl -sk http://127.0.0.1:8080/ready | grep -q \\"\\\\\\"overall\\\\\\": true\\"",
             "--name",
             "uiam-cosmosdb",
-            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20251124",
+            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20251223",
             "--protocol",
             "https",
             "--port",
@@ -179,11 +179,15 @@ describe(`#runUiamContainer()`, () => {
             "uiam.tokens.jwt.signature.secrets=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
             "--env",
             "uiam.tokens.jwt.signing.secret=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
+            "--env",
+            "uiam.tokens.jwt.verify.clock.skew=PT2S",
+            "--env",
+            "uiam.tokens.refresh.grace_period=PT3S",
             "--health-cmd",
             "timeout 1 bash -c \\"</dev/tcp/localhost/8080\\"",
             "--name",
             "uiam",
-            "docker.elastic.co/cloud-ci/uiam:git-fd2a53b8cf9f",
+            "docker.elastic.co/cloud-ci/uiam:git-1171ce2fde41",
           ],
         ],
         Array [
@@ -353,7 +357,7 @@ describe('#initializeUiamContainers', () => {
     expect(fetchSpy.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "https://127.0.0.1:8081/dbs",
+          "https://localhost:8081/dbs",
           Object {
             "body": "{\\"id\\":\\"uiam-db\\"}",
             "dispatcher": Object {
@@ -369,7 +373,7 @@ describe('#initializeUiamContainers', () => {
           },
         ],
         Array [
-          "https://127.0.0.1:8081/dbs/uiam-db/colls",
+          "https://localhost:8081/dbs/uiam-db/colls",
           Object {
             "body": "{\\"id\\":\\"users\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
             "dispatcher": Object {
@@ -385,7 +389,7 @@ describe('#initializeUiamContainers', () => {
           },
         ],
         Array [
-          "https://127.0.0.1:8081/dbs/uiam-db/colls",
+          "https://localhost:8081/dbs/uiam-db/colls",
           Object {
             "body": "{\\"id\\":\\"api-keys\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
             "dispatcher": Object {
@@ -401,7 +405,7 @@ describe('#initializeUiamContainers', () => {
           },
         ],
         Array [
-          "https://127.0.0.1:8081/dbs/uiam-db/colls",
+          "https://localhost:8081/dbs/uiam-db/colls",
           Object {
             "body": "{\\"id\\":\\"token-invalidation\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
             "dispatcher": Object {

@@ -15,7 +15,9 @@ import { allowShortQuerySyntax } from '../shared/oas_allow_short_query_syntax';
 import { removeDiscriminatorsWithoutMapping } from '../shared/oas_remove_discriminators_without_mapping';
 import { createRemoveServerDefaults } from '../shared/oas_remove_server_defaults';
 
+console.log('Reading OpenAPI spec from ', ES_SPEC_OPENAPI_PATH);
 const openApiSpec = JSON.parse(fs.readFileSync(ES_SPEC_OPENAPI_PATH, 'utf8')) as OpenAPIV3.Document;
+console.log('Preprocessing OpenAPI spec...');
 const preprocessedOpenApiSpec = [
   removeDiscriminatorsWithoutMapping,
   allowShortQuerySyntax,
@@ -25,30 +27,38 @@ const preprocessedOpenApiSpec = [
   createRemoveServerDefaults(ES_SPEC_SCHEMA_PATH),
 ].reduce((acc, fn) => fn(acc), openApiSpec);
 
-const config: UserConfig = {
-  // @ts-expect-error - for some reason openapi-ts doesn't accept OpenAPIV3.Document
-  input: preprocessedOpenApiSpec,
-  output: {
-    path: OPENAPI_TS_OUTPUT_FOLDER_PATH,
-    fileName: OPENAPI_TS_OUTPUT_FILENAME,
-  },
-  plugins: [
-    {
-      name: 'zod',
-      case: 'snake_case',
-      requests: {
-        name: '{{name}}_request',
-      },
-      responses: {
-        name: '{{name}}_response',
-      },
-      definitions: {
-        name: '{{name}}',
-      },
-      metadata: true,
-      compatibilityVersion: 4,
+function buildConfig({ include }: { include: string[] }): UserConfig {
+  return {
+    // @ts-expect-error - for some reason openapi-ts doesn't accept OpenAPIV3.Document
+    input: preprocessedOpenApiSpec,
+    output: {
+      path: OPENAPI_TS_OUTPUT_FOLDER_PATH,
+      fileName: OPENAPI_TS_OUTPUT_FILENAME,
     },
-  ],
-};
-
-export default config;
+    parser: {
+      filters: {
+        operations: {
+          include: include || [],
+        },
+      },
+    },
+    plugins: [
+      {
+        name: 'zod',
+        case: 'snake_case',
+        requests: {
+          name: '{{name}}_request',
+        },
+        responses: {
+          name: '{{name}}_response',
+        },
+        definitions: {
+          name: '{{name}}',
+        },
+        metadata: true,
+        compatibilityVersion: 4,
+      },
+    ],
+  };
+}
+export default buildConfig;

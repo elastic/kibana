@@ -34,6 +34,7 @@
       "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
+      "kql",
       "contentManagement"
     ],
     "optionalPlugins": [
@@ -48,6 +49,7 @@
       "serverless",
       "licensing",
       "fieldsMetadata",
+      "cps",
     ],
     "requiredBundles": [
       "unifiedSearch",

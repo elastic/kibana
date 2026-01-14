@@ -6,12 +6,12 @@
  */
 
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
 
 export class ManageSLO {
   constructor(
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private userId: string

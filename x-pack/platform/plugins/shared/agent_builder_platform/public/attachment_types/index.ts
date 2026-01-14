@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AttachmentServiceStartContract } from '@kbn/onechat-browser';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   AttachmentType,
   type TextAttachment,
   type ScreenContextAttachment,
   type EsqlAttachment,
-} from '@kbn/onechat-common/attachments';
+} from '@kbn/agent-builder-common/attachments';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,

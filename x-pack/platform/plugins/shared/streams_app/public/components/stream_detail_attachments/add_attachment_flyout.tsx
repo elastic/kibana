@@ -7,6 +7,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -19,8 +20,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState, useEffect } from 'react';
-import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import React, { useMemo, useState } from 'react';
+import type {
+  Attachment,
+  AttachmentType,
+} from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import { ATTACHMENT_SUGGESTIONS_LIMIT } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import {
@@ -33,13 +38,11 @@ import { AttachmentsTable } from './attachment_table';
 export function AddAttachmentFlyout({
   entityId,
   onAddAttachments,
-  linkedAttachments,
   isLoading,
   onClose,
 }: {
   entityId: string;
   onAddAttachments: (attachments: Attachment[]) => Promise<void>;
-  linkedAttachments: Attachment[];
   isLoading: boolean;
   onClose: () => void;
 }) {
@@ -58,49 +61,39 @@ export function AddAttachmentFlyout({
 
   const attachmentSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
+      // Build query params object, only including defined values
+      const queryParams: {
+        query?: string;
+        attachmentTypes?: AttachmentType[];
+        tags?: string[];
+      } = {};
+
+      if (filters.debouncedQuery) queryParams.query = filters.debouncedQuery;
+      if (filters.types.length > 0) queryParams.attachmentTypes = filters.types;
+      if (filters.tags.length > 0) queryParams.tags = filters.tags;
+
       return streamsRepositoryClient
-        .fetch('POST /internal/streams/{streamName}/attachments/_suggestions', {
+        .fetch('GET /internal/streams/{streamName}/attachments/_suggestions', {
           signal,
           params: {
             path: {
               streamName: entityId,
             },
-            query: {
-              query: filters.debouncedQuery,
-              attachmentType: filters.type,
-            },
-            body: {
-              tags: filters.tags,
-            },
+            query: queryParams,
           },
         })
         .then(({ suggestions }) => {
           return {
-            attachments: suggestions.filter((attachment) => {
-              return !linkedAttachments.find(
-                (linkedAttachment) => linkedAttachment.id === attachment.id
-              );
-            }),
+            attachments: suggestions,
           };
         });
     },
-    [
-      streamsRepositoryClient,
-      entityId,
-      filters.debouncedQuery,
-      filters.type,
-      filters.tags,
-      linkedAttachments,
-    ]
+    [streamsRepositoryClient, entityId, filters.debouncedQuery, filters.types, filters.tags]
   );
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'addAttachmentFlyoutTitle',
   });
-
-  useEffect(() => {
-    setSelectedAttachments([]);
-  }, [linkedAttachments]);
 
   const allAttachments = useMemo(() => {
     return attachmentSuggestionsFetch.value?.attachments || [];
@@ -129,6 +122,19 @@ export function AddAttachmentFlyout({
               }
             )}
           />
+          {attachmentSuggestionsFetch.value?.attachments.length ===
+            ATTACHMENT_SUGGESTIONS_LIMIT && (
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="primary"
+              title={i18n.translate('xpack.streams.addAttachmentFlyout.hasMoreResultsMessage', {
+                defaultMessage:
+                  'Showing first {limit} results. Use filters to narrow down your search.',
+                values: { limit: ATTACHMENT_SUGGESTIONS_LIMIT },
+              })}
+            />
+          )}
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="s">

@@ -5,44 +5,34 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { TaskSource, SiemReadinessTask } from './types';
-import {
-  GET_LATEST_SIEM_READINESS_TASKS_API_PATH,
-  POST_SIEM_READINESS_TASK_API_PATH,
-} from './constants';
-import { validateTask } from './validate_task';
+import type { CategoriesResponse } from './types';
+import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from './constants';
 
-const GET_LATEST_TASKS_QUERY_KEY = ['latest-readiness-tasks'];
+const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'];
+const GET_INSTALLED_INTEGRATIONS_QUERY_KEY = ['installed-integrations'];
 
-export const useReadinessTasks = () => {
+export const useSiemReadinessApi = () => {
   const { http } = useKibana<CoreStart>().services;
-  const queryClient = useQueryClient();
 
-  const { mutate: logReadinessTask } = useMutation<void, unknown, SiemReadinessTask>({
-    mutationFn: async (task: SiemReadinessTask): Promise<void> => {
-      validateTask(task);
-
-      await http.post<void>(POST_SIEM_READINESS_TASK_API_PATH, {
-        body: JSON.stringify(task),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: GET_LATEST_TASKS_QUERY_KEY });
+  const getReadinessCategories = useQuery({
+    queryKey: GET_READINESS_CATEGORIES_QUERY_KEY,
+    queryFn: () => {
+      return http.get<CategoriesResponse>(GET_SIEM_READINESS_CATEGORIES_API_PATH);
     },
   });
 
-  const getLatestTasks = useQuery({
-    queryKey: GET_LATEST_TASKS_QUERY_KEY,
+  const getInstalledIntegrations = useQuery({
+    queryKey: GET_INSTALLED_INTEGRATIONS_QUERY_KEY,
     queryFn: () => {
-      return http.get<TaskSource[]>(GET_LATEST_SIEM_READINESS_TASKS_API_PATH);
+      return http.get<unknown>('/api/fleet/epm/packages');
     },
   });
 
   return {
-    logReadinessTask,
-    getLatestTasks,
+    getReadinessCategories,
+    getInstalledIntegrations,
   };
 };

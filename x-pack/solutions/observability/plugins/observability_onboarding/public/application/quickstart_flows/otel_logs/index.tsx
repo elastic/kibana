@@ -38,6 +38,7 @@ import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { buildInstallCommand } from './build_install_command';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -116,7 +117,7 @@ export const OtelLogsPanel: React.FC = () => {
           })
         : '',
       start: 'sudo ./otelcol --config otel.yml',
-      type: 'copy',
+      codeLanguage: 'sh',
     },
     {
       id: 'mac',
@@ -134,7 +135,25 @@ export const OtelLogsPanel: React.FC = () => {
           })
         : '',
       start: './otelcol --config otel.yml',
-      type: 'copy',
+      codeLanguage: 'sh',
+    },
+    {
+      id: 'windows',
+      name: 'Windows',
+      firstStepTitle: HOST_COMMAND,
+      content: setupData
+        ? buildInstallCommand({
+            platform: 'windows',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+          })
+        : '',
+      start: '.\\otelcol.ps1 --config otel.yml',
+      codeLanguage: 'powershell',
     },
   ];
 
@@ -150,6 +169,7 @@ export const OtelLogsPanel: React.FC = () => {
     <EuiPanel hasBorder paddingSize="xl">
       <EuiFlexGroup direction="column" gutterSize="none">
         <MultiIntegrationInstallBanner />
+        <ManagedOtlpCallout />
         <EuiSteps
           steps={[
             {
@@ -185,7 +205,11 @@ export const OtelLogsPanel: React.FC = () => {
                         <p>{selectedContent.firstStepTitle}</p>
                       </EuiText>
                       <EuiFlexItem>
-                        <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
+                        <EuiCodeBlock
+                          language={selectedContent.codeLanguage}
+                          isCopyable
+                          overflowHeight={300}
+                        >
                           {selectedContent.content}
                         </EuiCodeBlock>
                       </EuiFlexItem>
@@ -237,13 +261,21 @@ export const OtelLogsPanel: React.FC = () => {
                       )}
                     </p>
                     <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
-                        {
-                          defaultMessage:
-                            'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
-                        }
-                      )}
+                      {selectedTab === 'windows'
+                        ? i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.windowsLogDescription',
+                            {
+                              defaultMessage:
+                                'On Windows, logs are collected from the Windows Event Log. You can customize this in the otel.yml file.',
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                            {
+                              defaultMessage:
+                                'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
+                            }
+                          )}
                     </p>
                   </EuiCallOut>
 
