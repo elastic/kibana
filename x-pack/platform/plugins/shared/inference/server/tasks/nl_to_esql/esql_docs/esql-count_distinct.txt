@@ -1,6 +1,6 @@
 # COUNT_DISTINCT
 
-The COUNT_DISTINCT function returns the approximate number of distinct values in a column or expression. It uses the HyperLogLog++ algorithm, which provides configurable precision and fixed memory usage, making it suitable for high-cardinality sets and large datasets. Counts are approximate, and the precision threshold allows you to trade memory for accuracy.
+The COUNT_DISTINCT function returns the approximate number of distinct values in a column or expression. Counts are approximate and are calculated using the HyperLogLog++ algorithm, which provides configurable precision, excellent accuracy for low-cardinality sets, and fixed memory usage regardless of the number of unique values.
 
 ## Syntax
 
@@ -10,29 +10,29 @@ The COUNT_DISTINCT function returns the approximate number of distinct values in
 
 #### field
 
-Column or literal for which to count the number of distinct values.
+The column or literal for which to count the number of distinct values.
 
 #### precision
 
-Optional. Precision threshold that controls the trade-off between memory usage and accuracy. The maximum supported value is 40000; values above this will behave as if set to 40000. The default value is 3000.
+Optional. The precision threshold that controls the trade-off between memory usage and accuracy. The maximum supported value is 40000; values above this are treated as 40000. The default value is 3000.
 
 ## Examples
 
-The following query counts the number of unique values in the `ip0` and `ip1` columns from the `hosts` dataset, returning an approximate count for each column:
+The following query calculates the approximate number of distinct values in the `ip0` and `ip1` columns from the `hosts` data source:
 
 ```esql
 FROM hosts
 | STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
 ```
 
-This query counts the number of unique values in the `ip0` and `ip1` columns from the `hosts` dataset, but specifies a custom precision threshold for each column: 80000 for `ip0` (which will be capped at 40000) and 5 for `ip1`. This allows you to control the trade-off between memory usage and accuracy for each column separately.
+This query demonstrates how to specify a custom precision threshold for the distinct count calculation. It counts the approximate number of unique values in the `ip0` column with a high precision setting (capped at 40000), and in the `ip1` column with a very low precision setting:
 
 ```esql
 FROM hosts
 | STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
 ```
 
-This query creates a single row with a string of words separated by semicolons, splits the string into individual words, and then counts the number of unique words in the list. The result is stored in the `distinct_word_count` column.
+This query counts the number of unique words in a semicolon-separated string by first splitting the string into individual words and then calculating the distinct count:
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
@@ -42,5 +42,5 @@ ROW words="foo;bar;baz;qux;quux;foo"
 ## Limitations
 
 - Counts are approximate and not exact.
-- The maximum supported precision threshold is 40000; higher values will be treated as 40000.
-- Accuracy depends on the dataset and the configured precision threshold. Even with low thresholds, error rates remain low (1-6%) for millions of items.
+- The maximum supported precision threshold is 40000; higher values are treated as 40000.
+- Accuracy depends on the dataset and the configured precision threshold. For low thresholds, the error remains low (1-6%) even when counting millions of items.

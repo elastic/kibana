@@ -18,7 +18,7 @@ The time window over which to compute the presence.
 
 ## Examples
 
-The following query calculates the maximum presence of the `events_received` field for each pod in 2-minute time buckets. It filters the data to only include records from the "prod" cluster and the pod named "two", then groups the results by pod and 2-minute time intervals, computing the maximum presence of the `events_received` field within each bucket.
+The following query calculates the maximum presence of the `events_received` field for each pod named "two" in the "prod" cluster, grouping the results into 2-minute time buckets. This helps you understand how often the `events_received` field is present for each pod over time.
 
 ```esql
 TS k8s

@@ -10,11 +10,13 @@ Returns a new string with all characters in the input string converted to upper 
 
 #### str
 
-String expression to convert to upper case. If the value is `null`, the function returns `null`. The input can be a single-valued or multi-valued column or expression.
+String expression to be converted to upper case. If the value is `null`, the function returns `null`. The input can be a single-valued or multi-valued column or expression.
 
 ## Examples
 
-The following query creates a row with a `message` column containing the text "Some Text", then adds a new column `message_upper` where the value of `message` is converted to upper case.
+Convert the contents of the `message` column to upper case:
+
+This query creates a row with a `message` column containing the text "Some Text", then adds a new column `message_upper` where the value of `message` is converted to all upper case letters.
 
 ```esql
 ROW message = "Some Text"

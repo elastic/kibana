@@ -1,6 +1,6 @@
 # TRANGE
 
-The TRANGE function filters data based on a specified time range using the `@timestamp` attribute.
+The TRANGE function filters data for a specified time range using the `@timestamp` attribute. It can be used with either a single offset from the current time or with explicit start and end times.
 
 ## Syntax
 
@@ -10,7 +10,7 @@ The TRANGE function filters data based on a specified time range using the `@tim
 
 #### start_time_or_offset
 
-Offset from NOW when used as a single parameter. When used with two parameters, this is the start time, which can be a date string, date, date_nanos, or epoch milliseconds.
+Offset from NOW when used in single parameter mode. In two parameter mode, this is the start time, which can be provided as a date string, date, date_nanos, or epoch milliseconds.
 
 #### end_time
 
@@ -18,7 +18,9 @@ Explicit end time for the range. This can be a date string, date, date_nanos, or
 
 ## Examples
 
-This query retrieves records from the `k8s` index that have a `@timestamp` within the last hour. Only the `@timestamp` field is kept in the results.
+Filter data from the last hour using a single offset parameter:
+
+This query retrieves records from the `k8s` index where the `@timestamp` is within the last hour, and keeps only the `@timestamp` field in the results.
 
 ```esql
 FROM k8s
@@ -26,7 +28,9 @@ FROM k8s
 | KEEP @timestamp
 ```
 
-This query selects records from the `k8s` index where the `@timestamp` falls between `"2024-05-10T00:17:14.000Z"` and `"2024-05-10T00:18:33.000Z"`. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
+Filter data between two specific timestamps using date strings:
+
+This query selects records from the `k8s` index where the `@timestamp` falls between "2024-05-10T00:17:14.000Z" and "2024-05-10T00:18:33.000Z". The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
 
 ```esql
 FROM k8s
@@ -36,7 +40,9 @@ FROM k8s
 | LIMIT 10
 ```
 
-This query filters records from the `k8s` index where the `@timestamp` is between two specific times, using the `to_datetime` function to convert the date strings. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
+Filter data between two specific timestamps using the `to_datetime` function:
+
+This query retrieves records from the `k8s` index where the `@timestamp` is between the two specified times, which are converted to datetime objects using the `to_datetime` function. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
 
 ```esql
 FROM k8s
@@ -46,7 +52,9 @@ FROM k8s
 | LIMIT 10
 ```
 
-This query retrieves records from the `k8s` index where the `@timestamp` is between two specific times with millisecond precision, using `to_datetime` for conversion. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
+Filter data between two specific timestamps using `to_datetime` with milliseconds precision:
+
+This query is similar to the previous one, but the timestamps include milliseconds precision. It selects records from the `k8s` index where the `@timestamp` is between the two precise times, sorts the results by `@timestamp`, keeps only the `@timestamp` field, and limits the output to 10 records.
 
 ```esql
 FROM k8s
@@ -56,7 +64,9 @@ FROM k8s
 | LIMIT 10
 ```
 
-This query filters records from the `k8s` index where the `@timestamp` is between two epoch millisecond values (`1715300236000` and `1715300282000`). The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
+Filter data between two specific timestamps using epoch milliseconds:
+
+This query filters records from the `k8s` index where the `@timestamp` is between the two specified epoch millisecond values. The results are sorted by `@timestamp`, only the `@timestamp` field is kept, and the output is limited to 10 records.
 
 ```esql
 FROM k8s

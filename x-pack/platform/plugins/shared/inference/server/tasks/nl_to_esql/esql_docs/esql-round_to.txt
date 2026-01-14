@@ -18,7 +18,7 @@ A list of constant values that define the rounding points.
 
 ## Examples
 
-The following query counts the number of employees, grouping them by their birth date rounded down to the nearest specified date window. It uses the `ROUND_TO` function to assign each employee's birth date to the closest earlier date from a list of fixed date points, then counts how many employees fall into each window and sorts the results in ascending order by the window.
+Group employees by their birth date rounded down to the nearest specified date window and count the number of employees in each group.
 
 ```esql
 FROM employees

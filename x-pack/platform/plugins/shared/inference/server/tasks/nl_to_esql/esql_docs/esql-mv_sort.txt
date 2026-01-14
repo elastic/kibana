@@ -14,13 +14,13 @@ Multivalue expression to be sorted. If the value is `null`, the function returns
 
 #### order
 
-Optional. Specifies the sort order. Valid options are `ASC` (ascending) and `DESC` (descending). The default is `ASC`.
+Optional. Specifies the sort order. Valid options are `ASC` for ascending and `DESC` for descending. The default is `ASC`.
 
 ## Examples
 
 Sort the values in a multivalued field in ascending and descending order:
 
-This query creates a row with a multivalued field `a` containing the values `[4, 2, -3, 2]`. It then uses the `mv_sort` function to produce two new fields: `sa`, which contains the values of `a` sorted in ascending order, and `sd`, which contains the values sorted in descending order.
+This query creates a row with a multivalued field `a` containing the array `[4, 2, -3, 2]`. It then sorts the array in ascending order and stores the result in the field `sa`, and sorts the array in descending order and stores the result in the field `sd`.
 
 ```esql
 ROW a = [4, 2, -3, 2]

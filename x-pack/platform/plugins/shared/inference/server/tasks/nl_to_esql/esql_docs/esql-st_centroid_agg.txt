@@ -14,9 +14,9 @@ The column containing spatial point geometry values to aggregate.
 
 ## Examples
 
-Calculate the centroid of all airport locations:
+Calculate the spatial centroid of airport locations:
 
-This query retrieves all records from the `airports` index and calculates the geographic centroid (average location) of all airport locations using the `location` field.
+This query retrieves data from the `airports` index and calculates the spatial centroid of all airport locations by aggregating the `location` field. The result is a single centroid point representing the average geographic center of all airport locations.
 
 ```esql
 FROM airports

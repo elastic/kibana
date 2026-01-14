@@ -10,13 +10,11 @@ Returns the value of e raised to the power of the given number.
 
 #### number
 
-Numeric expression to be used as the exponent. If `null`, the function returns `null`.
+Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-Calculate e raised to the power of 5.0:
-
-This query creates a single row with a column `d` set to 5.0, then calculates the exponential of `d` (e^5.0) and stores the result in a new column `s`.
+Calculates e raised to the power of 5.0 and stores the result in column `s`.
 
 ```esql
 ROW d = 5.0

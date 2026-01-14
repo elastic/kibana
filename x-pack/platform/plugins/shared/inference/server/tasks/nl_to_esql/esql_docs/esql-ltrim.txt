@@ -23,3 +23,4 @@ ROW message = "   some text  ",  color = " red "
 | EVAL message = CONCAT("'", message, "'")
 | EVAL color = CONCAT("'", color, "'")
 ```
+This query creates a row with two columns, `message` and `color`, each containing strings with leading spaces. It then removes the leading spaces from both columns using the `LTRIM` function. Finally, it wraps the trimmed values in single quotes using the `CONCAT` function.

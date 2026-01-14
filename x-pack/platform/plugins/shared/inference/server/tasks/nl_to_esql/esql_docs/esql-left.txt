@@ -18,7 +18,9 @@ The number of characters to return from the left side of the string.
 
 ## Examples
 
-The following query selects the `last_name` column from the `employees` data, and then creates a new column called `left` that contains only the first three characters of each `last_name`.
+Extract the first three characters from the `last_name` column:
+
+This query selects the `last_name` field from the `employees` data, then creates a new field called `left` that contains only the first three characters of each `last_name`.
 
 ```esql
 FROM employees

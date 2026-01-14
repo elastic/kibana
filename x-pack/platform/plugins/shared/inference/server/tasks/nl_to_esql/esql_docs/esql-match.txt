@@ -1,6 +1,6 @@
 # MATCH
 
-The MATCH function performs a match query on a specified field, similar to the `match` query in the Query DSL. It can be used on fields such as text, semantic_text, keyword, boolean, dates, and numeric types. When used on a semantic_text field, it performs a semantic query. MATCH supports function named parameters for additional query options, and all match query parameters are supported. The function returns true if the provided query matches the row. For a simplified syntax, you can use the match operator `:` instead of MATCH.
+The MATCH function performs a match query on a specified field, similar to the `match` query in the Elasticsearch Query DSL. It can be used on fields such as text, semantic_text, keyword, boolean, dates, and numeric types. When used on a semantic_text field, it performs a semantic query. MATCH supports function named parameters to specify additional options, and all match query parameters are supported. For a simplified syntax, the match operator `:` can be used instead of MATCH. The function returns true if the provided query matches the row.
 
 ## Syntax
 
@@ -10,15 +10,15 @@ The MATCH function performs a match query on a specified field, similar to the `
 
 #### field
 
-The field that the query will target.
+Field that the query will target.
 
 #### query
 
-The value to find in the provided field.
+Value to find in the provided field.
 
 #### options
 
-(Optional) Additional match options specified as function named parameters.
+(Optional) Additional match options as function named parameters.
 
 #### fuzziness
 
@@ -26,62 +26,58 @@ Maximum edit distance allowed for matching.
 
 #### auto_generate_synonyms_phrase_query
 
-If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.
+(Optional) If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.
 
 #### analyzer
 
-Analyzer used to convert the text in the query value into tokens. Defaults to the index-time analyzer mapped for the field, or the index’s default analyzer if none is mapped.
+(Optional) Analyzer used to convert the text in the query value into tokens. Defaults to the index-time analyzer mapped for the field, or the index’s default analyzer if none is mapped.
 
 #### minimum_should_match
 
-Minimum number of clauses that must match for a document to be returned.
+(Optional) Minimum number of clauses that must match for a document to be returned.
 
 #### zero_terms_query
 
-Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.
+(Optional) Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.
 
 #### boost
 
-Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
+(Optional) Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
 
 #### fuzzy_transpositions
 
-If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.
+(Optional) If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.
 
 #### fuzzy_rewrite
 
-Method used to rewrite the query. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.
+(Optional) Method used to rewrite the query. If the fuzziness parameter is not 0, the match query uses a fuzzy_rewrite method of top_terms_blended_freqs_${max_expansions} by default.
 
 #### prefix_length
 
-Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.
+(Optional) Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.
 
 #### lenient
 
-If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.
+(Optional) If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.
 
 #### operator
 
-Boolean logic used to interpret text in the query value. Defaults to OR.
+(Optional) Boolean logic used to interpret text in the query value. Defaults to OR.
 
 #### max_expansions
 
-Maximum number of terms to which the query will expand. Defaults to 50.
+(Optional) Maximum number of terms to which the query will expand. Defaults to 50.
 
 ## Examples
 
-Query for books where the author matches "Faulkner":
-
-This query retrieves all rows from the `books` index where the `author` field contains a match for the term "Faulkner".
+This example filters books where the author field matches "Faulkner".
 
 ```esql
 FROM books
 | WHERE MATCH(author, "Faulkner")
 ```
 
-Query for books where the title matches all terms "Hobbit Back Again" using the AND operator, and keep only the title column:
-
-This query selects books from the `books` index where the `title` field matches all the terms "Hobbit Back Again" (using AND logic), and then returns only the `title` column in the results.
+This example filters books where the title field matches all terms in "Hobbit Back Again" using the AND operator, and keeps only the title column.
 
 ```esql
 FROM books

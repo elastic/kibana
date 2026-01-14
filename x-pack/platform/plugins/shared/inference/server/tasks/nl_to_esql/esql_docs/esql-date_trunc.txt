@@ -1,6 +1,6 @@
 # DATE_TRUNC
 
-Rounds down a date to the nearest specified interval since the epoch, which starts at `0001-01-01T00:00:00Z`.
+The DATE_TRUNC function rounds down a date to the closest interval since the epoch, which starts at `0001-01-01T00:00:00Z`.
 
 ## Syntax
 
@@ -10,17 +10,17 @@ Rounds down a date to the nearest specified interval since the epoch, which star
 
 #### interval
 
-Interval to round down to, expressed using the timespan literal syntax.
+Interval, expressed using the timespan literal syntax.
 
 #### date
 
-The date expression to be rounded down.
+Date expression.
 
 ## Examples
 
-Round the hire date of each employee down to the start of the year:
+Round the hire date of each employee down to the closest year:
 
-This query retrieves each employee's first name, last name, and hire date, then creates a new field called `year_hired` that contains the hire date rounded down to the beginning of the year.
+This query selects the first name, last name, and hire date of each employee, and then adds a new column called `year_hired` that contains the hire date rounded down to the start of the year.
 
 ```esql
 FROM employees
@@ -30,7 +30,7 @@ FROM employees
 
 Calculate the number of hires per year by combining DATE_TRUNC with STATS:
 
-This query calculates the total number of employees hired each year. It first rounds each employee's hire date down to the start of the year, then counts the number of hires for each year and sorts the results by year.
+This query creates a new column with the hire date truncated to the year, then counts the number of employees hired in each year, and sorts the results by year.
 
 ```esql
 FROM employees
@@ -39,9 +39,9 @@ FROM employees
 | SORT year
 ```
 
-Calculate the average error rate per hour:
+Compute the average error rate per hour:
 
-This query analyzes log data to calculate the average error rate for each hour. It marks messages containing "error" with a value of 1, rounds timestamps down to the start of the hour, computes the average error value per hour, and sorts the results by hour.
+This query checks each message for the word "error" and assigns a value of 1 if found, otherwise 0. It then truncates the timestamp to the hour, calculates the average error rate for each hour, and sorts the results by hour.
 
 ```esql
 FROM sample_data

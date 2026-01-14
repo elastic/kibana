@@ -10,11 +10,11 @@ Returns the byte length of a string. All strings are in UTF-8, so a single chara
 
 #### string
 
-String expression. If `null`, the function returns `null`.
+String expression to measure. If `null`, the function returns `null`.
 
 ## Examples
 
-This query retrieves the city names of airports located in India, then calculates both the character length and the byte length (in UTF-8 encoding) for each city name.
+This query retrieves all airports located in India, keeps only the `city` field, and then calculates two new fields: `fn_length`, which is the number of characters in the city name, and `fn_byte_length`, which is the number of bytes used by the city name in UTF-8 encoding.
 
 ```esql
 FROM airports
@@ -22,3 +22,5 @@ FROM airports
 | KEEP city
 | EVAL fn_length = LENGTH(city), fn_byte_length = BYTE_LENGTH(city)
 ```
+
+Calculate both the character length and byte length of city names for airports in India.

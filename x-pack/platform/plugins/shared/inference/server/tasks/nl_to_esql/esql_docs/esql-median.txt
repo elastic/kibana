@@ -1,6 +1,6 @@
 # MEDIAN
 
-The MEDIAN function returns the value that is greater than half of all values and less than half of all values, also known as the 50th percentile. The result is usually approximate and can be non-deterministic, meaning you may get slightly different results using the same data.
+The MEDIAN function returns the value that is greater than half of all values and less than half of all values, also known as the 50th percentile. The result is usually approximate and may vary slightly for the same data due to its non-deterministic nature.
 
 ## Syntax
 
@@ -10,18 +10,18 @@ The MEDIAN function returns the value that is greater than half of all values an
 
 #### number
 
-Expression that outputs values to calculate the median of.
+Expression that outputs the values to calculate the median of.
 
 ## Examples
 
-The following query calculates both the median salary and the 50th percentile salary for all employees, allowing you to compare the results of the MEDIAN and PERCENTILE functions:
+The following query calculates both the median and the 50th percentile of the `salary` column from the `employees` data source. This helps you understand the central tendency of employee salaries.
 
 ```esql
 FROM employees
 | STATS MEDIAN(salary), PERCENTILE(salary, 50)
 ```
 
-This query calculates the median of the maximum salary change for each employee. It first finds the maximum salary change per employee (if there are multiple values), and then computes the median of those maximum values:
+This query calculates the median of the maximum values found in a multivalued column called `salary_change`. It first determines the maximum salary change for each record using `MV_MAX`, and then computes the median of those maximum values.
 
 ```esql
 FROM employees
@@ -31,4 +31,4 @@ FROM employees
 ## Limitations
 
 - The MEDIAN function is usually approximate.
-- The MEDIAN function is non-deterministic and may return slightly different results for the same data.
+- MEDIAN is non-deterministic, so results may vary slightly even with the same data.

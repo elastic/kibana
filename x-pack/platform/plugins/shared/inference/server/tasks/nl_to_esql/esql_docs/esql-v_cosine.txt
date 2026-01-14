@@ -10,15 +10,15 @@ Calculates the cosine similarity between two dense_vectors.
 
 #### left
 
-The first dense_vector to calculate cosine similarity.
+The first dense_vector used to calculate cosine similarity.
 
 #### right
 
-The second dense_vector to calculate cosine similarity.
+The second dense_vector used to calculate cosine similarity.
 
 ## Examples
 
-This query retrieves all records from the `colors` index where the color is not "black". It then calculates the cosine similarity between each record's `rgb_vector` and the vector `[0, 255, 255]`, storing the result in a new column called `similarity`. Finally, it sorts the results by similarity in descending order and by color in ascending order.
+This query calculates the cosine similarity between the `rgb_vector` column and the vector `[0, 255, 255]` for each row in the `colors` index, excluding rows where the color is "black". It then sorts the results first by similarity in descending order (most similar first), and then by color in ascending order.
 
 ```esql
 from colors

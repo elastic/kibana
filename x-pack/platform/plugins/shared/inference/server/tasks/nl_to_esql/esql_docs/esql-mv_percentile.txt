@@ -10,7 +10,7 @@ The MV_PERCENTILE function converts a multivalued field into a single valued fie
 
 #### number
 
-Multivalue expression to be evaluated.
+A multivalue expression containing the values to analyze.
 
 #### percentile
 
@@ -18,7 +18,7 @@ The percentile to calculate. Must be a number between 0 and 100. If the value is
 
 ## Examples
 
-The following query calculates the 50th percentile (also known as the median) for a list of values, and also computes the median using the MV_MEDIAN function for comparison. It creates a row with the values `[5, 5, 10, 12, 5000]`, then evaluates both the 50th percentile and the median for this list.
+This query creates a row with a multivalued field called `values`, then calculates the 50th percentile (median) using `MV_PERCENTILE` and compares it to the result of `MV_MEDIAN` for the same data.
 
 ```esql
 ROW values = [5, 5, 10, 12, 5000]

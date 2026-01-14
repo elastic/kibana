@@ -12,13 +12,17 @@ This function does not take any parameters.
 
 ## Examples
 
-This query creates a single row containing the current date and time in a column named `current_date`.
+Get the current date and time:
+
+This query creates a single row with a column named `current_date` that contains the current date and time.
 
 ```esql
 ROW current_date = NOW()
 ```
 
-This query retrieves records from the `sample_data` index where the `@timestamp` field is within the last hour, using the current time as a reference.
+Retrieve logs from the last hour:
+
+This query selects records from the `sample_data` index where the `@timestamp` field is within the last hour, using the current date and time as a reference.
 
 ```esql
 FROM sample_data

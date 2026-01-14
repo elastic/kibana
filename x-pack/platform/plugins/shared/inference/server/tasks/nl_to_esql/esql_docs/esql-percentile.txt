@@ -18,7 +18,7 @@ The percentile to calculate, expressed as a number (for example, 50 for the medi
 
 ## Examples
 
-The following query calculates the 0th, 50th, and 99th percentiles for the `salary` column in the `employees` dataset. This means it finds the minimum salary (0th percentile), the median salary (50th percentile), and the value below which 99% of salaries fall (99th percentile).
+The following query calculates the 0th, 50th, and 99th percentiles for the `salary` column in the `employees` dataset. This means it finds the minimum salary (0th percentile), the median salary (50th percentile), and the salary value that is greater than 99% of all salaries (99th percentile).
 
 ```esql
 FROM employees
@@ -27,7 +27,7 @@ FROM employees
      , p99 = PERCENTILE(salary, 99)
 ```
 
-This query calculates the 80th percentile of the maximum salary change per employee. It first finds the maximum salary change for each employee (if there are multiple values), and then determines the value below which 80% of these maximum changes fall.
+This query calculates the 80th percentile of the maximum salary change for each employee. It first determines the maximum salary change per employee and then finds the value that is greater than 80% of these maximum changes.
 
 ```esql
 FROM employees
@@ -36,7 +36,7 @@ FROM employees
 
 ## Limitations
 
-- The PERCENTILE function uses the TDigest algorithm, which provides approximate results, especially for large datasets.
-- Accuracy is higher for extreme percentiles (such as 99%) and for small datasets.
-- As the number of values increases, the function trades accuracy for memory efficiency, and the exact error depends on the data distribution and volume.
-- The function is non-deterministic, meaning repeated queries on the same data may yield slightly different results.
+- The PERCENTILE function uses the TDigest algorithm, which calculates approximate percentiles to efficiently handle large datasets.
+- Accuracy is higher for extreme percentiles (such as 99%) and for small sets of values. As the number of values increases, the algorithm trades accuracy for memory savings.
+- The function is non-deterministic, meaning you may get slightly different results when running the same query on the same data.
+- Precision may vary depending on the data distribution and the volume of data being aggregated.

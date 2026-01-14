@@ -18,7 +18,7 @@ The time window over which to compute the sum.
 
 ## Examples
 
-The following query calculates the total network cost over time, grouping the results by cluster and by 1-minute time intervals. It uses the `SUM_OVER_TIME` function to sum the `network.cost` field within each time window, then aggregates these sums for each cluster and time bucket.
+The following query calculates the sum of the `network.cost` field over time, grouping the results by cluster and by 1-minute time buckets. It uses the `SUM_OVER_TIME` function to aggregate the cost within each time window, then further sums these values and organizes the output by cluster and time interval.
 
 ```esql
 TS k8s

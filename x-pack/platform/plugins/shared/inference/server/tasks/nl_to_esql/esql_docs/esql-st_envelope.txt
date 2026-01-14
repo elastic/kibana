@@ -14,7 +14,7 @@ Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_sh
 
 ## Examples
 
-The following query calculates the minimum bounding box (envelope) for the city boundary of the airport with abbreviation "CPH", and returns the abbreviation, airport name, and the computed envelope:
+The following query calculates the minimum bounding box (envelope) for the city boundary of Copenhagen Airport and returns the abbreviation, airport name, and the computed envelope:
 
 ```esql
 FROM airport_city_boundaries
@@ -29,17 +29,17 @@ Extracts the maximum value of the `x` coordinates from the supplied geometry. Fo
 
 ## Syntax
 
-`ST_XMAX(point)`
+`ST_XMAX(geometry)`
 
 ### Parameters
 
-#### point
+#### geometry
 
 Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
 
 ## Examples
 
-This query extracts the minimum and maximum x (longitude) and y (latitude) coordinates from the bounding box of the city boundary for the airport with abbreviation "CPH". It returns the abbreviation, airport name, and the xmin, xmax, ymin, and ymax values:
+This query extracts the minimum and maximum x (longitude) and y (latitude) coordinates from the bounding box of Copenhagen Airport's city boundary. It first computes the envelope, then calculates the xmin, xmax, ymin, and ymax values, and finally returns the abbreviation, airport name, and these coordinate values:
 
 ```esql
 FROM airport_city_boundaries
@@ -55,17 +55,17 @@ Extracts the minimum value of the `x` coordinates from the supplied geometry. Fo
 
 ## Syntax
 
-`ST_XMIN(point)`
+`ST_XMIN(geometry)`
 
 ### Parameters
 
-#### point
+#### geometry
 
 Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
 
 ## Examples
 
-This query extracts the minimum x coordinate (xmin), along with the maximum x (xmax), minimum y (ymin), and maximum y (ymax) coordinates from the bounding box of the city boundary for the airport with abbreviation "CPH". It returns the abbreviation, airport name, and the coordinate values:
+This query extracts the minimum and maximum x (longitude) and y (latitude) coordinates from the bounding box of Copenhagen Airport's city boundary. It first computes the envelope, then calculates the xmin, xmax, ymin, and ymax values, and finally returns the abbreviation, airport name, and these coordinate values:
 
 ```esql
 FROM airport_city_boundaries
@@ -81,17 +81,17 @@ Extracts the maximum value of the `y` coordinates from the supplied geometry. Fo
 
 ## Syntax
 
-`ST_YMAX(point)`
+`ST_YMAX(geometry)`
 
 ### Parameters
 
-#### point
+#### geometry
 
 Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
 
 ## Examples
 
-This query extracts the maximum y coordinate (ymax), as well as the minimum x (xmin), maximum x (xmax), and minimum y (ymin) coordinates from the bounding box of the city boundary for the airport with abbreviation "CPH". It returns the abbreviation, airport name, and the coordinate values:
+This query extracts the minimum and maximum y (latitude) and x (longitude) coordinates from the bounding box of Copenhagen Airport's city boundary. It first computes the envelope, then calculates the xmin, xmax, ymin, and ymax values, and finally returns the abbreviation, airport name, and these coordinate values:
 
 ```esql
 FROM airport_city_boundaries
@@ -107,17 +107,17 @@ Extracts the minimum value of the `y` coordinates from the supplied geometry. Fo
 
 ## Syntax
 
-`ST_YMIN(point)`
+`ST_YMIN(geometry)`
 
 ### Parameters
 
-#### point
+#### geometry
 
 Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
 
 ## Examples
 
-This query extracts the minimum y coordinate (ymin), along with the minimum x (xmin), maximum x (xmax), and maximum y (ymax) coordinates from the bounding box of the city boundary for the airport with abbreviation "CPH". It returns the abbreviation, airport name, and the coordinate values:
+This query extracts the minimum and maximum y (latitude) and x (longitude) coordinates from the bounding box of Copenhagen Airport's city boundary. It first computes the envelope, then calculates the xmin, xmax, ymin, and ymax values, and finally returns the abbreviation, airport name, and these coordinate values:
 
 ```esql
 FROM airport_city_boundaries

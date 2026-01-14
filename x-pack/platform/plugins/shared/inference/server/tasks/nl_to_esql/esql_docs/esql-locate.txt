@@ -1,6 +1,6 @@
 # LOCATE
 
-Returns an integer indicating the position of a keyword substring within another string. If the substring is not found, the function returns `0`. String positions start from `1`.
+The LOCATE function returns an integer indicating the position of a keyword substring within another string. If the substring is not found, it returns `0`. String positions start from `1`.
 
 ## Syntax
 
@@ -22,9 +22,9 @@ The start index from which to begin the search.
 
 ## Examples
 
-Find the position of the substring "ll" within the string "hello":
+Find the position of the substring "ll" in the string "hello":
 
-This query creates a row with the value "hello" and then calculates the position where the substring "ll" first appears in that string. The result is stored in the column `a_ll`.
+This query creates a row with the value "hello" and then calculates the position of the substring "ll" within that string. The result is stored in the column `a_ll`. If "ll" is found, its starting position is returned; otherwise, the result is `0`.
 
 ```esql
 ROW a = "hello"

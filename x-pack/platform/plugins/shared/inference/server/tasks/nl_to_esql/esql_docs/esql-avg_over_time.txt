@@ -18,7 +18,7 @@ The time window over which to compute the average.
 
 ## Examples
 
-The following query calculates the maximum average network cost over time, grouping the results by cluster and by 1-minute time buckets. It first selects data from the `k8s` time series, then computes the average network cost over each time window, finds the maximum of these averages, and organizes the results by cluster and minute.
+The following query calculates the maximum average network cost per cluster in 1-minute time buckets. It first selects data from the `k8s` time series, then computes the average network cost over time using `AVG_OVER_TIME(network.cost)`, finds the maximum of these averages per cluster and per 1-minute time bucket, and returns the results grouped by cluster and time bucket.
 
 ```esql
 TS k8s

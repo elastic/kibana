@@ -16,7 +16,7 @@ A comma-separated list of columns to remove. Wildcards are supported to match mu
 
 Remove the column named `height`:
 
-This query retrieves all records from the `employees` source and removes the `height` column from the results.
+This query retrieves data from the `employees` index and removes the `height` column from the results.
 
 ```esql
 FROM employees
@@ -25,7 +25,7 @@ FROM employees
 
 Remove all columns with names that start with `height` using a wildcard:
 
-This query retrieves all records from the `employees` source and removes any columns whose names begin with `height` (such as `height`, `height_cm`, `height_in`, etc.) from the results.
+This query retrieves data from the `employees` index and removes all columns whose names begin with `height`, such as `height_cm` or `height_in`, from the results.
 
 ```esql
 FROM employees

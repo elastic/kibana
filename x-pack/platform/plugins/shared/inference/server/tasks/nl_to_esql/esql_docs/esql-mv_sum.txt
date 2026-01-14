@@ -14,7 +14,9 @@ A multivalue expression containing the values to be summed.
 
 ## Examples
 
-This query creates a row with a multivalued field `a` containing the values `[3, 5, 6]`, and then calculates the sum of these values using the `MV_SUM` function, storing the result in a new field called `sum_a`.
+Calculate the sum of all values in a multivalued field:
+
+This query creates a row with a multivalued field `a` containing the values `[3, 5, 6]`, then calculates the sum of these values and stores the result in a new field called `sum_a`.
 
 ```esql
 ROW a=[3, 5, 6]

@@ -14,13 +14,13 @@ The metric field to calculate the percentile for.
 
 #### percentile
 
-The percentile value to compute (must be between 0 and 100).
+The percentile value to compute, specified as a number between 0 and 100.
 
 ## Examples
 
 Calculate the 95th and 99th percentiles of `network.cost` over time, grouped by cluster and 1-minute time buckets:
 
-This query retrieves time series data from the `k8s` source, then calculates the 95th and 99th percentiles of the `network.cost` field for each cluster in 1-minute intervals. The results are grouped by `cluster` and by 1-minute time buckets, showing the maximum percentile values within each group.
+This query retrieves time series data from the `k8s` source, then calculates the 95th and 99th percentiles of the `network.cost` field for each cluster and each 1-minute time bucket. The results are grouped by `cluster` and by 1-minute intervals, with the maximum percentile values reported for each group.
 
 ```esql
 TS k8s

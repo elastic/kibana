@@ -18,7 +18,7 @@ Input to hash.
 
 ## Examples
 
-This query retrieves records from the `sample_data` source where the `message` field is not equal to "Connection error". For each of these records, it calculates both the MD5 and SHA-256 hash values of the `message` field and keeps only the `message`, `md5`, and `sha256` fields in the output.
+This query retrieves data from the `sample_data` index, filters out any rows where the `message` column is "Connection error", then calculates both the MD5 and SHA-256 hashes of the `message` column. The resulting output includes only the original message and its corresponding MD5 and SHA-256 hash values.
 
 ```esql
 FROM sample_data
@@ -26,5 +26,3 @@ FROM sample_data
 | EVAL md5 = hash("md5", message), sha256 = hash("sha256", message)
 | KEEP message, md5, sha256
 ```
-
-This example calculates the MD5 and SHA-256 hashes of the `message` field for all records where the message is not "Connection error".

@@ -14,9 +14,7 @@ The desired bucket size. This must be provided as a time duration or date period
 
 ## Examples
 
-Provide a bucket size as an argument:
-
-This query divides the `@timestamp` values in the `sample_data` source into 1-hour intervals (buckets). For each bucket, it calculates the earliest (`min`) and latest (`max`) timestamp, then sorts the results by the minimum timestamp in each bucket.
+The following query groups the data from `sample_data` into hourly buckets based on the `@timestamp` field. For each bucket, it calculates the minimum and maximum timestamp values, and then sorts the results by the minimum timestamp in each bucket.
 
 ```esql
 FROM sample_data
@@ -24,9 +22,7 @@ FROM sample_data
 | SORT min
 ```
 
-Provide a string representation of bucket size as an argument:
-
-This query performs the same operation as the previous example, but specifies the bucket size as a string ("1 hour"). It groups the `@timestamp` values into 1-hour buckets, calculates the minimum and maximum timestamp for each bucket, and sorts the results by the minimum timestamp.
+This query is similar to the previous one, but it specifies the bucket size as a string ("1 hour") instead of a direct value. It groups the data into hourly buckets, calculates the minimum and maximum timestamps for each bucket, and sorts the results by the minimum timestamp.
 
 ```esql
 FROM sample_data
@@ -36,4 +32,4 @@ FROM sample_data
 
 ## Limitations
 
-The reference for bucketing is the epoch, which starts at `0001-01-01T00:00:00Z`. The bucket size must be a valid time duration or date period, either as a direct value or a string.
+The bucket size must be a time duration or date period, either as a direct value or a string. The reference for bucketing is the epoch (`0001-01-01T00:00:00Z`).

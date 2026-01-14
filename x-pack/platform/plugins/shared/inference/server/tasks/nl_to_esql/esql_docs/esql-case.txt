@@ -1,6 +1,6 @@
 # CASE
 
-The CASE function evaluates pairs of conditions and values, returning the value associated with the first condition that evaluates to `true`. If no condition matches, it returns a default value if provided, or `null` if not.
+The CASE function evaluates pairs of conditions and values, returning the value associated with the first condition that evaluates to `true`. If no condition matches, a default value is returned if provided; otherwise, the function returns `null`.
 
 ## Syntax
 
@@ -14,7 +14,7 @@ A condition to evaluate.
 
 #### trueValue
 
-The value returned when the corresponding condition is the first to evaluate to `true`.
+The value returned when the corresponding condition is the first to evaluate to `true`. If no condition matches, the default value is returned.
 
 #### elseValue
 
@@ -24,8 +24,6 @@ The value returned when the corresponding condition is the first to evaluate to 
 
 Determine whether employees are monolingual, bilingual, or polyglot:
 
-This query retrieves employee data and uses the CASE function to classify each employee as "monolingual" if they speak one or fewer languages, "bilingual" if they speak two or fewer languages, and "polyglot" otherwise. The result includes the employee number, number of languages, and the classification type.
-
 ```esql
 FROM employees
 | EVAL type = CASE(
@@ -34,10 +32,9 @@ FROM employees
      "polyglot")
 | KEEP emp_no, languages, type
 ```
+This query classifies each employee as "monolingual" if they speak one or fewer languages, "bilingual" if they speak two or fewer languages, and "polyglot" otherwise. It then displays the employee number, number of languages spoken, and the assigned type.
 
 Calculate the total connection success rate based on log messages:
-
-This query analyzes log messages to determine connection success. It assigns a value of 1 to messages starting with "Connected to" and 0 to messages that are exactly "Connection error". It then calculates the average of these values to determine the overall connection success rate.
 
 ```esql
 FROM sample_data
@@ -47,10 +44,9 @@ FROM sample_data
   )
 | STATS success_rate = AVG(successful)
 ```
+This query assigns a value of 1 to log messages that start with "Connected to" (indicating a successful connection) and 0 to messages that exactly match "Connection error". It then calculates the average of these values to determine the overall connection success rate.
 
 Calculate an hourly error rate as a percentage of the total number of log messages:
-
-This query marks log messages containing the word "error" with a value of 1 and others with 0. It then groups the data by hour and calculates the average error rate for each hour, sorting the results chronologically.
 
 ```esql
 FROM sample_data
@@ -59,3 +55,4 @@ FROM sample_data
 | STATS error_rate = AVG(error) by hour
 | SORT hour
 ```
+This query flags log messages containing the word "error" by assigning them a value of 1 and all others a value of 0. It then groups the data by hour and calculates the average error rate for each hour, sorting the results chronologically.

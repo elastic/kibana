@@ -1,6 +1,9 @@
 # LOGICAL OPERATORS
 
-Logical operators are used to combine or modify boolean expressions in queries. The supported logical operators are:
+Logical operators are used to combine or negate conditions in queries. The supported logical operators are:
+- `AND`
+- `OR`
+- `NOT`
 
 ## Syntax
 

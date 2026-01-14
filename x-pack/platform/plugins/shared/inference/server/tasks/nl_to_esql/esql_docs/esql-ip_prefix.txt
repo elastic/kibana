@@ -1,6 +1,6 @@
 # IP_PREFIX
 
-The IP_PREFIX function truncates an IP address to a specified prefix length, supporting both IPv4 and IPv6 formats.
+The IP_PREFIX function truncates an IP address to a specified prefix length.
 
 ## Syntax
 
@@ -14,15 +14,15 @@ IP address of type `ip`. Both IPv4 and IPv6 addresses are supported.
 
 #### prefixLengthV4
 
-Prefix length to use for truncating IPv4 addresses.
+Prefix length for IPv4 addresses.
 
 #### prefixLengthV6
 
-Prefix length to use for truncating IPv6 addresses.
+Prefix length for IPv6 addresses.
 
 ## Examples
 
-The following query demonstrates how to truncate an IPv4 address to a /24 prefix and an IPv6 address to a /112 prefix. It creates two rows: one with an IPv4 address and one with an IPv6 address, then applies the IP_PREFIX function to each, resulting in the truncated versions of the addresses according to the specified prefix lengths.
+This query creates two rows: one with an IPv4 address (`1.2.3.4`) and one with an IPv6 address (`fe80::cae2:65ff:fece:feb9`). It then truncates the IPv4 address to a /24 prefix and the IPv6 address to a /112 prefix, producing the corresponding network prefixes for each IP.
 
 ```esql
 ROW ip4 = to_ip("1.2.3.4"), ip6 = TO_IP("fe80::cae2:65ff:fece:feb9")

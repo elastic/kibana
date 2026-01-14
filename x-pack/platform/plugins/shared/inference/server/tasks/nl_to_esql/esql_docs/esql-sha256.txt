@@ -14,7 +14,7 @@ The value to hash.
 
 ## Examples
 
-The following query selects all rows from the `sample_data` index where the `message` column does not equal "Connection error". For each of these rows, it computes the SHA256 hash of the `message` column and stores the result in a new column called `sha256`. Finally, it keeps only the `message` and `sha256` columns in the output.
+This query selects all rows from the `sample_data` index where the `message` column does not equal "Connection error". For each of these rows, it computes the SHA256 hash of the `message` column, stores the result in a new column called `sha256`, and then keeps only the `message` and `sha256` columns in the output.
 
 ```esql
 FROM sample_data

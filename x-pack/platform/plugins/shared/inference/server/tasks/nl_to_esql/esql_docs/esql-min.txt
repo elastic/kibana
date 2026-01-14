@@ -10,18 +10,18 @@ The MIN function returns the minimum value of a specified field.
 
 #### field
 
-The field for which you want to find the minimum value.
+The column for which you want to find the minimum value.
 
 ## Examples
 
-The following query retrieves the minimum value found in the `languages` field across all documents in the `employees` index:
+The following query retrieves the minimum value found in the `languages` column from the `employees` dataset.
 
 ```esql
 FROM employees
 | STATS MIN(languages)
 ```
 
-This query first calculates the average of the `salary_change` field for each row (handling multi-valued fields), and then finds the minimum of these average values, assigning the result to `min_avg_salary_change`:
+This query calculates the minimum of the average salary change per employee. It first computes the average salary change for each employee (using `MV_AVG(salary_change)`), and then finds the smallest of these average values.
 
 ```esql
 FROM employees

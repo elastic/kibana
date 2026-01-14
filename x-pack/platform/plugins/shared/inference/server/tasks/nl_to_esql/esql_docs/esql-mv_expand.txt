@@ -1,6 +1,6 @@
 # MV_EXPAND
 
-The MV_EXPAND command expands multivalued columns so that each value appears in its own row, duplicating the other columns for each value.
+The MV_EXPAND command expands multivalued columns so that each value appears in its own row, duplicating the other columns for each expanded value.
 
 ## Syntax
 
@@ -14,7 +14,7 @@ The multivalued column to expand.
 
 ## Examples
 
-This query takes a single row with multivalued columns and expands the column `a` so that each value in `a` (1, 2, and 3) appears in its own row. The other columns (`b` and `j`) are duplicated for each expanded value of `a`.
+The following query takes a row where column `a` contains multiple values (`[1,2,3]`), and expands it so that each value in `a` appears in its own row. The values of columns `b` and `j` are duplicated for each expanded row.
 
 ```esql
 ROW a=[1,2,3], b="b", j=["a","b"]

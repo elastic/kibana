@@ -14,7 +14,7 @@ Query string in Lucene query string format.
 
 #### options
 
-Optional. Additional options for Query String as function named parameters. See query string query for more information.
+(Optional) Additional options for Query String as function named parameters. See query string query for more information.
 
 #### max_determinized_states
 
@@ -30,7 +30,7 @@ Optional. Additional options for Query String as function named parameters. See 
 
 #### phrase_slop
 
-(integer) Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (exact matches required).
+(integer) Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).
 
 #### default_field
 
@@ -102,14 +102,14 @@ Optional. Additional options for Query String as function named parameters. See 
 
 ## Examples
 
-The following query filters the `books` dataset to only include rows where the author field matches "Faulkner".
+This query retrieves rows from the `books` index where the `author` field matches "Faulkner" using a query string search.
 
 ```esql
 FROM books
 | WHERE QSTR("author: Faulkner")
 ```
 
-This query filters the `books` dataset to find rows where the title is similar to "Hobbjt", allowing up to 2 character changes (fuzziness) to account for possible misspellings.
+This query retrieves rows from the `books` index where the `title` field matches "Hobbjt" with a fuzziness value of 2, allowing for up to two character differences in the match.
 
 ```esql
 FROM books

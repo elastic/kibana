@@ -1,6 +1,6 @@
 # KQL
 
-The KQL function evaluates a KQL query string and returns true if the query matches the row.
+The KQL function performs a query using the KQL query string format and returns true if the provided query matches the row.
 
 ## Syntax
 
@@ -14,29 +14,29 @@ Query string in KQL query string format.
 
 #### options
 
-(Optional) Additional KQL options as function named parameters. Available in stack version 9.3.0 and later.
+Optional. KQL additional options as function named parameters. Available in stack version 9.3.0 and later.
 
 #### boost
 
-(Optional) Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
+Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
 
 #### time_zone
 
-(Optional) UTC offset or IANA time zone used to interpret date literals in the query string.
+UTC offset or IANA time zone used to interpret date literals in the query string.
 
 #### case_insensitive
 
-(Optional) If true, performs case-insensitive matching for keyword fields. Defaults to false.
+If true, performs case-insensitive matching for keyword fields. Defaults to false.
 
 #### default_field
 
-(Optional) Default field to search if no field is provided in the query string. Supports wildcards (*).
+Default field to search if no field is provided in the query string. Supports wildcards (*).
 
 ## Examples
 
 Use KQL to filter by a specific field value:
 
-This query selects rows from the `books` dataset where the `author` field is exactly "Faulkner".
+This query selects rows from the `books` table where the `author` field is exactly "Faulkner".
 
 ```esql
 FROM books
@@ -45,7 +45,7 @@ FROM books
 
 Use KQL with additional options for case-insensitive matching and custom settings:
 
-This query selects rows from the `employees` dataset where the `first_name` field matches "mary", ignoring case sensitivity and applying a custom boost value to the relevance score.
+This query selects rows from the `employees` table where the `first_name` field matches "mary", ignoring case sensitivity and applying a boost to the relevance score.
 
 ```esql
 FROM employees

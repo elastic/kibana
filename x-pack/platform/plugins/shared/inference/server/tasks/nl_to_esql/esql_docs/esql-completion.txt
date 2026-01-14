@@ -1,8 +1,6 @@
 # COMPLETION
 
-The COMPLETION command provides a general-purpose interface for text generation tasks using a Large Language Model (LLM). It supports a wide range of tasks such as question answering, summarization, translation, content rewriting, and creative generation. The command allows you to send prompts and context to an LLM directly within your queries to perform text generation tasks.
-
-Every row processed by the COMPLETION command generates a separate API call to the LLM endpoint.
+The COMPLETION command provides a general-purpose interface for text generation tasks using a Large Language Model (LLM). It supports a wide range of tasks such as question answering, summarization, translation, content rewriting, and creative generation. The command allows you to send prompts and context to an LLM directly within your queries to perform text generation tasks. Each row processed by the COMPLETION command generates a separate API call to the LLM endpoint.
 
 ## Syntax
 
@@ -16,7 +14,7 @@ For version 9.1.x only:
 
 #### column
 
-Optional. The name of the output column containing the LLM's response. If not specified, the results will be stored in a column named `completion`. If the specified column already exists, it will be overwritten with the new results.
+(Optional) The name of the output column containing the LLM's response. If not specified, the results will be stored in a column named `completion`. If the specified column already exists, it will be overwritten with the new results.
 
 #### prompt
 
@@ -30,7 +28,7 @@ The ID of the inference endpoint to use for the task. The inference endpoint mus
 
 Use the default column name (results stored in `completion` column):
 
-This query creates a row with a question about Elasticsearch, sends the question to the LLM using the COMPLETION command, and stores the LLM's response in the default `completion` column. The final output includes both the original question and the generated completion.
+Generate a completion for a question and store the result in the default `completion` column. This query creates a row with a question, sends it to the LLM for text generation, and keeps both the original question and the generated completion in the output.
 
 ```esql
 ROW question = "What is Elasticsearch?"
@@ -40,7 +38,7 @@ ROW question = "What is Elasticsearch?"
 
 Specify the output column (results stored in `answer` column):
 
-This query creates a row with a question about Elasticsearch, sends the question to the LLM, and stores the response in a custom column named `answer`. The output displays both the question and the LLM's answer.
+Generate a completion for a question and store the result in the `answer` column. This query creates a row with a question, sends it to the LLM, and stores the generated response in a column named `answer`, keeping both the question and the answer in the output.
 
 ```esql
 ROW question = "What is Elasticsearch?"
@@ -50,7 +48,7 @@ ROW question = "What is Elasticsearch?"
 
 Summarize the top 10 highest-rated movies using a prompt:
 
-This query selects the top 10 movies with the highest ratings, constructs a custom prompt for each movie containing its title, synopsis, and actors, and sends this prompt to the LLM to generate a summary. The results include the movie title, the generated summary, and the rating.
+This query retrieves the top 10 movies sorted by rating, constructs a custom prompt for each movie containing its title, synopsis, and actors, sends the prompt to the LLM to generate a summary, and stores the result in the `summary` column along with the movie title and rating.
 
 ```esql
 FROM movies
@@ -69,8 +67,7 @@ FROM movies
 ## Limitations
 
 - Every row processed by the COMPLETION command generates a separate API call to the LLM endpoint, which may result in high consumption and costs.
-- Starting in version 9.3.0, COMPLETION automatically limits processing to 100 rows by default to prevent accidental high consumption and costs. This limit can be adjusted using the `esql.command.completion.limit` cluster setting.
-- The command may time out when processing large datasets or complex prompts. The default timeout is 10 minutes, but it can be increased via cluster settings or query parameters, depending on your deployment type.
-- For Elastic Cloud Serverless, increasing the timeout requires a manual override from Elastic Support.
-- The inference endpoint must be configured with the `completion` task type.
-- The command can be disabled entirely using the `esql.command.completion.enabled` cluster setting.
+- Starting in version 9.3.0, COMPLETION automatically limits processing to 100 rows by default to prevent accidental high consumption and costs. This limit is applied before the COMPLETION command executes. You can adjust or disable this limit using cluster settings.
+- COMPLETION commands may time out when processing large datasets or complex prompts. The default timeout is 10 minutes, but you can increase this limit depending on your deployment type.
+- For Elastic Cloud Serverless deployments, timeout settings require a manual override from Elastic Support.
+- To avoid timeouts and high costs, reduce data volume with LIMIT or selective filters before the COMPLETION command, split complex operations into simpler queries, and monitor your LLM API usage.

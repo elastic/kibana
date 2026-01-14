@@ -14,7 +14,7 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-Calculates the hyperbolic cosine of the value 1.8 and stores the result in the column `cosh`.
+The following query creates a single row with the value `1.8` in column `a`, then calculates the hyperbolic cosine of `a` and stores the result in a new column called `cosh`:
 
 ```esql
 ROW a=1.8

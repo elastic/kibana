@@ -1,6 +1,6 @@
 # CLAMP_MIN
 
-The CLAMP_MIN function limits all input sample values to a specified lower bound. Any value below the given minimum is set to that minimum.
+The CLAMP_MIN function restricts all input sample values to a specified lower bound. Any value below the minimum is set to the minimum value.
 
 ## Syntax
 
@@ -10,7 +10,7 @@ The CLAMP_MIN function limits all input sample values to a specified lower bound
 
 #### field
 
-The field to clamp.
+The field whose values you want to clamp.
 
 #### min
 
@@ -18,13 +18,10 @@ The minimum value to clamp data to.
 
 ## Examples
 
-The following query calculates the sum of network cost values after applying different clamping functions, grouped by 1-minute time buckets. Specifically, it computes:
-- `full_clamped_cost`: the sum of network cost values clamped between 1 and 2,
-- `clamped_cost`: the sum of network cost values clamped to a maximum of 1,
-- `clamped_min_cost`: the sum of network cost values clamped to a minimum of 10.
-All results are grouped by 1-minute intervals based on the `@timestamp` field.
+The following query demonstrates how to clamp the minimum value of `network.cost` to 10, and aggregate the results by minute:
 
 ```esql
 FROM k8s
 | STATS full_clamped_cost=sum(clamp(network.cost, 1, 2)), clamped_cost=sum(clamp_max(network.cost, 1)), clamped_min_cost=sum(clamp_min(network.cost, 10)) BY time_bucket = bucket(@timestamp,1minute)
 ```
+This query retrieves data from the `k8s` index and calculates three different sums for the `network.cost` field, each using a different clamping function. Specifically, it computes the sum of `network.cost` values clamped to a minimum of 10 using `clamp_min`, ensuring that no value below 10 is included in the sum. The results are grouped into one-minute intervals based on the `@timestamp` field.

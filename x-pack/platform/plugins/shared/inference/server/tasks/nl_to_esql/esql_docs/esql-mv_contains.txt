@@ -1,6 +1,6 @@
 # MV_CONTAINS
 
-The MV_CONTAINS function checks if all values from the second multivalue expression are present in the values from the first multivalue expression. It returns a boolean result. Null values are treated as an empty set.
+Checks if all values produced by the second multivalue expression are present in the values produced by the first multivalue expression. Returns a boolean value. Null values are treated as an empty set.
 
 ## Syntax
 
@@ -18,18 +18,18 @@ A multivalue expression representing the set of values to check for within the s
 
 ## Examples
 
-Check if a single element is present in a set:
+Check if a set contains a specific element:
 
-This query creates a row with a set containing "a", "b", and "c", and an element "a". It then checks if the element "a" is present in the set, returning a boolean result in the `set_contains_element` field.
+This query creates a row with a set containing "a", "b", and "c", and an element "a". It then checks if the element "a" is present in the set, returning a boolean result.
 
 ```esql
 ROW set = ["a", "b", "c"], element = "a"
 | EVAL set_contains_element = mv_contains(set, element)
 ```
 
-Check if one set is a subset of another, and vice versa:
+Check if one set is a subset of another:
 
-This query creates two sets, `setA` and `setB`. It checks if all elements of `setA` are present in `setB` (i.e., if `setA` is a subset of `setB`), and also checks if all elements of `setB` are present in `setA` (i.e., if `setB` is a subset of `setA`). The results are stored in `a_subset_of_b` and `b_subset_of_a` respectively.
+This query creates two sets, setA and setB, and evaluates whether all elements of setA are present in setB (i.e., setA is a subset of setB), and vice versa. It returns boolean results for both checks.
 
 ```esql
 ROW setA = ["a","c"], setB = ["a", "b", "c"]
@@ -37,9 +37,9 @@ ROW setA = ["a","c"], setB = ["a", "b", "c"]
 | EVAL b_subset_of_a = mv_contains(setA, setB)
 ```
 
-Filter airports where the type contains both "major" and "military", and scalerank is 9:
+Filter rows where a column contains all specified values:
 
-This query retrieves records from the `airports` index where the `type` field contains both "major" and "military", and the `scalerank` field equals 9. It then keeps only the `scalerank`, `name`, and `country` fields in the output.
+This query retrieves rows from the `airports` index where the `type` column contains both "major" and "military", and the `scalerank` is 9. It then keeps only the `scalerank`, `name`, and `country` columns in the output.
 
 ```esql
 FROM airports

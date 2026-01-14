@@ -10,7 +10,7 @@ Calculates the absolute change of a gauge field within a specified time window.
 
 #### field
 
-The metric field for which to calculate the absolute change.
+The metric field for which to calculate the change.
 
 #### window
 
@@ -18,7 +18,7 @@ The time window over which to compute the delta.
 
 ## Examples
 
-The following query calculates the sum of the absolute change in network bytes received for the pod named "one", grouping the results by cluster and by 10-minute time intervals:
+The following query calculates the sum of the change in `network.bytes_in` for each cluster and 10-minute time bucket, but only for pods named "one". This helps you understand how much incoming network traffic has changed over time for each cluster, grouped into 10-minute intervals.
 
 ```esql
 TS k8s

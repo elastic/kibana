@@ -14,10 +14,12 @@ Date expression to extract the month name from. If `null`, the function returns 
 
 ## Examples
 
-This query creates a row with a datetime value and then extracts the month name from that date, assigning it to a new column called `monthName`.
+Extract the month name from a specific date:
+
+This query creates a row with a datetime value set to March 21, 1996, and then adds a new column called `monthName` that contains the full name of the month ("March") extracted from the date.
 
 ```esql
 ROW dt = to_datetime("1996-03-21T00:00:00.000Z")
 | EVAL monthName = MONTH_NAME(dt);
 ```
-Extracts the month name ("March") from the given date.
+This example returns "March" for the given date.

@@ -10,17 +10,15 @@ The MV_APPEND function concatenates the values of two multi-value fields.
 
 #### field1
 
-The first multi-value field whose values will be concatenated.
+The first multi-value field to concatenate.
 
 #### field2
 
-The second multi-value field whose values will be concatenated.
+The second multi-value field to concatenate.
 
 ## Examples
 
-Concatenate the `birth_date` and `hire_date` fields for selected employees:
-
-This query selects employees with `emp_no` 10039 or 10040, sorts them by employee number, and creates a new field called `dates` that combines the values from the `birth_date` and `hire_date` fields for each employee. The output only includes the employee number, birth date, hire date, and the new `dates` field.
+This query retrieves employees with employee numbers 10039 or 10040, sorts them by employee number, and creates a new field called `dates` that combines the values from the `birth_date` and `hire_date` fields. The final output displays the employee number, birth date, hire date, and the concatenated dates.
 
 ```esql
 FROM employees
@@ -30,4 +28,4 @@ FROM employees
 | KEEP emp_no, birth_date, hire_date, dates
 ```
 
-This example creates a new field `dates` by appending the values from `birth_date` and `hire_date` for each employee.
+Concatenate the `birth_date` and `hire_date` fields for employees with employee numbers 10039 and 10040, and display the result in a new `dates` field.

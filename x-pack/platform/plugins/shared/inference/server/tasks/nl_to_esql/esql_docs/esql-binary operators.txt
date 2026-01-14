@@ -1,6 +1,6 @@
 # BINARY OPERATORS
 
-Binary operators perform comparisons and arithmetic operations between two fields or values. These include equality, inequality, less than, less than or equal to, greater than, greater than or equal to, addition, subtraction, multiplication, division, and modulus. If either operand is multivalued, the result is `null`. For comparison operators, if one side is a constant and the other is a field with both a mapping-index and doc-values, the operation is pushed to the underlying search index. For division, integer division rounds towards zero; use casting for floating point division.
+Binary operators perform comparisons and arithmetic operations between two fields or values. These include equality, inequality, relational comparisons, and mathematical calculations. If either field is multivalued, the result is `null`. For comparison operators, if one side is a constant and the other is a field with both a mapping-index and doc-values, the operation is pushed to the underlying search index.
 
 ## Syntax
 
@@ -10,11 +10,11 @@ Binary operators perform comparisons and arithmetic operations between two field
 
 #### field_or_value
 
-Represents the left or right operand in the binary operation.
+Represents the left or right operand in the binary operation. This can be a field from your data or a constant value.
 
 #### operator
 
-The binary operator to apply. Supported operators are:
+The binary operator to apply. Supported operators include:
 - Equality (`==`)
 - Inequality (`!=`)
 - Less than (`<`)
@@ -29,74 +29,74 @@ The binary operator to apply. Supported operators are:
 
 ## Examples
 
-Determines if the values in columns `a` and `b` are equal.
+Filter employees whose department is "Engineering".
 ```esql
-ROW a = 5, b = 5
-| EVAL is_equal = a == b
+FROM employees
+| WHERE department == "Engineering"
 ```
 
-Determines if the values in columns `a` and `b` are not equal.
+Filter employees whose status is not "inactive".
 ```esql
-ROW a = 5, b = 3
-| EVAL is_unequal = a != b
+FROM employees
+| WHERE status != "inactive"
 ```
 
-Checks if the value in column `a` is less than the value in column `b`.
+Filter employees younger than 30.
 ```esql
-ROW a = 2, b = 5
-| EVAL is_less = a < b
+FROM employees
+| WHERE age < 30
 ```
 
-Checks if the value in column `a` is less than or equal to the value in column `b`.
+Filter employees with 5 or fewer years of experience.
 ```esql
-ROW a = 5, b = 5
-| EVAL is_less_or_equal = a <= b
+FROM employees
+| WHERE years_experience <= 5
 ```
 
-Checks if the value in column `a` is greater than the value in column `b`.
+Filter employees with a salary greater than 50,000.
 ```esql
-ROW a = 7, b = 5
-| EVAL is_greater = a > b
+FROM employees
+| WHERE salary > 50000
 ```
 
-Checks if the value in column `a` is greater than or equal to the value in column `b`.
+Filter employees who have completed at least 10 projects.
 ```esql
-ROW a = 5, b = 5
-| EVAL is_greater_or_equal = a >= b
+FROM employees
+| WHERE projects_completed >= 10
 ```
 
-Adds the values in columns `a` and `b`.
+Calculate total compensation by adding salary and bonus.
 ```esql
-ROW a = 2, b = 3
-| EVAL sum = a + b
+FROM employees
+| EVAL total_compensation = salary + bonus
 ```
 
-Subtracts the value in column `b` from the value in column `a`.
+Calculate remaining vacation days.
 ```esql
-ROW a = 5, b = 3
-| EVAL difference = a - b
+FROM employees
+| EVAL remaining_vacation = vacation_days - vacation_taken
 ```
 
-Multiplies the values in columns `a` and `b`.
+Calculate annual bonus by multiplying monthly bonus by 12.
 ```esql
-ROW a = 2, b = 3
-| EVAL product = a * b
+FROM employees
+| EVAL annual_bonus = monthly_bonus * 12
 ```
 
-Divides the value in column `a` by the value in column `b`, rounding towards zero for integer types.
+Calculate average monthly salary.
 ```esql
-ROW a = 7, b = 2
-| EVAL quotient = a / b
+FROM employees
+| EVAL average_monthly_salary = salary / 12
 ```
 
-Calculates the remainder of dividing the value in column `a` by the value in column `b`.
+Determine if employee ID is odd or even.
 ```esql
-ROW a = 7, b = 2
-| EVAL remainder = a % b
+FROM employees
+| EVAL odd_even = employee_id % 2
 ```
 
 ## Limitations
 
 - If either operand is multivalued, the result is `null`.
-- For division, dividing two integer types yields an integer result, rounded towards zero. To obtain a floating point result, cast one of the operands to `DOUBLE`.
-- For comparison operators, the operation is pushed to the underlying search index only if one side is a constant and the other is a field with both a mapping-index and doc-values.
+- For division (`/`), dividing two integer types yields an integer result, rounding towards 0. For floating point division, cast one of the arguments to `DOUBLE`.
+- Comparison operators are pushed to the underlying search index only if one side is a constant and the other is a field with both a mapping-index and doc-values.

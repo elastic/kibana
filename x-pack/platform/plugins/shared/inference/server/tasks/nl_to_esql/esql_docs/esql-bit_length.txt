@@ -10,13 +10,11 @@ Returns the bit length of a string. All strings are in UTF-8, so a single charac
 
 #### string
 
-String expression. If `null`, the function returns `null`.
+String expression. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-Calculate the bit length and character length of airport city names in India:
-
-This query retrieves airport records from India, keeps only the city field, and then calculates both the number of characters and the number of bits used to represent each city name.
+This query retrieves all airports located in India, keeps only the city field, and then calculates both the character length and the bit length (in bits) of each city name.
 
 ```esql
 FROM airports
@@ -24,3 +22,5 @@ FROM airports
 | KEEP city
 | EVAL fn_length = LENGTH(city), fn_bit_length = BIT_LENGTH(city)
 ```
+
+Calculate the bit length and character length of city names for airports in India.

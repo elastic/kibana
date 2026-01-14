@@ -18,7 +18,7 @@ The prefix string to check for at the start of `str`. If this value is `null`, t
 
 ## Examples
 
-The following query checks if the `last_name` column starts with the letter "B" for each employee, and adds a new column `ln_S` with the result (true or false):
+The following query checks whether each employee's last name starts with the letter "B". It keeps only the `last_name` column and adds a new column `ln_S` that contains `true` if the last name starts with "B", and `false` otherwise.
 
 ```esql
 FROM employees

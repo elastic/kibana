@@ -1,11 +1,6 @@
 # CHANGE-POINT
 
-The CHANGE_POINT command detects spikes, dips, and change points in a metric. It adds columns to the table indicating the change point type and a p-value, which reflects how extreme the change point is (lower values indicate greater changes). The possible change point types are:
-- `dip`: a significant dip occurs at this change point
-- `distribution_change`: the overall distribution of the values has changed significantly
-- `spike`: a significant spike occurs at this point
-- `step_change`: the change indicates a statistically significant step up or down in value distribution
-- `trend_change`: there is an overall trend change occurring at this point
+The CHANGE_POINT command detects spikes, dips, and change points in a metric. It adds columns to the table indicating the type of change point and a p-value, which reflects how extreme the change is (lower values indicate greater changes). Possible change point types include: `dip`, `distribution_change`, `spike`, `step_change`, and `trend_change`.
 
 ## Syntax
 
@@ -15,7 +10,7 @@ The CHANGE_POINT command detects spikes, dips, and change points in a metric. It
 
 #### value
 
-The column containing the metric in which you want to detect a change point.
+The column containing the metric where you want to detect change points.
 
 #### key
 
@@ -27,13 +22,11 @@ Optional. The name of the output column for the change point type. Defaults to `
 
 #### pvalue_name
 
-Optional. The name of the output column for the p-value indicating how extreme the change point is. Defaults to `pvalue`.
+Optional. The name of the output column for the p-value indicating the extremity of the change point. Defaults to `pvalue`.
 
 ## Examples
 
 Detect a step change in a metric:
-
-This query creates a sequence of keys from 1 to 25, expands them into individual rows, and assigns a value of 0 for keys less than 13 and 42 for keys 13 and above. It then detects statistically significant change points in the `value` column, ordered by `key`, and filters the results to show only the rows where a change point was detected.
 
 ```esql
 ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
@@ -42,8 +35,10 @@ ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
 | CHANGE_POINT value ON key
 | WHERE type IS NOT NULL
 ```
+This query creates a sequence of keys from 1 to 25, expands them into individual rows, and assigns a value of 0 for keys less than 13 and 42 for keys 13 and above. It then detects statistically significant change points in the `value` column, ordered by `key`, and filters the results to show only the rows where a change point was detected.
 
 ## Limitations
 
-- At least 22 values are required for change point detection. Fewer than 1,000 values is preferred.
+- At least 22 values are required for change point detection.
+- Fewer than 1,000 values is preferred for optimal performance.
 - The CHANGE_POINT command requires a platinum license.

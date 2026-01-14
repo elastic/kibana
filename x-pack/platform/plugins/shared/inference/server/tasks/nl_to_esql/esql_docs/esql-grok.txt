@@ -1,6 +1,6 @@
 # GROK
 
-The GROK command is used to extract structured data from a string by matching it against patterns based on regular expressions. It extracts the specified patterns as columns.
+The GROK command is used to extract structured data from a string. It matches the string against patterns based on regular expressions and extracts the specified patterns as columns.
 
 ## Syntax
 
@@ -14,13 +14,11 @@ The column containing the string you want to structure. If the column has multip
 
 #### pattern
 
-A grok pattern. If a field name conflicts with an existing column, the existing column is discarded. If a field name is used more than once, a multi-valued column will be created with one value per each occurrence of the field name.
+A grok pattern. If a field name conflicts with an existing column, the existing column is discarded. If a field name is used more than once, a multi-valued column will be created with one value per occurrence of the field name.
 
 ## Examples
 
-Parse a string containing a timestamp, an IP address, an email address, and a number:
-
-This query creates a row with a single string containing a timestamp, an IP address, an email address, and a number. It then uses the GROK command to extract each of these elements into separate columns (`date`, `ip`, `email`, and `num`), and finally keeps only these extracted columns in the output.
+This query parses a string containing a timestamp, IP address, email address, and a number, and extracts each of these elements into separate columns named `date`, `ip`, `email`, and `num`.
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
@@ -28,9 +26,7 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | KEEP date, ip, email, num
 ```
 
-Convert the extracted number to an integer type directly in the pattern:
-
-This query is similar to the previous one, but it converts the extracted `num` field to an integer type directly within the GROK pattern, so the `num` column will contain an integer value instead of a string.
+This query parses the same string as above, but it also converts the extracted number into an integer type directly within the GROK pattern.
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
@@ -38,9 +34,7 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | KEEP date, ip, email, num
 ```
 
-Convert the extracted date to a datetime type using a type conversion function:
-
-This query extracts the same fields as before, with `num` already converted to an integer. After extraction, it uses the `EVAL` command to convert the `date` field from a string to a datetime type, making it easier to work with date values in subsequent operations.
+This query parses the string, converts the extracted number to an integer, and then uses a type conversion function to convert the extracted date string into a datetime type.
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
@@ -49,9 +43,7 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | EVAL date = TO_DATETIME(date)
 ```
 
-Create a multi-valued column by using the same field name more than once in the pattern:
-
-This query reads data from the `addresses` source, keeps only the `city.name` and `zip_code` columns, and then uses GROK to split the `zip_code` field into two parts. By using the same field name (`zip_parts`) twice in the pattern, it creates a multi-valued column containing both extracted parts.
+This query demonstrates how to create a multi-valued column by using the same field name more than once in the GROK pattern. It extracts two words from the `zip_code` column and stores them as separate values in a new column called `zip_parts`.
 
 ```esql
 FROM addresses

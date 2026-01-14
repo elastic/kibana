@@ -1,6 +1,6 @@
 # TO_DOUBLE
 
-Converts an input value to a double. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to double. Boolean `true` is converted to `1.0`, and `false` to `0.0`.
+Converts an input value to a double value. If the input is a date type, its value is interpreted as milliseconds since the Unix epoch and converted to double. Boolean `true` is converted to `1.0`, and `false` to `0.0`.
 
 ## Syntax
 
@@ -10,15 +10,13 @@ Converts an input value to a double. If the input is a date type, its value is i
 
 #### field
 
-The input value to convert. This can be a single- or multi-valued column, or an expression.
+The input value to convert. This can be a single- or multi-valued column or an expression.
 
 ## Examples
 
-The following query demonstrates how to convert different types of string values to double precision numbers. It converts a numeric string and a string in scientific notation to double, and also attempts to convert a non-numeric string, which results in a `null` value and a warning in the response.
+This query demonstrates how to convert string representations of numbers to double values. It creates a row with two string fields, then uses the `TO_DOUBLE` function to convert a numeric string, a scientific notation string, and a non-numeric string to double values. If the conversion is not possible (as with `"foo"`), the result is `null` and a warning header is added to the response indicating the failure.
 
 ```esql
 ROW str1 = "5.20128E11", str2 = "foo"
 | EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)
 ```
-
-This example converts a string representing a number and a scientific notation string to double, and attempts to convert a non-numeric string, which results in a `null` value and a warning header in the response.

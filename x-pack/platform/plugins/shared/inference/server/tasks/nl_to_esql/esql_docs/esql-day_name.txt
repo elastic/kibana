@@ -1,6 +1,6 @@
 # DAY_NAME
 
-Returns the name of the weekday for a given date, based on the configured Locale.
+Returns the name of the weekday for a given date, using the configured Locale.
 
 ## Syntax
 
@@ -10,9 +10,11 @@ Returns the name of the weekday for a given date, based on the configured Locale
 
 #### date
 
-Date expression. If `null`, the function returns `null`.
+Date expression to extract the weekday name from. If `null`, the function returns `null`.
 
 ## Examples
+
+Extract the weekday name from a specific date:
 
 This query creates a row with a datetime value set to "1953-09-02T00:00:00.000Z" and then calculates the name of the weekday for that date, storing it in a new column called `weekday`.
 
@@ -20,4 +22,3 @@ This query creates a row with a datetime value set to "1953-09-02T00:00:00.000Z"
 ROW dt = to_datetime("1953-09-02T00:00:00.000Z")
 | EVAL weekday = DAY_NAME(dt);
 ```
-This example returns the weekday name for the date "1953-09-02T00:00:00.000Z".

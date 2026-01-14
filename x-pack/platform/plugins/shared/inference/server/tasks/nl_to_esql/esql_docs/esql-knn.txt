@@ -1,6 +1,6 @@
 # KNN
 
-The KNN function finds the k nearest vectors to a query vector using a similarity metric. It performs approximate search on indexed `dense_vector` or `semantic_text` fields to identify the closest matches.
+The KNN function finds the k nearest vectors to a query vector using a similarity metric. It performs approximate search on indexed dense_vector or semantic_text fields to identify the closest matches.
 
 ## Syntax
 
@@ -10,7 +10,7 @@ The KNN function finds the k nearest vectors to a query vector using a similarit
 
 #### field
 
-The field to target for the query. This must be a `dense_vector` or `semantic_text` field. Other text fields are not supported.
+The field to target for the query. Only dense_vector or semantic_text fields are supported; other text fields are not allowed.
 
 #### query
 
@@ -18,39 +18,44 @@ The vector value for which to find the top nearest neighbors.
 
 #### options
 
-(Optional) Additional kNN options as function named parameters. See the knn query documentation for more details.
+(Optional) Additional kNN options as function named parameters. Refer to the knn query documentation for more details.
 
 #### boost
 
-A floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
+(Optional) A floating point number to adjust the relevance scores of the query. Defaults to 1.0.
 
 #### k
 
-The number of nearest neighbors to return from each shard. Elasticsearch collects k results from each shard and merges them to find the global top results. This value must be less than or equal to `num_candidates` and is automatically set when a LIMIT is applied.
+(Optional) The number of nearest neighbors to return from each shard. This value must be less than or equal to num_candidates and is automatically set when a LIMIT is applied.
 
 #### visit_percentage
 
-The percentage of vectors to explore per shard during knn search with `bbq_disk`. Must be between 0 and 100. A value of 0 defaults to using `num_candidates` for calculating the percent visited. Increasing this value can improve accuracy. If set for `bbq_disk`, `num_candidates` is ignored. Defaults to approximately 1% per shard for every 1 million vectors.
+(Optional) The percentage of vectors to explore per shard during knn search with bbq_disk. Must be between 0 and 100. Defaults to approximately 1% per shard for every 1 million vectors. Increasing this value can improve accuracy.
 
 #### min_candidates
 
-The minimum number of nearest neighbor candidates to consider per shard during knn search. Cannot exceed 10,000. Increasing this value can improve accuracy. Defaults to 1.5 times the value of `k` (or LIMIT) used for the query.
+(Optional) The minimum number of nearest neighbor candidates to consider per shard. Cannot exceed 10,000. Defaults to 1.5 times k (or LIMIT) used for the query. Increasing this value can improve accuracy.
 
 #### rescore_oversample
 
-A double value specifying the oversampling factor for rescoring quantized vectors.
+(Optional) Specifies the oversampling factor for rescoring quantized vectors.
 
 #### similarity
 
-The minimum similarity required for a document to be considered a match. This value relates to the raw similarity used, not the document score.
+(Optional) The minimum similarity required for a document to be considered a match. This value relates to the raw similarity, not the document score.
 
 ## Examples
 
-The following query finds the nearest color vectors to a given RGB vector and sorts the results by score and color:
+The following query finds the color vectors in the `colors` index that are closest to the RGB value `[0, 120, 0]` (a shade of green). It uses the KNN function to identify the nearest neighbors based on the `rgb_vector` field, includes the relevance score (`_score`) in the results, and sorts the output by descending score and ascending color name.
 
 ```esql
 from colors metadata _score
 | where knn(rgb_vector, [0, 120, 0])
 | sort _score desc, color asc
 ```
-This query searches the `colors` index for vectors in the `rgb_vector` field that are closest to the `[0, 120, 0]` RGB value. It uses k-nearest neighbor (KNN) search to find the most similar color vectors, includes the relevance score (`_score`) in the results, and sorts the output first by descending score (most relevant matches first) and then alphabetically by color name.
+
+## Limitations
+
+- The KNN function can only be used with dense_vector or semantic_text fields. Other text fields are not supported.
+- The min_candidates parameter cannot exceed 10,000.
+- The k parameter must be less than or equal to num_candidates and is automatically set when a LIMIT is applied.

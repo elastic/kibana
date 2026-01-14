@@ -1,6 +1,6 @@
 # ASIN
 
-Returns the arcsine of a numeric input as an angle in radians.
+Returns the arcsine of the input numeric expression as an angle in radians.
 
 ## Syntax
 

@@ -1,6 +1,6 @@
 # MEDIAN_ABSOLUTE_DEVIATION
 
-The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation, a robust measure of variability. It is particularly useful for describing data with outliers or non-normal distributions, and can be more informative than standard deviation in such cases. The value is computed as the median of the absolute differences between each data point and the median of the entire sample. For a variable `X`, this is expressed as `median(|median(X) - X|)`. The result is usually approximate.
+The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation, a robust measure of variability. It is particularly useful for describing data with outliers or data that is not normally distributed, and can be more informative than standard deviation in such cases. The value is computed as the median of the absolute deviations from the median of the entire sample: `median(|median(X) - X|)`. The result is usually approximate and may vary slightly between runs.
 
 ## Syntax
 
@@ -10,18 +10,18 @@ The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation,
 
 #### number
 
-The column or expression containing numeric values for which the median absolute deviation will be calculated.
+The numeric column or expression for which to calculate the median absolute deviation.
 
 ## Examples
 
-The following query calculates both the median and the median absolute deviation of the `salary` field for all employees. This helps you understand the central tendency and the variability of employee salaries, even in the presence of outliers.
+This query retrieves data from the `employees` index and calculates both the median and the median absolute deviation of the `salary` column, providing insights into the central tendency and variability of employee salaries.
 
 ```esql
 FROM employees
 | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
 ```
 
-This query computes the median absolute deviation of the maximum salary change for each employee. It first finds the maximum salary change per employee (using `MV_MAX(salary_change)`), then calculates how much these maximum changes deviate from their median value.
+This query calculates the median absolute deviation of the maximum values found in the multivalued `salary_change` column for each document in the `employees` index. The result, labeled as `m_a_d_max_salary_change`, helps measure the variability of the largest salary changes among employees.
 
 ```esql
 FROM employees
@@ -31,4 +31,4 @@ FROM employees
 ## Limitations
 
 - The result of MEDIAN_ABSOLUTE_DEVIATION is usually approximate.
-- The function is non-deterministic, meaning you may get slightly different results using the same data.
+- The function is non-deterministic, so results may vary slightly even with the same data.

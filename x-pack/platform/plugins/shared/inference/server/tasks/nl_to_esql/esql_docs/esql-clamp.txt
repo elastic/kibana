@@ -1,6 +1,6 @@
 # CLAMP
 
-The CLAMP function restricts values within a specified range, setting a lower limit (`min`) and an upper limit (`max`). Any value below the minimum is set to the minimum, and any value above the maximum is set to the maximum.
+The CLAMP function restricts values within a specified range, ensuring that all samples are no less than a minimum value and no greater than a maximum value.
 
 ## Syntax
 
@@ -22,7 +22,7 @@ The maximum value to clamp the data to.
 
 ## Examples
 
-The following query clamps the `network.cost` field so that its value is not less than the result of `clamp_max(network.bytes_in, 5)` and not greater than `network.bytes_in / 100`. It then creates a new field called `full_clamped_cost` with the clamped value and keeps only this field and the `@timestamp` field in the output.
+The following query clamps the `network.cost` value so that it is not less than the result of `clamp_max(network.bytes_in, 5)` and not greater than `network.bytes_in / 100`. The resulting clamped value is stored in a new field called `full_clamped_cost`, and only this field along with the timestamp is kept in the output.
 
 ```esql
 TS k8s

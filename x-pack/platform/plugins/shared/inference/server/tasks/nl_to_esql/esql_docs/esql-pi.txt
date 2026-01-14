@@ -12,9 +12,10 @@ This function does not take any parameters.
 
 ## Examples
 
-The following query returns the value of Pi as a column in the result:
+The following query creates a single row containing the value of Pi.
 
 ```esql
 ROW PI()
 ```
-This query creates a single row with a column containing the value of Pi (approximately 3.14159).
+
+Return the value of Pi.

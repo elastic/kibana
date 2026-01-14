@@ -10,15 +10,15 @@ Calculates the dot product between two dense_vectors.
 
 #### left
 
-First dense_vector to calculate dot product similarity.
+The first dense_vector to use in the dot product calculation.
 
 #### right
 
-Second dense_vector to calculate dot product similarity.
+The second dense_vector to use in the dot product calculation.
 
 ## Examples
 
-This query calculates the dot product similarity between the `rgb_vector` column and the vector `[0, 255, 255]` for each row in the `colors` table. It then sorts the results in descending order of similarity and, for rows with the same similarity, in ascending order of the `color` column.
+This query calculates the dot product similarity between the `rgb_vector` column and the vector `[0, 255, 255]` for each row in the `colors` table. It then sorts the results by the computed similarity in descending order (showing the most similar colors first) and by the color name in ascending order.
 
 ```esql
 from colors

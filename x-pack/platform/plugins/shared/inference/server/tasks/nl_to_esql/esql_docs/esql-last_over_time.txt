@@ -18,13 +18,9 @@ The time window over which to find the latest value.
 
 ## Examples
 
-The following query calculates the maximum value of the most recent `network.cost` for each cluster within 1-minute time buckets:
+The following query calculates the maximum value of the most recent `network.cost` for each cluster and each 1-minute time bucket. It first retrieves data from the `k8s` source, then uses the `LAST_OVER_TIME` function to get the latest `network.cost` value, and finally computes the maximum of these values grouped by `cluster` and by 1-minute intervals.
 
 ```esql
 TS k8s
 | STATS max_cost=MAX(LAST_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)
 ```
-
-## Limitations
-
-This function is available as a preview in stack version 9.2.0 and in serverless preview.

@@ -1,6 +1,6 @@
 # CLAMP_MAX
 
-The CLAMP_MAX function limits all input sample values to an upper bound specified by max. Any value above max is reduced to max.
+The CLAMP_MAX function limits all input sample values to an upper bound specified by `max`. Any value above `max` is reduced to `max`.
 
 ## Syntax
 
@@ -10,7 +10,7 @@ The CLAMP_MAX function limits all input sample values to an upper bound specifie
 
 #### field
 
-The field to clamp.
+The field whose values you want to clamp.
 
 #### max
 
@@ -18,15 +18,19 @@ The maximum value to clamp data to.
 
 ## Examples
 
-Calculate the sum of network cost values clamped to a maximum of 1, grouped by 1-minute time buckets:
+Clamp the `network.cost` field to a maximum value of 1, then sum the results grouped by 1-minute time buckets:
 
-This query retrieves data from the `k8s` source and calculates three different sums for the `network.cost` field, grouped into 1-minute time buckets:
-- `full_clamped_cost` is the sum of `network.cost` values clamped between 1 and 2.
-- `clamped_cost` is the sum of `network.cost` values clamped to a maximum of 1 (any value above 1 is set to 1 before summing).
-- `clamped_min_cost` is the sum of `network.cost` values clamped to a minimum of 10 (any value below 10 is set to 10 before summing).
-The results are grouped by each 1-minute interval based on the `@timestamp` field.
+This query retrieves data from the `k8s` source, then calculates three different sums for each 1-minute time bucket:  
+- `full_clamped_cost` is the sum of the `network.cost` field clamped between 1 and 2 using the `clamp` function.  
+- `clamped_cost` is the sum of the `network.cost` field with values capped at a maximum of 1 using the `clamp_max` function.  
+- `clamped_min_cost` is the sum of the `network.cost` field with values floored at a minimum of 10 using the `clamp_min` function.  
+The results are grouped by 1-minute intervals based on the `@timestamp` field.
 
 ```esql
 TS k8s
 | STATS full_clamped_cost=sum(clamp(network.cost, 1, 2)), clamped_cost=sum(clamp_max(network.cost, 1)), clamped_min_cost=sum(clamp_min(network.cost, 10)) BY time_bucket = bucket(@timestamp,1minute)
 ```
+
+Limitations
+
+No limitations are mentioned for this function.

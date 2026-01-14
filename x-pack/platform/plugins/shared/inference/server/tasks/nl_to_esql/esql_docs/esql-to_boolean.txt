@@ -1,6 +1,6 @@
 # TO_BOOLEAN
 
-Converts an input value to a boolean value. A string value of `true` (case-insensitive) is converted to the Boolean `true`. All other string values, including the empty string, are converted to `false`. The numeric value `0` is converted to `false`, while any other numeric value is converted to `true`.
+Converts an input value to a boolean value. A string value of `true` (case-insensitive) is converted to the Boolean `true`. All other string values, including the empty string, return `false`. The numerical value `0` is converted to `false`, while any other number is converted to `true`.
 
 ## Syntax
 
@@ -14,10 +14,10 @@ The input value to convert. This can be a single- or multi-valued column, or an 
 
 ## Examples
 
-Convert an array of string values to their boolean equivalents:
+This query creates a row with a list of string values and then converts each string to its boolean equivalent using the `TO_BOOLEAN` function. For example, "true" and "TRuE" will be converted to `true`, while "false", "", "yes", and "1" will be converted to `false` or `true` according to the conversion rules.
 
 ```esql
 ROW str = ["true", "TRuE", "false", "", "yes", "1"]
 | EVAL bool = TO_BOOLEAN(str)
 ```
-This query creates a row with an array of string values and then uses the `TO_BOOLEAN` function to convert each string in the array to its corresponding boolean value. For example, "true" and "TRuE" become `true`, while "false", the empty string, "yes", and "1" become `false` or `true` according to the conversion rules.
+Convert a list of string values to their boolean equivalents.

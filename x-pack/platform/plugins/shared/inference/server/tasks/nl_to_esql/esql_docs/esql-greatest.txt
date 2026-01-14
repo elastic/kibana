@@ -1,6 +1,6 @@
 # GREATEST
 
-The GREATEST function returns the maximum value from multiple columns. When used with `keyword` or `text` fields, it returns the last string in alphabetical order. For `boolean` columns, it returns `true` if any value is `true`.
+The GREATEST function returns the maximum value from multiple columns. When used with string fields, it returns the last string in alphabetical order. For boolean columns, it returns `true` if any value is `true`.
 
 ## Syntax
 
@@ -18,7 +18,7 @@ The remaining columns to evaluate.
 
 ## Examples
 
-The following query creates a row with two columns, `a` and `b`, assigned the values 10 and 20 respectively. It then uses the `GREATEST` function to compute the maximum value between `a` and `b`, storing the result in a new column `g`.
+The following query creates a row with two columns, `a` and `b`, having values 10 and 20 respectively. It then calculates the greatest value between these two columns and stores the result in a new column `g`.
 
 ```esql
 ROW a = 10, b = 20

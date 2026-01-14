@@ -1,6 +1,6 @@
 # COUNT_OVER_TIME
 
-Calculates the count over time value for a specified field within a given time window.
+Calculates the count over time value of a field within a specified time window.
 
 ## Syntax
 
@@ -18,9 +18,7 @@ The time window over which to compute the count over time.
 
 ## Examples
 
-Calculate the count over time for the `network.cost` field, grouped by cluster and 1-minute time buckets:
-
-This query retrieves data from the `k8s` time series, calculates the count over time for the `network.cost` field, and then aggregates the results by `cluster` and 1-minute time intervals. The output shows the count of `network.cost` events for each cluster in each 1-minute bucket.
+The following query calculates the count over time for the `network.cost` field, grouping the results by `cluster` and by 1-minute time buckets. This helps you see how many `network.cost` events occurred in each cluster for every minute.
 
 ```esql
 TS k8s

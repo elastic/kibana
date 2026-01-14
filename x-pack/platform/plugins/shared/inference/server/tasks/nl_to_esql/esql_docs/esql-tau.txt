@@ -12,7 +12,7 @@ This function does not take any parameters.
 
 ## Examples
 
-The following query calculates the mathematical constant tau (τ), which is the ratio of a circle’s circumference to its radius (equal to 2π):
+The following query calculates the value of tau (τ), which is the ratio of a circle's circumference to its radius. The result is returned as a single row.
 
 ```esql
 ROW TAU()
