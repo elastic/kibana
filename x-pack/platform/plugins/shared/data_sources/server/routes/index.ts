@@ -153,8 +153,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const savedObjectsClient = coreContext.savedObjects.client;
 
         // Validate data source type exists
-        const dataCatalog = dataCatalog.getCatalog();
-        const dataSource = dataCatalog.get(type);
+        const catalog = dataCatalog.getCatalog();
+        const dataSource = catalog.get(type);
         if (!dataSource) {
           return response.customError({
             statusCode: 400,
