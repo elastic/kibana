@@ -21,7 +21,6 @@ import { registerCreateRoute } from './register_create_route';
 
 import { registerIndicesGet } from './indices_get';
 import { registerIndicesStats } from './indices_stats';
-import { registerMeteringStats } from './metering_stats';
 
 export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerClearCacheRoute(dependencies);
@@ -38,5 +37,4 @@ export function registerIndicesRoutes(dependencies: RouteDependencies) {
 
   registerIndicesGet(dependencies);
   registerIndicesStats(dependencies);
-  registerMeteringStats(dependencies);
 }

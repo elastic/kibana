@@ -10,3 +10,8 @@ export interface MeteringStats {
   num_docs: number;
   size_in_bytes: number;
 }
+
+// is this used?
+export interface MeteringStatsResponse {
+  indices: MeteringStats[];
+}

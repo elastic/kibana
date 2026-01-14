@@ -31,3 +31,20 @@ export interface IndexSettingsResponse {
   settings: IndexSettings;
   defaults: IndexSettings;
 }
+
+export interface IndexData {
+  documents?: number;
+  size?: string;
+  name: string;
+  isFrozen: boolean;
+  aliases?: string[];
+  hidden: boolean;
+  data_stream?: string;
+  mode?: string;
+  primary?: number;
+  replica?: number;
+}
+
+export interface IndexDataResponse {
+  body: IndexData[];
+}
