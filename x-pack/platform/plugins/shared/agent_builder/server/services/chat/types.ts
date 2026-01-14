@@ -6,7 +6,12 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { AgentCapabilities, ChatEvent, ConverseInput } from '@kbn/agent-builder-common';
+import type {
+  AgentCapabilities,
+  ChatEvent,
+  ConverseInput,
+  AgentConfigurationOverrides,
+} from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 
@@ -61,4 +66,9 @@ export interface ChatConverseParams {
    * These tools will be registered as LLM tools with browser.* namespace.
    */
   browserApiTools?: BrowserApiToolMetadata[];
+  /**
+   * Runtime configuration overrides for the agent.
+   * These override the stored agent configuration for this execution only.
+   */
+  configurationOverrides?: AgentConfigurationOverrides;
 }

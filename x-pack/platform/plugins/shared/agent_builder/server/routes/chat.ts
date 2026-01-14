@@ -27,6 +27,7 @@ import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { AttachmentServiceStart } from '../services/attachments';
+import { validateToolSelection } from '../services/agents/persisted/client/utils';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
@@ -136,6 +137,31 @@ export function registerChatRoutes({
         }
       )
     ),
+    configuration_overrides: schema.maybe(
+      schema.object(
+        {
+          instructions: schema.maybe(
+            schema.string({
+              meta: { description: 'Custom instructions for the agent.' },
+            })
+          ),
+          tools: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                tool_ids: schema.arrayOf(schema.string()),
+              }),
+              { meta: { description: 'Tool selection to enable for this execution.' } }
+            )
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Runtime configuration overrides. These override the stored agent configuration for this execution only.',
+          },
+        }
+      )
+    ),
   });
 
   const validateAttachments = async ({
@@ -155,6 +181,27 @@ export function registerChatRoutes({
       }
     }
     return results;
+  };
+
+  const validateConfigurationOverrides = async ({
+    payload,
+    request,
+  }: {
+    payload: ChatRequestBodyPayload;
+    request: KibanaRequest;
+  }) => {
+    if (payload.configuration_overrides?.tools) {
+      const { tools: toolsService } = getInternalServices();
+      const toolRegistry = await toolsService.getRegistry({ request });
+      const errors = await validateToolSelection({
+        toolRegistry,
+        request,
+        toolSelection: payload.configuration_overrides.tools,
+      });
+      if (errors.length > 0) {
+        throw createBadRequestError(`Invalid tool override: ${errors.join(', ')}`);
+      }
+    }
   };
 
   const callConverse = ({
@@ -178,6 +225,7 @@ export function registerChatRoutes({
       prompts,
       capabilities,
       browser_api_tools: browserApiTools,
+      configuration_overrides: configurationOverrides,
     } = payload;
 
     return chatService.converse({
@@ -186,6 +234,7 @@ export function registerChatRoutes({
       conversationId,
       capabilities,
       browserApiTools,
+      configurationOverrides,
       abortSignal,
       nextInput: {
         message: input,
@@ -242,6 +291,8 @@ export function registerChatRoutes({
               attachmentsService,
             })
           : [];
+
+        await validateConfigurationOverrides({ payload, request });
 
         const chatEvents$ = callConverse({
           payload,
@@ -321,6 +372,8 @@ export function registerChatRoutes({
               attachmentsService,
             })
           : [];
+
+        await validateConfigurationOverrides({ payload, request });
 
         const chatEvents$ = callConverse({
           payload,
