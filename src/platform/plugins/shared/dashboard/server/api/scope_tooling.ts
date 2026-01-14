@@ -36,9 +36,15 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     return Boolean(transforms?.schema);
   }
 
-  function removeEnhancements(panel: DashboardPanel | DashboardPinnedPanel) {
-    const { enhancements, ...restOfConfig } = panel.config as { enhancements?: unknown };
-    if (enhancements) {
+  function removeEnhancements(panel: DashboardPanel) {
+    const { enhancements, ...restOfConfig } = panel.config as {
+      enhancements?: { dynamicActions: { events: [] } };
+    };
+    if (
+      typeof enhancements?.dynamicActions === 'object' &&
+      Array.isArray(enhancements?.dynamicActions?.events) &&
+      enhancements.dynamicActions.events.length
+    ) {
       warnings.push(`Dropped unmapped panel config key 'enhancements' from panel ${panel.uid}`);
     }
     return {

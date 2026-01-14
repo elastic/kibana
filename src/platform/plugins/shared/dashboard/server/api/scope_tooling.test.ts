@@ -159,7 +159,11 @@ describe('stripUnmappedKeys', () => {
         {
           config: {
             title: 'panel',
-            enhancements: {},
+            enhancements: {
+              dynamicActions: {
+                events: [],
+              },
+            },
           },
           grid: {
             h: 15,
@@ -176,7 +180,11 @@ describe('stripUnmappedKeys', () => {
             {
               config: {
                 title: 'panel in section',
-                enhancements: {},
+                enhancements: {
+                  dynamicActions: {
+                    events: [{}],
+                  },
+                },
               },
               grid: {
                 h: 15,
@@ -234,7 +242,6 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped unmapped panel config key 'enhancements' from panel panel1",
           "Dropped unmapped panel config key 'enhancements' from panel panelInSection1",
         ],
       }
