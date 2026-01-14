@@ -15,6 +15,7 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -38,6 +39,7 @@ const viewInDiscoverSupportedRuleTypes = [
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
+  ApmRuleType.TransactionDuration,
 ] as const;
 
 type ViewInDiscoverSupportedRuleType = (typeof viewInDiscoverSupportedRuleTypes)[number];
@@ -66,6 +68,7 @@ const getLocatorParamsMap: Record<
   [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
   [METRIC_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
   [LOG_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
+  [ApmRuleType.TransactionDuration]: getAlertsIndexPatternRuleData,
 };
 
 export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?: Rule }) => {
