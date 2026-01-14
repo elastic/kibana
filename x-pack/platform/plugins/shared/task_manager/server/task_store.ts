@@ -219,8 +219,52 @@ export class TaskStore {
     return this.savedObjectsRepository;
   }
 
+  private async regenerateApiKeyFromRequest(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
+    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+
+    // If a task with an API key is updated with a request
+    if (hasEncryptedFields && options?.request && options?.regenerateApiKey) {
+      const docsWithApiKeys: ConcreteTaskInstance[] = [];
+      const apiKeyIdsToRemove: string[] = [];
+
+      docs.forEach((taskInstance) => {
+        const { apiKey, userScope } = taskInstance;
+        if (apiKey && userScope) {
+          docsWithApiKeys.push(taskInstance);
+          if (!userScope.apiKeyCreatedByUser) {
+            apiKeyIdsToRemove.push(userScope.apiKeyId);
+          }
+        }
+      });
+
+      // we should invalidate the old API keys
+      if (apiKeyIdsToRemove.length) {
+        await bulkMarkApiKeysForInvalidation({
+          apiKeyIds: apiKeyIdsToRemove,
+          logger: this.logger,
+          savedObjectsClient: this.savedObjectsRepository,
+        });
+      }
+
+      // and create new API keys using the new request
+      if (docsWithApiKeys.length) {
+        return this.getApiKeyFromRequest(docsWithApiKeys, options.request);
+      }
+    }
+
+    return null;
+  }
+
   private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
     const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+
+    // If a task with an API key is updated without a request, throw an error.
+    if (hasEncryptedFields && !options?.request) {
+      throw new Error(
+        'Request is not defined but some of the tasks have API key or user scope. Cannot get the encrypted saved objects repository to bulk update tasks.'
+      );
+    }
+
     if (options?.request && !hasEncryptedFields) {
       this.logger.debug(
         'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
@@ -542,6 +586,8 @@ export class TaskStore {
     { validate, mergeAttributes = true, options }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
     const soClientToUpdate = this.getSoClientForUpdate(docs, options);
+    const apiKeyAndUserScopeMap =
+      (await this.regenerateApiKeyFromRequest(docs, options)) || new Map();
 
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
@@ -549,14 +595,19 @@ export class TaskStore {
           const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
             validate,
           });
+          const { apiKey: updatedApiKey, userScope: updatedUserScope } =
+            apiKeyAndUserScopeMap.get(taskInstance.id) || {};
+          const apiKey = updatedApiKey || doc?.apiKey;
+          const userScope = updatedUserScope || doc?.userScope;
+
           acc.set(doc.id, {
             type: 'task',
             id: doc.id,
             version: doc.version,
             attributes: {
               ...taskInstanceToAttributes(taskInstance, doc.id),
-              ...(doc?.apiKey ? { apiKey: doc.apiKey } : {}),
-              ...(doc?.userScope ? { userScope: doc.userScope } : {}),
+              ...(apiKey ? { apiKey } : {}),
+              ...(userScope ? { userScope } : {}),
             },
             mergeAttributes,
           });
