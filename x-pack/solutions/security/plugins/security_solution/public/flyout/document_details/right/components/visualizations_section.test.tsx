@@ -36,7 +36,7 @@ import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_re
 import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
-jest.mock('../hooks/use_expand_section');
+jest.mock('../../../shared/hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));

@@ -24,7 +24,7 @@ import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 
-jest.mock('../hooks/use_expand_section');
+jest.mock('../../../shared/hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../rule_details/hooks/use_rule_details');

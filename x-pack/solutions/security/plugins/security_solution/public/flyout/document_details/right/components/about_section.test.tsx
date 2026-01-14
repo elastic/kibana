@@ -25,7 +25,7 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 
 jest.mock('../../../../common/components/link_to');
-jest.mock('../hooks/use_expand_section');
+jest.mock('../../../shared/hooks/use_expand_section');
 
 const mockGetFieldsData: (field: string) => string = (field: string) => {
   switch (field) {
