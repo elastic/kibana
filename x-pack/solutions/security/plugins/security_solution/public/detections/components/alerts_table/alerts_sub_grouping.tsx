@@ -36,6 +36,7 @@ import { buildTimeRangeFilter } from './helpers';
 
 import * as i18n from './translations';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
+import { useQueryAlertsEsql } from '../../containers/detection_engine/alerts/use_query_esql';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getAlertsGroupingQuery } from './grouping_settings';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
@@ -110,6 +111,12 @@ interface OwnProps {
     aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
     groupingLevel?: number
   ) => void;
+
+  /**
+   * Optional ES|QL query string. If provided, ES|QL query will be used instead of KQL-based grouping query.
+   * The query should return at least two columns: grouping key and count (e.g., `STATS count BY field_name`).
+   */
+  esqlQuery?: string;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -140,6 +147,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   multiValueFieldsToFlatten,
   pageScope = PageScope.alerts,
   onAggregationsChange,
+  esqlQuery,
 }) => {
   const {
     services: { uiSettings },
@@ -209,6 +217,11 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const uniqueValue = useMemo(() => `SuperUniqueValue-${uuidv4()}`, []);
 
   const queryGroups = useMemo(() => {
+    if (esqlQuery) {
+      // For ES|QL, we return a special marker object
+      // All filters are already included in the ES|QL query string
+      return { _esqlQuery: esqlQuery };
+    }
     return getAlertsGroupingQuery({
       groupStatsAggregations,
       additionalFilters,
@@ -223,6 +236,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     });
   }, [
     additionalFilters,
+    esqlQuery,
     from,
     groupStatsAggregations,
     pageIndex,
@@ -249,6 +263,27 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     return pageScope === PageScope.attacks ? fetchQueryUnifiedAlerts : fetchQueryAlerts;
   }, [pageScope]);
 
+  // For ES|QL queries, use the dedicated hook
+  // All filters are already included in the ES|QL query string
+  const {
+    data: esqlData,
+    loading: esqlLoading,
+    request: esqlRequest,
+    response: esqlResponseText,
+    refetch: esqlRefetch,
+    setQuery: setEsqlQuery,
+  } = useQueryAlertsEsql<AlertsGroupingAggregation>({
+    query: esqlQuery,
+    skip: !esqlQuery || isNoneGroup([selectedGroup]),
+    queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING_ESQL,
+  });
+  // console.log(`[GroupedSubLevel] esqlQuery: ${JSON.stringify(esqlQuery, null, 2)}`);
+  // console.log(`[GroupedSubLevel] esqlData: ${JSON.stringify(esqlData, null, 2)}`);
+  // console.log(`[GroupedSubLevel] esqlLoading: ${esqlLoading}`);
+  // console.log(`[GroupedSubLevel] esqlRequest: ${JSON.stringify(esqlRequest, null, 2)}`);
+  // console.log(`[GroupedSubLevel] esqlResponseText: ${esqlResponseText}`);
+  // console.log(`[GroupedSubLevel] esqlRefetch: ${JSON.stringify(esqlRefetch, null, 2)}`);
+
   const {
     data: alertsGroupsData,
     loading: isLoadingGroups,
@@ -258,11 +293,19 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     setQuery: setAlertsQuery,
   } = useQueryAlerts<{}, GroupingAggregation<AlertsGroupingAggregation>>({
     fetchMethod,
-    query: queryGroups,
+    query: esqlQuery ? {} : queryGroups, // Don't pass query for ES|QL
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
-    skip: isNoneGroup([selectedGroup]),
+    skip: isNoneGroup([selectedGroup]) || !!esqlQuery, // Skip KQL path when ES|QL is used
   });
+
+  // Use ES|QL data when available, otherwise use KQL data
+  const finalGroupsData: GroupingAggregation<AlertsGroupingAggregation> | undefined = esqlQuery
+    ? esqlData ?? undefined
+    : alertsGroupsData?.aggregations;
+  const finalLoading = esqlQuery ? esqlLoading : isLoadingGroups;
+  const finalRequest = esqlQuery ? esqlRequest : request;
+  const finalResponse = esqlQuery ? esqlResponseText : response;
 
   const queriedGroup = useRef<string | null>(null);
 
@@ -273,24 +316,30 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
         queriedGroup.current === null ? selectedGroup : queriedGroup.current,
         uniqueValue,
-        alertsGroupsData?.aggregations
+        finalGroupsData
       ),
-    [alertsGroupsData?.aggregations, selectedGroup, uniqueValue]
+    [finalGroupsData, selectedGroup, uniqueValue]
   );
 
   useEffect(() => {
-    if (!isLoadingGroups) {
+    if (!finalLoading) {
       onAggregationsChange?.(aggs, groupingLevel);
     }
-  }, [aggs, groupingLevel, isLoadingGroups, onAggregationsChange]);
+  }, [aggs, groupingLevel, finalLoading, onAggregationsChange]);
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
-      queriedGroup.current =
-        queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup ?? '';
-      setAlertsQuery(queryGroups);
+      if (esqlQuery) {
+        queriedGroup.current = selectedGroup;
+        setEsqlQuery(esqlQuery);
+      } else {
+        const kqlQueryGroups = queryGroups as ReturnType<typeof getAlertsGroupingQuery>;
+        queriedGroup.current =
+          kqlQueryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup ?? '';
+        setAlertsQuery(kqlQueryGroups);
+      }
     }
-  }, [queryGroups, selectedGroup, setAlertsQuery]);
+  }, [queryGroups, selectedGroup, setAlertsQuery, esqlQuery, setEsqlQuery]);
 
   const { deleteQuery, setQuery } = useGlobalTime();
   // create a unique, but stable (across re-renders) query id
@@ -298,10 +347,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
 
   useInspectButton({
     deleteQuery,
-    loading: isLoadingGroups,
-    refetch,
-    request,
-    response,
+    loading: finalLoading,
+    refetch: esqlQuery ? esqlRefetch ?? null : refetch,
+    request: finalRequest,
+    response: finalResponse,
     setQuery,
     uniqueQueryId,
   });
@@ -341,7 +390,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         data: aggs,
         groupingLevel,
         additionalToolbarControls: [...additionalToolbarControls, inspect],
-        isLoading: loading || isLoadingGroups,
+        isLoading: loading || finalLoading,
         itemsPerPage: pageSize,
         onChangeGroupsItemsPerPage,
         onChangeGroupsPage,
@@ -357,7 +406,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       groupingLevel,
       groupTakeActionItems,
       inspect,
-      isLoadingGroups,
+      finalLoading,
       loading,
       onChangeGroupsItemsPerPage,
       onChangeGroupsPage,

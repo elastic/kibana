@@ -15,6 +15,10 @@ export interface QueryAlerts extends BasicSignals {
   query: object;
 }
 
+export interface QueryEsqlAlerts extends BasicSignals {
+  query: string;
+}
+
 export interface AlertsResponse {
   took: number;
   timeout: boolean;
