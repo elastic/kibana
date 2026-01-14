@@ -9,12 +9,12 @@
 
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
-export interface DataConnectorsPluginSetup {}
+export interface DataSourcesPluginSetup {}
 
-export interface DataConnectorsPluginStart {}
+export interface DataSourcesPluginStart {}
 
-export interface DataConnectorsPluginSetupDependencies {}
+export interface DataSourcesPluginSetupDependencies {}
 
-export interface DataConnectorsPluginStartDependencies {
+export interface DataSourcesPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }

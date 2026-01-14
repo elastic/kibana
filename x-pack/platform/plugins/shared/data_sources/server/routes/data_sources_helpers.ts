@@ -14,8 +14,8 @@ import type { DataSource } from '@kbn/data-sources-registry-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type {
-  DataConnectorsServerSetupDependencies,
-  DataConnectorsServerStartDependencies,
+  DataSourcesServerSetupDependencies,
+  DataSourcesServerStartDependencies,
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
 
@@ -73,10 +73,10 @@ interface CreateDataSourceAndResourcesParams {
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
   logger: Logger;
-  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
-  actions: DataConnectorsServerStartDependencies['actions'];
+  workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'];
+  actions: DataSourcesServerStartDependencies['actions'];
   dataSource: DataSource;
-  agentBuilder: DataConnectorsServerStartDependencies['agentBuilder'];
+  agentBuilder: DataSourcesServerStartDependencies['agentBuilder'];
 }
 
 function slugify(input: string): string {
@@ -193,12 +193,12 @@ interface DeleteRelatedResourcesParams {
   spaceId: string;
   request: KibanaRequest;
   logger: Logger;
-  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
+  workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'];
   actionsClient: Awaited<
-    ReturnType<DataConnectorsServerStartDependencies['actions']['getActionsClientWithRequest']>
+    ReturnType<DataSourcesServerStartDependencies['actions']['getActionsClientWithRequest']>
   >;
   toolRegistry: Awaited<
-    ReturnType<DataConnectorsServerStartDependencies['agentBuilder']['tools']['getRegistry']>
+    ReturnType<DataSourcesServerStartDependencies['agentBuilder']['tools']['getRegistry']>
   >;
 }
 
@@ -361,12 +361,12 @@ interface DeleteDataSourceAndRelatedResourcesParams {
   dataSource: SavedObject<DataSourceAttributes>;
   savedObjectsClient: SavedObjectsClientContract;
   actionsClient: Awaited<
-    ReturnType<DataConnectorsServerStartDependencies['actions']['getActionsClientWithRequest']>
+    ReturnType<DataSourcesServerStartDependencies['actions']['getActionsClientWithRequest']>
   >;
   toolRegistry: Awaited<
-    ReturnType<DataConnectorsServerStartDependencies['agentBuilder']['tools']['getRegistry']>
+    ReturnType<DataSourcesServerStartDependencies['agentBuilder']['tools']['getRegistry']>
   >;
-  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
+  workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'];
   request: KibanaRequest;
   logger: Logger;
 }

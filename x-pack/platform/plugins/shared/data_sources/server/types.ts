@@ -23,18 +23,18 @@ import type {
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-export interface DataConnectorsServerSetup {}
+export interface DataSourcesServerSetup {}
 
-export interface DataConnectorsServerStart {}
+export interface DataSourcesServerStart {}
 
-export interface DataConnectorsServerSetupDependencies {
+export interface DataSourcesServerSetupDependencies {
   actions: ActionsPluginSetup;
   dataSourcesRegistry: DataSourcesRegistryPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
 }
 
-export interface DataConnectorsServerStartDependencies {
+export interface DataSourcesServerStartDependencies {
   actions: ActionsPluginStart;
   dataSourcesRegistry: DataSourcesRegistryPluginStart;
   agentBuilder: AgentBuilderPluginStart;

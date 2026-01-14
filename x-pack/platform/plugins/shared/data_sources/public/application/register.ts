@@ -9,12 +9,12 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { AppMountParameters, CoreSetup } from '@kbn/core/public';
 import { DATA_SOURCES_ROUTE } from '../../common';
 import { DATA_SOURCES_APP_ID, DATA_SOURCES_FULL_TITLE } from '../../common/constants';
-import type { DataConnectorsPluginStart, DataConnectorsPluginStartDependencies } from '../types';
+import type { DataSourcesPluginStart, DataSourcesPluginStartDependencies } from '../types';
 
 export const registerApp = ({
   core,
 }: {
-  core: CoreSetup<DataConnectorsPluginStartDependencies, DataConnectorsPluginStart>;
+  core: CoreSetup<DataSourcesPluginStartDependencies, DataSourcesPluginStart>;
 }) => {
   core.application.register({
     id: DATA_SOURCES_APP_ID,

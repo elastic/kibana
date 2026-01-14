@@ -15,21 +15,21 @@ import type {
 import { registerRoutes } from './routes';
 import { registerDataSources } from './sources';
 import type {
-  DataConnectorsServerSetup,
-  DataConnectorsServerSetupDependencies,
-  DataConnectorsServerStart,
-  DataConnectorsServerStartDependencies,
+  DataSourcesServerSetup,
+  DataSourcesServerSetupDependencies,
+  DataSourcesServerStart,
+  DataSourcesServerStartDependencies,
 } from './types';
 import { registerUISettings } from './register';
 import { setupSavedObjects } from './saved_objects';
 
-export class DataConnectorsServerPlugin
+export class DataSourcesServerPlugin
   implements
     Plugin<
-      DataConnectorsServerSetup,
-      DataConnectorsServerStart,
-      DataConnectorsServerSetupDependencies,
-      DataConnectorsServerStartDependencies
+      DataSourcesServerSetup,
+      DataSourcesServerStart,
+      DataSourcesServerSetupDependencies,
+      DataSourcesServerStartDependencies
     >
 {
   private readonly logger: Logger;
@@ -39,9 +39,9 @@ export class DataConnectorsServerPlugin
   }
 
   setup(
-    core: CoreSetup<DataConnectorsServerStartDependencies>,
-    plugins: DataConnectorsServerSetupDependencies
-  ): DataConnectorsServerSetup {
+    core: CoreSetup<DataSourcesServerStartDependencies>,
+    plugins: DataSourcesServerSetupDependencies
+  ): DataSourcesServerSetup {
     const { savedObjects, uiSettings } = core;
     const { dataSourcesRegistry, workflowsManagement } = plugins;
 
@@ -65,10 +65,7 @@ export class DataConnectorsServerPlugin
     return {};
   }
 
-  start(
-    core: CoreStart,
-    plugins: DataConnectorsServerStartDependencies
-  ): DataConnectorsServerStart {
+  start(core: CoreStart, plugins: DataSourcesServerStartDependencies): DataSourcesServerStart {
     return {};
   }
 }

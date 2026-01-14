@@ -14,32 +14,32 @@ import {
 import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerApp } from './application/register';
 import type {
-  DataConnectorsPluginSetup,
-  DataConnectorsPluginSetupDependencies,
-  DataConnectorsPluginStart,
-  DataConnectorsPluginStartDependencies,
+  DataSourcesPluginSetup,
+  DataSourcesPluginSetupDependencies,
+  DataSourcesPluginStart,
+  DataSourcesPluginStartDependencies,
 } from './types';
 
-export class DataConnectorsPlugin
+export class DataSourcesPlugin
   implements
     Plugin<
-      DataConnectorsPluginSetup,
-      DataConnectorsPluginStart,
-      DataConnectorsPluginSetupDependencies,
-      DataConnectorsPluginStartDependencies
+      DataSourcesPluginSetup,
+      DataSourcesPluginStart,
+      DataSourcesPluginSetupDependencies,
+      DataSourcesPluginStartDependencies
     >
 {
   constructor(context: PluginInitializerContext) {}
   setup(
-    core: CoreSetup<DataConnectorsPluginStartDependencies, DataConnectorsPluginStart>
-  ): DataConnectorsPluginSetup {
+    core: CoreSetup<DataSourcesPluginStartDependencies, DataSourcesPluginStart>
+  ): DataSourcesPluginSetup {
     const isDataSourcesEnabled = core.settings.client.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID);
     if (isDataSourcesEnabled) {
       registerApp({ core });
     }
     return {};
   }
-  start(core: CoreStart): DataConnectorsPluginStart {
+  start(core: CoreStart): DataSourcesPluginStart {
     return {};
   }
 }

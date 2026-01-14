@@ -22,8 +22,8 @@ import {
 import type { DataSourceAttributes } from '../saved_objects';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
-  DataConnectorsServerSetupDependencies,
-  DataConnectorsServerStartDependencies,
+  DataSourcesServerSetupDependencies,
+  DataSourcesServerStartDependencies,
 } from '../types';
 import { convertSOtoAPIResponse, createDataSourceRequestSchema } from './schema';
 import { API_BASE_PATH } from '../../common/constants';
@@ -49,8 +49,8 @@ function createErrorResponse(
 export interface RouteDependencies {
   router: IRouter;
   logger: Logger;
-  getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>;
-  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
+  getStartServices: StartServicesAccessor<DataSourcesServerStartDependencies>;
+  workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'];
 }
 
 /**

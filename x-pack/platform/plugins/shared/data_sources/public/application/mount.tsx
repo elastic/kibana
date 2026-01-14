@@ -13,12 +13,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DataSourcesRoutes } from './routes';
-import type { DataConnectorsPluginStart, DataConnectorsPluginStartDependencies } from '../types';
+import type { DataSourcesPluginStart, DataSourcesPluginStartDependencies } from '../types';
 
 export interface DataSourcesMountParams {
   core: CoreStart;
-  plugins: DataConnectorsPluginStartDependencies;
-  services: DataConnectorsPluginStart;
+  plugins: DataSourcesPluginStartDependencies;
+  services: DataSourcesPluginStart;
   params: AppMountParameters;
 }
 

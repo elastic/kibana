@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { DataConnectorsPlugin } from './plugin';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
-export const plugin = (context: PluginInitializerContext) => new DataConnectorsPlugin(context);
+export const plugin = async (context: PluginInitializerContext) => {
+  const { DataSourcesServerPlugin } = await import('./plugin');
+  return new DataSourcesServerPlugin(context);
+};
