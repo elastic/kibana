@@ -217,6 +217,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                                 onClick={handleRegenerate}
                                 isLoading={isAiRuleCreationInProgress}
                                 isDisabled={!isValid}
+                                data-test-subj="ai-assisted-rule-creation-regenerate-button"
                               >
                                 {i18n.AI_ASSISTED_RULE_CREATION_REGENERATE_BUTTON}
                               </EuiButton>
@@ -229,7 +230,11 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                           <EuiSpacer size="m" />
                           <EuiFlexGroup direction="row" justifyContent="flexStart" gutterSize="s">
                             <EuiFlexItem grow={false}>
-                              <EuiButton color="danger" onClick={cancelRuleCreation}>
+                              <EuiButton
+                                color="danger"
+                                onClick={cancelRuleCreation}
+                                data-test-subj="ai-assisted-rule-creation-cancel-button"
+                              >
                                 {i18n.AI_ASSISTED_RULE_CREATION_CANCEL_BUTTON}
                               </EuiButton>
                             </EuiFlexItem>
@@ -243,12 +248,21 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                     <MaxWidthEuiFlexItem>
                       {isAiRuleCreationInProgress && (
                         <EuiFlexItem>
-                          <EuiProgress size="s" color="primary" />
+                          <EuiProgress
+                            size="s"
+                            color="primary"
+                            data-test-subj="ai-assisted-rule-creation-progress"
+                          />
                         </EuiFlexItem>
                       )}
 
                       {isAiRuleCreationCancelled ? (
-                        <EuiCallOut announceOnMount color="warning" iconType="warning">
+                        <EuiCallOut
+                          announceOnMount
+                          color="warning"
+                          iconType="warning"
+                          data-test-subj="ai-assisted-rule-creation-cancelled-callout"
+                        >
                           <EuiText size="s">
                             {i18n.AI_ASSISTED_RULE_CREATION_CANCELLED_MESSAGE}
                           </EuiText>
