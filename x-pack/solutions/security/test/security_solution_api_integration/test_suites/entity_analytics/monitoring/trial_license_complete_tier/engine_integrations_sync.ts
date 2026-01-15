@@ -12,7 +12,6 @@ import { PrivMonUtils } from './utils';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
   const esArchiver = getService('esArchiver');
-  const log = getService('log');
   const privMonUtils = PrivMonUtils(getService);
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Integrations Sync', () => {
