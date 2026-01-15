@@ -23,7 +23,12 @@ import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
-import { generateFieldHintCases, formatJsonProperty } from './utils';
+import {
+  generateFieldHintCases,
+  formatJsonProperty,
+  buildLookupJoinEsql,
+  buildEnrichPolicyEsql,
+} from './utils';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
 interface BuildEsqlQueryParams {
@@ -329,32 +334,13 @@ ${targetFieldHintCases},
 ${
   isLookupIndexAvailable
     ? `
-| DROP entity.id
-| DROP entity.target.id  
-// rename entity.*fields before next pipeline to avoid name collisions
-| EVAL entity.id = actorEntityId
-| LOOKUP JOIN ${getEntitiesLatestIndexName(spaceId)} ON entity.id
-| RENAME actorEntityName    = entity.name
-| RENAME actorEntityType    = entity.type
-| RENAME actorEntitySubType = entity.sub_type
-| RENAME actorHostIp        = host.ip
-| RENAME actorLookupEntityId = entity.id 
-
-| EVAL entity.id = targetEntityId
-| LOOKUP JOIN ${getEntitiesLatestIndexName(spaceId)} ON entity.id
-| RENAME targetEntityName    = entity.name
-| RENAME targetEntityType    = entity.type
-| RENAME targetEntitySubType = entity.sub_type
-| RENAME targetHostIp        = host.ip
-| RENAME targetLookupEntityId = entity.id
+${buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId))}
 
 ${buildEnrichedEntityFieldsEsql()}
 `
     : isEnrichPolicyExists
     ? `
-// Use ENRICH policy for entity enrichment (deprecated fallback)
-| ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
-| ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
+${buildEnrichPolicyEsql(enrichPolicyName)}
 
 ${buildEnrichedEntityFieldsEsql()}
 `

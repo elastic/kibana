@@ -78,3 +78,56 @@ export const formatJsonProperty = (
   const comma = includeComma ? ',' : '';
   return `CONCAT("${comma}\\"${propertyName}\\":\\"", COALESCE(${valueVar}, "undefined"), "\\"")`;
 };
+
+/**
+ * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
+ * This is the preferred method for enriching actor and target entities with entity store data.
+ *
+ * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_generic_default')
+ * @returns ESQL statements for LOOKUP JOIN enrichment
+ *
+ * @example
+ * ```typescript
+ * buildLookupJoinEsql('.entities.v2.latest.security_generic_default')
+ * // Returns ESQL with LOOKUP JOIN for actor and target enrichment
+ * ```
+ */
+export const buildLookupJoinEsql = (lookupIndexName: string): string => {
+  return `| DROP entity.id
+| DROP entity.target.id  
+// rename entity.*fields before next pipeline to avoid name collisions
+| EVAL entity.id = actorEntityId
+| LOOKUP JOIN ${lookupIndexName} ON entity.id
+| RENAME actorEntityName    = entity.name
+| RENAME actorEntityType    = entity.type
+| RENAME actorEntitySubType = entity.sub_type
+| RENAME actorHostIp        = host.ip
+| RENAME actorLookupEntityId = entity.id 
+
+| EVAL entity.id = targetEntityId
+| LOOKUP JOIN ${lookupIndexName} ON entity.id
+| RENAME targetEntityName    = entity.name
+| RENAME targetEntityType    = entity.type
+| RENAME targetEntitySubType = entity.sub_type
+| RENAME targetHostIp        = host.ip
+| RENAME targetLookupEntityId = entity.id`;
+};
+
+/**
+ * Generates ESQL statements for entity enrichment using ENRICH policy.
+ * This is the deprecated fallback method when LOOKUP JOIN is not available.
+ *
+ * @param enrichPolicyName - The name of the enrich policy
+ * @returns ESQL statements for ENRICH policy enrichment
+ *
+ * @example
+ * ```typescript
+ * buildEnrichPolicyEsql('entity_store_field_retention_generic_default_v1.0.0')
+ * // Returns ESQL with ENRICH for actor and target enrichment
+ * ```
+ */
+export const buildEnrichPolicyEsql = (enrichPolicyName: string): string => {
+  return `// Use ENRICH policy for entity enrichment (deprecated fallback)
+| ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
+| ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`;
+};
