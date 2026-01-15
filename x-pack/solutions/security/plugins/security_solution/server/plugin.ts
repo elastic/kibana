@@ -29,6 +29,7 @@ import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library'
 import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
+import { registerWorkflowSteps } from './workflows/step_types';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -274,6 +275,20 @@ export class Plugin implements ISecuritySolutionPlugin {
       .catch((error) => {
         this.logger.error(`Error checking AI agents feature flag: ${error}`);
       });
+  }
+
+  private registerWorkflowSteps(
+    workflowsExtensions: SecuritySolutionPluginSetupDependencies['workflowsExtensions']
+  ): void {
+    if (!workflowsExtensions) {
+      return;
+    }
+
+    try {
+      registerWorkflowSteps(workflowsExtensions);
+    } catch (error) {
+      this.logger.error(`Error registering security workflow steps: ${error}`);
+    }
   }
 
   public setup(
@@ -674,6 +689,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
+    this.registerWorkflowSteps(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement) {
       this.workflowsManagementSetup = plugins.workflowsManagement;

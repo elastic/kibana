@@ -48,6 +48,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -74,6 +75,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   share?: SharePluginSetup;
   onechat?: OnechatPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {

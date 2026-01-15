@@ -68,6 +68,7 @@ import { generateAttachmentType } from './threat_intelligence/modules/cases/util
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
+import { registerWorkflowSteps } from './workflows/step_types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -106,10 +107,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, usageCollection, management, cases, share } = plugins;
+    const { home, usageCollection, management, cases, share, workflowsExtensions } = plugins;
     const { productFeatureKeys$ } = this.contract;
     if (share) {
       share.url.locators.create(new AIValueReportLocatorDefinition());
+    }
+
+    // Register workflow steps
+    if (workflowsExtensions) {
+      registerWorkflowSteps(workflowsExtensions);
     }
 
     // Lazily instantiate subPlugins and initialize services

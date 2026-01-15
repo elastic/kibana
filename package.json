@@ -1229,6 +1229,7 @@
     "@tanstack/react-query-devtools": "^4.29.12",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.9",
+    "@toon-format/toon": "^2.1.0",
     "@turf/along": "6.0.1",
     "@turf/area": "6.0.1",
     "@turf/bbox": "6.0.1",

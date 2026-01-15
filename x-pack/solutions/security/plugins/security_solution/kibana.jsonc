@@ -82,7 +82,8 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
-      "workflowsManagement"
+      "workflowsManagement",
+      "workflowsExtensions"
     ],
     "requiredBundles": [
       "esUiShared",

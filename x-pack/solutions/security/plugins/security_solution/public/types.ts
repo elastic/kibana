@@ -115,6 +115,7 @@ export interface SetupPlugins {
   cases?: CasesPublicSetup;
   data: DataPublicPluginSetup;
   discoverShared: DiscoverSharedPublicStart;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 /**
