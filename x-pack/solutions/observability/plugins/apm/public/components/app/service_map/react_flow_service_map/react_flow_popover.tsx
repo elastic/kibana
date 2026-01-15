@@ -159,7 +159,7 @@ export function ReactFlowPopover({
                 {kuery && (
                   <EuiIconTip
                     position="bottom"
-                    content={i18n.translate('xpack.actions.serviceMap.kqlFilterInfo', {
+                    content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
                       defaultMessage: 'The KQL filter is not applied in the displayed stats.',
                     })}
                     type="info"
