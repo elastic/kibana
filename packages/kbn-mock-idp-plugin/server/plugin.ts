@@ -9,10 +9,6 @@
 
 import { existsSync } from 'fs';
 import { resolve } from 'path';
-import url from 'url';
-import { promisify } from 'util';
-import { parseString } from 'xml2js';
-import zlib from 'zlib';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
@@ -25,6 +21,7 @@ import {
 } from '@kbn/es';
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
 import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
+import { getSAMLRequestId } from '@kbn/mock-idp-utils/src/utils';
 
 import type { ConfigType } from './config';
 
@@ -77,26 +74,6 @@ const readStatefulRoles = () => {
   return readRolesFromResource(rolesResourcePath);
 };
 
-const inflateRawAsync = promisify(zlib.inflateRaw);
-const parseStringAsync = promisify(parseString);
-
-async function extractSamlRequestId(requestUrl: string): Promise<string | undefined> {
-  const samlRequest = url.parse(requestUrl, true /* parseQueryString */).query.SAMLRequest;
-
-  if (!samlRequest) {
-    return undefined;
-  }
-
-  const inflatedSAMLRequest = (await inflateRawAsync(
-    Buffer.from(samlRequest as string, 'base64')
-  )) as Buffer;
-
-  const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
-  const requestId = parsedSAMLRequest['saml2p:AuthnRequest'].$.ID as string;
-
-  return requestId;
-}
-
 export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 
 export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
@@ -117,7 +94,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
-        requestId = await extractSamlRequestId(request.url.href);
+        requestId = await getSAMLRequestId(request.url.href);
         logger.info(
           requestId
             ? `SP initiated login, SAML request ID: ${requestId}`

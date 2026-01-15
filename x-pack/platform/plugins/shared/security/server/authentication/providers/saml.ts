@@ -430,7 +430,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         },
       })) as any;
     } catch (err) {
-      // console.log(`**** SAML AUTH ERROR: ${JSON.stringify(err.meta.body, null, 2)}`);
       let inResponseToRequestId;
       if (err instanceof errors.ResponseError) {
         const body = (err as errors.ResponseError).meta.body as
@@ -439,12 +438,26 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         inResponseToRequestId =
           body?.error?.['security.saml.unsolicited_in_response_to'] ?? undefined;
       }
-      this.logger.error(
-        `Failed to log in with SAML response, ${
-          inResponseToRequestId ? `unsolicited InResponseTo: ${inResponseToRequestId}, ` : ''
-        } ${!isIdPInitiatedLogin ? `current requestIds: ${stateRequestIds}, ` : ''} error:
-        ${getDetailedErrorMessage(err)}`
-      );
+
+      const errorParts: string[] = ['Failed to log in with SAML response'];
+
+      if (inResponseToRequestId) {
+        errorParts.push(`SP-initiated, unsolicited InResponseTo: ${inResponseToRequestId}`);
+        if (!state) {
+          // If inResponseToRequestId is present but the state is NOT present this might be a delayed login attempt
+          errorParts.push(`no state - possible delayed login`);
+        }
+        errorParts.push(`current requestIds: ${stateRequestIds}`);
+      } else if (!inResponseToRequestId) {
+        // If inResponseToRequestId is NOT present we can say it's a proper IdP-initiated login
+        errorParts.push(`IDP-initiated`);
+      } else if (!isIdPInitiatedLogin) {
+        errorParts.push(`current requestIds: ${stateRequestIds}`);
+      }
+
+      errorParts.push(`error: ${getDetailedErrorMessage(err)}`);
+
+      this.logger.error(errorParts.join(', '));
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
       // there is a chance that it failed because of realm mismatch and hence we should return
@@ -815,7 +828,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Calls `saml/invalidate` with the `` query string parameter received from the Identity
+   * Calls `saml/invalidate` with the `SAMLRequest` query string parameter received from the Identity
    * Provider and redirects user back to the Identity Provider if needed.
    * @param request Request instance.
    * @param realm Configured SAML realm name.
