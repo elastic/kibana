@@ -25,7 +25,7 @@ import _, { cloneDeep } from 'lodash';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { StatusError } from '../../errors/status_error';
 import { validateClassicFields, validateSimulation } from '../../helpers/validate_fields';
-import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
+import { validateBracketsInFieldNames } from '../../helpers/validate_stream';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
 import { getDataStreamSettings, getUnmanagedElasticsearchAssets } from '../../stream_crud';
@@ -39,6 +39,7 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import type { StateDependencies, StreamChange } from '../types';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
@@ -231,9 +232,24 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateClassicFields(this._definition);
     validateBracketsInFieldNames(this._definition);
 
-    validateSettings(this._definition, this.dependencies.isServerless);
+    const allowlistValidation = validateSettings({
+      settings: this._definition.ingest.settings,
+      isServerless: this.dependencies.isServerless,
+    });
 
-    await validateSimulation(this._definition, this.dependencies.scopedClusterClient);
+    if (!allowlistValidation.isValid) {
+      return allowlistValidation;
+    }
+
+    await Promise.all([
+      validateSettingsWithDryRun({
+        scopedClusterClient: this.dependencies.scopedClusterClient,
+        streamName: this._definition.name,
+        settings: this._definition.ingest.settings,
+        isServerless: this.dependencies.isServerless,
+      }),
+      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+    ]);
 
     return { isValid: true, errors: [] };
   }
@@ -496,6 +512,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       },
       {
         type: 'unlink_systems',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_features',
         request: {
           name: this._definition.name,
         },

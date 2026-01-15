@@ -241,21 +241,12 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<",
-              {
                 "pluginId": "embeddableEnhanced",
                 "scope": "public",
                 "docId": "kibEmbeddableEnhancedPluginApi",
                 "section": "def-public.DynamicActionsSerializedState",
                 "text": "DynamicActionsSerializedState"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/embeddables/types.ts",
             "deprecated": false,
@@ -523,21 +514,13 @@
           "signature": [
             "(uuid: string, getTitle: () => string | undefined, state: ",
             {
-              "pluginId": "@kbn/presentation-publishing",
-              "scope": "public",
-              "docId": "kibKbnPresentationPublishingPluginApi",
-              "section": "def-public.SerializedPanelState",
-              "text": "SerializedPanelState"
-            },
-            "<",
-            {
               "pluginId": "embeddableEnhanced",
               "scope": "public",
               "docId": "kibEmbeddableEnhancedPluginApi",
               "section": "def-public.DynamicActionsSerializedState",
               "text": "DynamicActionsSerializedState"
             },
-            ">) => ",
+            ") => ",
             {
               "pluginId": "embeddableEnhanced",
               "scope": "public",
@@ -589,21 +572,12 @@
               "description": [],
               "signature": [
                 {
-                  "pluginId": "@kbn/presentation-publishing",
-                  "scope": "public",
-                  "docId": "kibKbnPresentationPublishingPluginApi",
-                  "section": "def-public.SerializedPanelState",
-                  "text": "SerializedPanelState"
-                },
-                "<",
-                {
                   "pluginId": "embeddableEnhanced",
                   "scope": "public",
                   "docId": "kibEmbeddableEnhancedPluginApi",
                   "section": "def-public.DynamicActionsSerializedState",
                   "text": "DynamicActionsSerializedState"
-                },
-                ">"
+                }
               ],
               "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
               "deprecated": false,

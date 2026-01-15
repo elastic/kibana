@@ -10,13 +10,29 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { StreamsTree } from './components/streams_tree/streams_tree';
+import { QueriesTable } from './components/queries_table';
+import { StreamsView } from './components/streams_view/streams_view';
+
+const discoveryTabs = ['streams', 'queries'] as const;
+type DiscoveryTab = (typeof discoveryTabs)[number];
+
+function isValidDiscoveryTab(value: string): value is DiscoveryTab {
+  return discoveryTabs.includes(value as DiscoveryTab);
+}
 
 export function SignificantEventsDiscoveryPage() {
+  const {
+    path: { tab },
+  } = useStreamsAppParams('/_discovery/{tab}');
+
+  const router = useStreamsAppRouter();
+
   const {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
@@ -42,6 +58,29 @@ export function SignificantEventsDiscoveryPage() {
     return <RedirectTo path="/" />;
   }
 
+  if (!isValidDiscoveryTab(tab)) {
+    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
+  }
+
+  const tabs = [
+    {
+      id: 'streams',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.streamsTab', {
+        defaultMessage: 'Streams',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'streams' } }),
+      isSelected: tab === 'streams',
+    },
+    {
+      id: 'queries',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
+        defaultMessage: 'Queries',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
+      isSelected: tab === 'queries',
+    },
+  ];
+
   return (
     <>
       <StreamsAppPageTemplate.Header
@@ -66,9 +105,11 @@ export function SignificantEventsDiscoveryPage() {
             <FeedbackButton />
           </EuiFlexGroup>
         }
+        tabs={tabs}
       />
       <StreamsAppPageTemplate.Body grow>
-        <StreamsTree />
+        {tab === 'streams' && <StreamsView />}
+        {tab === 'queries' && <QueriesTable />}
       </StreamsAppPageTemplate.Body>
     </>
   );
