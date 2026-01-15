@@ -223,7 +223,7 @@ export class RulesClientFactory {
         return actions.getActionsClientWithRequestInSpace(request, spaceId);
       },
       async getEventLogClient() {
-        return eventLog.getClient(request);
+        return eventLog.getClientWithRequestInSpace(request, spaceId);
       },
       eventLogger: this.eventLogger,
       isAuthenticationTypeAPIKey() {

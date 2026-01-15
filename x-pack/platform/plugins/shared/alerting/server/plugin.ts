@@ -739,15 +739,22 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
     });
 
-    this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {
-      return async (objects?: SavedObjectsBulkGetObject[]) => {
-        const client = await getRulesClientWithRequest(request);
+    this.eventLogService!.registerSavedObjectProvider(
+      RULE_SAVED_OBJECT_TYPE,
+      (request, spaceId) => {
+        return async (objects?: SavedObjectsBulkGetObject[]) => {
+          const client = spaceId
+            ? await getRulesClientWithRequestInSpace(request, spaceId)
+            : await getRulesClientWithRequest(request);
 
-        return objects
-          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
-          : Promise.resolve([]);
-      };
-    });
+          return objects
+            ? Promise.all(
+                objects.map(async (objectItem) => await client.get({ id: objectItem.id }))
+              )
+            : Promise.resolve([]);
+        };
+      }
+    );
 
     this.eventLogService!.isEsContextReady()
       .then(() => {
