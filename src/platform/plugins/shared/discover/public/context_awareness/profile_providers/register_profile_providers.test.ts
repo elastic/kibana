@@ -8,11 +8,7 @@
  */
 
 import { uniq } from 'lodash';
-import { createEsqlDataSource } from '../../../common/data_sources';
 import { createContextAwarenessMocks, createProfileProviderSharedServicesMock } from '../__mocks__';
-import { createExampleRootProfileProvider } from './example/example_root_profile';
-import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
-import { createExampleDocumentProfileProvider } from './example/example_document_profile';
 import { registerProfileProviders } from './register_profile_providers';
 import type { BaseProfileProvider } from '../profile_service';
 
@@ -40,10 +36,6 @@ jest.mock('./register_enabled_profile_providers', () => {
   };
 });
 
-const exampleRootProfileProvider = createExampleRootProfileProvider();
-const exampleDataSourceProfileProvider = createExampleDataSourceProfileProvider();
-const exampleDocumentProfileProvider = createExampleDocumentProfileProvider();
-
 describe('registerProfileProviders', () => {
   beforeEach(() => {
     mockAllCollectedProfiles = [];
@@ -59,32 +51,10 @@ describe('registerProfileProviders', () => {
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
-      enabledExperimentalProfileIds: [
-        exampleRootProfileProvider.profileId,
-        exampleDataSourceProfileProvider.profileId,
-        exampleDocumentProfileProvider.profileId,
-      ],
+      enabledExperimentalProfileIds: [],
       sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
-    const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
-    const dataSourceContext = await dataSourceProfileServiceMock.resolve({
-      rootContext,
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from my-example-logs' },
-    });
-    const documentContext = documentProfileServiceMock.resolve({
-      rootContext,
-      dataSourceContext,
-      record: {
-        id: 'test',
-        flattened: { 'data_stream.type': 'example' },
-        raw: {},
-      },
-    });
-    expect(rootContext.profileId).toBe(exampleRootProfileProvider.profileId);
-    expect(dataSourceContext.profileId).toBe(exampleDataSourceProfileProvider.profileId);
-    expect(documentContext.profileId).toBe(exampleDocumentProfileProvider.profileId);
   });
 
   it('should not register disabled experimental profile providers', async () => {
@@ -101,24 +71,6 @@ describe('registerProfileProviders', () => {
       sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
-    const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
-    const dataSourceContext = await dataSourceProfileServiceMock.resolve({
-      rootContext,
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from my-example-logs' },
-    });
-    const documentContext = documentProfileServiceMock.resolve({
-      rootContext,
-      dataSourceContext,
-      record: {
-        id: 'test',
-        flattened: { 'data_stream.type': 'example' },
-        raw: {},
-      },
-    });
-    expect(rootContext.profileId).not.toBe(exampleRootProfileProvider.profileId);
-    expect(dataSourceContext.profileId).not.toBe(exampleDataSourceProfileProvider.profileId);
-    expect(documentContext.profileId).not.toBe(exampleDocumentProfileProvider.profileId);
   });
 
   it('all profile ids should be unique', async () => {

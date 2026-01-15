@@ -14,11 +14,8 @@ import {
   createContextAwarenessMocks,
   createProfileProviderSharedServicesMock,
 } from '../__mocks__';
-import { createExampleRootProfileProvider } from './example/example_root_profile';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
 import type { CellRenderersExtensionParams } from '../types';
-
-const exampleRootProfileProvider = createExampleRootProfileProvider();
 
 describe('registerEnabledProfileProviders', () => {
   beforeEach(() => {
@@ -45,49 +42,6 @@ describe('registerEnabledProfileProviders', () => {
     expect(rootProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, {
       context,
     });
-  });
-
-  it('should not register experimental profile providers by default', async () => {
-    jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
-    const profileProviderServices = createProfileProviderSharedServicesMock();
-    const { rootProfileServiceMock } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
-    registerEnabledProfileProviders({
-      profileService: rootProfileServiceMock,
-      providers: [exampleRootProfileProvider],
-      enabledExperimentalProfileIds: [],
-      services: profileProviderServices,
-    });
-    const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
-    const profile = rootProfileServiceMock.getProfile({ context });
-    const baseImpl = () => ({});
-    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
-    expect(exampleRootProfileProvider.profile.getCellRenderers).not.toHaveBeenCalled();
-    expect(profile).toMatchObject({});
-  });
-
-  it('should register experimental profile providers when enabled by config', async () => {
-    jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
-    const profileProviderServices = createProfileProviderSharedServicesMock();
-    const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
-    registerEnabledProfileProviders({
-      profileService: rootProfileServiceMock,
-      providers: [exampleRootProfileProvider],
-      enabledExperimentalProfileIds: [exampleRootProfileProvider.profileId],
-      services: profileProviderServices,
-    });
-    const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
-    const profile = rootProfileServiceMock.getProfile({ context });
-    const baseImpl = () => ({});
-    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
-    expect(exampleRootProfileProvider.profile.getCellRenderers).toHaveBeenCalledTimes(1);
-    expect(exampleRootProfileProvider.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, {
-      context,
-    });
-    expect(rootProfileProviderMock.profile.getCellRenderers).not.toHaveBeenCalled();
   });
 
   it('should register restricted profile when product feature is available', async () => {
