@@ -156,7 +156,8 @@ export async function getFullAgentPolicy(
     getOutputIdForAgentPolicy(dataOutput),
     agentPolicy.namespace,
     agentPolicy.global_data_tags,
-    options?.agentVersion
+    options?.agentVersion,
+    soClient
   );
 
   let otelcolConfig;

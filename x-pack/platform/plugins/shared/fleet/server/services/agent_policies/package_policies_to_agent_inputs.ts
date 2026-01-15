@@ -180,10 +180,10 @@ export const getFullInputStreams = (
 const recompileInputsWithAgentVersion = async (
   packageInfo: PackageInfo,
   packagePolicy: PackagePolicy,
-  agentVersion: string
+  agentVersion: string,
+  soClient: SavedObjectsClientContract
 ): Promise<PackagePolicyInput[]> => {
   const logger = appContextService.getLogger();
-  const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const assetsMap = await getAgentTemplateAssetsMap({
     logger,
     packageInfo: packageInfo!,
@@ -206,7 +206,8 @@ export const storedPackagePoliciesToAgentInputs = async (
   agentPolicyOutputId: string = DEFAULT_OUTPUT.name,
   agentPolicyNamespace?: string,
   globalDataTags?: GlobalDataTag[],
-  agentVersion?: string
+  agentVersion?: string,
+  soClient?: SavedObjectsClientContract
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -231,7 +232,8 @@ export const storedPackagePoliciesToAgentInputs = async (
       const inputs = await recompileInputsWithAgentVersion(
         packageInfo!,
         packagePolicy,
-        agentVersion
+        agentVersion,
+        soClient!
       );
       packagePolicyWithUpdatedInputs = { ...packagePolicy, inputs };
     }
