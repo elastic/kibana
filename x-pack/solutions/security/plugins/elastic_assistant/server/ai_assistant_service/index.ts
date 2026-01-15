@@ -153,7 +153,7 @@ export class AIAssistantService {
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
-    this.getElserId = createGetElserId(options.ml.trainedModelsProvider);
+    this.getElserId = createGetElserId(options.ml.trainedModelsProvider, options.elserInferenceId);
     this.elserInferenceId = options.elserInferenceId;
 
     this.conversationsDataStream = this.createDataStream({
