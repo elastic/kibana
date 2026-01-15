@@ -229,6 +229,12 @@ const readAllSignificantEventsRoute = createServerRoute({
       to: dateFromString.describe('End of the time range'),
       bucketSize: z.string().describe('Size of time buckets for aggregation'),
       query: z.string().optional().describe('Query string to filter significant events queries'),
+      streamNames: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(z.string()).optional()
+        )
+        .describe('Stream names to filter significant events'),
     }),
   }),
   options: {
@@ -253,7 +259,7 @@ const readAllSignificantEventsRoute = createServerRoute({
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query } = params.query;
+    const { from, to, bucketSize, query, streamNames } = params.query;
 
     return readSignificantEventsFromAlertsIndices(
       {
@@ -261,6 +267,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         to,
         bucketSize,
         query,
+        streamNames,
       },
       { queryClient, scopedClusterClient }
     );
