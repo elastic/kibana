@@ -68,69 +68,6 @@ export const assignNextDataView: InternalStateThunkActionCreator<
   };
 
 /**
- * When editing an ad hoc data view, a new id needs to be generated for the data view
- * This is to prevent duplicate ids messing with our system
- */
-export const updateAdHocDataViewId: InternalStateThunkActionCreator<
-  [TabActionPayload<{ editedDataView: DataView }>],
-  Promise<DataView | undefined>
-> =
-  ({ tabId, editedDataView }) =>
-  async (dispatch, getState, { runtimeStateManager, services }) => {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const prevDataView = currentDataView$.getValue();
-    if (!prevDataView || prevDataView.isPersisted()) return;
-
-    const isUsedInMultipleTabs = selectIsDataViewUsedInMultipleRuntimeTabStates(
-      runtimeStateManager,
-      prevDataView.id!
-    );
-
-    const nextDataView = await services.dataViews.create({
-      ...editedDataView.toSpec(),
-      id: uuidv4(),
-    });
-
-    if (!isUsedInMultipleTabs) {
-      services.dataViews.clearInstanceCache(prevDataView.id);
-    }
-
-    await updateFiltersReferences({
-      prevDataView,
-      nextDataView,
-      services,
-    });
-
-    if (isUsedInMultipleTabs) {
-      dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
-    } else {
-      dispatch(internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView));
-    }
-
-    const currentState = getState();
-    const appState = selectTab(currentState, tabId).appState;
-
-    if (isDataSourceType(appState.dataSource, DataSourceType.DataView)) {
-      await dispatch(
-        internalStateActions.updateAppStateAndReplaceUrl({
-          tabId,
-          appState: {
-            dataSource: nextDataView.id
-              ? createDataViewDataSource({ dataViewId: nextDataView.id })
-              : undefined,
-          },
-        })
-      );
-    }
-
-    const { persistedDiscoverSession } = getState();
-    const trackingEnabled = Boolean(nextDataView.isPersisted() || persistedDiscoverSession?.id);
-    services.urlTracker.setTrackingEnabled(trackingEnabled);
-
-    return nextDataView;
-  };
-
-/**
  * Function executed when switching data view in the UI
  */
 export const changeDataView: InternalStateThunkActionCreator<
@@ -203,4 +140,91 @@ export const changeDataView: InternalStateThunkActionCreator<
     }
 
     dispatch(internalStateActions.setIsDataViewLoading({ tabId, isDataViewLoading: false }));
+  };
+
+/**
+ * Triggered when a new data view is created
+ */
+export const onDataViewCreated: InternalStateThunkActionCreator<
+  [TabActionPayload<{ nextDataView: DataView }>],
+  Promise<void>
+> =
+  ({ tabId, nextDataView }) =>
+  async (dispatch) => {
+    if (!nextDataView.isPersisted()) {
+      dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
+    } else {
+      await dispatch(internalStateActions.loadDataViewList());
+    }
+    if (nextDataView.id) {
+      await dispatch(
+        internalStateActions.changeDataView({
+          tabId,
+          dataViewOrDataViewId: nextDataView,
+        })
+      );
+    }
+  };
+
+/**
+ * When editing an ad hoc data view, a new id needs to be generated for the data view
+ * This is to prevent duplicate ids messing with our system
+ */
+export const updateAdHocDataViewId: InternalStateThunkActionCreator<
+  [TabActionPayload<{ editedDataView: DataView }>],
+  Promise<DataView | undefined>
+> =
+  ({ tabId, editedDataView }) =>
+  async (dispatch, getState, { runtimeStateManager, services }) => {
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const prevDataView = currentDataView$.getValue();
+    if (!prevDataView || prevDataView.isPersisted()) return;
+
+    const isUsedInMultipleTabs = selectIsDataViewUsedInMultipleRuntimeTabStates(
+      runtimeStateManager,
+      prevDataView.id!
+    );
+
+    const nextDataView = await services.dataViews.create({
+      ...editedDataView.toSpec(),
+      id: uuidv4(),
+    });
+
+    if (!isUsedInMultipleTabs) {
+      services.dataViews.clearInstanceCache(prevDataView.id);
+    }
+
+    await updateFiltersReferences({
+      prevDataView,
+      nextDataView,
+      services,
+    });
+
+    if (isUsedInMultipleTabs) {
+      dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
+    } else {
+      dispatch(internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView));
+    }
+
+    const currentState = getState();
+    const appState = selectTab(currentState, tabId).appState;
+
+    if (isDataSourceType(appState.dataSource, DataSourceType.DataView)) {
+      await dispatch(
+        internalStateActions.updateAppStateAndReplaceUrl({
+          tabId,
+          appState: {
+            dataSource: nextDataView.id
+              ? createDataViewDataSource({ dataViewId: nextDataView.id })
+              : undefined,
+          },
+        })
+      );
+    }
+
+    const { persistedDiscoverSession } = getState();
+    const trackingEnabled = Boolean(nextDataView.isPersisted() || persistedDiscoverSession?.id);
+    services.urlTracker.setTrackingEnabled(trackingEnabled);
+
+    return nextDataView;
   };

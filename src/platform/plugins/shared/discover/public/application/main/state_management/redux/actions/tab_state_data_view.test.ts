@@ -13,7 +13,12 @@ import {
   getDiscoverInternalStateMock,
   getDiscoverStateMock,
 } from '../../../../../__mocks__/discover_state.mock';
-import { createRuntimeStateManager, internalStateActions, selectTabRuntimeState } from '..';
+import {
+  createRuntimeStateManager,
+  internalStateActions,
+  selectTabRuntimeState,
+  selectTab,
+} from '..';
 import { createDataViewDataSource, DataSourceType } from '../../../../../../common/data_sources';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../../../__mocks__/services';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
@@ -21,6 +26,7 @@ import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import {
+  dataViewAdHoc,
   dataViewComplexMock,
   dataViewWithDefaultColumnMock,
 } from '../../../../../__mocks__/data_view_complex';
@@ -30,8 +36,15 @@ const setup = async () => {
   const { internalState, initializeTabs, initializeSingleTab, runtimeStateManager } =
     getDiscoverInternalStateMock({
       services,
-      persistedDataViews: [dataViewMockWithTimeField, dataViewMock],
+      persistedDataViews: [
+        dataViewMockWithTimeField,
+        dataViewMock,
+        dataViewComplexMock,
+        dataViewWithDefaultColumnMock,
+      ],
     });
+
+  const dataView = dataViewMockWithTimeField;
 
   // Create a persisted tab with ES|QL query
   const persistedTab = fromTabStateToSavedObjectTab({
@@ -39,15 +52,15 @@ const setup = async () => {
       id: 'test-tab',
       initialInternalState: {
         serializedSearchSource: {
-          index: dataViewMockWithTimeField.id,
-          query: { esql: 'FROM test-index' },
+          index: dataView.id,
         },
       },
       appState: {
-        query: { esql: 'FROM test-index' },
+        query: { language: 'kuery', query: 'test' },
         columns: ['field1', 'field2'],
         dataSource: {
-          type: DataSourceType.Esql,
+          type: DataSourceType.DataView,
+          dataViewId: dataView.id!,
         },
         sort: [['@timestamp', 'desc']],
         interval: 'auto',
@@ -70,6 +83,7 @@ const setup = async () => {
     internalState,
     runtimeStateManager,
     tabId: persistedTab.id,
+    services,
   };
 };
 
@@ -79,14 +93,13 @@ describe('tab_state_data_view actions', () => {
   });
 
   describe('assignNextDataView', () => {
-    it('should transition from ES|QL mode to Data View mode', async () => {
+    it('should update data view', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
       jest.spyOn(internalStateActions, 'pauseAutoRefreshInterval');
 
-      const dataViewIdBefore = selectTabRuntimeState(
-        runtimeStateManager,
-        tabId
-      )?.currentDataView$?.getValue()?.id;
+      expect(selectTabRuntimeState(runtimeStateManager, tabId)?.currentDataView$?.getValue()).toBe(
+        dataViewMockWithTimeField
+      );
 
       internalState.dispatch(
         internalStateActions.assignNextDataView({
@@ -95,13 +108,9 @@ describe('tab_state_data_view actions', () => {
         })
       );
 
-      const dataViewIdAfter = selectTabRuntimeState(
-        runtimeStateManager,
-        tabId
-      )?.currentDataView$?.getValue()?.id;
-
-      expect(dataViewIdAfter).toBe(dataViewMock.id);
-      expect(dataViewIdBefore).not.toBe(dataViewIdAfter);
+      expect(selectTabRuntimeState(runtimeStateManager, tabId)?.currentDataView$?.getValue()).toBe(
+        dataViewMock
+      );
       expect(internalStateActions.pauseAutoRefreshInterval).toHaveBeenCalledWith({
         tabId,
         dataView: dataViewMock,
@@ -213,6 +222,47 @@ describe('tab_state_data_view actions', () => {
           hideChart: true,
         })
       );
+    });
+  });
+
+  describe('onDataViewCreated', () => {
+    test('onDataViewCreated - persisted data view', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
+        dataViewMockWithTimeField
+      );
+      await internalState.dispatch(
+        internalStateActions.onDataViewCreated({
+          tabId,
+          nextDataView: dataViewComplexMock,
+        })
+      );
+      expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
+        createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
+      );
+    });
+
+    test('onDataViewCreated - ad-hoc data view', async () => {
+      const { internalState, tabId, runtimeStateManager, services } = await setup();
+      jest
+        .spyOn(services.dataViews, 'get')
+        .mockImplementationOnce((id) =>
+          id === dataViewAdHoc.id ? Promise.resolve(dataViewAdHoc) : Promise.reject()
+        );
+      await internalState.dispatch(
+        internalStateActions.onDataViewCreated({
+          tabId,
+          nextDataView: dataViewAdHoc,
+        })
+      );
+      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
+        dataViewAdHoc
+      );
+      expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
+        createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
+      );
+      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      expect(currentDataView$.getValue()?.id).toBe(dataViewAdHoc.id);
     });
   });
 });

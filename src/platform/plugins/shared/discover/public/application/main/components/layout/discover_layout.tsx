@@ -421,6 +421,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dispatch, changeDataView]
   );
 
+  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
+  const onDataViewCreated = useCallback(
+    (nextDataView: DataView) => {
+      dispatch(onDataViewCreatedAction({ nextDataView }));
+    },
+    [dispatch, onDataViewCreatedAction]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -466,7 +474,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
                 onChangeDataView={onChangeDataView}
-                onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
                 onRemoveField={onRemoveColumnWithTracking}
                 selectedDataView={dataView}

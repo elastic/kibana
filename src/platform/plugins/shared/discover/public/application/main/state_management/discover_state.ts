@@ -171,11 +171,6 @@ export interface DiscoverStateContainer {
      */
     createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
     /**
-     * Triggered when a new data view is created
-     * @param dataView
-     */
-    onDataViewCreated: (dataView: DataView) => Promise<void>;
-    /**
      * Triggered when a new data view is edited
      * @param dataView
      */
@@ -313,21 +308,6 @@ export function getDiscoverStateContainer({
     internalState.dispatch(
       injectCurrentTab(internalStateActions.updateGlobalState)({ globalState: { filters: [] } })
     );
-  };
-
-  const onDataViewCreated = async (nextDataView: DataView) => {
-    if (!nextDataView.isPersisted()) {
-      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
-    } else {
-      await internalState.dispatch(internalStateActions.loadDataViewList());
-    }
-    if (nextDataView.id) {
-      await internalState.dispatch(
-        injectCurrentTab(internalStateActions.changeDataView)({
-          dataViewOrDataViewId: nextDataView,
-        })
-      );
-    }
   };
 
   const onDataViewEdited = async (editedDataView: DataView) => {
@@ -719,7 +699,6 @@ export function getDiscoverStateContainer({
       stopSyncing,
       fetchData,
       createAndAppendAdHocDataView,
-      onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
       transitionFromESQLToDataView,
