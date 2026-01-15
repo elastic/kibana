@@ -171,8 +171,8 @@ describe('trace_charts_definition', () => {
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
 
-      expect(result.esqlQuery).toContain('COUNT(transaction.id)');
-      expect(result.esqlQuery).toContain('processor.event == "transaction"');
+      expect(result?.esqlQuery).toContain('COUNT(transaction.id)');
+      expect(result?.esqlQuery).toContain('processor.event == "transaction"');
     });
 
     it('should return throughput chart configuration for OTEL data source', () => {
@@ -194,8 +194,8 @@ describe('trace_charts_definition', () => {
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
 
-      expect(result.esqlQuery).toContain('COUNT(span.id)');
-      expect(result.esqlQuery).not.toContain('processor.event == "transaction"');
+      expect(result?.esqlQuery).toContain('COUNT(span.id)');
+      expect(result?.esqlQuery).not.toContain('processor.event == "transaction"');
     });
 
     it('should include all provided filters in the ESQL query', () => {
@@ -208,9 +208,9 @@ describe('trace_charts_definition', () => {
         fieldName: 'transaction.id',
       });
 
-      expect(result.esqlQuery).toContain('service.name == "test-service"');
-      expect(result.esqlQuery).toContain('environment == "production"');
-      expect(result.esqlQuery).toContain('processor.event == "transaction"');
+      expect(result?.esqlQuery).toContain('service.name == "test-service"');
+      expect(result?.esqlQuery).toContain('environment == "production"');
+      expect(result?.esqlQuery).toContain('processor.event == "transaction"');
     });
 
     it('should handle empty filters array', () => {
@@ -223,7 +223,7 @@ describe('trace_charts_definition', () => {
         fieldName: 'transaction.id',
       });
 
-      expect(result.esqlQuery).toContain('FROM traces-*');
+      expect(result?.esqlQuery).toContain('FROM traces-*');
     });
 
     it('should generate valid ESQL query structure', () => {
@@ -237,8 +237,8 @@ describe('trace_charts_definition', () => {
       });
 
       // Verify basic ESQL structure
-      expect(result.esqlQuery).toMatch(/FROM .+/);
-      expect(result.esqlQuery).toContain('STATS');
+      expect(result?.esqlQuery).toMatch(/FROM .+/);
+      expect(result?.esqlQuery).toContain('STATS');
     });
   });
 
