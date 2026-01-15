@@ -210,7 +210,11 @@ export class ListingTableService extends FtrService {
   }
 
   public async closeInspector() {
-    await this.testSubjects.click('closeFlyoutButton');
+    if (await this.testSubjects.exists('euiFlyoutCloseButton')) {
+      await this.testSubjects.click('euiFlyoutCloseButton');
+    } else {
+      await this.testSubjects.click('closeFlyoutButton');
+    }
   }
 
   /**
