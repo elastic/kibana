@@ -13,12 +13,17 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type {
   ControlsGroupState,
+  OptionsListControlState,
+  OptionsListDSLControlState,
+  OptionsListESQLControlState,
+  RangeSliderControlState,
   StoredESQLControlExplicitInput,
   StoredOptionsListExplicitInput,
   StoredPinnedControls,
   StoredPinnedControlState,
   StoredRangeSliderExplicitInput,
   StoredTimeSliderExplicitInput,
+  TimeSliderControlState,
 } from '@kbn/controls-schemas';
 import {
   ESQL_CONTROL,
@@ -54,7 +59,7 @@ function transformControlObjectToArray(
 function snakeCaseControlExplicitInput(
   type: string,
   explicitInput: StoredPinnedControlState['explicitInput']
-) {
+): OptionsListControlState | RangeSliderControlState | TimeSliderControlState {
   switch (type) {
     case OPTIONS_LIST_CONTROL: {
       const {
@@ -84,7 +89,7 @@ function snakeCaseControlExplicitInput(
         single_select: singleSelect,
         sort,
         use_global_filters: useGlobalFilters,
-      };
+      } as Omit<OptionsListDSLControlState, 'data_view_id'> & { dataViewRefName: string };
     }
     case ESQL_CONTROL: {
       const {
@@ -116,7 +121,7 @@ function snakeCaseControlExplicitInput(
         sort,
         variable_name: variableName,
         variable_type: variableType,
-      };
+      } as OptionsListESQLControlState;
     }
     case RANGE_SLIDER_CONTROL: {
       const { dataViewRefName, fieldName, ignoreValidations, step, useGlobalFilters, value } =
@@ -128,7 +133,7 @@ function snakeCaseControlExplicitInput(
         step,
         use_global_filters: useGlobalFilters,
         value,
-      };
+      } as RangeSliderControlState;
     }
     case TIME_SLIDER_CONTROL: {
       const {
@@ -140,7 +145,7 @@ function snakeCaseControlExplicitInput(
         is_anchored: isAnchored,
         time_slice_end_as_percentage_of_time_range: timesliceEndAsPercentageOfTimeRange,
         time_slice_start_as_percentage_of_time_range: timesliceStartAsPercentageOfTimeRange,
-      };
+      } as TimeSliderControlState;
     }
   }
 }
