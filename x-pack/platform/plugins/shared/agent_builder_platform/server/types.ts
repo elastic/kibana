@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
   AgentBuilderPluginSetup,
@@ -21,6 +22,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  alerting: AlertingServerStart;
   llmTasks?: LlmTasksPluginStart;
   cases?: CasesServerStart;
   spaces?: SpacesPluginStart;
