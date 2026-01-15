@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { capitalize } from 'lodash';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -267,11 +268,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.typeColumn', {
         defaultMessage: 'Type',
       }),
-      render: (type: string) => {
-        // Capitalize first letter: "notion" -> "Notion", "github" -> "Github"
-        const formattedType = type.charAt(0).toUpperCase() + type.slice(1);
-        return <EuiText size="s">{formattedType}</EuiText>;
-      },
+      render: (type: string) => <EuiText size="s">{capitalize(type)}</EuiText>,
     },
     {
       field: 'workflows',
