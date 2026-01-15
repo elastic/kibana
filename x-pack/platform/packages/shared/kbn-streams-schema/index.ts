@@ -10,7 +10,6 @@ export { IngestBase } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
-export { Group } from './src/models/group';
 
 export {
   type RoutingDefinition,
@@ -142,10 +141,12 @@ export { emptyAssets } from './src/helpers/empty_assets';
 
 export {
   type Feature,
-  type FeatureType,
+  type BaseFeature,
+  type FeatureStatus,
   isFeature,
   featureSchema,
-  featureTypeSchema,
+  baseFeatureSchema,
+  featureStatusSchema,
 } from './src/feature';
 
 export { type System, systemSchema, isSystem } from './src/system';

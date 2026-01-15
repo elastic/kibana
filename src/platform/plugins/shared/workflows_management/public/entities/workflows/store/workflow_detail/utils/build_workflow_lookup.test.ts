@@ -8,7 +8,7 @@
  */
 
 import { LineCounter, parseDocument } from 'yaml';
-import { inspectStep } from './build_workflow_lookup';
+import { buildWorkflowLookup, inspectStep } from './build_workflow_lookup';
 
 describe('inspectStep', () => {
   describe('simple step parsing', () => {
@@ -523,6 +523,28 @@ steps:
       expect(result.level4).toBeDefined();
       expect(result.level4.parentStepId).toBe('level3');
       expect(result.level4.propInfos).toHaveProperty('message');
+    });
+  });
+});
+
+describe('buildWorkflowLookup', () => {
+  it('should build a workflow lookup from a yaml string', () => {
+    const yaml = `
+name: test
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+    expect(result).toMatchObject({
+      steps: {
+        step1: {
+          stepId: 'step1',
+          stepType: 'console',
+        },
+      },
     });
   });
 });
