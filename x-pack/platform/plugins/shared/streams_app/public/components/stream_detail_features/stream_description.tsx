@@ -119,7 +119,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
               onChange={setDescription}
               aria-labelledby="stream-description-editor"
               placeholder={STREAM_DESCRIPTION_EMPTY}
-              readOnly={isUpdating || !isEditing}
+              readOnly={areButtonsDisabled || !isEditing}
               toolbarProps={{
                 right: (
                   <EuiFlexGroup
