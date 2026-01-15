@@ -25,6 +25,7 @@ import {
   CopyWorkflowStepJsonOption,
   CopyWorkflowStepOption,
 } from './step_action_options';
+import { CopyKibanaDevToolsOption } from './step_action_options/copy_kibana_devtools_option';
 import {
   selectEditorFocusedStepInfo,
   selectIsExecutionsTab,
@@ -70,6 +71,9 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }
       ...[
         ...(focusedStepInfo.stepType.startsWith('elasticsearch.')
           ? [<CopyElasticSearchDevToolsOption key="copy-as-console" onClick={closePopover} />]
+          : []),
+        ...(focusedStepInfo.stepType.startsWith('kibana.')
+          ? [<CopyKibanaDevToolsOption key="copy-as-console" onClick={closePopover} />]
           : []),
         <CopyWorkflowStepOption key="copy-workflow-step" onClick={closePopover} />,
         <CopyWorkflowStepJsonOption key="copy-step-as-json" onClick={closePopover} />,
