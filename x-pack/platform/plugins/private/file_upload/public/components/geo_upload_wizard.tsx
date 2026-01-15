@@ -54,6 +54,7 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
   private _fileId: string = '';
   private _sessionStartTime: number = 0;
   private _file?: File;
+  private _sessionTelemetryTracked: boolean = false;
 
   state: State = {
     failedPermissionCheck: false,
@@ -77,6 +78,19 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
 
   componentWillUnmount() {
     this._isMounted = false;
+
+    // Track cancel action
+    if (
+      this._telemetryService &&
+      this._file &&
+      this._sessionStartTime > 0 &&
+      !this._sessionTelemetryTracked &&
+      (this.state.phase === PHASE.IMPORT || this.state.phase === PHASE.CONFIGURE)
+    ) {
+      const sessionTimeMs = Date.now() - this._sessionStartTime;
+      this._trackUploadSession(false, false, sessionTimeMs, true);
+    }
+
     if (this._geoFileImporter) {
       this._geoFileImporter.destroy();
       this._geoFileImporter = undefined;
@@ -92,18 +106,25 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
   private _trackUploadSession(
     sessionSuccess: boolean,
     dataViewCreated: boolean,
-    sessionTimeMs: number
+    sessionTimeMs: number,
+    cancelled: boolean = false
   ) {
     if (!this._telemetryService || !this._file) {
       return;
     }
+
+    if (this._sessionTelemetryTracked) {
+      return;
+    }
+
+    this._sessionTelemetryTracked = true;
 
     this._telemetryService.trackUploadSession({
       upload_session_id: this._uploadSessionId,
       total_files: 1,
       total_size_bytes: this._file.size,
       session_success: sessionSuccess,
-      session_cancelled: false,
+      session_cancelled: cancelled,
       session_time_ms: sessionTimeMs,
       new_index_created: true,
       data_view_created: dataViewCreated,
