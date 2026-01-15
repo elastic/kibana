@@ -24,6 +24,7 @@ import {
   useIntegrationDisplayNames,
   useSiemReadinessApi,
 } from '@kbn/siem-readiness';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { useBasePath } from '../../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 
@@ -36,9 +37,14 @@ export const AllRuleCoveragePanel: React.FC = () => {
   const basePath = useBasePath();
   const { euiTheme } = useEuiTheme();
 
-  const { getInstalledIntegrations, getDetectionRules } = useSiemReadinessApi();
+  const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
 
-  const integrationNames = getInstalledIntegrations.data?.map((item) => item.name) || [];
+  const getInstalledIntegrations =
+    getIntegrations?.data?.items?.filter((pkg: PackageListItem) => pkg.status === 'installed') ||
+    [];
+
+  const integrationNames = getInstalledIntegrations?.map((item) => item.name) || [];
+
   const installedIntegrationRules = useDetectionRulesByIntegration(integrationNames);
 
   const integrationDisplayNames = useIntegrationDisplayNames();
@@ -189,9 +195,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
     [installedIntegrationAssociatedRulesCount, missingIntegrationAssociatedRulesCount]
   );
   const isLoading =
-    getInstalledIntegrations.isLoading ||
-    getDetectionRules.isLoading ||
-    installedIntegrationRules.isLoading;
+    getIntegrations.isLoading || getDetectionRules.isLoading || installedIntegrationRules.isLoading;
   const DONUT_CHART_DATA = useMemo(
     () => [
       {

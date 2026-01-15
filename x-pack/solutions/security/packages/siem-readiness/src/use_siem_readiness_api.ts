@@ -8,7 +8,9 @@
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { CategoriesResponse, FleetPackage } from './types';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import type { CategoriesResponse } from './types';
 import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from './constants';
 
 // Fix: Use 'as const' to make these readonly tuples for proper React Query typing
@@ -26,32 +28,14 @@ export const useSiemReadinessApi = () => {
   });
 
   const getIntegrations = useQuery({
-    queryKey: ['integrations'] as const,
-    queryFn: () => {
-      return http.get<{ items: FleetPackage[] }>('/api/fleet/epm/packages');
-    },
-    select: (data: { items: FleetPackage[] }) => {
-      const installed = data.items?.filter((pkg: FleetPackage) => pkg.status === 'installed') || [];
-      const notInstalled =
-        data.items?.filter((pkg: FleetPackage) => pkg.status === 'not_installed') || [];
-      return { installed, notInstalled };
-    },
+    queryKey: ['integrations', 'fleetPackages'] as const, // More specific query key
+    queryFn: () => http.get<{ items: PackageListItem[] }>('/api/fleet/epm/packages'),
   });
-
-  const getInstalledIntegrations = {
-    ...getIntegrations,
-    data: getIntegrations.data?.installed,
-  };
-
-  const getNotInstalledIntegrations = {
-    ...getIntegrations,
-    data: getIntegrations.data?.notInstalled,
-  };
 
   const getDetectionRules = useQuery({
     queryKey: GET_DETECTION_RULES_QUERY_KEY,
     queryFn: () => {
-      return http.get<{ data: FleetPackage[] }>('/api/detection_engine/rules/_find', {
+      return http.get<{ data: RuleResponse[] }>('/api/detection_engine/rules/_find', {
         query: {
           filter: 'alert.attributes.enabled:true',
           per_page: 10000,
@@ -62,8 +46,7 @@ export const useSiemReadinessApi = () => {
 
   return {
     getReadinessCategories,
-    getInstalledIntegrations,
-    getNotInstalledIntegrations,
+    getIntegrations,
     getDetectionRules,
   };
 };

@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDetectionRulesByIntegration, useSiemReadinessApi } from '@kbn/siem-readiness';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { AllRuleCoveragePanel } from './rule_coverage_panels/all_rules';
@@ -60,9 +61,13 @@ export const RuleCoveragePanel: React.FC = () => {
   );
 
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getInstalledIntegrations, getDetectionRules } = useSiemReadinessApi();
+  const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
 
-  const integrationNames = getInstalledIntegrations.data?.map((item) => item.name) || [];
+  const getInstalledIntegrations =
+    getIntegrations?.data?.items?.filter((pkg: PackageListItem) => pkg.status === 'installed') ||
+    [];
+
+  const integrationNames = getInstalledIntegrations?.map((item) => item.name) || [];
   const installedIntegrationRules = useDetectionRulesByIntegration(integrationNames);
 
   const caseDescription = useMemo(

@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
-import type { FleetPackage } from './types';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const useEnabledDetectionRules = () => {
   const { http } = useKibana<CoreStart>().services;
@@ -17,7 +17,7 @@ export const useEnabledDetectionRules = () => {
   return useQuery({
     queryKey: ['enabled-detection-rules'],
     queryFn: () =>
-      http.get<{ data: FleetPackage[] }>('/api/detection_engine/rules/_find', {
+      http.get<{ data: RuleResponse[] }>('/api/detection_engine/rules/_find', {
         query: {
           filter: 'alert.attributes.enabled:true',
           per_page: 10000,
@@ -27,15 +27,15 @@ export const useEnabledDetectionRules = () => {
 };
 
 export interface RuleIntegrationCoverage {
-  coveredRules: FleetPackage[];
-  uncoveredRules: FleetPackage[];
+  coveredRules: RuleResponse[];
+  uncoveredRules: RuleResponse[];
   missingIntegrations: string[];
   installedIntegrations: string[];
   relatedIntegrations: Array<{ package: string; version?: string; integration?: string }>;
 }
 
 export const getRuleIntegrationCoverage = (
-  rules: FleetPackage[],
+  rules: RuleResponse[],
   installedIntegrationPackages: string[]
 ): RuleIntegrationCoverage => {
   const installedSet = new Set(installedIntegrationPackages);
@@ -45,8 +45,8 @@ export const getRuleIntegrationCoverage = (
     { package: string; version?: string; integration?: string }
   >();
 
-  const coveredRules: FleetPackage[] = [];
-  const uncoveredRules: FleetPackage[] = [];
+  const coveredRules: RuleResponse[] = [];
+  const uncoveredRules: RuleResponse[] = [];
 
   rules.forEach((rule) => {
     const requiredIntegrations =
