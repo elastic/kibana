@@ -30,11 +30,6 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
-  async preserveCrossAppState() {
-    await this.page.goto(this.page.url());
-    await this.page.waitForLoadingIndicatorHidden();
-  }
-
   async waitForListingTableToLoad() {
     return this.page.testSubj.waitForSelector('table-is-ready', { state: 'visible' });
   }

@@ -24,7 +24,6 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.dashboard.goto();
-    await pageObjects.dashboard.preserveCrossAppState();
     await pageObjects.dashboard.openNewDashboard();
     dashboardUrl = page.url();
   });
