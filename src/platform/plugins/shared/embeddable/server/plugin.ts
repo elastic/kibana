@@ -25,7 +25,11 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import type { EmbeddableTransforms, TransformEnhancementsIn, TransformEnhancementsOut } from '../common';
+import type {
+  EmbeddableTransforms,
+  TransformEnhancementsIn,
+  TransformEnhancementsOut,
+} from '../common';
 import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {

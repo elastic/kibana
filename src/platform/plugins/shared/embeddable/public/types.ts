@@ -17,7 +17,11 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
-import type { EmbeddableTransforms, TransformEnhancementsIn, TransformEnhancementsOut } from '../common';
+import type {
+  EmbeddableTransforms,
+  TransformEnhancementsIn,
+  TransformEnhancementsOut,
+} from '../common';
 import type { AddFromLibraryFormProps } from './add_from_library/add_from_library_flyout';
 
 export interface EmbeddableSetupDependencies {
