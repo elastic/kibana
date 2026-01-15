@@ -18,6 +18,7 @@ plugins:
     - streams_app
     - workflows_extensions
     - transform
+    - fleet
   disabled:
 
 packages:
