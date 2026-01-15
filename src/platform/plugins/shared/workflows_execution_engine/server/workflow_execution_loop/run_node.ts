@@ -60,6 +60,8 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     /**
      * Check in-memory workflow state to skip execution if workflow is no longer running.
      * This is instant (no ES call) and catches cancellations that were already detected.
+     * When cancelRequested is true, status is always updated to CANCELLED, so this check
+     * covers both cancellation and other terminal states (COMPLETED, FAILED, etc.).
      */
     if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
       return;
