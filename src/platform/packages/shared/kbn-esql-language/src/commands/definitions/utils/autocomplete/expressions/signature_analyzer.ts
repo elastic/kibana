@@ -22,9 +22,10 @@ import type { ICommandContext } from '../../../../registry/types';
 import { acceptsArbitraryExpressions } from './utils';
 import type { FunctionDefinition } from '../../../types';
 
-// Parses mapParams format: {name='paramName', values=[val1, val2]}
+// Parses mapParams format: {name='paramName', values=[val1, val2], description='param desc', type=[valuesType]}
 // Captures: [1] = param name, [2] = comma-separated values
-const MAP_PARAMS_REGEX = /\{name='([^']+)'(?:,\s*values=\[([^\]]*)\])?[^}]*\}/g;
+const MAP_PARAMS_REGEX =
+  /\{name='([^']+)'(?:,\s*values=\[([^\]]*)\])?[^}]*(?:,\s*description='([^']+)')(?:,\s*type=\[([^\]]*)\])?[^}]*\}/g;
 const STRIP_SINGLE_QUOTES_REGEX = /^'|'$/g;
 
 /** Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API. */
@@ -463,22 +464,24 @@ export class SignatureAnalyzer {
   /**
    * Parses a mapParams definition string into MapParameters.
    *
-   * Input:  "{name='boost', values=[2.5]}, {name='analyzer', values=[standard]}"
+   * Input:  "{name='boost', values=[2.5], description='Boost value', type=[float]}, {name='analyzer', values=[standard], description='analyzer used', type=[keyword]}"
    * Output: { boost: { type: 'number', ... }, analyzer: { type: 'string', ... } }
    */
-  public static parseMapParams(mapParamsStr: string): MapParameters {
-    const result: MapParameters = {};
+  public static parseMapParams(mapParamsStr: string): MapParameters<boolean> {
+    const result: MapParameters<boolean> = {};
 
     for (const match of mapParamsStr.matchAll(MAP_PARAMS_REGEX)) {
       const paramName = match[1];
       const rawValues = match[2] ?? '';
+      const description = match[3] ?? '';
+      const rawType = match[4] ?? 'string';
 
       const values = rawValues
         .split(',')
         .map((val) => val.trim().replace(STRIP_SINGLE_QUOTES_REGEX, ''))
         .filter(Boolean);
 
-      result[paramName] = parseMapValues(values);
+      result[paramName] = parseMapValues(values, description, rawType);
     }
 
     return result;

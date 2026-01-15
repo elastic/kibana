@@ -21,12 +21,15 @@ export const DOUBLE_QUOTED_STRING_REGEX = /"([^"\\]|\\.)*"/g;
 // Extracts all object keys from "key": patterns in JSON-like syntax
 export const OBJECT_KEYS_REGEX = /"([^"]+)"\s*:/g;
 
-export interface MapParameterValues {
-  type: MapValueType;
+export interface MapParameterValues<MultipleTypes extends boolean = false> {
+  type: MultipleTypes extends true ? MapValueType[] : MapValueType;
   suggestions?: ISuggestionItem[];
 }
 
-export type MapParameters = Record<string, MapParameterValues>;
+export type MapParameters<MultipleTypes extends boolean = false> = Record<
+  string,
+  MapParameterValues<MultipleTypes>
+>;
 
 /**
  * This function provides suggestions for map expressions within a command.
@@ -139,22 +142,49 @@ export function isInsideMapExpression(text: string): boolean {
   return getMapNestingLevel(text) > 0;
 }
 
+// can be enhanced later to support more types
+const ESTypesMap: Record<string, MapValueType> = {
+  integer: 'number',
+  double: 'number',
+  float: 'number',
+  boolean: 'boolean',
+  keyword: 'string',
+  text: 'string',
+};
+
 /**
  * Parses a comma-separated values string and infers the type.
  * Returns suggestions for each value.
  */
-export function parseMapValues(values: string[]): {
-  type: MapValueType;
-  suggestions: ISuggestionItem[];
-} {
+export function parseMapValues(
+  values: string[],
+  description: string,
+  rawType: string
+): (MapParameterValues<false> | MapParameterValues<true>) & { description: string } {
+  const mappedTypesFromDefinition = rawType
+    .split(',')
+    .map((type) => ESTypesMap[type.trim()] ?? 'string');
+  const uniqueMappedTypes = Array.from(new Set(mappedTypesFromDefinition));
+  const hasMultipleTypes = uniqueMappedTypes.length > 1;
+
   if (values.length === 0) {
-    return { type: 'string', suggestions: [] };
+    // When no values provided, use type definition as-is
+    // Return array if multiple types defined, single type if only one
+    const type = hasMultipleTypes ? uniqueMappedTypes : uniqueMappedTypes[0] ?? 'string';
+
+    return {
+      type,
+      suggestions: [],
+      description,
+    };
   }
 
-  const type = inferMapValueType(values);
+  // When values exist, infer type from values
+  const inferredType = inferMapValueType(values);
+  const type = hasMultipleTypes ? [inferredType] : inferredType;
   const suggestions = values.map((value) => buildMapValueCompleteItem(value));
 
-  return { type, suggestions };
+  return { type, suggestions, description };
 }
 
 /**
