@@ -227,7 +227,7 @@
             ],
             "label": "open",
             "description": [
-              "\nOpens a flyout panel with the given mount point inside. You can use\n`close()` on the returned FlyoutRef to close the flyout.\n"
+              "\nOpens a flyout panel with the given mount point inside. Calling `open` for multiple flyouts replaces the current flyout.\nYou can use `close()` on the returned FlyoutRef to close the flyout.\n"
             ],
             "signature": [
               "(mount: ",
@@ -761,6 +761,57 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
+            "id": "def-public.OverlayStart.openSystemFlyout",
+            "type": "Function",
+            "tags": [],
+            "label": "openSystemFlyout",
+            "description": [
+              "Opens a system flyout that integrates with EUI Flyout Manager"
+            ],
+            "signature": [
+              "(content: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: ",
+              "OverlaySystemFlyoutOpenOptions",
+              " | undefined) => ",
+              "OverlayRef"
+            ],
+            "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-overlays-browser",
+                "id": "def-public.OverlayStart.openSystemFlyout.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "content",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                ],
+                "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-overlays-browser",
+                "id": "def-public.OverlayStart.openSystemFlyout.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "OverlaySystemFlyoutOpenOptions",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-overlays-browser",
             "id": "def-public.OverlayStart.openModal",
             "type": "Function",
             "tags": [],
@@ -886,6 +937,81 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-overlays-browser",
+        "id": "def-public.OverlaySystemFlyoutStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "OverlaySystemFlyoutStart",
+        "description": [
+          "\nAPIs to open and manage fly-out dialogs.\n"
+        ],
+        "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-overlays-browser",
+            "id": "def-public.OverlaySystemFlyoutStart.open",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "open",
+            "description": [
+              "\nOpens a flyout panel with given React element inside. Calling `open` for multiple flyouts allows history navigation.\nYou can use `close()` on the returned FlyoutRef to close the flyout.\n"
+            ],
+            "signature": [
+              "(content: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: ",
+              "OverlaySystemFlyoutOpenOptions",
+              " | undefined) => ",
+              "OverlayRef"
+            ],
+            "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-overlays-browser",
+                "id": "def-public.OverlaySystemFlyoutStart.open.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "content",
+                "description": [
+                  "React.ReactElement - Renders the content inside a flyout panel"
+                ],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                ],
+                "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-overlays-browser",
+                "id": "def-public.OverlaySystemFlyoutStart.open.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link EuiFlyoutProps } - options for the flyout"
+                ],
+                "signature": [
+                  "OverlaySystemFlyoutOpenOptions",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -902,11 +1028,28 @@
           "EuiFlyoutProps",
           "<\"div\" | \"nav\"> | ",
           "EuiFlyoutResizableProps",
-          ", \"onResize\" | \"onClose\"> & { onClose?: ((flyout: ",
+          ", \"onResize\" | \"onClose\" | \"session\"> & { onClose?: ((flyout: ",
           "OverlayRef",
-          ") => void) | undefined; isResizable?: boolean | undefined; }"
+          ") => void) | undefined; session?: \"never\" | undefined; isResizable?: boolean | undefined; }"
         ],
         "path": "src/core/packages/overlays/browser/src/flyout.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-overlays-browser",
+        "id": "def-public.OverlaySystemFlyoutOpenOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "OverlaySystemFlyoutOpenOptions",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "OverlayFlyoutOpenOptions",
+          ", \"session\"> & { session?: \"start\" | \"inherit\" | \"never\" | undefined; }"
+        ],
+        "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -29,6 +29,7 @@ interface AppMenuContextMenuProps {
   anchorPosition?: PopoverAnchorPosition;
   popoverTestId?: string;
   onClose: () => void;
+  onCloseOverflowButton?: () => void;
 }
 
 export const AppMenuPopover = ({
@@ -43,10 +44,18 @@ export const AppMenuPopover = ({
   anchorPosition,
   popoverTestId,
   onClose,
+  onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
   const panels = useMemo(
-    () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem, onClose }),
-    [items, primaryActionItem, secondaryActionItem, onClose]
+    () =>
+      getPopoverPanels({
+        items,
+        primaryActionItem,
+        secondaryActionItem,
+        onClose,
+        onCloseOverflowButton,
+      }),
+    [items, primaryActionItem, secondaryActionItem, onClose, onCloseOverflowButton]
   );
 
   if (panels.length === 0) {

@@ -172,7 +172,7 @@
 # =================== Search Autocomplete ===================
 # Time in milliseconds to wait for autocomplete suggestions from Elasticsearch.
 # This value must be a whole number greater than zero. Defaults to 1000ms
-#unifiedSearch.autocomplete.valueSuggestions.timeout: 1000
+# unifiedSearch.autocomplete.valueSuggestions.timeout: 1000
 
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000

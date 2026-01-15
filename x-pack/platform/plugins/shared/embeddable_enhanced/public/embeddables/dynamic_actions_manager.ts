@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  EmbeddableApiContext,
-  SerializedPanelState,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext, StateComparators } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
-import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, map } from 'rxjs';
@@ -23,21 +18,11 @@ import type { StartDependencies } from '../plugin';
 export function initializeDynamicActionsManager(
   uuid: string,
   getTitle: () => string | undefined,
-  state: SerializedPanelState<DynamicActionsSerializedState>,
+  state: DynamicActionsSerializedState,
   services: StartDependencies
 ): EmbeddableDynamicActionsManager {
-  const enhancement = services.embeddable.getEnhancement('dynamicActions');
-  const initialEnhancementsState =
-    enhancement && state.rawState.enhancements?.dynamicActions
-      ? {
-          dynamicActions: enhancement.inject(
-            state.rawState.enhancements.dynamicActions,
-            state.references ?? []
-          ),
-        }
-      : state.rawState.enhancements;
   const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
-    getDynamicActionsState(initialEnhancementsState)
+    getDynamicActionsState(state.enhancements)
   );
   const api: DynamicActionStorageApi = {
     dynamicActionsState$,
@@ -68,25 +53,7 @@ export function initializeDynamicActionsManager(
     } as StateComparators<DynamicActionsSerializedState>,
     anyStateChange$: dynamicActionsState$.pipe(map(() => undefined)),
     getLatestState,
-    serializeState: () => {
-      const latestState = getLatestState();
-      if (!enhancement || !latestState.enhancements?.dynamicActions) {
-        return {
-          rawState: latestState,
-          references: [],
-        };
-      }
-
-      const extractResults = enhancement.extract(latestState.enhancements.dynamicActions);
-      return {
-        rawState: {
-          enhancements: {
-            dynamicActions: extractResults.state as DynamicActionsState,
-          },
-        },
-        references: extractResults.references,
-      };
-    },
+    serializeState: () => getLatestState(),
     reinitializeState: (lastState: DynamicActionsSerializedState) => {
       api.setDynamicActions(lastState.enhancements);
     },

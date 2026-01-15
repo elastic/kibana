@@ -8,6 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { TaskPriority, type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
+import { TaskStatus } from '@kbn/streams-schema';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams } from './types';
 import { CancellationInProgressError } from './cancellation_in_progress_error';
@@ -46,7 +47,7 @@ export class TaskClient<TaskType extends string> {
       if (isNotFoundError(error)) {
         return {
           id,
-          status: 'not_started',
+          status: TaskStatus.NotStarted,
           created_at: '',
           space: '',
           stream: '',
@@ -67,7 +68,7 @@ export class TaskClient<TaskType extends string> {
     request,
   }: TaskRequest<TaskType, TParams>) {
     const storedTask = await this.get(task.id);
-    if (storedTask.status === 'being_canceled') {
+    if (storedTask.status === TaskStatus.BeingCanceled) {
       throw new CancellationInProgressError('Previous task run is still being canceled');
     }
 
@@ -76,7 +77,7 @@ export class TaskClient<TaskType extends string> {
       task: {
         params,
       },
-      status: 'in_progress',
+      status: TaskStatus.InProgress,
       created_at: new Date().toISOString(),
     };
 
@@ -115,20 +116,20 @@ export class TaskClient<TaskType extends string> {
     this.logger.debug(`Canceling task ${id}`);
 
     const task = await this.get(id);
-    if (task.status !== 'in_progress') {
+    if (task.status !== TaskStatus.InProgress) {
       return;
     }
 
     await this.update({
       ...task,
-      status: 'being_canceled',
+      status: TaskStatus.BeingCanceled,
     });
   }
 
   public async acknowledge<TParams extends {} = {}, TPayload extends {} = {}>(id: string) {
     const task = await this.get<TParams, TPayload>(id);
 
-    if (task.status !== 'completed') {
+    if (task.status !== TaskStatus.Completed) {
       throw new AcknowledgingIncompleteError('Only completed tasks can be acknowledged');
     }
 
@@ -136,8 +137,8 @@ export class TaskClient<TaskType extends string> {
 
     const taskDoc = {
       ...task,
-      status: 'acknowledged' as const,
-    };
+      status: TaskStatus.Acknowledged,
+    } satisfies PersistedTask<TParams, TPayload>;
 
     await this.update(taskDoc);
 

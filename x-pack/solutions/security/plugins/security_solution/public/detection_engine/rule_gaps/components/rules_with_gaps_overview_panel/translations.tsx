@@ -17,7 +17,7 @@ export const RULE_GAPS_OVERVIEW_PANEL_LABEL = i18n.translate(
 export const RULE_GAPS_OVERVIEW_PANEL_TOOLTIP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleGaps.overviewPanel.tooltip',
   {
-    defaultMessage: 'Total rules with gaps / rules that currently have in-progress gaps',
+    defaultMessage: 'Rules with gaps / rules with gaps being filled',
   }
 );
 

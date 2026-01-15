@@ -15,5 +15,6 @@ export {
   type LayoutConfigProviderProps as ChromeLayoutConfigProviderProps,
   useLayoutUpdate,
 } from './layout_config_context';
+export type { ChromeStyle } from '@kbn/core-chrome-browser';
 export { SimpleDebugOverlay } from './debug/simple_debug_overlay';
 export { LayoutDebugOverlay } from './debug/layout_debug_overlay';
