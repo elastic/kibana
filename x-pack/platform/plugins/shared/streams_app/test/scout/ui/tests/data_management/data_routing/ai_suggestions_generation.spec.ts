@@ -19,7 +19,7 @@ import {
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
-test.describe('FOO Stream data routing - AI suggestions generation', { tag: ['@ess'] }, () => {
+test.describe('Stream data routing - AI suggestions generation', { tag: ['@ess'] }, () => {
   let llmSetup: LlmProxySetup;
 
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
