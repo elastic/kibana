@@ -192,25 +192,6 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <CallOutSwitcher
-            namespace="detections"
-            condition={true}
-            message={{
-              type: 'primary',
-              id: 'gap-auto-fill-logs',
-              title: i18n.GAP_AUTO_FILL_LOGS_CALLOUT_TITLE,
-              description: (
-                <div>
-                  <FormattedMessage
-                    id="xpack.securitySolution.gapAutoFillLogs.caloutDescription"
-                    defaultMessage="The gap fill scheduler automatically checks for gaps in run executions and schedules backfills to cover them. The scheduler logs which gaps were scheduled to be filled, and whether they succeeded or failed. "
-                  />
-                  <EuiSpacer size="s" />
-                </div>
-              ),
-            }}
-          />
-          <EuiSpacer size="m" />
           <EuiPanel hasBorder>
             <EuiFlexGroup gutterSize="xl">
               <EuiFlexItem grow={false}>
@@ -243,6 +224,25 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
+          <EuiSpacer size="m" />
+          <CallOutSwitcher
+            namespace="detections"
+            condition={true}
+            message={{
+              type: 'primary',
+              id: 'gap-auto-fill-logs',
+              title: i18n.GAP_AUTO_FILL_LOGS_CALLOUT_TITLE,
+              description: (
+                <div>
+                  <FormattedMessage
+                    id="xpack.securitySolution.gapAutoFillLogs.caloutDescription"
+                    defaultMessage="The gap fill scheduler automatically checks for gaps in run executions and schedules backfills to cover them. The scheduler logs which gaps were scheduled to be filled, and whether they succeeded or failed. "
+                  />
+                  <EuiSpacer size="s" />
+                </div>
+              ),
+            }}
+          />
           <EuiSpacer size="m" />
           <EuiPanel hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
