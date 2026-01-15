@@ -87,24 +87,6 @@ export const SearchHomepagePage = () => {
                   <LicenseBadge />
                 </EuiFlexItem>
               )}
-              {/* {isAdmin && (
-                <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj="searchHomepageSearchHomepagePageManageSubscriptionLink"
-                    external
-                    href={projectManagementUrl}
-                    color="text"
-                    css={css({
-                      padding: euiTheme.size.s,
-                    })}
-                  >
-                    {i18n.translate(
-                      'xpack.searchHomepage.searchHomepagePage.manageSubscriptionLinkLabel',
-                      { defaultMessage: 'Manage' }
-                    )}
-                  </EuiLink>
-                </EuiFlexItem>
-              )} */}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

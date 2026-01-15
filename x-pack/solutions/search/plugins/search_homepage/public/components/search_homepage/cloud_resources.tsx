@@ -48,9 +48,6 @@ const ResourceCard = ({
   return (
     <EuiSplitPanel.Outer
       direction="row"
-      css={css({
-        // maxWidth: euiTheme.base * 36,
-      })}
       responsive={['xs', 's', 'm']}
       data-test-subj={dataTestSubj}
     >
