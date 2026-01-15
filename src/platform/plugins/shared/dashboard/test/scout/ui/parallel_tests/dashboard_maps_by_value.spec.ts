@@ -38,6 +38,7 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
     await pageObjects.maps.waitForRenderComplete();
     await pageObjects.maps.clickSaveAndReturnButton();
     await pageObjects.dashboard.waitForRenderComplete();
+    await expect.poll(async () => pageObjects.dashboard.getPanelCount()).toBe(1);
   };
 
   const editByValueMap = async ({
