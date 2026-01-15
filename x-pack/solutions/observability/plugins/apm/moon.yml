@@ -149,6 +149,7 @@ dependsOn:
   - '@kbn/discover-shared-plugin'
   - '@kbn/core-chrome-browser'
   - '@kbn/react-query'
+  - '@kbn/core-chrome-layout-constants'
 tags:
   - plugin
   - prod
