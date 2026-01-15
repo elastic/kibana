@@ -12,8 +12,9 @@ import type {
   PutSettingsRequestSchema,
   PutSpaceSettingsRequestSchema,
 } from '../../types';
-import { settingsService } from '../../services';
+import { appContextService, settingsService } from '../../services';
 import { getSpaceSettings, saveSpaceSettings } from '../../services/spaces/space_settings';
+import { scheduleReindexIntegrationKnowledgeTask } from '../../tasks/reindex_integration_knowledge_task';
 
 export const getSpaceSettingsHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
@@ -72,6 +73,10 @@ export const putSettingsHandler: FleetRequestHandler<
 
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
+
+    if (request.body.integration_knowledge_enabled) {
+      await scheduleReindexIntegrationKnowledgeTask(appContextService.getTaskManagerStart()!);
+    }
 
     const body = {
       item: settings,

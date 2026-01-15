@@ -35,9 +35,10 @@ export const convertValueToString = ({
   fieldFormats: FieldFormatsStart;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
+    compatibleWithMarkdown?: boolean; // values as one-liner
   };
 }): ConvertedResult => {
-  const disableMultiline = options?.compatibleWithCSV ?? false;
+  const disableMultiline = (options?.compatibleWithMarkdown || options?.compatibleWithCSV) ?? false;
 
   if (dataViewField?.type === '_source') {
     return {
@@ -75,7 +76,7 @@ export const convertValueToString = ({
 
   return {
     formattedString: formatted,
-    withFormula,
+    withFormula: options?.compatibleWithMarkdown ? false : withFormula,
   };
 };
 

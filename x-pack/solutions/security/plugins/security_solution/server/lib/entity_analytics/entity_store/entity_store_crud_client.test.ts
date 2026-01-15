@@ -18,6 +18,7 @@ import {
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store';
 import * as uuid from 'uuid';
 import { EntityStoreCapability } from '@kbn/entities-schema';
+import type { TransformPreviewTransformResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('EntityStoreCrudClient', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -252,6 +253,7 @@ describe('EntityStoreCrudClient', () => {
             },
           },
         },
+        refresh: 'wait_for',
       });
 
       expect(v4Spy).toBeCalledTimes(1);
@@ -327,6 +329,7 @@ describe('EntityStoreCrudClient', () => {
             },
           },
         },
+        refresh: 'wait_for',
       });
 
       expect(v4Spy).toBeCalledTimes(1);
@@ -419,6 +422,7 @@ describe('EntityStoreCrudClient', () => {
             },
           },
         },
+        refresh: 'wait_for',
       });
 
       expect(v4Spy).toBeCalledTimes(1);
@@ -428,7 +432,18 @@ describe('EntityStoreCrudClient', () => {
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
-
+      esClientMock.transform.previewTransform.mockReturnValue(
+        Promise.resolve({
+          preview: [
+            {
+              _id: 'some-id',
+              _source: {
+                entity: { identity: { host: { name: 'host-1' } } },
+              },
+            },
+          ],
+        } as TransformPreviewTransformResponse)
+      );
       const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
       jest.useFakeTimers();
       jest.setSystemTime(mockedDate);
@@ -474,9 +489,80 @@ describe('EntityStoreCrudClient', () => {
             },
           },
         },
+        refresh: 'wait_for',
       });
-
       expect(v4Spy).toBeCalledTimes(1);
+      expect(esClientMock.transform.previewTransform).toBeCalledWith(
+        {
+          pivot: {
+            aggs: {
+              count: {
+                value_count: {
+                  field: 'host.name',
+                },
+              },
+            },
+            group_by: {
+              'entity.identity.host.name': {
+                terms: {
+                  field: 'host.name',
+                },
+              },
+            },
+          },
+          source: {
+            index: '.entities.v1.updates.security_host_default',
+            query: { bool: { must: { term: { 'host.name': 'host-1' } } } },
+          },
+        },
+        { querystring: { as_index_request: true } }
+      );
+      expect(esClientMock.create).toBeCalledWith({
+        index: '.entities.v1.latest.security_host_default',
+        id: 'some-id',
+        document: {
+          '@timestamp': mockedDate.toISOString(),
+          host: {
+            name: 'host-1',
+            entity: {
+              id: 'host-1',
+              attributes: {
+                Privileged: true,
+              },
+              behaviors: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                New_country_login: false,
+              },
+            },
+          },
+        },
+        refresh: 'true',
+      });
+    });
+
+    it('when creating entity synchronously and entity is not in preview transform docs, throw error', async () => {
+      dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+      esClientMock.updateByQuery.mockReturnValue(Promise.resolve({ updated: 0 }));
+      esClientMock.transform.previewTransform.mockReturnValue(
+        Promise.resolve({
+          preview: [] as Array<{ _source: string; id: string }[]>,
+        } as TransformPreviewTransformResponse)
+      );
+
+      const doc: Entity = {
+        entity: {
+          id: 'user-id',
+          attributes: {
+            privileged: true,
+          },
+        },
+      };
+
+      await expect(async () => client.upsertEntity('user', doc)).rejects.toThrow(
+        new EntityNotFoundError('user', 'user-id')
+      );
+      expect(esClientMock.transform.previewTransform).toBeCalledTimes(1);
     });
   });
 

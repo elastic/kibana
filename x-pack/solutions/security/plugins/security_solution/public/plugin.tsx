@@ -19,6 +19,7 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
@@ -74,6 +75,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private experimentalFeatures: ExperimentalFeatures;
   private contract: PluginContract;
   private services: PluginServices;
+  private logger: Logger;
   private isServerless: boolean;
 
   private appUpdater$ = new Subject<AppUpdater>();
@@ -91,12 +93,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     ).features;
     this.contract = new PluginContract(this.experimentalFeatures);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.logger = initializerContext.logger.get(); // Initializes logger with name plugins.securitySolution
 
     this.services = new PluginServices(
       this.config,
       this.experimentalFeatures,
       this.contract,
-      initializerContext.env.packageInfo
+      initializerContext.env.packageInfo,
+      this.logger
     );
   }
 
@@ -213,15 +217,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       hideFromGlobalSearch: !this.isServerless,
       order: 1,
       mount: async (params) => {
+        const [coreStart] = await core.getStartServices();
         const { renderApp, services, store } = await mountDependencies();
         const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
+        const { RedirectIfUnauthorized } = await import(
+          './assistant/stack_management/redirect_if_unauthorized'
+        );
 
         return renderApp({
           ...params,
           services,
           store,
           usageCollection,
-          children: <ManagementSettings />,
+          children: (
+            <RedirectIfUnauthorized coreStart={coreStart}>
+              <ManagementSettings />
+            </RedirectIfUnauthorized>
+          ),
         });
       },
     });
@@ -263,9 +275,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
-    if (plugins.onechat?.attachments) {
+    if (plugins.agentBuilder?.attachments) {
       registerAttachmentUiDefinitions({
-        attachments: plugins.onechat.attachments,
+        attachments: plugins.agentBuilder.attachments,
       });
     }
 
@@ -348,7 +360,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assetInventory: subPlugins.assetInventory.start(),
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
-      cloudDefend: subPlugins.cloudDefend.start(),
+      cloudDefend: subPlugins.cloudDefend.start(this.isServerless),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),

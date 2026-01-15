@@ -1,0 +1,149 @@
+<!DOCTYPE qhelp SYSTEM "qhelp.dtd">
+<qhelp>
+
+<overview>
+<p>
+This query detects calls to <code>schema.arrayOf()</code> from the <code>@kbn/config-schema</code>
+library that do not specify a <code>maxSize</code> constraint. When array schemas are used to 
+validate untrusted input (such as HTTP request bodies, query parameters, or URL parameters), 
+the absence of a size limit can lead to Denial of Service (DoS) vulnerabilities.
+</p>
+<p>
+An attacker could exploit unbounded array validation by sending extremely large arrays in their 
+requests. This can cause:
+</p>
+<ul>
+<li>Excessive memory consumption as the server attempts to parse and store the array</li>
+<li>CPU exhaustion during validation and processing of array elements</li>
+<li>Application crashes due to out-of-memory conditions</li>
+<li>Degraded performance affecting all users of the system</li>
+</ul>
+<p>
+The query specifically targets <code>schema.arrayOf()</code> calls that are missing the 
+<code>maxSize</code> option in the second argument. It excludes configuration files 
+(<code>config.ts</code>) and plugin entry points (<code>server/index.ts</code>) as these 
+typically handle trusted internal configuration rather than external user input.
+</p>
+</overview>
+
+<recommendation>
+<p>
+Always specify a <code>maxSize</code> constraint when using <code>schema.arrayOf()</code> to 
+validate input from untrusted sources. The <code>maxSize</code> value should be set to a 
+reasonable limit based on your application's requirements.
+</p>
+<p>
+To fix this issue, add a second argument to <code>schema.arrayOf()</code> containing an 
+object with a <code>maxSize</code> property:
+</p>
+<sample language="javascript">
+// Before (vulnerable)
+schema.arrayOf(schema.string())
+
+// After (protected)
+schema.arrayOf(schema.string(), { maxSize: 100 })
+</sample>
+<p>
+When determining an appropriate <code>maxSize</code> value, consider:
+</p>
+<ul>
+<li>The actual business requirement - what is the maximum number of items a user would legitimately need to submit?</li>
+<li>Memory and processing overhead per array element</li>
+<li>The complexity of nested schemas - arrays of complex objects may need smaller limits</li>
+<li>Rate limiting and other complementary security controls in place</li>
+</ul>
+<p>
+For nested arrays (arrays containing arrays), ensure that <b>both</b> the outer and inner 
+arrays have appropriate <code>maxSize</code> constraints to prevent multiplicative resource 
+consumption.
+</p>
+</recommendation>
+
+<example>
+<p>
+The following example shows a route handler that accepts an unbounded array of user IDs.
+An attacker could send millions of IDs, causing the server to consume excessive memory
+and processing time:
+</p>
+<sample language="javascript">
+import { schema } from '@kbn/config-schema';
+
+// BAD: No maxSize constraint - vulnerable to DoS
+router.post({
+  path: '/api/users/batch-lookup',
+  validate: {
+    body: schema.object({
+      userIds: schema.arrayOf(schema.string()),  // Unbounded!
+    }),
+  },
+}, async (context, request, response) => {
+  const { userIds } = request.body;
+  // Processing millions of IDs could crash the server
+  const users = await lookupUsers(userIds);
+  return response.ok({ body: { users } });
+});
+</sample>
+<p>
+The fix is to add a <code>maxSize</code> constraint that matches the legitimate use case:
+</p>
+<sample language="javascript">
+import { schema } from '@kbn/config-schema';
+
+// GOOD: maxSize constraint prevents DoS
+router.post({
+  path: '/api/users/batch-lookup',
+  validate: {
+    body: schema.object({
+      userIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    }),
+  },
+}, async (context, request, response) => {
+  const { userIds } = request.body;
+  // At most 100 IDs - safe and bounded
+  const users = await lookupUsers(userIds);
+  return response.ok({ body: { users } });
+});
+</sample>
+<p>
+For more complex scenarios with nested arrays, ensure all levels are bounded:
+</p>
+<sample language="javascript">
+import { schema } from '@kbn/config-schema';
+
+// GOOD: Both outer and inner arrays are bounded
+router.post({
+  path: '/api/matrix/process',
+  validate: {
+    body: schema.object({
+      matrix: schema.arrayOf(
+        schema.arrayOf(schema.number(), { maxSize: 100 }),
+        { maxSize: 100 }
+      ),
+    }),
+  },
+}, handler);
+</sample>
+</example>
+
+<references>
+<li>
+  <a href="https://owasp.org/www-community/attacks/Denial_of_Service">OWASP: Denial of Service Attacks</a>
+</li>
+<li>
+  <a href="https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html">OWASP: Denial of Service Cheat Sheet</a>
+</li>
+<li>
+  <a href="https://cwe.mitre.org/data/definitions/400.html">CWE-400: Uncontrolled Resource Consumption</a>
+</li>
+<li>
+  <a href="https://cwe.mitre.org/data/definitions/770.html">CWE-770: Allocation of Resources Without Limits or Throttling</a>
+</li>
+<li>
+  Kibana <code>@kbn/config-schema</code> documentation for <code>schema.arrayOf()</code> options
+</li>
+</references>
+
+</qhelp>
+
+
+

@@ -11,7 +11,7 @@ import type { User, AssistantFeatures } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { Observable } from 'rxjs';
-import type { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import type { AIExperienceSelection } from '@kbn/ai-assistant-management-plugin/public';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
@@ -97,7 +97,7 @@ export interface AssistantProviderProps {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
-  openChatTrigger$?: Observable<{ assistant: AIAssistantType }>;
+  openChatTrigger$?: Observable<AIExperienceSelection>;
   completeOpenChat?: () => void;
 }
 
@@ -158,7 +158,7 @@ export interface UseAssistantContext {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
-  openChatTrigger$?: Observable<{ assistant: AIAssistantType }>;
+  openChatTrigger$?: Observable<AIExperienceSelection>;
   completeOpenChat?: () => void;
 }
 

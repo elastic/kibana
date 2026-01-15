@@ -10,24 +10,33 @@ import { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import { firstValueFrom } from 'rxjs';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
-import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { getLast24HoursTimeRange } from '../../../util/time_range';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { getFormattedError } from '../../../util/errors';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useTimefilter } from '../../../hooks/use_timefilter';
 
 export const useStreamDescriptionApi = ({
   definition,
   refreshDefinition,
+  aiFeatures,
+  silent = false,
 }: {
   definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
+  aiFeatures: AIFeatures | null;
+  silent?: boolean;
 }) => {
-  const { signal } = useAbortController();
+  const { signal, abort: abortController, refresh } = useAbortController();
+
+  const abort = useCallback(() => {
+    abortController();
+    refresh();
+  }, [abortController, refresh]);
 
   const updateStream = useUpdateStreams(definition.stream.name);
-  const aiFeatures = useAIFeatures();
 
   const {
     core: { notifications },
@@ -37,35 +46,28 @@ export const useStreamDescriptionApi = ({
     services: { telemetryClient },
   } = useKibana();
 
-  const { timeState } = useTimefilter();
-
   const [description, setDescription] = useState(definition.stream.description || '');
 
   const [isGenerating, setIsGenerating] = useState(false);
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  // Save the updated description; show success and error toasts
+  // Save the updated description; show success and error toasts unless silent
   const save = useCallback(
     async (nextDescription: string) => {
       setIsUpdating(true);
 
-      let stream;
-      if (Streams.GroupStream.Definition.is(definition.stream)) {
-        stream = omit(definition.stream, ['name', 'updated_at']);
-      } else {
-        stream = {
-          ...omit(definition.stream, ['name', 'updated_at']),
-          ingest: {
-            ...definition.stream.ingest,
-            processing: {
-              ...omit(definition.stream.ingest.processing, ['updated_at']),
-            },
+      const stream = {
+        ...omit(definition.stream, ['name', 'updated_at']),
+        ingest: {
+          ...definition.stream.ingest,
+          processing: {
+            ...omit(definition.stream.ingest.processing, ['updated_at']),
           },
-        };
-      }
+        },
+      };
 
-      updateStream(
+      return updateStream(
         Streams.all.UpsertRequest.parse({
           dashboards: definition.dashboards,
           queries: definition.queries,
@@ -77,25 +79,29 @@ export const useStreamDescriptionApi = ({
         })
       )
         .then(() => {
-          notifications.toasts.addSuccess({
-            title: i18n.translate(
-              'xpack.streams.streamDetailView.streamDescription.saveSuccessTitle',
-              {
-                defaultMessage: 'Description saved',
-              }
-            ),
-          });
+          if (!silent) {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.streams.streamDetailView.streamDescription.saveSuccessTitle',
+                {
+                  defaultMessage: 'Description saved',
+                }
+              ),
+            });
+          }
         })
         .catch((error) => {
-          notifications.toasts.addError(error, {
-            title: i18n.translate(
-              'xpack.streams.streamDetailView.streamDescription.saveErrorTitle',
-              {
-                defaultMessage: 'Failed to save description',
-              }
-            ),
-            toastMessage: getFormattedError(error).message,
-          });
+          if (!silent) {
+            notifications.toasts.addError(error, {
+              title: i18n.translate(
+                'xpack.streams.streamDetailView.streamDescription.saveErrorTitle',
+                {
+                  defaultMessage: 'Failed to save description',
+                }
+              ),
+              toastMessage: getFormattedError(error).message,
+            });
+          }
         })
         .finally(() => {
           setIsUpdating(false);
@@ -103,6 +109,7 @@ export const useStreamDescriptionApi = ({
         });
     },
     [
+      silent,
       updateStream,
       definition.dashboards,
       definition.queries,
@@ -113,58 +120,64 @@ export const useStreamDescriptionApi = ({
     ]
   );
 
-  const generate = useCallback(() => {
+  const generate = useCallback(async () => {
     if (!aiFeatures?.genAiConnectors.selectedConnector) {
       return;
     }
 
     setIsGenerating(true);
 
-    streams.streamsRepositoryClient
-      .stream('POST /internal/streams/{name}/_describe_stream', {
-        signal,
-        params: {
-          path: {
-            name: definition.stream.name,
+    try {
+      const { from, to } = getLast24HoursTimeRange();
+      const { description: generatedDescription, tokensUsed } = await firstValueFrom(
+        streams.streamsRepositoryClient.stream('POST /internal/streams/{name}/_describe_stream', {
+          signal,
+          params: {
+            path: {
+              name: definition.stream.name,
+            },
+            query: {
+              connectorId: aiFeatures.genAiConnectors.selectedConnector,
+              from,
+              to,
+            },
           },
-          query: {
-            connectorId: aiFeatures.genAiConnectors.selectedConnector,
-            from: timeState.asAbsoluteTimeRange.from,
-            to: timeState.asAbsoluteTimeRange.to,
-          },
-        },
-      })
-      .subscribe({
-        next({ description: generatedDescription, tokensUsed }) {
-          setDescription(generatedDescription);
-          telemetryClient.trackStreamDescriptionGenerated({
-            stream_name: definition.stream.name,
-            stream_type: getStreamTypeFromDefinition(definition.stream),
-            input_tokens_used: tokensUsed.prompt,
-            output_tokens_used: tokensUsed.completion,
-          });
-        },
-        complete() {
-          setIsGenerating(false);
-        },
-        error(error) {
-          setIsGenerating(false);
-          notifications.toasts.addError(error, {
-            title: i18n.translate(
-              'xpack.streams.streamDetailView.streamDescription.generateErrorTitle',
-              { defaultMessage: 'Failed to generate description' }
-            ),
-            toastMessage: getFormattedError(error).message,
-          });
-        },
+        })
+      );
+
+      setDescription(generatedDescription);
+
+      telemetryClient.trackStreamDescriptionGenerated({
+        stream_name: definition.stream.name,
+        stream_type: getStreamTypeFromDefinition(definition.stream),
+        input_tokens_used: tokensUsed.prompt,
+        output_tokens_used: tokensUsed.completion,
       });
+
+      return generatedDescription;
+    } catch (error) {
+      setIsGenerating(false);
+      if (error.name === 'AbortError') {
+        return;
+      }
+      if (!silent) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.streams.streamDetailView.streamDescription.generateErrorTitle',
+            { defaultMessage: 'Failed to generate description' }
+          ),
+          toastMessage: getFormattedError(error).message,
+        });
+      }
+    } finally {
+      setIsGenerating(false);
+    }
   }, [
+    silent,
     aiFeatures?.genAiConnectors.selectedConnector,
     streams.streamsRepositoryClient,
     signal,
     definition.stream,
-    timeState.asAbsoluteTimeRange.from,
-    timeState.asAbsoluteTimeRange.to,
     telemetryClient,
     notifications.toasts,
   ]);
@@ -174,21 +187,28 @@ export const useStreamDescriptionApi = ({
     setIsEditing(false);
   }, [setIsEditing, setDescription, definition.stream.description]);
 
-  const onGenerateDescription = useCallback(() => {
-    generate();
-    setIsEditing(true);
+  const onGenerateDescription = useCallback(async () => {
+    const result = await generate();
+    if (result) {
+      setIsEditing(true);
+    }
+    return result;
   }, [generate, setIsEditing]);
 
   const onStartEditing = useCallback(() => {
     setIsEditing(true);
   }, [setIsEditing]);
 
-  const onSaveDescription = useCallback(() => {
-    if (description !== definition.stream.description) {
-      save(description);
-    }
-    setIsEditing(false);
-  }, [description, definition.stream.description, save, setIsEditing]);
+  const onSaveDescription = useCallback(
+    (desc?: string) => {
+      const generatedDescription = desc ?? description;
+      if (generatedDescription !== definition.stream.description) {
+        return save(generatedDescription).then(() => setIsEditing(false));
+      }
+      setIsEditing(false);
+    },
+    [description, definition.stream.description, save, setIsEditing]
+  );
 
   const areButtonsDisabled = isUpdating || isGenerating;
 
@@ -203,5 +223,6 @@ export const useStreamDescriptionApi = ({
     onGenerateDescription,
     onStartEditing,
     onSaveDescription,
+    abort,
   };
 };

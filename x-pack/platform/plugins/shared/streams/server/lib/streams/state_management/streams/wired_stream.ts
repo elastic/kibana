@@ -41,10 +41,10 @@ import { StatusError } from '../../errors/status_error';
 import {
   validateAncestorFields,
   validateDescendantFields,
+  validateSimulation,
   validateSystemFields,
 } from '../../helpers/validate_fields';
 import {
-  validateNoManualIngestPipelineUsage,
   validateRootStreamChanges,
   validateBracketsInFieldNames,
   validateSettings,
@@ -346,11 +346,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     const existsInStartingState = startingState.has(this._definition.name);
 
-    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
-      // recursively go through all steps to make sure it's not using manual_ingest_pipeline
-      validateNoManualIngestPipelineUsage(this._definition.ingest.processing.steps);
-    }
-
     if (!existsInStartingState) {
       // Check for conflicts
       const { existsAsIndex, existsAsManagedDataStream, existsAsDataStream } =
@@ -530,6 +525,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     validateSettings(this._definition, this.dependencies.isServerless);
+
+    await validateSimulation(this._definition, this.dependencies.scopedClusterClient);
 
     return { isValid: true, errors: [] };
   }
@@ -926,6 +923,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'unlink_assets',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_systems',
         request: {
           name: this._definition.name,
         },

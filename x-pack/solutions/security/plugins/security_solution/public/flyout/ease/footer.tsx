@@ -14,7 +14,7 @@ import { TakeActionButton } from './components/take_action_button';
 import { useEaseDetailsContext } from './context';
 import { useBasicDataFromDetailsData } from '../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useAssistant } from '../document_details/right/hooks/use_assistant';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../assistant/helpers';
@@ -42,7 +42,7 @@ export const PanelFooter = memo(() => {
     isAlert,
   });
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
   const alertAttachment = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
@@ -62,18 +62,20 @@ export const PanelFooter = memo(() => {
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {showAssistant && (
-            <EuiFlexItem grow={false}>
-              {isAgentBuilderEnabled ? (
-                <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
-              ) : (
-                <NewChatByTitle
-                  showAssistantOverlay={showAssistantOverlay}
-                  text={ASK_AI_ASSISTANT}
-                />
-              )}
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            {isAgentChatExperienceEnabled && (
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                telemetry={{
+                  pathway: 'alerts_flyout',
+                  attachments: ['alert'],
+                }}
+              />
+            )}
+            {showAssistant && !isAgentChatExperienceEnabled && (
+              <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
+            )}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TakeActionButton />
           </EuiFlexItem>

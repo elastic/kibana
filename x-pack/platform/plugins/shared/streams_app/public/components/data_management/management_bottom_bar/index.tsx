@@ -63,6 +63,7 @@ export function ManagementBottomBar({
             size="s"
             iconType="editorCodeBlock"
             onClick={onViewCodeClick}
+            disabled={isInvalid}
           >
             {viewCodeButtonText}
           </EuiButtonEmpty>

@@ -816,7 +816,7 @@
             "label": "kind",
             "description": [],
             "signature": [
-              "\"type\" | \"keyword\" | \"property\" | \"field\" | \"class\" | \"method\" | \"constructor\""
+              "\"type\" | \"keyword\" | \"method\" | \"property\" | \"field\" | \"class\" | \"constructor\""
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/types.ts",
             "deprecated": false,
@@ -1278,7 +1278,7 @@
         "label": "PainlessCompletionKind",
         "description": [],
         "signature": [
-          "\"type\" | \"keyword\" | \"property\" | \"field\" | \"class\" | \"method\" | \"constructor\""
+          "\"type\" | \"keyword\" | \"method\" | \"property\" | \"field\" | \"class\" | \"constructor\""
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/types.ts",
         "deprecated": false,
@@ -2157,6 +2157,43 @@
               {
                 "parentPluginId": "@kbn/monaco",
                 "id": "def-common.ESQLLang.getSuggestionProvider.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "ESQLDependencies",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLLang.getSignatureProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getSignatureProvider",
+            "description": [],
+            "signature": [
+              "(deps?: ",
+              "ESQLDependencies",
+              " | undefined) => ",
+              "languages",
+              ".SignatureHelpProvider"
+            ],
+            "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.getSignatureProvider.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "deps",

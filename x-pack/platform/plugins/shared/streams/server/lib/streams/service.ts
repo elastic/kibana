@@ -9,11 +9,11 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
-import type { AssetClient } from './assets/asset_client';
 import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
-import type { FeatureClient } from './feature/feature_client';
 import type { AttachmentClient } from './attachments/attachment_client';
+import type { SystemClient } from './system/system_client';
+import type { FeatureClient } from './feature';
 
 export class StreamsService {
   constructor(
@@ -24,15 +24,15 @@ export class StreamsService {
 
   async getClientWithRequest({
     request,
-    assetClient,
     attachmentClient,
     queryClient,
-    featureClient: featureClient,
+    systemClient,
+    featureClient,
   }: {
     request: KibanaRequest;
-    assetClient: AssetClient;
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
+    systemClient: SystemClient;
     featureClient: FeatureClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
@@ -43,11 +43,11 @@ export class StreamsService {
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
     return new StreamsClient({
-      assetClient,
       attachmentClient,
       queryClient,
-      featureClient,
       logger,
+      systemClient,
+      featureClient,
       scopedClusterClient,
       lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: createStreamsStorageClient(scopedClusterClient.asInternalUser, logger),

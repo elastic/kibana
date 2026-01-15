@@ -146,6 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
             'workflowsManagement',
             'fleet',
             'fleetv2',
+            'cloudConnect',
           ].sort()
         );
       });

@@ -57,6 +57,7 @@ import {
   APP_UI_ID,
   CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
   DEFAULT_ALERTS_INDEX,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
@@ -127,6 +128,7 @@ import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks
 import {
   registerEntityStoreFieldRetentionEnrichTask,
   registerEntityStoreSnapshotTask,
+  registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
@@ -230,22 +232,22 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
-  private registerOnechatAttachmentsAndTools(
-    onechat: SecuritySolutionPluginSetupDependencies['onechat'],
-    config: ConfigType,
-    core: SecuritySolutionPluginCoreSetupDependencies
+  private registerAgentBuilderAttachmentsAndTools(
+    agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
+    core: SecuritySolutionPluginCoreSetupDependencies,
+    logger: Logger
   ): void {
-    if (!onechat || !config.experimentalFeatures.agentBuilderEnabled) {
+    if (!agentBuilder) {
       return;
     }
 
-    registerTools(onechat, core).catch((error) => {
+    registerTools(agentBuilder, core, logger).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
-    registerAttachments(onechat).catch((error) => {
+    registerAttachments(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
-    registerAgents(onechat).catch((error) => {
+    registerAgents(agentBuilder, core, logger).catch((error) => {
       this.logger.error(`Error registering security agent: ${error}`);
     });
   }
@@ -325,7 +327,21 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerEntityStoreSnapshotTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
+        telemetry: core.analytics,
         taskManager: plugins.taskManager,
+      });
+
+      registerEntityStoreHealthTask({
+        getStartServices: core.getStartServices,
+        appClientFactory,
+        logger: this.logger,
+        telemetry: core.analytics,
+        taskManager: plugins.taskManager,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        entityStoreConfig: config.entityAnalytics.entityStore,
+        experimentalFeatures,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        isServerless: this.isServerless,
       });
     }
 
@@ -487,7 +503,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerEndpointRoutes(router, this.endpointContext);
     registerEndpointSuggestionsRoutes(
       router,
-      plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
+      plugins.kql.autocomplete.getInitializerContextConfig().create(),
       this.endpointContext
     );
     registerLimitedConcurrencyRoutes(core);
@@ -633,7 +649,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerOnechatAttachmentsAndTools(plugins.onechat, config, core);
+    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
 
     return {
       setProductFeaturesConfigurator:
@@ -656,6 +672,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
       ])
     );
+
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exceptionListClient = this.lists!.getExceptionListClient(
@@ -792,16 +809,23 @@ export class Plugin implements ISecuritySolutionPlugin {
         .catch(() => {}); // it shouldn't refuse, but just in case
     }
 
-    let queryConfig: TelemetryQueryConfiguration | undefined;
+    const uiSettingsClient = core.uiSettings.asScopedToClient(
+      new SavedObjectsClient(core.savedObjects.createInternalRepository())
+    );
 
-    if (this.config.telemetry?.queryConfig !== undefined) {
-      queryConfig = {
-        pageSize: this.config.telemetry.queryConfig.pageSize ?? 500,
-        maxResponseSize: this.config.telemetry.queryConfig.maxResponseSize ?? 10 * 1024 * 1024, // 10 MB
-        maxCompressedResponseSize:
-          this.config.telemetry.queryConfig.maxCompressedResponseSize ?? 8 * 1024 * 1024, // 8 MB
-      };
-    }
+    const queryConfig: TelemetryQueryConfiguration = {
+      pageSize: this.config.telemetry?.queryConfig.pageSize,
+      maxResponseSize: this.config.telemetry?.queryConfig.maxResponseSize,
+      maxCompressedResponseSize: this.config.telemetry?.queryConfig.maxCompressedResponseSize,
+      excludeColdAndFrozenTiers: async () => {
+        try {
+          return await uiSettingsClient.get<boolean>(EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER);
+        } catch (error) {
+          this.logger.error('Error getting telemetry query config from uiSettings', { error });
+          return false;
+        }
+      },
+    };
 
     this.telemetryReceiver
       .start(

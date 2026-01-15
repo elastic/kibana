@@ -99,6 +99,7 @@ describe('listTypes()', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
     ]);
   });
@@ -136,6 +137,7 @@ describe('listTypes()', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
       {
         id: 'my-connector-type-2',
@@ -147,6 +149,7 @@ describe('listTypes()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         isDeprecated: false,
+        source: 'stack',
       },
     ]);
   });
@@ -177,6 +180,7 @@ describe('listTypes()', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
       },
       {
         id: '.cases',
@@ -188,6 +192,7 @@ describe('listTypes()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         isDeprecated: false,
+        source: 'stack',
       },
     ]);
   });

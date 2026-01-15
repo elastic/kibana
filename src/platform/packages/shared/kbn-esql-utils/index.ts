@@ -19,6 +19,7 @@ export {
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
+  appendLimitToQuery,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
@@ -50,7 +51,6 @@ export {
   convertTimeseriesCommandToFrom,
   getESQLStatsQueryMeta,
   constructCascadeQuery,
-  mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
   getESQLSources,
   getEsqlColumns,
@@ -60,6 +60,8 @@ export {
   getInferenceEndpoints,
   getEditorExtensions,
   hasDateBreakdown,
+  getProjectRoutingFromEsqlQuery,
+  hasOnlySourceCommand,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

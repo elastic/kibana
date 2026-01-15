@@ -14,8 +14,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
+  const dataGrid = getService('dataGrid');
 
-  const { discover, unifiedTabs } = getPageObjects(['discover', 'unifiedTabs']);
+  const { discover, unifiedTabs, common } = getPageObjects(['discover', 'unifiedTabs', 'common']);
 
   const QUERY1 = 'machine.os: "ios"';
   const QUERY2 = 'machine.os: "win"';
@@ -191,6 +193,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const hitCountAfterRevert = await discover.getHitCount();
         expect(hitCountAfterRevert).to.equal(originalHitCount);
+      });
+    });
+
+    describe('default app state', () => {
+      afterEach(async () => {
+        await kibanaServer.uiSettings.unset('defaultColumns');
+      });
+
+      it('does not show unsaved changes when default columns are applied to a saved tab', async () => {
+        const SEARCH_NAME = `unsaved_changes_${Date.now()}`;
+
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Summary']);
+
+        await discover.saveSearch(SEARCH_NAME);
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await discover.hasUnsavedChangesBadge()).to.be(false);
+
+        await kibanaServer.uiSettings.update({ defaultColumns: ['agent'] });
+        await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
+
+        await discover.loadSavedSearch(SEARCH_NAME);
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'agent']);
+        expect(await discover.hasUnsavedChangesBadge()).to.be(false);
       });
     });
   });

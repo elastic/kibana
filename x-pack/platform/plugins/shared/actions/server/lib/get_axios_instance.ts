@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosHeaderValue, AxiosInstance } from 'axios';
+import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { GetTokenOpts } from '@kbn/connector-specs';
@@ -73,7 +73,7 @@ export const getAxiosInstanceWithAuth = ({
       }
 
       // create a request interceptor to inject custom http/https agents based on the URL
-      axiosInstance.interceptors.request.use((config) => {
+      axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
         if (config.url) {
           const { httpAgent, httpsAgent } = getCustomAgents(
             configurationUtilities,
@@ -99,6 +99,7 @@ export const getAxiosInstanceWithAuth = ({
       }
 
       const configureCtx = {
+        getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
         getToken: async (opts: GetTokenOpts) => {
           return await getOAuthClientCredentialsAccessToken({
             connectorId,
@@ -119,6 +120,8 @@ export const getAxiosInstanceWithAuth = ({
           });
         },
         logger,
+        proxySettings: configurationUtilities.getProxySettings(),
+        sslSettings: configurationUtilities.getSSLSettings(),
       };
 
       // use the registered auth type to configure authentication for the axios instance

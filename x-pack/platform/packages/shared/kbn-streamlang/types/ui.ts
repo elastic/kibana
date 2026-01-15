@@ -6,10 +6,10 @@
  */
 
 import type { StreamlangProcessorDefinition } from './processors';
-import type { ConditionWithSteps, StreamlangWhereBlock } from './streamlang';
+import type { ConditionWithSteps, StreamlangConditionBlock } from './streamlang';
 
 export interface UIAttributes {
-  /* Denotes which Where block is the parent of this block, this can be used
+  /* Denotes which condition block is the parent of this block, this can be used
     to represent hierarchy within a UI. Null indicates that this block is top level
     and has no parent. */
   parentId: string | null;
@@ -22,10 +22,13 @@ export type StreamlangProcessorDefinitionWithUIAttributes = StreamlangProcessorD
   UIAttributes;
 
 export type StreamlangConditionWithoutSteps = Omit<ConditionWithSteps, 'steps'>;
-export type StreamlangWhereBlockWithUIAttributes = Omit<StreamlangWhereBlock, 'where'> & {
-  where: StreamlangConditionWithoutSteps;
+export type StreamlangConditionBlockWithUIAttributes = Omit<
+  StreamlangConditionBlock,
+  'condition'
+> & {
+  condition: StreamlangConditionWithoutSteps;
 } & UIAttributes;
 
 export type StreamlangStepWithUIAttributes =
   | StreamlangProcessorDefinitionWithUIAttributes
-  | StreamlangWhereBlockWithUIAttributes;
+  | StreamlangConditionBlockWithUIAttributes;

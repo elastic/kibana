@@ -12,7 +12,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { debounce } from 'lodash';
 import type { EuiRangeTick, EuiDualRangeProps } from '@elastic/eui';
 import { EuiDualRange, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import type { RangeValue } from '../types';
+import type { RangeSliderValue } from '@kbn/controls-schemas';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
 import { rangeSliderControlStyles } from './range_slider.styles';
@@ -27,9 +27,10 @@ export interface Props {
   min: number | undefined;
   step: number;
   uuid: string;
-  value: RangeValue | undefined;
+  value: RangeSliderValue | undefined;
   fieldFormatter?: (value: string) => string;
-  onChange: (value: RangeValue | undefined) => void;
+  onChange: (value: RangeSliderValue | undefined) => void;
+  isEdit: boolean;
 }
 
 export const RangeSliderControl: FC<Props> = ({
@@ -45,13 +46,14 @@ export const RangeSliderControl: FC<Props> = ({
   value,
   fieldFormatter,
   onChange,
+  isEdit,
 }: Props) => {
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
-  const [displayedValue, setDisplayedValue] = useState<RangeValue>(value ?? ['', '']);
+  const [displayedValue, setDisplayedValue] = useState<RangeSliderValue>(value ?? ['', '']);
   const debouncedOnChange = useMemo(
     () =>
-      debounce((newRange: RangeValue) => {
+      debounce((newRange: RangeSliderValue) => {
         onChange(newRange);
       }, 750),
     [onChange]
@@ -189,9 +191,11 @@ export const RangeSliderControl: FC<Props> = ({
 
   return (
     <span
-      css={[styles.rangeSliderControl, isInvalid && styles.invalid]}
-      className="rangeSliderAnchor__button"
+      data-shared-item
+      css={[styles.rangeSliderControl, isInvalid && styles.invalid, isEdit && styles.editMode]}
+      className="rangeSliderAnchor__button kbnGridLayout--hideDragHandle"
       data-test-subj={`range-slider-control-${uuid}`}
+      data-control-id={uuid}
     >
       <EuiDualRange
         ref={rangeSliderRef}

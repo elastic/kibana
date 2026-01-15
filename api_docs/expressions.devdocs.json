@@ -301,12 +301,43 @@
               "\nStop execution of expression."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -1030,12 +1061,43 @@
               "\nCancel the execution of the expression. This will set abort signal\n(available in execution context) to aborted state, letting expression\nfunctions to stop their execution."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution_contract.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExecutionContract.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution_contract.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -3267,12 +3329,43 @@
             "label": "cancel",
             "description": [],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/public/loader.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionLoader.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/public/loader.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -7705,7 +7798,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"result\" | \"not-started\""
+              "\"error\" | \"result\" | \"pending\" | \"not-started\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -11895,7 +11988,7 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xl\" | \"xs\" | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false,
@@ -12757,7 +12850,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -14008,12 +14101,43 @@
               "\nStop execution of expression."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -19243,7 +19367,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"result\" | \"not-started\""
+              "\"error\" | \"result\" | \"pending\" | \"not-started\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -22716,7 +22840,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -23302,12 +23426,43 @@
               "\nStop execution of expression."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -24031,12 +24186,43 @@
               "\nCancel the execution of the expression. This will set abort signal\n(available in execution context) to aborted state, letting expression\nfunctions to stop their execution."
             ],
             "signature": [
-              "() => void"
+              "(reason?: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.AbortReason",
+                "text": "AbortReason"
+              },
+              " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/execution_contract.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExecutionContract.cancel.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.AbortReason",
+                    "text": "AbortReason"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution_contract.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -31808,7 +31994,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"pending\" | \"result\" | \"not-started\""
+              "\"error\" | \"result\" | \"pending\" | \"not-started\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/execution/container.ts",
             "deprecated": false,
@@ -38332,7 +38518,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -40720,7 +40906,7 @@
                     "section": "def-common.ExpressionValueError",
                     "text": "ExpressionValueError"
                   },
-                  ", \"error\" | \"info\">>"
+                  ", \"info\" | \"error\">>"
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/error.ts",
                 "deprecated": false,

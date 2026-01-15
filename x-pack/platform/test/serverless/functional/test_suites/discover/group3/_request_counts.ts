@@ -205,21 +205,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing to a breakdown field without an other bucket', async () => {
-        await expectSearches(type, 2, async () => {
+      it('should send 1 request (chart) when changing to a breakdown field without an other bucket', async () => {
+        await expectSearches(type, 1, async () => {
           await discover.chooseBreakdownField('type');
         });
       });
 
-      it('should send 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
+      it('should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
         await testSubjects.click('discoverNewButton');
-        await expectSearches(type, 3, async () => {
-          await discover.chooseBreakdownField('extension.raw');
+        await expectSearches(type, 2, async () => {
+          await discover.chooseBreakdownField('geo.src');
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing the chart interval', async () => {
-        await expectSearches(type, 2, async () => {
+      it('should send 1 request (chart) when changing the chart interval', async () => {
+        await expectSearches(type, 1, async () => {
           await discover.setChartInterval('Day');
         });
       });

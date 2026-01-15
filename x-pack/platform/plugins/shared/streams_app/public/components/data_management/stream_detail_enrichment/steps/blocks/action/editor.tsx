@@ -6,58 +6,59 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiButtonEmpty,
   EuiButton,
-  EuiSpacer,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiHorizontalRule,
-  EuiFlexItem,
-  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { isEqual, isEmpty } from 'lodash';
-import React, { useState, useEffect, forwardRef } from 'react';
-import type { SubmitHandler } from 'react-hook-form';
-import { useForm, useWatch, FormProvider } from 'react-hook-form';
 import { useSelector } from '@xstate5/react';
-import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
+import { isEmpty, isEqual } from 'lodash';
+import React, { forwardRef, useEffect, useState } from 'react';
+import type { DefaultValues, SubmitHandler } from 'react-hook-form';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import type { ActionBlockProps } from '.';
+import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import {
   useGetStreamEnrichmentState,
   useStreamEnrichmentSelector,
 } from '../../../state_management/stream_enrichment_state_machine';
-import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
+import {
+  selectStreamType,
+  selectValidationErrors,
+} from '../../../state_management/stream_enrichment_state_machine/selectors';
 import type { ProcessorFormState } from '../../../types';
 import {
   convertFormStateToProcessor,
-  SPECIALISED_TYPES,
   getFormStateFromActionStep,
+  SPECIALISED_TYPES,
 } from '../../../utils';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import type { ConfigDrivenProcessorType } from './config_driven/types';
+import { ConvertProcessorForm } from './convert';
 import { DateProcessorForm } from './date';
 import { DissectProcessorForm } from './dissect';
+import { DropProcessorForm } from './drop_document';
 import { GrokProcessorForm } from './grok';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
+import { MathProcessorForm } from './math';
+import { ProcessorContextProvider } from './processor_context';
 import { ProcessorErrors } from './processor_metrics';
 import { ProcessorTypeSelector } from './processor_type_selector';
-import { SetProcessorForm } from './set';
-import { useKibana } from '../../../../../../hooks/use_kibana';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
-import { ConvertProcessorForm } from './convert';
 import { ReplaceProcessorForm } from './replace';
-import { DropProcessorForm } from './drop_document';
-import { ProcessorContextProvider } from './processor_context';
-import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
+import { SetProcessorForm } from './set';
+import { TransformStringProcessorForm } from './transform_string';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
-  const { appParams, core } = useKibana();
 
   const getEnrichmentState = useGetStreamEnrichmentState();
 
@@ -73,14 +74,13 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
     )
   );
 
-  const typeValidationErrors = useStreamEnrichmentSelector((snapshot) => {
+  const validationErrors = useStreamEnrichmentSelector((snapshot) => {
     const errors = selectValidationErrors(snapshot.context);
     return errors.get(step.customIdentifier) || [];
   });
 
   const methods = useForm<ProcessorFormState>({
-    // TODO: See if this can be stricter, DeepPartial<ProcessorFormState> doesn't work
-    defaultValues: defaultValues as any,
+    defaultValues: defaultValues as DefaultValues<ProcessorFormState>,
     mode: 'onChange',
   });
 
@@ -100,11 +100,13 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   const isConfigured = useSelector(stepRef, (snapshot) => snapshot.matches('configured'));
   const canDelete = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.delete' }));
-  const canSave = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.save' }));
-
-  const hasStreamChanges = useStreamEnrichmentSelector((state) =>
-    state.can({ type: 'stream.reset' })
+  const canSaveStateMachine = useSelector(stepRef, (snapshot) =>
+    snapshot.can({ type: 'step.save' })
   );
+
+  const hasConditionError = 'where' in methods.formState.errors;
+  const canSave = canSaveStateMachine && !hasConditionError;
+
   const hasStepChanges = useSelector(
     stepRef,
     (snapshot) => !isEqual(snapshot.context.previousStep, snapshot.context.step)
@@ -114,14 +116,8 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   const type = useWatch({ control: methods.control, name: 'action' });
 
-  useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasStreamChanges || hasStepChanges,
-    history: appParams.history,
-    http: core.http,
-    navigateToUrl: core.application.navigateToUrl,
-    openConfirm: core.overlays.openConfirm,
-    shouldPromptOnReplace: false,
-  });
+  // Note: Navigation prompts for unsaved changes are handled at the page level (page_content.tsx)
+  // This editor only handles cancel confirmation via useDiscardConfirm below
 
   const handleCancel = useDiscardConfirm(() => stepRef.send({ type: 'step.cancel' }), {
     enabled: hasStepChanges,
@@ -157,6 +153,52 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
                 {type === 'set' && <SetProcessorForm />}
                 {type === 'drop_document' && <DropProcessorForm />}
+                {type === 'math' && <MathProcessorForm />}
+                {type === 'uppercase' && (
+                  <TransformStringProcessorForm
+                    fieldSelectorHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseFieldHelpText',
+                      { defaultMessage: 'The field to uppercase.' }
+                    )}
+                    targetFieldHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseTargetHelpText',
+                      {
+                        defaultMessage:
+                          'The field that will hold the uppercased string. If empty, the input field is updated in place.',
+                      }
+                    )}
+                  />
+                )}
+                {type === 'lowercase' && (
+                  <TransformStringProcessorForm
+                    fieldSelectorHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseFieldHelpText',
+                      { defaultMessage: 'The field to lowercase.' }
+                    )}
+                    targetFieldHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseTargetHelpText',
+                      {
+                        defaultMessage:
+                          'The field that will hold the lowercase string. If empty, the input field is updated in place.',
+                      }
+                    )}
+                  />
+                )}
+                {type === 'trim' && (
+                  <TransformStringProcessorForm
+                    fieldSelectorHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimFieldHelpText',
+                      { defaultMessage: 'The field to trim.' }
+                    )}
+                    targetFieldHelpText={i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimTargetHelpText',
+                      {
+                        defaultMessage:
+                          'The field that will hold the trimmed string. If empty, the input field is updated in place.',
+                      }
+                    )}
+                  />
+                )}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}
@@ -167,7 +209,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
               <EuiFlexItem grow={false}>
                 {canDelete && (
                   <EuiButton
-                    data-test-subj="streamsAppProcessorConfigurationButton"
+                    data-test-subj="streamsAppProcessorConfigurationDeleteButton"
                     data-stream-type={streamType}
                     color="danger"
                     onClick={handleDelete}
@@ -218,21 +260,21 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {typeValidationErrors.length > 0 && (
+            {validationErrors.length > 0 && (
               <>
                 <EuiSpacer size="m" />
                 <EuiCallOut
                   announceOnMount
                   title={i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.typeValidationErrors.title',
-                    { defaultMessage: 'Type validation errors' }
+                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title',
+                    { defaultMessage: 'Validation errors' }
                   )}
                   color="danger"
                   iconType="warning"
                   size="s"
                 >
                   <ul>
-                    {typeValidationErrors.map((error, index: number) => (
+                    {validationErrors.map((error, index: number) => (
                       <li key={index}>{error.message}</li>
                     ))}
                   </ul>

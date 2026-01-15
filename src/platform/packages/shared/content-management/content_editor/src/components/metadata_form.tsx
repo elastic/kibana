@@ -62,7 +62,10 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
     <EuiForm isInvalid={isSubmitted && !isValid} error={getErrors()} data-test-subj="metadataForm">
       <ContentEditorFlyoutWarningsCallOut warningMessages={getWarnings()} />
       {isReadonly && (
-        <EuiCallOut announceOnMount={false} size="s" title={readonlyReason} iconType="info" />
+        <>
+          <EuiCallOut size="s" title={readonlyReason} iconType="info" announceOnMount={false} />
+          <EuiSpacer size="l" />
+        </>
       )}
       <EuiFormRow
         label={i18n.translate('contentManagement.contentEditor.metadataForm.nameInputLabel', {
@@ -71,6 +74,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
         error={title.errors}
         isInvalid={!isFormFieldValid(title)}
         fullWidth
+        isDisabled={isReadonly}
       >
         <EuiFieldText
           isInvalid={!isFormFieldValid(title)}
@@ -96,6 +100,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
         error={description.errors}
         isInvalid={!isFormFieldValid(description)}
         fullWidth
+        isDisabled={isReadonly}
       >
         <EuiTextArea
           isInvalid={!isFormFieldValid(description)}
@@ -117,6 +122,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
               defaultMessage: 'Tags',
             })}
             fullWidth
+            isDisabled={isReadonly}
           >
             <TagList references={tagsReferences} />
           </EuiFormRow>

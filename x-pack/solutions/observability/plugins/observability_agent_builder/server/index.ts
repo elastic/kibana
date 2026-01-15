@@ -16,5 +16,7 @@ export type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from './types';
 
+export type { ObservabilityAgentBuilderServerRouteRepository } from './routes/get_global_observability_agent_builder_route_repository';
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new ObservabilityAgentBuilderPlugin(initializerContext);

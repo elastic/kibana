@@ -501,6 +501,31 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.DotKeysOf",
+        "type": "Type",
+        "tags": [],
+        "label": "DotKeysOf",
+        "description": [],
+        "signature": [
+          "keyof ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/dot.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-common.DotObject",
         "type": "Type",
         "tags": [],
@@ -633,6 +658,202 @@
           "<T, K> & Partial<Pick<T, K>>"
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.OrStringRecursive",
+        "type": "Type",
+        "tags": [],
+        "label": "OrStringRecursive",
+        "description": [
+          "\nRecursively transform a type so that each value can be either its original type or a string.\nThis is useful for types that may contain template strings (like Liquid templates) that will\nbe rendered at runtime.\n"
+        ],
+        "signature": [
+          "T extends (infer U)[] ? string | ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.OrStringRecursive",
+            "text": "OrStringRecursive"
+          },
+          "<U>[] : T extends object ? { [K in keyof T]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.OrStringRecursive",
+            "text": "OrStringRecursive"
+          },
+          "<T[K]>; } : string | T"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/or_string_recursive.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.PickDotted",
+        "type": "Type",
+        "tags": [],
+        "label": "PickDotted",
+        "description": [],
+        "signature": [
+          "(Exclude<",
+          "ValuesType",
+          "<{ [TKey in keyof Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey> as string]: string extends TKey ? Record<TKey, Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey]> : {} extends Pick<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey> ? ",
+          "DeepPartial",
+          "<DedotKey<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey, Exclude<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey], undefined>>> : DedotKey<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey, Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey]>; }>, undefined> extends any ? (k: Exclude<",
+          "ValuesType",
+          "<{ [TKey in keyof Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey> as string]: string extends TKey ? Record<TKey, Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey]> : {} extends Pick<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey> ? ",
+          "DeepPartial",
+          "<DedotKey<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey, Exclude<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey], undefined>>> : DedotKey<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey, Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey]>; }>, undefined>) => void : never) extends (k: infer I) => void ? I : never"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/dot.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

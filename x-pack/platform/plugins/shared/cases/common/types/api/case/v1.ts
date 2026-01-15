@@ -259,7 +259,7 @@ export const CasesFindRequestSortFieldsRt = rt.keyof({
   severity: null,
 });
 
-export const CasesFindRequestRt = rt.intersection([
+export const CasesFindRequestBaseFieldsRt = rt.intersection([
   rt.exact(
     rt.partial({
       /**
@@ -327,13 +327,6 @@ export const CasesFindRequestRt = rt.intersection([
        */
       search: rt.string,
       /**
-       * The fields to perform the simple_query_string parsed query against
-       */
-      searchFields: rt.union([
-        rt.array(CasesFindRequestSearchFieldsRt),
-        CasesFindRequestSearchFieldsRt,
-      ]),
-      /**
        * The field to use for sorting the found objects.
        *
        */
@@ -371,7 +364,23 @@ export const CasesFindRequestRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
 ]);
 
-export const CasesSearchRequestRt = rt.intersection([
+export const CasesFindRequestRt = rt.intersection([
+  CasesFindRequestBaseFieldsRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * The fields to perform the simple_query_string parsed query against
+       */
+      searchFields: rt.union([
+        rt.array(CasesFindRequestSearchFieldsRt),
+        CasesFindRequestSearchFieldsRt,
+      ]),
+    })
+  ),
+]);
+
+export const CasesFindRequestWithCustomFieldsRt = rt.intersection([
+  CasesFindRequestRt,
   rt.exact(
     rt.partial({
       /**
@@ -383,7 +392,47 @@ export const CasesSearchRequestRt = rt.intersection([
       ),
     })
   ),
-  CasesFindRequestRt,
+]);
+
+/**
+ * search cases
+ */
+
+export const CasesSearchRequestSearchFieldsRt = rt.keyof({
+  'cases.description': null,
+  'cases.title': null,
+  'cases.incremental_id.text': null,
+  'cases.observables.value': null,
+  'cases.customFields.value': null,
+  'cases-comments.comment': null,
+  'cases-comments.alertId': null,
+  'cases-comments.eventId': null,
+});
+
+export const CasesSearchRequestRt = rt.intersection([
+  CasesFindRequestBaseFieldsRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * custom fields of the case
+       */
+      customFields: rt.record(
+        rt.string,
+        rt.array(rt.union([rt.string, rt.boolean, rt.number, rt.null]))
+      ),
+    })
+  ),
+  rt.exact(
+    rt.partial({
+      /**
+       * The fields to perform the simple_query_string parsed query against.
+       */
+      searchFields: rt.union([
+        rt.array(CasesSearchRequestSearchFieldsRt),
+        CasesSearchRequestSearchFieldsRt,
+      ]),
+    })
+  ),
 ]);
 
 export const CasesFindResponseRt = rt.intersection([
@@ -559,6 +608,7 @@ export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesFindRequestWithCustomFields = rt.TypeOf<typeof CasesFindRequestWithCustomFieldsRt>;
 export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;

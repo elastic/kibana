@@ -7,13 +7,12 @@
 
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { RuleForm } from '@kbn/response-ops-rule-form';
+import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
 import { AlertConsumers, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
-import { useRuleTemplate } from '../../hooks/use_rule_template';
 import { RuleTemplateError } from './components/rule_template_error';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
@@ -57,6 +56,7 @@ export const RuleFormRoute = () => {
     isLoading: isLoadingRuleTemplate,
     isError: isErrorRuleTemplate,
   } = useRuleTemplate({
+    http,
     templateId,
   });
 
@@ -121,9 +121,20 @@ export const RuleFormRoute = () => {
           }
         }}
         onSubmit={(ruleId) => {
-          application.navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
-          });
+          if (returnApp === 'rules') {
+            // Navigate to rule details page in the rules app
+            application.navigateToApp('rules', {
+              path: getRuleDetailsRoute(ruleId),
+            });
+          } else if (returnApp && returnPath) {
+            // Navigate back to the original app/path for other apps
+            application.navigateToApp(returnApp, { path: returnPath });
+          } else {
+            // Default: navigate to management app rule details (existing behavior)
+            application.navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
+            });
+          }
         }}
         multiConsumerSelection={AlertConsumers.ALERTS}
       />

@@ -92,49 +92,31 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('fails if width or height are non-numeric', async () => {
-        const downloadReportPath = await reportingAPI.postJobJSON(
+        await reportingAPI.postJobJSON(
           '/api/reporting/generate/printablePdfV2',
-          { jobParams: createPdfV2Params('cucucachoo') }
+          { jobParams: createPdfV2Params('cucucachoo') },
+          400
         );
-        await retry.tryForTime(30000, async () => {
-          const response: supertest.Response = await supertestSvc
-            .get(downloadReportPath)
-            .responseType('blob')
-            .set('kbn-xsrf', 'xxx');
-
-          expect(response.status).equal(500);
-        });
       });
 
       it('fails if there is an invalid layout ID', async () => {
-        const downloadReportPath = await reportingAPI.postJobJSON(
+        await reportingAPI.postJobJSON(
           '/api/reporting/generate/printablePdfV2',
-          { jobParams: createPdfV2Params(1541, 'landscape') }
+          { jobParams: createPdfV2Params(1541, 'landscape') },
+          400
         );
-        await retry.tryForTime(30000, async () => {
-          const response: supertest.Response = await supertestSvc
-            .get(downloadReportPath)
-            .responseType('blob')
-            .set('kbn-xsrf', 'xxx');
-
-          expect(response.status).equal(500);
-        });
       });
     });
 
     describe('pngV2', () => {
       it('fails if width or height are non-numeric', async () => {
-        const downloadReportPath = await reportingAPI.postJobJSON('/api/reporting/generate/pngV2', {
-          jobParams: createPngV2Params('cucucachoo'),
-        });
-        await retry.tryForTime(30000, async () => {
-          const response: supertest.Response = await supertestSvc
-            .get(downloadReportPath)
-            .responseType('blob')
-            .set('kbn-xsrf', 'xxx');
-
-          expect(response.status).equal(500);
-        });
+        await reportingAPI.postJobJSON(
+          '/api/reporting/generate/pngV2',
+          {
+            jobParams: createPngV2Params('cucucachoo'),
+          },
+          400
+        );
       });
     });
   });

@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
             .send({
               avatar: {
                 initials: `some-initials-${userPrefix}`,
-                color: `some-color-${userPrefix}`,
+                color: `#f3f3f3`,
               },
               userSettings: { darkMode: `dark`, contrastMode: `high` },
             })
@@ -162,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {
               "avatar": Object {
-                "color": "some-color-one",
+                "color": "#f3f3f3",
                 "imageUrl": null,
                 "initials": "some-initials-one",
               },
@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {
               "avatar": Object {
-                "color": "some-color-two",
+                "color": "#f3f3f3",
                 "imageUrl": null,
                 "initials": "some-initials-two",
               },

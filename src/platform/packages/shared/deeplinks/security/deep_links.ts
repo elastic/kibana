@@ -36,6 +36,7 @@ export enum SecurityPageName {
   cloudSecurityPostureVulnerabilityDashboard = 'cloud_security_posture-vulnerability_dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
   cloudSecurityPostureRules = 'cloud_security_posture-rules',
+  cloudDefend = 'cloud_defend',
   cloudDefendPolicies = 'cloud_defend-policies',
   dashboards = 'dashboards',
   dataQuality = 'data_quality',

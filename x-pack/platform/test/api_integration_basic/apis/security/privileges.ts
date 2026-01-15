@@ -46,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
             agentBuilder: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
+            cloudConnect: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],
             uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -135,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
             graph: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
+            cloudConnect: ['all', 'read', 'minimal_all', 'minimal_read'],
             maps: ['all', 'read', 'minimal_all', 'minimal_read'],
             maps_v2: ['all', 'read', 'minimal_all', 'minimal_read'],
             generalCases: [

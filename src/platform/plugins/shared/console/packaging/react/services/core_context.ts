@@ -106,6 +106,7 @@ export function createCoreContext(options: CoreContextOptions = {}): CoreContext
         dev: isDev,
         prod: !isDev,
       },
+      airgapped: false,
     },
   } as CoreContext;
 }

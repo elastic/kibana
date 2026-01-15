@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   ATTACKS_ALERTS_ALIGNMENT_ENABLED,
   SecurityGroupName,
@@ -16,8 +17,8 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 import {
   defaultNavigationTree,
   LazyIconFindings,
-  LazyIconWorkflow,
   LazyIconIntelligence,
+  LazyIconAgentBuilder,
 } from '@kbn/security-solution-navigation/navigation_tree';
 
 import { type Services } from '../common/services';
@@ -29,7 +30,8 @@ const SOLUTION_NAME = i18n.translate(
 );
 
 export const createNavigationTree = async (
-  services: Services
+  services: Services,
+  chatExperience: AIChatExperience = AIChatExperience.Classic
 ): Promise<NavigationTreeDefinition> => ({
   body: [
     {
@@ -53,11 +55,17 @@ export const createNavigationTree = async (
           link: securityLink(SecurityPageName.alerts),
         },
     {
-      // TODO: update icon from EUI
-      icon: LazyIconWorkflow,
       link: 'workflows',
-      badgeType: 'techPreview' as const,
     },
+    ...(chatExperience === AIChatExperience.Agent
+      ? [
+          {
+            // TODO: update icon to 'robot' once it's available in EUI
+            icon: LazyIconAgentBuilder,
+            link: 'agent_builder' as AppDeepLinkId,
+          },
+        ]
+      : []),
     {
       id: SecurityPageName.attackDiscovery,
       icon: 'bolt',
@@ -131,6 +139,6 @@ export const createNavigationTree = async (
       title: i18nStrings.devTools,
       icon: 'editorCodeBlock',
     },
-    createManagementFooterItemsTree(),
+    createManagementFooterItemsTree(chatExperience),
   ],
 });

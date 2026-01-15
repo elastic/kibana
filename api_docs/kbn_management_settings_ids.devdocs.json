@@ -54,21 +54,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.AGENT_BUILDER_ENABLED_SETTING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "AGENT_BUILDER_ENABLED_SETTING_ID",
-        "description": [],
-        "signature": [
-          "\"agentBuilder:enabled\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.AGENT_BUILDER_NAV_ENABLED_SETTING_ID",
         "type": "string",
         "tags": [],
@@ -106,6 +91,21 @@
         "description": [],
         "signature": [
           "\"aiAssistant:preferredAIAssistantType\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AI_CHAT_EXPERIENCE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AI_CHAT_EXPERIENCE_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiAssistant:preferredChatExperience\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

@@ -20,7 +20,7 @@ import type { HTMLAttributes } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { IndexUpdateService } from '../../index_update_service';
+import type { IndexUpdateService } from '../../services/index_update_service';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 import { AddColumnPopover, COLUMN_INDEX_PROP } from './add_column_popover';
 import { isPlaceholderColumn } from '../../utils';
@@ -65,7 +65,7 @@ export const getColumnHeaderRenderer = (
               label: (
                 <FormattedMessage
                   id="indexEditor.flyout.grid.columnHeader.editAction"
-                  defaultMessage="Edit column"
+                  defaultMessage="Edit field"
                 />
               ),
               size: 'xs',
@@ -79,7 +79,7 @@ export const getColumnHeaderRenderer = (
               label: (
                 <FormattedMessage
                   id="indexEditor.flyout.grid.columnHeader.deleteAction"
-                  defaultMessage="Delete column and values"
+                  defaultMessage="Delete field and values"
                 />
               ),
               size: 'xs',
@@ -130,7 +130,7 @@ const ColumnHeader = ({
       <EuiIcon type="plus" />
       <FormattedMessage
         id="indexEditor.flyout.grid.columnHeader.add"
-        defaultMessage="Add a column…"
+        defaultMessage="Add a field…"
       />
     </EuiFlexGroup>
   ) : (
@@ -142,7 +142,7 @@ const ColumnHeader = ({
           color="warning"
           size="m"
           content={i18n.translate('indexEditor.columnHeader.unsupportedWarning', {
-            defaultMessage: `ES|QL doesn't support the {unsupportedType} data type yet. You can still set columns of this index to this type and save them, but Discover won't display them and they will be hidden from this view if you open it again later.`,
+            defaultMessage: `ES|QL doesn't support the {unsupportedType} data type yet. You can still set fields of this index to this type and save them, but Discover won't display them and they will be hidden from this view if you open it again later.`,
             values: { unsupportedType: initialColumnType },
           })}
           className="fieldWarningTip"
@@ -165,7 +165,7 @@ const ColumnHeader = ({
     <EuiButtonEmpty
       data-test-subj="indexEditorColumnNameButton"
       aria-label={i18n.translate('indexEditor.columnHeaderEdit.ariaLabel', {
-        defaultMessage: 'Edit column',
+        defaultMessage: 'Edit field',
       })}
       css={{
         color: euiTheme.colors.textSubdued,

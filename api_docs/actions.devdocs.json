@@ -2488,492 +2488,6 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-server.ActionType",
-        "type": "Interface",
-        "tags": [],
-        "label": "ActionType",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionType",
-            "text": "ActionType"
-          },
-          "<Config, Secrets, Params, ExecutorResultData>"
-        ],
-        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.maxAttempts",
-            "type": "number",
-            "tags": [],
-            "label": "maxAttempts",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.minimumLicenseRequired",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "minimumLicenseRequired",
-            "description": [],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.supportedFeatureIds",
-            "type": "Array",
-            "tags": [],
-            "label": "supportedFeatureIds",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.validate",
-            "type": "Object",
-            "tags": [],
-            "label": "validate",
-            "description": [],
-            "signature": [
-              "{ params: ",
-              "ValidatorType",
-              "<Params>; config: ",
-              "ValidatorType",
-              "<Config>; secrets: ",
-              "ValidatorType",
-              "<Secrets>; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; }"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.isSystemActionType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isSystemActionType",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.subFeature",
-            "type": "string",
-            "tags": [],
-            "label": "subFeature",
-            "description": [],
-            "signature": [
-              "\"endpointSecurity\" | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.isDeprecated",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDeprecated",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.allowMultipleSystemActions",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "allowMultipleSystemActions",
-            "description": [
-              "\nAllows multiple instances of the same system action in a single rule.\nBy default, system actions can only be used once per rule.\nSet to true to allow the same system action connector to be used multiple times.\nOnly applies to system actions (isSystemActionType: true)."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.getKibanaPrivileges",
-            "type": "Function",
-            "tags": [],
-            "label": "getKibanaPrivileges",
-            "description": [
-              "\nAdditional Kibana privileges to be checked by the actions framework.\nUse it if you want to perform extra authorization checks based on a Kibana feature.\nFor example, you can define the privileges a users needs to have to execute\na Case or OsQuery system action.\n\nThe list of the privileges follows the Kibana privileges format usually generated with `security.authz.actions.*.get(...)`.\n\nIt only works with system actions and only when executing an action.\nFor all other scenarios they will be ignored"
-            ],
-            "signature": [
-              "((args?: { params?: Params | undefined; source?: ",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.ActionExecutionSourceType",
-                "text": "ActionExecutionSourceType"
-              },
-              " | undefined; } | undefined) => string[]) | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.getKibanaPrivileges.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "args",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "actions",
-                    "id": "def-server.ActionType.getKibanaPrivileges.$1.params",
-                    "type": "Uncategorized",
-                    "tags": [],
-                    "label": "params",
-                    "description": [],
-                    "signature": [
-                      "Params | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "actions",
-                    "id": "def-server.ActionType.getKibanaPrivileges.$1.source",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "source",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "actions",
-                        "scope": "server",
-                        "docId": "kibActionsPluginApi",
-                        "section": "def-server.ActionExecutionSourceType",
-                        "text": "ActionExecutionSourceType"
-                      },
-                      " | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.globalAuthHeaders",
-            "type": "Object",
-            "tags": [],
-            "label": "globalAuthHeaders",
-            "description": [],
-            "signature": [
-              "Record<string, ",
-              "AxiosHeaderValue",
-              "> | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.renderParameterTemplates",
-            "type": "Function",
-            "tags": [],
-            "label": "renderParameterTemplates",
-            "description": [],
-            "signature": [
-              "RenderParameterTemplates",
-              "<Params> | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.executor",
-            "type": "Function",
-            "tags": [],
-            "label": "executor",
-            "description": [],
-            "signature": [
-              "(options: ",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.ActionTypeExecutorOptions",
-                "text": "ActionTypeExecutorOptions"
-              },
-              "<Config, Secrets, Params>) => Promise<",
-              {
-                "pluginId": "actions",
-                "scope": "common",
-                "docId": "kibActionsPluginApi",
-                "section": "def-common.ActionTypeExecutorResult",
-                "text": "ActionTypeExecutorResult"
-              },
-              "<ExecutorResultData>>"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.executor.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "actions",
-                    "scope": "server",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-server.ActionTypeExecutorOptions",
-                    "text": "ActionTypeExecutorOptions"
-                  },
-                  "<Config, Secrets, Params>"
-                ],
-                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.getService",
-            "type": "Function",
-            "tags": [],
-            "label": "getService",
-            "description": [],
-            "signature": [
-              "((params: ",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.ServiceParams",
-                "text": "ServiceParams"
-              },
-              "<Config, Secrets>) => ",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.SubActionConnector",
-                "text": "SubActionConnector"
-              },
-              "<Config, Secrets>) | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.getService.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "actions",
-                    "scope": "server",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-server.ServiceParams",
-                    "text": "ServiceParams"
-                  },
-                  "<Config, Secrets>"
-                ],
-                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.preSaveHook",
-            "type": "Function",
-            "tags": [],
-            "label": "preSaveHook",
-            "description": [],
-            "signature": [
-              "((params: ",
-              "PreSaveConnectorHookParams",
-              "<Config, Secrets>) => Promise<void>) | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.preSaveHook.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "PreSaveConnectorHookParams",
-                  "<Config, Secrets>"
-                ],
-                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.postSaveHook",
-            "type": "Function",
-            "tags": [],
-            "label": "postSaveHook",
-            "description": [],
-            "signature": [
-              "((params: ",
-              "PostSaveConnectorHookParams",
-              "<Config, Secrets>) => Promise<void>) | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.postSaveHook.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "PostSaveConnectorHookParams",
-                  "<Config, Secrets>"
-                ],
-                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.ActionType.postDeleteHook",
-            "type": "Function",
-            "tags": [],
-            "label": "postDeleteHook",
-            "description": [],
-            "signature": [
-              "((params: ",
-              "PostDeleteConnectorHookParams",
-              "<Config, Secrets>) => Promise<void>) | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.postDeleteHook.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "PostDeleteConnectorHookParams",
-                  "<Config, Secrets>"
-                ],
-                "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
         "id": "def-server.ActionTypeExecutorOptions",
         "type": "Interface",
         "tags": [],
@@ -3415,6 +2929,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\""
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ConnectorType.subFeature",
             "type": "string",
             "tags": [],
@@ -3846,104 +3374,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
-        "id": "def-server.SSLSettings",
-        "type": "Interface",
-        "tags": [],
-        "label": "SSLSettings",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.verificationMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "verificationMode",
-            "description": [],
-            "signature": [
-              "\"none\" | \"certificate\" | \"full\" | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.pfx",
-            "type": "Object",
-            "tags": [],
-            "label": "pfx",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.cert",
-            "type": "Object",
-            "tags": [],
-            "label": "cert",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.key",
-            "type": "Object",
-            "tags": [],
-            "label": "key",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.passphrase",
-            "type": "string",
-            "tags": [],
-            "label": "passphrase",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.ca",
-            "type": "Object",
-            "tags": [],
-            "label": "ca",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -4142,6 +3572,54 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.ActionType",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ClassicActionType",
+            "text": "ClassicActionType"
+          },
+          "<Config, Secrets, Params, ExecutorResultData> | ",
+          "WorkflowActionType",
+          "<Config, Secrets, Params, ExecutorResultData>"
+        ],
+        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.ClassicActionType",
+        "type": "Type",
+        "tags": [],
+        "label": "ClassicActionType",
+        "description": [],
+        "signature": [
+          "ActionTypeCoreFields",
+          "<Config, Secrets, Params> & { executor: ",
+          "ExecutorType",
+          "<Config, Secrets, Params, ExecutorResultData>; validate: { params: ",
+          "ValidatorType",
+          "<Params>; config: ",
+          "ValidatorType",
+          "<Config>; secrets: ",
+          "ValidatorType",
+          "<Secrets>; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; }; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -4193,7 +3671,7 @@
             {
               "parentPluginId": "actions",
               "id": "def-server.PluginSetupContract.registerType.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "actionType",
               "description": [],
@@ -5546,6 +5024,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-common.ActionType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-common.ActionType.subFeature",
             "type": "string",
             "tags": [],
@@ -6246,6 +5738,21 @@
             "text": "ActionTypeExecutorResult"
           },
           "<Data> & { error?: Error | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ActionTypeSource",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionTypeSource",
+        "description": [],
+        "signature": [
+          "\"spec\" | \"yml\" | \"stack\""
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
         "deprecated": false,

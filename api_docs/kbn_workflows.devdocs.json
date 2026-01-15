@@ -1029,6 +1029,39 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.isBuiltInStepProperty",
+        "type": "Function",
+        "tags": [],
+        "label": "isBuiltInStepProperty",
+        "description": [],
+        "signature": [
+          "(property: string) => property is string"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.isBuiltInStepProperty.$1",
+            "type": "string",
+            "tags": [],
+            "label": "property",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.isBuiltInStepType",
         "type": "Function",
         "tags": [],
@@ -1887,6 +1920,20 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.BaseConnectorContract.configSchema",
+            "type": "Any",
+            "tags": [],
+            "label": "configSchema",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.BaseConnectorContract.summary",
             "type": "CompoundType",
             "tags": [],
@@ -1939,6 +1986,36 @@
             "signature": [
               "ConnectorExamples",
               " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.BaseConnectorContract.editorHandlers",
+            "type": "Object",
+            "tags": [],
+            "label": "editorHandlers",
+            "description": [],
+            "signature": [
+              "{ config?: Record<string, ",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.StepPropertyHandler",
+                "text": "StepPropertyHandler"
+              },
+              "<unknown> | undefined> | undefined; input?: Record<string, ",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.StepPropertyHandler",
+                "text": "StepPropertyHandler"
+              },
+              "<unknown> | undefined> | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -2565,6 +2642,20 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.taskRunAt",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "taskRunAt",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.EsWorkflowExecution.traceId",
             "type": "string",
             "tags": [],
@@ -2583,6 +2674,20 @@
             "type": "string",
             "tags": [],
             "label": "entryTransactionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.concurrencyGroupKey",
+            "type": "string",
+            "tags": [],
+            "label": "concurrencyGroupKey",
             "description": [],
             "signature": [
               "string | undefined"
@@ -2958,6 +3063,212 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.PropertyCompletionOption",
+        "type": "Interface",
+        "tags": [],
+        "label": "PropertyCompletionOption",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyCompletionOption.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "The value that will be stored in the yaml"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyCompletionOption.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "The label displayed in the completion popup"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyCompletionOption.detail",
+            "type": "string",
+            "tags": [],
+            "label": "detail",
+            "description": [
+              "Brief detail shown inline in completion popup (optional)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyCompletionOption.documentation",
+            "type": "string",
+            "tags": [],
+            "label": "documentation",
+            "description": [
+              "Extended documentation shown in side panel (optional)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.PropertyValidationContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PropertyValidationContext",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyValidationContext.stepType",
+            "type": "string",
+            "tags": [],
+            "label": "stepType",
+            "description": [
+              "The step type ID (e.g., \"onechat.runAgent\")"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyValidationContext.scope",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scope",
+            "description": [
+              "The property path (\"config\" or \"input\")"
+            ],
+            "signature": [
+              "\"config\" | \"input\""
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyValidationContext.propertyKey",
+            "type": "string",
+            "tags": [],
+            "label": "propertyKey",
+            "description": [
+              "The property key (e.g., \"agent_id\")"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.PropertyValidationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "PropertyValidationResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyValidationResult.severity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "severity",
+            "description": [
+              "null = valid (show success decoration), 'error'|'warning'|'info' = show error"
+            ],
+            "signature": [
+              "\"info\" | \"error\" | \"warning\" | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyValidationResult.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "Error message for markers panel (only when severity is not null)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyValidationResult.afterMessage",
+            "type": "string",
+            "tags": [],
+            "label": "afterMessage",
+            "description": [
+              "Decoration text shown after the value (e.g., \"✓ Connected (agent ID: xyz)\")"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyValidationResult.hoverMessage",
+            "type": "string",
+            "tags": [],
+            "label": "hoverMessage",
+            "description": [
+              "Hover tooltip (markdown supported)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.Provider",
         "type": "Interface",
         "tags": [],
@@ -3124,6 +3435,78 @@
             "signature": [
               "ScopeEntry",
               "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.StepPropertyHandler",
+        "type": "Interface",
+        "tags": [],
+        "label": "StepPropertyHandler",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.StepPropertyHandler",
+            "text": "StepPropertyHandler"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.StepPropertyHandler.completion",
+            "type": "Object",
+            "tags": [],
+            "label": "completion",
+            "description": [
+              "\nAutocompletion configuration for the property."
+            ],
+            "signature": [
+              "{ getOptions: ",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.PropertyCompletionFn",
+                "text": "PropertyCompletionFn"
+              },
+              "<T>; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.StepPropertyHandler.validation",
+            "type": "Object",
+            "tags": [],
+            "label": "validation",
+            "description": [
+              "\nAdditional validation configuration for the property."
+            ],
+            "signature": [
+              "{ validate: ",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.PropertyValidationFn",
+                "text": "PropertyValidationFn"
+              },
+              "<T>; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -5533,6 +5916,36 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.BuiltInStepProperties",
+        "type": "Array",
+        "tags": [],
+        "label": "BuiltInStepProperties",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.BuiltInStepProperty",
+        "type": "Type",
+        "tags": [],
+        "label": "BuiltInStepProperty",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.BuiltInStepType",
         "type": "Type",
         "tags": [],
@@ -5555,6 +5968,66 @@
         "description": [],
         "signature": [
           "any[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.CollisionStrategy",
+        "type": "Type",
+        "tags": [],
+        "label": "CollisionStrategy",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.CollisionStrategySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "CollisionStrategySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.ConcurrencySettings",
+        "type": "Type",
+        "tags": [],
+        "label": "ConcurrencySettings",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.ConcurrencySettingsSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ConcurrencySettingsSchema",
+        "description": [],
+        "signature": [
+          "any"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
@@ -5639,6 +6112,36 @@
           "any"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.DataSetStep",
+        "type": "Type",
+        "tags": [],
+        "label": "DataSetStep",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.DataSetStepSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "DataSetStepSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6120,6 +6623,114 @@
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.PropertyCompletionFn",
+        "type": "Type",
+        "tags": [],
+        "label": "PropertyCompletionFn",
+        "description": [],
+        "signature": [
+          "(value: T) => Promise<",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.PropertyCompletionOption",
+            "text": "PropertyCompletionOption"
+          },
+          "[]>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyCompletionFn.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.PropertyValidationFn",
+        "type": "Type",
+        "tags": [],
+        "label": "PropertyValidationFn",
+        "description": [],
+        "signature": [
+          "(value: T, context: ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.PropertyValidationContext",
+            "text": "PropertyValidationContext"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.PropertyValidationResult",
+            "text": "PropertyValidationResult"
+          },
+          " | null>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyValidationFn.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertyValidationFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.PropertyValidationContext",
+                "text": "PropertyValidationContext"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6673,7 +7284,7 @@
         "label": "WorkflowExecutionListItemDto",
         "description": [],
         "signature": [
-          "{ id: string; spaceId: string; context?: Record<string, unknown> | undefined; error: any; duration: number | null; status: ",
+          "{ id: string; spaceId: string; context?: Record<string, unknown> | undefined; error: any; status: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -6681,7 +7292,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; isTestRun: boolean; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
+          "; duration: number | null; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; isTestRun: boolean; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -7075,7 +7686,7 @@
         "label": "WorkflowStepExecutionDto",
         "description": [],
         "signature": [
-          "{ id: string; error?: any; state?: Record<string, unknown> | undefined; status: ",
+          "{ id: string; error?: any; status: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -7083,7 +7694,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; input?: ",
+          "; state?: Record<string, unknown> | undefined; input?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -7130,6 +7741,30 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.TerminalExecutionStatuses",
+        "type": "Object",
+        "tags": [],
+        "label": "TerminalExecutionStatuses",
+        "description": [],
+        "signature": [
+          "readonly ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.ExecutionStatus",
+            "text": "ExecutionStatus"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

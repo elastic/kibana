@@ -224,7 +224,7 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"success\" | \"warning\" | \"default\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"danger\" | \"subdued\" | \"ghost\" | ",
           "Property",
           ".Color | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
@@ -279,7 +279,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"success\" | \"warning\" | \"default\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
+                  "\"default\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"danger\" | \"subdued\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],
@@ -1391,7 +1391,7 @@
         "label": "QueryInput",
         "description": [],
         "signature": [
-          "({ value, onChange, dataView, isInvalid, onSubmit, disableAutoFocus, [\"data-test-subj\"]: dataTestSubj, placeholder, appName, services: { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews }, }: { value: ",
+          "({ value, onChange, dataView, isInvalid, onSubmit, disableAutoFocus, [\"data-test-subj\"]: dataTestSubj, placeholder, appName, services: { data, uiSettings, http, notifications, docLinks, storage, kql, dataViews }, }: { value: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1426,7 +1426,7 @@
             "id": "def-public.QueryInput.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  value,\n  onChange,\n  dataView,\n  isInvalid,\n  onSubmit,\n  disableAutoFocus,\n  ['data-test-subj']: dataTestSubj,\n  placeholder,\n  appName,\n  services: { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews },\n}",
+            "label": "{\n  value,\n  onChange,\n  dataView,\n  isInvalid,\n  onSubmit,\n  disableAutoFocus,\n  ['data-test-subj']: dataTestSubj,\n  placeholder,\n  appName,\n  services: { data, uiSettings, http, notifications, docLinks, storage, kql, dataViews },\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",
             "deprecated": false,
@@ -1857,7 +1857,7 @@
             "label": "triggerIconType",
             "description": [],
             "signature": [
-              "\"none\" | \"disabled\" | \"color\" | \"aggregate\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
+              "\"none\" | \"color\" | \"disabled\" | \"aggregate\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
             "deprecated": false,
@@ -2255,18 +2255,18 @@
           },
           {
             "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.QueryInputServices.unifiedSearch",
+            "id": "def-public.QueryInputServices.kql",
             "type": "Object",
             "tags": [],
-            "label": "unifiedSearch",
+            "label": "kql",
             "description": [],
             "signature": [
               {
-                "pluginId": "unifiedSearch",
+                "pluginId": "kql",
                 "scope": "public",
-                "docId": "kibUnifiedSearchPluginApi",
-                "section": "def-public.UnifiedSearchPublicPluginStart",
-                "text": "UnifiedSearchPublicPluginStart"
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.KqlPluginStart",
+                "text": "KqlPluginStart"
               }
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/query_input/query_input.tsx",

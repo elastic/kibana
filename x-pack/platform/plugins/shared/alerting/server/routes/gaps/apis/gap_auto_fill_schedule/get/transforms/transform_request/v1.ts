@@ -6,7 +6,7 @@
  */
 
 import type { GetGapAutoFillSchedulerParamsV1 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import type { GetGapAutoFillSchedulerParams } from '../../../../../../../application/gap_auto_fill_scheduler/methods/types';
+import type { GetGapAutoFillSchedulerParams } from '../../../../../../../application/gaps/auto_fill_scheduler/methods/types';
 
 export const transformRequest = (
   params: GetGapAutoFillSchedulerParamsV1

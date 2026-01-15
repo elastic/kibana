@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
+  axisTitleSchemaProps,
   collapseBySchema,
   dslOnlyPanelInfoSchema,
   ignoringGlobalFiltersSchemaRaw,
@@ -25,11 +26,12 @@ import {
 import { esqlColumnSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
+import { builderEnums } from '../enums';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
  */
-const statisticsSchema = schema.oneOf(
+export const statisticsSchema = schema.oneOf(
   [
     schema.oneOf([
       schema.literal('min'),
@@ -59,6 +61,9 @@ const statisticsSchema = schema.oneOf(
     },
   }
 );
+
+// Should be kept in sync with the number of statistics options
+export const statisticsOptionsSize = 17;
 
 /**
  * Y-axis extent configuration defining how the axis bounds are calculated
@@ -108,13 +113,7 @@ const yScaleSchema = schema.oneOf(
  */
 const sharedAxisSchema = {
   title: schema.maybe(
-    schema.object(
-      {
-        value: schema.string({ meta: { description: 'Axis title text' } }),
-        visible: schema.maybe(schema.boolean()),
-      },
-      { meta: { description: 'Axis title configuration' } }
-    )
+    schema.object(axisTitleSchemaProps, { meta: { description: 'Axis title configuration' } })
   ),
   ticks: schema.maybe(
     schema.boolean({ meta: { description: 'Whether to show tick marks on the axis' } })
@@ -123,10 +122,9 @@ const sharedAxisSchema = {
     schema.boolean({ meta: { description: 'Whether to show grid lines for this axis' } })
   ),
   label_orientation: schema.maybe(
-    schema.oneOf(
-      [schema.literal('horizontal'), schema.literal('vertical'), schema.literal('angled')],
-      { meta: { description: 'Orientation of the axis labels' } }
-    )
+    builderEnums.orientation({
+      meta: { description: 'Orientation of the axis labels' },
+    })
   ),
 };
 
@@ -169,7 +167,10 @@ const xyDataLayerSharedSchema = {
 const sharedLegendSchema = {
   visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
   statistics: schema.maybe(
-    schema.arrayOf(statisticsSchema, { meta: { description: 'Statistics to display in legend' } })
+    schema.arrayOf(statisticsSchema, {
+      meta: { description: 'Statistics to display in legend' },
+      maxSize: statisticsOptionsSize,
+    })
   ),
   truncate_after_lines: schema.maybe(
     schema.number({ min: 1, max: 5, meta: { description: 'Maximum lines before truncation' } })
@@ -371,7 +372,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
           { meta: { description: 'Y-axis metric configuration with axis assignment' } }
         )
       ),
-      { meta: { description: 'Array of metrics to display on Y-axis' } }
+      { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
     ),
     x: schema.maybe(
       mergeAllBucketsWithChartDimensionSchema(
@@ -399,7 +400,7 @@ const xyDataLayerSchemaESQL = schema.object(
         },
         { meta: { description: 'ES|QL column for Y-axis metric' } }
       ),
-      { meta: { description: 'Array of ES|QL columns for Y-axis metrics' } }
+      { meta: { description: 'Array of ES|QL columns for Y-axis metrics' }, maxSize: 100 }
     ),
     x: schema.maybe(esqlColumnSchema),
   },
@@ -483,7 +484,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
           meta: { description: 'Reference line threshold configuration' },
         })
       ),
-      { meta: { description: 'Array of reference line thresholds' }, minSize: 1 }
+      { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
     ),
   },
   { meta: { description: 'Reference line layer for standard queries' } }
@@ -504,7 +505,11 @@ const referenceLineLayerSchemaESQL = schema.object(
           meta: { description: 'ES|QL reference line threshold' },
         }),
       ]),
-      { meta: { description: 'Array of ES|QL-based reference line thresholds' }, minSize: 1 }
+      {
+        meta: { description: 'Array of ES|QL-based reference line thresholds' },
+        minSize: 1,
+        maxSize: 100,
+      }
     ),
   },
   { meta: { description: 'Reference line layer for ES|QL queries' } }
@@ -581,7 +586,7 @@ const annotationQuery = schema.object(
     extra_fields: schema.maybe(
       schema.arrayOf(
         schema.string({ meta: { description: 'Additional field to include in tooltip' } }),
-        { meta: { description: 'Additional fields for annotation tooltip' } }
+        { meta: { description: 'Additional fields for annotation tooltip' }, maxSize: 100 }
       )
     ),
   },
@@ -641,7 +646,7 @@ const annotationLayerSchema = schema.object(
     type: schema.literal('annotations'),
     events: schema.arrayOf(
       schema.oneOf([annotationQuery, annotationManualEvent, annotationManualRange]),
-      { meta: { description: 'Array of annotation configurations' }, minSize: 1 }
+      { meta: { description: 'Array of annotation configurations' }, minSize: 1, maxSize: 100 }
     ),
   },
   { meta: { description: 'Layer containing annotations (query-based, points, and ranges)' } }
@@ -669,6 +674,7 @@ export const xyStateSchema = schema.object(
       ]),
       {
         minSize: 1,
+        maxSize: 100,
         meta: { description: 'Chart layers (minimum 1 required)' },
       }
     ),
