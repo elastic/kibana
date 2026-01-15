@@ -464,9 +464,6 @@ export const WorkflowYAMLEditor = ({
       if (isTriggerType(action.id)) {
         insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
       } else {
-        if (!yamlDocumentCurrent) {
-          return;
-        }
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }
       closeActionsPopover();
