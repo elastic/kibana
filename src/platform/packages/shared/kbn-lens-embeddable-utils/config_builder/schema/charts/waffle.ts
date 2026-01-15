@@ -114,7 +114,11 @@ export const waffleStateSchemaNoESQL = schema.object(
     group_by: schema.maybe(
       schema.arrayOf(
         mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
-        { minSize: 1, meta: { description: 'Array of breakdown dimensions (minimum 1)' } }
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
       )
     ),
   },
@@ -142,7 +146,8 @@ const waffleStateSchemaESQL = schema.object(
           esqlColumnSchema,
         ],
         { meta: { description: 'ES|QL column reference for primary metric' } }
-      )
+      ),
+      { maxSize: 100 }
     ),
     group_by: schema.maybe(
       schema.arrayOf(

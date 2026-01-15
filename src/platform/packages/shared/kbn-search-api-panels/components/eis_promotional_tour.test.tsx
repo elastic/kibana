@@ -13,7 +13,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent, screen } from '@testing-library/react';
 import { EisPromotionalTour } from './eis_promotional_tour';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
-import { EIS_PROMO_TOUR_TITLE, EIS_TOUR_CTA } from '../translations';
+import { EIS_PROMO_TOUR_TITLE, TOUR_CTA } from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 
@@ -95,7 +95,7 @@ describe('EisPromotionalTour', () => {
     const ctaBtn = screen.getByTestId('eisPromoTourCtaBtn');
     expect(ctaBtn).toBeInTheDocument();
     expect(ctaBtn).toHaveAttribute('href', ctaLink);
-    expect(ctaBtn).toHaveTextContent(EIS_TOUR_CTA);
+    expect(ctaBtn).toHaveTextContent(TOUR_CTA);
   });
 
   it('does not render CTA button when ctaLink is undefined', () => {

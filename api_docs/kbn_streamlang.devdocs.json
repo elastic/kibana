@@ -489,7 +489,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", nested: boolean) => string"
+          ", nested: boolean, varMap: FieldVarMap | undefined) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/condition_to_painless.ts",
         "deprecated": false,
@@ -530,6 +530,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.conditionToStatement.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "varMap",
+            "description": [],
+            "signature": [
+              "FieldVarMap | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/condition_to_painless.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

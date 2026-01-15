@@ -9,6 +9,7 @@
 
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
+import type { Mutable } from 'utility-types';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
@@ -30,6 +31,8 @@ import type {
   SuspendProcessRequestBody,
   KillProcessRequestBody,
   UnisolationRouteRequestBody,
+  RunScriptActionRequestBody,
+  EndpointRunScriptActionRequestParams,
 } from '../../../../../../common/api/endpoint';
 import {
   ResponseActionsClientImpl,
@@ -50,12 +53,15 @@ import type {
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
   LogsEndpointAction,
-  EndpointActionDataParameterTypes,
   UploadedFileInfo,
   ResponseActionScanParameters,
   ResponseActionScanOutputContent,
   ResponseActionMemoryDumpOutputContent,
   ResponseActionMemoryDumpParameters,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
+  EndpointScript,
+  EndpointActionDataParameterTypes,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
@@ -153,6 +159,19 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }
     }
 
+    if (actionRequest.command === 'runscript') {
+      const scriptDetails = await this.fetchScript(actionRequest.parameters.scriptId);
+
+      if (scriptDetails.requiresInput && !(actionRequest.parameters.scriptInput ?? '').trim()) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The script [${scriptDetails.name}] requires arguments to be specified.`
+          ),
+        };
+      }
+    }
+
     return super.validateRequest(actionRequest);
   }
 
@@ -172,9 +191,9 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       command,
       endpoint_ids: validatedAgents.valid || [],
     });
-
     const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
     let actionError: string | undefined = validationError?.message || error;
+    let actionRequestMeta: Record<string, unknown> | undefined;
 
     if (actionError && !this.options.isAutomated) {
       throw new ResponseActionsClientError(actionError, 400);
@@ -182,6 +201,43 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
     // Dispatch action to Endpoint using Fleet
     if (!actionError) {
+      let actionParams = actionReq.parameters;
+
+      // For runscript, we pass allow some additional data to the Endpoint which does
+      // not come from the action request
+      if (command === 'runscript') {
+        const runscriptActionParams = actionParams as EndpointRunScriptActionRequestParams;
+        const scriptDetails = await this.fetchScript(runscriptActionParams.scriptId);
+        const scriptInfo = {
+          file_id: scriptDetails.fileId,
+          file_hash: scriptDetails.fileHash,
+          file_name: scriptDetails.fileName,
+          file_size: scriptDetails.fileSize,
+          path_to_executable: scriptDetails.pathToExecutable,
+        };
+
+        actionParams = {
+          ...actionParams,
+          ...scriptInfo,
+        };
+
+        // For reference and because the file information is not stored in the Action Request list of `parameters`,
+        // we store the script info. in the action request `meta` field.
+        actionRequestMeta = {
+          ...(actionRequestMeta ?? {}),
+          ...scriptInfo,
+        };
+
+        // Prepend the script name to the `comment` field for reference
+        const scriptNameComment = `(Script name: ${scriptDetails.name} / File name: ${scriptDetails.fileName})`;
+
+        if (!(actionReq.comment ?? '').startsWith(scriptNameComment)) {
+          (actionReq as Mutable<TOptions>).comment = `${scriptNameComment}${
+            actionReq.comment ? ` ${actionReq.comment}` : ''
+          }`;
+        }
+      }
+
       try {
         await this.dispatchActionViaFleet({
           actionId,
@@ -189,7 +245,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           data: {
             command,
             comment: actionReq.comment,
-            parameters: actionReq.parameters as EndpointActionDataParameterTypes,
+            parameters: actionParams as EndpointActionDataParameterTypes,
           },
         });
       } catch (e) {
@@ -223,6 +279,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       actionId,
       command,
       comment,
+      meta: actionRequestMeta,
     } as ResponseActionsClientWriteActionRequestToEndpointIndexOptions);
 
     // Update cases
@@ -293,6 +350,29 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       this.log.error(error);
       throw error;
     });
+  }
+
+  protected async fetchScript(scriptId: string): Promise<EndpointScript> {
+    const cacheKey = `script:${scriptId}`;
+    const cacheResponse = this.cache.get<EndpointScript>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached script details found for script id [${scriptId}] - returning it`
+      );
+
+      return cacheResponse;
+    }
+
+    const scriptsLibraryClient = this.options.endpointService.getScriptsLibraryClient(
+      this.options.spaceId,
+      this.options.username
+    );
+    const scriptDetails = await scriptsLibraryClient.get(scriptId);
+
+    this.cache.set(cacheKey, scriptDetails);
+
+    return scriptDetails;
   }
 
   async isolate(
@@ -470,6 +550,25 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       MemoryDumpActionRequestBody,
       ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
     >('memory-dump', actionRequest, options);
+  }
+
+  async runscript(
+    actionRequest: OmitUnsupportedAttributes<RunScriptActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+  > {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript) {
+      throw new ResponseActionsClientError(
+        'Elastic Defend runscript operation is not enabled',
+        400
+      );
+    }
+
+    return this.handleResponseAction<
+      RunScriptActionRequestBody,
+      ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+    >('runscript', actionRequest, options);
   }
 
   async getFileDownload(actionId: string, fileId: string): Promise<GetFileDownloadMethodResponse> {

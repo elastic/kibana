@@ -226,53 +226,6 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-public.EisTokenCostTour",
-        "type": "Function",
-        "tags": [],
-        "label": "EisTokenCostTour",
-        "description": [],
-        "signature": [
-          "({ anchorPosition, ctaLink, promoId, isCloudEnabled, isReady, children, }: ",
-          {
-            "pluginId": "@kbn/search-api-panels",
-            "scope": "public",
-            "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-public.EisTokenCostTourProps",
-            "text": "EisTokenCostTourProps"
-          },
-          ") => React.JSX.Element"
-        ],
-        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-public.EisTokenCostTour.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  anchorPosition = 'downCenter',\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  isReady = true,\n  children,\n}",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/search-api-panels",
-                "scope": "public",
-                "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-public.EisTokenCostTourProps",
-                "text": "EisTokenCostTourProps"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-panels",
         "id": "def-public.EisUpdateCallout",
         "type": "Function",
         "tags": [],
@@ -529,6 +482,53 @@
               "{ assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/github_link.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.InferenceCostsTransparencyTour",
+        "type": "Function",
+        "tags": [],
+        "label": "InferenceCostsTransparencyTour",
+        "description": [],
+        "signature": [
+          "({ anchorPosition, ctaLink, promoId, isCloudEnabled, isReady, children, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.InferenceCostsTransparencyTourProps",
+            "text": "InferenceCostsTransparencyTourProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTour.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  anchorPosition = 'downCenter',\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  isReady = true,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.InferenceCostsTransparencyTourProps",
+                "text": "InferenceCostsTransparencyTourProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -863,107 +863,6 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-public.EisTokenCostTourProps",
-        "type": "Interface",
-        "tags": [
-          "property",
-          "property",
-          "property",
-          "property",
-          "property",
-          "property"
-        ],
-        "label": "EisTokenCostTourProps",
-        "description": [
-          "\nProps for the EisTokenCostTour component.\n"
-        ],
-        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-public.EisTokenCostTourProps.anchorPosition",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "anchorPosition",
-            "description": [],
-            "signature": [
-              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-public.EisTokenCostTourProps.ctaLink",
-            "type": "string",
-            "tags": [],
-            "label": "ctaLink",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-public.EisTokenCostTourProps.promoId",
-            "type": "string",
-            "tags": [],
-            "label": "promoId",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-public.EisTokenCostTourProps.isCloudEnabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "isCloudEnabled",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-public.EisTokenCostTourProps.isReady",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isReady",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-public.EisTokenCostTourProps.children",
-            "type": "Object",
-            "tags": [],
-            "label": "children",
-            "description": [],
-            "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-panels",
         "id": "def-public.EisUpdateCalloutProps",
         "type": "Interface",
         "tags": [
@@ -1071,6 +970,107 @@
               "\"top\" | \"bottom\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.InferenceCostsTransparencyTourProps",
+        "type": "Interface",
+        "tags": [
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property"
+        ],
+        "label": "InferenceCostsTransparencyTourProps",
+        "description": [
+          "\nProps for the InferenceCostsTransparencyTour component.\n"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.anchorPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "anchorPosition",
+            "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.isReady",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReady",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -26,6 +26,7 @@ import type { ResponseActionsRequestBody } from '../../../../../../common/api/en
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { ScriptsLibraryMock } from '../../../scripts_library/mocks';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -62,6 +63,9 @@ describe('EndpointActionsClient', () => {
 
     // @ts-expect-error mocking this for testing purposes
     classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
+      true;
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
       true;
   });
 
@@ -403,12 +407,7 @@ describe('EndpointActionsClient', () => {
 
   type ResponseActionsMethodsOnly = keyof Omit<
     ResponseActionsClient,
-    | 'processPendingActions'
-    | 'getFileDownload'
-    | 'getFileInfo'
-    | 'runscript'
-    | 'getCustomScripts'
-    | 'cancel'
+    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'getCustomScripts' | 'cancel'
   >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -441,8 +440,7 @@ describe('EndpointActionsClient', () => {
       getCommonResponseActionOptions()
     ),
 
-    // TODO: not yet implemented
-    // runscript: responseActionsClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
+    runscript: endpointActionClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
@@ -451,6 +449,7 @@ describe('EndpointActionsClient', () => {
       await endpointActionsClient[methodName](responseActionMethods[methodName]);
 
       let expectedParams = responseActionMethods[methodName].parameters;
+      let expectedComment = 'test comment';
 
       switch (methodName) {
         case 'upload':
@@ -469,6 +468,20 @@ describe('EndpointActionsClient', () => {
             timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
           };
           break;
+
+        case 'runscript':
+          expectedParams = {
+            ...expectedParams,
+            file_hash: 'e5441eb2bb',
+            file_id: 'file-1-2-3',
+            file_name: 'my_script.sh',
+            file_size: 12098,
+            path_to_executable: undefined,
+            scriptId: 'script-1-2-3',
+            timeout: 60000,
+          };
+          expectedComment = `(Script name: script one / File name: my_script.sh) ${expectedComment}`;
+          break;
       }
 
       expect(
@@ -477,7 +490,7 @@ describe('EndpointActionsClient', () => {
         expect.objectContaining({
           data: {
             command: expect.any(String),
-            comment: 'test comment',
+            comment: expectedComment,
             parameters: expectedParams,
           },
         })
@@ -630,6 +643,71 @@ describe('EndpointActionsClient', () => {
         );
       }
     );
+  });
+
+  describe('#runscript()', () => {
+    it('should error if feature flag is disabled', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
+        false;
+
+      await expect(
+        endpointActionsClient.runscript(endpointActionClientMock.createRunScriptOptions())
+      ).rejects.toThrow('Elastic Defend runscript operation is not enabled');
+    });
+
+    it('should error if script ID does not exist', async () => {
+      (
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as jest.Mock
+      ).mockRejectedValueOnce(new Error('not found'));
+
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'non-existent-script-id' },
+          })
+        )
+      ).rejects.toThrow('not found');
+    });
+
+    it('should error if script requires input args but none were provided', async () => {
+      (
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as jest.Mock
+      ).mockResolvedValue(ScriptsLibraryMock.generateScriptEntry({ requiresInput: true }));
+
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args' },
+          })
+        )
+      ).rejects.toThrow('The script [script one] requires arguments to be specified.');
+    });
+
+    it('should store script info in action request doc `meta` property', async () => {
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args' },
+          })
+        )
+      ).resolves.toEqual(expect.any(Object));
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            meta: {
+              file_hash: 'e5441eb2bb',
+              file_id: 'file-1-2-3',
+              file_name: 'my_script.sh',
+              file_size: 12098,
+              path_to_executable: undefined,
+            },
+          }),
+        }),
+        expect.anything()
+      );
+    });
   });
 
   describe('and Space Awareness is enabled', () => {
