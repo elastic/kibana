@@ -499,7 +499,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
       </table>
     </div>
     <div
-      class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"

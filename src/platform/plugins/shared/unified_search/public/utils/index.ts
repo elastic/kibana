@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { onRaf } from './on_raf';
 export { shallowEqual } from './shallow_equal';
 
 export { getBooleanRelationType } from './combined_filter';

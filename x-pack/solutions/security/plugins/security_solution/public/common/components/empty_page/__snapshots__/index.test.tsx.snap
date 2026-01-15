@@ -29,7 +29,7 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
         class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
       />
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-stretch-row"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-m-center-stretch-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -118,7 +118,7 @@ exports[`EmptyPage component renders actions without descriptions 1`] = `
         class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
       />
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-stretch-row"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-m-center-stretch-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
