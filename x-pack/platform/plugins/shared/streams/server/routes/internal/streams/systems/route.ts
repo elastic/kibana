@@ -552,12 +552,10 @@ export const describeStreamRoute = createServerRoute({
 
     const stream = await streamsClient.getStream(name);
 
-    const promptsConfigService = new PromptsConfigService({
+    const { descriptionPromptOverride } = await new PromptsConfigService({
       soClient,
       logger,
-    });
-
-    const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
+    }).getPrompt();
 
     return from(
       generateStreamDescription({
@@ -568,7 +566,7 @@ export const describeStreamRoute = createServerRoute({
         end: end.valueOf(),
         signal: getRequestAbortSignal(request),
         logger: logger.get('stream_description'),
-        systemPromptOverride: descriptionPromptOverride,
+        systemPrompt: descriptionPromptOverride,
       })
     ).pipe(
       map((result) => {
