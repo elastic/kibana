@@ -1,0 +1,307 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useCallback, useMemo } from 'react';
+import {
+  EuiAvatar,
+  EuiBadge,
+  EuiBasicTable,
+  EuiFacetButton,
+  EuiI18nNumber,
+  EuiHorizontalRule,
+  EuiText,
+  EuiToolTip,
+  type CriteriaWithPagination,
+  type EuiTableSortingType,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { SCRIPT_TAGS } from '../../../../../../common/endpoint/service/scripts_library/constants';
+import { PopoverItems } from '../../../../../common/components/popover_items';
+import { useAppUrl } from '../../../../../common/lib/kibana';
+import { FormattedDate } from '../../../../../common/components/formatted_date';
+import { useFormatBytes } from '../../../../../common/components/formatted_bytes';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../common/constants';
+import { useUrlPagination } from '../../../../hooks/use_url_pagination';
+import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import type {
+  EndpointScript,
+  EndpointScriptListApiResponse,
+} from '../../../../../../common/endpoint/types';
+import { scriptsLibraryLabels as i18n } from '../../translations';
+import { ScriptNameNavLink } from './script_name_nav_link';
+import { getScriptsDetailPath } from '../../../../common/routing';
+import { ScriptTablePlatformBadges } from './platform_badges';
+
+const columnWidths = {
+  name: '25%',
+  platform: '15%',
+  tags: '150px',
+  updatedBy: '15%',
+  updatedAt: '25%',
+  size: '5%',
+  actions: '65px',
+};
+
+interface GetScriptsLibraryTableColumnsProps {
+  formatBytes: (bytes: number) => string;
+  getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
+  getTestId: (suffix?: string | undefined) => string | undefined;
+}
+
+const getScriptsLibraryTableColumns = ({
+  formatBytes,
+  getAppUrl,
+  getTestId,
+  queryParams,
+}: GetScriptsLibraryTableColumnsProps) => {
+  const columns = [
+    {
+      field: 'name',
+      name: i18n.table.columns.name,
+      sortable: true,
+      width: columnWidths.name,
+      truncateText: true,
+      render: (name: string, item: EndpointScript) => {
+        const toRoutePath = getScriptsDetailPath({
+          query: { ...queryParams, selectedScriptId: item.id, show: 'details' },
+        });
+        const toRouteUrl = getAppUrl({ path: toRoutePath });
+        return (
+          <EuiToolTip content={name} anchorClassName="eui-textTruncate">
+            <ScriptNameNavLink
+              name={name}
+              href={toRouteUrl}
+              data-test-subj={`${getTestId(`column-name-${item.id}`)}`}
+            />
+          </EuiToolTip>
+        );
+      },
+    },
+    {
+      field: 'platform',
+      name: i18n.table.columns.platform,
+      width: columnWidths.platform,
+      render: (platforms: string[]) => (
+        <ScriptTablePlatformBadges
+          platforms={platforms}
+          data-test-subj={getTestId('platform-badges')}
+        />
+      ),
+    },
+    {
+      field: 'tags',
+      name: i18n.table.columns.tags,
+      width: columnWidths.tags,
+      render: (tags: string[]) => {
+        const renderItem = (sortedTag: string, i: number) => (
+          <EuiBadge
+            color="hollow"
+            key={`${sortedTag}-${i}`}
+            data-test-subj={getTestId(`tags-${sortedTag}`)}
+          >
+            {SCRIPT_TAGS[sortedTag as keyof typeof SCRIPT_TAGS] || sortedTag}
+          </EuiBadge>
+        );
+        return (
+          <PopoverItems
+            items={tags.sort()}
+            popoverTitle={i18n.table.columns.tags}
+            popoverButtonIcon="tag"
+            popoverButtonTitle={tags.length.toString()}
+            renderItem={renderItem}
+            dataTestPrefix={getTestId('tags')}
+          />
+        );
+      },
+    },
+    {
+      field: 'updatedBy',
+      name: i18n.table.columns.updatedBy,
+      sortable: true,
+      width: columnWidths.updatedBy,
+      render: (updatedBy: string) => (
+        <EuiFacetButton
+          icon={
+            <EuiAvatar
+              aria-hidden={true}
+              name={updatedBy}
+              data-test-subj={getTestId('column-user-avatar')}
+              size="s"
+            />
+          }
+        >
+          <EuiToolTip content={updatedBy} anchorClassName="eui-textTruncate">
+            <EuiText
+              size="s"
+              className="eui-textTruncate eui-fullWidth"
+              data-test-subj={getTestId('column-username')}
+              tabIndex={0}
+            >
+              {updatedBy}
+            </EuiText>
+          </EuiToolTip>
+        </EuiFacetButton>
+      ),
+    },
+    {
+      field: 'updatedAt',
+      name: i18n.table.columns.updatedAt,
+      width: columnWidths.updatedAt,
+      truncateText: true,
+      sortable: true,
+      render: (updatedAt: string) => {
+        return (
+          <FormattedDate
+            fieldName={i18n.table.columns.updatedAt}
+            value={updatedAt}
+            className="eui-textTruncate"
+          />
+        );
+      },
+    },
+    {
+      field: 'fileSize',
+      name: i18n.table.columns.size,
+      width: columnWidths.size,
+      render: (fileSize: number) => (
+        <EuiText size="s" data-test-subj={getTestId('file-size')}>
+          {formatBytes(fileSize).toLowerCase()}
+        </EuiText>
+      ),
+    },
+    {
+      field: '',
+      name: i18n.table.columns.actions,
+      width: columnWidths.actions,
+      actions: [],
+    },
+  ];
+
+  return columns;
+};
+
+type OnChangeTable = (criteria: CriteriaWithPagination<EndpointScript>) => void;
+type ScriptItems = EndpointScriptListApiResponse['data'];
+
+export interface ScriptsLibraryTableProps {
+  'data-test-subj'?: string;
+  error?: string;
+  isLoading?: boolean;
+  items: ScriptItems;
+  onChange: OnChangeTable;
+  queryParams: ListScriptsRequestQuery;
+  totalItemCount: number;
+}
+export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
+  ({
+    'data-test-subj': dataTestSubj,
+    error,
+    isLoading,
+    items,
+    onChange,
+    queryParams,
+    totalItemCount,
+  }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const { getAppUrl } = useAppUrl();
+    const formatBytes = useFormatBytes();
+    const { pagination: paginationFromUrlParams } = useUrlPagination();
+    const sorting = useMemo(
+      () => ({
+        sort: {
+          field: queryParams?.sortField,
+          direction: queryParams?.sortDirection,
+        },
+      }),
+      [queryParams?.sortField, queryParams?.sortDirection]
+    );
+
+    const tablePagination = useMemo(() => {
+      return {
+        pageIndex: paginationFromUrlParams.page - 1,
+        pageSize: paginationFromUrlParams.pageSize,
+        totalItemCount,
+        pageSizeOptions: MANAGEMENT_PAGE_SIZE_OPTIONS as number[],
+      };
+    }, [paginationFromUrlParams.page, paginationFromUrlParams.pageSize, totalItemCount]);
+
+    const pagedResultsCount = useMemo(() => {
+      const page = queryParams?.page ?? 1;
+      const perPage = queryParams?.pageSize ?? 10;
+
+      const totalPages = Math.ceil(totalItemCount / perPage);
+      const fromCount = perPage * page - perPage + 1;
+      const toCount =
+        page === totalPages || totalPages === 1 ? totalItemCount : fromCount + perPage - 1;
+      return { fromCount, toCount };
+    }, [queryParams?.page, queryParams?.pageSize, totalItemCount]);
+
+    const recordRangeLabel = useMemo(
+      () => (
+        <EuiText color="default" size="xs" data-test-subj={getTestId('record-range-label')}>
+          <FormattedMessage
+            id="xpack.securitySolution.scriptsLibrary.list.recordRange"
+            defaultMessage="Showing {range} of {total} {recordsLabel}"
+            values={{
+              range: (
+                <strong>
+                  <EuiI18nNumber value={pagedResultsCount.fromCount} />
+                  {'-'}
+                  <EuiI18nNumber value={pagedResultsCount.toCount} />
+                </strong>
+              ),
+              total: <EuiI18nNumber value={totalItemCount} />,
+              recordsLabel: <strong>{i18n.table.recordsPerPage(totalItemCount)}</strong>,
+            }}
+          />
+        </EuiText>
+      ),
+      [getTestId, pagedResultsCount.fromCount, pagedResultsCount.toCount, totalItemCount]
+    );
+
+    const columns = useMemo(
+      () =>
+        getScriptsLibraryTableColumns({
+          formatBytes,
+          getTestId,
+          getAppUrl,
+          queryParams,
+        }),
+      [formatBytes, getTestId, getAppUrl, queryParams]
+    );
+
+    const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {
+      return {
+        'data-script-id': scriptData.id,
+      };
+    }, []);
+
+    return (
+      <>
+        {recordRangeLabel}
+        <EuiHorizontalRule margin="xs" />
+        <EuiBasicTable
+          columns={columns}
+          error={error}
+          items={items}
+          noItemsMessage={i18n.table.noItemsMessage}
+          loading={isLoading}
+          pagination={tablePagination}
+          onChange={onChange}
+          rowProps={setTableRowProps}
+          sorting={sorting as EuiTableSortingType<EndpointScript>}
+          tableCaption={i18n.pageTitle}
+          data-test-subj={dataTestSubj}
+        />
+      </>
+    );
+  }
+);
+
+ScriptsLibraryTable.displayName = 'ScriptsLibraryTable';
