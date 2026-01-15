@@ -78,7 +78,7 @@
             "description": [],
             "signature": [
               "() => jest.MockedObjectDeep<",
-              "APIKeys",
+              "APIKeysType",
               ">"
             ],
             "path": "src/core/packages/security/server-mocks/src/api_keys.mock.ts",
