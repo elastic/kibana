@@ -14,25 +14,20 @@ import { Chart } from '../chart';
 import { useChartLayers } from '../chart/hooks/use_chart_layers';
 import { getThroughputChart } from './trace_charts_definition';
 
-export const ThroughputChart = () => {
-  const {
-    filters,
-    services,
-    fetchParams,
-    discoverFetch$,
-    dataSource,
-    indexes,
-    onBrushEnd,
-    onFilter,
-  } = useTraceMetricsContext();
-  const fieldName = dataSource === 'apm' ? TRANSACTION_ID : SPAN_ID;
-  const throughputChart = getThroughputChart({
-    dataSource,
-    indexes,
-    filters,
-    fieldName,
-  });
-  const { esqlQuery, seriesType, unit, color, title } = throughputChart || {};
+type ThroughputChartContentProps = NonNullable<ReturnType<typeof getThroughputChart>> & {
+  fieldName: string;
+};
+
+const ThroughputChartContent = ({
+  esqlQuery,
+  seriesType,
+  unit,
+  color,
+  title,
+  fieldName,
+}: ThroughputChartContentProps) => {
+  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter } =
+    useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
     metric: {
@@ -47,10 +42,6 @@ export const ThroughputChart = () => {
     seriesType,
     customFunction: 'COUNT',
   });
-
-  if (!throughputChart) {
-    return null;
-  }
 
   return (
     <Chart
@@ -67,4 +58,21 @@ export const ThroughputChart = () => {
       syncCursor
     />
   );
+};
+
+export const ThroughputChart = () => {
+  const { filters, dataSource, indexes } = useTraceMetricsContext();
+  const fieldName = dataSource === 'apm' ? TRANSACTION_ID : SPAN_ID;
+  const throughputChart = getThroughputChart({
+    dataSource,
+    indexes,
+    filters,
+    fieldName,
+  });
+
+  if (!throughputChart) {
+    return null;
+  }
+
+  return <ThroughputChartContent {...throughputChart} fieldName={fieldName} />;
 };
