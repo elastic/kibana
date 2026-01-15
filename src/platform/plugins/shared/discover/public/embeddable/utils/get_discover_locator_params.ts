@@ -16,7 +16,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { isApiESQLVariablesCompatible } from '@kbn/lens-plugin/public/react_embeddable/type_guards';
+import type { ESQLVariablesCompatibleDashboardApi } from '@kbn/lens-common';
 import { type PublishesSavedSearch } from '../types';
 import type { DiscoverAppLocatorParams } from '../../../common';
 
@@ -48,6 +48,14 @@ export const getDiscoverLocatorParams = (
 
   return locatorParams;
 };
+
+function isApiESQLVariablesCompatible(
+  api: unknown | null
+): api is ESQLVariablesCompatibleDashboardApi {
+  return Boolean(
+    api && (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined
+  );
+}
 
 function getEsqlControls(embeddableParentApi: unknown, query: AggregateQuery | Query | undefined) {
   if (!isOfAggregateQueryType(query)) return;
