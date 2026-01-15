@@ -143,6 +143,11 @@ const stateSchemaV6 = stateSchemaV5.extends({
   total_filled_gap_duration_ms: schema.number(),
 });
 
+const stateSchemaV7 = stateSchemaV6.extends({
+  count_rules_installed_by_integrations: schema.number(),
+  count_rules_installed_by_integrations_by_type: schema.recordOf(schema.string(), schema.number()),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -276,9 +281,18 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV6,
   },
+  7: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[6].up(state),
+      count_rules_installed_by_integrations: state.count_rules_installed_by_integrations || 0,
+      count_rules_installed_by_integrations_by_type:
+        state.count_rules_installed_by_integrations_by_type || {},
+    }),
+    schema: stateSchemaV7,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[6].schema;
+const latestTaskStateSchema = stateSchemaByVersion[7].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -321,6 +335,8 @@ export const emptyState: LatestTaskStateSchema = {
     warning: 0,
   },
   count_rules_with_tags: 0,
+  count_rules_installed_by_integrations: 0,
+  count_rules_installed_by_integrations_by_type: {},
   count_rules_by_notify_when: {
     on_action_group_change: 0,
     on_active_alert: 0,

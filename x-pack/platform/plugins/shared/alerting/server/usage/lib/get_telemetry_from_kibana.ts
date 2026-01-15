@@ -44,6 +44,8 @@ type GetTotalCountsResults = Pick<
   | 'count_rules_by_execution_status'
   | 'count_rules_by_notify_when'
   | 'count_rules_with_tags'
+  | 'count_rules_installed_by_integrations'
+  | 'count_rules_installed_by_integrations_by_type'
   | 'count_rules_snoozed'
   | 'count_rules_snoozed_by_type'
   | 'count_rules_muted'
@@ -195,6 +197,22 @@ export async function getTotalCountAggregations({
                 }`,
           },
         },
+        rule_installed_by_integration: {
+          type: 'long' as const,
+          script: {
+            source: `
+               def rule = params._source['alert'];
+                if (rule != null && rule.tags != null) {
+                  for (tag in rule.tags) {
+                    if (tag == 'Elastic Agent') {
+                      emit(1);
+                      return;
+                    }
+                  }
+                }
+                emit(0);`,
+          },
+        },
         rule_snoozed: {
           type: 'long' as const,
           script: {
@@ -314,6 +332,20 @@ export async function getTotalCountAggregations({
           },
         },
         sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
+        sum_rules_installed_by_integrations: { sum: { field: 'rule_installed_by_integration' } },
+        sum_rules_installed_by_integrations_by_type: {
+          filter: {
+            term: { rule_installed_by_integration: 1 },
+          },
+          aggs: {
+            by_alert_type: {
+              terms: {
+                field: 'alert.alertTypeId',
+                size: NUM_ALERTING_RULE_TYPES,
+              },
+            },
+          },
+        },
         sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
         sum_rules_snoozed_by_type: {
           filter: {
@@ -367,6 +399,10 @@ export async function getTotalCountAggregations({
       connector_types_by_consumers: AggregationsTermsAggregateBase<ConnectorsByConsumersBucket>;
       by_search_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       sum_rules_with_tags: AggregationsSingleMetricAggregateBase;
+      sum_rules_installed_by_integrations: AggregationsSingleMetricAggregateBase;
+      sum_rules_installed_by_integrations_by_type: {
+        by_alert_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+      };
       sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
       sum_rules_snoozed_by_type: {
         by_alert_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
@@ -408,6 +444,13 @@ export async function getTotalCountAggregations({
       },
       count_rules_by_execution_status: countRulesByExecutionStatus,
       count_rules_with_tags: aggregations.sum_rules_with_tags.value ?? 0,
+      count_rules_installed_by_integrations:
+        aggregations.sum_rules_installed_by_integrations.value ?? 0,
+      count_rules_installed_by_integrations_by_type: {
+        ...parseSimpleRuleTypeBucket(
+          aggregations.sum_rules_installed_by_integrations_by_type.by_alert_type.buckets
+        ),
+      },
       count_rules_by_notify_when: countRulesByNotifyWhen,
       count_rules_snoozed: aggregations.sum_rules_snoozed.value ?? 0,
       count_rules_snoozed_by_type: {
@@ -463,6 +506,8 @@ export async function getTotalCountAggregations({
         on_action_group_change: 0,
       },
       count_rules_with_tags: 0,
+      count_rules_installed_by_integrations: 0,
+      count_rules_installed_by_integrations_by_type: {},
       count_rules_snoozed: 0,
       count_rules_muted: 0,
       count_rules_with_muted_alerts: 0,
