@@ -7,7 +7,12 @@
 
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import { SERVICE_SYNTH_GO, SERVICE_SYNTH_GO_2, SERVICE_SYNTH_NODE_1 } from '../constants';
+import {
+  SERVICE_SYNTH_GO,
+  SERVICE_SYNTH_GO_2,
+  SERVICE_SYNTH_NODE_1,
+  PRODUCTION_ENVIRONMENT,
+} from '../constants';
 
 export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields> {
   const start = Date.now() - 1000 * 60 * 15;
@@ -16,17 +21,21 @@ export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields>
   const synthGo1 = apm
     .service({
       name: SERVICE_SYNTH_GO,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'go',
     })
     .instance('my-instance');
   const synthGo2 = apm
-    .service({ name: SERVICE_SYNTH_GO_2, environment: 'production', agentName: 'go' })
+    .service({
+      name: SERVICE_SYNTH_GO_2,
+      environment: PRODUCTION_ENVIRONMENT,
+      agentName: 'go',
+    })
     .instance('my-instance');
   const synthNode = apm
     .service({
       name: SERVICE_SYNTH_NODE_1,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'nodejs',
     })
     .instance('my-instance');
