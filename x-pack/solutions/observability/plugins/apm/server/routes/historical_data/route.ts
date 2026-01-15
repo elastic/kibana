@@ -8,6 +8,7 @@
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
+import { hasUnprocessedOtelData } from './has_unprocessed_otel_data';
 
 const hasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/has_data',
@@ -19,4 +20,17 @@ const hasDataRoute = createApmServerRoute({
   },
 });
 
-export const historicalDataRouteRepository = { ...hasDataRoute };
+const hasUnprocessedOtelDataRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/has_unprocessed_otel_data',
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ hasUnprocessedOtelData: boolean }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const hasUnprocessedOtelDataResult = await hasUnprocessedOtelData(apmEventClient);
+    return { hasUnprocessedOtelData: hasUnprocessedOtelDataResult };
+  },
+});
+
+export const historicalDataRouteRepository = {
+  ...hasDataRoute,
+  ...hasUnprocessedOtelDataRoute,
+};
