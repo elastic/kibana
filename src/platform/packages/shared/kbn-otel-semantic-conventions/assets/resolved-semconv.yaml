@@ -3937,11 +3937,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -3955,14 +3981,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -3996,7 +4014,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -4008,7 +4027,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If applicable.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -4070,14 +4089,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -4195,11 +4206,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -4213,14 +4250,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -4323,14 +4352,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -4817,11 +4838,36 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
         requirement_level: recommended
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -4844,7 +4890,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -4856,7 +4903,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -4906,9 +4953,8 @@ groups:
             - brief
             - examples
             - note
-            - stability
-          locally_overridden_fields:
             - requirement_level
+            - stability
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -12845,7 +12891,7 @@ groups:
     type: event
     brief: Describes a message sent or received within the context of an RPC call.
     note: |
-      In the lifetime of an RPC stream, an event for each message sent/received on client and server spans SHOULD be created. In case of unary calls only one sent and one received message will be recorded for both client and server spans.
+      In the lifetime of an RPC stream, an event for each message sent/received on client and server spans SHOULD be created. In case of unary calls message events SHOULD NOT be recorded.
     stability: development
     attributes:
       - name: rpc.message.compressed_size
@@ -12880,7 +12926,7 @@ groups:
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/rpc/spans.yaml
+        path: /home/weaver/source/rpc/events.yaml
       attributes:
         rpc.message.compressed_size:
           source_group: registry.rpc
@@ -23586,6 +23632,8 @@ groups:
             - brief
             - note
             - requirement_level
+    entity_associations:
+      - container
     annotations:
       code_generation:
         metric_value_type: double
@@ -23656,6 +23704,8 @@ groups:
             - brief
             - note
             - requirement_level
+    entity_associations:
+      - container
     annotations:
       code_generation:
         metric_value_type: double
@@ -23711,6 +23761,8 @@ groups:
             - note
             - requirement_level
             - stability
+    entity_associations:
+      - container
     annotations:
       code_generation:
         metric_value_type: int
@@ -23874,6 +23926,8 @@ groups:
       provenance:
         registry_id: main
         path: /home/weaver/source/container/metrics.yaml
+    entity_associations:
+      - container
     annotations:
       code_generation:
         metric_value_type: int
@@ -23949,6 +24003,8 @@ groups:
             - note
             - requirement_level
             - stability
+    entity_associations:
+      - container
     annotations:
       code_generation:
         metric_value_type: int
@@ -23966,6 +24022,8 @@ groups:
       provenance:
         registry_id: main
         path: /home/weaver/source/container/metrics.yaml
+    entity_associations:
+      - container
     annotations:
       code_generation:
         metric_value_type: double
@@ -39662,6 +39720,8 @@ groups:
       provenance:
         registry_id: main
         path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.pod
     annotations:
       code_generation:
         metric_value_type: double
@@ -41259,6 +41319,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+    entity_associations:
+      - k8s.resourcequota
     annotations:
       code_generation:
         metric_value_type: int
@@ -41303,6 +41365,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+    entity_associations:
+      - k8s.resourcequota
     annotations:
       code_generation:
         metric_value_type: int
@@ -50150,11 +50214,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -50168,14 +50258,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -50209,7 +50291,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -50221,7 +50304,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If applicable.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -50286,14 +50369,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -50423,11 +50498,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -50441,14 +50542,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -50482,7 +50575,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -50494,7 +50588,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If applicable.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -50559,14 +50653,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -50690,11 +50776,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -50708,14 +50820,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -50749,7 +50853,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -50761,7 +50866,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If applicable.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -50826,14 +50931,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -50962,11 +51059,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -50980,14 +51103,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -51021,7 +51136,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -51033,7 +51149,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If applicable.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -51098,14 +51214,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -51229,11 +51337,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -51247,14 +51381,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -51288,7 +51414,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -51300,7 +51427,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If applicable.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -51365,14 +51492,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -51501,11 +51620,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -51519,14 +51664,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -51560,7 +51697,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
         stability: stable
@@ -51572,7 +51710,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If applicable.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -51637,14 +51775,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -51769,11 +51899,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -51787,14 +51943,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -51900,14 +52048,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -52037,11 +52177,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -52055,14 +52221,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -52168,14 +52326,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -52299,11 +52449,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -52317,14 +52493,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -52430,14 +52598,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -52566,11 +52726,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -52584,14 +52770,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -52697,14 +52875,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -52828,11 +52998,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -52846,14 +53042,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -52959,14 +53147,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -53095,11 +53275,37 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -53113,14 +53319,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -53226,14 +53424,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -58428,6 +58618,32 @@ groups:
             - bazinga
         requirement_level: recommended
         stability: development
+      - name: pprof.profile.doc_url
+        type: string
+        brief: |
+          Documentation link for this profile type.
+        examples:
+          - http://pprof.example.com/cpu-profile.html
+        requirement_level: recommended
+        note: |
+          The URL must be absolute and may be missing if the profile was generated by code that did not supply a link
+        stability: development
+      - name: pprof.profile.drop_frames
+        type: string
+        brief: |
+          Frames with Function.function_name fully matching the regexp will be dropped from the samples, along with their successors.
+        examples:
+          - /foobar/
+        requirement_level: recommended
+        stability: development
+      - name: pprof.profile.keep_frames
+        type: string
+        brief: |
+          Frames with Function.function_name fully matching the regexp will be kept, even if it matches drop_frames.
+        examples:
+          - /bazinga/
+        requirement_level: recommended
+        stability: development
     lineage:
       provenance:
         registry_id: main
@@ -58474,6 +58690,33 @@ groups:
           locally_overridden_fields:
             - requirement_level
         pprof.profile.comment:
+          source_group: registry.pprof
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        pprof.profile.doc_url:
+          source_group: registry.pprof
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        pprof.profile.drop_frames:
+          source_group: registry.pprof
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        pprof.profile.keep_frames:
           source_group: registry.pprof
           inherited_fields:
             - brief
@@ -69459,6 +69702,32 @@ groups:
             - bazinga
         requirement_level: recommended
         stability: development
+      - name: pprof.profile.doc_url
+        type: string
+        brief: |
+          Documentation link for this profile type.
+        examples:
+          - http://pprof.example.com/cpu-profile.html
+        requirement_level: recommended
+        note: |
+          The URL must be absolute and may be missing if the profile was generated by code that did not supply a link
+        stability: development
+      - name: pprof.profile.drop_frames
+        type: string
+        brief: |
+          Frames with Function.function_name fully matching the regexp will be dropped from the samples, along with their successors.
+        examples:
+          - /foobar/
+        requirement_level: recommended
+        stability: development
+      - name: pprof.profile.keep_frames
+        type: string
+        brief: |
+          Frames with Function.function_name fully matching the regexp will be kept, even if it matches drop_frames.
+        examples:
+          - /bazinga/
+        requirement_level: recommended
+        stability: development
     lineage:
       provenance:
         registry_id: main
@@ -69977,11 +70246,46 @@ groups:
         stability: development
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
         requirement_level: recommended
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level: recommended
         stability: development
       - name: rpc.request.metadata
         type: template[string[]]
@@ -70023,14 +70327,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -70340,6 +70636,15 @@ groups:
           reason: renamed
           renamed_to: jsonrpc.protocol.version
           note: Replaced by `jsonrpc.protocol.version`.
+      - name: rpc.service
+        type: string
+        brief: Deprecated, use fully-qualified `rpc.method` instead.
+        examples: myservice.EchoService
+        requirement_level: recommended
+        stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -72435,12 +72740,49 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -72463,7 +72805,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -72476,7 +72819,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
@@ -72549,6 +72892,15 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -72558,313 +72910,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        server.address:
-          source_group: registry.server
-          inherited_fields:
-            - examples
-            - stability
-          locally_overridden_fields:
-            - brief
-            - note
-            - requirement_level
-            - sampling_relevant
-        server.port:
-          source_group: registry.server
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - sampling_relevant
-  - id: rpc_service.server
-    type: attribute_group
-    brief: This document defines semantic conventions for remote procedure calls.
-    attributes:
-      - name: client.address
-        type: string
-        brief: Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-        examples:
-          - client.example.com
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.address` SHOULD represent the client address behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
-      - name: client.port
-        type: int
-        brief: Client port number.
-        examples:
-          - 65123
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
-      - name: error.type
-        type:
-          members:
-            - id: other
-              value: _OTHER
-              brief: |
-                A fallback error value to be used when the instrumentation doesn't define a custom value.
-              stability: stable
-        brief: |
-          Describes a class of error the operation ended with.
-        examples:
-          - DEADLINE_EXCEEDED
-          - java.net.UnknownHostException
-          - '-32602'
-        requirement_level:
-          conditionally_required: If and only if the operation failed.
-        note: |
-          If the RPC fails with an error before status code is returned,
-          `error.type` SHOULD be set to the exception type (its fully-qualified class name, if applicable)
-          or a component-specific, low cardinality error identifier.
-
-          If a response status code is returned and status indicates an error,
-          `error.type` SHOULD be set to that status code. Check system-specific conventions
-          for the details on which values of `rpc.response.status_code` are considered errors.
-
-          The `error.type` value SHOULD be predictable and SHOULD have low cardinality.
-          Instrumentations SHOULD document the list of errors they report.
-
-          If the request has completed successfully, instrumentations SHOULD NOT set
-          `error.type`.
-        stability: stable
-      - name: network.peer.address
-        type: string
-        brief: Peer address of the network connection - IP address or Unix domain socket name.
-        examples:
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: recommended
-        stability: stable
-      - name: network.peer.port
-        type: int
-        brief: Peer port number of the network connection.
-        examples:
-          - 65123
-        requirement_level:
-          recommended: If `network.peer.address` is set.
-        stability: stable
-      - name: network.protocol.name
-        type: string
-        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
-        examples:
-          - http
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
-      - name: network.protocol.version
-        type: string
-        brief: The actual version of the protocol used for network communication.
-        examples:
-          - '1.1'
-          - '2'
-        requirement_level: recommended
-        note: |
-          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
-        stability: stable
-      - name: network.transport
-        type:
-          members:
-            - id: tcp
-              value: tcp
-              brief: TCP
-              stability: stable
-            - id: udp
-              value: udp
-              brief: UDP
-              stability: stable
-            - id: pipe
-              value: pipe
-              brief: Named or anonymous pipe.
-              stability: stable
-            - id: unix
-              value: unix
-              brief: Unix domain socket
-              stability: stable
-            - id: quic
-              value: quic
-              brief: QUIC
-              stability: stable
-        brief: |
-          [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
-        examples:
-          - tcp
-          - udp
-        requirement_level: recommended
-        note: |
-          The value SHOULD be normalized to lowercase.
-
-          Consider always setting the transport when setting a port number, since
-          a port number is ambiguous without knowing the transport. For example
-          different processes could be listening on TCP port 12345 and UDP port 12345.
-        stability: stable
-      - name: rpc.method
-        type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
-        sampling_relevant: true
-        note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
-        stability: development
-      - name: rpc.response.status_code
-        type: string
-        brief: Status code of the RPC returned by the RPC server or generated by the client
-        examples:
-          - OK
-          - DEADLINE_EXCEEDED
-          - '-32602'
-        requirement_level:
-          conditionally_required: if available.
-        note: |
-          Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
-          Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        sampling_relevant: true
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
-        stability: development
-      - name: server.address
-        type: string
-        brief: |
-          RPC server [host name](https://grpc.github.io/grpc/core/md_doc_naming.html).
-        examples:
-          - example.com
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: required
-        sampling_relevant: true
-        note: |
-          May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
-        stability: stable
-      - name: server.port
-        type: int
-        brief: Server port number.
-        examples:
-          - 80
-          - 8080
-          - 443
-        requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
-        sampling_relevant: true
-        note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
-        stability: stable
-    lineage:
-      provenance:
-        registry_id: main
-        path: /home/weaver/source/rpc/spans.yaml
-      attributes:
-        client.address:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        client.port:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        error.type:
-          source_group: registry.error
-          inherited_fields:
-            - brief
-            - stability
-          locally_overridden_fields:
-            - examples
-            - note
-            - requirement_level
-        network.peer.address:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.peer.port:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.protocol.name:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - note
-            - requirement_level
-            - stability
-          locally_overridden_fields:
-            - examples
-        network.protocol.version:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
-        network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        rpc.method:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - sampling_relevant
-        rpc.response.status_code:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -73012,12 +73057,49 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -73040,7 +73122,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -73053,7 +73136,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
@@ -73144,6 +73227,15 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -74245,6 +74337,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -74328,8 +74423,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -74538,6 +74634,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -74675,8 +74774,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -81687,6 +81787,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -81788,8 +81891,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -81879,6 +81983,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -81989,8 +82096,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -82109,6 +82217,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -82255,8 +82366,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -82345,6 +82457,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -82455,8 +82570,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -82531,6 +82647,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -82623,8 +82742,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -82699,6 +82819,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -82791,8 +82914,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -82888,6 +83012,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -83006,8 +83133,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -83097,6 +83225,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -83207,8 +83338,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -83298,6 +83430,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -83408,8 +83543,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -83540,6 +83676,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -83702,8 +83841,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -83857,6 +83997,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -84047,8 +84190,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -84137,6 +84281,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -84247,8 +84394,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -84360,6 +84508,9 @@ groups:
           - S3
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: Value should be included in `rpc.method` which is expected to be a fully-qualified name.
       - name: rpc.system
         type:
           members:
@@ -84497,8 +84648,9 @@ groups:
             - examples
             - note
         rpc.service:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
+            - deprecated
             - requirement_level
             - stability
           locally_overridden_fields:
@@ -89449,12 +89601,49 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -89468,15 +89657,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        sampling_relevant: true
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -89511,7 +89691,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -89524,14 +89705,12 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
     span_kind: client
-    events:
-      - rpc.message
     lineage:
       provenance:
         registry_id: main
@@ -89600,6 +89779,15 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -89609,16 +89797,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
-          locally_overridden_fields:
-            - sampling_relevant
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -89790,12 +89968,49 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -89809,15 +90024,6 @@ groups:
         note: |
           Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
           Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        sampling_relevant: true
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
         stability: development
       - name: rpc.system.name
         type:
@@ -89852,7 +90058,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -89865,14 +90072,12 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
         stability: stable
     span_kind: server
-    events:
-      - rpc.message
     lineage:
       provenance:
         registry_id: main
@@ -89959,6 +90164,15 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -89968,16 +90182,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - sampling_relevant
         rpc.system.name:
           source_group: registry.rpc
           inherited_fields:
@@ -90124,12 +90328,49 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.request.metadata
         type: template[string[]]
@@ -90172,15 +90413,6 @@ groups:
         note: |
           All error codes except `OK` SHOULD be considered errors.
         stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        sampling_relevant: true
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
-        stability: development
       - name: server.address
         type: string
         brief: |
@@ -90189,7 +90421,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -90202,7 +90435,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
@@ -90276,6 +90509,15 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         rpc.request.metadata:
           source_group: registry.rpc
           inherited_fields:
@@ -90303,16 +90545,6 @@ groups:
             - brief
             - note
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
-          locally_overridden_fields:
-            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -90470,12 +90702,49 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.request.metadata
         type: template[string[]]
@@ -90525,15 +90794,6 @@ groups:
           - `unavailable`
           - `data_loss`
         stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        sampling_relevant: true
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
-        stability: development
       - name: server.address
         type: string
         brief: |
@@ -90542,7 +90802,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -90555,7 +90816,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
@@ -90647,6 +90908,15 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         rpc.request.metadata:
           source_group: registry.rpc
           inherited_fields:
@@ -90674,16 +90944,6 @@ groups:
             - brief
             - note
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -90822,12 +91082,48 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
         requirement_level: required
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.request.metadata
         type: template[string[]]
@@ -90870,15 +91166,6 @@ groups:
         note: |
           All status codes except `OK` SHOULD be considered errors.
         stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: required
-        sampling_relevant: true
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
-        stability: development
       - name: server.address
         type: string
         brief: |
@@ -90887,7 +91174,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -90900,7 +91188,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
@@ -90974,6 +91262,15 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         rpc.request.metadata:
           source_group: registry.rpc
           inherited_fields:
@@ -91001,16 +91298,6 @@ groups:
             - brief
             - note
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -91169,12 +91456,49 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: recommended
+        brief: The fully-qualified logical name of the method from the RPC interface perspective.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level:
+          conditionally_required: if available.
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          The method name MAY have unbounded cardinality in edge or error cases.
+
+          Some RPC frameworks or libraries provide a fixed set of recognized methods
+          for client stubs and server implementations. Instrumentations for such
+          frameworks MUST set this attribute to the original method name only
+          when the method is recognized by the framework or library.
+
+          When the method is not recognized, for example, when the server receives
+          a request for a method that is not predefined on the server, or when
+          instrumentation is not able to reliably detect if the method is predefined,
+          the attribute MUST be set to `_OTHER`. In such cases, tracing
+          instrumentations MUST also set `rpc.method_original` attribute to
+          the original method value.
+
+          If the RPC instrumentation could end up converting valid RPC methods to
+          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
+          RPC methods.
+
+          The `rpc.method` can be different from the name of any implementing
+          method/function.
+          The `code.function.name` attribute may be used to record the fully-qualified
+          method actually executing the call on the server side, or the
+          RPC client stub method on the client side.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.request.metadata
         type: template[string[]]
@@ -91224,15 +91548,6 @@ groups:
           - `UNAVAILABLE`
           - `DATA_LOSS`
         stability: development
-      - name: rpc.service
-        type: string
-        brief: The full (logical) name of the service being called, including its package name, if applicable.
-        examples: myservice.EchoService
-        requirement_level: recommended
-        sampling_relevant: true
-        note: |
-          This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub class on the client side.
-        stability: development
       - name: server.address
         type: string
         brief: |
@@ -91241,7 +91556,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -91254,7 +91570,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
@@ -91346,6 +91662,15 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         rpc.request.metadata:
           source_group: registry.rpc
           inherited_fields:
@@ -91373,16 +91698,6 @@ groups:
             - brief
             - note
             - requirement_level
-        rpc.service:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -91544,12 +91859,27 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: required
+        brief: JSON-RPC method name provided in the request.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level: opt_in
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          JSON-RPC supports sending and receiving arbitrary method names without prior registration or definition. As a result, the method name MAY have unbounded cardinality in edge or error cases.
+          General-purpose JSON-RPC instrumentations therefore SHOULD NOT set this attribute by default and SHOULD provide a way to configure the list of recognized RPC methods. When tracing instrumentation converts RPC method to `_OTHER`, it MUST also set `rpc.method_original` span attribute to the original value.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -91571,7 +91901,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -91584,7 +91915,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
@@ -91669,13 +92000,22 @@ groups:
         rpc.method:
           source_group: registry.rpc
           inherited_fields:
+            - examples
+            - stability
+          locally_overridden_fields:
+            - brief
+            - note
+            - requirement_level
+            - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
             - brief
             - examples
             - note
             - stability
           locally_overridden_fields:
             - requirement_level
-            - sampling_relevant
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
@@ -91866,12 +92206,27 @@ groups:
         stability: stable
       - name: rpc.method
         type: string
-        brief: This is the logical name of the method from the RPC interface perspective.
-        examples: exampleMethod
-        requirement_level: required
+        brief: JSON-RPC method name provided in the request.
+        examples:
+          - com.example.ExampleService/exampleMethod
+          - EchoService/Echo
+          - _OTHER
+        requirement_level: opt_in
         sampling_relevant: true
         note: |
-          This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The `code.function.name` attribute may be used to record the fully-qualified method actually executing the call on the server side, or the RPC client stub method on the client side.
+          JSON-RPC supports sending and receiving arbitrary method names without prior registration or definition. As a result, the method name MAY have unbounded cardinality in edge or error cases.
+          General-purpose JSON-RPC instrumentations therefore SHOULD NOT set this attribute by default and SHOULD provide a way to configure the list of recognized RPC methods. When tracing instrumentation converts RPC method to `_OTHER`, it MUST also set `rpc.method_original` span attribute to the original value.
+        stability: development
+      - name: rpc.method_original
+        type: string
+        brief: |
+          The original name of the method used by the client.
+        examples:
+          - com.myservice.EchoService/catchAll
+          - com.myservice.EchoService/unknownMethod
+          - InvalidMethod
+        requirement_level:
+          conditionally_required: If and only if it's different than `rpc.method`.
         stability: development
       - name: rpc.response.status_code
         type: string
@@ -91893,7 +92248,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: required
+        requirement_level:
+          conditionally_required: If available.
         sampling_relevant: true
         note: |
           May contain server IP address, DNS name, or local socket name. When host component is an IP address, instrumentations SHOULD NOT do a reverse proxy lookup to obtain DNS name and SHOULD set `server.address` to the IP address provided in the host component.
@@ -91906,7 +92262,7 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: if the port is supported by the network transport used for communication.
+          conditionally_required: if `server.address` is set and if the port is supported by the network transport used for communication.
         sampling_relevant: true
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
@@ -92009,13 +92365,22 @@ groups:
         rpc.method:
           source_group: registry.rpc
           inherited_fields:
+            - examples
+            - stability
+          locally_overridden_fields:
+            - brief
+            - note
+            - requirement_level
+            - sampling_relevant
+        rpc.method_original:
+          source_group: registry.rpc
+          inherited_fields:
             - brief
             - examples
             - note
             - stability
           locally_overridden_fields:
             - requirement_level
-            - sampling_relevant
         rpc.response.status_code:
           source_group: registry.rpc
           inherited_fields:
