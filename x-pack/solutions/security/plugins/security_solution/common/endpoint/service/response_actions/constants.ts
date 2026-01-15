@@ -45,6 +45,7 @@ export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiComma
   'isolate',
   'kill-process',
   'suspend-process',
+  'runscript',
 ];
 
 export type EnabledAutomatedResponseActionsCommands =

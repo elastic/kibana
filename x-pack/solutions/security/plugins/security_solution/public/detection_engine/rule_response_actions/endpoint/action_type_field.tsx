@@ -46,7 +46,12 @@ const ActionTypeFieldComponent = ({
 
   const enabledActions = useMemo(
     () =>
-      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS as ['isolate', 'kill-process', 'suspend-process'],
+      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS as [
+        'isolate',
+        'kill-process',
+        'suspend-process',
+        'runscript'
+      ],
     []
   );
 

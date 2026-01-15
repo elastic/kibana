@@ -59,6 +59,13 @@ const useGetCommandText = (
         description: CONSOLE_COMMANDS.suspendProcess.about,
         tooltip: CONSOLE_COMMANDS.suspendProcess.privileges,
       };
+    case 'runscript':
+      // FIXME:PT RUNSCRIPT: i18n values below
+      return {
+        title: 'runscript',
+        description: 'run a script',
+        tooltip: 'some tooltip',
+      };
     default:
       return {
         title: '',

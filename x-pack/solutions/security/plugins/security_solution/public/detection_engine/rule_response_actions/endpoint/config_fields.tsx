@@ -50,6 +50,27 @@ export const ConfigFieldsComponent = ({
     );
   }
 
+  if (currentCommand === 'runscript') {
+    return (
+      <>
+        <EuiSpacer />
+        <h2>{'runscript options per os here'}</h2>
+        <span>
+          <pre>
+            {JSON.stringify(
+              {
+                commandPath,
+                data,
+              },
+              null,
+              2
+            )}
+          </pre>
+        </span>
+      </>
+    );
+  }
+
   return null;
 };
 
