@@ -27,8 +27,15 @@ export const createReverseCategorizeFieldAction = (
       return field.esTypes?.includes('text') === true;
     },
     execute: async (context: CategorizeFieldContext) => {
-      const { field, dataView, fieldValue, originatingApp, additionalFilter, focusTrapProps } =
-        context;
+      const {
+        field,
+        dataView,
+        fieldValue,
+        originatingApp,
+        additionalFilter,
+        focusTrapProps,
+        onFilter,
+      } = context;
       const { showReverseCategorizeFieldFlyout } = await import('./show_reverse_flyout');
       showReverseCategorizeFieldFlyout(
         field,
@@ -38,7 +45,8 @@ export const createReverseCategorizeFieldAction = (
         plugins,
         originatingApp,
         additionalFilter,
-        focusTrapProps
+        focusTrapProps,
+        onFilter
       );
     },
   });

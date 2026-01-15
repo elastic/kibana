@@ -138,6 +138,7 @@ export const ReverseCategorizeBtn = ({
           dataView: context.dataView,
           originatingApp: 'discover',
           fieldValue: valueFormatted,
+          onFilter: context.onFilter,
         });
         dataGridRef?.current?.closeCellPopover();
       }}

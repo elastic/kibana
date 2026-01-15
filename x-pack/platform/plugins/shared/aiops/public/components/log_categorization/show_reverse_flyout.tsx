@@ -35,7 +35,8 @@ export async function showReverseCategorizeFieldFlyout(
   plugins: AiopsPluginStartDeps,
   originatingApp: string,
   additionalFilter?: CategorizationAdditionalFilter,
-  focusTrapProps?: EuiFlyoutProps['focusTrapProps']
+  focusTrapProps?: EuiFlyoutProps['focusTrapProps'],
+  onFilter?: (field: DataViewField, value: string, mode: '+' | '-') => void
 ): Promise<void> {
   const { overlays, application, i18n } = coreStart;
 
@@ -82,6 +83,7 @@ export async function showReverseCategorizeFieldFlyout(
                     fieldValue={fieldValue}
                     onClose={onFlyoutClose}
                     additionalFilter={additionalFilter}
+                    onFilter={onFilter}
                   />
                 </StorageContextProvider>
               </DatePickerContextProvider>

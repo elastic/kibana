@@ -68,6 +68,7 @@ export interface ReverseCategorizationPageProps {
   fieldValue: string;
   onClose: () => void;
   additionalFilter?: CategorizationAdditionalFilter;
+  onFilter?: (field: DataViewField, value: string, mode: '+' | '-') => void;
 }
 
 const BAR_TARGET = 60;
@@ -79,6 +80,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   fieldValue,
   onClose,
   additionalFilter,
+  onFilter,
 }) => {
   const {
     notifications: { toasts },
@@ -189,6 +191,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     undefined,
     onClose
   );
+  // console.log(dataView.isPersisted());
 
   const loadCategories = useCallback(async () => {
     const { getIndexPattern, timeFieldName: timeField } = dataView;
