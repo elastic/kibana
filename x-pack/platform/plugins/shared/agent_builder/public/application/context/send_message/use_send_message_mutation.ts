@@ -18,6 +18,7 @@ import { mutationKeys } from '../../mutation_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
+import { useAgentOverrides } from '../agent_overrides/agent_overrides_context';
 
 interface UseSendMessageMutationProps {
   connectorId?: string;
@@ -28,6 +29,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { services } = useKibana();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =
     useConversationContext();
+  const { overrides } = useAgentOverrides();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
@@ -86,6 +88,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       connectorId,
       attachments: attachments ?? [],
       browserApiTools: browserApiToolsMetadata,
+      configurationOverrides: overrides,
     });
 
     return subscribeToChatEvents(events$);
