@@ -13,6 +13,7 @@ import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/componen
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getRbacControl } from '../../../../common/endpoint/service/response_actions/utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { CHOOSE_FROM_THE_LIST, LEARN_MORE } from './translations';
@@ -43,17 +44,15 @@ const ActionTypeFieldComponent = ({
       },
     },
   } = useKibana().services;
-
-  const enabledActions = useMemo(
-    () =>
-      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS as [
-        'isolate',
-        'kill-process',
-        'suspend-process',
-        'runscript'
-      ],
-    []
+  const isAutomatedRunsScriptEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsEndpointAutomatedRunScript'
   );
+
+  const enabledActions = useMemo(() => {
+    return ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.filter((command) => {
+      return command !== 'runscript' || isAutomatedRunsScriptEnabled;
+    });
+  }, [isAutomatedRunsScriptEnabled]);
 
   const fieldOptions = useMemo(
     () =>

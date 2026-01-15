@@ -9,6 +9,7 @@ import React from 'react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash';
+import { RunscriptConfig } from './runscript_config';
 import { OverwriteField } from './overwrite_process_field';
 import { FieldNameField } from './field_name';
 
@@ -18,11 +19,8 @@ interface AdditionalConfigFieldProps {
   readDefaultValueOnForm: boolean;
 }
 
-export const ConfigFieldsComponent = ({
-  basePath,
-  disabled,
-  readDefaultValueOnForm,
-}: AdditionalConfigFieldProps) => {
+export const ConfigFieldsComponent = (props: AdditionalConfigFieldProps) => {
+  const { basePath, disabled, readDefaultValueOnForm } = props;
   const commandPath = `${basePath}.command`;
   const overWritePath = `${basePath}.config.overwrite`;
   const [data] = useFormData({ watch: [commandPath, overWritePath] });
@@ -51,24 +49,7 @@ export const ConfigFieldsComponent = ({
   }
 
   if (currentCommand === 'runscript') {
-    return (
-      <>
-        <EuiSpacer />
-        <h2>{'runscript options per os here'}</h2>
-        <span>
-          <pre>
-            {JSON.stringify(
-              {
-                commandPath,
-                data,
-              },
-              null,
-              2
-            )}
-          </pre>
-        </span>
-      </>
-    );
+    return <RunscriptConfig {...props} />;
   }
 
   return null;
