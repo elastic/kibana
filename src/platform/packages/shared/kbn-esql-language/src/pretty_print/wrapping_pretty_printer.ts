@@ -10,7 +10,7 @@
 import { BinaryExpressionGroup } from '../ast/grouping';
 import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/grouping';
 import { isBinaryExpression, isIdentifier, isParamLiteral } from '../ast/is';
-import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
+import type { ESQLAstBaseItem, ESQLAstQueryExpression, ESQLMap } from '../types';
 import type {
   CommandOptionVisitorContext,
   ExpressionVisitorContext,
@@ -296,7 +296,8 @@ export class WrappingPrettyPrinter {
       | FunctionCallExpressionVisitorContext
       | ListLiteralExpressionVisitorContext
       | MapExpressionVisitorContext,
-    inp: Input
+    inp: Input,
+    doNotUseCommaAsSeparator: boolean = false
   ) {
     let txt = '';
     let lines = 1;
@@ -318,7 +319,9 @@ export class WrappingPrettyPrinter {
       }
     }
 
-    const commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+    let commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+
+    if (doNotUseCommaAsSeparator) commaBetweenArgs = false;
 
     if (!oneArgumentPerLine) {
       let argIndex = 0;
@@ -651,8 +654,15 @@ export class WrappingPrettyPrinter {
     })
 
     .on('visitMapEntryExpression', (ctx, inp: Input) => {
-      const operator = this.keyword(':');
-      const expression = this.printBinaryOperatorExpression(ctx, operator, inp, '');
+      const representation = (ctx.parent?.node as ESQLMap).representation ?? 'map';
+      const operator = representation === 'map' ? ':' : representation === 'assignment' ? '=' : '';
+      const operatorLeadingWhitespace = representation === 'assignment' ? ' ' : '';
+      const expression = this.printBinaryOperatorExpression(
+        ctx,
+        operator,
+        inp,
+        operatorLeadingWhitespace
+      );
 
       return this.decorateWithComments(
         { ...inp, suffix: '' },
@@ -663,14 +673,22 @@ export class WrappingPrettyPrinter {
     })
 
     .on('visitMapExpression', (ctx, inp: Input) => {
-      const { txt, oneArgumentPerLine } = this.printChildrenList(ctx, inp);
+      const representation = ctx.node.representation ?? 'map';
+      const doNotUseCommaAsSeparator = representation !== 'map';
+      const { txt, oneArgumentPerLine } = this.printChildrenList(
+        ctx,
+        inp,
+        doNotUseCommaAsSeparator
+      );
 
       let formatted = txt;
 
-      if (oneArgumentPerLine) {
-        formatted = '{' + txt + '\n' + inp.indent + '}';
-      } else {
-        formatted = '{' + txt + '}';
+      if (representation === 'map') {
+        if (oneArgumentPerLine) {
+          formatted = '{' + txt + '\n' + inp.indent + '}';
+        } else {
+          formatted = '{' + txt + '}';
+        }
       }
 
       return this.decorateWithComments(inp, ctx.node, formatted);

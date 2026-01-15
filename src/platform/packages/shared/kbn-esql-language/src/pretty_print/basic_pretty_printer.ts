@@ -36,6 +36,7 @@ import type {
   ESQLAstCommand,
   ESQLAstItem,
   ESQLAstQueryExpression,
+  ESQLMap,
   ESQLProperNode,
 } from '../types';
 
@@ -259,6 +260,10 @@ export class BasicPrettyPrinter {
 
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx) => {
+      if (ctx.node.type === 'unknown') {
+        return this.decorateWithComments(ctx.node, ctx.node.text || '<UNKNOWN>');
+      }
+
       return '<EXPRESSION>';
     })
 
@@ -332,19 +337,27 @@ export class BasicPrettyPrinter {
     .on('visitMapEntryExpression', (ctx) => {
       const key = ctx.visitKey();
       const value = ctx.visitValue();
-      const formatted = key + ': ' + value;
+      const parentNode = ctx.parent?.node as ESQLMap | undefined;
+      const representation = parentNode?.representation ?? 'map';
+      const separator =
+        representation === 'map' ? ': ' : representation === 'assignment' ? ' = ' : ' ';
+      const formatted = key + separator + value;
 
       return this.decorateWithComments(ctx.node, formatted);
     })
 
     .on('visitMapExpression', (ctx) => {
-      let entriesFormatted = '';
+      const representation = ctx.node.representation ?? 'map';
+      const separator = representation === 'map' ? ', ' : ' ';
+      let formatted = '';
 
       for (const entry of ctx.visitEntries()) {
-        entriesFormatted += (entriesFormatted ? ', ' : '') + entry;
+        formatted += (formatted ? separator : '') + entry;
       }
 
-      const formatted = '{' + entriesFormatted + '}';
+      if (representation === 'map') {
+        formatted = '{' + formatted + '}';
+      }
 
       return this.decorateWithComments(ctx.node, formatted);
     })

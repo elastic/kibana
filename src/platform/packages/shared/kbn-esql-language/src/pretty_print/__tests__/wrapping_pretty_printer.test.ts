@@ -999,6 +999,33 @@ FROM index
     })`
       );
     });
+
+    describe('representation: assignment', () => {
+      test('single entry assignment map', () => {
+        const src = `PROMQL index = my_index bytes[5m]`;
+        const text = reprint(src).text;
+
+        expect(text).toBe(`PROMQL index = my_index bytes[5m]`);
+      });
+
+      test('multiple entry assignment map', () => {
+        const src = `PROMQL index = my_index time = ?param bytes[5m]`;
+        const text = reprint(src).text;
+
+        expect(text).toBe(`PROMQL index = my_index time = ?param bytes[5m]`);
+      });
+
+      test('assignment map with long values wraps correctly', () => {
+        const src = `PROMQL index = my_very_long_index_name_that_should_wrap time = ?param bytes[5m]`;
+        const text = reprint(src, { wrap: 60 }).text;
+
+        expect(text).toBe(`PROMQL
+  
+    index = my_very_long_index_name_that_should_wrap
+    time = ?param
+  bytes[5m]`);
+      });
+    });
   });
 
   describe('binary expressions', () => {
