@@ -146,12 +146,12 @@ function TraceTree() {
     }, {})
   );
 
-  function toggleAccordionState(id: string) {
+  const toggleAccordionState = useCallback((id: string) => {
     setAccordionStateMap((prevStates) => ({
       ...prevStates,
       [id]: prevStates[id] === 'open' ? 'closed' : 'open',
     }));
-  }
+  }, []);
 
   const rowHeightCache = useRef(
     new CellMeasurerCache({
