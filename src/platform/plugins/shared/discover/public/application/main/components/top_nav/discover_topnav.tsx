@@ -8,7 +8,7 @@
  */
 
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
 import {
   DiscoverFlyouts,
   dismissAllFlyoutsExceptFor,
@@ -238,6 +238,15 @@ export const DiscoverTopNav = ({
     },
     [dispatch, onDataViewEditedAction]
   );
+  const createAndAppendAdHocDataView = useCurrentTabAction(
+    internalStateActions.createAndAppendAdHocDataView
+  );
+  const onCreateDefaultAdHocDataView = useCallback(
+    (dataViewSpec: DataViewSpec) => {
+      dispatch(createAndAppendAdHocDataView({ dataViewSpec }));
+    },
+    [dispatch, createAndAppendAdHocDataView]
+  );
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
       trigger: {
@@ -248,7 +257,7 @@ export const DiscoverTopNav = ({
       currentDataViewId: dataView?.id,
       onAddField: addField,
       onDataViewCreated,
-      onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
+      onCreateDefaultAdHocDataView,
       onChangeDataView,
       adHocDataViews,
       savedDataViews,
@@ -259,10 +268,10 @@ export const DiscoverTopNav = ({
     addField,
     dataView,
     savedDataViews,
-    stateContainer,
     onChangeDataView,
     onDataViewCreated,
     onDataViewEdited,
+    onCreateDefaultAdHocDataView,
   ]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {

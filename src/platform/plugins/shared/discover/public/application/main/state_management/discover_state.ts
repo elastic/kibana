@@ -22,7 +22,7 @@ import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
 } from '@kbn/data-plugin/public';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
@@ -157,12 +157,6 @@ export interface DiscoverStateContainer {
      * Stop syncing the state containers started by initializeAndSync
      */
     stopSyncing: () => void;
-    /**
-     * Create and select a temporary/adhoc data view by a given index pattern
-     * Used by the Data View Picker
-     * @param pattern
-     */
-    createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
     /**
      * Triggered when transitioning from ESQL to Dataview
      * Clean ups the ES|QL query and moves to the dataview mode
@@ -588,20 +582,6 @@ export function getDiscoverStateContainer({
     };
   };
 
-  const createAndAppendAdHocDataView = async (dataViewSpec: DataViewSpec) => {
-    const newDataView = await services.dataViews.create(dataViewSpec);
-    if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
-      newDataView.timeFieldName = '@timestamp';
-    }
-    internalState.dispatch(internalStateActions.appendAdHocDataViews(newDataView));
-    await internalState.dispatch(
-      injectCurrentTab(internalStateActions.changeDataView)({
-        dataViewOrDataViewId: newDataView,
-      })
-    );
-    return newDataView;
-  };
-
   const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
     const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const scopedEbtManager = scopedEbtManager$.getValue();
@@ -663,7 +643,6 @@ export function getDiscoverStateContainer({
     actions: {
       initializeAndSync,
       stopSyncing,
-      createAndAppendAdHocDataView,
       onOpenSavedSearch,
       transitionFromESQLToDataView,
       transitionFromDataViewToESQL,

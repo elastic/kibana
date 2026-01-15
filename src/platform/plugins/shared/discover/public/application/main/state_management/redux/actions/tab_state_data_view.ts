@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -251,4 +251,28 @@ export const updateAdHocDataViewId: InternalStateThunkActionCreator<
     services.urlTracker.setTrackingEnabled(trackingEnabled);
 
     return nextDataView;
+  };
+
+/**
+ * Create and select a temporary/adhoc data view by a given spec
+ * Used by the Data View Picker
+ */
+export const createAndAppendAdHocDataView: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataViewSpec: DataViewSpec }>],
+  Promise<DataView>
+> =
+  ({ tabId, dataViewSpec }) =>
+  async (dispatch, _, { services }) => {
+    const newDataView = await services.dataViews.create(dataViewSpec);
+    if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
+      newDataView.timeFieldName = '@timestamp';
+    }
+    dispatch(internalStateActions.appendAdHocDataViews(newDataView));
+    await dispatch(
+      changeDataView({
+        tabId,
+        dataViewOrDataViewId: newDataView,
+      })
+    );
+    return newDataView;
   };

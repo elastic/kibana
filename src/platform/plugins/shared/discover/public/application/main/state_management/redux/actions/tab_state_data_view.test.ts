@@ -309,4 +309,20 @@ describe('tab_state_data_view actions', () => {
       expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
     });
   });
+
+  describe('createAndAppendAdHocDataView', () => {
+    test('should create a new data view and append to the ad-hoc data view list', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      await internalState.dispatch(
+        internalStateActions.createAndAppendAdHocDataView({
+          tabId,
+          dataViewSpec: { title: 'ad-hoc' },
+        })
+      );
+      expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
+        createDataViewDataSource({ dataViewId: 'ad-hoc-id' })
+      );
+      expect(runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe('ad-hoc-id');
+    });
+  });
 });

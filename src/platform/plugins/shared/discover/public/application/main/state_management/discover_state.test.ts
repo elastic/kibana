@@ -1362,27 +1362,6 @@ describe('Discover state', () => {
       expect(state.getCurrentTab().appState.filters).toBeUndefined();
     });
 
-    test('onCreateDefaultAdHocDataView', async () => {
-      const { state, customizationService } = await getState('/', { savedSearch: savedSearchMock });
-      await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
-          initializeSingleTabParams: {
-            stateContainer: state,
-            customizationService,
-            dataViewSpec: undefined,
-            defaultUrlState: undefined,
-            esqlControls: undefined,
-          },
-        })
-      );
-      await state.actions.createAndAppendAdHocDataView({ title: 'ad-hoc-test' });
-      expect(state.getCurrentTab().appState.dataSource).toEqual(
-        createDataViewDataSource({ dataViewId: 'ad-hoc-id' })
-      );
-      expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe('ad-hoc-id');
-      state.actions.stopSyncing();
-    });
-
     test('resetDiscoverSession - when changing data views', async () => {
       const { state, customizationService, runtimeStateManager, getCurrentUrl } = await getState(
         '/',
