@@ -6,6 +6,7 @@
  */
 import { createOnPreResponseHandler } from './on_pre_response_handler';
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { of, BehaviorSubject, NEVER } from 'rxjs';
 import { licenseMock } from '../common/licensing.mock';
 
 describe('createOnPreResponseHandler', () => {
@@ -19,14 +20,13 @@ describe('createOnPreResponseHandler', () => {
 
   it('sets unknown if license.signature is unset', async () => {
     const refresh = jest.fn();
-    const getLicense = jest.fn(() => undefined);
     const toolkit = httpServiceMock.createOnPreResponseToolkit();
+    const noLicense$ = NEVER;
 
-    const interceptor = createOnPreResponseHandler(refresh, getLicense);
+    const interceptor = createOnPreResponseHandler(refresh, noLicense$);
     await interceptor(httpServerMock.createKibanaRequest(), { statusCode: 200 }, toolkit);
 
     expect(refresh).toHaveBeenCalledTimes(0);
-    expect(getLicense).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
@@ -37,14 +37,15 @@ describe('createOnPreResponseHandler', () => {
 
   it('sets license.signature header immediately for non-error responses', async () => {
     const refresh = jest.fn();
-    const getLicense = jest.fn(() => licenseMock.createLicense({ signature: 'foo' }));
     const toolkit = httpServiceMock.createOnPreResponseToolkit();
 
-    const interceptor = createOnPreResponseHandler(refresh, getLicense);
+    const interceptor = createOnPreResponseHandler(
+      refresh,
+      of(licenseMock.createLicense({ signature: 'foo' }))
+    );
     await interceptor(httpServerMock.createKibanaRequest(), { statusCode: 200 }, toolkit);
 
     expect(refresh).toHaveBeenCalledTimes(0);
-    expect(getLicense).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
@@ -54,14 +55,15 @@ describe('createOnPreResponseHandler', () => {
   });
   it('sets license.signature header immediately for 429 error responses', async () => {
     const refresh = jest.fn();
-    const getLicense = jest.fn(() => licenseMock.createLicense({ signature: 'foo' }));
     const toolkit = httpServiceMock.createOnPreResponseToolkit();
 
-    const interceptor = createOnPreResponseHandler(refresh, getLicense);
+    const interceptor = createOnPreResponseHandler(
+      refresh,
+      of(licenseMock.createLicense({ signature: 'foo' }))
+    );
     await interceptor(httpServerMock.createKibanaRequest(), { statusCode: 429 }, toolkit);
 
     expect(refresh).toHaveBeenCalledTimes(0);
-    expect(getLicense).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
@@ -71,20 +73,19 @@ describe('createOnPreResponseHandler', () => {
   });
   it('sets license.signature header after refresh for other error responses', async () => {
     const updatedLicense = licenseMock.createLicense({ signature: 'bar' });
-    const getLicense = jest.fn(() => licenseMock.createLicense({ signature: 'foo' }));
+    const license$ = new BehaviorSubject(licenseMock.createLicense({ signature: 'foo' }));
     const refresh = jest.fn().mockImplementation(async () => {
       setTimeout(() => {
-        getLicense.mockReturnValue(updatedLicense);
+        license$.next(updatedLicense);
       }, 1);
     });
 
     const toolkit = httpServiceMock.createOnPreResponseToolkit();
 
-    const interceptor = createOnPreResponseHandler(refresh, getLicense);
+    const interceptor = createOnPreResponseHandler(refresh, license$);
     await interceptor(httpServerMock.createKibanaRequest(), { statusCode: 400 }, toolkit);
 
     expect(refresh).toHaveBeenCalledTimes(1);
-    expect(getLicense).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
@@ -93,10 +94,10 @@ describe('createOnPreResponseHandler', () => {
     });
 
     jest.advanceTimersByTime(10);
+
     await interceptor(httpServerMock.createKibanaRequest(), { statusCode: 400 }, toolkit);
 
     expect(refresh).toHaveBeenCalledTimes(2);
-    expect(getLicense).toHaveBeenCalledTimes(2);
     expect(toolkit.next).toHaveBeenCalledTimes(2);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
