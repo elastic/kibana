@@ -171,9 +171,9 @@ export const internalStateSlice = createSlice({
     ) => {
       withTab(state, action.payload, (tab) => {
         if (tab.expandedDoc?.id !== action.payload.expandedDoc?.id) {
-          // Reset the initialDocViewerTabId and docViews when changing expandedDoc to a different document
+          // Reset the initialDocViewerTabId and docViewer when changing expandedDoc to a different document
           tab.initialDocViewerTabId = undefined;
-          tab.uiState.docViewer.docViews = {};
+          tab.uiState.docViewer = {};
         }
 
         tab.expandedDoc = action.payload.expandedDoc;
@@ -286,7 +286,7 @@ export const internalStateSlice = createSlice({
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
         tab.initialDocViewerTabId = undefined;
-        tab.uiState.docViewer.docViews = {};
+        tab.uiState.docViewer = {};
       }),
 
     setESQLEditorUiState: (
@@ -362,7 +362,7 @@ export const internalStateSlice = createSlice({
 
     setDocViewerUiState: (
       state,
-      action: TabAction<{ docViewerUiState: TabState['uiState']['docViewer'] }>
+      action: TabAction<{ docViewerUiState: Partial<TabState['uiState']['docViewer']> }>
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.uiState.docViewer = action.payload.docViewerUiState;

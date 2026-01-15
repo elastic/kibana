@@ -26,7 +26,11 @@ import { useProfileAccessor } from '../../context_awareness';
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
-export interface DiscoverGridFlyoutProps extends Pick<DocViewerProps, 'onUpdateSelectedTabId'> {
+export interface DiscoverGridFlyoutProps
+  extends Pick<
+    DocViewerProps,
+    'initialDocViewerState' | 'onInitialDocViewerStateChange' | 'onUpdateSelectedTabId'
+  > {
   savedSearchId?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
@@ -65,6 +69,8 @@ export function DiscoverGridFlyout({
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
+  initialDocViewerState,
+  onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
@@ -128,6 +134,8 @@ export function DiscoverGridFlyout({
       setExpandedDoc={setExpandedDoc}
       initialTabId={initialTabId}
       docViewerRef={docViewerRef}
+      initialDocViewerState={initialDocViewerState}
+      onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       onUpdateSelectedTabId={onUpdateSelectedTabId}
     />
   );
