@@ -189,15 +189,15 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('discoverOpenButton');
   }
 
-  public async hasUnsavedChangesBadge() {
-    return await this.testSubjects.exists('unsavedChangesBadge');
+  public async hasUnsavedChangesIndicator() {
+    return await this.testSubjects.exists('split-button-notification-indicator');
   }
 
   public async revertUnsavedChanges() {
-    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
-    await this.testSubjects.click('unsavedChangesBadge');
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
     await this.retry.waitFor('popover is open', async () => {
-      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
     });
     await this.testSubjects.click('revertUnsavedChangesButton');
     await this.header.waitUntilLoadingHasFinished();
@@ -205,12 +205,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async saveUnsavedChanges() {
-    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
-    await this.testSubjects.click('unsavedChangesBadge');
-    await this.retry.waitFor('popover is open', async () => {
-      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
-    });
-    await this.testSubjects.click('saveUnsavedChangesButton');
+    await this.testSubjects.moveMouseTo('discoverSaveButton');
+    await this.testSubjects.click('discoverSaveButton');
     await this.retry.waitFor('modal is open', async () => {
       return Boolean(await this.testSubjects.find('confirmSaveSavedObjectButton'));
     });
@@ -644,6 +640,9 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
+    await this.testSubjects.exists('app-menu-overflow-button');
+    await this.testSubjects.click('app-menu-overflow-button');
+
     if (await this.testSubjects.exists('select-text-based-language-btn')) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();

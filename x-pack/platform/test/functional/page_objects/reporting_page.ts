@@ -132,6 +132,7 @@ export class ReportingPageObject extends FtrService {
 
   async openExportPopover() {
     this.log.debug('open export popover');
+    await this.testSubjects.click('app-menu-overflow-button');
     await this.exports.clickExportTopNavButton();
   }
 

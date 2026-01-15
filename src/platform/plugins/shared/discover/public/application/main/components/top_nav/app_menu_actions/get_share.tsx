@@ -313,6 +313,7 @@ export const getShareAppMenuItem = ({
       iconType: 'exportAction',
       testId: 'exportTopNavButton',
       items: exportItems,
+      popoverTestId: 'exportPopoverPanel',
     });
   }
 

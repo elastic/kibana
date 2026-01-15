@@ -31,7 +31,6 @@ export const getTopNavBadges = ({
 
   const isManaged = stateContainer.savedSearchState.getState().managed;
 
-  // Show solutions view badge if spaces is enabled and not on mobile
   if (services.spaces && !isMobile) {
     entries.push({
       badgeText: i18n.translate('discover.topNav.solutionViewTitle', {

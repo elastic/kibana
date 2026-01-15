@@ -164,7 +164,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await exports.isExportPopoverOpen();
         });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
@@ -175,7 +174,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await exports.isExportPopoverOpen();
         });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await reporting.openExportPopover();
       });
     });
 

@@ -227,10 +227,8 @@ export const useTopNavLinks = ({
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
 
-    // Register all base items to the registry
     newAppMenuRegistry.registerItems(appMenuItems);
 
-    // Add ESQL switch item
     if (services.uiSettings.get(ENABLE_ESQL)) {
       newAppMenuRegistry.registerItem({
         id: 'esql',
@@ -287,6 +285,7 @@ export const useTopNavLinks = ({
           });
         },
         popoverWidth: 150,
+        popoverTestId: 'discoverSaveButtonPopover',
         splitButtonProps: {
           showNotificationIndicator: hasUnsavedChanges,
           notifcationIndicatorTooltipContent: hasUnsavedChanges
@@ -333,7 +332,7 @@ export const useTopNavLinks = ({
                 defaultMessage: 'Reset changes',
               }),
               iconType: 'editorUndo',
-              testId: 'discardChangesMenuItem',
+              testId: 'revertUnsavedChangesButton',
               disableButton: !hasUnsavedChanges,
             },
           ],
