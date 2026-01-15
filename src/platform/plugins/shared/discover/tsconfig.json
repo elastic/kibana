@@ -123,7 +123,6 @@
     "@kbn/cps",
     "@kbn/controls-renderer",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/core-chrome-app-menu",
     "@kbn/shared-ux-error-boundary",
   ],
   "exclude": ["target/**/*"]
