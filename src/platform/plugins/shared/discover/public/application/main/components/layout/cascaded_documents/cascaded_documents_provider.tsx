@@ -18,9 +18,11 @@ import type {
   internalStateActions,
 } from '../../../state_management/redux';
 import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
+import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
 
 export interface CascadedDocumentsContext
   extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
+  cascadedDocumentsFetcher: CascadedDocumentsFetcher;
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
