@@ -57,20 +57,30 @@ import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
 
+/** The type identifier for dashboard APIs. */
 export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
+/**
+ * Options for creating a dashboard.
+ * These options control how the dashboard is initialized and integrates with various Kibana features.
+ */
 export interface DashboardCreationOptions {
+  /** Returns the initial dashboard state and view mode. */
   getInitialInput?: () => Partial<
     DashboardState & { references?: Reference[]; viewMode?: ViewMode }
   >;
 
+  /** Returns context to pass through to child embeddables. */
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
+  /** Returns embeddables to add to the dashboard on load. */
   getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
+  /** Whether to enable search sessions integration. */
   useSearchSessionsIntegration?: boolean;
+  /** Settings for search session integration. */
   searchSessionSettings?: {
     sessionIdToRestore?: string;
     sessionIdUrlChangeObservable?: Observable<string | undefined>;
@@ -82,21 +92,42 @@ export interface DashboardCreationOptions {
     ) => SearchSessionInfoProvider;
   };
 
+  /** Whether to enable session storage integration. */
   useSessionStorageIntegration?: boolean;
 
+  /** Whether to enable unified search integration. */
   useUnifiedSearchIntegration?: boolean;
+  /** Settings for unified search integration. */
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
+  /**
+   * Validates a loaded saved object and determines whether it is valid.
+   *
+   * @param result - The loaded dashboard response body.
+   * @returns The validation result: 'valid', 'invalid', or 'redirected'.
+   */
   validateLoadedSavedObject?: (
     result: DashboardReadResponseBody
   ) => 'valid' | 'invalid' | 'redirected';
 
+  /** Whether to start the dashboard in full screen mode. */
   fullScreenMode?: boolean;
+  /** Whether the dashboard is embedded externally (outside Kibana). */
   isEmbeddedExternally?: boolean;
 
+  /**
+   * Returns the embeddable app context for the dashboard.
+   *
+   * @param dashboardId - The optional dashboard ID.
+   * @returns The {@link EmbeddableAppContext} for the dashboard.
+   */
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
 
+/**
+ * The public API for interacting with a dashboard.
+ * This type combines multiple capability interfaces to provide full dashboard functionality.
+ */
 export type DashboardApi = CanExpandPanels &
   CanPinPanels &
   HasSections &
@@ -183,7 +214,7 @@ export type DashboardApi = CanExpandPanels &
 
 export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'controlGroupInput'>;
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;

@@ -27,6 +27,20 @@ export const DataSourcesLayout: React.FC<DataSourcesLayoutProps> = ({ children }
     {
       label: (
         <>
+          {i18n.translate('xpack.dataConnectors.tabs.activeSources', {
+            defaultMessage: 'Active sources',
+          })}{' '}
+          <EuiBadge color="hollow">{activeSources.length}</EuiBadge>
+        </>
+      ),
+      onClick: navigateToActiveSources,
+      isSelected: isActiveSourcesTab,
+      key: 'active-sources',
+      'data-test-subj': 'activeSourcesTab',
+    },
+    {
+      label: (
+        <>
           {i18n.translate('xpack.dataSources.tabs.catalog', {
             defaultMessage: 'Catalog',
           })}{' '}
@@ -37,20 +51,6 @@ export const DataSourcesLayout: React.FC<DataSourcesLayoutProps> = ({ children }
       isSelected: isConnectorsTab,
       key: 'connectors',
       'data-test-subj': 'connectorsTab',
-    },
-    {
-      label: (
-        <>
-          {i18n.translate('xpack.dataSources.tabs.activeSources', {
-            defaultMessage: 'Active sources',
-          })}{' '}
-          <EuiBadge color="hollow">{activeSources.length}</EuiBadge>
-        </>
-      ),
-      onClick: navigateToActiveSources,
-      isSelected: isActiveSourcesTab,
-      key: 'active-sources',
-      'data-test-subj': 'activeSourcesTab',
     },
   ];
 

@@ -29,11 +29,11 @@ export const useConnectorNavigation = () => {
     });
   }, [application]);
 
-  // Active sources tab is only selected when explicitly on that path
-  const isActiveSourcesTab = useMemo(() => currentPath === '/active-sources', [currentPath]);
+  // Connectors tab is only selected when explicitly on that path
+  const isConnectorsTab = useMemo(() => currentPath === '/connectors', [currentPath]);
 
-  // Connectors tab is selected by default (including root path)
-  const isConnectorsTab = useMemo(() => !isActiveSourcesTab, [isActiveSourcesTab]);
+  // Active sources tab is selected by default (including root path)
+  const isActiveSourcesTab = useMemo(() => !isConnectorsTab, [isConnectorsTab]);
 
   return {
     navigateToConnectors,
