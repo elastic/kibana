@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
-  - '@kbn/zod'
 tags:
   - plugin
   - prod
