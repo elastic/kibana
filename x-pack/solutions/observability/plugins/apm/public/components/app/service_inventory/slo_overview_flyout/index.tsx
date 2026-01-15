@@ -24,7 +24,10 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiStat,
+  EuiTablePagination,
+  EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -33,8 +36,15 @@ import numeral from '@elastic/numeral';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import rison from '@kbn/rison';
 import { AgentIcon } from '@kbn/custom-icons';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
+import {
+  AlertConsumers,
+  SLO_RULE_TYPE_IDS,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -84,7 +94,12 @@ const statusColors: Record<string, string> = {
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
-  const { http, uiSettings, slo } = useKibana<ApmPluginStartDeps>().services;
+  const {
+    http,
+    uiSettings,
+    slo: sloPlugin,
+    application: { navigateToUrl },
+  } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const { query } = useApmParams('/services');
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,7 +107,11 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sloData, setSloData] = useState<SLOWithSummaryResponse[]>([]);
+  const [totalSlos, setTotalSlos] = useState(0);
   const [selectedSloId, setSelectedSloId] = useState<string | null>(null);
+  const [activeAlerts, setActiveAlerts] = useState<Map<string, number>>(new Map());
+  const [page, setPage] = useState(0);
+  const [perPage, setPerPage] = useState(10);
   const percentFormat = uiSettings?.get('format:percent:defaultPattern') ?? '0.00%';
 
   const filtersQuery = useMemo(() => {
@@ -115,39 +134,145 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     });
   }, [serviceName]);
 
+  // Fetch SLOs and alerts in parallel
   useEffect(() => {
+    if (!http) return;
+
     let isMounted = true;
     setIsLoading(true);
 
-    http
-      ?.fetch<{ results: SLOWithSummaryResponse[]; total: number }>('/api/observability/slos', {
-        method: 'GET',
-        version: '2023-10-31',
-        query: {
-          filters: filtersQuery,
-          perPage: '100',
-          sortBy: 'status',
-          sortDirection: 'desc',
-          hideStale: 'true',
-        },
-      })
-      .then((response) => {
+    const fetchSlosAndAlerts = async () => {
+      try {
+        // First fetch SLOs with pagination
+        const sloResponse = await http.fetch<{ results: SLOWithSummaryResponse[]; total: number }>(
+          '/api/observability/slos',
+          {
+            method: 'GET',
+            version: '2023-10-31',
+            query: {
+              filters: filtersQuery,
+              page: String(page + 1), // API uses 1-based indexing
+              perPage: String(perPage),
+              sortBy: 'status',
+              sortDirection: 'desc',
+              hideStale: 'true',
+            },
+          }
+        );
+
+        if (!isMounted) return;
+
+        const slos = sloResponse.results;
+        const total = sloResponse.total;
+
+        // Then fetch alerts for those SLOs in parallel
+        if (slos.length > 0) {
+          const sloIdsAndInstanceIds = slos.map(
+            (sloItem) => [sloItem.id, sloItem.instanceId ?? ALL_VALUE] as [string, string]
+          );
+
+          const alertsResponse = await http
+            .post<{
+              aggregations?: {
+                perSloId: {
+                  buckets: Array<{
+                    key: [string, string];
+                    key_as_string: string;
+                    doc_count: number;
+                  }>;
+                };
+              };
+            }>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
+              body: JSON.stringify({
+                rule_type_ids: SLO_RULE_TYPE_IDS,
+                consumers: [
+                  AlertConsumers.SLO,
+                  AlertConsumers.OBSERVABILITY,
+                  AlertConsumers.ALERTS,
+                ],
+                size: 0,
+                query: {
+                  bool: {
+                    filter: [
+                      { range: { '@timestamp': { gte: 'now-24h' } } },
+                      { term: { 'kibana.alert.status': 'active' } },
+                    ],
+                    should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
+                      bool: {
+                        filter: [
+                          { term: { 'slo.id': sloId } },
+                          ...(instanceId === ALL_VALUE
+                            ? []
+                            : [{ term: { 'slo.instanceId': instanceId } }]),
+                        ],
+                      },
+                    })),
+                    minimum_should_match: 1,
+                  },
+                },
+                aggs: {
+                  perSloId: {
+                    multi_terms: {
+                      size: 10000,
+                      terms: [{ field: 'slo.id' }, { field: 'slo.instanceId' }],
+                    },
+                  },
+                },
+              }),
+            })
+            .catch(() => null); // Ignore alerts fetch errors
+
+          if (isMounted && alertsResponse) {
+            const alertsMap = new Map<string, number>();
+            alertsResponse.aggregations?.perSloId?.buckets?.forEach((bucket) => {
+              alertsMap.set(bucket.key_as_string, bucket.doc_count);
+            });
+            setActiveAlerts(alertsMap);
+          }
+        }
+
         if (isMounted) {
-          setSloData(response.results);
+          setSloData(slos);
+          setTotalSlos(total);
           setIsLoading(false);
         }
-      })
-      .catch(() => {
+      } catch {
         if (isMounted) {
           setSloData([]);
+          setTotalSlos(0);
           setIsLoading(false);
         }
-      });
+      }
+    };
+
+    fetchSlosAndAlerts();
 
     return () => {
       isMounted = false;
     };
-  }, [http, filtersQuery]);
+  }, [http, filtersQuery, page, perPage]);
+
+  const getActiveAlertsForSlo = useCallback(
+    (sloItem: SLOWithSummaryResponse) => {
+      const key = `${sloItem.id}|${sloItem.instanceId ?? ALL_VALUE}`;
+      return activeAlerts.get(key) ?? 0;
+    },
+    [activeAlerts]
+  );
+
+  const handleActiveAlertsClick = useCallback(
+    (sloItem: SLOWithSummaryResponse) => {
+      const kuery = encodeURIComponent(
+        `'slo.id:"${sloItem.id}" and slo.instanceId:"${sloItem.instanceId}"'`
+      );
+      navigateToUrl(
+        `${http?.basePath.prepend(
+          observabilityPaths.alerts
+        )}?_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`
+      );
+    },
+    [http?.basePath, navigateToUrl]
+  );
 
   const statusCounts = useMemo(() => {
     const counts = {
@@ -254,8 +379,52 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     setSelectedSloId(null);
   }, []);
 
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  const handlePerPageChange = useCallback((newPerPage: number) => {
+    setPerPage(newPerPage);
+    setPage(0); // Reset to first page when changing items per page
+  }, []);
+
   const columns: Array<EuiBasicTableColumn<SLOWithSummaryResponse>> = useMemo(
     () => [
+      {
+        field: 'alerts',
+        name: i18n.translate('xpack.apm.sloOverviewFlyout.columns.alerts', {
+          defaultMessage: 'Alerts',
+        }),
+        width: '70px',
+        render: (_: unknown, sloItem: SLOWithSummaryResponse) => {
+          const alertCount = getActiveAlertsForSlo(sloItem);
+          if (!alertCount) return null;
+          return (
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('xpack.apm.sloOverviewFlyout.activeAlertsBadge.tooltip', {
+                defaultMessage:
+                  '{count, plural, one {# burn rate alert} other {# burn rate alerts}}, click to view.',
+                values: { count: alertCount },
+              })}
+            >
+              <EuiBadge
+                iconType="warning"
+                color="danger"
+                onClick={() => handleActiveAlertsClick(sloItem)}
+                onClickAriaLabel={i18n.translate(
+                  'xpack.apm.sloOverviewFlyout.activeAlertsBadge.ariaLabel',
+                  { defaultMessage: 'active alerts badge' }
+                )}
+                data-test-subj="apmSloActiveAlertsBadge"
+                css={{ cursor: 'pointer' }}
+              >
+                {alertCount}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        },
+      },
       {
         field: 'summary.status',
         name: i18n.translate('xpack.apm.sloOverviewFlyout.columns.status', {
@@ -277,7 +446,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         render: (name: string, sloItem: SLOWithSummaryResponse) => (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="visGauge" size="s" color="subdued" />
+              <EuiIcon type="expand" size="s" color="subdued" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiLink data-test-subj="apmSloNameLink" onClick={() => handleSloClick(sloItem.id)}>
@@ -307,7 +476,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         render: (target: number) => numeral(target).format(percentFormat),
       },
     ],
-    [handleSloClick, percentFormat]
+    [getActiveAlertsForSlo, handleActiveAlertsClick, handleSloClick, percentFormat]
   );
 
   const activeFiltersCount = selectedStatuses.length;
@@ -460,6 +629,23 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
         <EuiSpacer size="m" />
 
+        {/* Results count */}
+        {totalSlos > 0 && (
+          <>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.apm.sloOverviewFlyout.resultsCount', {
+                defaultMessage: 'Showing {start}-{end} of {total} SLOs',
+                values: {
+                  start: page * perPage + 1,
+                  end: Math.min((page + 1) * perPage, totalSlos),
+                  total: totalSlos,
+                },
+              })}
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
+
         <EuiBasicTable<SLOWithSummaryResponse>
           items={filteredSlos}
           columns={columns}
@@ -480,9 +666,25 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           }
           data-test-subj="sloOverviewFlyoutTable"
         />
+
+        {/* Pagination */}
+        {totalSlos > perPage && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiTablePagination
+              pageCount={Math.ceil(totalSlos / perPage)}
+              activePage={page}
+              onChangePage={handlePageChange}
+              itemsPerPage={perPage}
+              itemsPerPageOptions={[10, 25, 50]}
+              onChangeItemsPerPage={handlePerPageChange}
+              data-test-subj="sloOverviewFlyoutPagination"
+            />
+          </>
+        )}
       </EuiFlyoutBody>
-      {selectedSloId && slo?.getSLODetailsFlyout && (
-        <slo.getSLODetailsFlyout
+      {selectedSloId && sloPlugin?.getSLODetailsFlyout && (
+        <sloPlugin.getSLODetailsFlyout
           sloId={selectedSloId}
           onClose={handleCloseSloDetails}
           size="m"
