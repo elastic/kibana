@@ -97,7 +97,6 @@ export const DiscoverTopNav = ({
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
-  const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -348,7 +347,7 @@ export const DiscoverTopNav = ({
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
-        onDraftChange={tabsEnabled ? onSearchDraftChange : undefined}
+        onDraftChange={onSearchDraftChange}
         esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
         esqlVariablesConfig={
@@ -376,7 +375,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
-        onOpenQueryInNewTab={tabsEnabled ? onOpenQueryInNewTab : undefined}
+        onOpenQueryInNewTab={onOpenQueryInNewTab}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
