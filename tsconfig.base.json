@@ -1180,6 +1180,8 @@
       "@kbn/ftr-common-functional-services/*": ["src/platform/packages/shared/kbn-ftr-common-functional-services/*"],
       "@kbn/ftr-common-functional-ui-services": ["src/platform/packages/shared/kbn-ftr-common-functional-ui-services"],
       "@kbn/ftr-common-functional-ui-services/*": ["src/platform/packages/shared/kbn-ftr-common-functional-ui-services/*"],
+      "@kbn/ftr-llm-proxy": ["src/platform/packages/shared/kbn-ftr-llm-proxy"],
+      "@kbn/ftr-llm-proxy/*": ["src/platform/packages/shared/kbn-ftr-llm-proxy/*"],
       "@kbn/ftr-screenshot-filename": ["src/platform/packages/private/kbn-ftr-screenshot-filename"],
       "@kbn/ftr-screenshot-filename/*": ["src/platform/packages/private/kbn-ftr-screenshot-filename/*"],
       "@kbn/functional-with-es-ssl-cases-test-plugin": ["x-pack/platform/test/functional_with_es_ssl/plugins/cases"],
