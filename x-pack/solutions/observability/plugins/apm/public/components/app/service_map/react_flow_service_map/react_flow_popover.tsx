@@ -143,7 +143,7 @@ export function ReactFlowPopover({
   const trigger = <div style={{ width: 1, height: 1, visibility: 'hidden' }} />;
 
   return (
-    <div style={popoverStyle} onClick={(e) => e.stopPropagation()} role="presentation">
+    <div style={popoverStyle} role="presentation">
       <EuiPopover
         anchorPosition={'upCenter'}
         button={trigger}
@@ -159,7 +159,7 @@ export function ReactFlowPopover({
                 {kuery && (
                   <EuiIconTip
                     position="bottom"
-                    content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                    content={i18n.translate('xpack.actions.serviceMap.kqlFilterInfo', {
                       defaultMessage: 'The KQL filter is not applied in the displayed stats.',
                     })}
                     type="info"
