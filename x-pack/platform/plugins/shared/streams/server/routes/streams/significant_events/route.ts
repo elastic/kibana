@@ -144,7 +144,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
 
     return readSignificantEventsFromAlertsIndices(
       {
-        name,
+        streamNames: [name],
         from,
         to,
         bucketSize,
@@ -218,17 +218,12 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
-    const promptsConfigService = new PromptsConfigService({
-      soClient,
-      logger,
-    });
-
     // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(connectorId);
-
-    const definition = await streamsClient.getStream(params.path.name);
-
-    const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
+    const [connector, definition, { significantEventsPromptOverride }] = await Promise.all([
+      inferenceClient.getConnectorById(connectorId),
+      streamsClient.getStream(params.path.name),
+      new PromptsConfigService({ soClient, logger }).getPrompt(),
+    ]);
 
     return fromRxjs(
       generateSignificantEventDefinitions(
@@ -239,7 +234,7 @@ const generateSignificantEventsRoute = createServerRoute({
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
           sampleDocsSize: params.query.sampleDocsSize,
-          systemPromptOverride: significantEventsPromptOverride,
+          systemPrompt: significantEventsPromptOverride,
         },
         {
           inferenceClient,

@@ -84,7 +84,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                           end,
                           system,
                           sampleDocsSize,
-                          systemPromptOverride: significantEventsPromptOverride,
+                          systemPrompt: significantEventsPromptOverride,
                         },
                         {
                           inferenceClient,
