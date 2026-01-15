@@ -129,7 +129,6 @@ export const getAlertsAppMenuItem = ({
   const items = [];
 
   if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
-    // activeSpace.solution && activeSpace.solution !== 'classic' TODO handle this
     items.push({
       id: AppMenuActionId.manageRulesAndConnectors,
       order: Number.MAX_SAFE_INTEGER,

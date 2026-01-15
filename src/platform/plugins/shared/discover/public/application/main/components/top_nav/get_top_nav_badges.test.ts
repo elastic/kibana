@@ -22,22 +22,18 @@ discoverServiceMock.capabilities.discover_v2.save = true;
 describe('getTopNavBadges()', function () {
   test('should not return the unsaved changes badge if no changes', () => {
     const topNavBadges = getTopNavBadges({
-      hasUnsavedChanges: false,
       isMobile: false,
       services: discoverServiceMock,
       stateContainer,
-      topNavCustomization: undefined,
     });
     expect(topNavBadges).toMatchInlineSnapshot(`Array []`);
   });
 
   test('should return the unsaved changes badge when has changes', async () => {
     const topNavBadges = getTopNavBadges({
-      hasUnsavedChanges: true,
       isMobile: false,
       services: discoverServiceMock,
       stateContainer,
-      topNavCustomization: undefined,
     });
     expect(topNavBadges).toMatchInlineSnapshot(`
       Array [
@@ -63,11 +59,9 @@ describe('getTopNavBadges()', function () {
     const discoverServiceMockReadOnly = createDiscoverServicesMock();
     discoverServiceMockReadOnly.capabilities.discover_v2.save = false;
     const topNavBadges = getTopNavBadges({
-      hasUnsavedChanges: true,
       isMobile: false,
       services: discoverServiceMockReadOnly,
       stateContainer,
-      topNavCustomization: undefined,
     });
 
     expect(topNavBadges).toHaveLength(1);
@@ -88,11 +82,9 @@ describe('getTopNavBadges()', function () {
 
     test('should return the managed badge when managed saved search', () => {
       const topNavBadges = getTopNavBadges({
-        hasUnsavedChanges: false,
         isMobile: false,
         services: discoverServiceMock,
         stateContainer: stateContainerWithManagedSavedSearch,
-        topNavCustomization: undefined,
       });
 
       expect(topNavBadges).toHaveLength(1);
@@ -101,11 +93,9 @@ describe('getTopNavBadges()', function () {
 
     test('should not show save in unsaved changed badge', async () => {
       const topNavBadges = getTopNavBadges({
-        hasUnsavedChanges: true,
         isMobile: false,
         services: discoverServiceMock,
         stateContainer: stateContainerWithManagedSavedSearch,
-        topNavCustomization: undefined,
       });
 
       expect(topNavBadges).toHaveLength(2);
@@ -120,18 +110,9 @@ describe('getTopNavBadges()', function () {
 
   test('should not return the unsaved changes badge when disabled in customization', () => {
     const topNavBadges = getTopNavBadges({
-      hasUnsavedChanges: true,
       isMobile: false,
       services: discoverServiceMock,
       stateContainer,
-      topNavCustomization: {
-        id: 'top_nav',
-        defaultBadges: {
-          unsavedChangesBadge: {
-            disabled: true,
-          },
-        },
-      },
     });
     expect(topNavBadges).toMatchInlineSnapshot(`Array []`);
   });
@@ -143,11 +124,9 @@ describe('getTopNavBadges()', function () {
 
     test('should return the solutions view badge when spaces is enabled', () => {
       const topNavBadges = getTopNavBadges({
-        hasUnsavedChanges: false,
         isMobile: false,
         services: discoverServiceWithSpacesMock,
         stateContainer,
-        topNavCustomization: undefined,
       });
       expect(topNavBadges).toMatchInlineSnapshot(`
         Array [

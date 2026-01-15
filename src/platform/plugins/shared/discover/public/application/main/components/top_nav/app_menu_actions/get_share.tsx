@@ -199,7 +199,7 @@ const getExportItems = (
     }
   };
 
-  const exportItems = exportIntegrations
+  const exportItems: AppMenuPopoverItem[] = exportIntegrations
     .filter((item) => item.shareType === 'integration')
     .map((item) => ({
       ...mapIntegrationToMetaData(item.id),
@@ -211,7 +211,7 @@ const getExportItems = (
       },
     }));
 
-  const derivativeItems = exportDerivatives
+  const derivativeItems: AppMenuPopoverItem[] = exportDerivatives
     .filter(
       (item): item is typeof item & { shareType: 'integration'; id: string } =>
         item.shareType === 'integration' && item.groupId === 'exportDerivatives'

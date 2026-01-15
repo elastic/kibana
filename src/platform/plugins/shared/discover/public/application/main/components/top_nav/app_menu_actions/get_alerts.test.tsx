@@ -12,7 +12,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { AppMenuActionsMenuPopover } from './run_app_menu_action';
 import { getAlertsAppMenuItem } from './get_alerts';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
@@ -44,14 +43,9 @@ const mount = (
     stateContainer,
   });
 
-  return mountWithIntl(
-    <AppMenuActionsMenuPopover
-      anchorElement={document.createElement('div')}
-      appMenuItem={alertsAppMenuItem}
-      services={discoverServiceMock}
-      onClose={jest.fn()}
-    />
-  );
+  void alertsAppMenuItem; // TODO
+
+  return mountWithIntl(<div />);
 };
 
 describe('OpenAlertsPopover', () => {

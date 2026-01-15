@@ -9304,10 +9304,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unsaved-changes-badge@link:src/platform/packages/private/kbn-unsaved-changes-badge":
-  version "0.0.0"
-  uid ""
-
 "@kbn/unsaved-changes-prompt@link:src/platform/packages/shared/kbn-unsaved-changes-prompt":
   version "0.0.0"
   uid ""

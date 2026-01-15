@@ -77,7 +77,6 @@ dependsOn:
   - '@kbn/no-data-page-plugin'
   - '@kbn/global-search-plugin'
   - '@kbn/resizable-layout'
-  - '@kbn/unsaved-changes-badge'
   - '@kbn/rule-data-utils'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-plugins-server'

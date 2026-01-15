@@ -76,112 +76,33 @@ describe('useTopNavLinks', () => {
   };
 
   it('should return results', () => {
-    const topNavLinks = setup();
+    const appMenuConfig = setup();
 
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "color": "text",
-          "emphasize": true,
-          "fill": false,
-          "id": "esql",
-          "label": "Try ES|QL",
-          "run": [Function],
-          "testId": "select-text-based-language-btn",
-          "tooltip": "ES|QL is Elastic's powerful new piped query language.",
-        },
-        Object {
-          "description": "Open Inspector for search",
-          "id": "inspect",
-          "label": "Inspect",
-          "run": [Function],
-          "testId": "openInspectorButton",
-        },
-        Object {
-          "description": "New session",
-          "iconOnly": true,
-          "iconType": "plus",
-          "id": "new",
-          "label": "New session",
-          "run": [Function],
-          "testId": "discoverNewButton",
-        },
-        Object {
-          "description": "Open session",
-          "iconOnly": true,
-          "iconType": "folderOpen",
-          "id": "open",
-          "label": "Open session",
-          "run": [Function],
-          "testId": "discoverOpenButton",
-        },
-        Object {
-          "description": "Save session",
-          "emphasize": true,
-          "iconType": "save",
-          "id": "save",
-          "label": "Save",
-          "run": [Function],
-          "testId": "discoverSaveButton",
-        },
-      ]
-    `);
+    expect(appMenuConfig.items).toBeDefined();
+    expect(appMenuConfig.items!.length).toBeGreaterThan(0);
+
+    // Check for key items
+    const itemIds = appMenuConfig.items!.map((item) => item.id);
+    expect(itemIds).toContain('new');
+    expect(itemIds).toContain('open');
+
+    // Check primary action item (Save)
+    expect(appMenuConfig.primaryActionItem).toBeDefined();
+    expect(appMenuConfig.primaryActionItem?.label).toBe('Save');
   });
 
   describe('when ES|QL mode is true', () => {
     it('should return results', () => {
-      const topNavLinks = setup({
+      const appMenuConfig = setup({
         isEsqlMode: true,
       });
 
-      expect(topNavLinks).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "color": "text",
-            "emphasize": true,
-            "fill": false,
-            "id": "esql",
-            "label": "Switch to classic",
-            "run": [Function],
-            "testId": "switch-to-dataviews",
-            "tooltip": "Switch to KQL or Lucene syntax.",
-          },
-          Object {
-            "description": "Open Inspector for search",
-            "id": "inspect",
-            "label": "Inspect",
-            "run": [Function],
-            "testId": "openInspectorButton",
-          },
-          Object {
-            "description": "New session",
-            "iconOnly": true,
-            "iconType": "plus",
-            "id": "new",
-            "label": "New session",
-            "run": [Function],
-            "testId": "discoverNewButton",
-          },
-          Object {
-            "description": "Open session",
-            "iconOnly": true,
-            "iconType": "folderOpen",
-            "id": "open",
-            "label": "Open session",
-            "run": [Function],
-            "testId": "discoverOpenButton",
-          },
-          Object {
-            "description": "Save session",
-            "emphasize": true,
-            "iconType": "save",
-            "id": "save",
-            "label": "Save",
-            "run": [Function],
-            "testId": "discoverSaveButton",
-          },
-        ]
-      `);
+      expect(appMenuConfig.items).toBeDefined();
+
+      // Check for ESQL switch item
+      const esqlItem = appMenuConfig.items!.find((item) => item.id === 'esql');
+      expect(esqlItem).toBeDefined();
+      expect(esqlItem?.label).toBe('Switch to classic');
     });
   });
 
@@ -195,69 +116,18 @@ describe('useTopNavLinks', () => {
     });
 
     it('should include the share menu item', () => {
-      const topNavLinks = setup();
+      const appMenuConfig = setup();
 
-      expect(topNavLinks).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "color": "text",
-            "emphasize": true,
-            "fill": false,
-            "id": "esql",
-            "label": "Try ES|QL",
-            "run": [Function],
-            "testId": "select-text-based-language-btn",
-            "tooltip": "ES|QL is Elastic's powerful new piped query language.",
-          },
-          Object {
-            "description": "Open Inspector for search",
-            "id": "inspect",
-            "label": "Inspect",
-            "run": [Function],
-            "testId": "openInspectorButton",
-          },
-          Object {
-            "description": "New session",
-            "iconOnly": true,
-            "iconType": "plus",
-            "id": "new",
-            "label": "New session",
-            "run": [Function],
-            "testId": "discoverNewButton",
-          },
-          Object {
-            "description": "Open session",
-            "iconOnly": true,
-            "iconType": "folderOpen",
-            "id": "open",
-            "label": "Open session",
-            "run": [Function],
-            "testId": "discoverOpenButton",
-          },
-          Object {
-            "description": "Share Discover session",
-            "iconOnly": true,
-            "iconType": "share",
-            "id": "share",
-            "label": "Share",
-            "run": [Function],
-            "testId": "shareTopNavButton",
-          },
-          Object {
-            "description": "Save session",
-            "emphasize": true,
-            "iconType": "save",
-            "id": "save",
-            "label": "Save",
-            "run": [Function],
-            "testId": "discoverSaveButton",
-          },
-        ]
-      `);
+      expect(appMenuConfig.items).toBeDefined();
+
+      // Check for share item
+      const shareItem = appMenuConfig.items!.find((item) => item.id === 'share');
+      expect(shareItem).toBeDefined();
+      expect(shareItem?.label).toBe('Share');
     });
 
     it('should include the export menu item', () => {
-      const topNavLinks = renderHook(
+      const appMenuConfig = renderHook(
         () =>
           useTopNavLinks({
             dataView: dataViewMock,
@@ -276,7 +146,14 @@ describe('useTopNavLinks', () => {
           wrapper: Wrapper,
         }
       ).result.current;
-      expect(topNavLinks.filter((obj) => obj.id === 'export')).toBeDefined();
+
+      // Check for share item with export popover items
+      const shareItem = appMenuConfig.items!.find((item) => item.id === 'share');
+      expect(shareItem).toBeDefined();
+
+      // Export should be a popover item under share
+      const exportItem = shareItem?.items?.find((item) => item.id === 'export');
+      expect(exportItem).toBeDefined();
     });
   });
 
@@ -290,17 +167,23 @@ describe('useTopNavLinks', () => {
     });
 
     it('should return the background search menu item', () => {
-      const topNavLinks = setup();
+      const appMenuConfig = setup();
 
-      expect(topNavLinks.filter((obj) => obj.id === 'backgroundSearch')).toBeDefined();
+      const backgroundSearchItem = appMenuConfig.items!.find(
+        (item) => item.id === 'backgroundSearch'
+      );
+      expect(backgroundSearchItem).toBeDefined();
     });
   });
 
   describe('when background search is disabled', () => {
     it('should NOT return the background search menu item', () => {
-      const topNavLinks = setup();
+      const appMenuConfig = setup();
 
-      expect(topNavLinks.filter((obj) => obj.id === 'backgroundSearch')).toHaveLength(0);
+      const backgroundSearchItem = appMenuConfig.items!.find(
+        (item) => item.id === 'backgroundSearch'
+      );
+      expect(backgroundSearchItem).toBeUndefined();
     });
   });
 });

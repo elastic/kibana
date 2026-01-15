@@ -2396,8 +2396,6 @@
       "@kbn/unified-tabs/*": ["src/platform/packages/shared/kbn-unified-tabs/*"],
       "@kbn/unified-tabs-examples-plugin": ["examples/unified_tabs_examples"],
       "@kbn/unified-tabs-examples-plugin/*": ["examples/unified_tabs_examples/*"],
-      "@kbn/unsaved-changes-badge": ["src/platform/packages/private/kbn-unsaved-changes-badge"],
-      "@kbn/unsaved-changes-badge/*": ["src/platform/packages/private/kbn-unsaved-changes-badge/*"],
       "@kbn/unsaved-changes-prompt": ["src/platform/packages/shared/kbn-unsaved-changes-prompt"],
       "@kbn/unsaved-changes-prompt/*": ["src/platform/packages/shared/kbn-unsaved-changes-prompt/*"],
       "@kbn/upgrade-assistant-pkg-common": ["x-pack/platform/packages/private/upgrade-assistant/common"],

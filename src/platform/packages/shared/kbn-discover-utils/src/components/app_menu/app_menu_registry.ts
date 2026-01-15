@@ -66,30 +66,9 @@ export class AppMenuRegistry {
     this.items.set(parentId, {
       ...this.items.get(parentId),
       items: [...(this.items.get(parentId)?.items || []), popoverItem].sort(
-        (a, b) => (a.order || 0) - (b.order || 0)
+        (a: AppMenuPopoverItem, b: AppMenuPopoverItem) => (a.order || 0) - (b.order || 0)
       ),
     } as AppMenuItemType);
-  }
-
-  /**
-   * Register multiple popover items for a specific parent menu item.
-   * @param parentId The ID of the parent menu item
-   * @param popoverItems Array of popover items to register
-   */
-  public registerPopoverItems(parentId: string, popoverItems: AppMenuPopoverItem[]) {
-    popoverItems.forEach((item) => this.registerPopoverItem(parentId, item));
-  }
-
-  /**
-   * Check if an item with the given ID is registered.
-   * @param itemId The ID to check
-   */
-  public isItemRegistered(itemId: string): boolean {
-    if (this.items.has(itemId)) {
-      return true;
-    }
-
-    return false;
   }
 
   /**
@@ -98,7 +77,9 @@ export class AppMenuRegistry {
    */
   public getAppMenuConfig(): AppMenuConfig {
     return {
-      items: Array.from(this.items.values()),
+      items: Array.from(this.items.values()).sort(
+        (a: AppMenuItemType, b: AppMenuItemType) => (a.order || 0) - (b.order || 0)
+      ),
       primaryActionItem: this.primaryActionItem,
       secondaryActionItem: this.secondaryActionItem,
     };

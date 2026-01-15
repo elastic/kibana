@@ -12,13 +12,10 @@ import { of } from 'rxjs';
 import { SolutionsViewBadge } from './solutions_view_badge';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import type { DiscoverServices } from '../../../../build_services';
 
-jest.mock('../../../../hooks/use_discover_services');
-const useDiscoverServicesMock = jest.mocked(useDiscoverServices);
-
-const mockUseDiscoverServicesMock = ({
+const createMockServices = ({
   getActiveSpaceReturn,
   isSolutionViewEnabled,
   canManageSpaces = true,
@@ -26,8 +23,8 @@ const mockUseDiscoverServicesMock = ({
   getActiveSpaceReturn: object | undefined;
   isSolutionViewEnabled: boolean;
   canManageSpaces?: boolean;
-}) => {
-  useDiscoverServicesMock.mockReturnValue({
+}): DiscoverServices => {
+  return {
     spaces: {
       getActiveSpace$: jest.fn().mockReturnValue(of(getActiveSpaceReturn)),
       isSolutionViewEnabled,
@@ -37,15 +34,15 @@ const mockUseDiscoverServicesMock = ({
     },
     addBasePath: (path: string) => path,
     capabilities: { spaces: { manage: canManageSpaces } },
-  } as unknown as ReturnType<typeof useDiscoverServices>);
+  } as unknown as DiscoverServices;
 };
 
-const setup = () => {
+const setup = (services: DiscoverServices) => {
   const user = userEvent.setup();
 
   const { container } = render(
     <DiscoverTestProvider>
-      <SolutionsViewBadge badgeText="Toggle popover" />
+      <SolutionsViewBadge badgeText="Toggle popover" services={services} />
     </DiscoverTestProvider>
   );
 
@@ -56,7 +53,7 @@ describe('SolutionsViewBadge', () => {
   describe('when the solution visibility feature is disabled', () => {
     it('does not render the badge', () => {
       // Given
-      mockUseDiscoverServicesMock({
+      const services = createMockServices({
         getActiveSpaceReturn: {
           id: 'default',
           solution: 'classic',
@@ -65,7 +62,7 @@ describe('SolutionsViewBadge', () => {
       });
 
       // When
-      const { container } = setup();
+      const { container } = setup(services);
 
       // Then
       expect(container).toBeEmptyDOMElement();
@@ -75,13 +72,13 @@ describe('SolutionsViewBadge', () => {
   describe('when spaces is disabled (no active space available)', () => {
     it('does not render the badge', () => {
       // Given
-      mockUseDiscoverServicesMock({
+      const services = createMockServices({
         getActiveSpaceReturn: undefined,
         isSolutionViewEnabled: true,
       });
 
       // When
-      const { container } = setup();
+      const { container } = setup(services);
 
       // Then
       expect(container).toBeEmptyDOMElement();
@@ -92,7 +89,7 @@ describe('SolutionsViewBadge', () => {
     describe('when the active space is configured to use a solution view other than "classic"', () => {
       it('does not render the badge', () => {
         // Given
-        mockUseDiscoverServicesMock({
+        const services = createMockServices({
           getActiveSpaceReturn: {
             id: 'default',
             solution: 'oblt',
@@ -101,7 +98,7 @@ describe('SolutionsViewBadge', () => {
         });
 
         // When
-        const { container } = setup();
+        const { container } = setup(services);
 
         // Then
         expect(container).toBeEmptyDOMElement();
@@ -111,7 +108,7 @@ describe('SolutionsViewBadge', () => {
     describe('when the active space is configured to use the classic solution view', () => {
       it('renders the badge', () => {
         // Given
-        mockUseDiscoverServicesMock({
+        const services = createMockServices({
           getActiveSpaceReturn: {
             id: 'default',
             solution: 'classic',
@@ -121,7 +118,7 @@ describe('SolutionsViewBadge', () => {
         });
 
         // When
-        setup();
+        setup(services);
 
         // Then
         expect(screen.getByText('Toggle popover')).toBeVisible();
@@ -131,7 +128,7 @@ describe('SolutionsViewBadge', () => {
         describe('and the user has manage spaces capability', () => {
           it('opens the popover', async () => {
             // Given
-            mockUseDiscoverServicesMock({
+            const services = createMockServices({
               getActiveSpaceReturn: {
                 id: 'default',
                 solution: 'classic',
@@ -141,7 +138,7 @@ describe('SolutionsViewBadge', () => {
             });
 
             // When
-            const { user } = setup();
+            const { user } = setup(services);
 
             // Then
             await user.click(screen.getByTitle('Toggle popover'));
@@ -160,7 +157,7 @@ describe('SolutionsViewBadge', () => {
         describe('and the user does not have manage spaces capability', () => {
           it('opens the popover', async () => {
             // Given
-            mockUseDiscoverServicesMock({
+            const services = createMockServices({
               getActiveSpaceReturn: {
                 id: 'default',
                 solution: 'classic',
@@ -170,7 +167,7 @@ describe('SolutionsViewBadge', () => {
             });
 
             // When
-            const { user } = setup();
+            const { user } = setup(services);
 
             // Then
             await user.click(screen.getByTitle('Toggle popover'));
