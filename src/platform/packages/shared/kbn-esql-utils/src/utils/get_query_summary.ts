@@ -51,5 +51,5 @@ export function getQuerySummary(query: string): ESQLCommandSummary {
  * @returns True if the field is computed by the query (not from index), false otherwise.
  */
 export function isComputedColumn(fieldName: string, summary: ESQLCommandSummary): boolean {
-  return summary.newColumns.has(fieldName) || Boolean(summary?.metadataColumns?.has(fieldName));
+  return summary.newColumns.has(fieldName) || Boolean(summary.metadataColumns?.has(fieldName));
 }
