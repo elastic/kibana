@@ -13,6 +13,7 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
 import { getToolHandler } from './handler';
@@ -69,6 +70,12 @@ When to use:
 `,
     schema: getMetricChangePointsSchema,
     tags: ['observability', 'metrics'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async ({ start, end, index, kqlFilter, aggregation, groupBy = [] }, { esClient }) => {
       try {
         const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });

@@ -14,6 +14,7 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getToolHandler } from './handler';
@@ -58,6 +59,12 @@ How it works:
 Uses "categorize_text" aggregation to group similar unstructured messages into patterns, then detects change points (spikes, dips, trend changes) within each category.`,
     schema: getLogChangePointsSchema,
     tags: ['observability', 'logs'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async ({ start, end, index, kqlFilter, messageField = 'message' }, { esClient }) => {
       try {
         const logIndexPatterns = await getLogsIndices({ core, logger });

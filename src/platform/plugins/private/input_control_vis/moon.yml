@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/react-kibana-context-render'
   - '@kbn/visualizations-common'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

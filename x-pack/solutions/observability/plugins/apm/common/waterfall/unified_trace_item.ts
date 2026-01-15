@@ -30,4 +30,5 @@ export interface TraceItem {
     outgoing: number;
   };
   icon?: string;
+  coldstart?: boolean;
 }
