@@ -23,7 +23,11 @@ describe('buildSecurityApi', () => {
   beforeEach(() => {
     authc = authenticationServiceMock.createStart();
     auditService = auditServiceMock.create();
-    api = buildSecurityApi({ getAuthc: () => authc, audit: auditService });
+    api = buildSecurityApi({
+      getAuthc: () => authc,
+      audit: auditService,
+      config: { uiam: { enabled: false } },
+    });
   });
 
   describe('authc.getCurrentUser', () => {
@@ -78,6 +82,91 @@ describe('buildSecurityApi', () => {
       const areAPIKeysEnabled = await authc.apiKeys.areAPIKeysEnabled();
 
       expect(areAPIKeysEnabled).toBe(false);
+    });
+  });
+
+  describe('config.uiam', () => {
+    describe('when uiam is enabled', () => {
+      beforeEach(() => {
+        authc = authenticationServiceMock.createStart();
+        auditService = auditServiceMock.create();
+        api = buildSecurityApi({
+          getAuthc: () => authc,
+          audit: auditService,
+          config: { uiam: { enabled: true } },
+        });
+      });
+
+      it('should expose the uiam API', () => {
+        expect(api.authc.apiKeys.uiam).not.toBeNull();
+        expect(api.authc.apiKeys.uiam).toBeDefined();
+      });
+
+      it('should properly delegate grant to the service', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const grantParams = {
+          name: 'test-key',
+          expiration: '1d',
+        };
+
+        await api.authc.apiKeys.uiam!.grant(request, grantParams);
+
+        expect(authc.apiKeys.uiam!.grant).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.grant).toHaveBeenCalledWith(request, grantParams);
+      });
+
+      it('should properly delegate invalidate to the service', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const invalidateParams = {
+          id: 'key-id-1',
+        };
+
+        await api.authc.apiKeys.uiam!.invalidate(request, invalidateParams);
+
+        expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledWith(request, invalidateParams);
+      });
+
+      it('should properly delegate getScopedClusterClientWithApiKey to the service', () => {
+        const apiKey = 'test-api-key';
+
+        api.authc.apiKeys.uiam!.getScopedClusterClientWithApiKey(apiKey);
+
+        expect(authc.apiKeys.uiam!.getScopedClusterClientWithApiKey).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.getScopedClusterClientWithApiKey).toHaveBeenCalledWith(apiKey);
+      });
+    });
+
+    describe('when uiam is disabled', () => {
+      beforeEach(() => {
+        authc = authenticationServiceMock.createStart();
+        auditService = auditServiceMock.create();
+        api = buildSecurityApi({
+          getAuthc: () => authc,
+          audit: auditService,
+          config: { uiam: { enabled: false } },
+        });
+      });
+
+      it('should set uiam to null', () => {
+        expect(api.authc.apiKeys.uiam).toBeNull();
+      });
+    });
+
+    describe('when uiam config is not provided', () => {
+      beforeEach(() => {
+        authc = authenticationServiceMock.createStart();
+        auditService = auditServiceMock.create();
+        api = buildSecurityApi({
+          getAuthc: () => authc,
+          audit: auditService,
+          config: {},
+        });
+      });
+
+      it('should set uiam to null', () => {
+        expect(api.authc.apiKeys.uiam).toBeNull();
+      });
     });
   });
 });

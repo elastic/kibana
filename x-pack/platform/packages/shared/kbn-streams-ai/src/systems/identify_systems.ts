@@ -26,8 +26,8 @@ export interface IdentifySystemsOptions {
   inferenceClient: BoundInferenceClient;
   logger: Logger;
   signal: AbortSignal;
-  systemsPromptOverride?: string;
-  descriptionPromptOverride?: string;
+  descriptionPrompt: string;
+  systemsPrompt: string;
   dropUnmapped?: boolean;
   maxSteps?: number;
 }
@@ -53,9 +53,9 @@ export async function identifySystems({
   inferenceClient,
   logger,
   signal,
-  systemsPromptOverride,
   maxSteps: initialMaxSteps,
   dropUnmapped,
+  systemsPrompt,
 }: IdentifySystemsOptions): Promise<IdentifySystemsResult> {
   logger.debug(`Identifying systems for stream ${stream.name}`);
 
@@ -102,7 +102,7 @@ export async function identifySystems({
         initial_clustering: JSON.stringify(initialClustering),
         condition_schema: conditionSchemaText,
       },
-      prompt: createIdentifySystemsPrompt({ systemPromptOverride: systemsPromptOverride }),
+      prompt: createIdentifySystemsPrompt({ systemPrompt: systemsPrompt }),
       inferenceClient,
       finalToolChoice: {
         function: 'finalize_systems',
