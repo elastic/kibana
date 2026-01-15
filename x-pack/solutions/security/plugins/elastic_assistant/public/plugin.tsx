@@ -14,6 +14,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import type {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -77,13 +78,19 @@ export class ElasticAssistantPublicPlugin
       return services;
     };
 
-    coreStart.chrome.navControls.registerRight({
-      order: 1001,
-      mount: (target) => {
-        const startService = startServices();
-        return this.mountAIAssistantButton(target, coreStart, startService);
-      },
-    });
+    // Only register the nav control if the user has the assistant privilege
+    const hasAssistantPrivilege =
+      coreStart.application.capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
+
+    if (hasAssistantPrivilege) {
+      coreStart.chrome.navControls.registerRight({
+        order: 1001,
+        mount: (target) => {
+          const startService = startServices();
+          return this.mountAIAssistantButton(target, coreStart, startService);
+        },
+      });
+    }
 
     return {};
   }

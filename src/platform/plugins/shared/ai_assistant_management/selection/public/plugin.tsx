@@ -205,7 +205,7 @@ export class AIAssistantManagementPlugin
     };
   }
 
-  private registerNavControl(
+  private async registerNavControl(
     coreStart: CoreStart,
     openChatSubject: BehaviorSubject<AIExperienceSelection>,
     spaces?: SpacesPluginStart
@@ -219,6 +219,22 @@ export class AIAssistantManagementPlugin
     const isUntouchedUiSetting = coreStart.settings.client.isDefault(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
     );
+
+    // Check if in Agent mode - nav control should not be registered
+    const chatExperience = coreStart.settings.client.get<AIChatExperience>(
+      PREFERRED_CHAT_EXPERIENCE_SETTING_KEY
+    );
+    if (chatExperience === AIChatExperience.Agent) {
+      return;
+    }
+
+    // Check if in a solution view - nav control should not be registered
+    // Solution views use the Project Header where this control isn't visible
+    const activeSpace = await spaces?.getActiveSpace?.();
+    const isSolutionView = Boolean(activeSpace?.solution && activeSpace.solution !== 'classic');
+    if (isSolutionView) {
+      return;
+    }
 
     if (
       !this.isServerless &&

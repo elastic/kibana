@@ -129,26 +129,8 @@ export class ObservabilityAIAssistantAppPlugin
     const isEnabled = appService.isEnabled();
 
     if (isEnabled) {
-      coreStart.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <NavControlInitiator
-              appService={appService}
-              coreStart={coreStart}
-              pluginsStart={pluginsStart}
-              isServerless={this.isServerless}
-            />,
-            element,
-            () => {}
-          );
-
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // right before the user profile
-        order: 1001,
-      });
+      // Check conditions before registering to avoid empty container divs
+      this.registerNavControl(coreStart, pluginsStart, appService);
     }
 
     const service = pluginsStart.observabilityAIAssistant.service;
@@ -191,5 +173,49 @@ export class ObservabilityAIAssistantAppPlugin
     return {
       RootCauseAnalysisContainer: LazilyLoadedRootCauseAnalysisContainer,
     };
+  }
+
+  private async registerNavControl(
+    coreStart: CoreStart,
+    pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies,
+    appService: AIAssistantAppService
+  ) {
+    // Check if in Agent mode - nav control should not be registered
+    const chatExperience = coreStart.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+    if (chatExperience === AIChatExperience.Agent) {
+      return;
+    }
+
+    // Check if in a solution view where this nav control should be visible
+    // Only register for Search ('es'), Observability ('oblt') solution views, or serverless
+    if (!this.isServerless) {
+      const activeSpace = await pluginsStart.spaces.getActiveSpace();
+      const isVisibleInSolutionView =
+        activeSpace.solution === 'es' || activeSpace.solution === 'oblt';
+      if (!isVisibleInSolutionView) {
+        return;
+      }
+    }
+
+    coreStart.chrome.navControls.registerRight({
+      mount: (element) => {
+        ReactDOM.render(
+          <NavControlInitiator
+            appService={appService}
+            coreStart={coreStart}
+            pluginsStart={pluginsStart}
+            isServerless={this.isServerless}
+          />,
+          element,
+          () => {}
+        );
+
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+      // right before the user profile
+      order: 1001,
+    });
   }
 }

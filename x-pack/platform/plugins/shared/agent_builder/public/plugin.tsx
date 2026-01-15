@@ -14,6 +14,8 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -197,7 +199,13 @@ export class AgentBuilderPlugin
       },
     };
 
-    if (hasAgentBuilder) {
+    // Only register nav control when user has Agent Builder capability AND is in Agent mode
+    // The AgentBuilderNavControlInitiator component returns null when not in Agent mode,
+    // which would leave an empty container div in the header
+    const chatExperience = core.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+    const isAgentsExperience = chatExperience === AIChatExperience.Agent;
+
+    if (hasAgentBuilder && isAgentsExperience) {
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
