@@ -36,6 +36,7 @@ const createSAMLResponseSchema = schema.object({
   full_name: schema.maybe(schema.nullable(schema.string())),
   email: schema.maybe(schema.nullable(schema.string())),
   roles: schema.arrayOf(schema.string()),
+  url: schema.string(),
 });
 
 // BOOKMARK - List of Kibana project types
@@ -87,8 +88,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
       const config = initializerContext.config.get<ConfigType>();
       const router = core.http.createRouter();
 
-      let requestId: string | undefined;
-
       core.http.resources.register(
         {
           path: MOCK_IDP_LOGIN_PATH,
@@ -97,12 +96,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           security: { authz: { enabled: false, reason: '' } },
         },
         async (context, request, response) => {
-          requestId = await getSAMLRequestId(request.url.href);
-          logger.info(
-            requestId
-              ? `SP initiated login, SAML request ID: ${requestId}`
-              : 'IDP initiated login, no request ID'
-          );
           return response.renderAnonymousCoreApp();
         }
       );
@@ -163,6 +156,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             : {};
 
           try {
+            const requestId = await getSAMLRequestId(request.body.url);
             if (requestId) {
               logger.info(`Sending SAML response for request ID: ${requestId}`);
             }
