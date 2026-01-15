@@ -67,7 +67,7 @@ function buildSecretsFromConnectorSpec(
 /**
  * Builds the secrets object for an MCP connector based on its config
  * @param config - The MCP connector configuration
- * @param token - The authentication token (or credentials)
+ * @param credentials - The authentication credentials
  * @returns The secrets object to pass to the actions client
  */
 function buildSecretsFromMCPConnectorConfig(

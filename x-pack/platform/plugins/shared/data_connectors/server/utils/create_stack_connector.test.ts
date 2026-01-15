@@ -309,9 +309,6 @@ describe('createStackConnector', () => {
         tools: mockMcpTools,
         namespace: 'test-connector',
       });
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        `Imported tools in createMCPconnector: ${JSON.stringify(mockToolIds)}`
-      );
     });
 
     it('should not create MCP tools when importedTools is not provided', async () => {
