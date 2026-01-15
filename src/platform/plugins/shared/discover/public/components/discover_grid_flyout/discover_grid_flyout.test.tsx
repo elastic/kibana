@@ -104,6 +104,7 @@ describe('Discover flyout', function () {
         ? buildDataTableRecord(expandedHit, dataView || dataViewMock)
         : currentRecords[0],
       hits: currentRecords,
+      filters: [], // to signal embeddable view
       query,
       onAddColumn: jest.fn(),
       onClose,
