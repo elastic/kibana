@@ -30,7 +30,7 @@ describe('trace_charts_definition', () => {
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
 
-      expect(result.esqlQuery).toContain('event.outcome == "failure"');
+      expect(result?.esqlQuery).toContain('event.outcome == "failure"');
     });
 
     it('should return error rate chart configuration for OTEL data source', () => {
@@ -47,8 +47,8 @@ describe('trace_charts_definition', () => {
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
 
-      expect(result.esqlQuery).toContain('status.code == "Error"');
-      expect(result.esqlQuery).not.toContain('event.outcome');
+      expect(result?.esqlQuery).toContain('status.code == "Error"');
+      expect(result?.esqlQuery).not.toContain('event.outcome');
     });
 
     it('should include all provided filters in the ESQL query', () => {
@@ -56,9 +56,9 @@ describe('trace_charts_definition', () => {
 
       const result = getErrorRateChart({ dataSource, indexes: mockIndexes, filters: mockFilters });
 
-      expect(result.esqlQuery).toContain('service.name == "test-service"');
-      expect(result.esqlQuery).toContain('environment == "production"');
-      expect(result.esqlQuery).toContain('processor.event == "transaction"');
+      expect(result?.esqlQuery).toContain('service.name == "test-service"');
+      expect(result?.esqlQuery).toContain('environment == "production"');
+      expect(result?.esqlQuery).toContain('processor.event == "transaction"');
     });
 
     it('should handle empty filters array', () => {
@@ -66,8 +66,8 @@ describe('trace_charts_definition', () => {
 
       const result = getErrorRateChart({ dataSource, indexes: mockIndexes, filters: [] });
 
-      expect(result.esqlQuery).toContain('processor.event == "transaction"');
-      expect(result.esqlQuery).toContain('FROM traces-*');
+      expect(result?.esqlQuery).toContain('processor.event == "transaction"');
+      expect(result?.esqlQuery).toContain('FROM traces-*');
     });
 
     it('should generate valid ESQL query structure', () => {
@@ -75,12 +75,12 @@ describe('trace_charts_definition', () => {
 
       const result = getErrorRateChart({ dataSource, indexes: mockIndexes, filters: mockFilters });
 
-      expect(result.esqlQuery).toMatch(/FROM .+/);
-      expect(result.esqlQuery).toContain('STATS');
-      expect(result.esqlQuery).toContain('EVAL');
-      expect(result.esqlQuery).toContain('KEEP');
-      expect(result.esqlQuery).toContain('SORT');
-      expect(result.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+      expect(result?.esqlQuery).toMatch(/FROM .+/);
+      expect(result?.esqlQuery).toContain('STATS');
+      expect(result?.esqlQuery).toContain('EVAL');
+      expect(result?.esqlQuery).toContain('KEEP');
+      expect(result?.esqlQuery).toContain('SORT');
+      expect(result?.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
     });
   });
 
@@ -99,7 +99,7 @@ describe('trace_charts_definition', () => {
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
 
-      expect(result.esqlQuery).toContain('ROUND(transaction.duration.us) / 1000');
+      expect(result?.esqlQuery).toContain('ROUND(transaction.duration.us) / 1000');
     });
 
     it('should return latency chart configuration for OTEL data source', () => {
@@ -116,7 +116,7 @@ describe('trace_charts_definition', () => {
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
 
-      expect(result.esqlQuery).toContain('ROUND(duration) / 1000 / 1000');
+      expect(result?.esqlQuery).toContain('ROUND(duration) / 1000 / 1000');
     });
 
     it('should include all provided filters in the ESQL query', () => {
@@ -124,9 +124,9 @@ describe('trace_charts_definition', () => {
 
       const result = getLatencyChart({ dataSource, indexes: mockIndexes, filters: mockFilters });
 
-      expect(result.esqlQuery).toContain('service.name == "test-service"');
-      expect(result.esqlQuery).toContain('environment == "production"');
-      expect(result.esqlQuery).toContain('processor.event == "transaction"');
+      expect(result?.esqlQuery).toContain('service.name == "test-service"');
+      expect(result?.esqlQuery).toContain('environment == "production"');
+      expect(result?.esqlQuery).toContain('processor.event == "transaction"');
     });
 
     it('should handle empty filters array', () => {
@@ -134,7 +134,7 @@ describe('trace_charts_definition', () => {
 
       const result = getLatencyChart({ dataSource, indexes: mockIndexes, filters: [] });
 
-      expect(result.esqlQuery).toContain('FROM traces-*');
+      expect(result?.esqlQuery).toContain('FROM traces-*');
     });
 
     it('should generate valid ESQL query structure', () => {
@@ -143,11 +143,11 @@ describe('trace_charts_definition', () => {
       const result = getLatencyChart({ dataSource, indexes: mockIndexes, filters: mockFilters });
 
       // Verify basic ESQL structure
-      expect(result.esqlQuery).toMatch(/FROM .+/);
-      expect(result.esqlQuery).toContain('EVAL');
-      expect(result.esqlQuery).toContain('STATS');
-      expect(result.esqlQuery).toContain('AVG(duration_ms)');
-      expect(result.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+      expect(result?.esqlQuery).toMatch(/FROM .+/);
+      expect(result?.esqlQuery).toContain('EVAL');
+      expect(result?.esqlQuery).toContain('STATS');
+      expect(result?.esqlQuery).toContain('AVG(duration_ms)');
+      expect(result?.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
     });
   });
 
