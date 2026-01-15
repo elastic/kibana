@@ -14,7 +14,7 @@ import type {
 } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensMetricConfig } from '../types';
-import { DEFAULT_LAYER_ID } from '../types';
+import { DEFAULT_LAYER_ID } from '../constants';
 import {
   addLayerColumn,
   addLayerFormulaColumns,

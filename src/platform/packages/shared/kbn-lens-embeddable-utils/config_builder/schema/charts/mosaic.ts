@@ -18,6 +18,7 @@ import {
   layerSettingsSchema,
   sharedPanelInfoSchema,
 } from '../shared';
+import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
   legendTruncateAfterLinesSchema,
@@ -132,7 +133,26 @@ export const mosaicStateSchemaNoESQL = schema.object(
       description:
         'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
-    validate: validateGroupings,
+    validate({
+      metrics,
+      group_by,
+      group_breakdown_by,
+    }: {
+      metrics: Array<PartitionMetric>;
+      group_by?: Array<{ collapse_by?: string }>;
+      group_breakdown_by?: Array<{ collapse_by?: string }>;
+    }) {
+      if (group_by && group_by.filter((def) => def.collapse_by == null).length > 1) {
+        return 'Only a single non-collapsed dimension is allowed for group_by';
+      }
+      if (
+        group_breakdown_by &&
+        group_breakdown_by.filter((def) => def.collapse_by == null).length > 1
+      ) {
+        return 'Only a single non-collapsed dimension is allowed for group_breakdown_by';
+      }
+      return validateGroupings({ metrics, group_by });
+    },
   }
 );
 
@@ -206,7 +226,26 @@ const mosaicStateSchemaESQL = schema.object(
       description:
         'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
-    validate: validateGroupings,
+    validate({
+      metrics,
+      group_by,
+      group_breakdown_by,
+    }: {
+      metrics: Array<PartitionMetric>;
+      group_by?: Array<{ collapse_by?: string }>;
+      group_breakdown_by?: Array<{ collapse_by?: string }>;
+    }) {
+      if (group_by && group_by?.filter((def) => def.collapse_by != null).length > 1) {
+        return 'Only a single non-collapsed dimension is allowed for group_by';
+      }
+      if (
+        group_breakdown_by &&
+        group_breakdown_by?.filter((def) => def.collapse_by != null).length > 1
+      ) {
+        return 'Only a single non-collapsed dimension is allowed for group_breakdown_by';
+      }
+      return validateGroupings({ metrics, group_by });
+    },
   }
 );
 

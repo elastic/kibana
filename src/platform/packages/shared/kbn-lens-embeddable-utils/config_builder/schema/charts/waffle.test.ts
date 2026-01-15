@@ -143,11 +143,41 @@ describe('Waffle Schema', () => {
             fields: ['category'],
             size: 5,
             color: {
-              type: 'dynamic',
-              range: 'absolute',
-              steps: [
-                { type: 'from', from: 0, color: 'red' },
-                { type: 'to', to: 100, color: 'blue' },
+              mode: 'categorical',
+              palette: 'default',
+              mapping: [
+                {
+                  values: ['success'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 6,
+                  },
+                },
+                {
+                  values: ['info'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 9,
+                  },
+                },
+                {
+                  values: ['security'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 4,
+                  },
+                },
+                {
+                  values: ['__other__'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 5,
+                  },
+                },
               ],
             },
           },

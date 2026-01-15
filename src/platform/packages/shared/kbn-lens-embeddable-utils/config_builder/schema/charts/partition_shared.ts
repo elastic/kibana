@@ -65,12 +65,12 @@ export const legendNestedSchema = schema.maybe(
   })
 );
 
-type Metric =
+export type PartitionMetric =
   | {}
   | {
       color?: StaticColorType;
     };
-interface GroupBy {
+export interface PartitionGroupBy {
   collapse_by?: string;
   color?: ColorMappingType;
 }
@@ -79,8 +79,8 @@ function validateColouringAssignments({
   metrics,
   group_by,
 }: {
-  metrics: Array<Metric>;
-  group_by?: Array<GroupBy>;
+  metrics: Array<PartitionMetric>;
+  group_by?: Array<PartitionGroupBy>;
 }) {
   if (group_by) {
     const hasStaticColouring = metrics.some((metric) => 'color' in metric && metric.color != null);
@@ -105,21 +105,21 @@ export function validateGroupings({
   metrics,
   group_by,
 }: {
-  metrics: Array<Metric>;
+  metrics: Array<PartitionMetric>;
   group_by?: Array<{ collapse_by?: string }>;
 }) {
   if (metrics.length > 1) {
     if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 0) {
-      return 'When multiple metrics are defined, only collapsed breakdown dimensions are allowed.';
+      return 'When multiple metrics are defined, only collapsed group_by dimensions are allowed.';
     }
   }
   if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
-    return 'Only a single non-collapsed breakdown dimension is allowed.';
+    return 'Only a single non-collapsed dimension is allowed for group_by';
   }
 }
 
 export function validateMultipleMetricsCriteria(arg: {
-  metrics: Array<Metric>;
+  metrics: Array<PartitionMetric>;
   group_by?: Array<{ collapse_by?: string }>;
 }) {
   validateGroupings(arg);
