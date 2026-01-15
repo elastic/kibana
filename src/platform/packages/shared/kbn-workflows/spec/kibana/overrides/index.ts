@@ -13,5 +13,5 @@ import type { InternalConnectorContract } from '../../../types/latest';
 
 export const KIBANA_OVERRIDES: Record<string, InternalConnectorContract> = {
   'kibana.SetAlertsStatus': SET_ALERTS_STATUS_CONTRACT,
-  'kibana.addCaseCommentDefaultSpace': ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT,
+  'kibana.addCaseComment': ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT,
 };

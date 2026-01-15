@@ -27,7 +27,7 @@ import {
 
 // export contract
 export const ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.addCaseCommentDefaultSpace',
+  type: 'kibana.addCaseComment',
   summary: `Add a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
