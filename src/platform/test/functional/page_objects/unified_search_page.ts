@@ -67,6 +67,7 @@ export class UnifiedSearchPageObject extends FtrService {
   }
 
   public async switchToDataViewMode() {
+    await this.testSubjects.click('app-menu-overflow-button');
     await this.testSubjects.click('switch-to-dataviews');
     await this.retry.waitFor('the modal to open', async () => {
       return await this.testSubjects.exists('discover-esql-to-dataview-modal');
