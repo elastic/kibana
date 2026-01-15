@@ -35,31 +35,20 @@ export async function getToolHandler({
   fields: string[];
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
-  const baseFilters = [
+  const boolFilters = [
     ...timeRangeFilter('@timestamp', {
       start: parseDatemath(start),
       end: parseDatemath(end, { roundUp: true }),
     }),
     ...kqlFilter(kuery),
+    { exists: { field: 'message' } },
   ];
 
-  // Filters for standard logs with message field
-  const messageFilters = [...baseFilters, { exists: { field: 'message' } }];
-
-  // Filters for OTel exceptions without a message field (e.g., span exception events).
-  // These have exception.message but no body.text/message, so we categorize on exception.message.
-  const spanExceptionFilters = [
-    ...baseFilters,
-    { exists: { field: 'exception.message' } },
-    // Exclude docs with message field - those are handled by messageFilters
-    { bool: { must_not: { exists: { field: 'message' } } } },
-  ];
-
-  const [highSeverityResult, lowSeverityCategories, exceptionResult] = await Promise.all([
+  const [highSeverityCategories, lowSeverityCategories] = await Promise.all([
     getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: messageFilters, must: [warningAndAboveLogFilter()] },
+      boolQuery: { filter: boolFilters, must: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 20,
       fields,
@@ -68,39 +57,13 @@ export async function getToolHandler({
     getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: messageFilters, must_not: [warningAndAboveLogFilter()] },
+      boolQuery: { filter: boolFilters, must_not: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 10,
       fields,
       field: 'message',
     }),
-    // OTel exceptions without a message field (e.g., span exception events created via
-    // span.RecordException()). These have exception.message but no body.text/message field,
-    // so we must categorize on exception.message explicitly.
-    // https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/
-    getLogCategories({
-      esClient,
-      logsIndices,
-      boolQuery: { filter: spanExceptionFilters },
-      logger,
-      categoryCount: 10,
-      fields,
-      field: 'exception.message',
-    }),
   ]);
-
-  // Combine regular high severity logs with OTel exception events
-  const mergedCategories = [
-    ...(highSeverityResult?.categories ?? []),
-    ...(exceptionResult?.categories ?? []),
-  ];
-  const highSeverityCategories =
-    mergedCategories.length > 0
-      ? {
-          categories: mergedCategories,
-          totalHits: (highSeverityResult?.totalHits ?? 0) + (exceptionResult?.totalHits ?? 0),
-        }
-      : undefined;
 
   return { highSeverityCategories, lowSeverityCategories };
 }
