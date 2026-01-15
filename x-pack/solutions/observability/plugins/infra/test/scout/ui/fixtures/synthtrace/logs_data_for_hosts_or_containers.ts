@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import type { LogDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { generateShortId, log, timerange } from '@kbn/synthtrace-client';
-import { HOST_LOGS } from '../constants';
+import { LOG_LEVELS } from '../constants';
 
-export function generateLogsDataForHosts({
+export function generateLogsDataForHostsOrContainers({
   from,
   to,
-  hosts,
-}: {
-  from: string;
-  to: string;
-  hosts: Array<{ hostName: string }>;
-}) {
+  hostNames,
+  containerIds,
+}:
+  | {
+      from: string;
+      to: string;
+    } & (
+      | { hostNames: string[]; containerIds?: undefined }
+      | { containerIds: string[]; hostNames?: undefined }
+    )): SynthtraceGenerator<LogDocument> {
   const range = timerange(from, to);
 
   // Logs Data logic
@@ -33,13 +38,20 @@ export function generateLogsDataForHosts({
     .interval('30s')
     .rate(1)
     .generator((timestamp) =>
-      hosts.flatMap(({ hostName }) => {
-        const index = Math.floor(Math.random() * HOST_LOGS.length);
-        return log
+      (hostNames ?? containerIds).flatMap((name) => {
+        const index = Math.floor(Math.random() * LOG_LEVELS.length);
+        const logConfig = log
           .create()
-          .message(HOST_LOGS[index].message)
-          .logLevel(HOST_LOGS[index].level)
-          .hostName(hostName)
+          .message(LOG_LEVELS[index].message)
+          .logLevel(LOG_LEVELS[index].level);
+
+        if (containerIds) {
+          logConfig.containerId(name);
+        } else {
+          logConfig.hostName(name);
+        }
+
+        return logConfig
           .defaults({
             'trace.id': generateShortId(),
             'agent.name': 'synth-agent',

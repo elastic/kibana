@@ -18,7 +18,7 @@ export const HOST6_NAME = 'host-6';
 
 export const HOSTS_METADATA_FIELDS = ['host.name', 'agent.name.text'];
 
-export const HOST_LOGS = [
+export const LOG_LEVELS = [
   { message: 'A simple log', level: 'info' },
   { message: 'Yet another debug log', level: 'debug' },
   { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
@@ -86,10 +86,22 @@ export const DATE_WITH_DOCKER_DATA_FROM = '2023-03-31T18:20:00.000Z';
 export const DATE_WITH_DOCKER_DATA_TO = '2023-03-31T18:21:00.000Z';
 export const DATE_WITH_DOCKER_DATA = '03/31/2023 6:20:59 PM';
 export const CONTAINER_COUNT = 1;
+export const CONTAINER_IDS = Array.from({ length: CONTAINER_COUNT }, (_, i) => `cont-${i}`);
 export const CONTAINER_NAMES = Array.from(
   { length: CONTAINER_COUNT },
-  (_, i) => `container-container-${i}`
+  (_, i) => `container-cont-${i}`
 );
+
+export const CONTAINER_METADATA_FIELDS = [
+  'host.name',
+  'container.runtime',
+  'container.name',
+  'container.image.name',
+  'container.id',
+  'cloud.image.id',
+  'cloud.instance.id',
+  'cloud.provider',
+];
 
 export const DATE_WITH_POD_DATA_FROM = '2023-04-01T18:20:00.000Z';
 export const DATE_WITH_POD_DATA_TO = '2023-04-01T18:21:00.000Z';
@@ -98,3 +110,5 @@ export const POD_COUNT = 1;
 export const POD_NAMES = Array.from({ length: POD_COUNT }, (_, i) => `pod-${i}`);
 
 export const DATE_WITHOUT_DATA = '04/01/2024 6:20:59 PM';
+
+export const EXTENDED_TIMEOUT = 45000; // 45 seconds

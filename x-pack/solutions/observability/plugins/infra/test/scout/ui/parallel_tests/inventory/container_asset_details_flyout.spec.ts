@@ -8,11 +8,13 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import {
-  DATE_WITH_HOSTS_DATA,
-  HOST1_NAME,
-  LOG_LEVELS,
-  HOSTS_METADATA_FIELDS,
+  CONTAINER_COUNT,
+  CONTAINER_IDS,
+  CONTAINER_METADATA_FIELDS,
+  CONTAINER_NAMES,
+  DATE_WITH_DOCKER_DATA,
   EXTENDED_TIMEOUT,
+  LOG_LEVELS,
 } from '../../fixtures/constants';
 import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asset_details/metrics_tab';
 
@@ -20,10 +22,13 @@ test.use({
   timezoneId: 'GMT',
 });
 
-const METADATA_FIELD = HOSTS_METADATA_FIELDS[1];
+const METADATA_FIELD = CONTAINER_METADATA_FIELDS[1];
+
+const CONTAINER_NAME = CONTAINER_NAMES[CONTAINER_COUNT - 1];
+const CONTAINER_ID = CONTAINER_IDS[CONTAINER_COUNT - 1];
 
 test.describe(
-  'Infrastructure Inventory - Host Asset Details Flyout',
+  'Infrastructure Inventory - Container Asset Details Flyout',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
@@ -32,8 +37,9 @@ test.describe(
       // Dismiss k8s tour if it's present to avoid interference with other test assertions
       // The k8s tour specific test will take care of adding it back during its own execution
       await inventoryPage.dismissK8sTour();
-      await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
-      await inventoryPage.clickWaffleNode(HOST1_NAME);
+      await inventoryPage.showContainers();
+      await inventoryPage.goToTime(DATE_WITH_DOCKER_DATA);
+      await inventoryPage.clickWaffleNode(CONTAINER_NAME);
     });
 
     test('Overview Tab', async ({ pageObjects: { assetDetailsPage } }) => {
@@ -46,18 +52,8 @@ test.describe(
           assetDetailsPage.overviewTab.kpiCpuUsageChart.getByRole('heading', { name: 'CPU Usage' })
         ).toBeVisible();
         await expect(
-          assetDetailsPage.overviewTab.kpiNormalizedLoadChart.getByRole('heading', {
-            name: 'Normalized Load',
-          })
-        ).toBeVisible();
-        await expect(
           assetDetailsPage.overviewTab.kpiMemoryUsageChart.getByRole('heading', {
             name: 'Memory Usage',
-          })
-        ).toBeVisible();
-        await expect(
-          assetDetailsPage.overviewTab.kpiDiskUsageChart.getByRole('heading', {
-            name: 'Disk Usage',
           })
         ).toBeVisible();
       });
@@ -73,12 +69,19 @@ test.describe(
         );
         await expect(assetDetailsPage.overviewTab.metadataShowAllButton).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metadataSummaryItems).toHaveCount(2);
+        await expect(assetDetailsPage.overviewTab.metadataSummaryItems).toHaveCount(3);
         await expect(
-          assetDetailsPage.overviewTab.metadataSummaryItems.filter({ hasText: 'Host IP' })
+          assetDetailsPage.overviewTab.metadataSummaryItems.filter({ hasText: 'Container ID' })
         ).toBeVisible();
         await expect(
-          assetDetailsPage.overviewTab.metadataSummaryItems.filter({ hasText: 'Host OS version' })
+          assetDetailsPage.overviewTab.metadataSummaryItems.filter({
+            hasText: 'Container image name',
+          })
+        ).toBeVisible();
+        await expect(
+          assetDetailsPage.overviewTab.metadataSummaryItems.filter({
+            hasText: 'Host name',
+          })
         ).toBeVisible();
 
         await assetDetailsPage.overviewTab.metadataSectionCollapsible.click();
@@ -108,27 +111,6 @@ test.describe(
         await expect(assetDetailsPage.overviewTab.alertsContent).toBeVisible();
       });
 
-      await test.step('renders services section', async () => {
-        await expect(assetDetailsPage.overviewTab.servicesSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.servicesSection).toHaveAttribute(
-          'data-section-state',
-          'open'
-        );
-        await expect(assetDetailsPage.overviewTab.servicesSectionGroup).not.toHaveAttribute(
-          'inert'
-        );
-        await expect(assetDetailsPage.overviewTab.servicesShowAllButton).toBeVisible();
-
-        await expect(assetDetailsPage.overviewTab.servicesContainer).toBeVisible();
-
-        await assetDetailsPage.overviewTab.servicesSectionCollapsible.click();
-        await expect(assetDetailsPage.overviewTab.servicesSection).toHaveAttribute(
-          'data-section-state',
-          'closed'
-        );
-        await expect(assetDetailsPage.overviewTab.servicesSectionGroup).toHaveAttribute('inert');
-      });
-
       await test.step('renders metrics section', async () => {
         await expect(assetDetailsPage.overviewTab.metricsSection).toBeVisible();
         await expect(assetDetailsPage.overviewTab.metricsSection).toHaveAttribute(
@@ -141,7 +123,6 @@ test.describe(
         await expect(assetDetailsPage.overviewTab.metricsCpuSectionTitle).toBeVisible();
         await expect(assetDetailsPage.overviewTab.metricsCpuShowAllButton).toBeVisible();
         await expect(assetDetailsPage.overviewTab.metricsCpuUsageChart).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsCpuNormalizedLoadChart).toBeVisible();
 
         await expect(assetDetailsPage.overviewTab.metricsMemorySection).toBeVisible();
         await expect(assetDetailsPage.overviewTab.metricsMemorySectionTitle).toBeVisible();
@@ -156,7 +137,6 @@ test.describe(
         await expect(assetDetailsPage.overviewTab.metricsDiskSection).toBeVisible();
         await expect(assetDetailsPage.overviewTab.metricsDiskSectionTitle).toBeVisible();
         await expect(assetDetailsPage.overviewTab.metricsDiskShowAllButton).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsDiskUsageChart).toBeVisible();
         await expect(assetDetailsPage.overviewTab.metricsDiskIOChart).toBeVisible();
 
         await assetDetailsPage.overviewTab.metricsSectionCollapsible.click();
@@ -329,7 +309,7 @@ test.describe(
       await test.step('filter logs via search bar and open the query in discover', async () => {
         await assetDetailsPage.logsTag.filterTable(`"${LOG_LEVELS[0].message}"`);
 
-        const discoverQuery = `(host.name: ${HOST1_NAME}) and ("${LOG_LEVELS[0].message}")`;
+        const discoverQuery = `(container.id: ${CONTAINER_ID}) and ("${LOG_LEVELS[0].message}")`;
 
         await assetDetailsPage.logsTag.openInDiscoverButton.click();
 
@@ -352,7 +332,9 @@ test.describe(
       await test.step('open asset details as page keeping the selected tab', async () => {
         await assetDetailsPage.openAsPageButton.click();
         const url = new URL(page.url());
-        expect(url.pathname).toBe(`/app/metrics/detail/host/${encodeURIComponent(HOST1_NAME)}`);
+        expect(url.pathname).toBe(
+          `/app/metrics/detail/container/${encodeURIComponent(CONTAINER_ID)}`
+        );
         await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.metadataTab.searchBar).toBeVisible();
         await expect(assetDetailsPage.metadataTab.table).toBeVisible();
@@ -361,7 +343,7 @@ test.describe(
       await test.step('return to flyout from asset details page', async () => {
         await assetDetailsPage.returnButton.click();
         await expect(
-          page.getByRole('dialog').getByRole('heading', { name: HOST1_NAME })
+          page.getByRole('dialog').getByRole('heading', { name: CONTAINER_NAME })
         ).toBeVisible();
         await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.metadataTab.searchBar).toBeVisible();
