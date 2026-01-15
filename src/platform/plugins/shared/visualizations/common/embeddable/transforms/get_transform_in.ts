@@ -74,7 +74,7 @@ export function getTransformIn(
 
     return {
       state: {
-        ...stateWithStoredTitles,x
+        ...stateWithStoredTitles,
         ...(enhancementsResults.state ? { enhancements: enhancementsResults.state } : {}),
       } as StoredVisualizeEmbeddableState,
       references: enhancementsResults.references,

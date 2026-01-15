@@ -20,9 +20,9 @@ describe('titles api', () => {
 
   it('should initialize publishing subjects from initialState', () => {
     const { api } = initializeTitleManager(initialTitles);
-    expect(api.title$.value).toBe(rawState.title);
-    expect(api.description$.value).toBe(rawState.description);
-    expect(api.hideTitle$.value).toBe(rawState.hide_title);
+    expect(api.title$.value).toBe(initialTitles.title);
+    expect(api.description$.value).toBe(initialTitles.description);
+    expect(api.hideTitle$.value).toBe(initialTitles.hide_title);
   });
 
   it('should update publishing subject values when set functions are called', () => {
