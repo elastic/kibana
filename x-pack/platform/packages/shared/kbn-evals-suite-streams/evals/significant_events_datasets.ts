@@ -154,6 +154,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         output: {
           expected_query: {
             categories: ['operational', 'system'],
+            kql_substrings: ['error or fail*'],
           },
         },
         metadata: {

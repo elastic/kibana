@@ -149,11 +149,13 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
 
             let bulkBody;
             if ((example.input as any).ingest_mode === 'single_doc') {
+              const message = example.input.sample_logs.join('\n');
               bulkBody = [
                 { create: { _index: testIndex } },
                 {
                   '@timestamp': new Date().toISOString(),
-                  'event.original': example.input.sample_logs.join('\n'),
+                  'event.original': message,
+                  message,
                 },
               ];
             } else {
