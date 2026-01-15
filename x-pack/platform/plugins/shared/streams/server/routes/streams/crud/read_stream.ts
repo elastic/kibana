@@ -64,15 +64,6 @@ export async function readStream({
     return query.query;
   });
 
-  if (Streams.GroupStream.Definition.is(streamDefinition)) {
-    return {
-      stream: streamDefinition,
-      dashboards,
-      rules,
-      queries,
-    };
-  }
-
   const privileges = await streamsClient.getPrivileges(name);
 
   // These queries are only relavant for IngestStreams
