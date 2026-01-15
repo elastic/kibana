@@ -16,24 +16,13 @@ export class IndexDataEnricher {
     this._enrichers.push(enricher);
   }
 
-  public enrichIndices = async (indices: Index[], client: HttpSetup): Promise<Index[]> => {
-    let enrichedIndices = indices;
-
-    for (let i = 0; i < this.enrichers.length; i++) {
-      const dataEnricher = this.enrichers[i];
-      try {
-        // todo do this in parallel
-        const dataEnricherResponse = await dataEnricher(enrichedIndices, client);
-        enrichedIndices = dataEnricherResponse;
-      } catch (e) {
-        // silently swallow enricher response errors
-      }
-    }
-
-    return enrichedIndices;
+  public enrichIndices = (client: HttpSetup): Promise<Index[]>[] => {
+    return this.enrichers.map((enricher) => enricher(client));
   };
 
   public get enrichers() {
     return this._enrichers;
   }
 }
+
+export const indexDataEnricher = new IndexDataEnricher();

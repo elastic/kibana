@@ -46,7 +46,7 @@ import { IndexManagementLocatorDefinition } from './locator';
 import { ComponentTemplateFlyout } from './application/components/component_templates/component_templates_flyout_embeddable';
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
-import { IndexDataEnricher } from './services';
+import { indexDataEnricher, type IndexDataEnricher } from './services';
 
 export class IndexMgmtUIPlugin
   implements
@@ -118,7 +118,7 @@ export class IndexMgmtUIPlugin
       enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
 
-    this.indexDataEnricher = new IndexDataEnricher();
+    this.indexDataEnricher = indexDataEnricher;
   }
 
   public setup(

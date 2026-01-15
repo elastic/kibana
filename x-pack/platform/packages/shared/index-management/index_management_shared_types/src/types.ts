@@ -19,7 +19,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { ExtensionsSetup } from './services/extensions_service';
 import type { PublicApiServiceSetup } from './services/public_api_service';
 
-export type Enricher = (indices: Index[], client: HttpSetup) => Promise<Index[]>;
+export type Enricher = (client: HttpSetup) => Promise<Index[]>;
 
 export type IndexManagementLocatorParams = SerializableRecord &
   (

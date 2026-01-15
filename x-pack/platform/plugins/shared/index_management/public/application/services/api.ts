@@ -161,6 +161,7 @@ interface IndexMetadata {
 }
 
 export async function loadIndices() {
+  // todo get config
   const config = {
     isIndexStatsEnabled: true,
     isSizeAndDocCountEnabled: true,
