@@ -147,14 +147,12 @@ export const useTopNavLinks = ({
             services.data.search.showSearchSessionsFlyout({
               appId,
               trackingProps: { openedFrom: 'background search button' },
-              onBackgroundSearchOpened: services.discoverFeatureFlags.getTabsEnabled()
-                ? ({ session, event }) => {
-                    event?.preventDefault();
-                    dispatch(
-                      internalStateActions.openSearchSessionInNewTab({ searchSession: session })
-                    );
-                  }
-                : undefined,
+              onBackgroundSearchOpened: ({ session, event }) => {
+                event?.preventDefault();
+                dispatch(
+                  internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+                );
+              },
             });
           },
         });

@@ -100,12 +100,11 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome, data, discoverFeatureFlags } = services;
+  const { core, dataViews, chrome, data } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled =
-    !services.embeddableEditor.isByValueEditor() && discoverFeatureFlags.getTabsEnabled();
+  const tabsEnabled = !services.embeddableEditor.isByValueEditor();
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
@@ -265,7 +264,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
                     defaultMessage: 'Discover - Session not yet saved',
                   })}
             </h1>
-            {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
+            {customizationContext.displayMode !== 'embedded' ? (
               <TabsView {...props} />
             ) : (
               <SingleTabView {...props} />

@@ -268,9 +268,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
-    discoverFeatureFlags: {
-      getTabsEnabled: () => true,
-    },
+    discoverFeatureFlags: {},
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
       isEmbeddedEditor: jest.fn(() => false),
