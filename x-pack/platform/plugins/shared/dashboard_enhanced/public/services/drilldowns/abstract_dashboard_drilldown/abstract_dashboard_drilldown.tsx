@@ -80,7 +80,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   };
 
   public readonly execute = async (config: Config, context: Context) => {
-    if (config.openInNewTab) {
+    if (config.open_in_new_tab) {
       window.open(await this.getHref(config, context), '_blank');
     } else {
       const { app, path, state } = await this.getLocation(config, context, false);
