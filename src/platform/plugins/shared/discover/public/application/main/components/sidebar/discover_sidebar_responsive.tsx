@@ -163,6 +163,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
+  const chromeStyle = useObservable(services.core.chrome.getChromeStyle$(), 'classic');
   const isEsqlMode = useIsEsqlMode();
   const {
     fieldListVariant,
@@ -407,7 +408,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       css={css`
         height: 100%;
         display: ${isSidebarCollapsed ? 'none' : 'flex'};
-        background-color: ${euiTheme.colors.body};
+        // Make Discover's field list background distinguished for the "new chrome"
+        background-color: ${chromeStyle === 'project'
+          ? euiTheme.colors.backgroundBasePlain
+          : euiTheme.colors.body};
       `}
     >
       <EuiFlexItem>

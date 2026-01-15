@@ -11,7 +11,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiButton, EuiButtonEmpty, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { docLinks } from '../../../../../common/doc_links';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { AgentsList } from './agents_list';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
@@ -25,6 +25,7 @@ const manageToolsLabel = i18n.translate('xpack.agentBuilder.agents.manageToolsLa
 export const AgentBuilderAgents = () => {
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
+  const { docLinksService } = useAgentBuilderServices();
   const headerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
     border-style: none;
@@ -71,7 +72,7 @@ export const AgentBuilderAgents = () => {
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    href={docLinks.agentBuilderAgents}
+                    href={docLinksService.agentBuilderAgents}
                     target="_blank"
                     aria-label={i18n.translate(
                       'xpack.agentBuilder.agents.agentsDocumentationAriaLabel',

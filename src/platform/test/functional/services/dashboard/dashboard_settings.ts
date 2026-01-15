@@ -102,6 +102,12 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
       }
     }
 
+    public async toggleAutoApplyFilters(value: boolean) {
+      const status = value ? 'check' : 'uncheck';
+      log.debug(`toggleAutoApplyFilters::${status}`);
+      await testSubjects.setEuiSwitch('dashboardAutoApplyFiltersCheckbox', status);
+    }
+
     public async isShowingDuplicateTitleWarning() {
       log.debug('isShowingDuplicateTitleWarning');
       await testSubjects.exists('duplicateTitleWarningMessage');

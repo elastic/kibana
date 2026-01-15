@@ -175,7 +175,7 @@
           "\nPublic-facing interface\nApps should use this interface to build job params.\nbrowserTimezone and version is provided by Reporting"
         ],
         "signature": [
-          "{ title: string; forceNow?: string | undefined; layout: { id?: ",
+          "{ title: string; objectType: string; forceNow?: string | undefined; layout: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",
@@ -185,7 +185,7 @@
           },
           " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
-          "> | undefined; zoom?: number | undefined; }; objectType: string; pagingStrategy?: ",
+          "> | undefined; zoom?: number | undefined; }; pagingStrategy?: ",
           "CsvPagingStrategy",
           " | undefined; locatorParams: ",
           "LocatorParams",

@@ -90,6 +90,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.fleet.experimentalFeatures=${JSON.stringify({
           enablePackageRollback: true,
           enableAgentPrivilegeLevelChange: true,
+          enableAgentRollback: true,
           enableFleetPolicyRevisionsCleanupTask: false,
           enableSloTemplates: true,
         })}`,

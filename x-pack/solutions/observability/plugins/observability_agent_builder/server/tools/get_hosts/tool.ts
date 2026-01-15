@@ -95,14 +95,11 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
       },
     },
     handler: async (
-      {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        limit = DEFAULT_LIMIT,
-        kqlFilter,
-      },
+      toolParams,
       { request }
     ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
+      const { start, end, limit = DEFAULT_LIMIT, kqlFilter } = toolParams;
+
       try {
         const { hosts, total } = await getToolHandler({
           request,

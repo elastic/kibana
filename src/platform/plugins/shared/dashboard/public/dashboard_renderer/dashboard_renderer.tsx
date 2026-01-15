@@ -49,8 +49,9 @@ export interface DashboardRendererProps {
    * Callback invoked when the dashboard API becomes available.
    *
    * @param api - The {@link DashboardApi} instance.
+   * @param internalApi - The {@link DashboardInternalApi} instance.
    */
-  onApiAvailable?: (api: DashboardApi) => void;
+  onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
 }
 
 export function DashboardRenderer({
@@ -101,7 +102,7 @@ export function DashboardRenderer({
         cleanupDashboardApi = results.cleanup;
         setDashboardApi(results.api);
         setDashboardInternalApi(results.internalApi);
-        onApiAvailable?.(results.api);
+        onApiAvailable?.(results.api, results.internalApi);
       })
       .catch((err) => {
         if (!canceled) setError(err);

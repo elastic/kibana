@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
-import type { PublishesESQLVariables } from '@kbn/esql-types';
+import type { ESQLControlVariable, PublishesESQLVariables } from '@kbn/esql-types';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
-  CanAddNewSection,
   CanExpandPanels,
+  CanPinPanels,
   HasLastSavedChildState,
+  HasSections,
   HasSerializedChildState,
   PassThroughContext,
   PresentationContainer,
@@ -34,7 +33,7 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
-  PublishesPauseFetch,
+  PublishesEditablePauseFetch,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
@@ -42,16 +41,16 @@ import type {
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
-  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
@@ -69,7 +68,9 @@ export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
  */
 export interface DashboardCreationOptions {
   /** Returns the initial dashboard state and view mode. */
-  getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
+  getInitialInput?: () => Partial<
+    DashboardState & { references?: Reference[]; viewMode?: ViewMode }
+  >;
 
   /** Returns context to pass through to child embeddables. */
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
@@ -128,7 +129,8 @@ export interface DashboardCreationOptions {
  * This type combines multiple capability interfaces to provide full dashboard functionality.
  */
 export type DashboardApi = CanExpandPanels &
-  CanAddNewSection &
+  CanPinPanels &
+  HasSections &
   HasAppContext &
   HasExecutionContext &
   HasLastSavedChildState &
@@ -150,11 +152,10 @@ export type DashboardApi = CanExpandPanels &
   PublishesProjectRouting &
   PublishesViewMode &
   PublishesWritableViewMode &
-  PublishesPauseFetch &
+  PublishesEditablePauseFetch &
   TrackContentfulRender &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
-    controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     setFocusedPanelId: (id: string | undefined) => void;
@@ -162,12 +163,11 @@ export type DashboardApi = CanExpandPanels &
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
       attributes: DashboardState;
-      references: Reference[];
     };
     getDashboardPanelFromId: (id: string) => {
       type: string;
       grid: GridData;
-      serializedState: SerializedPanelState;
+      serializedState: object;
     };
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -192,7 +192,19 @@ export type DashboardApi = CanExpandPanels &
     setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
-    unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
+
+    publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
+    unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
+    publishFilters: () => void;
+
+    publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
+    unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
+    publishTimeslice: () => void;
+
+    layout$: BehaviorSubject<DashboardLayout>;
+
+    registerChildApi: (api: DefaultEmbeddableApi) => void;
+
     accessControl$: PublishingSubject<Partial<SavedObjectAccessControl>>;
     changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
     createdBy?: string;
@@ -201,18 +213,15 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
-  layout$: BehaviorSubject<DashboardLayout>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
-  registerChildApi: (api: DefaultEmbeddableApi) => void;
-  setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'controlGroupInput'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
-  serializeControls: () => {
-    controlGroupInput: ControlsGroupState | undefined;
-    controlGroupReferences: Reference[];
-  };
+  publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+  unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+  publishVariables: () => void;
+  arePanelsRelated$: BehaviorSubject<(a: string, b: string) => boolean>;
 }
 
 export interface DashboardUser {

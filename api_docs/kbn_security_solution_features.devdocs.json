@@ -1353,6 +1353,16 @@
           },
           "<",
           "SecuritySubFeatureId",
+          "> | undefined; endpoint_scripts_management?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<",
+          "SecuritySubFeatureId",
           "> | undefined; endpoint_policy_protections?: ",
           {
             "pluginId": "@kbn/security-solution-features",
@@ -1647,6 +1657,14 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
+          "<readonly string[] | undefined>; api?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursivePartial",
+            "text": "RecursivePartial"
+          },
           "<readonly string[] | undefined>; requireAllSpaces?: ",
           {
             "pluginId": "@kbn/utility-types",
@@ -1655,15 +1673,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<boolean | undefined>; api?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.RecursivePartial",
-            "text": "RecursivePartial"
-          },
-          "<readonly string[] | undefined>; savedObject?: ",
+          "<boolean | undefined>; savedObject?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

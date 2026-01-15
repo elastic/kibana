@@ -18,11 +18,9 @@ import type {
 import { ChatExperience } from './chat_experience';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
-import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 
 jest.mock('../../contexts/settings_context');
 jest.mock('../../hooks/use_kibana');
-jest.mock('@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled');
 
 let lastFieldRowProps: unknown;
 
@@ -57,9 +55,6 @@ jest.mock('@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal', () => 
 
 const mockUseSettingsContext = useSettingsContext as jest.MockedFunction<typeof useSettingsContext>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockGetIsAiAgentsEnabled = getIsAiAgentsEnabled as jest.MockedFunction<
-  typeof getIsAiAgentsEnabled
->;
 
 type ReportEvent = (eventType: string, payload: Record<string, unknown>) => void;
 
@@ -68,11 +63,9 @@ interface CapturedFieldRowProps {
 }
 
 const setup = ({
-  isAiAgentsEnabled = true,
   savedValue,
   hasField = true,
 }: {
-  isAiAgentsEnabled?: boolean;
   savedValue?: unknown;
   hasField?: boolean;
 } = {}) => {
@@ -88,7 +81,6 @@ const setup = ({
       }
     : {};
 
-  mockGetIsAiAgentsEnabled.mockReturnValue(isAiAgentsEnabled);
   mockUseSettingsContext.mockReturnValue({
     fields,
     handleFieldChange,
@@ -134,16 +126,8 @@ describe('ChatExperience', () => {
     }
   });
 
-  it('returns null when AI agents are disabled', () => {
-    const { renderResult } = setup({
-      isAiAgentsEnabled: false,
-      savedValue: AIChatExperience.Classic,
-    });
-    expect(renderResult.container.firstChild).toBeNull();
-  });
-
   it('returns null when the field is missing', () => {
-    const { renderResult } = setup({ isAiAgentsEnabled: true, hasField: false });
+    const { renderResult } = setup({ hasField: false });
     expect(renderResult.container.firstChild).toBeNull();
   });
 

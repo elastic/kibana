@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type ControlGroupRendererApi,
-  type ControlGroupRendererProps,
-  type ControlGroupStateBuilder,
-} from '@kbn/controls-plugin/public';
+import type {
+  ControlGroupRendererApi,
+  ControlGroupRendererProps,
+  ControlGroupStateBuilder,
+} from '@kbn/control-group-renderer';
 import React, { useEffect, useState } from 'react';
 import { TEST_IDS } from '../constants';
 import { getControlGroupMock } from './control_group';
@@ -40,7 +40,7 @@ export const getMockedControlGroupRenderer = (
       if (creationOptionsCalled) return;
       setCreationOptionsCalled(true);
       if (getCreationOptions) {
-        getCreationOptions({}, {
+        getCreationOptions({ initialChildControlState: {} }, {
           addOptionsListControl: addOptionsListControlMock,
         } as unknown as ControlGroupStateBuilder);
       }

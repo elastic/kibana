@@ -5,6 +5,107 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getHighContrastBorder",
+        "type": "Function",
+        "tags": [],
+        "label": "getHighContrastBorder",
+        "description": [
+          "\nHelper function to get container border styles for high contrast mode.\nIn high contrast mode, renders a solid border. Otherwise, renders based on color mode.\n"
+        ],
+        "signature": [
+          "(euiThemeContext: ",
+          "UseEuiTheme",
+          "<{}>) => string"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getHighContrastBorder.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "euiThemeContext",
+            "description": [
+              "- EUI theme context"
+            ],
+            "signature": [
+              "UseEuiTheme",
+              "<{}>"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "CSS border string"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.getHighContrastSeparator",
+        "type": "Function",
+        "tags": [],
+        "label": "getHighContrastSeparator",
+        "description": [
+          "\nHelper function to get separator border styles for high contrast mode.\nIn high contrast mode, renders a real border. Otherwise, renders a pseudo-element with subdued styling.\n"
+        ],
+        "signature": [
+          "(euiThemeContext: ",
+          "UseEuiTheme",
+          "<{}>, options?: ",
+          "HighContrastSeparatorOptions",
+          ") => string"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getHighContrastSeparator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "euiThemeContext",
+            "description": [],
+            "signature": [
+              "UseEuiTheme",
+              "<{}>"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.getHighContrastSeparator.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Configuration options for the separator"
+            ],
+            "signature": [
+              "HighContrastSeparatorOptions"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "CSS string for the separator"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
         "id": "def-public.getScrollContainer",
         "type": "Function",
         "tags": [],
@@ -498,7 +599,86 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-utils",
+        "id": "def-public.HighContrastSeparatorOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HighContrastSeparatorOptions",
+        "description": [],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.side",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "side",
+            "description": [
+              "The side to place the border separator ('top' or 'bottom'). Default: 'bottom'"
+            ],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.width",
+            "type": "string",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "Width of the separator line. Default: theme.size.xl"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.left",
+            "type": "string",
+            "tags": [],
+            "label": "left",
+            "description": [
+              "Left position for the separator. Default: '0'"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-utils",
+            "id": "def-public.HighContrastSeparatorOptions.right",
+            "type": "string",
+            "tags": [],
+            "label": "right",
+            "description": [
+              "Right position for the separator. Default: '0'"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

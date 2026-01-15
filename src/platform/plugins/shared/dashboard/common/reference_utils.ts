@@ -9,8 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-const controlGroupReferencePrefix = 'controlGroup_';
-
 export const getPanelIdFromReference = (reference: Reference) => {
   const splits = reference.name.split(':', 1);
   return splits.length ? splits[0] : undefined;
@@ -30,17 +28,6 @@ export const getReferencesForPanelId = (id: string, references: Reference[]): Re
     .filter((reference) => reference.name.indexOf(prefix) === 0)
     .map((reference) => ({ ...reference, name: reference.name.replace(prefix, '') }));
   return filteredReferences;
-};
-
-/**
- * Retrieves references for the control group.
- * Filters references that have the control group prefix.
- *
- * @param references - The array of {@link Reference} objects to filter.
- * @returns An array of {@link Reference} objects belonging to the control group.
- */
-export const getReferencesForControls = (references: Reference[]): Reference[] => {
-  return references.filter((reference) => reference.name.startsWith(controlGroupReferencePrefix));
 };
 
 /**

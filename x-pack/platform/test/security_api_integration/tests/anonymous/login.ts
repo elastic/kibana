@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(unauthenticatedResponse.headers['set-cookie']).to.be(undefined);
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('error');
+        expect(unauthenticatedResponse.text).to.contain('<h1>Unauthenticated</h1>');
       });
     });
 
