@@ -13,7 +13,6 @@ import type {
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
-  SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
 
@@ -44,7 +43,7 @@ export interface BuildEmbeddableProps<
   /**
    * Initial serialized state provided by the parent.
    */
-  initialState: SerializedPanelState<SerializedState>;
+  initialState: SerializedState;
 
   /**
    * A function that adds default & required methods to the passed API registration object.

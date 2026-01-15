@@ -8,9 +8,32 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowContext, WorkflowInput } from '@kbn/workflows';
 import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
+
+type WorkflowInputs = NonNullable<WorkflowContext['inputs']>;
+function applyInputDefaults(
+  workflowDefinitionInputs: WorkflowInput[] = [],
+  providedInputs: WorkflowInputs | undefined
+): WorkflowInputs | undefined {
+  const defaultInputs: WorkflowInputs = {};
+
+  for (const input of workflowDefinitionInputs) {
+    if (input.default !== undefined) {
+      defaultInputs[input.name] = input.default;
+    }
+  }
+
+  if (Object.keys(defaultInputs).length === 0) {
+    return providedInputs;
+  }
+
+  return {
+    ...defaultInputs,
+    ...(providedInputs || {}),
+  };
+}
 
 export function buildWorkflowContext(
   workflowExecution: EsWorkflowExecution,
@@ -23,6 +46,11 @@ export function buildWorkflowContext(
     workflowExecution.spaceId,
     workflowExecution.workflowId,
     workflowExecution.id
+  );
+
+  const inputsWithDefaults = applyInputDefaults(
+    workflowExecution.workflowDefinition?.inputs,
+    workflowExecution.context?.inputs
   );
 
   return {
@@ -41,7 +69,7 @@ export function buildWorkflowContext(
     kibanaUrl,
     consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
-    inputs: workflowExecution.context?.inputs,
+    inputs: inputsWithDefaults,
     now: new Date(),
   };
 }

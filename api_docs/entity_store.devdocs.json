@@ -24,6 +24,21 @@
     "misc": [
       {
         "parentPluginId": "entityStore",
+        "id": "def-common.FF_ENABLE_ENTITY_STORE_V2",
+        "type": "string",
+        "tags": [],
+        "label": "FF_ENABLE_ENTITY_STORE_V2",
+        "description": [],
+        "signature": [
+          "\"securitySolution:entityStoreEnableV2\""
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],

@@ -8,12 +8,15 @@
 export type { AuthenticationServiceStart } from './authentication_service';
 
 export type {
-  APIKeysService as APIKeys,
+  NativeAPIKeysType,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+  UiamAPIKeysType,
 } from '@kbn/core-security-server';
 
 export {

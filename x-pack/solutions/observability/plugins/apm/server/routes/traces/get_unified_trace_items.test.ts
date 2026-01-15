@@ -40,6 +40,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  FAAS_COLDSTART,
 } from '../../../common/es_fields/apm';
 
 describe('getErrorsByDocId', () => {
@@ -679,6 +680,77 @@ describe('getUnifiedTraceItems', () => {
         agentName: undefined,
         sync: undefined,
       });
+    });
+
+    it('should include coldstart field when present and true', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [FAAS_COLDSTART]: [true],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].coldstart).toBe(true);
+    });
+
+    it('should include coldstart field when present and false', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [FAAS_COLDSTART]: [false],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].coldstart).toBe(false);
+    });
+
+    it('should return undefined coldstart when not present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].coldstart).toBeUndefined();
     });
   });
 
