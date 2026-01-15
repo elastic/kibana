@@ -42,11 +42,11 @@ export function registerInstall(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, resourcesService } = entityStoreCtx;
+        const { logger, assetManager } = entityStoreCtx;
         const { entityTypes, logExtractionFrequency } = req.body;
         logger.debug('Install api called');
 
-        await resourcesService.install(entityTypes, logExtractionFrequency);
+        await assetManager.install(entityTypes, logExtractionFrequency);
 
         return res.ok({
           body: {

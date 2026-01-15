@@ -15,10 +15,10 @@ import type { Logger } from '@kbn/logging';
 import type { EntityType } from '../domain/definitions/entity_type';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
-import type { ResourcesService } from '../domain/resources_service';
+import type { AssetManager } from '../domain/asst_manager';
 
 interface ExtractEntityTaskParams {
-  resourcesService: ResourcesService;
+  assetManager: AssetManager;
 }
 
 interface ExtractEntityTaskBaseState {
@@ -83,10 +83,10 @@ async function run({
 }): Promise<RunResult> {
   const currentState = taskInstance.state;
   const runs = currentState.runs || 0;
-  const { resourcesService } = taskInstance.params;
+  const { assetManager } = taskInstance.params;
 
   logger.info(
-    `Running extract entity task, runs: ${runs}, resourcesService: ${resourcesService}, abortController: ${abortController}`
+    `Running extract entity task, runs: ${runs}, assetManager: ${assetManager}, abortController: ${abortController}`
   );
   try {
     const updatedState = {
@@ -143,13 +143,13 @@ export function registerExtractEntityTasks({
 export async function scheduleExtractEntityTasks({
   taskManager,
   entityTypes,
-  resourcesService,
+  assetManager,
   logger,
   frequency,
 }: {
   taskManager: TaskManagerStartContract;
   entityTypes: EntityType[];
-  resourcesService: ResourcesService;
+  assetManager: AssetManager;
   logger: Logger;
   frequency?: string;
 }): Promise<void> {
@@ -164,7 +164,7 @@ export async function scheduleExtractEntityTasks({
         schedule: {
           interval,
         },
-        params: { resourcesService },
+        params: { assetManager },
         state: {},
       });
     }

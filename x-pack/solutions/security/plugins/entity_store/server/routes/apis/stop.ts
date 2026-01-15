@@ -43,12 +43,12 @@ export function registerStop(router: EntityStorePluginRouter) {
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse<StopEntityStoreAPIResponse>> => {
           const entityStoreCtx = await ctx.entityStore;
-          const { logger, resourcesService } = entityStoreCtx;
+          const { logger, assetManager } = entityStoreCtx;
           const { entityTypes } = req.body;
 
           logger.debug('Stop API invoked');
 
-          const { stoppedTasks } = await resourcesService.stop(entityTypes);
+          const { stoppedTasks } = await assetManager.stop(entityTypes);
 
           return res.ok({
             body: {

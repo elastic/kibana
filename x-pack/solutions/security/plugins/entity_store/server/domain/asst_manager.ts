@@ -11,15 +11,15 @@ import { ALL_ENTITY_TYPES } from './definitions/entity_type';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { scheduleExtractEntityTasks, stopExtractEntityTasks } from '../tasks/extract_entity_task';
 
-export class ResourcesService {
-  constructor(private logger: Logger, private taskManager: TaskManagerStartContract) { }
+export class AssetManager {
+  constructor(private logger: Logger, private taskManager: TaskManagerStartContract) {}
 
   public async install(entityTypes: EntityType[] = ALL_ENTITY_TYPES, logExtractionFrequency?: string) {
     this.logger.debug(`Should initialize entity store for types ${JSON.stringify(entityTypes)}`);
     await scheduleExtractEntityTasks({
       taskManager: this.taskManager,
       entityTypes,
-      resourcesService: this,
+      assetManager: this,
       logger: this.logger,
       frequency: logExtractionFrequency,
     });
