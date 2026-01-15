@@ -20,6 +20,9 @@ import { mockRule, mockLogResponse } from './test_helpers';
 import { getJsDomPerformanceFix } from '../../test_utils';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { CreateRuleButton } from '../../rules_list/components/create_rule_button';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
+import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_link';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
@@ -35,6 +38,16 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 jest.mock('../../../hooks/use_load_rule_event_logs', () => ({
   useLoadRuleEventLogs: jest.fn(),
 }));
+
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
+  useGetRuleTypesPermissions: jest.fn().mockReturnValue({
+    authorizedToCreateAnyRules: true,
+  }),
+}));
+
+const { useGetRuleTypesPermissions } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 const { getIsExperimentalFeatureEnabled } = jest.requireMock(
   '../../../../common/get_experimental_features'
@@ -258,6 +271,43 @@ describe('rule_event_log_list_table', () => {
           ruleTypeIds: ['test-1', 'test-2'],
         })
       );
+    });
+  });
+
+  describe('setHeaderActions', () => {
+    beforeEach(() => {
+      useGetRuleTypesPermissions.mockClear();
+    });
+
+    it('should set header actions correctly when user is authorized to create rules', async () => {
+      const setHeaderActionsMock = jest.fn();
+
+      render(
+        <RuleEventLogListWithProvider
+          ruleId={ruleMock.id}
+          setHeaderActions={setHeaderActionsMock}
+        />
+      );
+      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(CreateRuleButton);
+      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesSettingsLink);
+      expect(setHeaderActionsMock.mock.lastCall[0][2].type).toEqual(RulesListDocLink);
+    });
+
+    it('should set header actions correctly when user is not authorized to create rules', async () => {
+      const setHeaderActionsMock = jest.fn();
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToCreateAnyRules: false,
+      });
+
+      render(
+        <RuleEventLogListWithProvider
+          ruleId={ruleMock.id}
+          setHeaderActions={setHeaderActionsMock}
+        />
+      );
+      // Do not render the create rule button since the user is not authorized
+      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(RulesSettingsLink);
+      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesListDocLink);
     });
   });
 
