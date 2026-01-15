@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { isHttpFetchError } from '@kbn/server-route-repository-client';
+import { getLast24HoursTimeRange } from '../../../util/time_range';
 import { getFormattedError } from '../../../util/errors';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -127,7 +128,7 @@ export const useStreamDescriptionApi = ({
 
   const scheduleDescriptionGenerationTask = useCallback(
     async (connectorId: string) => {
-      const now = Date.now();
+      const { from, to } = getLast24HoursTimeRange();
       await streams.streamsRepositoryClient.fetch(
         'POST /internal/streams/{name}/_description_generation/_task',
         {
@@ -136,8 +137,8 @@ export const useStreamDescriptionApi = ({
             path: { name: definition.stream.name },
             body: {
               action: 'schedule',
-              to: new Date(now).toISOString(),
-              from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+              to,
+              from,
               connectorId,
             },
           },
