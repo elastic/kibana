@@ -48,6 +48,8 @@ export const createDataControlPanelAction = (): ActionDefinition<
       publishedDataViewId ??
       (await dataViewsService.getDefaultDataView())?.id;
 
+    console.log('creatreDataControlPanelAction before openDataControlEditor');
+
     openDataControlEditor({
       initialState: {
         dataViewId: parentDataViewId,

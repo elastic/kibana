@@ -168,6 +168,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     });
 
   const onEdit = async () => {
+    console.log('onEdit in data_control_manager called');
     // open the editor to get the new state
     openDataControlEditor<DataControlState & EditorState>({
       initialState: {
