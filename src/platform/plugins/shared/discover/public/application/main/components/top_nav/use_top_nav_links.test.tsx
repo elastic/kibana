@@ -11,6 +11,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { BehaviorSubject } from 'rxjs';
 import { useTopNavLinks } from './use_top_nav_links';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -20,9 +21,14 @@ import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 describe('useTopNavLinks', () => {
   const services = {
     ...createDiscoverServicesMock(),
+    application: {
+      ...createDiscoverServicesMock().application,
+      currentAppId$: new BehaviorSubject('discover'),
+    },
     capabilities: {
       discover_v2: {
         save: true,
+        storeSearchSession: true,
       },
     },
     uiSettings: {
@@ -79,10 +85,10 @@ describe('useTopNavLinks', () => {
     const appMenuConfig = setup();
 
     expect(appMenuConfig.items).toBeDefined();
-    expect(appMenuConfig.items!.length).toBeGreaterThan(0);
+    expect(appMenuConfig.items?.length).toBeGreaterThan(0);
 
     // Check for key items
-    const itemIds = appMenuConfig.items!.map((item) => item.id);
+    const itemIds = appMenuConfig.items?.map((item) => item.id);
     expect(itemIds).toContain('new');
     expect(itemIds).toContain('open');
 
@@ -100,7 +106,7 @@ describe('useTopNavLinks', () => {
       expect(appMenuConfig.items).toBeDefined();
 
       // Check for ESQL switch item
-      const esqlItem = appMenuConfig.items!.find((item) => item.id === 'esql');
+      const esqlItem = appMenuConfig.items?.find((item) => item.id === 'esql');
       expect(esqlItem).toBeDefined();
       expect(esqlItem?.label).toBe('Switch to classic');
     });
@@ -109,6 +115,7 @@ describe('useTopNavLinks', () => {
   describe('when share service included', () => {
     beforeAll(() => {
       services.share = sharePluginMock.createStartContract();
+      jest.spyOn(services.share, 'availableIntegrations').mockReturnValue([]);
     });
 
     afterAll(() => {
@@ -121,12 +128,28 @@ describe('useTopNavLinks', () => {
       expect(appMenuConfig.items).toBeDefined();
 
       // Check for share item
-      const shareItem = appMenuConfig.items!.find((item) => item.id === 'share');
+      const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
       expect(shareItem).toBeDefined();
       expect(shareItem?.label).toBe('Share');
     });
 
     it('should include the export menu item', () => {
+      jest
+        .spyOn(services.share!, 'availableIntegrations')
+        .mockImplementation((_objectType, groupId) => {
+          if (groupId === 'export') {
+            return [
+              {
+                id: 'export',
+                shareType: 'integration' as const,
+                groupId: 'export',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          return [];
+        });
+
       const appMenuConfig = renderHook(
         () =>
           useTopNavLinks({
@@ -147,13 +170,16 @@ describe('useTopNavLinks', () => {
         }
       ).result.current;
 
-      // Check for share item with export popover items
-      const shareItem = appMenuConfig.items!.find((item) => item.id === 'share');
-      expect(shareItem).toBeDefined();
-
-      // Export should be a popover item under share
-      const exportItem = shareItem?.items?.find((item) => item.id === 'export');
+      const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
       expect(exportItem).toBeDefined();
+      expect(exportItem?.label).toBe('Export');
+
+      // Export should have popover items
+      expect(exportItem?.items).toBeDefined();
+      expect(exportItem?.items?.length).toBeGreaterThan(0);
+
+      const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
+      expect(shareItem).toBeDefined();
     });
   });
 
@@ -169,7 +195,7 @@ describe('useTopNavLinks', () => {
     it('should return the background search menu item', () => {
       const appMenuConfig = setup();
 
-      const backgroundSearchItem = appMenuConfig.items!.find(
+      const backgroundSearchItem = appMenuConfig.items?.find(
         (item) => item.id === 'backgroundSearch'
       );
       expect(backgroundSearchItem).toBeDefined();
@@ -180,7 +206,7 @@ describe('useTopNavLinks', () => {
     it('should NOT return the background search menu item', () => {
       const appMenuConfig = setup();
 
-      const backgroundSearchItem = appMenuConfig.items!.find(
+      const backgroundSearchItem = appMenuConfig.items?.find(
         (item) => item.id === 'backgroundSearch'
       );
       expect(backgroundSearchItem).toBeUndefined();

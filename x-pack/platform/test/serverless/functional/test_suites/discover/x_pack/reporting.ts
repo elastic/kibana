@@ -105,7 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await PageObjects.exports.isExportPopoverOpen();
         });
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await PageObjects.reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {

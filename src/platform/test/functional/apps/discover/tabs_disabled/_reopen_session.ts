@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('14,004');
         expect(await discover.getSavedSearchTitle()).to.be(firstSession);
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        await testSubjects.missingOrFail('split-button-notification-indicator');
       });
 
       const query = 'machine.os: "ios"';
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await discover.getHitCount()).to.be('2,784');
-        await testSubjects.existOrFail('unsavedChangesBadge');
+        await testSubjects.existOrFail('split-button-notification-indicator');
       });
 
       await discover.saveSearch(secondSession, true);
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHitCount()).to.be('2,784');
         expect(await queryBar.getQueryString()).to.be(query);
         expect(await discover.getSavedSearchTitle()).to.be(secondSession);
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        await testSubjects.missingOrFail('split-button-notification-indicator');
       });
 
       await discover.loadSavedSearch(firstSession);
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHitCount()).to.be('14,004');
         expect(await queryBar.getQueryString()).to.be('');
         expect(await discover.getSavedSearchTitle()).to.be(firstSession);
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        await testSubjects.missingOrFail('split-button-notification-indicator');
       });
 
       await discover.loadSavedSearch(secondSession);
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHitCount()).to.be('2,784');
         expect(await queryBar.getQueryString()).to.be(query);
         expect(await discover.getSavedSearchTitle()).to.be(secondSession);
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        await testSubjects.missingOrFail('split-button-notification-indicator');
       });
     });
   });

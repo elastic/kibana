@@ -13,8 +13,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DiscoverTopNav } from './discover_topnav';
-import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { TopNavMenu } from '@kbn/navigation-plugin/public';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -25,6 +24,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { DiscoverTopNavMenuProvider } from './discover_topnav_menu';
+import { useDiscoverTopNav } from './use_discover_topnav';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -54,10 +54,17 @@ const mockSearchBarCustomizationWithHiddenDataViewPicker: SearchBarCustomization
 };
 
 let mockUseCustomizations = false;
+let mockAppMenuConfig: AppMenuConfig = {
+  items: [],
+};
 
 jest.mock('../../../../customizations', () => ({
   ...jest.requireActual('../../../../customizations'),
   useDiscoverCustomization: jest.fn(),
+}));
+
+jest.mock('./use_discover_topnav', () => ({
+  useDiscoverTopNav: jest.fn(),
 }));
 
 const mockDefaultCapabilities = {
@@ -124,23 +131,51 @@ describe('Discover topnav component', () => {
     mockUseKibana.mockReturnValue({
       services: mockDiscoverService,
     });
+
+    (useDiscoverTopNav as jest.Mock).mockImplementation(() => ({
+      topNavMenu: mockAppMenuConfig,
+      topNavBadges: [],
+    }));
   });
 
-  test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
+  test('generated config of AppMenuConfig is correct when discover save permissions are assigned', () => {
+    mockAppMenuConfig = {
+      items: [
+        { id: 'inspect', label: 'Inspect', iconType: 'inspect', order: 1, run: jest.fn() },
+        { id: 'new', label: 'New', iconType: 'plusInCircle', order: 2, run: jest.fn() },
+        { id: 'open', label: 'Open', iconType: 'folderOpen', order: 3, run: jest.fn() },
+      ],
+      primaryActionItem: {
+        id: 'save',
+        label: 'Save',
+        iconType: 'save',
+        run: jest.fn(),
+      },
+    };
     const props = getProps({ capabilities: { discover_v2: { save: true } } });
-    const component = getTestComponent(props);
-    const topNavMenu = component.find(TopNavMenu).at(0);
-    const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'save']);
+    getTestComponent(props);
+
+    const { topNavMenu } = (useDiscoverTopNav as jest.Mock).mock.results[0].value;
+    const itemIds = topNavMenu.items?.map((item: { id: string }) => item.id) || [];
+    expect(itemIds).toEqual(['inspect', 'new', 'open']);
+    expect(topNavMenu.primaryActionItem?.id).toBe('save');
   });
 
-  test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
+  test('generated config of AppMenuConfig is correct when no discover save permissions are assigned', () => {
+    mockAppMenuConfig = {
+      items: [
+        { id: 'inspect', label: 'Inspect', iconType: 'inspect', order: 1, run: jest.fn() },
+        { id: 'new', label: 'New', iconType: 'plusInCircle', order: 2, run: jest.fn() },
+        { id: 'open', label: 'Open', iconType: 'folderOpen', order: 3, run: jest.fn() },
+      ],
+    };
     const props = getProps({ capabilities: { discover_v2: { save: false } } });
-    const component = getTestComponent(props);
+    getTestComponent(props);
 
-    const topNavMenu = component.find(TopNavMenu).at(0).props();
-    const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['inspect', 'new', 'open']);
+    const { topNavMenu } = (useDiscoverTopNav as jest.Mock).mock.results[0].value;
+    const itemIds = topNavMenu.items?.map((item: { id: string }) => item.id) || [];
+    expect(itemIds).toEqual(['inspect', 'new', 'open']);
+    expect(topNavMenu.primaryActionItem).toBeUndefined();
   });
 
   describe('top nav customization', () => {
@@ -154,12 +189,15 @@ describe('Discover topnav component', () => {
         inspectItem: { disabled: true },
         saveItem: { disabled: true },
       };
+      mockAppMenuConfig = {
+        items: [],
+      };
       const props = getProps();
-      const component = getTestComponent(props);
+      getTestComponent(props);
 
-      const topNavMenu = component.find(TopNavMenu).at(0);
-      const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-      expect(topMenuConfig).toEqual([]);
+      const { topNavMenu } = (useDiscoverTopNav as jest.Mock).mock.results[0].value;
+      const itemIds = topNavMenu.items?.map((item: { id: string }) => item.id) || [];
+      expect(itemIds).toEqual([]);
     });
 
     describe('share service available', () => {
@@ -181,12 +219,27 @@ describe('Discover topnav component', () => {
       });
 
       it('will include share menu item if the share service is available', () => {
+        mockAppMenuConfig = {
+          items: [
+            { id: 'inspect', label: 'Inspect', iconType: 'inspect', order: 1, run: jest.fn() },
+            { id: 'new', label: 'New', iconType: 'plusInCircle', order: 2, run: jest.fn() },
+            { id: 'open', label: 'Open', iconType: 'folderOpen', order: 3, run: jest.fn() },
+            { id: 'share', label: 'Share', iconType: 'share', order: 4, run: jest.fn() },
+          ],
+          primaryActionItem: {
+            id: 'save',
+            label: 'Save',
+            iconType: 'save',
+            run: jest.fn(),
+          },
+        };
         const props = getProps();
-        const component = getTestComponent(props);
+        getTestComponent(props);
 
-        const topNavMenu = component.find(TopNavMenu).at(0);
-        const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-        expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share', 'save']);
+        const { topNavMenu } = (useDiscoverTopNav as jest.Mock).mock.results[0].value;
+        const itemIds = topNavMenu.items?.map((item: { id: string }) => item.id) || [];
+        expect(itemIds).toEqual(['inspect', 'new', 'open', 'share']);
+        expect(topNavMenu.primaryActionItem?.id).toBe('save');
       });
 
       it('will include export menu item if there are export integrations available', () => {
@@ -205,12 +258,28 @@ describe('Discover topnav component', () => {
           return [];
         });
 
+        mockAppMenuConfig = {
+          items: [
+            { id: 'inspect', label: 'Inspect', iconType: 'inspect', order: 1, run: jest.fn() },
+            { id: 'new', label: 'New', iconType: 'plusInCircle', order: 2, run: jest.fn() },
+            { id: 'open', label: 'Open', iconType: 'folderOpen', order: 3, run: jest.fn() },
+            { id: 'export', label: 'Export', iconType: 'exportAction', order: 4, run: jest.fn() },
+            { id: 'share', label: 'Share', iconType: 'share', order: 5, run: jest.fn() },
+          ],
+          primaryActionItem: {
+            id: 'save',
+            label: 'Save',
+            iconType: 'save',
+            run: jest.fn(),
+          },
+        };
         const props = getProps();
-        const component = getTestComponent(props);
+        getTestComponent(props);
 
-        const topNavMenu = component.find(TopNavMenu).at(0).props();
-        const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
-        expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'export', 'share', 'save']);
+        const { topNavMenu } = (useDiscoverTopNav as jest.Mock).mock.results[0].value;
+        const itemIds = topNavMenu.items?.map((item: { id: string }) => item.id) || [];
+        expect(itemIds).toEqual(['inspect', 'new', 'open', 'export', 'share']);
+        expect(topNavMenu.primaryActionItem?.id).toBe('save');
       });
     });
   });
@@ -236,7 +305,7 @@ describe('Discover topnav component', () => {
 
       const topNav = component
         .find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu)
-        .at(1);
+        .at(0);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
       const dataViewPickerOverride = mountWithIntl(
         topNav.prop('dataViewPickerOverride') as ReactElement
@@ -256,7 +325,7 @@ describe('Discover topnav component', () => {
 
       const topNav = component
         .find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu)
-        .at(1);
+        .at(0);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
     });
   });

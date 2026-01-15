@@ -56,9 +56,13 @@ export class InspectorService extends FtrService {
    */
   public async open(openButton: string = 'openInspectorButton'): Promise<void> {
     this.log.debug('Inspector.open');
+
     const isOpen = await this.testSubjects.exists('inspectorPanel');
     if (!isOpen) {
       await this.retry.try(async () => {
+        if (await this.testSubjects.exists('app-menu-overflow-button')) {
+          await this.testSubjects.click('app-menu-overflow-button');
+        }
         await this.testSubjects.click(openButton);
         await this.testSubjects.exists('inspectorPanel');
       });
