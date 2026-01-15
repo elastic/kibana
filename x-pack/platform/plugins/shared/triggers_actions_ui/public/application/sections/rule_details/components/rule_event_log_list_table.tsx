@@ -20,6 +20,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import type { IExecutionLog } from '@kbn/alerting-plugin/common';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
+import { getCreateRuleRoute, getCreateRuleFromTemplateRoute } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
@@ -48,6 +51,7 @@ import type { UseLoadRuleEventLogsProps } from '../../../hooks/use_load_rule_eve
 import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import type { RefreshToken } from './types';
+import { CreateRuleButton } from '../../rules_list/components/create_rule_button';
 
 const API_FAILED_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.apiError',
@@ -116,11 +120,17 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     hasRuleNames = false,
     hasAllSpaceSwitch = false,
     setHeaderActions,
-    filteredRuleTypes,
+    filteredRuleTypes = [],
     getRuleDetailsRoute,
   } = props;
 
-  const { uiSettings, notifications } = useKibana().services;
+  const {
+    uiSettings,
+    notifications,
+    http,
+    application: { navigateToApp },
+    ruleTypeRegistry,
+  } = useKibana().services;
 
   const [searchText, setSearchText] = useState<string>('');
   const [search, setSearch] = useState<string>('');
@@ -165,6 +175,14 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     );
   });
 
+  const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState(false);
+
+  const { authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
+    http,
+    toasts: notifications.toasts,
+    filteredRuleTypes,
+  });
+
   const { onShowAllSpacesChange, canAccessMultipleSpaces, namespaces, activeSpace } =
     useMultipleSpaces({
       setShowFromAllSpaces,
@@ -189,8 +207,13 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     }));
   }, [sortingColumns]);
 
+  const openRuleTypeModal = useCallback(() => {
+    setRuleTypeModalVisibility(true);
+  }, []);
+
   useEffect(() => {
     setHeaderActions?.([
+      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
       <RulesSettingsLink
         alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
       />,
@@ -760,6 +783,27 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           refreshToken={refreshToken}
           onClose={onFlyoutClose}
           activeSpaceId={activeSpace?.id}
+        />
+      )}
+      {ruleTypeModalVisible && (
+        <RuleTypeModal
+          onClose={() => setRuleTypeModalVisibility(false)}
+          onSelectRuleType={(ruleTypeId) => {
+            navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+            });
+          }}
+          onSelectTemplate={(templateId) => {
+            navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                encodeURIComponent(templateId)
+              )}`,
+            });
+          }}
+          http={http}
+          toasts={notifications.toasts}
+          registeredRuleTypes={ruleTypeRegistry.list()}
+          filteredRuleTypes={filteredRuleTypes}
         />
       )}
     </EuiFlexGroup>
