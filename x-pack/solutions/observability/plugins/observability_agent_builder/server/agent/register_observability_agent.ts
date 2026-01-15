@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-<<<<<<< HEAD
 import type { Logger } from '@kbn/core/server';
-=======
-import type { CoreSetup, Logger } from '@kbn/core/server';
 import dedent from 'dedent';
->>>>>>> main
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
