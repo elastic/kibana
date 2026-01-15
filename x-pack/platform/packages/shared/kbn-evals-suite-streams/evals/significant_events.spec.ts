@@ -31,7 +31,7 @@ const ALLOWED_CATEGORIES = [
 const codeBasedEvaluator = {
   name: 'significant_events_code_evaluator',
   kind: 'CODE' as const,
-  evaluate: async ({ output, esClient, example, metadata }: any) => {
+  evaluate: async ({ output, esClient, input, metadata }: any) => {
     const queries = Array.isArray(output) ? output : [output];
 
     if (queries.length === 0 || !queries[0] || !queries[0].kql) {
@@ -51,7 +51,7 @@ const codeBasedEvaluator = {
 
     for (const query of queries) {
       const { kql, category, severity_score, evidence } = query;
-      const { sample_logs } = example.input;
+      const { sample_logs } = input;
 
       // 1. KQL Syntax Validation
       let isSyntaxValid = false;
@@ -196,8 +196,12 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
                   return queries;
                 },
               },
+
               [
-                codeBasedEvaluator,
+                {
+                  ...codeBasedEvaluator,
+                  evaluate: (args) => codeBasedEvaluator.evaluate({ ...args, esClient }),
+                },
                 {
                   name: 'llm_evaluator',
                   kind: 'LLM',
