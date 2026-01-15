@@ -49,7 +49,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   private readonly isElasticsearchAvailable$ = new ReplaySubject<boolean>(1);
   private readonly logger: Logger;
   private readonly config: LicenseConfigType;
-  private currentLicense: undefined | Readonly<ILicense>;
   private licenseSubscription?: Subscription;
   private featureUsage = new FeatureUsageService();
 
@@ -90,7 +89,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     const featureUsageSetup = this.featureUsage.setup();
 
     registerRoutes(core.http.createRouter(), featureUsageSetup, core.getStartServices);
-    core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, () => this.currentLicense));
+    core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
 
     this.refresh = refresh;
     this.license$ = license$;
@@ -134,7 +133,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     );
 
     this.licenseSubscription = license$.subscribe((license) => {
-      this.currentLicense = license;
       this.logger.debug(
         () =>
           'Imported license information from Elasticsearch:' +
