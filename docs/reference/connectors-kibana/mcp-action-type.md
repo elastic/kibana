@@ -58,6 +58,6 @@ MCP connectors offer three actions:
 `callTool`
 :   Call a specific MCP server tool.
 
-:::{tip)
+:::{tip}
 Call `listTools` first to understand how to correctly call an MCP server's tools, before using the `callTool` action. 
 :::
