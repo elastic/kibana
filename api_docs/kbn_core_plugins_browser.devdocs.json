@@ -204,7 +204,7 @@
                 "section": "def-server.PackageInfo",
                 "text": "PackageInfo"
               },
-              ">; }"
+              ">; airgapped: boolean; }"
             ],
             "path": "src/core/packages/plugins/browser/src/plugin_initializer.ts",
             "deprecated": false,

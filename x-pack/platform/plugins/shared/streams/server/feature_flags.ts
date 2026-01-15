@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
 } from '@kbn/management-settings-ids';
@@ -71,26 +70,6 @@ export function registerFeatureFlags(
     .catch((error) => {
       logger.error(`Failed to register significant events ui settings: ${error}`);
     });
-
-  core.uiSettings.register({
-    [OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS]: {
-      category: ['observability'],
-      name: i18n.translate('xpack.streams.groupStreamsSettingsName', {
-        defaultMessage: 'Group streams',
-      }) as string,
-      value: false,
-      description: i18n.translate('xpack.streams.groupStreamsSettingsDescription', {
-        defaultMessage: 'Enable Group streams.',
-      }),
-      type: 'boolean',
-      schema: schema.boolean(),
-      requiresPageReload: true,
-      solutionViews: ['classic', 'oblt'],
-      technicalPreview: true,
-      readonly: true,
-      readonlyMode: 'ui',
-    },
-  });
 
   core.uiSettings.register({
     [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: {
