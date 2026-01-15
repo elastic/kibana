@@ -417,16 +417,20 @@ const parseStringAsync = promisify(parseString);
 export async function getSAMLRequestId(requestUrl: string): Promise<string | undefined> {
   const samlRequest = Url.parse(requestUrl, true /* parseQueryString */).query.SAMLRequest;
 
-  if (!samlRequest) {
-    return undefined;
+  let requestId: string | undefined;
+
+  if (samlRequest) {
+    try {
+      const inflatedSAMLRequest = (await inflateRawAsync(
+        Buffer.from(samlRequest as string, 'base64')
+      )) as Buffer;
+
+      const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
+      requestId = parsedSAMLRequest['saml2p:AuthnRequest'].$.ID as string;
+    } catch (e) {
+      return undefined;
+    }
   }
-
-  const inflatedSAMLRequest = (await inflateRawAsync(
-    Buffer.from(samlRequest as string, 'base64')
-  )) as Buffer;
-
-  const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
-  const requestId = parsedSAMLRequest['saml2p:AuthnRequest'].$.ID as string;
 
   return requestId;
 }
