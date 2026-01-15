@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Stateful Observability feature flag testing - Deployment-agnostic Observability Agent Builder API integration tests', () => {
-    loadTestFile(require.resolve('../../apis/observability_agent_builder/index.ts'));
+  describe('Stateful Observability - Deployment-agnostic Observability Agent Builder API integration tests', function () {
+    loadTestFile(require.resolve('../../apis/observability_agent_builder'));
   });
 }
