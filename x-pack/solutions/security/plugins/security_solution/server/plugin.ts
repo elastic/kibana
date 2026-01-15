@@ -153,6 +153,9 @@ import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
+import { EntityMaintainerRegistry } from './lib/entity_analytics/maintainers/entity_maintainer_registry';
+import { registerEntityMaintainers } from './lib/entity_analytics/maintainers/register_entity_maintainers';
+import { EntityMaintainerClient } from './lib/entity_analytics/maintainers/entity_maintainer_client';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -183,6 +186,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
+
+  private entityMaintainerRegistry?: EntityMaintainerRegistry;
+  private entityMaintainerClient?: EntityMaintainerClient;
 
   private isServerless: boolean;
 
@@ -297,6 +303,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.ruleMonitoringService.setup(core, plugins);
+
+    this.entityMaintainerRegistry = new EntityMaintainerRegistry();
+    registerEntityMaintainers(this.entityMaintainerRegistry);
+
+    this.entityMaintainerClient = new EntityMaintainerClient({
+      entityMaintainerRegistry: this.entityMaintainerRegistry,
+      logger: this.logger,
+    });
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
