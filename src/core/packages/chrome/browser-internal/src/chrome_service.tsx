@@ -283,7 +283,7 @@ export class ChromeService {
     const { customBranding$ } = customBranding;
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
 
-    const sidebar = this.sidebar.start();
+    const sidebar = this.sidebar.start(http.basePath.get());
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {

@@ -36,8 +36,14 @@ export interface SidebarAppStateServiceApi {
  */
 export class SidebarAppStateService implements SidebarAppStateServiceApi {
   private readonly appParams = new Map<string, BehaviorSubject<any>>();
+  // Base path is needed to separate storage keys between different Kibana spaces. Base path === space path.
+  private basePath!: string;
 
   constructor(private readonly registry: SidebarRegistryServiceApi) {}
+
+  start(basePath: string): void {
+    this.basePath = basePath;
+  }
 
   getParams$<T>(appId: SidebarAppId): Observable<T> {
     return this.getOrCreateParams<T>(appId);
@@ -112,7 +118,14 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
   }
 
   private getStorageKey(appId: SidebarAppId): string {
-    return `core.chrome.sidebar.app:${appId}`;
+    if (this.basePath === undefined) {
+      throw new Error(
+        '[SidebarAppStateService] Service not started. Call start(basePath) before using.'
+      );
+    }
+    return this.basePath
+      ? `${this.basePath}:core.chrome.sidebar.app:${appId}`
+      : `core.chrome.sidebar.app:${appId}`;
   }
 
   /**

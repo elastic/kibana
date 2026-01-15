@@ -55,9 +55,10 @@ export class SidebarService {
     };
   }
 
-  start(): SidebarServiceStart {
-    // initialize state service on start to make sure all apps are registered
-    (this.state as SidebarStateService).start();
+  start(basePath: string): SidebarServiceStart {
+    // initialize services on start to make sure all apps are registered
+    this.appState.start(basePath);
+    (this.state as SidebarStateService).start(basePath);
     return {
       // SidebarStateServiceApi
       isOpen$: this.state.isOpen$.bind(this.state),

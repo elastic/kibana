@@ -42,6 +42,7 @@ export class SidebarStateService implements SidebarStateServiceApi {
   private readonly currentAppId$ = new BehaviorSubject<SidebarAppId | null>(null);
   private readonly width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
   private pendingRestoreSubscription?: Subscription;
+  private storage!: StorageHelper;
 
   constructor(
     private readonly registry: SidebarRegistryServiceApi,
@@ -63,8 +64,9 @@ export class SidebarStateService implements SidebarStateServiceApi {
     return this.currentAppId$.asObservable();
   }
 
-  start() {
-    const currentAppId = StorageHelper.get<string>('currentAppId') ?? null;
+  start(basePath: string) {
+    this.storage = new StorageHelper(basePath);
+    const currentAppId = this.storage.get<string>('currentAppId') ?? null;
 
     // Validate app ID from localStorage - ignore if invalid
     if (currentAppId && isValidSidebarAppId(currentAppId) && this.registry.hasApp(currentAppId)) {
@@ -77,7 +79,7 @@ export class SidebarStateService implements SidebarStateServiceApi {
       }
     }
 
-    const width = StorageHelper.get<number>('width');
+    const width = this.storage.get<number>('width');
     if (width) {
       this.setWidth(width);
     }
@@ -132,12 +134,12 @@ export class SidebarStateService implements SidebarStateServiceApi {
     }
 
     this.currentAppId$.next(appId);
-    StorageHelper.set('currentAppId', appId);
+    this.storage.set('currentAppId', appId);
   }
 
   close(): void {
     this.currentAppId$.next(null);
-    StorageHelper.set('currentAppId', null);
+    this.storage.set('currentAppId', null);
   }
 
   isOpen(): boolean {
@@ -149,7 +151,7 @@ export class SidebarStateService implements SidebarStateServiceApi {
     width = Math.max(MIN_WIDTH, Math.min(maxWidth, width));
 
     this.width$.next(width);
-    StorageHelper.set('width', width);
+    this.storage.set('width', width);
   }
 
   getWidth(): number {
@@ -164,28 +166,34 @@ export class SidebarStateService implements SidebarStateServiceApi {
 type StorageKeys = 'currentAppId' | 'width';
 
 class StorageHelper {
-  static PERSISTENCE: Record<StorageKeys, 'local' | 'session'> = {
+  // some keys are persisted in localStorage, others in sessionStorage
+  private static readonly PERSISTENCE: Record<StorageKeys, 'local' | 'session'> = {
     currentAppId: 'session' as const,
     width: 'local' as const,
   };
 
-  static getStoragePrefix(key: string): string {
-    return `core.chrome.sidebar.state:${key}`;
+  // Base path is needed to separate storage keys between different Kibana spaces. Base path === space path.
+  constructor(private readonly basePath: string) {}
+
+  private getStoragePrefix(key: string): string {
+    return this.basePath
+      ? `${this.basePath}:core.chrome.sidebar.state:${key}`
+      : `core.chrome.sidebar.state:${key}`;
   }
 
-  static set<T>(key: StorageKeys, state: T): void {
+  set<T>(key: StorageKeys, state: T): void {
     try {
       const storage = StorageHelper.PERSISTENCE[key] === 'local' ? localStorage : sessionStorage;
-      storage.setItem(StorageHelper.getStoragePrefix(key), JSON.stringify(state));
+      storage.setItem(this.getStoragePrefix(key), JSON.stringify(state));
     } catch (e) {
       // Ignore
     }
   }
 
-  static get<T>(key: StorageKeys): T | null {
+  get<T>(key: StorageKeys): T | null {
     try {
       const storage = StorageHelper.PERSISTENCE[key] === 'local' ? localStorage : sessionStorage;
-      const item = storage.getItem(StorageHelper.getStoragePrefix(key));
+      const item = storage.getItem(this.getStoragePrefix(key));
       if (item) {
         return JSON.parse(item) as T;
       }
