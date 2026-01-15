@@ -8,8 +8,9 @@
  */
 
 // TODO derive type from schema and make keys snake_case
-export interface DashboardNavigationOptions {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DashboardNavigationOptions = {
   useCurrentFilters: boolean;
   useCurrentDateRange: boolean;
   openInNewTab: boolean;
-}
+};
