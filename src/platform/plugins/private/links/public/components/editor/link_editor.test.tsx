@@ -53,9 +53,9 @@ describe('LinksEditor', () => {
         expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
-      expect(getOptionAriaChecked('use_filters')).toBe('true');
-      expect(getOptionAriaChecked('use_time_range')).toBe('true');
-      expect(getOptionAriaChecked('open_in_new_tab')).toBe('false');
+      expect(getOptionAriaChecked('useFilters')).toBe('true');
+      expect(getOptionAriaChecked('useTimeRange')).toBe('true');
+      expect(getOptionAriaChecked('openInNewTab')).toBe('false');
     });
 
     test('properly overrides default values when provided', async () => {
@@ -72,9 +72,9 @@ describe('LinksEditor', () => {
         expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
-      expect(getOptionAriaChecked('use_filters')).toBe('false');
-      expect(getOptionAriaChecked('use_time_range')).toBe('false');
-      expect(getOptionAriaChecked('open_in_new_tab')).toBe('true');
+      expect(getOptionAriaChecked('useFilters')).toBe('false');
+      expect(getOptionAriaChecked('useTimeRange')).toBe('false');
+      expect(getOptionAriaChecked('openInNewTab')).toBe('true');
     });
 
     test('options are persisted on edit', async () => {

@@ -29,7 +29,7 @@ export const DashboardNavigationOptionsEditor = ({ options, onOptionChange }: Pr
           })}
           checked={options.use_filters}
           onChange={() => onOptionChange({ use_filters: !options.use_filters })}
-          data-test-subj="dashboardNavigationOptions--useCurrentFilters--checkbox"
+          data-test-subj="dashboardNavigationOptions--useFilters--checkbox"
         />
         <EuiSpacer size="s" />
         <EuiSwitch
@@ -40,7 +40,7 @@ export const DashboardNavigationOptionsEditor = ({ options, onOptionChange }: Pr
           })}
           checked={options.use_time_range}
           onChange={() => onOptionChange({ use_time_range: !options.use_time_range })}
-          data-test-subj="dashboardNavigationOptions--useCurrentDateRange--checkbox"
+          data-test-subj="dashboardNavigationOptions--useTimeRange--checkbox"
         />
         <EuiSpacer size="s" />
         <EuiSwitch
