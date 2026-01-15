@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { createDashboardTool } from './create_dashboard';
-export type { StoredDashboardState } from './create_dashboard';
+export { manageDashboardTool } from './manage_dashboard';

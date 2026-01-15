@@ -6,4 +6,5 @@
  */
 
 export { createDashboardTool } from './create_dashboard';
-export { updateDashboardTool } from './update_dashboard';
+export { createVisualizationsTool } from './create_visualizations';
+export { manageDashboardTool } from './manage_dashboard';

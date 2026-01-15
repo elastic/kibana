@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
 import {
@@ -174,4 +175,48 @@ const buildLensPanelFromApi = (
     grid,
     config: lensConfig,
   };
+};
+
+/**
+ * Generates a unique panel UID using UUID v4.
+ */
+export const generatePanelUid = (): string => {
+  return uuidv4();
+};
+
+/**
+ * Assigns unique UIDs to all panels that don't already have one.
+ * This is important for panel identification during manage_dashboard operations.
+ */
+export const assignPanelUids = (panels: DashboardPanel[]): DashboardPanel[] => {
+  return panels.map((panel) => {
+    if (panel.uid) {
+      return panel;
+    }
+    return {
+      ...panel,
+      uid: generatePanelUid(),
+    };
+  });
+};
+
+/**
+ * Finds a panel by its UID in an array of panels.
+ */
+export const findPanelByUid = (
+  panels: DashboardPanel[],
+  uid: string
+): DashboardPanel | undefined => {
+  return panels.find((panel) => panel.uid === uid);
+};
+
+/**
+ * Removes panels with the specified UIDs from an array of panels.
+ */
+export const removePanelsByUids = (
+  panels: DashboardPanel[],
+  uidsToRemove: string[]
+): DashboardPanel[] => {
+  const uidSet = new Set(uidsToRemove);
+  return panels.filter((panel) => !panel.uid || !uidSet.has(panel.uid));
 };

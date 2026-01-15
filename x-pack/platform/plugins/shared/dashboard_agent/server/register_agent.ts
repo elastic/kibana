@@ -26,9 +26,9 @@ export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
       research: {
         instructions: `## Dashboard Tools
 
-- ${dashboardTools.createDashboard}: Creates a new dashboard with visualization panels
-- ${dashboardTools.updateDashboard}: Modifies an existing dashboard
-- ${platformCoreTools.createVisualization}: Generates visualization configurations for dashboard panels
+- ${dashboardTools.createVisualizations}: Creates multiple visualization configurations in a single batch operation
+- ${dashboardTools.createDashboard}: Creates an in-memory dashboard with visualization panels
+- ${dashboardTools.manageDashboard}: Updates an existing in-memory dashboard (add/remove panels, update metadata)
 
 ## Creating a Dashboard
 
@@ -39,53 +39,68 @@ When the user asks to create a dashboard:
    - Use ${platformCoreTools.getIndexMapping} to discover actual field names
    - If no relevant data exists, inform the user and suggest what data IS available
 
-2. **Create visualizations based on real data** - Call ${platformCoreTools.createVisualization} for each panel:
-   - The \`query\` parameter MUST reference actual index names and field names you discovered
-   - Example: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
-   - Pass \`index\` when you know the target index pattern to avoid extra discovery work (improves performance)
-   - Pass \`esql\` if you have a pre-generated query (improves performance)
-   - Pass \`chartType\` (Metric, Gauge, Tagcloud, or XY) to skip chart type detection
-   - After ${platformCoreTools.createVisualization} returns, save the returned \`tool_result_id\` - you will pass this as a panel reference to ${dashboardTools.createDashboard} (preferred to reduce tokens)
-     - Example result structure:
-       \`\`\`
-       {
-         "type": "visualization",
-         "tool_result_id": "...",
-         "data": {
-           "query": "...",
-           "visualization": "<VISUALIZATION_CONFIG>",
-           "chart_type": "...",
-           "esql": "..."
-         }
-       }
-       \`\`\`
+2. **Create visualizations in batch** - Call ${dashboardTools.createVisualizations} with an array of visualization descriptions:
+   - Each visualization should have a \`query\` that references actual index names and field names you discovered
+   - Example query: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
+   - Pass \`index\` when you know the target index pattern to improve performance
+   - Pass \`esql\` if you have a pre-generated query to improve performance
+   - Pass \`chartType\` (Metric, Gauge, Tagcloud, XY, RegionMap, or Heatmap) to skip chart type detection
+   - The tool returns an array of results, each with a \`tool_result_id\` for use in dashboard creation
+   - Example input:
+     \`\`\`
+     {
+       "visualizations": [
+         { "query": "Show total CPU usage as a metric", "index": "metrics-*", "chartType": "Metric" },
+         { "query": "Show memory usage over time", "index": "metrics-*", "chartType": "XY" }
+       ]
+     }
+     \`\`\`
 
 3. **Create the dashboard** - Call ${dashboardTools.createDashboard} with:
    - \`title\`: Dashboard title
    - \`description\`: Dashboard description
-   - \`panels\`: Array of panel definitions, either:
-     - the visualization configs (from \`data.visualization\`), OR
-     - the visualization \`tool_result_id\` values from previous ${platformCoreTools.createVisualization} calls (preferred)
-   - \`markdownContent\`: A markdown summary that will be displayed at the top of the dashboard
-     - This should describe what the dashboard shows and provide helpful context
-     - Use markdown formatting (headers, lists, bold text) to make it readable
-     - Example: "### Server Performance Overview\\n\\nThis dashboard displays key server metrics including:\\n- **CPU utilization** trends over time\\n- **Memory usage** patterns\\n- **Disk I/O** performance"
+   - \`panels\`: Array of \`tool_result_id\` values from the ${dashboardTools.createVisualizations} call (preferred), or full visualization configs
+   - \`markdownContent\`: A markdown summary displayed at the top of the dashboard
+     - Should describe what the dashboard shows and provide helpful context
+     - Use markdown formatting (headers, lists, bold text)
+     - Example: "### Server Performance Overview\\n\\nThis dashboard displays key server metrics including:\\n- **CPU utilization** trends\\n- **Memory usage** patterns"
+
+The dashboard is created as an **in-memory dashboard** (not saved automatically). The user can review and save it using the dashboard UI.
 
 
 **CRITICAL RULES:**
-- NEVER call ${platformCoreTools.createVisualization} without first discovering what data exists
+- NEVER call ${dashboardTools.createVisualizations} without first discovering what data exists
 - NEVER invent index names or field names - only use indices/fields you found via ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}
-- Only when creating a dashboard (i.e. the user asked for a dashboard): ALWAYS call ${dashboardTools.createDashboard} to complete the request
+- When creating a dashboard: ALWAYS call ${dashboardTools.createDashboard} to complete the request
 
 
 ## Updating a Dashboard
 
-When updating existing dashboards:
-- Use ${dashboardTools.updateDashboard} to modify existing dashboards
-- You may need to call ${platformCoreTools.createVisualization} for new panels to add
-- ALWAYS pass \`panels\` containing the full set of panels you want in the dashboard (not just the new ones) - this tool replaces the existing visualization panels
-  - Panels can be full visualization configs, or visualization \`tool_result_id\` references from previous ${platformCoreTools.createVisualization} calls (preferred)
-- ALWAYS pass \`markdownContent\` (existing or updated) - this tool replaces the markdown summary panel at the top
+When the user wants to modify an existing in-memory dashboard:
+
+1. **Get the previous dashboard's tool_result_id** - This was returned by ${dashboardTools.createDashboard} or a previous ${dashboardTools.manageDashboard} call
+
+2. **Create any new visualizations** - If adding new panels, call ${dashboardTools.createVisualizations} first
+
+3. **Call ${dashboardTools.manageDashboard}** with:
+   - \`toolResultId\`: The \`tool_result_id\` from the previous dashboard operation
+   - \`panelsToAdd\`: (optional) Array of \`tool_result_id\` values for new visualizations to add
+   - \`panelsToRemove\`: (optional) Array of panel UIDs to remove
+   - \`title\`: (optional) Updated dashboard title
+   - \`description\`: (optional) Updated dashboard description
+   - \`markdownContent\`: (optional) Updated markdown summary
+
+The tool returns a new \`tool_result_id\` that can be used for subsequent modifications.
+
+**Example workflow:**
+1. User: "Create a dashboard with CPU metrics"
+   -> ${platformCoreTools.listIndices} -> ${platformCoreTools.getIndexMapping} -> ${dashboardTools.createVisualizations} -> ${dashboardTools.createDashboard}
+   -> Returns dashboard with \`tool_result_id: "abc123"\`
+
+2. User: "Add memory metrics to that dashboard"
+   -> ${dashboardTools.createVisualizations} (for memory viz) -> Returns \`tool_result_id: "viz456"\`
+   -> ${dashboardTools.manageDashboard}({ toolResultId: "abc123", panelsToAdd: ["viz456"] })
+   -> Returns updated dashboard with new \`tool_result_id: "def789"\`
 `,
       },
       answer: {
@@ -95,13 +110,13 @@ When updating existing dashboards:
         {
           tool_ids: [
             dashboardTools.createDashboard,
-            dashboardTools.updateDashboard,
+            dashboardTools.createVisualizations,
+            dashboardTools.manageDashboard,
             platformCoreTools.executeEsql,
             platformCoreTools.generateEsql,
             platformCoreTools.search,
             platformCoreTools.listIndices,
             platformCoreTools.getIndexMapping,
-            platformCoreTools.createVisualization,
           ],
         },
       ],
@@ -140,10 +155,9 @@ Tool response includes:
   "tool_result_id": "abc123",
   "type": "${dashboard}",
   "data": {
-    "id": "dashboard-123",
     "title": "My Dashboard",
     "content": {
-      "url": "/app/dashboards#/view/dashboard-123",
+      "url": "/app/dashboards#/create?...",
       "description": "Dashboard showing metrics",
       "panelCount": 3
     }
