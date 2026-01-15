@@ -275,19 +275,6 @@ function extractFieldFromQuery(query: unknown): string | null {
 }
 
 /**
- * Helper to remove negate property from base properties
- * For condition filters, negate is represented in the condition.negate flag, not a separate property
- */
-function stripNegateProperty(
-  baseProperties: Partial<AsCodeFilter>
-): Omit<Partial<AsCodeFilter>, 'negate'> {
-  const { negate: _, ...basePropsWithoutNegate } = baseProperties as Partial<AsCodeFilter> & {
-    negate?: boolean;
-  };
-  return basePropsWithoutNegate;
-}
-
-/**
  * TYPE-SPECIFIC CONVERTERS
  * Each function handles a specific FILTERS enum type
  */
@@ -319,7 +306,7 @@ function convertPhraseFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...stripNegateProperty(baseProperties),
+      ...baseProperties,
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -335,7 +322,7 @@ function convertPhrasesFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...stripNegateProperty(baseProperties),
+      ...baseProperties,
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -356,9 +343,6 @@ function convertRangeFilter(
 
   try {
     const condition = convertToSimpleCondition(filter);
-    // IMPORTANT: Range filters do NOT strip negate property
-    // Unlike other conditions that encode negation in the operator,
-    // RANGE has no opposition operator, so negate must be preserved as condition.negate
     return {
       ...baseProperties,
       condition,
@@ -376,7 +360,7 @@ function convertExistsFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...stripNegateProperty(baseProperties),
+      ...baseProperties,
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {

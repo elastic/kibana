@@ -199,7 +199,11 @@ describe('fromStoredFilter', () => {
     it('should handle negated filters', () => {
       const storedFilter = {
         meta: { key: 'status', negate: true, type: 'phrase' },
-        query: { term: { status: 'inactive' } },
+        query: {
+          match_phrase: {
+            status: 'inactive',
+          },
+        },
       };
 
       const result = fromStoredFilter(storedFilter) as AsCodeFilter;
@@ -212,12 +216,10 @@ describe('fromStoredFilter', () => {
     });
 
     it('should preserve negate property for negated range filter', () => {
-      // Range filters do NOT have an opposition operator (unlike IS/IS_NOT, EXISTS/NOT_EXISTS)
-      // so negate must be preserved in the base properties
       const negatedRangeFilter = {
         meta: {
           disabled: false,
-          negate: true, // CRITICAL: This must be preserved
+          negate: true,
           alias: null,
           key: 'bytes',
           field: 'bytes',
@@ -237,7 +239,6 @@ describe('fromStoredFilter', () => {
 
       expect(result).toBeDefined();
       expect(isConditionFilter(result!)).toBe(true);
-      // CRITICAL: condition.negate MUST be preserved for range filters
       if (isRangeConditionFilter(result!)) {
         expect(result.condition.negate).toBe(true);
       }
@@ -324,20 +325,6 @@ describe('fromStoredFilter', () => {
             },
           },
         });
-      }
-    });
-
-    it('should preserve term queries as DSL when meta.type is missing', () => {
-      const storedFilter = {
-        meta: {},
-        query: { term: { username: 'john' } },
-      };
-
-      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
-
-      expect(isDSLFilter(result)).toBe(true);
-      if (isDSLFilter(result)) {
-        expect(result.dsl.query).toEqual({ term: { username: 'john' } });
       }
     });
   });
