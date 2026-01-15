@@ -9,15 +9,6 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  CONTROL_WIDTH_LARGE,
-  CONTROL_WIDTH_MEDIUM,
-  CONTROL_WIDTH_SMALL,
-  ESQL_CONTROL,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL,
-} from '@kbn/controls-constants';
-import {
   storedOptionsListDSLControlSchema,
   storedOptionsListESQLControlSchema,
 } from './stored_options_list_schema';
@@ -27,7 +18,7 @@ import { storedTimeSliderControlSchema } from './stored_time_slider_schema';
 export const storedPinnedControlSchema = schema.object({
   id: schema.string(), // id is required
   order: schema.number(), // order is generated from the array order of the API schema
-  width: schema.maybe(schema.string())
+  width: schema.maybe(schema.string()),
   grow: schema.maybe(schema.boolean()),
 });
 
@@ -56,7 +47,7 @@ export const controlsGroupSchema = schema.arrayOf(
       .extendsDeep({ unknowns: 'allow' }),
     schema
       .allOf([
-        schema.object({ type: schema.string()}), 
+        schema.object({ type: schema.string() }),
         schema.object({ explicitInput: storedTimeSliderControlSchema }),
         storedPinnedControlSchema,
       ])
