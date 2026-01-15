@@ -35,6 +35,8 @@ export class InventoryPage {
   public readonly noDataPage: Locator;
   public readonly noDataPageActionButton: Locator;
 
+  public readonly k8sPodWaffleContextMenu: Locator;
+
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
     this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
@@ -62,6 +64,10 @@ export class InventoryPage {
 
     this.noDataPage = this.page.getByTestId('kbnNoDataPage');
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
+
+    this.k8sPodWaffleContextMenu = this.page
+      .getByRole('dialog')
+      .filter({ hasText: 'Kubernetes Pod details' });
   }
 
   private async waitForNodesToLoad() {

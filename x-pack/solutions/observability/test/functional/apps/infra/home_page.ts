@@ -472,6 +472,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await returnTo(INVENTORY_PATH);
         });
 
+        // Done
         describe('Redirect to Pod Details page', () => {
           it('should redirect to Pod Details page', async () => {
             await pageObjects.infraHome.goToPods();

@@ -14,10 +14,13 @@ import {
   DATE_WITH_POD_DATA,
   DATE_WITHOUT_DATA,
   HOSTS,
+  POD_COUNT,
   POD_NAMES,
 } from '../../fixtures/constants';
 
 const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
+
+const POD_NAME = POD_NAMES[POD_COUNT - 1];
 
 test.use({
   timezoneId: 'GMT',
@@ -124,10 +127,9 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       await inventoryPage.showPods();
       await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
 
-      const podName = POD_NAMES[Math.floor(Math.random() * POD_NAMES.length)];
-      const waffleNode = await inventoryPage.getWaffleNode(podName);
+      const waffleNode = await inventoryPage.getWaffleNode(POD_NAME);
       await expect(waffleNode.container).toBeVisible();
-      await expect(waffleNode.name).toHaveText(podName);
+      await expect(waffleNode.name).toHaveText(POD_NAME);
 
       await expect(inventoryPage.k8sFeedbackLink).toBeVisible();
     });
@@ -141,6 +143,39 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       const waffleNode = await inventoryPage.getWaffleNode(containerName);
       await expect(waffleNode.container).toBeVisible();
       await expect(waffleNode.name).toHaveText(containerName);
+    });
+  });
+
+  test('K8s pods waffle map redirect to pod details page', async ({
+    page,
+    pageObjects: { inventoryPage },
+  }) => {
+    await test.step('switch to k8s pods', async () => {
+      await inventoryPage.goToTime(DATE_WITH_POD_DATA);
+      await inventoryPage.showPods();
+      await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
+    });
+
+    await test.step('open pod waffle context menu', async () => {
+      const waffleNode = await inventoryPage.getWaffleNode(POD_NAME);
+      await waffleNode.container.click();
+
+      await expect(inventoryPage.k8sPodWaffleContextMenu).toBeVisible();
+      await expect(inventoryPage.k8sPodWaffleContextMenu).toContainText(
+        `View details for kubernetes.pod.uid ${POD_NAME}`
+      );
+    });
+
+    await test.step('click pod details link and verify redirection', async () => {
+      await inventoryPage.k8sPodWaffleContextMenu
+        .getByRole('link', {
+          name: 'Kubernetes Pod metrics',
+        })
+        .click();
+
+      const url = new URL(page.url());
+
+      expect(url.pathname).toBe(`/app/metrics/detail/pod/${encodeURIComponent(POD_NAME)}`);
     });
   });
 
