@@ -142,7 +142,6 @@ describe('TraceWaterfall', () => {
       duration: 100,
       timestampUs: 0,
       errors: [],
-      spanLinksCount: { incoming: 0, outgoing: 0 },
     },
     {
       id: 'span-1',
@@ -153,7 +152,6 @@ describe('TraceWaterfall', () => {
       duration: 50,
       timestampUs: 0,
       errors: [],
-      spanLinksCount: { incoming: 0, outgoing: 0 },
     },
     {
       id: 'span-2',
@@ -164,7 +162,6 @@ describe('TraceWaterfall', () => {
       duration: 30,
       timestampUs: 0,
       errors: [],
-      spanLinksCount: { incoming: 0, outgoing: 0 },
     },
   ];
 
