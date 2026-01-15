@@ -11,7 +11,6 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_type';
-import { stopExtractEntityTasks } from '../../tasks/extract_entity_task';
 import { wrapMiddlewares } from '../middleware';
 
 interface StopEntityStoreAPIResponse {
@@ -44,16 +43,12 @@ export function registerStop(router: EntityStorePluginRouter) {
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse<StopEntityStoreAPIResponse>> => {
           const entityStoreCtx = await ctx.entityStore;
-          const { taskManagerStart, logger } = entityStoreCtx;
+          const { logger, resourcesService } = entityStoreCtx;
           const { entityTypes } = req.body;
 
           logger.debug('Stop API invoked');
 
-          const stoppedTasks = await stopExtractEntityTasks({
-            taskManager: taskManagerStart,
-            logger,
-            entityTypes,
-          });
+          const { stoppedTasks } = await resourcesService.stop(entityTypes);
 
           return res.ok({
             body: {

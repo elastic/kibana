@@ -30,7 +30,6 @@ export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   logger: Logger;
   resourcesService: ResourcesService;
-  taskManagerStart: TaskManagerStartContract;
   featureFlags: FeatureFlags;
 }
 

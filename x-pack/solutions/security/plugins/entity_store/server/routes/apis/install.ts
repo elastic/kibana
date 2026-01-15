@@ -11,7 +11,6 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_type';
-import { scheduleExtractEntityTasks } from '../../tasks/extract_entity_task';
 import { wrapMiddlewares } from '../middleware';
 
 const bodySchema = z.object({
@@ -43,20 +42,11 @@ export function registerInstall(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, resourcesService, taskManagerStart } = entityStoreCtx;
+        const { logger, resourcesService } = entityStoreCtx;
         const { entityTypes, logExtractionFrequency } = req.body;
         logger.debug('Install api called');
-        resourcesService.install(entityTypes);
 
-        await scheduleExtractEntityTasks({
-          taskManager: taskManagerStart,
-          entityTypes,
-          resourcesService,
-          logger,
-          frequency: logExtractionFrequency,
-        });
-
-        resourcesService.install(entityTypes);
+        await resourcesService.install(entityTypes, logExtractionFrequency);
 
         return res.ok({
           body: {
