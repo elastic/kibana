@@ -11555,20 +11555,20 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "unifiedSearch",
-            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_enum.ts"
+            "plugin": "kql",
+            "path": "src/platform/plugins/shared/kql/server/autocomplete/terms_enum.ts"
           },
           {
-            "plugin": "unifiedSearch",
-            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_enum.ts"
+            "plugin": "kql",
+            "path": "src/platform/plugins/shared/kql/server/autocomplete/terms_enum.ts"
           },
           {
-            "plugin": "unifiedSearch",
-            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_agg.ts"
+            "plugin": "kql",
+            "path": "src/platform/plugins/shared/kql/server/autocomplete/terms_agg.ts"
           },
           {
-            "plugin": "unifiedSearch",
-            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_agg.ts"
+            "plugin": "kql",
+            "path": "src/platform/plugins/shared/kql/server/autocomplete/terms_agg.ts"
           }
         ],
         "children": [
@@ -11687,20 +11687,20 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "unifiedSearch",
-            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_enum.ts"
+            "plugin": "kql",
+            "path": "src/platform/plugins/shared/kql/server/autocomplete/terms_enum.ts"
           },
           {
-            "plugin": "unifiedSearch",
-            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_enum.ts"
+            "plugin": "kql",
+            "path": "src/platform/plugins/shared/kql/server/autocomplete/terms_enum.ts"
           },
           {
-            "plugin": "unifiedSearch",
-            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_agg.ts"
+            "plugin": "kql",
+            "path": "src/platform/plugins/shared/kql/server/autocomplete/terms_agg.ts"
           },
           {
-            "plugin": "unifiedSearch",
-            "path": "src/platform/plugins/shared/unified_search/server/autocomplete/terms_agg.ts"
+            "plugin": "kql",
+            "path": "src/platform/plugins/shared/kql/server/autocomplete/terms_agg.ts"
           }
         ],
         "children": [
@@ -13680,8 +13680,12 @@
                 "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+                "plugin": "kql",
+                "path": "src/platform/plugins/shared/kql/public/components/query_string_input/fetch_index_patterns.ts"
+              },
+              {
+                "plugin": "kql",
+                "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/value_suggestion_provider.ts"
               },
               {
                 "plugin": "unifiedSearch",
