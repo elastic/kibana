@@ -128,16 +128,18 @@ export function readFieldCapsResponse(
         return agg;
       }
 
-      let timeSeriesMetricType: 'gauge' | 'counter' | 'position' | undefined;
+      let timeSeriesMetricType: 'gauge' | 'counter' | 'position' | 'histogram' | undefined;
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'gauge') {
         timeSeriesMetricType = 'gauge';
       }
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'counter') {
         timeSeriesMetricType = 'counter';
       }
-
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'position') {
         timeSeriesMetricType = 'position';
+      }
+      if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'histogram') {
+        timeSeriesMetricType = 'histogram';
       }
       const esType = types[0];
 

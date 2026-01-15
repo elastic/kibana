@@ -68,30 +68,78 @@ export function replaceFunctionParams(functionString: string, params: Params): s
 }
 
 /**
+ * Determines the ES|QL aggregation function template based on the instrument and field type.
+ *
+ * @param type - The ES field type (e.g., 'histogram', 'exponential_histogram').
+ * @param instrument - The metric instrument type (e.g., 'counter', 'histogram', 'gauge').
+ * @param placeholderName - The name of the placeholder to use in the template.
+ * @param customFunction - Optional custom aggregation function to use.
+ * @returns The ES|QL aggregation function template string.
+ */
+function getAggregationTemplate({
+  type,
+  instrument,
+  placeholderName,
+  customFunction,
+}: {
+  type?: MetricField['type'];
+  instrument?: MetricField['instrument'];
+  placeholderName: string;
+  customFunction?: string;
+}): string {
+  if (instrument === 'histogram') {
+    if (type === 'exponential_histogram') {
+      return `PERCENTILE(??${placeholderName}, 95)`;
+    }
+
+    return `PERCENTILE(TO_TDIGEST(??${placeholderName}), 95)`;
+  }
+
+  if (instrument === 'counter') {
+    return `SUM(RATE(??${placeholderName}))`;
+  }
+
+  // Default to AVG or custom function
+  return `${customFunction || 'AVG'}(??${placeholderName})`;
+}
+
+/**
  * Creates the metric aggregation part of an ES|QL query.
- * It returns `SUM(RATE(...))` for counters and `AVG(...)` for other metric types.
+ * It returns:
+ * - For `histogram` instrument:
+ *   - `PERCENTILE(..., 95)` if type is `exponential_histogram`
+ *   - `PERCENTILE(TO_TDIGEST(...), 95)` for other histogram types
+ * - `SUM(RATE(...))` for counter instruments
+ * - `AVG(...)` for other metric types
+ *
  * If a metric name is provided, it will be properly escaped and substituted.
  *
- * @param instrument - The type of metric instrument (e.g., 'counter').
+ * @param type - The ES field type (e.g., 'histogram', 'exponential_histogram').
+ * @param instrument - The metric instrument type (e.g., 'counter', 'histogram', 'gauge').
  * @param metricName - The actual name of the metric field to aggregate.
  * @param placeholderName - The name of the placeholder to use in the template.
+ * @param customFunction - Optional custom aggregation function to use for default case.
  * @returns The ES|QL aggregation string.
  */
 export function createMetricAggregation({
+  type,
   instrument,
   metricName,
   placeholderName = 'metricName',
   customFunction,
 }: {
-  instrument: MetricField['instrument'];
+  type?: MetricField['type'];
+  instrument?: MetricField['instrument'];
   metricName?: string;
   placeholderName?: string;
   customFunction?: string;
 }) {
-  const functionTemplate =
-    instrument === 'counter'
-      ? `SUM(RATE(??${placeholderName}))`
-      : `${customFunction || 'AVG'}(??${placeholderName})`;
+  const functionTemplate = getAggregationTemplate({
+    type,
+    instrument,
+    placeholderName,
+    customFunction,
+  });
   return metricName
     ? replaceFunctionParams(functionTemplate, { [placeholderName]: metricName })
     : functionTemplate;

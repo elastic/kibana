@@ -59,12 +59,13 @@ function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): st
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({ metric, dimensions = [] }: CreateESQLQueryParams) {
-  const { name: metricField, instrument, index } = metric;
+  const { name: metricField, type, instrument, index } = metric;
   const source = timeseries(index);
 
   const queryPipeline = source.pipe(
     stats(
       `${createMetricAggregation({
+        type,
         instrument,
         placeholderName: 'metricField',
       })} BY ${createTimeBucketAggregation({})}${
