@@ -713,12 +713,18 @@ export const cli = () => {
       const clean = Boolean(cliContext.flags.clean);
       const skipAlerts = Boolean(cliContext.flags['skip-alerts']);
       const skipRulesetPreview = Boolean(cliContext.flags['skip-ruleset-preview']);
-      const skipAttackDiscoveries = Boolean(cliContext.flags['skip-attack-discoveries']);
+      const attacks = Boolean(cliContext.flags.attacks);
       const createCases = Boolean(cliContext.flags.cases);
+      const shouldGenerateAttackDiscoveries = attacks || createCases;
+      const shouldCreateCases = createCases;
       const maxPreviewInvocations = Math.max(
         1,
         Number(cliContext.flags['max-preview-invocations'] ?? 12)
       );
+
+      if (createCases && !attacks) {
+        log.info(`--cases enabled: implicitly enabling --attacks.`);
+      }
 
       assertPositiveInt('events', events);
       assertPositiveInt('hosts', hosts);
@@ -893,7 +899,7 @@ export const cli = () => {
 
         if (skipAlerts) {
           log.warning(
-            `--skip-alerts enabled: skipping rule preview, copying alerts, and Attack Discoveries. Raw data was still indexed.`
+            `--skip-alerts enabled: skipping rule preview, copying alerts, and optional Attack Discoveries/Cases. Raw data was still indexed.`
           );
           return;
         }
@@ -972,7 +978,7 @@ export const cli = () => {
 
         log.info(`Done generating/copying canonical Security alerts for ruleset.`);
 
-        if (!skipAttackDiscoveries) {
+        if (shouldGenerateAttackDiscoveries) {
           const discoveries = await generateAndIndexAttackDiscoveries({
             esClient,
             log,
@@ -984,7 +990,7 @@ export const cli = () => {
 
           log.info(`Done generating synthetic Attack Discoveries.`);
 
-          if (createCases) {
+          if (shouldCreateCases) {
             await createCasesFromAttackDiscoveries({
               kbnClient,
               log,
@@ -994,7 +1000,7 @@ export const cli = () => {
             log.info(`Done creating cases for a subset of Attack Discoveries.`);
           }
         } else {
-          log.warning(`--skip-attack-discoveries enabled: skipping Attack Discoveries.`);
+          log.info(`Skipping Attack Discoveries (enable with --attacks, or use --cases).`);
         }
       } catch (e) {
         log.warning(
@@ -1025,13 +1031,7 @@ export const cli = () => {
           'indexPrefix',
           'max-preview-invocations',
         ],
-        boolean: [
-          'clean',
-          'skip-alerts',
-          'skip-ruleset-preview',
-          'skip-attack-discoveries',
-          'cases',
-        ],
+        boolean: ['clean', 'skip-alerts', 'skip-ruleset-preview', 'attacks', 'cases'],
         alias: {
           n: 'events',
           h: 'hosts',
@@ -1053,7 +1053,7 @@ export const cli = () => {
           clean: false,
           'skip-alerts': false,
           'skip-ruleset-preview': false,
-          'skip-attack-discoveries': false,
+          attacks: false,
           cases: false,
         },
         allowUnexpected: false,
@@ -1071,8 +1071,8 @@ export const cli = () => {
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
         --skip-alerts                     Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
         --skip-ruleset-preview            Skip previews of the ruleset rules (baseline attribution only; faster)
-        --skip-attack-discoveries         Skip Attack Discovery generation (faster)
-        --cases                          Create cases from ~50% of generated Attack Discoveries
+        --attacks                         Generate synthetic Attack Discoveries (opt-in)
+        --cases                          Create cases from ~50% of generated Attack Discoveries (implies --attacks)
 
         --username                       Kibana/Elasticsearch username (Default: elastic)
         --password                       Kibana/Elasticsearch password (Default: changeme)

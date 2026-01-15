@@ -6,7 +6,7 @@ It generates:
 
 - **Realistic raw endpoint events** and **endpoint alerts** by replaying + scaling vendored “attack episodes”
 - **Full-fidelity Security detection alerts** by running the **Detection Engine Rule Preview** API and copying preview alerts into the real alerts index
-- **Synthetic Attack Discoveries (no LLM)** built from the generated Security alerts, time-aligned to the requested date range
+- **Optional synthetic Attack Discoveries (no LLM)** built from the generated Security alerts, time-aligned to the requested date range (enable with `--attacks`)
 
 ## What’s “realistic” about it?
 
@@ -75,6 +75,22 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.j
   --start-date 1d --end-date now
 ```
 
+To also generate synthetic Attack Discoveries (and optionally cases):
+
+```bash
+node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.js \
+  -n 100 -h 5 -u 5 \
+  --start-date 1d --end-date now \
+  --attacks
+```
+
+```bash
+node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.js \
+  -n 100 -h 5 -u 5 \
+  --start-date 1d --end-date now \
+  --cases
+```
+
 ## CLI arguments
 
 ### Data scale + time range
@@ -124,8 +140,8 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 - `--max-preview-invocations`: Caps rule preview invocations per rule (lower is faster). Default: `12`
 - `--skip-alerts`: Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
 - `--skip-ruleset-preview`: Skip previews of the ruleset rules (baseline attribution only; faster)
-- `--skip-attack-discoveries`: Skip Attack Discovery generation (faster)
-- `--cases`: Create Kibana cases from **~50%** of generated Attack Discoveries
+- `--attacks`: Generate synthetic Attack Discoveries (**opt-in**)
+- `--cases`: Create Kibana cases from **~50%** of generated Attack Discoveries (**implies `--attacks`**)
   - Creates a case per selected discovery and attaches:
     - a markdown summary comment
     - all discovery alert IDs as alert attachments (from `.alerts-security.alerts-<spaceId>`)
@@ -158,7 +174,7 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
    - any rules resolved from `--ruleset`
 7. Copies preview alerts into `.alerts-security.alerts-<spaceId>` and rewrites `kibana.alert.rule.*` so alerts are attributed to **real installed+enabled rules**
    - While copying, alert timestamps are **jittered within the requested time range** so alerts are interleaved across rules in time-sorted views
-8. Creates **synthetic Attack Discoveries (no LLM)** and indexes them into:
+8. Optionally (with `--attacks`, or `--cases`) creates **synthetic Attack Discoveries (no LLM)** and indexes them into:
    - `.internal.adhoc.alerts-security.attack.discovery.alerts-<spaceId>-000001`
    - Attack Discoveries are generated only for a small set of “risky” entities (top host/user pairs by alert volume), not for every host/user
 
