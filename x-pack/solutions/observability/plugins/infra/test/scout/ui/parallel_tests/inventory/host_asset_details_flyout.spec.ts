@@ -335,5 +335,34 @@ test.describe(
         await expect(page.getByTestId('queryInput')).toHaveValue(discoverQuery);
       });
     });
+
+    test('Open as page and return to flyout', async ({
+      page,
+      pageObjects: { assetDetailsPage },
+    }) => {
+      await test.step('go to metadata tab', async () => {
+        await assetDetailsPage.metadataTab.clickTab();
+        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
+      });
+
+      await test.step('open asset details as page keeping the selected tab', async () => {
+        await assetDetailsPage.openAsPageButton.click();
+        const url = new URL(page.url());
+        expect(url.pathname).toBe(`/app/metrics/detail/host/${encodeURIComponent(HOST1_NAME)}`);
+        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.metadataTab.searchBar).toBeVisible();
+        await expect(assetDetailsPage.metadataTab.table).toBeVisible();
+      });
+
+      await test.step('return to flyout from asset details page', async () => {
+        await assetDetailsPage.returnButton.click();
+        await expect(
+          page.getByRole('dialog').getByRole('heading', { name: HOST1_NAME })
+        ).toBeVisible();
+        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.metadataTab.searchBar).toBeVisible();
+        await expect(assetDetailsPage.metadataTab.table).toBeVisible();
+      });
+    });
   }
 );

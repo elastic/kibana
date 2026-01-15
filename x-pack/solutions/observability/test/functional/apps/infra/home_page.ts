@@ -454,6 +454,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.waitForLoading();
         });
 
+        // Done
         it('Should redirect to Host Details page', async () => {
           await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
           await pageObjects.infraHome.goToHost();
