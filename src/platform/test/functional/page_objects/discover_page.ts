@@ -640,13 +640,54 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
-    await this.testSubjects.exists('app-menu-overflow-button');
-    await this.testSubjects.click('app-menu-overflow-button');
-
+    // First check if the button is directly visible
     if (await this.testSubjects.exists('select-text-based-language-btn')) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();
       await this.waitUntilSearchingHasFinished();
+      return;
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+
+      if (await this.testSubjects.exists('select-text-based-language-btn')) {
+        await this.testSubjects.click('select-text-based-language-btn');
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+      }
+
+      // Close the popover if open
+      if (await this.testSubjects.exists('app-menu-popover')) {
+        await this.testSubjects.click('app-menu-overflow-button');
+      }
+    }
+  }
+
+  public async selectDataViewMode() {
+    // First check if the button is directly visible
+    if (await this.testSubjects.exists('switch-to-dataviews')) {
+      await this.testSubjects.click('switch-to-dataviews');
+      await this.header.waitUntilLoadingHasFinished();
+      await this.waitUntilSearchingHasFinished();
+      return;
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+
+      if (await this.testSubjects.exists('switch-to-dataviews')) {
+        await this.testSubjects.click('switch-to-dataviews');
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+      }
+
+      // Close the popover if open
+      if (await this.testSubjects.exists('app-menu-popover')) {
+        await this.testSubjects.click('app-menu-overflow-button');
+      }
     }
   }
 
@@ -936,5 +977,13 @@ export class DiscoverPageObject extends FtrService {
       await cb();
     }
     await this.expectRequestCount(endpointRegExp, expectedCount);
+  }
+
+  public async ensureHasUnsavedChangesIndicator() {
+    await this.testSubjects.existOrFail('split-button-notification-indicator');
+  }
+
+  public async ensureNoUnsavedChangesIndicator() {
+    await this.testSubjects.missingOrFail('split-button-notification-indicator');
   }
 }

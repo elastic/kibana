@@ -299,8 +299,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show switch modal when switching to a data view', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
-        await testSubjects.click('app-menu-overflow-button');
-        await testSubjects.click('switch-to-dataviews');
+        await discover.selectDataViewMode();
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
@@ -313,8 +312,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
-        await testSubjects.click('app-menu-overflow-button');
-        await testSubjects.click('switch-to-dataviews');
+        await discover.selectDataViewMode();
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
@@ -325,8 +323,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
         });
         await discover.saveSearch('esql_test');
-        await testSubjects.click('app-menu-overflow-button');
-        await testSubjects.click('switch-to-dataviews');
+        await discover.selectDataViewMode();
         await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
@@ -339,8 +336,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
-        await testSubjects.click('app-menu-overflow-button');
-        await testSubjects.click('switch-to-dataviews');
+        await discover.selectDataViewMode();
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });

@@ -101,7 +101,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
-
     await exports.clickExportTopNavButton();
     await retry.waitFor('the popover to be opened', async () => {
       return await exports.isExportPopoverOpen();

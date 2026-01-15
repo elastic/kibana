@@ -14,7 +14,6 @@ const SAVED_SEARCH_WITH_FILTERS_NAME = 'test saved search with filters';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
@@ -32,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     hideAnnouncements: true,
   };
 
-  describe('discover unsaved changes badge', function describeIndexTests() {
+  describe('discover unsaved changes notification indicator', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded(
@@ -60,18 +59,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
-    it('should not show the badge initially nor after changes to a draft saved search', async () => {
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+    it('should not show the notification indicator initially nor after changes to a draft saved search', async () => {
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
     });
 
-    it('should show the badge only after changes to a persisted saved search', async () => {
+    it('should show the notification indicator only after changes to a persisted saved search', async () => {
       await dataViews.createFromSearchBar({
         name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
         adHoc: true,
@@ -80,36 +79,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureHasUnsavedChangesIndicator();
 
       await PageObjects.discover.saveUnsavedChanges();
 
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
     });
 
-    it('should not show a badge after loading a saved search, only after changes', async () => {
+    it('should not show a notification indicator after loading a saved search, only after changes', async () => {
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilTabIsLoaded();
 
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       await PageObjects.discover.chooseBreakdownField('_index');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureHasUnsavedChangesIndicator();
     });
 
     it('should allow to revert changes', async () => {
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilTabIsLoaded();
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       // test changes to columns
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes']);
@@ -117,10 +116,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes', 'extension']);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureHasUnsavedChangesIndicator();
       await PageObjects.discover.revertUnsavedChanges();
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes']);
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       // test changes to sample size
       await dataGrid.clickGridSettings();
@@ -129,12 +128,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickGridSettings();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureHasUnsavedChangesIndicator();
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(250);
       await dataGrid.clickGridSettings();
       await PageObjects.discover.revertUnsavedChanges();
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(500);
       await dataGrid.clickGridSettings();
@@ -144,17 +143,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.changeRowsPerPageTo(25);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureHasUnsavedChangesIndicator();
       await dataGrid.checkCurrentRowsPerPageToBe(25);
       await PageObjects.discover.revertUnsavedChanges();
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
       await dataGrid.checkCurrentRowsPerPageToBe(100);
     });
 
-    it('should hide the badge once user manually reverts changes', async () => {
+    it('should hide the notification indicator once user manually reverts changes', async () => {
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilTabIsLoaded();
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       // changes to columns
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes']);
@@ -162,46 +161,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes', 'extension']);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureHasUnsavedChangesIndicator();
       await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes']);
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       // test changes to breakdown field
       await PageObjects.discover.chooseBreakdownField('_index');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureHasUnsavedChangesIndicator();
       await PageObjects.discover.clearBreakdownField();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
     });
 
-    it('should not show the badge after pinning the first filter but after disabling a filter', async () => {
+    it('should not show the notification indicator after pinning the first filter but after disabling a filter', async () => {
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
       await filterBar.addFilter({ field: 'bytes', operation: 'exists' });
       await PageObjects.discover.saveSearch(SAVED_SEARCH_WITH_FILTERS_NAME);
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       await filterBar.toggleFilterPinned('extension');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await filterBar.isFilterPinned('extension')).to.be(true);
 
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       await filterBar.toggleFilterNegated('bytes');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await filterBar.isFilterNegated('bytes')).to.be(true);
 
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureHasUnsavedChangesIndicator();
 
       await PageObjects.discover.revertUnsavedChanges();
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
       expect(await filterBar.getFilterCount()).to.be(2);
       expect(await filterBar.isFilterPinned('extension')).to.be(false);
