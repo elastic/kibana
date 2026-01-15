@@ -40,7 +40,7 @@ import type { GaugeVisualizationState } from './constants';
 import { GROUP_ID, LENS_GAUGE_ID } from './constants';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
-import { getAccessorsFromState } from './utils';
+import { getAccessorsFromState, getDefaultPalette } from './utils';
 import {
   GAUGE_GOAL_GT_MAX,
   GAUGE_METRIC_GT_MAX,
@@ -229,13 +229,17 @@ export const getGaugeVisualization = ({
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-        ticksPosition: 'auto',
+        colorMode: 'palette',
+        palette:
+          mainPalette?.type === 'legacyPalette'
+            ? mainPalette.value
+            : getDefaultPalette(paletteService),
+        ticksPosition: 'bands',
         labelMajorMode: 'auto',
       }
     );
   },
-  getSuggestions,
+  getSuggestions: (params) => getSuggestions({ ...params, paletteService }),
 
   getConfiguration({ state, frame }) {
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
