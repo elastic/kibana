@@ -352,6 +352,7 @@ const ESQLEditorInternal = function ESQLEditor({
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
 
+  // Measure keystroke to React commit by waiting for the code state update.
   useEffect(() => {
     reportInputLatency();
   }, [code, reportInputLatency]);
