@@ -122,6 +122,7 @@ Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
 
 ```typescript
 import type { ServerStepDefinition, StepHandler } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import { myStepCommonDefinition } from '../../common/step_types/my_step';
 
 export const getMyStepDefinition = (coreSetup: CoreSetup) =>
@@ -349,6 +350,60 @@ Step type IDs must follow a namespaced format to avoid conflicts:
 - ✅ Good: `"myPlugin.myStep"`, `"custom.feature.step"`
 - ❌ Bad: `"myStep"`, `"step"` (too generic)
 
+### Config vs Inputs: Mental Model
+
+When designing a step, you need to decide which parameters should be **config** properties (step-level in YAML) and which should be **inputs** (in the `with` section). Here's the recommended mental model:
+
+**Config (step-level properties):**
+Use config to **control step behavior** - how/when/who the step executes:
+- Execution context (e.g., `connector-id: 'slack-webhook'`, `agent-id: 'agent-123'`)
+- Execution mode (e.g., `mode: 'batch'`, `strategy: 'parallel'`)
+
+**Built-in step-level config examples:**
+- `if`: Conditional execution (e.g., `if: '${{ steps.check.output.passed }}'`)
+- `foreach`: Iteration over collections (e.g., `foreach: '${{ steps.list.output.items }}'`)
+- `on-failure`: Error handling policy with `continue`, `retry`, or `fallback` strategies
+- `timeout`: Execution time limits (e.g., `timeout: 30s`)
+
+**Inputs (the `with` section):**
+Use inputs for **what/where to process** - the step's payload:
+- Target destinations (e.g., `index`, `channel`, `namespace`, `bucket`)
+- Data to process (e.g., `document`, `message`, `query`, `payload`)
+- Processing parameters (e.g., `severity`, `priority`, `format`, `options`)
+- Dynamic values from previous steps or context
+
+**Example:**
+
+```yaml
+# Config properties (step-level) - Control step behavior
+- name: send_notification
+  type: myPlugin.sendNotification
+  connector-id: slack-webhook                      # Config: which connector to use (controls behavior)
+  mode: async                                   # Config: execution mode (controls behavior)
+  timeout: 10s                                  # Config: time limit (controls behavior)
+  # Inputs (with section) - What/Where to process
+  with:
+    channel: "#alerts"                          # Input: WHERE - target destination
+    message: ${{ steps.process.output.alert }}  # Input: WHAT - data to send
+    priority: high                              # Input: WHAT - processing parameter
+
+- name: process_data
+  type: myPlugin.processData
+  if: steps.previous.output.data.length > 10    # Config: by which condition to run this step (control behavior)
+  agent-id: data-processor-1                     # Config: which agent to use (controls behavior)
+  strategy: parallel                            # Config: processing strategy (controls behavior)
+  # Inputs (with section) - What/Where to process
+  with:
+    index: logs-*                               # Input: WHERE - data source
+    query: "status:error"                       # Input: WHAT - data to process
+    outputIndex: processed-*                    # Input: WHERE - output destination
+    transform:                                  # Input: WHAT - transformation logic
+      field: timestamp
+      format: iso8601
+```
+
+**Note:** This mental model is a guideline, not a strict rule. Teams have flexibility in choosing what makes sense for their specific step types. The key is consistency within your plugin's step definitions.
+
 ### Type Safety
 
 The step type ID used in the server registry **must match** the one used in the public registry. TypeScript will help catch mismatches at compile time, but it's critical to use the same string value in both registrations.
@@ -379,6 +434,134 @@ const myStepHandler: StepHandler = async (context) => {
   };
 };
 ```
+
+### Error Handling
+
+Step handlers can return errors in their result, or throw errors directly. The workflow execution engine automatically catches thrown errors and converts them to `ExecutionError`, so you don't need to handle conversion manually.
+
+However, if you need to throw or return an error with a **custom error type** or **additional details** for better debugging and error categorization, you can use the `ExecutionError` class from `@kbn/workflows/server`.
+
+#### Standard Error Handling (No ExecutionError Required)
+
+For most cases, you can simply throw errors or return them. When a raw error is thrown or returned, it will be automatically converted to `ExecutionError` with the following mapping:
+- `ExecutionError.type` = `Error.name` (e.g., `'TypeError'`, `'RangeError'`)
+- `ExecutionError.message` = `Error.message`
+- `ExecutionError.details` = `undefined` (no additional details)
+
+```typescript
+import type { StepHandler } from '@kbn/workflows-extensions/server';
+
+const myStepHandler: StepHandler = async (context) => {
+  // Option 1: Let errors propagate (recommended for simplicity)
+  const result = await someOperation(); // Throws on error - automatically caught
+  return { output: { result } };
+  
+  // Option 2: Catch and return errors explicitly
+  try {
+    const result = await someOperation();
+    return { output: { result } };
+  } catch (error) {
+    context.logger.error('Step execution failed', error);
+    // Standard errors are automatically converted to ExecutionError
+    return { error };
+  }
+};
+```
+
+#### Custom Errors with Type and Details
+
+Use `ExecutionError` when you need to provide structured error information with custom types and additional context. You can either throw it or return it:
+
+```typescript
+import { ExecutionError } from '@kbn/workflows/server';
+
+const myStepHandler: StepHandler = async (context) => {
+  const { userId, action } = context.input;
+  
+  // Option 1: Throw ExecutionError (recommended for validation errors)
+  if (!userId) {
+    throw new ExecutionError({
+      type: 'ValidationError',
+      message: 'User ID is required',
+      details: {
+        field: 'userId',
+        providedValue: userId,
+      },
+    });
+  }
+  
+  // Option 2: Return ExecutionError in result
+  const user = await fetchUser(userId);
+  if (!user.hasPermission(action)) {
+    return {
+      error: new ExecutionError({
+        type: 'PermissionError',
+        message: `User ${userId} does not have permission to perform ${action}`,
+        details: {
+          userId,
+          action,
+          userPermissions: user.permissions,
+          requiredPermission: action,
+        },
+      }),
+    };
+  }
+  
+  // Proceed with step logic
+  const result = await performAction(user, action);
+  return { output: { result } };
+};
+```
+
+You can also wrap standard errors with additional context:
+
+```typescript
+const myStepHandler: StepHandler = async (context) => {
+  const { userId, action } = context.input;
+  
+  try {
+    const user = await fetchUser(userId);
+    const result = await performAction(user, action);
+    return { output: { result } };
+  } catch (error) {
+    context.logger.error('Failed to process user action', error);
+    
+    // If already an ExecutionError, re-throw or return it
+    if (error instanceof ExecutionError) {
+      throw error; // or: return { error };
+    }
+    
+    // Wrap standard errors with additional context
+    throw new ExecutionError({
+      type: 'ProcessingError',
+      message: `Failed to process action for user ${userId}`,
+      details: {
+        userId,
+        action,
+        originalError: error instanceof Error ? error.message : String(error),
+      },
+    });
+  }
+};
+```
+
+#### ExecutionError Properties
+
+The `ExecutionError` class supports the following properties:
+
+- **`type`** (required): A string identifying the error category (e.g., `'ValidationError'`, `'PermissionError'`, `'NetworkError'`)
+- **`message`** (required): A human-readable error message describing what went wrong
+- **`details`** (optional): An object containing additional context about the error (e.g., field names, user IDs, failed values)
+
+#### When to Use ExecutionError
+
+- ✅ **DO** use `ExecutionError` when you need custom error types (e.g., `'ValidationError'`, `'PermissionError'`)
+- ✅ **DO** use `ExecutionError` when you need to include additional error context in the `details` object
+- ✅ **DO** use `ExecutionError` for categorizing errors in a structured way
+- ✅ **DO** provide meaningful `type` values that help identify the error category
+- ✅ **DO** include relevant context in the `details` object for debugging
+- ⛔ **DON'T** use `ExecutionError` for standard errors that don't need custom types or details (they're converted automatically)
+- ⛔ **DON'T** use generic error types like `'Error'` when a more specific type applies
 
 ### Step Handler Context
 
