@@ -900,8 +900,8 @@ export const PostGenerateAgentsReportRequestSchema = {
     timezone: schema.string(),
     sort: schema.maybe(
       schema.object({
-        field: schema.string(),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+        field: schema.maybe(schema.string()),
+        direction: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
       })
     ),
   }),
