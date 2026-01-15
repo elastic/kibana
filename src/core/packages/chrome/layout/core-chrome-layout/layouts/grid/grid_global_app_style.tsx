@@ -109,11 +109,13 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
     }
 
-    // if the overlay mask exists that is above the header, set the top of the right flyouts to 0
+    // if the overlay mask exists that is above the header, set the top, right and bottom of the right flyouts to 0
     .euiOverlayMask[data-relative-to-header='above']
       + [data-euiportal='true']
       .euiFlyout[class*='right'] {
       ${logicalCSS('top', 0)};
+      ${logicalCSS('right', 0)};
+      ${logicalCSS('bottom', 0)};
     }
   }
 
