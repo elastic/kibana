@@ -23,7 +23,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/get_metric_change_points.spec.ts'));
     loadTestFile(require.resolve('./tools/get_trace_change_points.spec.ts'));
     loadTestFile(require.resolve('./tools/get_index_info.spec.ts'));
-    
+
     // ai insights
     loadTestFile(require.resolve('./ai_insights/error.spec.ts'));
     loadTestFile(require.resolve('./ai_insights/alert.spec.ts'));
