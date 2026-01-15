@@ -200,9 +200,11 @@ export const featuresStatusRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const stream = await streamsClient.getStream(params.path.name);
+    const { name } = params.path;
+    await streamsClient.ensureStream(name);
+
     const task = await taskClient.get<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
-      getFeaturesIdentificationTaskId(stream.name)
+      getFeaturesIdentificationTaskId(name)
     );
 
     if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
@@ -275,8 +277,10 @@ export const featuresTaskRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const stream = await streamsClient.getStream(params.path.name);
-    const taskId = getFeaturesIdentificationTaskId(stream.name);
+    const { name } = params.path;
+    await streamsClient.ensureStream(name);
+
+    const taskId = getFeaturesIdentificationTaskId(name);
 
     if (params.body.action === 'schedule') {
       const { from: start, to: end, connector_id: connectorIdParam } = params.body;
@@ -293,7 +297,7 @@ export const featuresTaskRoute = createServerRoute({
             type: FEATURES_IDENTIFICATION_TASK_TYPE,
             id: taskId,
             space: '*',
-            stream: stream.name,
+            stream: name,
           },
           params: {
             connectorId,
