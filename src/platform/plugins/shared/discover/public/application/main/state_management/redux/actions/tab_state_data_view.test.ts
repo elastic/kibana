@@ -64,7 +64,7 @@ const setup = async () => {
   };
 };
 
-describe('data_views actions', () => {
+describe('tab_state_data_view actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

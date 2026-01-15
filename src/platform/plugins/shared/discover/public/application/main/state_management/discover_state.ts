@@ -24,7 +24,6 @@ import {
 } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
@@ -44,7 +43,6 @@ import type { DiscoverAppLocatorParams } from '../../../../common';
 import { APP_STATE_URL_KEY, DISCOVER_APP_LOCATOR } from '../../../../common';
 import type { DiscoverAppState, ReactiveTabRuntimeState } from './redux';
 import { getCurrentUrlState } from './utils/cleanup_url_state';
-import { updateFiltersReferences } from './utils/update_filter_references';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {
   createDataViewDataSource,
@@ -63,7 +61,6 @@ import {
   internalStateActions,
   selectTab,
   selectTabRuntimeState,
-  selectIsDataViewUsedInMultipleRuntimeTabStates,
 } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
@@ -214,11 +211,6 @@ export interface DiscoverStateContainer {
      */
     onChangeDataView: (id: string | DataView) => Promise<void>;
     /**
-     * When editing an ad hoc data view, a new id needs to be generated for the data view
-     * This is to prevent duplicate ids messing with our system
-     */
-    updateAdHocDataViewId: (editedDataView: DataView) => Promise<DataView | undefined>;
-    /**
      * Updates the ES|QL query string
      */
     updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
@@ -258,62 +250,6 @@ export function getDiscoverStateContainer({
     injectCurrentTab,
     getCurrentTab,
   });
-
-  /**
-   * When editing an ad hoc data view, a new id needs to be generated for the data view
-   * This is to prevent duplicate ids messing with our system
-   */
-  const updateAdHocDataViewId = async (editedDataView: DataView) => {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const prevDataView = currentDataView$.getValue();
-    if (!prevDataView || prevDataView.isPersisted()) return;
-
-    const isUsedInMultipleTabs = selectIsDataViewUsedInMultipleRuntimeTabStates(
-      runtimeStateManager,
-      prevDataView.id!
-    );
-
-    const nextDataView = await services.dataViews.create({
-      ...editedDataView.toSpec(),
-      id: uuidv4(),
-    });
-
-    if (!isUsedInMultipleTabs) {
-      services.dataViews.clearInstanceCache(prevDataView.id);
-    }
-
-    await updateFiltersReferences({
-      prevDataView,
-      nextDataView,
-      services,
-    });
-
-    if (isUsedInMultipleTabs) {
-      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
-    } else {
-      internalState.dispatch(
-        internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
-      );
-    }
-
-    if (isDataSourceType(getCurrentTab().appState.dataSource, DataSourceType.DataView)) {
-      await internalState.dispatch(
-        injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
-          appState: {
-            dataSource: nextDataView.id
-              ? createDataViewDataSource({ dataViewId: nextDataView.id })
-              : undefined,
-          },
-        })
-      );
-    }
-
-    const { persistedDiscoverSession } = internalState.getState();
-    const trackingEnabled = Boolean(nextDataView.isPersisted() || persistedDiscoverSession?.id);
-    services.urlTracker.setTrackingEnabled(trackingEnabled);
-
-    return nextDataView;
-  };
 
   const onOpenSavedSearch = async (newSavedSearchId: string) => {
     addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
@@ -406,7 +342,9 @@ export function getDiscoverStateContainer({
         injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: newDataView })
       );
     } else {
-      await updateAdHocDataViewId(editedDataView);
+      await internalState.dispatch(
+        injectCurrentTab(internalStateActions.updateAdHocDataViewId)({ editedDataView })
+      );
     }
     void internalState.dispatch(internalStateActions.loadDataViewList());
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
@@ -800,7 +738,6 @@ export function getDiscoverStateContainer({
       transitionFromESQLToDataView,
       transitionFromDataViewToESQL,
       onUpdateQuery,
-      updateAdHocDataViewId,
       updateESQLQuery,
     },
   };
