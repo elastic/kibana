@@ -18,9 +18,8 @@ import {
 } from '../../../../../../common/data_types/logs/constants';
 import { DataSourceCategory, type DataSourceProfileProvider } from '../../../../profiles';
 import { extendProfileProvider } from '../../../extend_profile_provider';
-import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import { createChartSection } from '../accessors/chart_section';
-import { reContainsTracesApm, reContainsTracesOtel } from './reg_exps';
+import type { TracesDataContext } from '../profile';
 
 export const createTracesAPMDataSourceProfileProvider = (
   tracesDataSourceProfileProvider: DataSourceProfileProvider
@@ -30,13 +29,14 @@ export const createTracesAPMDataSourceProfileProvider = (
     if (!baseResult.isMatch) {
       return baseResult;
     }
-    const indexPattern = extractIndexPatternFrom(params);
-
-    const isOtelIndexPattern = reContainsTracesOtel.test(indexPattern || '');
-    const isApmIndexPattern = reContainsTracesApm.test(indexPattern || '');
+    const baseContext = baseResult.context as TracesDataContext;
+    const { hasApm, hasUnprocessedOtel } = baseContext;
 
     // Avoid mixing APM and OTEL columns in the same profile
-    if (isApmIndexPattern && !isOtelIndexPattern) {
+    // (activate only when the source is uniquely APM)
+    if (hasApm && !hasUnprocessedOtel) {
+      // eslint-disable-next-line no-console
+      console.log('[traces profile] APM sub-profile matched');
       return {
         isMatch: true,
         context: { category: DataSourceCategory.Traces },
