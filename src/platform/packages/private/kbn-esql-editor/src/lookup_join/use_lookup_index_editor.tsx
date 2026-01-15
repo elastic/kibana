@@ -288,6 +288,16 @@ export const useLookupIndexCommand = (
       canEditIndex = true,
       triggerSource = 'esql_autocomplete'
     ) => {
+      if (editorRef.current) {
+        // Hiding the hover widget is easier in newer monaco versions, we can improve this if we update.
+        // In new versions there is a comamnd: editorRef.current.trigger('command', 'editor.action.hideHover', {});
+        const hoverController =
+          editorRef.current.getContribution<HoverController>('editor.contrib.hover');
+        if (hoverController?._contentWidget?.widget?.hide) {
+          hoverController._contentWidget.widget.hide();
+        }
+      }
+
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
         doesIndexExist,
@@ -308,7 +318,7 @@ export const useLookupIndexCommand = (
         onOpenIndexInDiscover,
       } as EditLookupIndexContentContext);
     },
-    [onFlyoutClose, onOpenIndexInDiscover, uiActions]
+    [editorRef, onFlyoutClose, onOpenIndexInDiscover, uiActions]
   );
 
   const openFlyoutRef = useRef(openFlyout);
@@ -316,31 +326,18 @@ export const useLookupIndexCommand = (
     openFlyoutRef.current = openFlyout;
   }, [openFlyout]);
 
-  useEffect(
-    function registerCommandOnMount() {
-      const disposable = monaco.editor.registerCommand(
-        COMMAND_ID,
-        async (_, args: IndexEditorCommandArgs) => {
-          if (editorRef.current) {
-            // Hiding the hover widget is easier in newer monaco versions, we can improve this if we update.
-            // In new versions there is a comamnd: editorRef.current.trigger('command', 'editor.action.hideHover', {});
-            const hoverController =
-              editorRef.current.getContribution<HoverController>('editor.contrib.hover');
-            if (hoverController?._contentWidget?.widget?.hide) {
-              hoverController._contentWidget.widget.hide();
-            }
-          }
-
-          const { indexName, doesIndexExist, canEditIndex, triggerSource } = args;
-          await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, triggerSource);
-        }
-      );
-      return () => {
-        disposable.dispose();
-      };
-    },
-    [editorRef]
-  );
+  useEffect(function registerCommandOnMount() {
+    const disposable = monaco.editor.registerCommand(
+      COMMAND_ID,
+      async (_, args: IndexEditorCommandArgs) => {
+        const { indexName, doesIndexExist, canEditIndex, triggerSource } = args;
+        await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, triggerSource);
+      }
+    );
+    return () => {
+      disposable.dispose();
+    };
+  }, []);
 
   return {
     addLookupIndicesDecorator,
