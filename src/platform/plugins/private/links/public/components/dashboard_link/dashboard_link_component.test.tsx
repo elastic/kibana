@@ -127,12 +127,12 @@ describe('Dashboard link component', () => {
     expect(preventDefault).toHaveBeenCalledTimes(0);
   });
 
-  test('openInNewTab uses window.open, not navigateToApp, and renders external icon', async () => {
+  test('open_in_new_tab uses window.open, not navigateToApp, and renders external icon', async () => {
     const parentApi = createMockLinksParent({});
     renderComponent({
       link: {
         ...resolvedLink,
-        options: { ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS, openInNewTab: true },
+        options: { ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS, open_in_new_tab: true },
       },
       parentApi,
     });
@@ -183,7 +183,7 @@ describe('Dashboard link component', () => {
     });
   });
 
-  test('does not pass timeRange to locator.getRedirectUrl if useCurrentDateRange is false', async () => {
+  test('does not pass timeRange to locator.getRedirectUrl if use_time_range is false', async () => {
     const initialFilters = [
       {
         query: { match_phrase: { foo: 'bar' } },
@@ -206,7 +206,7 @@ describe('Dashboard link component', () => {
         ...resolvedLink,
         options: {
           ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
-          useCurrentDateRange: false,
+          use_time_range: false,
         },
       },
       parentApi,
@@ -219,7 +219,7 @@ describe('Dashboard link component', () => {
     });
   });
 
-  test('does not pass filters or query to locator.getRedirectUrl if useCurrentFilters is false', async () => {
+  test('does not pass filters or query to locator.getRedirectUrl if use_filters is false', async () => {
     const initialFilters = [
       {
         query: { match_phrase: { foo: 'bar' } },
@@ -242,7 +242,7 @@ describe('Dashboard link component', () => {
         ...resolvedLink,
         options: {
           ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
-          useCurrentFilters: false,
+          use_filters: false,
         },
       },
       parentApi,

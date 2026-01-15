@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO derive type from schema and make keys snake_case
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type DashboardNavigationOptions = {
-  useCurrentFilters: boolean;
-  useCurrentDateRange: boolean;
-  openInNewTab: boolean;
-};
+import type { TypeOf } from '@kbn/config-schema';
+import type { dashboardNavigationOptionsSchema } from './schemas';
+
+export type DashboardNavigationOptions = Required<TypeOf<typeof dashboardNavigationOptionsSchema>>;

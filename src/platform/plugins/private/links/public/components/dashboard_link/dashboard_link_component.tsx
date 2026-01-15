@@ -26,6 +26,7 @@ import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/cont
 import { trackUiMetric } from '../../services/kibana_services';
 import type { LinksParentApi, ResolvedLink } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
+import { DashboardLink } from '../../../server';
 
 export interface DashboardLinkProps {
   link: ResolvedLink;
@@ -96,15 +97,15 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
     };
-    if (linkOptions.useCurrentFilters && query) {
+    if (linkOptions.use_filters && query) {
       params.query = query as Query;
     }
 
-    if (linkOptions.useCurrentDateRange && timeRange) {
+    if (linkOptions.use_time_range && timeRange) {
       params.time_range = timeRange;
     }
 
-    params.filters = linkOptions.useCurrentFilters ? filters : filters?.filter(isFilterPinned);
+    params.filters = linkOptions.use_filters ? filters : filters?.filter(isFilterPinned);
 
     const locator = parentApi.locator;
     if (!locator) return;
@@ -126,7 +127,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
 
         /** Otherwise, prevent the default behaviour and handle click depending on `openInNewTab` option */
         event.preventDefault();
-        if (linkOptions.openInNewTab) {
+        if (linkOptions.open_in_new_tab) {
           window.open(href, '_blank');
         } else {
           await locator.navigate(params);
@@ -170,7 +171,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
         'dashboardLinkError--noLabel': !link.label,
       })}
       label={linkLabel}
-      external={link.options?.openInNewTab}
+      external={(link.options as DashboardLink['options'])?.open_in_new_tab}
       data-test-subj={link.error ? `${id}--error` : `${id}`}
       aria-current={link.destination === parentDashboardId}
     />

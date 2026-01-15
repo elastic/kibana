@@ -27,8 +27,8 @@ export const DashboardNavigationOptionsEditor = ({ options, onOptionChange }: Pr
           label={i18n.translate('dashboard.navigationOptions.useCurrentFiltersLabel', {
             defaultMessage: 'Use filters and query from origin dashboard',
           })}
-          checked={options.useCurrentFilters}
-          onChange={() => onOptionChange({ useCurrentFilters: !options.useCurrentFilters })}
+          checked={options.use_filters}
+          onChange={() => onOptionChange({ use_filters: !options.use_filters })}
           data-test-subj="dashboardNavigationOptions--useCurrentFilters--checkbox"
         />
         <EuiSpacer size="s" />
@@ -38,8 +38,8 @@ export const DashboardNavigationOptionsEditor = ({ options, onOptionChange }: Pr
           label={i18n.translate('dashboard.navigationOptions.useCurrentDateRange', {
             defaultMessage: 'Use date range from origin dashboard',
           })}
-          checked={options.useCurrentDateRange}
-          onChange={() => onOptionChange({ useCurrentDateRange: !options.useCurrentDateRange })}
+          checked={options.use_time_range}
+          onChange={() => onOptionChange({ use_time_range: !options.use_time_range })}
           data-test-subj="dashboardNavigationOptions--useCurrentDateRange--checkbox"
         />
         <EuiSpacer size="s" />
@@ -49,8 +49,8 @@ export const DashboardNavigationOptionsEditor = ({ options, onOptionChange }: Pr
           label={i18n.translate('dashboard.navigationOptions.openInNewTab', {
             defaultMessage: 'Open dashboard in new tab',
           })}
-          checked={options.openInNewTab}
-          onChange={() => onOptionChange({ openInNewTab: !options.openInNewTab })}
+          checked={options.open_in_new_tab}
+          onChange={() => onOptionChange({ open_in_new_tab: !options.open_in_new_tab })}
           data-test-subj="dashboardNavigationOptions--openInNewTab--checkbox"
         />
       </div>

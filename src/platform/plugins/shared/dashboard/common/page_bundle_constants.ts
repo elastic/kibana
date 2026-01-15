@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardNavigationOptions } from '../server';
-
 export const LANDING_PAGE_PATH = '/list';
 export const DASHBOARD_APP_ID = 'dashboards';
 export const SEARCH_SESSION_ID = 'searchSessionId';
 export const DASHBOARD_GRID_COLUMN_COUNT = 48;
 
-export const DEFAULT_DASHBOARD_NAVIGATION_OPTIONS: DashboardNavigationOptions = {
-  openInNewTab: false,
-  useCurrentDateRange: true,
-  useCurrentFilters: true,
+export const DEFAULT_DASHBOARD_NAVIGATION_OPTIONS = {
+  open_in_new_tab: false,
+  use_time_range: true,
+  use_filters: true,
 };

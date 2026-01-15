@@ -15,16 +15,16 @@ export function getOptions(type: LinkType, options: LinkOptions) {
   if (!options) return undefined;
 
   if (type === DASHBOARD_LINK_TYPE) {
-    const dashboardOptions = options as Required<DashboardLink>['options'];
+    const dashboardOptions = options as DashboardLink['options'];
     return {
-      ...(typeof dashboardOptions.openInNewTab === 'boolean' && {
-        openInNewTab: dashboardOptions.openInNewTab,
+      ...(typeof dashboardOptions?.open_in_new_tab === 'boolean' && {
+        open_in_new_tab: dashboardOptions.open_in_new_tab,
       }),
-      ...(typeof dashboardOptions.useCurrentFilters === 'boolean' && {
-        useCurrentFilters: dashboardOptions.useCurrentFilters,
+      ...(typeof dashboardOptions?.use_filters === 'boolean' && {
+        use_filters: dashboardOptions.use_filters,
       }),
-      ...(typeof dashboardOptions.useCurrentDateRange === 'boolean' && {
-        useCurrentDateRange: dashboardOptions.useCurrentDateRange,
+      ...(typeof dashboardOptions?.use_time_range === 'boolean' && {
+        use_time_range: dashboardOptions.use_time_range,
       }),
     };
   }

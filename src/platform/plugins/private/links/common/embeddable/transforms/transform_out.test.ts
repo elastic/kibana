@@ -24,11 +24,11 @@ describe('transformOut', () => {
           order: 0,
           destination: 'https://github.com/',
           options: {
-            openInNewTab: true,
+            open_in_new_tab: true,
             // these are dashboard link options saved in external link
             // state because of editor UI bug
-            useCurrentDateRange: true,
-            useCurrentFilters: true,
+            use_time_range: true,
+            use_filters: true,
           } as LinkOptions,
         },
       ],
@@ -40,9 +40,7 @@ describe('transformOut', () => {
           Object {
             "destination": "https://github.com/",
             "id": "e2ab286f-0945-4e17-b256-f497b6c3102e",
-            "options": Object {
-              "openInNewTab": true,
-            },
+            "options": Object {},
             "order": 0,
             "type": "externalLink",
           },

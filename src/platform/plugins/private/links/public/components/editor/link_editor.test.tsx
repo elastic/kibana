@@ -19,9 +19,9 @@ jest.mock('./link_destination', () => {
 
 describe('LinksEditor', () => {
   const nonDefaultOptions = {
-    openInNewTab: true,
-    useCurrentDateRange: false,
-    useCurrentFilters: false,
+    open_in_new_tab: true,
+    use_time_range: false,
+    use_filters: false,
   };
 
   const defaultProps = {
@@ -53,9 +53,9 @@ describe('LinksEditor', () => {
         expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
-      expect(getOptionAriaChecked('useCurrentFilters')).toBe('true');
-      expect(getOptionAriaChecked('useCurrentDateRange')).toBe('true');
-      expect(getOptionAriaChecked('openInNewTab')).toBe('false');
+      expect(getOptionAriaChecked('use_filters')).toBe('true');
+      expect(getOptionAriaChecked('use_time_range')).toBe('true');
+      expect(getOptionAriaChecked('open_in_new_tab')).toBe('false');
     });
 
     test('properly overrides default values when provided', async () => {
@@ -72,9 +72,9 @@ describe('LinksEditor', () => {
         expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
-      expect(getOptionAriaChecked('useCurrentFilters')).toBe('false');
-      expect(getOptionAriaChecked('useCurrentDateRange')).toBe('false');
-      expect(getOptionAriaChecked('openInNewTab')).toBe('true');
+      expect(getOptionAriaChecked('use_filters')).toBe('false');
+      expect(getOptionAriaChecked('use_time_range')).toBe('false');
+      expect(getOptionAriaChecked('open_in_new_tab')).toBe('true');
     });
 
     test('options are persisted on edit', async () => {
