@@ -99,13 +99,13 @@ export const registerDriftSummaryRoute = (
           // Build filter clauses for category, severity, and host
           const filterClauses: Array<Record<string, unknown>> = [];
           if (categories.length > 0) {
-            filterClauses.push({ terms: { 'drift.category': categories } });
+            filterClauses.push({ terms: { 'drift.category.keyword': categories } });
           }
           if (severities.length > 0) {
-            filterClauses.push({ terms: { 'drift.severity': severities } });
+            filterClauses.push({ terms: { 'drift.severity.keyword': severities } });
           }
           if (hostId) {
-            filterClauses.push({ term: { 'host.id': hostId } });
+            filterClauses.push({ term: { 'host.id.keyword': hostId } });
           }
 
           const result = await esClient.search({
@@ -132,31 +132,31 @@ export const registerDriftSummaryRoute = (
               },
               by_category: {
                 terms: {
-                  field: 'drift.category',
+                  field: 'drift.category.keyword',
                   size: 10,
                 },
               },
               by_severity: {
                 terms: {
-                  field: 'drift.severity',
+                  field: 'drift.severity.keyword',
                   size: 10,
                 },
               },
               unique_hosts: {
                 cardinality: {
-                  field: 'host.id',
+                  field: 'host.id.keyword',
                 },
               },
               top_changed_assets: {
                 terms: {
-                  field: 'host.id',
+                  field: 'host.id.keyword',
                   size: 10,
                   order: { _count: 'desc' },
                 },
                 aggs: {
                   host_name: {
                     terms: {
-                      field: 'host.name',
+                      field: 'host.name.keyword',
                       size: 1,
                     },
                   },
@@ -257,27 +257,53 @@ export const registerDriftSummaryRoute = (
               '@timestamp',
               'host.id',
               'host.name',
+              'host.os.platform',
               'drift.category',
               'drift.action',
               'drift.item.name',
+              'drift.item.type',
+              'drift.item.value',
               'drift.severity',
+              'drift.query_name',
+              'action_id',
             ],
           });
 
           const recentChanges = recentEventsResult.hits.hits.map((hit) => {
             const source = hit._source as Record<string, unknown>;
-            const host = source.host as Record<string, string> | undefined;
+            const host = source.host as Record<string, unknown> | undefined;
+            const hostOs = host?.os as Record<string, string> | undefined;
             const drift = source.drift as Record<string, unknown> | undefined;
             const driftItem = drift?.item as Record<string, string> | undefined;
+            const actionId = source.action_id as string | undefined;
+
+            // Extract human-readable query name from action_id
+            // e.g., "pack_Asset-Drift-Detection_drift_network_listening_ports" -> "Listening Ports"
+            let queryName = driftItem?.type ?? 'change';
+            if (actionId) {
+              const parts = actionId.split('_');
+              // Get the last 2-3 parts after "drift_category_"
+              const nameIndex = parts.findIndex((p) => p === 'drift');
+              if (nameIndex !== -1 && nameIndex + 2 < parts.length) {
+                queryName = parts
+                  .slice(nameIndex + 2)
+                  .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+                  .join(' ');
+              }
+            }
 
             return {
               timestamp: source['@timestamp'] as string,
-              host_id: host?.id ?? 'unknown',
-              host_name: host?.name ?? host?.id ?? 'unknown',
+              host_id: (host?.id as string) ?? 'unknown',
+              host_name: (host?.name as string) ?? (host?.id as string) ?? 'unknown',
+              platform: hostOs?.platform ?? 'unknown',
               category: (drift?.category as string) ?? 'unknown',
               action: (drift?.action as string) ?? 'unknown',
               item_name: driftItem?.name ?? 'unknown',
+              item_type: driftItem?.type ?? 'unknown',
+              item_value: driftItem?.value ?? '',
               severity: (drift?.severity as string) ?? 'low',
+              query_name: queryName,
             };
           });
 

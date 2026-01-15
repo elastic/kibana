@@ -278,13 +278,17 @@ export interface DriftEvent {
   host: {
     id: string;
     name: string;
-    os: {
-      platform: string;
+    os?: {
+      platform?: string;
+      name?: string;
+      version?: string;
     };
   };
 
-  agent: {
+  agent?: {
     id: string;
+    name?: string;
+    version?: string;
   };
 
   drift: {
@@ -298,12 +302,12 @@ export interface DriftEvent {
       previous_value?: string;
     };
     query_id: string;
-    query_name: string;
+    query_name?: string;
   };
 
-  osquery: Record<string, unknown>;
+  osquery?: Record<string, unknown>;
 
-  event: {
+  event?: {
     kind: 'event';
     category: ['configuration'];
     type: ['change'];
@@ -460,10 +464,14 @@ export interface DriftSummaryResponse {
     timestamp: string;
     host_id: string;
     host_name: string;
+    platform: string;
     category: string;
     action: string;
     item_name: string;
+    item_type: string;
+    item_value: string;
     severity: string;
+    query_name: string;
   }>;
   time_range: string;
   /** Current page number (1-based) */

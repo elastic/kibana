@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   DriftEvent,
@@ -176,7 +176,7 @@ export const useDriftEvents = (
       host: {
         id: change.host_id,
         name: change.host_name,
-        os: { platform: 'unknown' },
+        os: { platform: change.platform },
       },
       agent: {
         id: change.host_id,
@@ -186,9 +186,12 @@ export const useDriftEvents = (
         action: change.action as 'added' | 'removed' | 'modified',
         severity: change.severity as 'critical' | 'high' | 'medium' | 'low',
         item: {
-          type: change.category,
+          type: change.item_type,
           name: change.item_name,
+          value: change.item_value,
         },
+        query_id: change.query_name,
+        query_name: change.query_name,
       },
     }));
 
@@ -203,11 +206,13 @@ export const useDriftEvents = (
     };
   }, [services, timeRange, categories, severities, hostId, page, pageSize]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isFetching, error } = useQuery({
     queryKey: [QUERY_KEY, timeRange, categories, severities, hostId, page, pageSize],
     queryFn: fetchDriftEvents,
     staleTime: 30000,
     refetchOnWindowFocus: false,
+    // Keep previous page data visible while fetching new page
+    placeholderData: keepPreviousData,
   });
 
   const refresh = useCallback(() => {
@@ -218,7 +223,7 @@ export const useDriftEvents = (
 
   return {
     data: data ?? null,
-    loading: isLoading,
+    loading: isFetching,
     error: error as Error | null,
     refresh,
   };
