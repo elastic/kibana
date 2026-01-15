@@ -223,7 +223,8 @@ export const reindexServiceFactory = (
     // Backup the current settings to restore them after the reindex
     // https://github.com/elastic/kibana/issues/201605
     // In serverless mode, index.number_of_replicas setting is not available
-    const backupSettings = isServerless
+    // Filter out undefined values to prevent them from overriding null in settingsToApply
+    const rawBackupSettings = isServerless
       ? {
           'index.refresh_interval': settings['index.refresh_interval'],
         }
@@ -231,6 +232,10 @@ export const reindexServiceFactory = (
           'index.number_of_replicas': settings['index.number_of_replicas'],
           'index.refresh_interval': settings['index.refresh_interval'],
         };
+
+    const backupSettings = Object.fromEntries(
+      Object.entries(rawBackupSettings).filter(([key, value]) => value !== undefined)
+    );
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const settings_override = isServerless
@@ -429,14 +434,13 @@ export const reindexServiceFactory = (
 
     // Build settings to restore or remove
     // In serverless mode, index.number_of_replicas setting is not available
-    const settingsToApply: Record<string, any> = isServerless
+    // Defaulting to null in case the original setting was empty to remove the setting.
+    const settingsToApply: IndicesIndexSettings = isServerless
       ? {
-          // Defaulting to null in case the original setting was empty to remove the setting.
           'index.refresh_interval': null,
           ...backupSettings,
         }
       : {
-          // Defaulting to null in case the original setting was empty to remove the setting.
           'index.number_of_replicas': null,
           'index.refresh_interval': null,
           ...backupSettings,
