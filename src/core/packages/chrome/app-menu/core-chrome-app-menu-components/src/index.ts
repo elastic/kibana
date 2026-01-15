@@ -15,6 +15,7 @@ export { AppMenuPopover } from './components';
 export { AppMenuPopoverActionButtons } from './components';
 
 export type {
+  AppMenuRunAction,
   AppMenuConfig,
   AppMenuItemType,
   AppMenuSecondaryActionItem,
