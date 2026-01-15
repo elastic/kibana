@@ -181,25 +181,16 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
         defaultMessage: 'Fields',
       }),
       searchPlaceholder: i18n.translate('esqlEditor.fieldsBrowser.searchPlaceholder', {
-        defaultMessage: 'Search fields...',
+        defaultMessage: 'Search',
       }),
       filterTitle: i18n.translate('esqlEditor.fieldsBrowser.filterTitle', {
-        defaultMessage: 'Filter by field type',
-      }),
-      filterSearchPlaceholder: i18n.translate(
-        'esqlEditor.fieldsBrowser.filterSearchPlaceholder',
-        {
-          defaultMessage: 'Search types',
-        }
-      ),
-      filterByType: i18n.translate('esqlEditor.fieldsBrowser.filterByType', {
         defaultMessage: 'Filter by field type',
       }),
       closeLabel: i18n.translate('esqlEditor.fieldsBrowser.closeLabel', {
         defaultMessage: 'Close',
       }),
       loading: i18n.translate('esqlEditor.fieldsBrowser.loading', {
-        defaultMessage: 'Loading fields...',
+        defaultMessage: 'Loading fields',
       }),
       empty: i18n.translate('esqlEditor.fieldsBrowser.empty', {
         defaultMessage: 'No fields found',

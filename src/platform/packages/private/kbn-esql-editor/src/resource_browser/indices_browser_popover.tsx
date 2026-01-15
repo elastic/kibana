@@ -95,25 +95,16 @@ export const IndicesBrowserPopover: React.FC<IndicesBrowserPopoverProps> = ({
         defaultMessage: 'Data sources',
       }),
       searchPlaceholder: i18n.translate('esqlEditor.indicesBrowser.searchPlaceholder', {
-        defaultMessage: 'Search indices, aliases, data streams...',
+        defaultMessage: 'Search',
       }),
       filterTitle: i18n.translate('esqlEditor.indicesBrowser.filterTitle', {
-        defaultMessage: 'Filter by data source',
-      }),
-      filterSearchPlaceholder: i18n.translate(
-        'esqlEditor.indicesBrowser.filterSearchPlaceholder',
-        {
-          defaultMessage: 'Search types',
-        }
-      ),
-      filterByType: i18n.translate('esqlEditor.indicesBrowser.filterByType', {
         defaultMessage: 'Filter by data source',
       }),
       closeLabel: i18n.translate('esqlEditor.indicesBrowser.closeLabel', {
         defaultMessage: 'Close',
       }),
       loading: i18n.translate('esqlEditor.indicesBrowser.loading', {
-        defaultMessage: 'Loading data srources...',
+        defaultMessage: 'Loading data srources',
       }),
       empty: i18n.translate('esqlEditor.indicesBrowser.empty', {
         defaultMessage: 'No data sources found',

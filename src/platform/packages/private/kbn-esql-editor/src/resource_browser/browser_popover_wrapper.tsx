@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useState, useEffect, useMemo, useCallback, useRef, ReactNode } from 'react';
 
 export const BROWSER_POPOVER_WIDTH = 400;
@@ -41,17 +42,11 @@ export interface BrowserPopoverWrapperProps<TItem> {
     title: string;
     searchPlaceholder: string;
     filterTitle: string;
-    filterSearchPlaceholder: string;
-    filterByType: string;
     closeLabel: string;
     loading: string;
     empty: string;
     noMatches: string;
   };
-  // Custom renderers
-  renderFilterButtonIcon?: () => ReactNode;
-  renderOptionAppend?: (item: TItem) => ReactNode;
-  renderOptionPrepend?: (item: TItem) => ReactNode;
 }
 
 export function BrowserPopoverWrapper<TItem extends { name: string }>({
@@ -64,9 +59,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   getTypeLabel,
   createOptions,
   i18nKeys,
-  renderFilterButtonIcon,
-  renderOptionAppend,
-  renderOptionPrepend,
 }: BrowserPopoverWrapperProps<TItem>) {
   const { euiTheme } = useEuiTheme();
   const [items, setItems] = useState<TItem[]>([]);
@@ -217,34 +209,28 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
 
   const filterButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="filter"
       isSelected={isFilterPopoverOpen}
       hasActiveFilters={selectedTypes.length > 0}
-      numActiveFilters={selectedTypes.length}
       onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
-      aria-label={i18nKeys.filterByType}
+      aria-label={i18nKeys.filterTitle}
       buttonRef={setFilterButtonRef}
-    >
-      {renderFilterButtonIcon ? renderFilterButtonIcon() : <EuiIcon type="filter" />}
-    </EuiFilterButton>
+      grow={false}
+    />
   );
 
+    // Overwriting the border style as setting listProps.bordered to false doesn't work
+    const filterListStyles = useMemo(
+      () => css`
+        .euiSelectableListItem {
+          border-top: none;
+          border-bottom: none;
+        }
+      `,
+      []
+    );
+
   return (
-    <div
-      style={{
-        ...position,
-        backgroundColor: euiTheme.colors.emptyShade,
-        borderRadius: euiTheme.border.radius.small,
-        position: 'absolute',
-        overflowY: 'auto',
-        maxHeight: '400px',
-        outline: 'none',
-        zIndex: 1001,
-        border: euiTheme.border.thin,
-      }}
-      tabIndex={-1}
-      role="button"
-    >
       <EuiPopover
         button={<div style={{ display: 'none' }} />}
         isOpen={isOpen}
@@ -254,6 +240,11 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
         panelStyle={{
           width: BROWSER_POPOVER_WIDTH,
           maxHeight: BROWSER_POPOVER_HEIGHT,
+          overflowY: 'auto',
+        }}
+        style={{
+          ...position,
+          position: 'absolute',
         }}
       >
         <EuiSelectable
@@ -270,22 +261,19 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
                 isOpen={isFilterPopoverOpen}
                 closePopover={() => setIsFilterPopoverOpen(false)}
                 panelPaddingSize="none"
-                anchorPosition="downRight"
+                panelStyle={{ transform: `translateX(${euiTheme.size.xxxl})` }}
               >
+                <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
                 <EuiSelectable
-                  searchable
-                  searchProps={{
-                    placeholder: i18nKeys.filterSearchPlaceholder,
-                    compressed: true,
-                  }}
                   options={typeFilterOptions}
                   onChange={handleTypeFilterChange}
+                  listProps={{
+                    bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
+                  }}
                 >
-                  {(list, search) => (
-                    <div style={{ width: 250, maxHeight: 300 }}>
-                      <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
-                      {search}
-                      <div style={{ maxHeight: 250, overflowY: 'auto' }}>{list}</div>
+                  {(list) => (
+                    <div css={filterListStyles} style={{ width: 250, maxHeight: 250, overflowY: 'auto' }}>
+                      {list}
                     </div>
                   )}
                 </EuiSelectable>
@@ -321,7 +309,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
           )}
         </EuiSelectable>
       </EuiPopover>
-    </div>
   );
 }
 
