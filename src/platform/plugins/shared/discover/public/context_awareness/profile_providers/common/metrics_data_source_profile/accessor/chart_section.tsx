@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
@@ -24,14 +24,18 @@ const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & { actions: ChartSectionConfigurationExtensionParams['actions'] }
 ) => {
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
+  const { onFilter } = props;
 
   // This will prevent the filter being added to the query for multi-dimensional breakdowns when the user clicks on a data point on the series.
-  const handleFilter = (event: ExpressionRendererEvent['data']) => {
-    if (props.onFilter) {
-      props.onFilter(event);
-    }
-    event.preventDefault();
-  };
+  const handleFilter = useCallback(
+    (event: ExpressionRendererEvent['data']) => {
+      if (onFilter) {
+        onFilter(event);
+      }
+      event.preventDefault();
+    },
+    [onFilter]
+  );
 
   return (
     <UnifiedMetricsExperienceGrid

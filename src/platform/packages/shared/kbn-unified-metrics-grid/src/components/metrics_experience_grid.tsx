@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import {
-  METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
-  MAX_DIMENSIONS_SELECTIONS,
-} from '../common/constants';
+import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../common/constants';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { EmptyState } from './empty_state/empty_state';
@@ -22,6 +19,7 @@ import { SearchButton } from './toolbar/right_side_actions/search_button';
 import { useMetricFields } from '../hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import type { UnifiedMetricsGridProps } from '../types';
+import { useDiscoverFieldForBreakdown } from '../hooks/use_discover_field_for_breakdown';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -48,50 +46,7 @@ export const MetricsExperienceGrid = ({
 
   const { allMetricFields, visibleMetricFields, dimensions } = useMetricFields();
 
-  // Helper function to sync breakdownField to selectedDimensions
-  const syncBreakdownFieldToDimensions = useCallback(() => {
-    if (!breakdownField || dimensions.length === 0) {
-      return;
-    }
-
-    const matchingDimension = dimensions.find((d) => d.name === breakdownField);
-    if (!matchingDimension) {
-      return;
-    }
-
-    // Idempotent check
-    if (selectedDimensions.some((d) => d.name === breakdownField)) {
-      return;
-    }
-
-    // Update selection
-    if (selectedDimensions.length === 0) {
-      onDimensionsChange([matchingDimension]);
-    } else if (MAX_DIMENSIONS_SELECTIONS === 1) {
-      onDimensionsChange([matchingDimension]);
-    } else {
-      onDimensionsChange(
-        [...selectedDimensions, matchingDimension].slice(0, MAX_DIMENSIONS_SELECTIONS)
-      );
-    }
-  }, [breakdownField, dimensions, selectedDimensions, onDimensionsChange]);
-
-  // Track previous breakdownField to detect changes
-  const prevBreakdownFieldRef = useRef<string | undefined>(breakdownField);
-
-  // Sync breakdownField to selectedDimensions when it changes or dimensions become available
-  useEffect(() => {
-    const hasBreakdownFieldChanged = prevBreakdownFieldRef.current !== breakdownField;
-
-    if (hasBreakdownFieldChanged) {
-      prevBreakdownFieldRef.current = breakdownField;
-    }
-
-    // Only sync if breakdownField is set and dimensions are available
-    if (breakdownField && dimensions.length > 0) {
-      syncBreakdownFieldToDimensions();
-    }
-  }, [breakdownField, dimensions, syncBreakdownFieldToDimensions]);
+  useDiscoverFieldForBreakdown(breakdownField, dimensions, selectedDimensions, onDimensionsChange);
 
   const { onPageReady } = usePerformanceContext();
   useEffect(() => {
