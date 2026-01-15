@@ -836,7 +836,9 @@ export const GetAvailableAgentVersionsResponseSchema = schema.object({
 
 export const ChangeAgentPrivilegeLevelRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({
+      meta: { description: 'The agent ID to change privilege level for' },
+    }),
   }),
   body: schema.nullable(
     schema.object({
