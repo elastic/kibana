@@ -87,9 +87,10 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.j
     - the episode indices created by this script for the selected `--episodes` (for the current date suffix)
     - detection alerts in `.alerts-security.alerts-<spaceId>` attributed to the ruleset rules (within the time range)
     - ad-hoc Attack Discoveries created by this script (Synthetic (no-LLM), for the current `--username`, within the time range)
+    - Cases created by this script (tagged `data-generator`)
   - Notes:
     - **Does not delete** preview indices. Some dev setups won’t automatically recreate preview indices once deleted.
-    - If preview indices are missing, the generator will **recreate them best-effort** by cloning mappings from `.internal.alerts-security.alerts-<spaceId>-000001`.
+    - If preview indices are missing, the generator will **recreate them** by cloning mappings from `.internal.alerts-security.alerts-<spaceId>-000001`.
 - `--start-date`: Date math start (default: `1d`)
   - Accepts `now-1d` style date math, and a shorthand like `1d` (treated as `now-1d`)
 - `--end-date`: Date math end (default: `now`)
@@ -107,7 +108,7 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.j
 - `--indexPrefix`: Prefix for the endpoint event/alert indices created by this script (default: `logs-endpoint`)
   - If your cluster has templates/data streams that conflict with creating concrete indices under `logs-endpoint.*`, set this to something else (e.g. `security-solution-data-gen`).
 
-Ruleset entries are resolved **best-effort**:
+Ruleset entries are resolved
 
 - If a `rule_id` is provided, it must exist (or the entry is skipped in non-strict mode)
 - Otherwise, rules are matched by `name_contains_any` tokens against installed rules’ names
@@ -142,7 +143,7 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 
 ## What the script does (high level)
 
-1. **Installs prebuilt rules (best-effort)** if missing
+1. **Installs prebuilt rules** if missing
    - On a fresh Kibana (0 prebuilt rules installed), it installs **only the rules matched by `--ruleset`** (not all rules).
    - If prebuilt rules are already installed, it **does not uninstall** existing rules.
 2. Loads vendored episode fixtures from `episodes/attacks/`

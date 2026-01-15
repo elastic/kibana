@@ -1,7 +1,7 @@
 # Default ruleset for the Security Solution data generator (`scripts/data/generate.ts`).
 #
 # What this does:
-# - The generator reads this file to decide WHICH prebuilt rules to install/enable (best-effort),
+# - The generator reads this file to decide WHICH prebuilt rules to install/enable,
 #   and which rules to use when attributing generated detection alerts.
 #
 # Format:

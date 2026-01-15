@@ -24,7 +24,7 @@ import {
   episodeIndexNames,
   scriptsDataDir,
 } from './lib/indexing';
-import { ensurePrebuiltRulesInstalledBestEffort } from './lib/prebuilt_rules';
+import { ensurePrebuiltRulesInstalled } from './lib/prebuilt_rules';
 import { loadInsightsRuleCreateProps } from './lib/insights_rule';
 import { copyPreviewAlertsToRealAlertsIndex, previewRule } from './lib/rule_preview';
 import {
@@ -42,6 +42,7 @@ import {
 const ATTACKS_DIR = scriptsDataDir('episodes', 'attacks');
 const NOISE_DIR = scriptsDataDir('episodes', 'noise');
 const MAPPING_PATH = path.join(ATTACKS_DIR, 'mapping.json');
+const DATA_GENERATOR_CASE_TAG = 'data-generator';
 
 const parseDateMathOrThrow = (input: string, nowMs: number): number => {
   if (input === 'now') return nowMs;
@@ -209,7 +210,7 @@ const createCasesFromAttackDiscoveries = async ({
       },
       body: {
         title,
-        tags: [],
+        tags: [DATA_GENERATOR_CASE_TAG],
         category: null,
         severity: 'low',
         description,
@@ -268,9 +269,9 @@ const createCasesFromAttackDiscoveries = async ({
         },
       });
     } catch (e) {
-      // Best-effort: case creation/attachments should still succeed even if timestamp patching fails.
+      // case creation/attachments should still succeed even if timestamp patching fails.
       log.warning(
-        `--cases: failed to set case timestamps for caseId=${caseId} (best-effort): ${String(
+        `--cases: failed to set case timestamps for caseId=${caseId}: ${String(
           (e as Error).message ?? e
         )}`
       );
@@ -278,7 +279,88 @@ const createCasesFromAttackDiscoveries = async ({
   }
 };
 
-const clearPreviewAlertsDocumentsBestEffort = async ({
+const deleteGeneratedCases = async ({
+  kbnClient,
+  log,
+  authenticatedUsername,
+}: {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  authenticatedUsername: string;
+}): Promise<void> => {
+  interface FindCasesResponse {
+    cases: Array<{ id: string }>;
+    total: number;
+  }
+
+  const findCaseIds = async (query: Record<string, unknown>): Promise<string[]> => {
+    const perPage = 100;
+    let page = 1;
+    const ids: string[] = [];
+
+    while (true) {
+      const resp = await kbnClient.request<FindCasesResponse>({
+        method: 'GET',
+        path: '/api/cases/_find',
+        headers: { 'kbn-xsrf': 'true' },
+        query: { ...query, page, perPage },
+      });
+
+      const pageIds = resp.data.cases.map((c) => c.id).filter(Boolean);
+      ids.push(...pageIds);
+
+      if (ids.length >= resp.data.total || pageIds.length === 0) break;
+      page++;
+    }
+
+    return ids;
+  };
+
+  const deleteByIds = async (caseIds: string[]) => {
+    const batchSize = 50;
+    for (let i = 0; i < caseIds.length; i += batchSize) {
+      const batch = caseIds.slice(i, i + batchSize);
+      await kbnClient.request({
+        method: 'DELETE',
+        path: '/api/cases',
+        headers: { 'kbn-xsrf': 'true' },
+        query: { ids: JSON.stringify(batch) },
+      });
+    }
+  };
+
+  try {
+    // Primary: safe deletion by generator tag.
+    const tagged = await findCaseIds({
+      owner: 'securitySolution',
+      tags: DATA_GENERATOR_CASE_TAG,
+    });
+
+    // Backwards-compatibility: older generator cases created before tagging existed.
+    // Keep this narrow by filtering to the reporter and owner, and searching only the description field.
+    const legacy = await findCaseIds({
+      owner: 'securitySolution',
+      reporters: authenticatedUsername,
+      search: '"This case was opened for attack discovery"',
+      searchFields: 'description',
+    });
+
+    const caseIds = Array.from(new Set([...tagged, ...legacy]));
+    if (caseIds.length === 0) {
+      log.info(`--clean: no generator-created cases found to delete.`);
+      return;
+    }
+
+    log.warning(`--clean: deleting ${caseIds.length} generator-created case(s).`);
+    await deleteByIds(caseIds);
+  } catch (e) {
+    log.warning(
+      `--clean: failed to delete generator-created cases: ${String((e as Error).message ?? e)}`
+    );
+  }
+};
+
+const clearPreviewAlertsDocuments = async ({
   esClient,
   log,
   spaceId,
@@ -304,7 +386,7 @@ const clearPreviewAlertsDocumentsBestEffort = async ({
     log.info(`Cleared existing preview alert documents from ${previewInternalAlias}`);
   } catch (e) {
     log.warning(
-      `Failed to clear preview alert documents from ${previewInternalAlias} (best-effort): ${String(
+      `Failed to clear preview alert documents from ${previewInternalAlias}: ${String(
         (e as Error).message ?? e
       )}`
     );
@@ -332,8 +414,9 @@ const ensureGeneratorIndices = async ({
   }
 };
 
-const cleanGeneratedDataBestEffort = async ({
+const cleanGeneratedData = async ({
   esClient,
+  kbnClient,
   log,
   episodeIds,
   endMs,
@@ -345,6 +428,7 @@ const cleanGeneratedDataBestEffort = async ({
   indexPrefix,
 }: {
   esClient: Client;
+  kbnClient: KbnClient;
   log: ToolingLog;
   episodeIds: string[];
   endMs: number;
@@ -386,11 +470,7 @@ const cleanGeneratedDataBestEffort = async ({
       });
     }
   } catch (e) {
-    log.warning(
-      `--clean: failed to delete episode indices (best-effort): ${String(
-        (e as Error).message ?? e
-      )}`
-    );
+    log.warning(`--clean: failed to delete episode indices: ${String((e as Error).message ?? e)}`);
   }
 
   // 2) Remove previously generated Security alerts (copied from preview).
@@ -431,7 +511,7 @@ const cleanGeneratedDataBestEffort = async ({
       }
     } catch (e) {
       log.warning(
-        `--clean: failed to delete Security alerts from ${alertsIndex} (best-effort): ${String(
+        `--clean: failed to delete Security alerts from ${alertsIndex}: ${String(
           (e as Error).message ?? e
         )}`
       );
@@ -464,18 +544,21 @@ const cleanGeneratedDataBestEffort = async ({
     }
   } catch (e) {
     log.warning(
-      `--clean: failed to delete Attack Discoveries from ${adhocDiscoveryAlias} (best-effort): ${String(
+      `--clean: failed to delete Attack Discoveries from ${adhocDiscoveryAlias}: ${String(
         (e as Error).message ?? e
       )}`
     );
   }
+
+  // 4) Remove previously generated Cases created by this script.
+  await deleteGeneratedCases({ kbnClient, log, authenticatedUsername: username });
 
   // NOTE: Do NOT delete preview indices here.
   // The Rule Preview API may not recreate them automatically in all dev setups, which can lead
   // to "no preview alerts were written" on subsequent runs.
 };
 
-const ensurePreviewAlertsIndexBestEffort = async ({
+const ensurePreviewAlertsIndex = async ({
   esClient,
   log,
   spaceId,
@@ -537,7 +620,7 @@ const ensurePreviewAlertsIndexBestEffort = async ({
     });
   } catch (e) {
     log.warning(
-      `Failed to recreate preview alerts index ${previewAlias} (best-effort): ${String(
+      `Failed to recreate preview alerts index ${previewAlias}: ${String(
         (e as Error).message ?? e
       )}`
     );
@@ -615,7 +698,7 @@ const bulkIndexStreamed = async ({
     }
   } catch (e) {
     log.warning(
-      `Failed to refresh episode indices (best-effort); rule preview may miss newly indexed docs: ${String(
+      `Failed to refresh episode indices; rule preview may miss newly indexed docs: ${String(
         (e as Error).message ?? e
       )}`
     );
@@ -705,13 +788,13 @@ export const cli = () => {
       );
 
       try {
-        await ensurePrebuiltRulesInstalledBestEffort({
+        await ensurePrebuiltRulesInstalled({
           kbnClient,
           log,
           rulesetPath: cliContext.flags.ruleset as string,
         });
       } catch (e) {
-        // Best-effort: don’t block generation if the user doesn’t have Kibana privileges.
+        // don’t block generation if the user doesn’t have Kibana privileges.
         // The script will still be able to index raw events, and may still preview rules
         // if the current user has detection privileges.
         log.warning(
@@ -770,8 +853,9 @@ export const cli = () => {
             new Set([...resolvedRules.map((r) => r.rule_id), ...explicitRuleIds])
           );
 
-          await cleanGeneratedDataBestEffort({
+          await cleanGeneratedData({
             esClient,
+            kbnClient,
             log,
             episodeIds,
             endMs,
@@ -822,8 +906,8 @@ export const cli = () => {
         await enableRules({ kbnClient, ids: resolvedRules.map((r) => r.id) });
 
         // Ensure preview index exists (some dev clusters don't allow it to be recreated automatically if deleted).
-        await ensurePreviewAlertsIndexBestEffort({ esClient, log, spaceId: effectiveSpaceId });
-        await clearPreviewAlertsDocumentsBestEffort({ esClient, log, spaceId: effectiveSpaceId });
+        await ensurePreviewAlertsIndex({ esClient, log, spaceId: effectiveSpaceId });
+        await clearPreviewAlertsDocuments({ esClient, log, spaceId: effectiveSpaceId });
 
         if (skipAlerts) {
           log.warning(

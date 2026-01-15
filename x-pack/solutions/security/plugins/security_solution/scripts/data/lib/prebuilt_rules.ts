@@ -26,7 +26,7 @@ interface PrebuiltRulesStatusResponse {
 
 const INTERNAL_API_VERSION = '1';
 
-export const ensurePrebuiltRulesInstalledBestEffort = async ({
+export const ensurePrebuiltRulesInstalled = async ({
   kbnClient,
   log,
   rulesetPath,
@@ -66,7 +66,7 @@ export const ensurePrebuiltRulesInstalledBestEffort = async ({
   }
 
   log.info(
-    `Prebuilt rules missing (installed=${stats.num_prebuilt_rules_installed}, to_install=${stats.num_prebuilt_rules_to_install}). Installing ruleset subset best-effort...`
+    `Prebuilt rules missing (installed=${stats.num_prebuilt_rules_installed}, to_install=${stats.num_prebuilt_rules_to_install}). Installing ruleset subset...`
   );
 
   try {

@@ -497,7 +497,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver,
       this.isServerless,
       core.docLinks,
-      this.endpointContext
+      this.endpointContext,
+      pluginContext.env.mode.dev
     );
 
     registerEndpointRoutes(router, this.endpointContext);

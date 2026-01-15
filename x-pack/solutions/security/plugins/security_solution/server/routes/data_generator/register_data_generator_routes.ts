@@ -20,17 +20,18 @@ const UpdateCaseTimestampsParams = z.object({
 
 const UpdateCaseTimestampsBody = z.object({
   /**
-   * ISO timestamp that will be applied to both `created_at` and `updated_at`.
+   * ISO timestamp that will be applied to `created_at`.
    */
   timestamp: z.string(),
 });
 
 /**
- * Internal-only routes used by the Security Solution data generator script.
+ * Internal-only, dev-only routes used by the Security Solution data generator script.
  */
 export const registerDataGeneratorRoutes = (
   router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  isDev: boolean
 ) => {
   router.versioned
     .put({
@@ -50,6 +51,10 @@ export const registerDataGeneratorRoutes = (
       },
       async (context, request, response) => {
         try {
+          if (!isDev) {
+            return response.notFound();
+          }
+
           const [coreStart] = await getStartServices();
           const internalRepo = coreStart.savedObjects.createInternalRepository([
             ...SAVED_OBJECT_TYPES,

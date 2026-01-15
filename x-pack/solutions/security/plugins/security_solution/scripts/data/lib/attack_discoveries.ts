@@ -10,7 +10,6 @@ import type { Client } from '@elastic/elasticsearch';
 import type {
   BulkOperationType,
   BulkResponseItem,
-  SortResults,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -58,7 +57,7 @@ const pickMitreAttackTactics = (seed: string): string[] => {
   const maxLen = 7;
   const len = minLen + (n % (maxLen - minLen + 1));
   const maxStart = Math.max(0, MITRE_ATTACK_TACTICS_SUBSET.length - len);
-  const start = maxStart === 0 ? 0 : (Math.floor(n / 13) % (maxStart + 1));
+  const start = maxStart === 0 ? 0 : Math.floor(n / 13) % (maxStart + 1);
   const slice = MITRE_ATTACK_TACTICS_SUBSET.slice(start, start + len);
 
   // Ensure we always have at least one of the most common mid-chain tactics so the UI is meaningful.
@@ -102,6 +101,8 @@ export interface GeneratedAttackDiscoveryGroup {
   userName?: string;
   title: string;
 }
+
+type AttackDiscoveryGroupSeed = Omit<GeneratedAttackDiscoveryGroup, 'title'>;
 
 interface AlertSummary {
   id: string;
@@ -200,7 +201,7 @@ const groupAlertsToDiscoveries = ({
 }: {
   alerts: AlertSummary[];
   maxDiscoveries: number;
-}): GeneratedAttackDiscoveryGroup[] => {
+}): AttackDiscoveryGroupSeed[] => {
   // Focus discoveries on only a few "risky" entities. In practice, those are the host/user pairs
   // with the most alerts in the requested time range.
   //
@@ -215,7 +216,7 @@ const groupAlertsToDiscoveries = ({
     byPair.set(key, list);
   }
 
-  const discoveries: GeneratedAttackDiscoveryGroup[] = [];
+  const discoveries: AttackDiscoveryGroupSeed[] = [];
 
   const focusPairsCount = Math.max(1, Math.min(3, byPair.size));
   const pairsByVolume = [...byPair.entries()]
@@ -466,10 +467,7 @@ export const generateAndIndexAttackDiscoveries = async ({
       doc[ALERT_UUID] = id;
 
       // Use "index" so repeated runs are idempotent (same deterministic ids).
-      bulkBody.push(
-        { index: { _index: attackDiscoveryIndex, _id: id } },
-        doc
-      );
+      bulkBody.push({ index: { _index: attackDiscoveryIndex, _id: id } }, doc);
     }
   }
 

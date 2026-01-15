@@ -74,7 +74,8 @@ export const initRoutes = (
   previewTelemetryReceiver: ITelemetryReceiver,
   isServerless: boolean,
   docLinks: DocLinksServiceSetup,
-  endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext,
+  isDev: boolean
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -151,5 +152,5 @@ export const initRoutes = (
 
   registerSiemReadinessRoutes({ router, logger });
 
-  registerDataGeneratorRoutes(router, getStartServices);
+  registerDataGeneratorRoutes(router, getStartServices, isDev);
 };

@@ -238,8 +238,6 @@ const setHostAndUserInPlace = ({
   // Agent
   setNested(doc, ['agent', 'id'], agentId);
   setNested(doc, ['elastic', 'agent', 'id'], agentId);
-
-  // User (best effort)
   setNested(doc, ['user', 'name'], userName);
 };
 
