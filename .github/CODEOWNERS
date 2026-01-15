@@ -633,7 +633,7 @@ src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discove
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-histogram @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-unified-tabs @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-onboarding-team
