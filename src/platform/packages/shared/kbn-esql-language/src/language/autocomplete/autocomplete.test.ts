@@ -1096,7 +1096,7 @@ describe('autocomplete', () => {
   });
 
   describe('Unmmapped fields', () => {
-    describe('should suggest unmmaped field after its first ussage if unmmaped_fields is LOAD or NULLIFY', () => {
+    describe('should suggest unmapped field after its first usage if unmapped is LOAD or NULLIFY', () => {
       testSuggestions('SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | KEEP /', [
         ...getFieldNamesByType('any'),
         { text: 'unmappedField' },
@@ -1106,7 +1106,7 @@ describe('autocomplete', () => {
         [...getFieldNamesByType('any'), { text: 'unmappedField' }]
       );
     });
-    describe('should not suggest unmmaped field after its first ussage if unmmaped_fields is FAIL', () => {
+    describe('should not suggest unmapped field after its first usage if unmapped is FAIL', () => {
       testSuggestions('SET unmapped_fields = "FAIL"; FROM a | WHERE unmappedField > 0 | KEEP /', [
         ...getFieldNamesByType('any'),
       ]);
