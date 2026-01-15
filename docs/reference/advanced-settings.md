@@ -45,7 +45,7 @@ Change the settings that apply only to a specific {{product.kibana}} space.
 
 ### General [kibana-general-settings]
 
-$$$hideAnnouncements$$$`hideAnnouncements` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
+$$$hideAnnouncements$$$`hideAnnouncements` {applies_to}`stack: deprecated 9.4` {applies_to}`serverless: unavailable`
 :   Stops showing messages and tours that highlight new features. `false` by default.
 
 $$$dateformat$$$`dateFormat` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
@@ -647,6 +647,11 @@ Change the settings that apply to all of {{product.kibana}}.
 2. Click **Global Settings**.
 3. Scroll or search for the setting.
 4. Make your change, then click **Save changes**.
+
+### General [kibana-general-global-settings]
+
+$$$hideAnnouncements$$$`hideAnnouncements` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
+:   Stops showing messages and tours that highlight new features. `false` by default.
 
 
 ### Custom branding [kibana-custom-branding-settings]
