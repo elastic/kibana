@@ -43,10 +43,8 @@ export function transformEnhancementsOut(
 
   return enhancementsPersistableState.inject(
     {
-      enhancementsState: {
-        dynamicActions: {
-          events,
-        },
+      dynamicActions: {
+        events,
       },
     },
     references
