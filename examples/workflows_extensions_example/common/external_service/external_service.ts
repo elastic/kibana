@@ -20,11 +20,13 @@ export class ExampleExternalService implements IExampleExternalService {
   }
 
   public async getProxies(): Promise<{ id: string; url: string }[]> {
+    // An artificial delay is added to simulate a real-world external service call.
     await new Promise((resolve) => setTimeout(resolve, 200));
     return Object.entries(this.proxies).map(([id, url]) => ({ id, url }));
   }
 
   public async getProxy(proxyId: string): Promise<{ id: string; url: string } | null> {
+    // An artificial delay is added to simulate a real-world external service call.
     await new Promise((resolve) => setTimeout(resolve, 200));
     if (!this.proxies[proxyId]) {
       return null;
