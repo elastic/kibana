@@ -126,6 +126,23 @@ export function useYamlValidation(
             source: 'variable-validation',
           });
         }
+        const decorationOptions: monaco.editor.IModelDecorationOptions = {
+          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+          hoverMessage: validationResult.hoverMessage
+            ? createMarkdownContent(validationResult.hoverMessage)
+            : null,
+          before: validationResult.beforeMessage
+            ? {
+                content: validationResult.beforeMessage,
+                cursorStops: monaco.editor.InjectedTextCursorStops.None,
+                inlineClassName: `connector-name-badge`,
+              }
+            : null,
+        };
+        // Only add inlineClassName for errors, not for valid connectors
+        if (validationResult.severity !== null) {
+          decorationOptions.inlineClassName = `template-variable-${validationResult.severity}`;
+        }
         // handle valid variables
         decorations.push({
           range: new monaco.Range(
@@ -134,13 +151,7 @@ export function useYamlValidation(
             validationResult.endLineNumber,
             validationResult.endColumn
           ),
-          options: {
-            inlineClassName: `template-variable-${validationResult.severity ?? 'valid'}`,
-            hoverMessage: validationResult.hoverMessage
-              ? createMarkdownContent(validationResult.hoverMessage)
-              : null,
-            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          },
+          options: decorationOptions,
         });
       } else if (validationResult.owner === 'liquid-template-validation') {
         markers.push({
