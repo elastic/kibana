@@ -20,7 +20,6 @@ import { mockRule, mockLogResponse } from './test_helpers';
 import { getJsDomPerformanceFix } from '../../test_utils';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { IToasts } from '@kbn/core/public';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
