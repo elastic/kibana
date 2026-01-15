@@ -75,7 +75,7 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   model?: string;
 }
 
-type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream' | 'timeout'>;
+type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
 
 /**
  * Langchain chatModel utilizing the inference API under the hood for communication with the LLM.
@@ -193,7 +193,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },
-      timeout: options.timeout ?? this.timeout,
+      timeout: 8888, // --@@ options.timeout ?? this.timeout,
     };
   }
 

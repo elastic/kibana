@@ -109,7 +109,10 @@ export function createChatCompleteCallbackApi({
             temperature,
             toolChoice,
             tools,
+            timeout,
           } = callback(executor);
+          // @TODO: remove
+          console.log(`--@@timeout`, timeout);
 
           const messages = givenMessages.map((message) => {
             // remove empty toolCalls array, spec doesn't like it
@@ -176,6 +179,7 @@ export function createChatCompleteCallbackApi({
                       modelName,
                       abortSignal,
                       metadata,
+                      timeout,
                     })
                     .pipe(
                       chunksIntoMessage({

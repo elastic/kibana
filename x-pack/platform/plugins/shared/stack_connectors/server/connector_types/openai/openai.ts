@@ -302,6 +302,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
     parentSpan?.setAttribute('openai.raw_request', executeBody);
 
+    // @TODO: remove
+    console.log(`--@@openapi stream timeout`, timeout);
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
     try {
       const response = await this.request(
@@ -383,6 +385,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   ): Promise<PassThrough> {
     const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
 
+    // @TODO: remove
+    console.log(`--@@openAPI invokeStream timeout`, timeout);
     const res = (await this.streamApi(
       {
         body: JSON.stringify(rest),
@@ -462,6 +466,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
     const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
+    // @TODO: remove
+    console.log(`--@@invokeAI`, JSON.stringify(body, null, 2));
     const res = await this.runApi(
       { body: JSON.stringify(rest), signal, timeout },
       connectorUsageCollector
