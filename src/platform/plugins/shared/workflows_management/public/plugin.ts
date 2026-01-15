@@ -84,15 +84,6 @@ export class WorkflowsPlugin
         // Load application bundle
         const { renderApp } = await import('./application');
         const services = await this.createWorkflowsStartServices(core);
-
-        // Set badge for classic navbar
-        services.chrome.setBadge({
-          text: 'Technical preview',
-          tooltip:
-            'This functionality is in technical preview. It may change or be removed in a future release.',
-          iconType: 'beaker',
-        });
-
         return renderApp(services, params);
       },
     });

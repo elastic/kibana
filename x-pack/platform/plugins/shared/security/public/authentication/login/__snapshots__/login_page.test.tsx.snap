@@ -443,7 +443,7 @@ exports[`LoginPage page renders as expected 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
               />
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
@@ -632,7 +632,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                 </div>
               </div>
               <div
-                class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
               />
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
