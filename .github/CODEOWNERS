@@ -530,7 +530,7 @@ src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
+src/platform/packages/shared/kbn-io-ts-utils @elastic/observability-ui
 src/platform/packages/shared/kbn-jest-benchmarks @elastic/obs-ui-devex-team
 src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations
 src/platform/packages/shared/kbn-lens-common @elastic/kibana-visualizations
@@ -633,7 +633,7 @@ src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discove
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-histogram @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-unified-tabs @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-onboarding-team
@@ -1513,7 +1513,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/obs-ai-team
 /x-pack/solutions/observability/test/fixtures/es_archives/observability/ai_assistant @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/obs-ai-team
@@ -1524,10 +1523,11 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts  @elastic/obs-ai-team
 
 # Observability Agent Builder
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.ai_agent.index.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.ai_agent.stateful.config.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.ai_agent.index.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.ai_agent.serverless.config.ts @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_agent.index.ts @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_agent.serverless.config.ts @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.index.ts @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts @elastic/obs-ai-team
 
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.

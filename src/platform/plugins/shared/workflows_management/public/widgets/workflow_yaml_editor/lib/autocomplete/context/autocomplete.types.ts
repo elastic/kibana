@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document, Scalar } from 'yaml';
+import type { Document, LineCounter, Scalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
@@ -39,6 +39,7 @@ export interface AutocompleteContext {
   contextSchema: z.ZodType;
   contextScopedToPath: string | null;
   yamlDocument: Document;
+  yamlLineCounter: LineCounter | null;
   scalarType: Scalar.Type | null;
 
   // kind of ast info
