@@ -9,6 +9,7 @@
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ILicense } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { QuerySuggestion } from '@kbn/kql/public';
 import type { RecommendedField, RecommendedQuery } from './extensions_autocomplete_types';
 import type { ESQLSourceResult, IndexAutocompleteItem } from './sources_autocomplete_types';
 import type { ESQLControlVariable } from './variables_types';
@@ -105,4 +106,8 @@ export interface ESQLCallbacks {
   getHistoryStarredItems?: () => Promise<string[]>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
+  getKqlSuggestions?: (
+    kqlQuery: string,
+    cursorPositionInKql: number
+  ) => Promise<QuerySuggestion[] | undefined>;
 }

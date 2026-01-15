@@ -35,6 +35,7 @@ import {
   fixESQLQueryWithVariables,
   prettifyQuery,
   hasOnlySourceCommand,
+  getESQLAdHocDataview,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -138,7 +139,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
+  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection, kql } =
     kibana.services;
 
   const favoritesClient = useMemo(
@@ -657,19 +658,39 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       canCreateLookupIndex,
       isServerless: Boolean(kibana.services?.esql?.isServerless),
+      getKqlSuggestions: async (kqlQuery: string, cursorPositionInKql: number) => {
+        const hasQuerySuggestions = kql?.autocomplete?.hasQuerySuggestions('kuery');
+        if (!hasQuerySuggestions) {
+          return undefined;
+        }
+        const dataView = await getESQLAdHocDataview({
+          dataViewsService: data.dataViews,
+          query: minimalQueryRef.current,
+        });
+        const suggestions = await kql?.autocomplete.getQuerySuggestions({
+          language: 'kuery',
+          query: kqlQuery,
+          selectionStart: cursorPositionInKql,
+          selectionEnd: cursorPositionInKql,
+          indexPatterns: [dataView],
+        });
+        return suggestions;
+      },
     };
     return callbacks;
   }, [
     fieldsMetadata,
     getJoinIndicesCallback,
-    kibana.services?.esql,
     canCreateLookupIndex,
+    kibana.services?.esql,
+    kql?.autocomplete,
     dataSourcesCache,
     memoizedSources,
     core,
     esqlFieldsCache,
     data.query.timefilter.timefilter,
     data.search.search,
+    data.dataViews,
     memoizedFieldsFromESQL,
     abortController.signal,
     variablesService?.esqlVariables,

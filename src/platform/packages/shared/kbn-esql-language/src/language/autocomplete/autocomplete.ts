@@ -272,6 +272,7 @@ async function getSuggestionsWithinCommandExpression(
           }
         : undefined,
       hasMinimumLicenseRequired,
+      getKqlSuggestions: callbacks?.getKqlSuggestions,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
       isServerless: callbacks?.isServerless,
     },
