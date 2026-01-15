@@ -13,6 +13,7 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiFilterButton,
+  EuiNotificationBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -151,6 +152,15 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     return Array.from(typeSet).sort();
   }, [items, getTypeKey]);
 
+  const typeCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    items.forEach((item) => {
+      const typeKey = getTypeKey(item);
+      counts.set(typeKey, (counts.get(typeKey) ?? 0) + 1);
+    });
+    return counts;
+  }, [items, getTypeKey]);
+
   // Create filter options for the type filter popover
   const typeFilterOptions: EuiSelectableOption[] = useMemo(() => {
     return availableTypes.map((typeKey) => ({
@@ -158,8 +168,13 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       label: getTypeLabel(typeKey),
       checked: selectedTypes.includes(typeKey) ? ('on' as const) : undefined,
       prepend: getTypeIcon?.(typeKey),
+      append: (
+        <EuiNotificationBadge color="subdued" size="m">
+          {typeCounts.get(typeKey) ?? 0}
+        </EuiNotificationBadge>
+      ),
     }));
-  }, [availableTypes, selectedTypes, getTypeLabel, getTypeIcon]);
+  }, [availableTypes, selectedTypes, getTypeLabel, getTypeIcon, typeCounts]);
 
   const options: EuiSelectableOption[] = useMemo(() => {
     return createOptions(items, selectedItems);
