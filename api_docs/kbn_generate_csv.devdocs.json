@@ -502,6 +502,34 @@
             "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv_esql.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/generate-csv",
+            "id": "def-server.JobParamsCsvESQL.forceNow",
+            "type": "string",
+            "tags": [],
+            "label": "forceNow",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/generate-csv",
+            "id": "def-server.JobParamsCsvESQL.timeFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
