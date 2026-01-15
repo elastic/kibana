@@ -35,7 +35,7 @@ export function Bar({
   const { euiTheme } = useEuiTheme();
 
   const barStyle =
-    duration && composite
+    duration && composite && composite.count > 0
       ? getCompositeBarStyle(color, duration, composite)
       : { backgroundColor: color };
 
