@@ -547,7 +547,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
       schema.object({
         id: schema.string(),
       }),
-      { maxSize: 1000 }
+      { maxSize: 10000 }
     )
   ),
   signed: schema.maybe(

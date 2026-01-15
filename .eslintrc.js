@@ -1925,30 +1925,6 @@ module.exports = {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },
-    /**
-     * Allows snake_case variables in the server, because that's how we return API properties
-     */
-    {
-      files: ['x-pack/solutions/search/plugins/enterprise_search/server/**/*.{ts,tsx}'],
-      rules: {
-        '@typescript-eslint/naming-convention': [
-          'error',
-          {
-            selector: 'variable',
-            modifiers: ['destructured'],
-            format: null,
-            leadingUnderscore: 'allow',
-            trailingUnderscore: 'allow',
-          },
-          {
-            selector: 'variable',
-            format: ['camelCase', 'UPPER_CASE'],
-            leadingUnderscore: 'allow',
-            trailingUnderscore: 'allow',
-          },
-        ],
-      },
-    },
     {
       // Source files only - allow `any` in test/mock files
       files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
@@ -2504,8 +2480,10 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
+        '@kbn/eslint/scout_max_one_describe': 'error',
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },

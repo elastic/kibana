@@ -112,7 +112,6 @@ async function createStreamsManagedPipeline({
   });
 
   // Remove properties from the GET response that cannot be in the PUT request
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { created_date_millis, modified_date_millis, ...safeTemplate } =
     indexTemplate.index_template as IndicesIndexTemplate & {
       created_date_millis: number;

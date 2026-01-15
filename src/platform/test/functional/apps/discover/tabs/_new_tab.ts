@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/247926
-  describe.skip('new tab', function () {
+  describe('opening a new tab', function () {
     it('should create a new tab in classic mode', async () => {
       // tab 0 - with the default data view
 

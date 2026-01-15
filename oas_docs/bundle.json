@@ -18235,7 +18235,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 1000,
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             "service": {
@@ -18718,7 +18718,7 @@
                   "properties": {
                     "dataPreview": {
                       "items": {},
-                      "maxItems": 1000,
+                      "maxItems": 10000,
                       "type": "array"
                     },
                     "items": {
@@ -19024,7 +19024,7 @@
                                     ],
                                     "type": "object"
                                   },
-                                  "maxItems": 1000,
+                                  "maxItems": 10000,
                                   "type": "array"
                                 }
                               },
@@ -19036,7 +19036,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 1000,
+                            "maxItems": 10000,
                             "type": "array"
                           },
                           "default_api_key": {
@@ -19166,7 +19166,7 @@
                             "items": {
                               "type": "string"
                             },
-                            "maxItems": 1000,
+                            "maxItems": 10000,
                             "type": "array"
                           },
                           "policy_id": {
@@ -19235,7 +19235,7 @@
                             "items": {
                               "type": "string"
                             },
-                            "maxItems": 1000,
+                            "maxItems": 10000,
                             "nullable": true,
                             "type": "array"
                           },
@@ -19454,7 +19454,7 @@
                       "items": {
                         "type": "string"
                       },
-                      "maxItems": 1000,
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -19692,7 +19692,7 @@
                         ],
                         "type": "object"
                       },
-                      "maxItems": 1000,
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -19897,7 +19897,7 @@
                       "items": {
                         "type": "string"
                       },
-                      "maxItems": 1000,
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -21366,7 +21366,7 @@
                                   ],
                                   "type": "object"
                                 },
-                                "maxItems": 1000,
+                                "maxItems": 10000,
                                 "type": "array"
                               }
                             },
@@ -21378,7 +21378,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 1000,
+                          "maxItems": 10000,
                           "type": "array"
                         },
                         "default_api_key": {
@@ -21508,7 +21508,7 @@
                           "items": {
                             "type": "string"
                           },
-                          "maxItems": 1000,
+                          "maxItems": 10000,
                           "type": "array"
                         },
                         "policy_id": {
@@ -21577,7 +21577,7 @@
                           "items": {
                             "type": "string"
                           },
-                          "maxItems": 1000,
+                          "maxItems": 10000,
                           "nullable": true,
                           "type": "array"
                         },
@@ -21873,7 +21873,7 @@
                                   ],
                                   "type": "object"
                                 },
-                                "maxItems": 1000,
+                                "maxItems": 10000,
                                 "type": "array"
                               }
                             },
@@ -21885,7 +21885,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 1000,
+                          "maxItems": 10000,
                           "type": "array"
                         },
                         "default_api_key": {
@@ -22015,7 +22015,7 @@
                           "items": {
                             "type": "string"
                           },
-                          "maxItems": 1000,
+                          "maxItems": 10000,
                           "type": "array"
                         },
                         "policy_id": {
@@ -22084,7 +22084,7 @@
                           "items": {
                             "type": "string"
                           },
-                          "maxItems": 1000,
+                          "maxItems": 10000,
                           "nullable": true,
                           "type": "array"
                         },
@@ -23017,7 +23017,7 @@
                         ],
                         "type": "object"
                       },
-                      "maxItems": 1000,
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -24748,7 +24748,7 @@
                         ],
                         "type": "object"
                       },
-                      "maxItems": 1000,
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -25553,7 +25553,7 @@
                                   ],
                                   "type": "object"
                                 },
-                                "maxItems": 1000,
+                                "maxItems": 10000,
                                 "type": "array"
                               },
                               "installed_kibana": {
@@ -25600,7 +25600,7 @@
                                   ],
                                   "type": "object"
                                 },
-                                "maxItems": 1000,
+                                "maxItems": 10000,
                                 "type": "array"
                               },
                               "installed_kibana_space_id": {
@@ -25829,7 +25829,7 @@
                         ],
                         "type": "object"
                       },
-                      "maxItems": 1000,
+                      "maxItems": 10000,
                       "type": "array"
                     }
                   },
@@ -26252,7 +26252,7 @@
                                         }
                                       ]
                                     },
-                                    "maxItems": 1000,
+                                    "maxItems": 10000,
                                     "type": "array"
                                   },
                                   "error": {},
@@ -26937,7 +26937,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 1000,
+                            "maxItems": 10000,
                             "type": "array"
                           },
                           "description": {
@@ -27786,7 +27786,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 1000,
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             "installed_kibana": {
@@ -27833,7 +27833,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 1000,
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             "installed_kibana_space_id": {
@@ -28774,7 +28774,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 1000,
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             "installed_kibana": {
@@ -28821,7 +28821,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 1000,
+                              "maxItems": 10000,
                               "type": "array"
                             },
                             "installed_kibana_space_id": {
