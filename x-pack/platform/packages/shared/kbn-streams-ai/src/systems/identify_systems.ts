@@ -10,13 +10,12 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { type Streams, type System } from '@kbn/streams-schema';
-import type { Condition } from '@kbn/streamlang';
+import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { withSpan } from '@kbn/apm-utils';
 import { createIdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { sumTokens } from '../helpers/sum_tokens';
-import { isValidFilter } from './utils';
 
 export interface IdentifySystemsOptions {
   stream: Streams.all.Definition;
@@ -148,7 +147,7 @@ export async function identifySystems({
 
   const identifiedSystems = response.toolCalls.flatMap((toolCall) =>
     toolCall.function.arguments.systems
-      .filter((args) => isValidFilter(args.filter))
+      .filter((args) => conditionSchema.safeParse(args.filter).success)
       .map((args) => {
         const system = {
           ...args,
