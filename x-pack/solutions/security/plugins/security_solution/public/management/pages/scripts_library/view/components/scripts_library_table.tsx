@@ -52,6 +52,7 @@ interface GetScriptsLibraryTableColumnsProps {
   formatBytes: (bytes: number) => string;
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
   getTestId: (suffix?: string | undefined) => string | undefined;
+  queryParams: ScriptsLibraryTableProps['queryParams'];
 }
 
 const getScriptsLibraryTableColumns = ({
