@@ -186,6 +186,7 @@ export const PrivMonUtils = (
   const waitForSyncTaskRun = async (): Promise<void> => {
     const initialTime = new Date();
 
+    // Just wait for task to be scheduled - rely on side effects (user count, markers) to verify completion
     await waitFor(
       async () => {
         const task = await kibanaServer.savedObjects.get({
@@ -253,6 +254,29 @@ export const PrivMonUtils = (
     const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} });
 
     return res.body;
+  };
+
+  const waitForMarkerUpdate = async (
+    indexPattern: string,
+    expectedMarker?: string,
+    timeout: number = 30000
+  ): Promise<void> => {
+    return retry.waitForWithTimeout('marker to be updated', timeout, async () => {
+      const marker = await getLastProcessedMarker(indexPattern);
+
+      if (expectedMarker) {
+        // Wait for specific marker value
+        if (marker === expectedMarker) {
+          log.info(`Marker updated to expected value: ${expectedMarker}`);
+          return true;
+        }
+        log.info(`Waiting for marker: current=${marker}, expected=${expectedMarker}`);
+        return false;
+      } else {
+        // Just wait for marker to exist/be updated
+        return !!marker;
+      }
+    });
   };
 
   async function runSync() {
@@ -531,6 +555,7 @@ export const PrivMonUtils = (
     setTimestamp,
     getSyncData,
     getLastProcessedMarker,
+    waitForMarkerUpdate,
     setIntegrationUserPrivilege,
     updateIntegrationsUsersWithRelativeTimestamps,
     updateIntegrationsUserTimeStamp,

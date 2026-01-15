@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
   const privMonUtils = PrivMonUtils(getService);
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Integrations Sync', () => {
-    describe('integrations sync', async () => {
+    describe.only('integrations sync', async () => {
       beforeEach(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
@@ -154,6 +154,11 @@ export default ({ getService }: FtrProviderContext) => {
           privMonUtils.integrationsSync.OKTA_INDEX
         );
         await privMonUtils.scheduleEngineAndWaitForUserCount(4);
+        // Wait for marker to be updated before checking
+        await privMonUtils.integrationsSync.waitForMarkerUpdate(
+          privMonUtils.integrationsSync.OKTA_INDEX,
+          nowMinus1w
+        );
         const markerAfterPhase3 = await privMonUtils.integrationsSync.getLastProcessedMarker(
           privMonUtils.integrationsSync.OKTA_INDEX
         );
@@ -172,7 +177,11 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         await privMonUtils.scheduleEngineAndWaitForUserCount(5);
-
+        // Wait for marker to be updated before checking
+        await privMonUtils.integrationsSync.waitForMarkerUpdate(
+          privMonUtils.integrationsSync.OKTA_INDEX,
+          nowMinus6d
+        );
         const markerAfterPhase4 = await privMonUtils.integrationsSync.getLastProcessedMarker(
           privMonUtils.integrationsSync.OKTA_INDEX
         );
