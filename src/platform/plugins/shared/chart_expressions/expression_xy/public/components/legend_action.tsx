@@ -81,13 +81,13 @@ export const getLegendAction = (
       return null;
     }
 
-    // Don't show filter actions for columns that don't belong to the index, related to ESQL new columns
-    const hasNonIndexField = filterActionData.some((data) => {
+    // Don't show filter actions for computed columns
+    const hasComputedColumn = filterActionData.some((data) => {
       const column = data.table.columns[data.column];
-      return column?.isIndexField === false;
+      return column?.isComputedColumn === true;
     });
 
-    if (hasNonIndexField) {
+    if (hasComputedColumn) {
       return null;
     }
 

@@ -268,16 +268,16 @@ describe('getLegendAction', function () {
     );
   });
 
-  it('is not rendered if column has isIndexField set to false', () => {
-    const tableWithNonIndexField: Datatable = {
+  it('is not rendered if column has isComputedColumn set to true', () => {
+    const tableWithComputedColumn: Datatable = {
       ...table,
       columns: table.columns.map((col) =>
-        col.id === 'splitAccessorId' ? { ...col, isIndexField: false } : col
+        col.id === 'splitAccessorId' ? { ...col, isComputedColumn: true } : col
       ),
     };
-    const layerWithNonIndexField = { ...sampleLayer, table: tableWithNonIndexField };
-    const ComponentWithNonIndexField = getLegendAction(
-      [layerWithNonIndexField],
+    const layerWithComputedColumn = { ...sampleLayer, table: tableWithComputedColumn };
+    const ComponentWithComputedColumn = getLegendAction(
+      [layerWithComputedColumn],
       jest.fn(),
       [legendCellValueActions],
       {
@@ -296,7 +296,7 @@ describe('getLegendAction', function () {
       },
       {
         first: {
-          table: tableWithNonIndexField,
+          table: tableWithComputedColumn,
           invertedRawValueMap,
           formattedColumns: {},
         },
@@ -312,16 +312,16 @@ describe('getLegendAction', function () {
         },
       ] as unknown as SeriesIdentifier[],
     };
-    wrapper = mountWithIntl(<ComponentWithNonIndexField {...newProps} />);
+    wrapper = mountWithIntl(<ComponentWithComputedColumn {...newProps} />);
     expect(wrapper).toEqual({});
     expect(wrapper.find(EuiPopover).length).toBe(0);
   });
 
-  it('is rendered if column has isIndexField set to true', () => {
+  it('is rendered if column has isComputedColumn set to false', () => {
     const tableWithIndexField: Datatable = {
       ...table,
       columns: table.columns.map((col) =>
-        col.id === 'splitAccessorId' ? { ...col, isIndexField: true } : col
+        col.id === 'splitAccessorId' ? { ...col, isComputedColumn: false } : col
       ),
     };
     const layerWithIndexField = { ...sampleLayer, table: tableWithIndexField };

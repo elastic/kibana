@@ -58,9 +58,9 @@ export const getLegendActions = (
       return null;
     }
 
-    // Don't show filter actions for columns that don't belong to the index, related to ESQL new columns
+    // Don't show filter actions for computed columns
     const column = visData.columns[columnIndex];
-    if (column?.isIndexField === false) {
+    if (column?.isComputedColumn === true) {
       return null;
     }
 
