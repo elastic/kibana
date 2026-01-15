@@ -94,14 +94,15 @@ export function getQueryLinkUuid(name: string, asset: Pick<QueryLink, 'asset.id'
 function toQueryLink<TQueryLink extends QueryLinkRequest>(
   name: string,
   asset: TQueryLink
-): TQueryLink & { [ASSET_UUID]: string } {
+): QueryLink {
   return {
     ...asset,
     [ASSET_UUID]: getQueryLinkUuid(name, asset),
+    stream_name: name,
   };
 }
 
-type QueryLinkStorageFields = Omit<QueryLink, 'query'> & {
+type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
@@ -134,6 +135,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   };
   return {
     ...storageFields,
+    stream_name: link[STREAM_NAME],
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
@@ -155,7 +157,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
 
 function toStorage(name: string, request: QueryLinkRequest): StoredQueryLink {
   const link = toQueryLink(name, request);
-  const { query, ...rest } = link;
+  const { query, stream_name, ...rest } = link;
   return {
     ...rest,
     [STREAM_NAME]: name,
@@ -182,6 +184,7 @@ function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
     'asset.type': 'query',
     'asset.id': query.id,
     query,
+    stream_name: stream,
   };
 }
 
@@ -290,13 +293,11 @@ export class QueryClient {
   }
 
   /**
-   * Returns all query links for a given stream or
-   * all query links if no stream is provided.
+   * Returns all query links for given streams or
+   * all query links if no stream names are provided.
    */
-  async getQueryLinks(name?: string): Promise<QueryLink[]> {
-    const filter = name
-      ? [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')]
-      : [...termQuery(ASSET_TYPE, 'query')];
+  async getQueryLinks(streamNames: string[]): Promise<QueryLink[]> {
+    const filter = [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')];
 
     const queriesResponse = await this.dependencies.storageClient.search({
       size: 10_000,
@@ -332,7 +333,9 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
-  async findQueries(name: string, query: string) {
+  async findQueries(streamNames: string[], query: string): Promise<QueryLink[]> {
+    const filter = [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')];
+
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
       track_total_hits: false,
@@ -342,7 +345,7 @@ export class QueryClient {
       },
       query: {
         bool: {
-          filter: [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')],
+          filter,
           should: [
             ...wildcardQuery(QUERY_TITLE, query),
             ...wildcardQuery(QUERY_KQL_BODY, query),
@@ -395,6 +398,7 @@ export class QueryClient {
         [ASSET_TYPE]: link[ASSET_TYPE],
         query: link.query,
         title: link.query.title,
+        stream_name: link.stream_name,
       };
     });
   }
