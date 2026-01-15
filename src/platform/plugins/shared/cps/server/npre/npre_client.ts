@@ -79,7 +79,7 @@ export class NpreClient implements INpreClient {
       .asScoped(this.request)
       .asCurrentUser.transport.request<NpreExpressionResponse>({
         method: 'GET',
-        path: `/_project_routing/${encodeURIComponent(expressionName)}`,
+        path: `/_project_routing/${expressionName}`,
       })
       .then((response) => response.expression)
       .catch((error) => {
@@ -119,7 +119,7 @@ export class NpreClient implements INpreClient {
       .asScoped(this.request)
       .asCurrentUser.transport.request<AcknowledgeResponse>({
         method: 'PUT',
-        path: `/_project_routing/${encodeURIComponent(expressionName)}`,
+        path: `/_project_routing/${expressionName}`,
         body: {
           expression,
         },
@@ -143,7 +143,7 @@ export class NpreClient implements INpreClient {
       .asScoped(this.request)
       .asCurrentUser.transport.request<AcknowledgeResponse>({
         method: 'DELETE',
-        path: `/_project_routing/${encodeURIComponent(expressionName)}`,
+        path: `/_project_routing/${expressionName}`,
       })
       .catch((error) => {
         this.logger.error(

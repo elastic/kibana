@@ -21,16 +21,14 @@ import { SectionPanel } from '../section_panel';
 
 interface Props {
   space: CustomizeSpaceFormValues;
-  editingExistingSpace: boolean;
   onChange: (space: CustomizeSpaceFormValues) => void;
-  title?: string;
 }
 
 interface KibanaServices {
   cps?: CPSPluginStart;
 }
 
-export const CustomizeCps: FC<Props> = ({ space, title, onChange }) => {
+export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
   const {
     services: { cps, application },
   } = useKibana<KibanaServices>();
@@ -51,7 +49,7 @@ export const CustomizeCps: FC<Props> = ({ space, title, onChange }) => {
   };
 
   return (
-    <SectionPanel title={title} dataTestSubj="cpsDefaultScopePanel">
+    <SectionPanel dataTestSubj="cpsDefaultScopePanel">
       <EuiDescribedFormGroup
         title={
           <EuiTitle size="xs">
