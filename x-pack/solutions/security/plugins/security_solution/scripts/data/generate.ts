@@ -174,10 +174,16 @@ const cleanGeneratedDataBestEffort = async ({
   );
 
   try {
-    await esClient.indices.delete({
-      index: episodeIndices,
-      ignore_unavailable: true,
-    });
+    // Delete in small batches to avoid `too_long_http_line_exception` from very long URLs.
+    const batchSize = 10;
+    for (let i = 0; i < episodeIndices.length; i += batchSize) {
+      const batch = episodeIndices.slice(i, i + batchSize);
+      await esClient.indices.delete({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        index: batch as any,
+        ignore_unavailable: true,
+      });
+    }
   } catch (e) {
     log.warning(
       `--clean: failed to delete episode indices (best-effort): ${String(
@@ -186,7 +192,8 @@ const cleanGeneratedDataBestEffort = async ({
     );
   }
 
-  // 2) Remove previously generated Security alerts (copied from preview) for the selected rules + time range.
+  // 2) Remove previously generated Security alerts (copied from preview).
+  // Prefer deleting by our generator marker tag; fallback to ruleset-based filters if needed.
   const alertsIndex = `.alerts-security.alerts-${spaceId}`;
   const hasRuleFilters = ruleUuids.length > 0 || ruleIds.length > 0;
   if (hasRuleFilters) {
@@ -201,16 +208,11 @@ const cleanGeneratedDataBestEffort = async ({
             bool: {
               filter: [
                 {
-                  range: {
-                    '@timestamp': {
-                      gte: new Date(startMs).toISOString(),
-                      lte: new Date(endMs).toISOString(),
-                    },
-                  },
-                },
-                {
                   bool: {
                     should: [
+                      // Prefer deleting alerts explicitly marked by the generator.
+                      { term: { 'kibana.alert.rule.tags': 'data-generator' } },
+                      // Backwards compatibility: delete by ruleset filters too (older generated docs won't have the tag).
                       ...(ruleUuids.length > 0
                         ? [{ terms: { 'kibana.alert.rule.uuid': ruleUuids } }]
                         : []),
@@ -239,7 +241,8 @@ const cleanGeneratedDataBestEffort = async ({
     );
   }
 
-  // 3) Remove previously generated ad-hoc Attack Discoveries (synthetic/no-LLM) for this user + time range.
+  // 3) Remove previously generated ad-hoc Attack Discoveries (synthetic/no-LLM) for this user.
+  // We intentionally do NOT time-filter here, for the same reason as Security alert deletion above.
   const adhocDiscoveryAlias = `.adhoc.alerts-security.attack.discovery.alerts-${spaceId}`;
   try {
     const exists = await esClient.indices.exists({ index: adhocDiscoveryAlias });
@@ -251,14 +254,6 @@ const cleanGeneratedDataBestEffort = async ({
         query: {
           bool: {
             filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: new Date(startMs).toISOString(),
-                    lte: new Date(endMs).toISOString(),
-                  },
-                },
-              },
               { term: { 'kibana.alert.attack_discovery.api_config.name': 'Synthetic (no-LLM)' } },
               { term: { 'kibana.alert.attack_discovery.user.name': username } },
             ],

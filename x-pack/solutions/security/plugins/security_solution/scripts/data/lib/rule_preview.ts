@@ -89,32 +89,18 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
       );
     }
 
-    await esClient.reindex({
-      wait_for_completion: true,
-      refresh: true,
-      source: {
-        index: previewIndex,
-        query: {
-          term: {
-            'kibana.alert.rule.uuid': previewId,
-          },
+    const script = (() => {
+      if (!targetRule) return;
+      return {
+        lang: 'painless',
+        params: {
+          uuid: targetRule.id,
+          rule_id: targetRule.rule_id,
+          name: targetRule.name,
+          startMs: timestampRange?.startMs,
+          endMs: timestampRange?.endMs,
         },
-      },
-      dest: {
-        index: destIndex,
-        // Default op_type overwrites existing docs, which makes reruns idempotent.
-      },
-      script: targetRule
-        ? {
-            lang: 'painless',
-            params: {
-              uuid: targetRule.id,
-              rule_id: targetRule.rule_id,
-              name: targetRule.name,
-              startMs: timestampRange?.startMs,
-              endMs: timestampRange?.endMs,
-            },
-            source: `
+        source: `
               // IMPORTANT:
               // Preview alerts often have deterministic _ids that can collide across multiple previews.
               // If we reindex them as-is, later previews overwrite earlier ones and it looks like all
@@ -145,7 +131,11 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
                 } catch (Exception e) {
                   uh = ((long)(newId.hashCode())) & 0x7fffffffL;
                 }
-                long tsMs = params.startMs + (uh % rangeMs);
+                // uh might be negative (signed long holding an unsigned value). Ensure the modulo is in [0, rangeMs).
+                // NOTE: Painless doesn't support java.lang.Math.floorMod in all contexts/versions.
+                long mod = uh % rangeMs;
+                if (mod < 0) { mod = mod + rangeMs; }
+                long tsMs = params.startMs + mod;
                 def iso = java.time.Instant.ofEpochMilli(tsMs).toString();
                 ctx._source['@timestamp'] = iso;
                 if (ctx._source.containsKey('kibana.alert.start')) { ctx._source['kibana.alert.start'] = iso; }
@@ -158,6 +148,17 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
               ctx._source['kibana.alert.rule.name'] = params.name;
               ctx._source['kibana.alert.rule.enabled'] = true;
               ctx._source['kibana.alert.rule.producer'] = 'siem';
+              // Mark alerts as generator-owned so --clean can remove only generated docs.
+              if (ctx._source.containsKey('kibana.alert.rule.tags') && ctx._source['kibana.alert.rule.tags'] != null) {
+                def tags = ctx._source['kibana.alert.rule.tags'];
+                if (tags instanceof List) {
+                  if (!tags.contains('data-generator')) { tags.add('data-generator'); }
+                } else {
+                  ctx._source['kibana.alert.rule.tags'] = ['data-generator'];
+                }
+              } else {
+                ctx._source['kibana.alert.rule.tags'] = ['data-generator'];
+              }
 
               if (ctx._source.containsKey('kibana.alert.rule.parameters') && ctx._source['kibana.alert.rule.parameters'] != null) {
                 ctx._source['kibana.alert.rule.parameters'].rule_id = params.rule_id;
@@ -165,8 +166,25 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
                 ctx._source['kibana.alert.rule.parameters'].rule_name_override = null;
               }
             `,
-          }
-        : undefined,
+      };
+    })();
+
+    await esClient.reindex({
+      wait_for_completion: true,
+      refresh: true,
+      source: {
+        index: previewIndex,
+        query: {
+          term: {
+            'kibana.alert.rule.uuid': previewId,
+          },
+        },
+      },
+      dest: {
+        index: destIndex,
+        // Default op_type overwrites existing docs, which makes reruns idempotent.
+      },
+      script,
       conflicts: 'proceed',
     });
   } catch (e) {
