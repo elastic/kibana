@@ -9,12 +9,7 @@
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
-import type {
-  ConnectorIdItem,
-  YamlValidationResult,
-  YamlValidationResultConnectorIdError,
-  YamlValidationResultConnectorIdValid,
-} from '../model/types';
+import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
@@ -24,7 +19,7 @@ export function validateConnectorIds(
   const results: YamlValidationResult[] = [];
 
   if (!dynamicConnectorTypes) {
-    const errorResult: YamlValidationResultConnectorIdError = {
+    const errorResult: YamlValidationResult = {
       id: 'connector-id-validation',
       severity: 'error',
       message: 'Dynamic connector types not found',
@@ -55,7 +50,7 @@ export function validateConnectorIds(
     const instance = instances.find((ins) => ins.id === connectorIdItem.key);
 
     if (!instance) {
-      const errorResult: YamlValidationResultConnectorIdError = {
+      const errorResult: YamlValidationResult = {
         id: connectorIdItem.id,
         severity: 'error',
         message: `${displayName} connector UUID "${connectorIdItem.key}" not found. Add a new connector or choose an existing one`,
@@ -72,7 +67,7 @@ export function validateConnectorIds(
       };
       results.push(errorResult);
     } else {
-      const validResult: YamlValidationResultConnectorIdValid = {
+      const validResult: YamlValidationResult = {
         id: connectorIdItem.id,
         severity: null,
         message: null,

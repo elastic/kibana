@@ -48,7 +48,7 @@ export function generateConnectorSnippet(
     if (instances.length > 0) {
       // Use the first non-deprecated instance as default, or first instance if all are deprecated
       const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];
-      connectorIdValue = defaultInstance.id; // Use UUID instead of name
+      connectorIdValue = defaultInstance.id; // Use UUID
     } else {
       // No instances configured, add placeholder comment
       connectorIdValue = '# Enter connector UUID here';

@@ -90,18 +90,16 @@ interface YamlValidationResultLiquidTemplate extends YamlValidationResultBase {
   message: string;
   owner: 'liquid-template-validation';
 }
-export interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
+interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
   severity: null;
   message: null;
   owner: 'connector-id-validation';
-  beforeMessage: string | null;
 }
 
-export interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
+interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
   owner: 'connector-id-validation';
-  beforeMessage: null;
 }
 
 interface YamlValidationResultCustomPropertyError extends YamlValidationResultBase {
