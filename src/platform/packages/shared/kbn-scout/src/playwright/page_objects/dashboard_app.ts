@@ -30,6 +30,11 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
+  async preserveCrossAppState() {
+    await this.page.goto(this.page.url());
+    await this.page.waitForLoadingIndicatorHidden();
+  }
+
   async waitForListingTableToLoad() {
     return this.page.testSubj.waitForSelector('table-is-ready', { state: 'visible' });
   }
@@ -37,6 +42,30 @@ export class DashboardApp {
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
     await this.page.testSubj.waitForSelector('emptyDashboardWidget', { state: 'visible' });
+  }
+
+  private getSettingsFlyout() {
+    return this.page.testSubj.locator('dashboardSettingsFlyout');
+  }
+
+  async openSettingsFlyout() {
+    if ((await this.getSettingsFlyout().count()) === 0) {
+      await this.page.testSubj.click('dashboardSettingsButton');
+      await this.getSettingsFlyout().waitFor({ state: 'visible' });
+    }
+  }
+
+  async toggleSyncColors(value: boolean) {
+    const targetValue = value ? 'true' : 'false';
+    const toggle = this.page.testSubj.locator('dashboardSyncColorsCheckbox');
+    if ((await toggle.getAttribute('aria-checked')) !== targetValue) {
+      await toggle.click();
+    }
+  }
+
+  async applyDashboardSettings() {
+    await this.page.testSubj.click('applyCustomizeDashboardButton');
+    await this.getSettingsFlyout().waitFor({ state: 'hidden' });
   }
 
   // ============================================================
@@ -94,11 +123,57 @@ export class DashboardApp {
     await this.page.testSubj.waitForSelector('dashboardPanelSelectionList', { state: 'visible' });
   }
 
+  async clickCreateNewVisualization() {
+    await this.page.testSubj.click('dashboardAddTopNavButton');
+    await this.page.testSubj.click('dashboardCreateNewVisButton');
+    await this.page.testSubj.waitForSelector('dashboardCreateNewVisButton', { state: 'hidden' });
+    await this.page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
+  }
+
   async saveDashboard(name: string) {
     await this.page.testSubj.click('dashboardInteractiveSaveMenuItem');
     await this.page.testSubj.fill('savedObjectTitle', name);
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'hidden' });
+  }
+
+  async openSaveSplitMenu() {
+    await this.page.testSubj.click('dashboardQuickSaveMenuItem-secondary-button');
+  }
+
+  async clickQuickSave() {
+    const quickSaveMenuItem = this.page.testSubj.locator('dashboardQuickSaveMenuItem');
+    if ((await quickSaveMenuItem.count()) > 0) {
+      await this.page.testSubj.click('dashboardQuickSaveMenuItem');
+      return;
+    }
+
+    const interactiveSaveMenuItem = this.page.testSubj.locator('dashboardInteractiveSaveMenuItem');
+    if ((await interactiveSaveMenuItem.count()) > 0) {
+      await this.page.testSubj.click('dashboardInteractiveSaveMenuItem');
+      return;
+    }
+
+    // Fallback when test subjects are not present (UI renders a plain "Save" button)
+    await this.page.getByRole('button', { name: 'Save', exact: true }).click();
+  }
+
+  async clearUnsavedChanges() {
+    const isViewMode = await this.getIsInViewMode();
+    if (isViewMode) {
+      await this.switchToEditMode();
+    }
+
+    const unsavedBadge = this.page.testSubj.locator('dashboardUnsavedChangesBadge');
+    if ((await unsavedBadge.count()) > 0) {
+      await this.clickQuickSave();
+      await unsavedBadge.waitFor({ state: 'hidden' });
+      await this.toasts.closeAll();
+    }
+
+    if (isViewMode) {
+      await this.clickCancelOutOfEditMode();
+    }
   }
 
   // ============================================================
@@ -201,6 +276,40 @@ export class DashboardApp {
     return this.addEmbeddable(vizName, 'Visualization');
   }
 
+  /**
+   * Adds a Lens visualization to the dashboard from the library.
+   * Wrapper around addEmbeddable() with type='lens'.
+   *
+   * @param lensName - Name of the Lens saved object
+   */
+  async addLens(lensName: string) {
+    return this.addEmbeddable(lensName, 'lens');
+  }
+
+  /**
+   * Adds a new Markdown panel (by value) to the dashboard.
+   *
+   * @param content - Markdown content to save
+   */
+  async addMarkdownPanel(content: string) {
+    await this.openAddPanelFlyout();
+    await this.page.testSubj.fill('dashboardPanelSelectionFlyout__searchInput', 'Markdown text');
+    await this.page.testSubj.click('create-action-Markdown text');
+
+    const editorInput = this.page.locator('textarea[aria-label="Dashboard markdown editor"]');
+    await editorInput.waitFor({ state: 'visible' });
+    await editorInput.fill(content);
+    await this.page.testSubj.click('markdownEditorApplyButton');
+
+    await this.page.testSubj.waitForSelector('markdownRenderer', { state: 'visible' });
+  }
+
+  async addMapPanel() {
+    await this.openAddPanelFlyout();
+    await this.page.testSubj.fill('dashboardPanelSelectionFlyout__searchInput', 'Maps');
+    await this.page.testSubj.click('create-action-Maps');
+  }
+
   async customizePanel(options: {
     name: string;
     customTimeRageCommonlyUsed?: {
@@ -235,6 +344,10 @@ export class DashboardApp {
     });
   }
 
+  async editPanel(name?: string) {
+    await this.clickPanelAction('embeddablePanelAction-editPanel', name);
+  }
+
   async waitForPanelsToLoad(
     expectedCount: number,
     options: { timeout: number; selector: string } = {
@@ -263,6 +376,10 @@ export class DashboardApp {
     return Promise.all(titleElements.map(async (el) => (await el.textContent()) ?? ''));
   }
 
+  getPanelTitlesLocator() {
+    return this.page.testSubj.locator('embeddablePanelTitle');
+  }
+
   /**
    * Gets the count of panels on the dashboard
    */
@@ -281,6 +398,127 @@ export class DashboardApp {
       // Wait for all panels to have data-render-complete="true"
       await this.waitForPanelsToLoad(count);
     }
+  }
+
+  // ============================================================
+  // Customize Panel Methods (mirrors FTR's DashboardCustomizePanel)
+  // ============================================================
+
+  private readonly customTimeRangeToggleTestSubj = 'customizePanelShowCustomTimeRange';
+  private readonly customizePanelTestSubj = 'customizePanel';
+
+  private async waitForCustomTimeRangeToggleState(enabled: boolean) {
+    const expected = enabled ? 'true' : 'false';
+    const selector = `[data-test-subj="${this.customTimeRangeToggleTestSubj}"]`;
+    await this.page.waitForFunction(
+      ({ selector: selectorArg, expectedValue }) =>
+        document.querySelector(selectorArg)?.getAttribute('aria-checked') === expectedValue,
+      { selector, expectedValue: expected }
+    );
+  }
+
+  private getCustomizePanelFlyout() {
+    return this.page.testSubj.locator(this.customizePanelTestSubj);
+  }
+
+  async enableCustomTimeRange() {
+    const toggle = this.getCustomizePanelFlyout().locator(
+      `[data-test-subj="${this.customTimeRangeToggleTestSubj}"]`
+    );
+    if ((await toggle.getAttribute('aria-checked')) !== 'true') {
+      await toggle.click();
+    }
+    await this.waitForCustomTimeRangeToggleState(true);
+    await this.getCustomizePanelFlyout()
+      .locator('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+      .waitFor({ state: 'visible' });
+  }
+
+  async disableCustomTimeRange() {
+    const toggle = this.getCustomizePanelFlyout().locator(
+      `[data-test-subj="${this.customTimeRangeToggleTestSubj}"]`
+    );
+    if ((await toggle.getAttribute('aria-checked')) !== 'false') {
+      await toggle.click();
+    }
+    await this.waitForCustomTimeRangeToggleState(false);
+  }
+
+  async openDatePickerQuickMenu() {
+    await this.getCustomizePanelFlyout()
+      .locator('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+      .click();
+  }
+
+  async clickCommonlyUsedTimeRange(timeRange: CommonlyUsedTimeRange) {
+    await this.page.testSubj.click(`superDatePickerCommonlyUsed_${timeRange}`);
+  }
+
+  async openCustomizePanel(title?: string) {
+    await this.clickPanelAction('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL', title);
+    await this.page.testSubj.waitForSelector('customizePanel', { state: 'visible' });
+  }
+
+  async closeCustomizePanel() {
+    await this.page.testSubj.click('cancelCustomizePanelButton');
+    await this.page.testSubj.waitForSelector('customizePanel', { state: 'hidden' });
+  }
+
+  async getCustomPanelTitle() {
+    return this.page.testSubj.locator('customEmbeddablePanelTitleInput').inputValue();
+  }
+
+  async setCustomPanelTitle(customTitle: string) {
+    const titleInput = this.page.testSubj.locator('customEmbeddablePanelTitleInput');
+    await titleInput.click();
+    await titleInput.fill(customTitle);
+  }
+
+  async resetCustomPanelTitle() {
+    await this.page.testSubj.click('resetCustomEmbeddablePanelTitleButton');
+  }
+
+  getResetCustomPanelTitleButton() {
+    return this.page.testSubj.locator('resetCustomEmbeddablePanelTitleButton');
+  }
+
+  async getCustomPanelDescription() {
+    return this.page.testSubj.locator('customEmbeddablePanelDescriptionInput').inputValue();
+  }
+
+  async setCustomPanelDescription(customDescription: string) {
+    const descriptionInput = this.page.testSubj.locator('customEmbeddablePanelDescriptionInput');
+    await descriptionInput.click();
+    await descriptionInput.fill(customDescription);
+  }
+
+  async resetCustomPanelDescription() {
+    await this.page.testSubj.click('resetCustomEmbeddablePanelDescriptionButton');
+  }
+
+  getResetCustomPanelDescriptionButton() {
+    return this.page.testSubj.locator('resetCustomEmbeddablePanelDescriptionButton');
+  }
+
+  async saveCustomizePanel() {
+    await this.page.testSubj.click('saveCustomizePanelButton');
+    await this.page.testSubj.waitForSelector('customizePanel', { state: 'hidden' });
+  }
+
+  async expectTimeRangeBadgeExists() {
+    await this.page.testSubj.waitForSelector('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE', {
+      state: 'visible',
+    });
+  }
+
+  async expectTimeRangeBadgeMissing() {
+    await this.page.testSubj.waitForSelector('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE', {
+      state: 'hidden',
+    });
+  }
+
+  async clickTimeRangeBadge() {
+    await this.page.testSubj.click('embeddablePanelBadge-CUSTOM_TIME_RANGE_BADGE');
   }
 
   // ============================================================
@@ -334,6 +572,20 @@ export class DashboardApp {
     }
   }
 
+  async navigateToLensEditorFromPanel(title?: string) {
+    await this.openPanelContextMenu(title);
+    await this.page.testSubj.click('embeddablePanelAction-editPanel');
+    await this.page.testSubj.waitForSelector('navigateToLensEditorLink', { state: 'visible' });
+    await this.page.testSubj.click('navigateToLensEditorLink');
+
+    const confirmModal = this.page.testSubj.locator('confirmModalConfirmButton');
+    if ((await confirmModal.count()) > 0) {
+      await confirmModal.click();
+    }
+
+    await this.page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
+  }
+
   /**
    * Checks if a panel action exists as a descendant of the panel wrapper.
    * Matches FTR's panelActionExists() which uses descendantExists.
@@ -379,7 +631,15 @@ export class DashboardApp {
    * Matches FTR's clonePanel(title) + the extra waits FTR does in tests.
    */
   async clonePanel(title?: string) {
+    const panels = this.page.testSubj.locator('embeddablePanel');
+    const initialCount = await panels.count();
+
     await this.clickPanelAction('embeddablePanelAction-clonePanel', title);
+    await this.page.waitForFunction(
+      (expectedCount) =>
+        document.querySelectorAll('[data-test-subj="embeddablePanel"]').length > expectedCount,
+      initialCount
+    );
     await this.waitForRenderComplete();
     // FTR tests also call these after clonePanel to ensure panel state is updated
     await this.page.waitForLoadingIndicatorHidden();

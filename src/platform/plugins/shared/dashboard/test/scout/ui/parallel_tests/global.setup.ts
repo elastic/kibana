@@ -13,6 +13,7 @@ import { globalSetupHook, tags } from '@kbn/scout';
 const ES_ARCHIVES = {
   LOGSTASH_FUNCTIONAL: 'src/platform/test/functional/fixtures/es_archiver/logstash_functional',
   DASHBOARD_DATA: 'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data',
+  SHAKESPEARE: 'x-pack/platform/test/fixtures/es_archives/getting_started/shakespeare',
 };
 
 globalSetupHook(
@@ -23,6 +24,7 @@ globalSetupHook(
 
     await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH_FUNCTIONAL);
     await esArchiver.loadIfNeeded(ES_ARCHIVES.DASHBOARD_DATA);
+    await esArchiver.loadIfNeeded(ES_ARCHIVES.SHAKESPEARE);
 
     log.info('[setup] Dashboard ES archives loaded successfully');
   }

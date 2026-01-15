@@ -27,4 +27,50 @@ export class MapsPage {
       .locator('div[data-dom-id][data-render-complete="true"]')
       .waitFor({ timeout: DEFAULT_MAP_LOADING_TIMEOUT });
   }
+
+  async clickSaveAndReturnButton() {
+    await this.page.testSubj.click('mapSaveAndReturnButton');
+  }
+
+  async clickSaveButton() {
+    await this.page.testSubj.click('mapSaveButton');
+  }
+
+  async clickAddLayer() {
+    await this.page.testSubj.click('addLayerButton');
+    await this.page.testSubj.waitForSelector('layerAddForm', { state: 'visible' });
+  }
+
+  async selectLayerWizardByTitle(title: string) {
+    const wizardTestSubj = title
+      .split(' ')
+      .map((segment, index) =>
+        index === 0 ? segment.toLowerCase() : segment.charAt(0).toUpperCase() + segment.slice(1)
+      )
+      .join('');
+    await this.page.testSubj.click(wizardTestSubj);
+  }
+
+  async clickImportFileButton() {
+    await this.page.testSubj.click('importFileButton');
+  }
+
+  async saveFromModal(title: string, { redirectToOrigin = true }: { redirectToOrigin?: boolean }) {
+    await this.page.testSubj.fill('savedObjectTitle', title);
+    const returnToOrigin = this.page.testSubj.locator('returnToOriginModeSwitch');
+    if ((await returnToOrigin.count()) > 0) {
+      const isChecked = (await returnToOrigin.getAttribute('aria-checked')) === 'true';
+      if (isChecked !== redirectToOrigin) {
+        await returnToOrigin.click();
+      }
+    }
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'hidden' });
+  }
+
+  async doesLayerExist(displayName: string) {
+    const escapedName = displayName.split(' ').join('_');
+    const locator = this.page.testSubj.locator(`layerTocActionsPanelToggleButton${escapedName}`);
+    return (await locator.count()) > 0;
+  }
 }
