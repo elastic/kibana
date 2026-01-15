@@ -296,8 +296,7 @@ export function getDataStateContainer({
             getCurrentTab,
           };
 
-          abortController?.abort(AbortReason.REPLACED);
-          abortControllerFetchMore?.abort(AbortReason.REPLACED);
+          cancel(AbortReason.REPLACED);
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
@@ -328,6 +327,15 @@ export function getDataStateContainer({
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
                 isSearchSessionRestored,
+              },
+            })
+          );
+
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+              cascadedDocumentsState: {
+                ...getCurrentTab().cascadedDocumentsState,
+                cascadedDocumentsMap: {},
               },
             })
           );
@@ -413,6 +421,7 @@ export function getDataStateContainer({
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
                     cascadedDocumentsState: {
+                      ...getCurrentTab().cascadedDocumentsState,
                       availableCascadeGroups: newAvailableGroups,
                       selectedCascadeGroups: newSelectedGroups,
                     },
@@ -422,6 +431,7 @@ export function getDataStateContainer({
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
                     cascadedDocumentsState: {
+                      ...getCurrentTab().cascadedDocumentsState,
                       availableCascadeGroups: [],
                       selectedCascadeGroups: [],
                     },
@@ -520,9 +530,15 @@ export function getDataStateContainer({
     sendResetMsg(dataSubjects, getInitialFetchStatus());
   };
 
-  const cancel = () => {
-    abortController?.abort(AbortReason.CANCELED);
-    abortControllerFetchMore?.abort(AbortReason.CANCELED);
+  const cancel = (reason: AbortReason = AbortReason.CANCELED) => {
+    const { cascadedDocumentsFetcher$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      getCurrentTab().id
+    );
+
+    cascadedDocumentsFetcher$.getValue().cancelAllFetches(reason);
+    abortController?.abort(reason);
+    abortControllerFetchMore?.abort(reason);
   };
 
   const getAbortController = () => {

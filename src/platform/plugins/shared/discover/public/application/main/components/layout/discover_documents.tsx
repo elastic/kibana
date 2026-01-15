@@ -54,7 +54,7 @@ import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
-import { useAppStateSelector } from '../../state_management/redux';
+import { useAppStateSelector, useCurrentTabRuntimeState } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -490,13 +490,17 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
   );
 
-  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
+    stateContainer.runtimeStateManager,
+    (runtimeState) => runtimeState.cascadedDocumentsFetcher$
+  );
   const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
     (tab) => tab.cascadedDocumentsState
   );
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
@@ -506,6 +510,7 @@ function DiscoverDocumentsComponent({
     }
 
     return {
+      cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
       esqlQuery: query,
@@ -523,6 +528,7 @@ function DiscoverDocumentsComponent({
     };
   }, [
     availableCascadeGroups,
+    cascadedDocumentsFetcher,
     dispatch,
     esqlVariables,
     onUpdateESQLQuery,
