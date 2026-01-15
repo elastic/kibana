@@ -222,7 +222,7 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
             );
 
             // Cleanup the test data stream
-            // await esClient.indices.deleteDataStream({ name: testIndex });
+            await esClient.indices.deleteDataStream({ name: testIndex });
           }
         );
       });
