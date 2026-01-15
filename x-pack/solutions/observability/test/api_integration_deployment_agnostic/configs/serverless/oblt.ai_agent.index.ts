@@ -7,7 +7,9 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Serverless Observability feature flag testing - Deployment-agnostic Observability Agent Builder API integration tests', function () {
-    loadTestFile(require.resolve('../../apis/observability_agent_builder/index.ts'));
+  describe('Serverless Observability - Deployment-agnostic Observability Agent Builder API integration tests', function () {
+    this.tags(['esGate']);
+
+    loadTestFile(require.resolve('../../apis/observability_agent_builder'));
   });
 }
