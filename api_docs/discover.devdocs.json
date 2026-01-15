@@ -3979,6 +3979,51 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-server.LocatorServiceScopedClient.timeFieldNameFromLocator",
+            "type": "Function",
+            "tags": [],
+            "label": "timeFieldNameFromLocator",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "discover",
+                "scope": "common",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-common.DiscoverAppLocatorParams",
+                "text": "DiscoverAppLocatorParams"
+              },
+              ") => Promise<string | undefined>"
+            ],
+            "path": "src/platform/plugins/shared/discover/server/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-server.LocatorServiceScopedClient.timeFieldNameFromLocator.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "discover",
+                    "scope": "common",
+                    "docId": "kibDiscoverPluginApi",
+                    "section": "def-common.DiscoverAppLocatorParams",
+                    "text": "DiscoverAppLocatorParams"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/discover/server/locator/time_field_name_from_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
