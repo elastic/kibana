@@ -1229,7 +1229,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const spacesToAuthorize = new Set<string>([namespaceString]);
 
-    const { types: typesRequiringAccessControl, objects: objectsRequiringAccessControl } =
+    const { types: typesRequiringAccessControl, objects: objectsRequiringPrivilegeCheck } =
       this.accessControlService.getObjectsRequiringPrivilegeCheck({
         objects,
         actions: new Set([action]),
@@ -1240,9 +1240,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     // instead of 'manage_access_control'. The owner is required to have access to update an object
     // in order to change its access control settings.
     const typesRequiringRbac = new Set(
-      objectsRequiringAccessControl
+      objectsRequiringPrivilegeCheck
         .filter((object) => object.requiresManageAccessControl === false)
         .map((object) => object.type)
+    );
+
+    const objectsRequiringAccessControl = objectsRequiringPrivilegeCheck.filter(
+      (object) => object.requiresManageAccessControl
     );
 
     /**

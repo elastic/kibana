@@ -26,14 +26,14 @@ const buildAccessDeniedMessage = (rbacTypes: string[], accessControlTypes: strin
   if (rbacTypes.length > 0) {
     const typeList = rbacTypes.join(', ');
     parts.push(
-      `Unable to perform operation on ${typeList}. You may have lost access to this space or required privileges have been revoked.`
+      `Unable to perform operation on ${typeList}: the "update" privilege is required to change access control of objects owned by the current user.`
     );
   }
 
   if (accessControlTypes.length > 0) {
     const typeList = accessControlTypes.join(', ');
     parts.push(
-      `Unable to manage access control for ${typeList}. The "manage_access_control" privilege is required to change access control of objects owned by another user.`
+      `Unable to manage access control for ${typeList}: the "manage_access_control" privilege is required to change access control of objects owned by another user.`
     );
   }
 
