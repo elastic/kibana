@@ -10,6 +10,7 @@
 import type { monaco } from '@kbn/monaco';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
+import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions';
 import { getJsonSchemaSuggestions } from './json_schema/get_json_schema_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
@@ -20,11 +21,12 @@ import { getRRuleSchedulingSuggestions } from './rrule/get_rrule_scheduling_sugg
 import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
+import { getPropertyHandler } from '../../../../../../common/schema';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
-export function getSuggestions(
+export async function getSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
-): monaco.languages.CompletionItem[] {
+): Promise<monaco.languages.CompletionItem[]> {
   // console.log('getSuggestions', autocompleteContext);
   const { lineParseResult } = autocompleteContext;
 
@@ -163,7 +165,25 @@ export function getSuggestions(
     return jsonSchemaSuggestions;
   }
 
-  // Future enhancement: Connector with block completion
-  // This would provide autocompletion for connector-specific parameters
-  return [];
+  // Custom property completion for steps registered via workflows_extensions
+  return getCustomPropertySuggestions(
+    autocompleteContext,
+    (stepType: string, scope: 'config' | 'input', key: string) =>
+      getPropertyHandler(stepType, scope, key)
+  );
+
+  // TODO: Implement connector with block completion
+  // Connector with block completion
+  // e.g.
+  // steps:
+  // - name: search-alerts
+  //   type: elasticsearch.search
+  //   with:
+  //     index: "alerts-*"
+  //     query:
+  //       range:
+  //         "@timestamp":
+  //           gte: "now-1h"
+  //     |<-
+  // return [];
 }

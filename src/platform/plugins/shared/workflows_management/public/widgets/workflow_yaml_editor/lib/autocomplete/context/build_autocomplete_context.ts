@@ -43,6 +43,7 @@ export function buildAutocompleteContext({
   const workflowGraph = editorState?.computed?.workflowGraph;
   const yamlDocument = editorState?.computed?.yamlDocument;
   const workflowLookup = editorState?.computed?.workflowLookup;
+  const yamlLineCounter = editorState?.computed?.yamlLineCounter;
   const focusedStepId = editorState?.focusedStepId;
   const workflowDefinition = editorState?.computed?.workflowDefinition;
   // monaco-related
@@ -134,6 +135,7 @@ export function buildAutocompleteContext({
     contextSchema,
     contextScopedToPath,
     yamlDocument,
+    yamlLineCounter: yamlLineCounter ?? null,
     scalarType,
 
     // kind of ast info
