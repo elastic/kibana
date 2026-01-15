@@ -58,6 +58,15 @@ async function validatePath(input: string): Promise<boolean | string> {
   }
 }
 
+async function pathExists(targetPath: string): Promise<boolean> {
+  try {
+    await Fsp.stat(targetPath);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 async function createDirectoryStructure(
   basePath: string,
   testType: TestType,
@@ -234,16 +243,77 @@ export const generateCmd: Command<void> = {
 
     log.info(`Validated path: ${relativePath}`);
 
+    const basePath = Path.resolve(REPO_ROOT, relativePath);
+    const scoutDir = Path.resolve(basePath, 'test/scout');
+    const apiDir = Path.resolve(scoutDir, 'api');
+    const uiDir = Path.resolve(scoutDir, 'ui');
+
+    const scoutDirExists = await pathExists(scoutDir);
+    const apiDirExists = await pathExists(apiDir);
+    const uiDirExists = await pathExists(uiDir);
+
+    if (apiDirExists && uiDirExists) {
+      log.warning(
+        'Both test/scout/api and test/scout/ui already exist. The generator will not modify existing sub-directories.'
+      );
+      return;
+    }
+
+    if (scoutDirExists || apiDirExists || uiDirExists) {
+      const existingDirs: string[] = [];
+      if (apiDirExists) {
+        existingDirs.push('test/scout/api');
+      }
+      if (uiDirExists) {
+        existingDirs.push('test/scout/ui');
+      }
+      log.warning(
+        `Existing Scout test directories found: ${existingDirs.join(
+          ', '
+        )}. The generator will not modify existing sub-directories.`
+      );
+      const continueResult = await inquirer.prompt<{ proceed: boolean }>({
+        type: 'list',
+        name: 'proceed',
+        message: 'Do you want to continue and generate only missing sections?',
+        default: false,
+        choices: [
+          { name: 'No', value: false },
+          { name: 'Yes', value: true },
+        ],
+      });
+
+      if (!continueResult.proceed) {
+        log.info('Aborted.');
+        return;
+      }
+    }
+
+    const apiMissing = !apiDirExists;
+    const uiMissing = !uiDirExists;
+
+    if (!apiMissing && !uiMissing) {
+      log.warning('All Scout test directories already exist. Nothing to generate.');
+      return;
+    }
+
+    const testTypeChoices: Array<{ name: string; value: TestType }> = [];
+    if (apiMissing) {
+      testTypeChoices.push({ name: 'API tests', value: 'api' });
+    }
+    if (uiMissing) {
+      testTypeChoices.push({ name: 'UI tests', value: 'ui' });
+    }
+    if (apiMissing && uiMissing) {
+      testTypeChoices.push({ name: 'Both API and UI tests', value: 'both' });
+    }
+
     const testTypeResult = await inquirer.prompt<{ testType: TestType }>({
       type: 'list',
       name: 'testType',
       message: 'What type of tests do you plan to add?',
-      default: 'api',
-      choices: [
-        { name: 'API tests', value: 'api' },
-        { name: 'UI tests', value: 'ui' },
-        { name: 'Both API and UI tests', value: 'both' },
-      ],
+      default: apiMissing ? 'api' : 'ui',
+      choices: testTypeChoices,
     });
 
     const testType = testTypeResult.testType;
