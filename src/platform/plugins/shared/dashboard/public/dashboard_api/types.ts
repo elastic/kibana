@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
@@ -42,7 +41,6 @@ import type {
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
-  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -52,6 +50,7 @@ import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
@@ -63,7 +62,9 @@ export const DASHBOARD_API_TYPE = 'dashboard';
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
+  getInitialInput?: () => Partial<
+    DashboardState & { references?: Reference[]; viewMode?: ViewMode }
+  >;
 
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
@@ -131,12 +132,11 @@ export type DashboardApi = CanExpandPanels &
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
       attributes: DashboardState;
-      references: Reference[];
     };
     getDashboardPanelFromId: (id: string) => {
       type: string;
       grid: GridData;
-      serializedState: SerializedPanelState;
+      serializedState: object;
     };
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -183,7 +183,7 @@ export type DashboardApi = CanExpandPanels &
 
 export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
-  serializeLayout: () => Pick<DashboardState, 'panels' | 'controlGroupInput' | 'references'>;
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'controlGroupInput'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;

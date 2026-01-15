@@ -301,6 +301,3 @@ xpack.genAiSettings:
 # Cross Project Search
 cps.enabled: true
 cps.cpsEnabled: false
-
-# Disable saved objects access control features (write-restricted dashboards)
-savedObjects.enableAccessControl: false

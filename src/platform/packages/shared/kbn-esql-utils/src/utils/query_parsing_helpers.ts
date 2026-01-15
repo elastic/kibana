@@ -15,6 +15,7 @@ import {
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
+  esqlCommandRegistry,
 } from '@kbn/esql-language';
 
 import type {
@@ -642,3 +643,17 @@ export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []):
 
   return foundDateField;
 }
+
+/**
+ * Checks if the ESQL query contains only source commands (e.g., FROM, TS).
+ * @param esql: string - The ESQL query string
+ * @returns true if the query contains only source commands, false otherwise
+ */
+export const hasOnlySourceCommand = (query: string): boolean => {
+  const { root } = Parser.parse(query);
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  return (
+    root.commands.length > 0 &&
+    root.commands.every((command) => sourceCommands.includes(command.name))
+  );
+};
