@@ -11,9 +11,13 @@ import {
   EuiErrorBoundary,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiSkeletonText,
+  EuiSkeletonTitle,
   EuiTab,
   EuiTabs,
+  EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -86,6 +90,7 @@ export function WaterfallFlyout({
   flyoutId,
 }: Props) {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
+  const flyoutTitleId = useGeneratedHtmlId();
 
   return (
     <EuiFlyout
@@ -95,9 +100,16 @@ export function WaterfallFlyout({
       size="s"
       includeFixedHeadersInFocusTrap={false}
       onClose={onCloseFlyout}
-      aria-label={title}
+      aria-labelledby={flyoutTitleId}
       id={flyoutId}
     >
+      <EuiFlyoutHeader>
+        <EuiSkeletonTitle isLoading={loading}>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{title}</h2>
+          </EuiTitle>
+        </EuiSkeletonTitle>
+      </EuiFlyoutHeader>
       <EuiFlyoutBody
         css={css`
           & .euiFlyoutBody__overflow {
