@@ -6,7 +6,7 @@
  */
 import React, { type ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFormPrepend, EuiSelect, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ESQLDefaultLimitSizeOption } from '../../../embeddables/grid_embeddable/types';
 
@@ -53,12 +53,14 @@ export const ESQLDefaultLimitSizeSelect = ({
         defaultMessage: 'Limit size',
       })}
       prepend={
-        <EuiText textAlign="center">
-          <FormattedMessage
-            id="xpack.dataVisualizer.searchPanel.esql.limitSizeLabel"
-            defaultMessage="Limit analysis to"
-          />
-        </EuiText>
+        <EuiFormPrepend
+          label={
+            <FormattedMessage
+              id="xpack.dataVisualizer.searchPanel.esql.limitSizeLabel"
+              defaultMessage="Limit analysis to"
+            />
+          }
+        />
       }
     />
   );
