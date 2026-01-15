@@ -437,10 +437,23 @@ export class RulesPage {
   }
 
   /**
+   * Waits for the form to be ready after data view changes
+   */
+  async waitForFormReady() {
+    // Ensure save button is enabled (form is valid)
+    await expect(this.ruleSaveButton).toBeEnabled({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
    * Saves the rule by clicking save and confirming
    */
   async saveRule() {
+    // Scroll the save button into view to ensure it's accessible
+    await this.ruleSaveButton.scrollIntoViewIfNeeded();
+
+    // Click the save button
     await this.ruleSaveButton.click();
+
     await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.confirmModalButton.click();
     // Wait for navigation to rule details page
