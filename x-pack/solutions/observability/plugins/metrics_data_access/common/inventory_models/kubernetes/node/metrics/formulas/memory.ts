@@ -14,7 +14,7 @@ export const nodeMemoryCapacity: SchemaBasedFormula = {
   }),
   value: {
     ecs: 'max(kubernetes.node.memory.allocatable.bytes)',
-    semconv: '',
+    semconv: 'max(metrics.k8s.node.memory.allocatable)',
   },
   format: 'bytes',
   decimals: 1,
@@ -26,7 +26,7 @@ export const nodeMemoryUsed: SchemaBasedFormula = {
   }),
   value: {
     ecs: 'average(kubernetes.node.memory.usage.bytes)',
-    semconv: '',
+    semconv: 'average(metrics.k8s.node.memory.usage)',
   },
   format: 'bytes',
   decimals: 1,

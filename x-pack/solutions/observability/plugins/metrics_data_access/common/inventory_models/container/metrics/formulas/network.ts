@@ -12,7 +12,8 @@ export const dockerContainerNetworkRx: SchemaBasedFormula = {
   label: RX_LABEL,
   value: {
     ecs: "average(docker.network.inbound.bytes) * 8 / (max(metricset.period, kql='docker.network.inbound.bytes: *') / 1000)",
-    semconv: '',
+    semconv:
+      'average(metrics.container.network.io, kql="metric.network.io.direction: receive") * 8',
   },
   format: 'bits',
   decimals: 1,
@@ -23,7 +24,8 @@ export const dockerContainerNetworkTx: SchemaBasedFormula = {
   label: TX_LABEL,
   value: {
     ecs: "average(docker.network.outbound.bytes) * 8 / (max(metricset.period, kql='docker.network.outbound.bytes: *') / 1000)",
-    semconv: '',
+    semconv:
+      'average(metrics.container.network.io, kql="metric.network.io.direction: transmit") * 8',
   },
   format: 'bits',
   decimals: 1,

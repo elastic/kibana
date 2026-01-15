@@ -14,7 +14,7 @@ export const nodePodCapacity: SchemaBasedFormula = {
   }),
   value: {
     ecs: "last_value(kubernetes.node.pod.allocatable.total,  kql='kubernetes.node.pod.allocatable.total: *')",
-    semconv: '',
+    semconv: 'last_value(metrics.k8s.node.pod.allocatable)',
   },
   format: 'number',
   decimals: 0,
@@ -26,7 +26,7 @@ export const nodePodUsed: SchemaBasedFormula = {
   }),
   value: {
     ecs: 'unique_count(kubernetes.pod.uid)',
-    semconv: '',
+    semconv: 'unique_count(metrics.k8s.pod.uid)',
   },
   format: 'number',
   decimals: 0,

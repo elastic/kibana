@@ -14,7 +14,7 @@ export const nodeDiskCapacity: SchemaBasedFormula = {
   }),
   value: {
     ecs: 'max(kubernetes.node.fs.capacity.bytes)',
-    semconv: '',
+    semconv: 'max(metrics.k8s.node.filesystem.capacity)',
   },
   format: 'bytes',
   decimals: 1,
@@ -26,7 +26,7 @@ export const nodeDiskUsed: SchemaBasedFormula = {
   }),
   value: {
     ecs: 'average(kubernetes.node.fs.used.bytes)',
-    semconv: '',
+    semconv: 'average(metrics.k8s.node.filesystem.usage)',
   },
   format: 'bytes',
   decimals: 1,

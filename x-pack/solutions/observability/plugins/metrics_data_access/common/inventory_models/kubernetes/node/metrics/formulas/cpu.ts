@@ -14,7 +14,7 @@ export const nodeCpuCapacity: SchemaBasedFormula = {
   }),
   value: {
     ecs: 'max(kubernetes.node.cpu.allocatable.cores) * 1000000000',
-    semconv: '',
+    semconv: 'max(metrics.k8s.node.cpu.allocatable)',
   },
   format: 'number',
   decimals: 1,
@@ -27,7 +27,7 @@ export const nodeCpuUsed: SchemaBasedFormula = {
   }),
   value: {
     ecs: 'average(kubernetes.node.cpu.usage.nanocores)',
-    semconv: '',
+    semconv: 'average(metrics.k8s.node.cpu.usage)',
   },
   format: 'number',
   decimals: 1,
