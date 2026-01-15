@@ -388,4 +388,44 @@ describe('CostSavingsKeyInsight', () => {
       });
     });
   });
+
+  describe('render complete signaling for reporting', () => {
+    it('should transition data-render-complete from false to true and dispatch renderComplete event when Markdown finishes rendering', async () => {
+      const renderCompleteHandler = jest.fn();
+
+      mockUseAIValueExportContext.mockReturnValue({
+        forwardedState: { insight: 'Test insight content' },
+        isInsightVerified: true,
+        shouldRegenerateInsight: false,
+        setInsight: mockSetInsightInExportContext,
+      });
+
+      const { rerender } = render(
+        <CostSavingsKeyInsight isLoading={true} lensResponse={mockLensResponse} />,
+        { wrapper }
+      );
+
+      const container = screen.getByTestId('alertProcessingKeyInsightsGreetingGroup');
+      container.addEventListener('renderComplete', renderCompleteHandler);
+
+      expect(container).toHaveAttribute('data-shared-item');
+      expect(container).toHaveAttribute('data-render-complete', 'false');
+      expect(renderCompleteHandler).not.toHaveBeenCalled();
+
+      // Change props to isLoading = false to render the insight
+      rerender(<CostSavingsKeyInsight isLoading={false} lensResponse={mockLensResponse} />);
+
+      await waitFor(() => {
+        expect(container).toHaveAttribute('data-render-complete', 'true');
+      });
+
+      expect(renderCompleteHandler).toHaveBeenCalledTimes(1);
+      expect(renderCompleteHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'renderComplete',
+          bubbles: true,
+        })
+      );
+    });
+  });
 });

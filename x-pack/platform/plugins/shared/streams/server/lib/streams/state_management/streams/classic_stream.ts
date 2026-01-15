@@ -500,6 +500,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
           name: this._definition.name,
         },
       },
+      {
+        type: 'unlink_features',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
 
     if (this._definition.ingest.processing.steps.length > 0) {
