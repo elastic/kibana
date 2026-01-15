@@ -18,6 +18,7 @@ export type {
   IndexSettingsResponse,
   Mappings,
   TemplateSerialized,
+  TemplateSerializedWithDateFields,
   TemplateDeserialized,
   TemplateType,
   TemplateFromEs,

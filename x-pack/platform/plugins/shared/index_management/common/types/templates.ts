@@ -32,6 +32,15 @@ export interface TemplateSerialized {
 }
 
 /**
+ * Extended interface for TemplateSerialized that includes date fields
+ * returned by Elasticsearch GET operations but not allowed in PUT operations
+ */
+export interface TemplateSerializedWithDateFields extends TemplateSerialized {
+  created_date_millis?: number;
+  modified_date_millis?: number;
+}
+
+/**
  * TemplateDeserialized is the format the UI will be working with,
  * regardless if we are loading the new format (composable) index template,
  * or the legacy one. Serialization is done server side.
@@ -75,7 +84,7 @@ export type TemplateType = 'default' | 'managed' | 'cloudManaged' | 'system';
 
 export interface TemplateFromEs {
   name: string;
-  index_template: TemplateSerialized;
+  index_template: TemplateSerializedWithDateFields;
 }
 
 /**

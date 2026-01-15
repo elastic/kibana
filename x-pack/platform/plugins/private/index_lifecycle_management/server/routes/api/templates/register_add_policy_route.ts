@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
-import type { TemplateFromEs, TemplateSerialized } from '@kbn/index-management-plugin/common/types';
+import type { TemplateSerializedWithDateFields } from '@kbn/index-management-plugin/common/types';
 import type { LegacyTemplateSerialized } from '@kbn/index-management-plugin/server';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -27,7 +27,7 @@ async function getLegacyIndexTemplate(
 async function getIndexTemplate(
   client: ElasticsearchClient,
   templateName: string
-): Promise<TemplateSerialized | undefined> {
+): Promise<TemplateSerializedWithDateFields | undefined> {
   const options = {
     // we allow 404 incase the user shutdown security in-between the check and now
     ignore: [404],
@@ -41,7 +41,10 @@ async function getIndexTemplate(
   );
 
   const { index_templates: templates } = response as {
-    index_templates: TemplateFromEs[];
+    index_templates: Array<{
+      name: string;
+      index_template: TemplateSerializedWithDateFields;
+    }>;
   };
   return templates.find((template) => template.name === templateName)?.index_template;
 }
@@ -68,22 +71,29 @@ async function updateIndexTemplate(
   if (!indexTemplate) {
     return false;
   }
+
   if (isLegacy) {
     merge(indexTemplate, { settings });
+    return client.indices.putTemplate({
+      name: templateName,
+      // @ts-expect-error Types of property auto_expand_replicas are incompatible.
+      body: indexTemplate,
+    });
   } else {
     merge(indexTemplate, {
       template: {
         settings,
       },
     });
+    // Remove properties from the GET response that cannot be in the PUT request
+    const { created_date_millis, modified_date_millis, ...safeTemplate } =
+      indexTemplate as TemplateSerializedWithDateFields;
+    return client.indices.putIndexTemplate({
+      name: templateName,
+      // @ts-expect-error Type 'IndexSettings' is not assignable to type 'IndicesIndexSettings'.
+      body: safeTemplate,
+    });
   }
-
-  if (isLegacy) {
-    // @ts-expect-error Types of property auto_expand_replicas are incompatible.
-    return client.indices.putTemplate({ name: templateName, body: indexTemplate });
-  }
-  // @ts-expect-error Type 'IndexSettings' is not assignable to type 'IndicesIndexSettings'.
-  return client.indices.putIndexTemplate({ name: templateName, body: indexTemplate });
 }
 
 const bodySchema = schema.object({
