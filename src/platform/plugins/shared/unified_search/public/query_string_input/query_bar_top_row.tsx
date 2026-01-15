@@ -654,6 +654,7 @@ export const QueryBarTopRow = React.memo(
           value="last 15 minutes"
           _showBadgeAtEnd={false}
           onTimeChange={onTimeChange}
+          isInvalid={isDateRangeInvalid}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
