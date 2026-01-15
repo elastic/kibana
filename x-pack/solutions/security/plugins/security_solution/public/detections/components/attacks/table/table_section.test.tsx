@@ -47,13 +47,6 @@ const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
 const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
 const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
 
-const defaultProps: Parameters<typeof TableSection>[0] = {
-  assignees: [],
-  pageFilters: [],
-  statusFilter: [],
-  dataView,
-};
-
 describe('<TableSection />', () => {
   const openSchedulesFlyout = jest.fn();
 
