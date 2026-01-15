@@ -18,5 +18,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/core",
     "@kbn/react-query",
+    "@kbn/security-solution-plugin",
+    "@kbn/fleet-plugin",
   ]
 }
