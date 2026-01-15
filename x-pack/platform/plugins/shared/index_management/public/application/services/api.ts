@@ -141,19 +141,13 @@ export async function updateDSFailureStore(
   });
 }
 
-async function internalLoadIndices() {
+export async function loadIndices() {
   const response = await httpService.httpClient.get<any>(`${API_BASE_PATH}/indices`);
-  return (response.data ? response.data : response) as Index[];
-}
-
-export function loadIndices() {
-  internalLoadIndicesSubject.next({});
+  internalLoadIndicesSubject.next(response.data);
 }
 
 const internalLoadIndicesSubject = new Subject<{}>();
-export const loadIndices$ = internalLoadIndicesSubject.pipe(
-  mergeMap(() => from(internalLoadIndices()))
-);
+export const loadIndices$ = internalLoadIndicesSubject.asObservable();
 
 export async function reloadIndices(
   indexNames: string[],
