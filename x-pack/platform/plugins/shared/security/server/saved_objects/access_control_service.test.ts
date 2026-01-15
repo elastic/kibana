@@ -359,7 +359,7 @@ describe('AccessControlService', () => {
       it('throws if not globally authorized and not authorized in current space', () => {
         const authorizationResult = makeAuthResult('partially_authorized', {
           dashboard: {
-            update: {
+            manage_access_control: {
               isGloballyAuthorized: false,
               authorizedSpaces: ['foo'],
             },
