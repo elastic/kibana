@@ -20,6 +20,7 @@ import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { AppLeaveContext } from '../app_leave_context';
 import { AgentBuilderTourProvider } from '../agent_builder_tour_context';
+import { AgentOverridesProvider } from '../agent_overrides/agent_overrides_context';
 
 const noopOnAppLeave = () => {};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
@@ -203,7 +204,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
             <AppLeaveContext.Provider value={noopOnAppLeave}>
               <ConversationContext.Provider value={conversationContextValue}>
                 <AgentBuilderTourProvider>
-                  <SendMessageProvider>{children}</SendMessageProvider>
+                  <AgentOverridesProvider>
+                    <SendMessageProvider>{children}</SendMessageProvider>
+                  </AgentOverridesProvider>
                 </AgentBuilderTourProvider>
               </ConversationContext.Provider>
             </AppLeaveContext.Provider>
