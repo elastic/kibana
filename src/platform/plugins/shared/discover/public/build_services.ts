@@ -71,7 +71,6 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from './constants';
 
 /**
  * Location state of internal Discover history instance
@@ -86,9 +85,7 @@ export interface UrlTracker {
   setTrackingEnabled: (value: boolean) => void;
 }
 
-export interface DiscoverFeatureFlags {
-  getTabsEnabled: () => boolean;
-}
+export type DiscoverFeatureFlags = Record<string, never>;
 
 export interface DiscoverServices {
   aiops?: AiopsPluginStart;
@@ -196,9 +193,7 @@ export const buildServices = ({
     data: plugins.data,
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
-    discoverFeatureFlags: {
-      getTabsEnabled: () => core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, true),
-    },
+    discoverFeatureFlags: {},
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
     i18n: core.i18n,
