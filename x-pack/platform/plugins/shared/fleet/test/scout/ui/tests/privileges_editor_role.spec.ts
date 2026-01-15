@@ -17,7 +17,7 @@ test.describe('When the user has Editor built-in role', { tag: ['@ess'] }, () =>
     page,
   }) => {
     // Mock the fleet setup API to indicate fleet server is ready
-    await page.route('**/api/fleet/agents/setup', (route) => {
+    await page.route('**/api/fleet/agents/setup', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -27,8 +27,8 @@ test.describe('When the user has Editor built-in role', { tag: ['@ess'] }, () =>
           missing_requirements: [],
           missing_optional_features: [],
         }),
-      });
-    });
+      })
+    );
 
     await browserAuth.loginAsPrivilegedUser();
     const { fleetHome } = pageObjects;

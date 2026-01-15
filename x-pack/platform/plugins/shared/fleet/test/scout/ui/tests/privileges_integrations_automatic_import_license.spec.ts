@@ -16,7 +16,7 @@ test.describe('User with basic license should hit License Paywall', { tag: ['@es
     page,
   }) => {
     // Mock the licensing API to return a basic license
-    await page.route('**/api/licensing/info', (route) => {
+    await page.route('**/api/licensing/info', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -30,8 +30,8 @@ test.describe('User with basic license should hit License Paywall', { tag: ['@es
           },
           signature: 'someIdAgain',
         }),
-      });
-    });
+      })
+    );
 
     await browserAuth.loginAsPrivilegedUser();
     const { createIntegrationLanding } = pageObjects;
