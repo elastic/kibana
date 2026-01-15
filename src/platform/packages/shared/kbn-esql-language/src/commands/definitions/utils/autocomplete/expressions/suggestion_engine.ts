@@ -142,14 +142,14 @@ async function tryGetKqlSuggestions(ctx: ExpressionContext): Promise<ISuggestion
     return null;
   }
 
-  // Check if we're inside a KQL function call
-  const kqlMatch = innerText.match(/\bkql\s*\(\s*(['"]|""")([^'"]*?)$/i);
+  // Check if we're inside a KQL function call with triple quotes
+  const kqlMatch = innerText.match(/\bkql\s*\(\s*"""([\s\S]*)$/i);
 
   if (!kqlMatch) {
     return null;
   }
 
-  const kqlQuery = kqlMatch[2];
+  const kqlQuery = kqlMatch[1];
   const cursorPositionInKql = kqlQuery.length;
 
   try {
