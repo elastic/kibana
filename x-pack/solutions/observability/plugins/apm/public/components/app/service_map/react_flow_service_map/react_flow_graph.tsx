@@ -114,8 +114,8 @@ function ReactFlowGraphInner({
       return edgesToHighlight.map((edge) => {
         const isConnected = nodeId !== null && (edge.source === nodeId || edge.target === nodeId);
         const color = isConnected ? primaryColor : EDGE_COLOR_DEFAULT;
-        const strokeWidth = isConnected ? 3 : 1;
-        const markerSize = isConnected ? 24 : 20;
+        const strokeWidth = isConnected ? 2 : 1;
+        const markerSize = isConnected ? 14 : 12;
 
         // Always create complete marker objects to ensure arrows render in all layouts
         const markerEnd: EdgeMarker = {

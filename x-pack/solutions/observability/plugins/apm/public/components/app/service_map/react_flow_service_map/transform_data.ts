@@ -68,8 +68,8 @@ export function transformElements(
 
       const markerEnd: EdgeMarker = {
         type: MarkerType.ArrowClosed,
-        width: 20,
-        height: 20,
+        width: 12,
+        height: 12,
         color: defaultColor,
       };
 
@@ -81,7 +81,7 @@ export function transformElements(
         style: { stroke: defaultColor, strokeWidth: 1 },
         markerEnd,
         markerStart: isBidirectional
-          ? { type: MarkerType.ArrowClosed, width: 20, height: 20, color: defaultColor }
+          ? { type: MarkerType.ArrowClosed, width: 12, height: 12, color: defaultColor }
           : undefined,
         data: { isBidirectional },
       });
