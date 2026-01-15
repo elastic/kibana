@@ -15,7 +15,6 @@ import {
   dataRegexExtractStepDefinition,
   dataRegexReplaceStepDefinition,
 } from './data';
-import { rerankStepDefinition } from './rerank';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
 
@@ -28,5 +27,4 @@ export const registerInternalStepDefinitions = (
   serverStepRegistry.register(dataRegexExtractStepDefinition);
   serverStepRegistry.register(dataRegexReplaceStepDefinition);
   serverStepRegistry.register(aiPromptStepDefinition(core));
-  serverStepRegistry.register(rerankStepDefinition);
 };

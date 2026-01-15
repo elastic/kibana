@@ -34,7 +34,7 @@ describe('Reranker Tech preview badge', () => {
   } as InferenceInferenceEndpointInfo;
 
   const mockJinaRerankerV2Provider = {
-    inference_id: '.jina-reranker-v2',
+    inference_id: '',
     task_type: 'rerank',
     service: 'elastic',
     service_settings: {

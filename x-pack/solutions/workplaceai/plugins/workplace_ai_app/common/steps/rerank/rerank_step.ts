@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { z } from '@kbn/zod/v4';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
  * Step type ID for the rerank workflow step
  */
-export const RerankStepTypeId = 'elasticsearch.rerank';
+export const RerankStepTypeId = 'search.rerank';
 
 /**
  * Default values for rerank step parameters
@@ -79,9 +78,13 @@ export type RerankOutput = z.infer<typeof RerankOutputSchema>;
  * Common step definition for rerank step
  * Shared between server and public implementations
  */
-export const rerankStepCommonDefinition = {
+export const rerankStepCommonDefinition: CommonStepDefinition<
+  typeof RerankInputSchema,
+  typeof RerankOutputSchema,
+  typeof RerankConfigSchema
+> = {
   id: RerankStepTypeId,
   inputSchema: RerankInputSchema,
   configSchema: RerankConfigSchema,
   outputSchema: RerankOutputSchema,
-} as const;
+};

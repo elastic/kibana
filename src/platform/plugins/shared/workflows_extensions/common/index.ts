@@ -9,6 +9,3 @@
 
 export type { CommonStepDefinition } from './step_registry/types';
 export { DataMapStepTypeId } from './steps/data';
-
-export { RerankStepTypeId, rerankStepCommonDefinition } from './steps/rerank';
-export type { RerankInput, RerankOutput } from './steps/rerank';

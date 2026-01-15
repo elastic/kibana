@@ -1,34 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import type { CoreSetup, HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { rerankStepCommonDefinition, RerankStepTypeId } from '../../../common/steps/rerank';
-import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
+import { rerankStepCommonDefinition, RerankStepTypeId } from '../../../common/steps/rerank/rerank_step';
+import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import {
+  createInferenceIdCompletion,
+  createInferenceIdValidator,
+} from './inference_id_validation';
 
-export const rerankStepDefinition: PublicStepDefinition = {
-  ...rerankStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/sortable').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
-  label: i18n.translate('workflowsExtensions.rerankStep.label', {
-    defaultMessage: 'Rerank Results',
-  }),
-  description: i18n.translate('workflowsExtensions.rerankStep.description', {
-    defaultMessage:
-      'Rerank documents using a rerank inference endpoint for improved relevance ordering',
-  }),
-  documentation: {
-    details: i18n.translate('workflowsExtensions.rerankStep.documentation.details', {
-      defaultMessage: `The rerank step calls a rerank inference endpoint to reorder documents based on relevance to the provided text.
+export const createRerankStepDefinition = (core: CoreSetup) => {
+  let httpPromise: Promise<HttpStart> | null = null;
+  
+  const getHttp = async (): Promise<HttpStart> => {
+    if (!httpPromise) {
+      httpPromise = core.getStartServices().then(([coreStart]) => coreStart.http);
+    }
+    return httpPromise;
+  };
+
+  return createPublicStepDefinition({
+    ...rerankStepCommonDefinition,
+    icon: React.lazy(() =>
+      import('@elastic/eui/es/components/icon/assets/sortable').then(({ icon }) => ({
+        default: icon,
+      }))
+    ),
+    label: i18n.translate('searchWorkflows.rerankStep.label', {
+      defaultMessage: 'Rerank Results',
+    }),
+    description: i18n.translate('searchWorkflows.rerankStep.description', {
+      defaultMessage:
+        'Rerank documents using a rerank inference endpoint for improved relevance ordering',
+    }),
+    documentation: {
+      details: i18n.translate('searchWorkflows.rerankStep.documentation.details', {
+        defaultMessage: `The rerank step calls a rerank inference endpoint to reorder documents based on relevance to the provided text.
 
 **How it works:**
 • Takes an array of documents and rerank text
@@ -36,7 +49,7 @@ export const rerankStepDefinition: PublicStepDefinition = {
 • Applies two-level truncation to prevent token limit issues:
   - max_input_field_length: truncates each individual field (defaults to 1000 characters)
   - max_input_total_length: truncates total text per document after concatenation (defaults to 2000 characters)
-• Calls the /_inference/rerank/{model_id} endpoint with the rank window
+• Calls the rerank inference endpoint with the rank window
 • Returns reranked documents followed by any remaining documents in their input order
 
 **Data handling:**
@@ -51,7 +64,7 @@ export const rerankStepDefinition: PublicStepDefinition = {
 • At least one rerank inference endpoint must be configured in Elasticsearch
 
 This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
-    }),
+      }),
     examples: [
       `## Basic usage with rank window
 \`\`\`yaml
@@ -110,4 +123,23 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
     ],
   },
   actionsMenuGroup: ActionsMenuGroup.elasticsearch,
+  editorHandlers: {
+    config: {
+      inference_id: {
+        completion: {
+          getOptions: async (value) => {
+            const http = await getHttp();
+            return createInferenceIdCompletion(http)(value);
+          },
+        },
+        validation: {
+          validate: async (value, context) => {
+            const http = await getHttp();
+            return createInferenceIdValidator(http)(value);
+          },
+        },
+      },
+    },
+  },
+  });
 };
