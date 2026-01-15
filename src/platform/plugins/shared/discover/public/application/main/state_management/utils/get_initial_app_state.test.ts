@@ -17,6 +17,7 @@ import { fromTabStateToSavedObjectTab } from '../redux';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { DiscoverServices } from '../../../../build_services';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { DEFAULT_COLUMNS_SETTING } from '@kbn/discover-utils';
 
 describe('getInitialAppState', () => {
   const customQuery = {
@@ -395,6 +396,87 @@ describe('getInitialAppState', () => {
         services,
       });
       expect(appState.sort).toEqual([['test', 'desc']]);
+    });
+  });
+
+  describe('default columns', () => {
+    test('should use persistedTab columns if provided', () => {
+      const services = createDiscoverServicesMock();
+      const appState = getInitialAppState({
+        initialUrlState: undefined,
+        persistedTab: {
+          ...getPersistedTab({ services }),
+          columns: ['column_1', 'column_2'],
+        },
+        dataView: dataViewWithTimefieldMock,
+        services,
+      });
+      expect(appState.columns).toEqual(['column_1', 'column_2']);
+    });
+
+    test('should use default columns if empty columns are stored for persistedTab', () => {
+      const services = createDiscoverServicesMock();
+      const appState = getInitialAppState({
+        initialUrlState: undefined,
+        persistedTab: {
+          ...getPersistedTab({ services }),
+          columns: [],
+        },
+        dataView: dataViewWithTimefieldMock,
+        services,
+      });
+      expect(appState.columns).toEqual(['default_column']);
+    });
+
+    test('should use an empty array if stored as empty in persistedTab and no default columns are set in uiSettings', () => {
+      const services = createDiscoverServicesMock();
+      services.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+        if (key === DEFAULT_COLUMNS_SETTING) {
+          return [];
+        }
+      });
+      const appState = getInitialAppState({
+        initialUrlState: undefined,
+        persistedTab: {
+          ...getPersistedTab({ services }),
+          columns: [],
+        },
+        dataView: dataViewWithTimefieldMock,
+        services,
+      });
+      expect(appState.columns).toEqual([]);
+    });
+
+    test('should return an empty array if provided as empty via URL and no default columns are set in uiSettings', () => {
+      const services = createDiscoverServicesMock();
+      services.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+        if (key === DEFAULT_COLUMNS_SETTING) {
+          return [];
+        }
+      });
+      const appState = getInitialAppState({
+        initialUrlState: { columns: [] },
+        persistedTab: undefined,
+        dataView: dataViewWithTimefieldMock,
+        services,
+      });
+      expect(appState.columns).toEqual([]);
+    });
+
+    test('should return undefined if not provided and no default columns are set in uiSettings', () => {
+      const services = createDiscoverServicesMock();
+      services.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+        if (key === DEFAULT_COLUMNS_SETTING) {
+          return [];
+        }
+      });
+      const appState = getInitialAppState({
+        initialUrlState: undefined,
+        persistedTab: undefined,
+        dataView: dataViewWithTimefieldMock,
+        services,
+      });
+      expect(appState.columns).toEqual(undefined);
     });
   });
 });

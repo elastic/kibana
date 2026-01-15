@@ -279,7 +279,7 @@ exports[`SampleDataCard not installed renders 1`] = `
         style="display:contents"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexEnd-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"

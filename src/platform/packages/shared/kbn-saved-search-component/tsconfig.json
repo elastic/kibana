@@ -24,7 +24,6 @@
     "@kbn/data-plugin",
     "@kbn/discover-plugin",
     "@kbn/i18n",
-    "@kbn/presentation-publishing",
     "@kbn/saved-search-plugin",
     "@kbn/data-views-plugin",
     "@kbn/unified-data-table",
