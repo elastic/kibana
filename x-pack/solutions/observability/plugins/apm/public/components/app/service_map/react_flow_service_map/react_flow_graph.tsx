@@ -59,14 +59,14 @@ interface ReactFlowGraphProps {
 const layoutDirectionOptions = [
   {
     id: 'LR',
-    label: i18n.translate('xpack.actions.serviceMap.layoutDirection.horizontal', {
+    label: i18n.translate('xpack.apm.serviceMap.layoutDirection.horizontal', {
       defaultMessage: 'Horizontal',
     }),
     iconType: 'sortRight',
   },
   {
     id: 'TB',
-    label: i18n.translate('xpack.actions.serviceMap.layoutDirection.vertical', {
+    label: i18n.translate('xpack.apm.serviceMap.layoutDirection.vertical', {
       defaultMessage: 'Vertical',
     }),
     iconType: 'sortDown',
@@ -103,6 +103,10 @@ function ReactFlowGraphInner({
   }, [reactFlowInstance]);
 
   const primaryColor = euiTheme.colors.primary;
+
+  // Track the current selected node for use in layout effect without triggering re-layout
+  const selectedNodeIdRef = React.useRef<string | null>(null);
+  selectedNodeIdRef.current = selectedNodeId;
 
   // Helper to apply edge highlighting based on selected node
   const applyEdgeHighlighting = useCallback(
@@ -156,47 +160,60 @@ function ReactFlowGraphInner({
     );
 
     setNodes(layoutedNodes);
-    // Preserve highlighting if a node is selected
-    setEdges(applyEdgeHighlighting(layoutedEdges, selectedNodeId));
+    // Preserve highlighting if a node is selected (using ref to avoid triggering re-layout)
+    setEdges(applyEdgeHighlighting(layoutedEdges, selectedNodeIdRef.current));
     // Fit view after layout change with a small delay to ensure nodes are rendered
     setTimeout(() => fitView({ padding: 0.2, duration: 200 }), 50);
-  }, [
-    elements,
-    layoutDirection,
-    selectedNodeId,
-    applyEdgeHighlighting,
-    setNodes,
-    setEdges,
-    fitView,
-  ]);
+  }, [elements, layoutDirection, applyEdgeHighlighting, setNodes, setEdges, fitView]);
 
   const handleLayoutDirectionChange = useCallback((optionId: string) => {
     setLayoutDirection(optionId as LayoutDirection);
   }, []);
 
-  // Handle node click - update edges with highlight colors
+  // Handle node click - update node selection and edge highlighting
   const handleNodeClick: NodeMouseHandler<Node<ServiceMapNodeData>> = useCallback(
     (event, node) => {
       event.stopPropagation();
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
+
+      // Update node selection state
+      setNodes((currentNodes) =>
+        currentNodes.map((n) => ({
+          ...n,
+          selected: n.id === newSelectedId,
+        }))
+      );
+
+      // Update edge highlighting
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
       setSelectedNodeForPopover(newSelectedId ? node : null);
+
       // Track when popover opens and store current viewport
       if (newSelectedId) {
         popoverOpenTimeRef.current = Date.now();
         lastViewportRef.current = reactFlowInstanceRef.current.getViewport();
       }
     },
-    [selectedNodeId, setEdges, applyEdgeHighlighting]
+    [selectedNodeId, setNodes, setEdges, applyEdgeHighlighting]
   );
 
   // Handle pane click to deselect
   const handlePaneClick = useCallback(() => {
     setSelectedNodeId(null);
+
+    // Clear node selection
+    setNodes((currentNodes) =>
+      currentNodes.map((n) => ({
+        ...n,
+        selected: false,
+      }))
+    );
+
+    // Clear edge highlighting
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
     setSelectedNodeForPopover(null);
-  }, [setEdges, applyEdgeHighlighting]);
+  }, [setNodes, setEdges, applyEdgeHighlighting]);
 
   // Handle viewport changes (pan/zoom) - close popover
   const handleMove = useCallback(() => {
@@ -288,12 +305,12 @@ function ReactFlowGraphInner({
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Panel position="top-right">
           <EuiToolTip
-            content={i18n.translate('xpack.actions.serviceMap.layoutDirection.tooltip', {
+            content={i18n.translate('xpack.apm.serviceMap.layoutDirection.tooltip', {
               defaultMessage: 'Change layout orientation',
             })}
           >
             <EuiButtonGroup
-              legend={i18n.translate('xpack.actions.serviceMap.layoutDirection.legend', {
+              legend={i18n.translate('xpack.apm.serviceMap.layoutDirection.legend', {
                 defaultMessage: 'Layout direction',
               })}
               options={layoutDirectionOptions}
