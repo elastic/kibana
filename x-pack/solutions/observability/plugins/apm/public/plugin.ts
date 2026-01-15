@@ -84,6 +84,7 @@ import type {
   DiscoverSharedPublicSetup,
   DiscoverSharedPublicStart,
 } from '@kbn/discover-shared-plugin/public';
+import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -109,6 +110,7 @@ export interface ApmPluginSetupDeps {
   embeddable: EmbeddableSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -154,6 +156,7 @@ export interface ApmPluginStartDeps {
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
   uiActions: UiActionsStart;

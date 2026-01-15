@@ -12,7 +12,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { DATA_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { registerApp } from './register';
+import { registerApp } from './application/register';
 import type {
   DataConnectorsPluginSetup,
   DataConnectorsPluginSetupDependencies,
