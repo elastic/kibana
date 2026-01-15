@@ -13,6 +13,7 @@ import { appContextService } from '../app_context';
 import * as AgentService from '../agents';
 import type { FleetServerPolicy, FullAgentPolicy, FullAgentPolicyInput } from '../../types';
 import { agentPolicyService } from '../agent_policy';
+import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types';
 
 export const AGENT_POLICY_VERSION_SEPARATOR = '#';
 
@@ -90,7 +91,7 @@ export function hasAgentVersionConditionInInputTemplate(
   assetsMap: PackagePolicyAssetsMap
 ): boolean {
   let hasVersionConditionInInputTemplate = false;
-  assetsMap?.forEach((assetBuffer, assetPath) => {
+  assetsMap?.forEach((assetBuffer?: Buffer, assetPath: string) => {
     if (assetPath.endsWith('.hbs') && assetBuffer?.toString().includes('_meta.agent.version')) {
       hasVersionConditionInInputTemplate = true;
     }
