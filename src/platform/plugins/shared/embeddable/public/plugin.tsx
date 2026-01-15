@@ -50,7 +50,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerAddFromLibraryType,
       registerLegacyURLTransform,
       transformEnhancementsIn: enhancementsPersistableState.extract,
-      transformEnhancementsOut: transformEnhancementsOut,
+      transformEnhancementsOut,
     };
   }
 

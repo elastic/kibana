@@ -6,7 +6,7 @@
  */
 
 import type { UiActionsEnhancedBaseActionFactoryContext } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
 
 export type DashboardDrilldownConfig = {
   dashboardId?: string;
