@@ -14,9 +14,9 @@
 // * Apply tags (operationId: SetAlertTags)
 // * Read tags (operationId: ReadTags)
 // Case Management:
-// * Create case (operationId: createCaseDefaultSpace)
-// * Update case (operationId: updateCaseDefaultSpace)
-// This sample steps is used to test validation in generateYamlSchemaFromConnectors.kibana.test.ts and getWorkflowJsonSchema.kibana.test.ts
+// * Create case (operationId: createCaseDefaultSpace -> type: kibana.createCase)
+// * Update case (operationId: updateCaseDefaultSpace -> type: kibana.updateCase)
+// These sample steps are used to test validation in generateYamlSchemaFromConnectors.kibana.test.ts and getWorkflowJsonSchema.kibana.test.ts
 export const KIBANA_SAMPLE_STEPS = [
   {
     name: 'set_alerts_status_by_ids',
@@ -69,7 +69,7 @@ export const KIBANA_SAMPLE_STEPS = [
   // },
   {
     name: 'create_case',
-    type: 'kibana.createCaseDefaultSpace',
+    type: 'kibana.createCase',
     with: {
       owner: 'securitySolution',
       title: '[Attack Discovery] {{foreach.item.attack_discovery.title_with_replacements}}',
@@ -90,7 +90,7 @@ export const KIBANA_SAMPLE_STEPS = [
   },
   {
     name: 'update_case',
-    type: 'kibana.updateCaseDefaultSpace',
+    type: 'kibana.updateCase',
     with: {
       cases: [
         {
@@ -103,7 +103,7 @@ export const KIBANA_SAMPLE_STEPS = [
   },
   {
     name: 'get_case',
-    type: 'kibana.getCaseDefaultSpace',
+    type: 'kibana.getCase',
     with: {
       caseId: '123',
       includeComments: true,
@@ -111,7 +111,7 @@ export const KIBANA_SAMPLE_STEPS = [
   },
   {
     name: 'add_case_comment_alert',
-    type: 'kibana.addCaseCommentDefaultSpace',
+    type: 'kibana.addCaseComment',
     with: {
       caseId: '123',
       alertId: 'alert-123',
@@ -126,7 +126,7 @@ export const KIBANA_SAMPLE_STEPS = [
   },
   {
     name: 'add_case_comment_user',
-    type: 'kibana.addCaseCommentDefaultSpace',
+    type: 'kibana.addCaseComment',
     with: {
       caseId: '123',
       comment: 'This is a user comment on the case',
