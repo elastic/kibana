@@ -5,20 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-export type ConnectorSecrets = z.infer<typeof ConnectorSecretsSchema>;
-
-/**
- * Schema for Stack connector secrets.
- */
-export const ConnectorSecretsSchema = z.object({
-  token: z.string().optional(),
-  apiKey: z.string().optional(),
-  user: z.string().optional(),
-  password: z.string().optional(),
-  secretHeaders: z.record(z.string(), z.string()).optional(),
-});
-
 /**
  * OAuth providers supported by EARS
  */
