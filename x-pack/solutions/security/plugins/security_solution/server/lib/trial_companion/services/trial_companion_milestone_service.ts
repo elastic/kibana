@@ -21,6 +21,7 @@ import {
   savedDiscoverySessionsM2,
   detectionRulesInstalledM3,
   installedPackagesM1,
+  aiFeaturesM5,
   casesM6,
 } from './trial_companion_nba_detectors';
 import { TrialCompanionMilestoneRepositoryImpl } from './trial_companion_milestone_repository';
@@ -50,12 +51,13 @@ export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneSe
   usageCollection?: UsageCollectionSetup
 ) => {
   const soClient = savedObjects.getUnsafeInternalClient();
+  const detectorsLogger = logger.get('trial-companion-milestone-detectors');
 
   const detectors: DetectorF[] = [];
 
   const usageCollectorDeps: UsageCollectorDeps | undefined = usageCollection
     ? {
-        logger,
+        logger: detectorsLogger,
         collectorContext: {
           esClient,
           soClient,
@@ -65,11 +67,12 @@ export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneSe
     : undefined;
 
   // order matters
-  detectors.push(installedPackagesM1(logger, packageService));
+  detectors.push(installedPackagesM1(detectorsLogger, packageService));
   if (usageCollectorDeps) {
     detectors.push(
       savedDiscoverySessionsM2(usageCollectorDeps),
       detectionRulesInstalledM3(usageCollectorDeps),
+      aiFeaturesM5(esClient),
       casesM6(usageCollectorDeps)
     );
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { CollectorFetchContext, ICollectorSet } from '@kbn/usage-collection-plugin/server';
 import { CASE_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
@@ -93,16 +93,12 @@ export const detectionRulesInstalledM3 = (deps: UsageCollectorDeps): DetectorF =
 
 export const casesM6 = (deps: UsageCollectorDeps): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
-    interface SavedObjectsCountsTelemetry {
-      by_type?: [{ type: string; count: number }];
-    }
-
-    const result = await fetchCollectorResults<SavedObjectsCountsTelemetry>(
-      'saved_objects_counts',
-      deps
-    );
-    const count = result?.by_type?.find((item) => item.type === CASE_SAVED_OBJECT)?.count ?? 0;
-    return count > 0 ? undefined : Milestone.M6;
+    const { total } = await deps.collectorContext.soClient.find({
+      type: CASE_SAVED_OBJECT,
+      perPage: 0,
+      page: 0,
+    });
+    return total > 0 ? undefined : Milestone.M6;
   };
 };
 
@@ -116,6 +112,38 @@ export const savedDiscoverySessionsM2 = (deps: UsageCollectorDeps): DetectorF =>
     });
 
     return total > 0 ? undefined : Milestone.M2;
+  };
+};
+
+export const aiFeaturesM5 = (esClient: ElasticsearchClient): DetectorF => {
+  return async (): Promise<Milestone | undefined> => {
+    const attackDiscoveryResponse = await esClient.count({
+      index: '.alerts-security.attack.discovery.alerts-*',
+      query: {
+        range: {
+          '@timestamp': {
+            gte: 'now-14d',
+          },
+        },
+      },
+    });
+    if (attackDiscoveryResponse.count > 0) {
+      return undefined;
+    }
+    const aiAssistantResponse = await esClient.count({
+      index: '.kibana-elastic-ai-assistant-conversations-*',
+      query: {
+        range: {
+          '@timestamp': {
+            gte: 'now-14d',
+          },
+        },
+      },
+    });
+    if (aiAssistantResponse.count > 0) {
+      return undefined;
+    }
+    return Milestone.M5;
   };
 };
 

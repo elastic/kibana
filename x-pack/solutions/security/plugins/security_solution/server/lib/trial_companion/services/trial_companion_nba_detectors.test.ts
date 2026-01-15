@@ -12,6 +12,7 @@ import {
   installedPackagesM1,
   savedDiscoverySessionsM2,
   detectionRulesInstalledM3,
+  aiFeaturesM5,
 } from './trial_companion_nba_detectors';
 import type {
   Collector,
@@ -20,11 +21,13 @@ import type {
 } from '@kbn/usage-collection-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Milestone } from '../../../../common/trial_companion/types';
 import type { PackageClient, PackageService } from '@kbn/fleet-plugin/server';
 import { lazyObject } from '@kbn/lazy-object';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import type { CountResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('Trial companion NBA detectors', () => {
   const logger = loggingSystemMock.createLogger();
@@ -38,7 +41,7 @@ describe('Trial companion NBA detectors', () => {
   let deps: UsageCollectorDeps;
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
-    esClient = {} as jest.Mocked<ElasticsearchClient>;
+    esClient = elasticsearchClientMock.createInternalClient();
     usageCollection = {
       getCollectorByType: jest.fn(),
     } as unknown as jest.Mocked<ICollectorSet>;
@@ -133,34 +136,10 @@ describe('Trial companion NBA detectors', () => {
 
   describe('casesM6', () => {
     it.each([
-      [
-        '0 cases',
-        {
-          by_type: [{ type: 'cases', count: 0 }],
-        },
-        Milestone.M6,
-      ],
-      [
-        'no cases',
-        {
-          by_type: [{ type: 'foo', count: 0 }],
-        },
-        Milestone.M6,
-      ],
-      [
-        'with cases',
-        {
-          by_type: [
-            { type: 'foo', count: 1 },
-            { type: 'bar', count: 2 },
-            { type: 'cases', count: 3 },
-          ],
-        },
-        undefined,
-      ],
-      ['empty telemetry', {}, Milestone.M6],
-    ])('compares total count of cases saved objects - %s', async (_tcName, telemetry, expected) => {
-      (collector.fetch as jest.Mock).mockResolvedValue(telemetry);
+      ['0 cases', 0, Milestone.M6],
+      ['with cases', 3, undefined],
+    ])('compares total count of cases saved objects - %s', async (_tcName, total, expected) => {
+      soClient.find.mockResolvedValueOnce({ saved_objects: [], total, per_page: 0, page: 0 });
       await expect(casesM6(deps)()).resolves.toEqual(expected);
     });
 
@@ -199,6 +178,31 @@ describe('Trial companion NBA detectors', () => {
         (collector.fetch as jest.Mock).mockResolvedValue(telemetry);
         await expect(detectionRulesInstalledM3(deps)()).resolves.toEqual(expected);
       });
+    });
+
+    describe('aiFeaturesM5', () => {
+      const buildCountResponse = (count: number): CountResponse => ({
+        count,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+        },
+      });
+
+      it.each([
+        ['0 alerts, 0 conversations', 0, 0, Milestone.M5],
+        ['0 alerts, 3 conversations', 0, 3, undefined],
+        ['2 alerts, 0 conversations', 2, 0, undefined],
+        ['5 alerts, 12 conversations', 5, 12, undefined],
+      ])(
+        'compares count of attack discovery alerts and assistant conversations - %s',
+        async (_tcName, alerts, assistant, expected) => {
+          (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(alerts));
+          (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(assistant));
+          await expect(aiFeaturesM5(esClient)()).resolves.toEqual(expected);
+        }
+      );
     });
   });
 });
