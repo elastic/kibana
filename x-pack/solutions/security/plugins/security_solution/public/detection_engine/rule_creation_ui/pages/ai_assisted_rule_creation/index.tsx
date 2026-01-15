@@ -64,7 +64,6 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const {
     settings,
     application: { navigateToApp },
-    featureFlags,
   } = useKibana().services;
   const styles = useHeaderLinkBackStyles();
 
