@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
       await privMonUtils.deleteIndex(index1);
     });
 
-    it('should merge sources when the same user is added through different methods (API, CSV, index)', async () => {
+    it(`should merge sources when the same user is added through different methods (API, CSV, index)`, async () => {
       await privMonUtils.initPrivMonEngine();
 
       // Step 1: Add user via API
@@ -65,15 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(user?.labels?.sources).toContain('csv');
 
       // Step 3: Add same user via index sync - should merge all three sources
-      const createEntitySourceResponse = await entityAnalyticsApi.createEntitySource({
-        body: {
-          type: 'index',
-          name: 'User Monitored Indices - Multi-Source Test',
-          indexPattern: index1,
-        },
-      });
-
-      expect(createEntitySourceResponse.status).toBe(200);
+      await indexSyncUtils.createEntitySourceForIndex();
       // Can't use scheduleEngineAndWaitForUserCount(1) because count is already 1 from API/CSV sources.
       // It would return immediately before the index sync merges the 'index' source into user labels.
       // Instead, manually trigger the sync and wait for the actual source merge to complete.
