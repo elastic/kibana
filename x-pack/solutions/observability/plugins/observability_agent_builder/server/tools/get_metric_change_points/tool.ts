@@ -14,6 +14,7 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
 import { getToolHandler } from './handler';
