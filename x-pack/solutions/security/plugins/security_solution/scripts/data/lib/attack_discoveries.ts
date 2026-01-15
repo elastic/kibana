@@ -23,6 +23,71 @@ import { attackDiscoveryAlertFieldMap } from '@kbn/elastic-assistant-plugin/serv
 const ALERT_UUID = 'kibana.alert.uuid';
 const ID_NAMESPACE = '3c0de8b5-1a9d-4d9f-9e2a-2fb3a58d6f9f';
 
+// IMPORTANT:
+// The Security Solution Attack Discovery UI derives the "attack chain" visualization from
+// `attackDiscovery.mitreAttackTactics` and expects the tactic labels below.
+// See `getTacticMetadata` in `@kbn/elastic-assistant-common`.
+const MITRE_ATTACK_TACTICS_SUBSET = [
+  'Reconnaissance',
+  'Resource Development',
+  'Initial Access',
+  'Execution',
+  'Persistence',
+  'Privilege Escalation',
+  'Defense Evasion',
+  'Credential Access',
+  'Discovery',
+  'Lateral Movement',
+  'Collection',
+  'Command and Control',
+  'Exfiltration',
+  'Impact',
+] as const;
+
+const getDeterministicHexSeed = (seed: string): number => {
+  // `seed` is typically a UUID. Convert it to a stable 32-bit number by taking the first 8 hex chars.
+  const hex = seed.replace(/-/g, '').slice(0, 8);
+  const n = Number.parseInt(hex, 16);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const pickMitreAttackTactics = (seed: string): string[] => {
+  // Pick a contiguous range to look like a plausible "chain", while remaining deterministic.
+  const n = getDeterministicHexSeed(seed);
+  const minLen = 3;
+  const maxLen = 7;
+  const len = minLen + (n % (maxLen - minLen + 1));
+  const maxStart = Math.max(0, MITRE_ATTACK_TACTICS_SUBSET.length - len);
+  const start = maxStart === 0 ? 0 : (Math.floor(n / 13) % (maxStart + 1));
+  const slice = MITRE_ATTACK_TACTICS_SUBSET.slice(start, start + len);
+
+  // Ensure we always have at least one of the most common mid-chain tactics so the UI is meaningful.
+  // If the slice doesn't include Execution, add it (while keeping the set unique).
+  const execution = 'Execution';
+  if (!slice.includes(execution)) {
+    return Array.from(new Set([...slice, execution]));
+  }
+  return [...slice];
+};
+
+const buildUniqueAttackDiscoveryTitle = ({
+  discoveryKey,
+  hostName,
+  userName,
+  discoveryTimeIso,
+}: {
+  discoveryKey: string;
+  hostName?: string;
+  userName?: string;
+  discoveryTimeIso: string;
+}): string => {
+  const day = discoveryTimeIso.slice(0, 10);
+  const shortId = uuidv5(discoveryKey, ID_NAMESPACE).split('-')[0];
+  const hostLabel = hostName ?? 'unknown host';
+  const userLabel = userName ? ` / ${userName}` : '';
+  return `Attack discovery: ${hostLabel}${userLabel} (${day}) [${shortId}]`;
+};
+
 export interface GenerateAttackDiscoveriesOptions {
   startMs: number;
   endMs: number;
@@ -350,9 +415,15 @@ export const generateAndIndexAttackDiscoveries = async ({
       g.alertIds.join(','),
     ].join('|');
 
+    const generationUuid = uuidv5(discoveryKey, ID_NAMESPACE);
     const attack: AttackDiscovery = {
       alertIds: g.alertIds,
-      title: g.hostName ? `Attack discovery on ${g.hostName}` : `Attack discovery on unknown host`,
+      title: buildUniqueAttackDiscoveryTitle({
+        discoveryKey,
+        hostName: g.hostName,
+        userName: g.userName,
+        discoveryTimeIso: g.discoveryTimeIso,
+      }),
       summaryMarkdown: `Detected ${g.alertIds.length} alert(s) that appear related.`,
       entitySummaryMarkdown: g.hostName
         ? `Host {{ host.name ${g.hostName} }}${
@@ -364,7 +435,8 @@ export const generateAndIndexAttackDiscoveries = async ({
         `- Alerts: ${g.alertIds.length}\n${
           g.hostName ? `- Host: {{ host.name ${g.hostName} }}\n` : ''
         }${g.userName ? `- User: {{ user.name ${g.userName} }}\n` : ''}`,
-      mitreAttackTactics: [],
+      // Drives the "attack chain" visualization in the UI.
+      mitreAttackTactics: pickMitreAttackTactics(generationUuid),
       timestamp: g.discoveryTimeIso,
     };
 
@@ -376,7 +448,7 @@ export const generateAndIndexAttackDiscoveries = async ({
         alertsContextCount: g.alertIds.length,
         attackDiscoveries: [attack],
         // Deterministic so repeated runs overwrite the same docs.
-        generationUuid: uuidv5(discoveryKey, ID_NAMESPACE),
+        generationUuid,
       },
       now,
       spaceId,
