@@ -2641,9 +2641,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_time_picker2_a.tgz":
+"@elastic/eui@file:./eui_time_picker2_beed41d.tgz":
   version "111.0.0"
-  resolved "file:./eui_time_picker2_a.tgz#a028698e5122e69b1908b58fa6ee15c50bc33e09"
+  resolved "file:./eui_time_picker2_beed41d.tgz#15d9b0741a4f2494967b25e72ce29b58e567adff"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
