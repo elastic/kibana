@@ -61,7 +61,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: () => schema.maybe(searchSessionSchema()),
+              body: () => schema.maybe(searchSessionSchema),
             },
           },
         },
@@ -111,7 +111,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionSchema,
+              body: () => searchSessionSchema,
             },
           },
         },
@@ -151,7 +151,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionStatusSchema,
+              body: () => searchSessionStatusSchema,
             },
           },
         },
@@ -202,7 +202,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionsFindSchema,
+              body: () => searchSessionsFindSchema,
             },
           },
         },
@@ -326,7 +326,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionsUpdateSchema,
+              body: () => searchSessionsUpdateSchema,
             },
           },
         },
@@ -372,7 +372,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionsUpdateSchema,
+              body: () => searchSessionsUpdateSchema,
             },
           },
         },
@@ -417,7 +417,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionStatusesSchema,
+              body: () => searchSessionStatusesSchema,
             },
           },
         },

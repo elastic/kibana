@@ -151,21 +151,14 @@ export class SearchSessionService implements ISearchSessionService {
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
-    const sessions = await this.bulkGet({ savedObjectsClient }, user, [sessionId]);
-    return sessions[0];
-  };
-
-  private bulkGet = async (
-    { savedObjectsClient }: SearchSessionDependencies,
-    user: AuthenticatedUser | null,
-    sessionIds: string[]
-  ) => {
-    this.logger.debug(`bulkGet | ${sessionIds}`);
-    const sessions = await savedObjectsClient.bulkGet<SearchSessionSavedObjectAttributes>(
-      sessionIds.map((id) => ({ id, type: SEARCH_SESSION_TYPE }))
+    this.logger.debug(`get | ${sessionId}`);
+    const session = await savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
+      SEARCH_SESSION_TYPE,
+      sessionId
     );
-    sessions.saved_objects.forEach((session) => this.throwOnUserConflict(user, session));
-    return sessions.saved_objects;
+    this.throwOnUserConflict(user, session);
+
+    return session;
   };
 
   public find = async (
@@ -425,6 +418,19 @@ export class SearchSessionService implements ISearchSessionService {
 
     return { statuses: sessionStatusesRecord };
   }
+
+  private bulkGet = async (
+    { savedObjectsClient }: SearchSessionDependencies,
+    user: AuthenticatedUser | null,
+    sessionIds: string[]
+  ) => {
+    this.logger.debug(`bulkGet | ${sessionIds}`);
+    const sessions = await savedObjectsClient.bulkGet<SearchSessionSavedObjectAttributes>(
+      sessionIds.map((id) => ({ id, type: SEARCH_SESSION_TYPE }))
+    );
+    sessions.saved_objects.forEach((session) => this.throwOnUserConflict(user, session));
+    return sessions.saved_objects;
+  };
 
   /**
    * Look up an existing search ID that matches the given request in the given session so that the

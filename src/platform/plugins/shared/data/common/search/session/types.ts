@@ -73,7 +73,8 @@ export interface SearchSessionSavedObjectAttributes {
   status?: SearchSessionStatus;
 }
 
-export interface SearchSessionRequestInfo {
+// For this type we need to omit status because we can't go from it being present to optional
+export interface SearchSessionRequestInfo extends Omit<SearchSessionRequestStatus, 'status'> {
   /**
    * ID of the async search request
    */
@@ -86,18 +87,6 @@ export interface SearchSessionRequestInfo {
    * Search status - used to avoid extra calls to ES when tracking search IDs
    */
   status?: SearchStatus;
-  /**
-   * Start time of the search request in ISO format
-   */
-  startedAt?: string;
-  /**
-   * Completion time of the search request in ISO format
-   */
-  completedAt?: string;
-  /**
-   * An optional error. Set if status is set to error.
-   */
-  error?: string;
 }
 
 export interface SearchSessionRequestStatus {
@@ -136,6 +125,5 @@ export interface SearchSessionStatusesResponse {
 /**
  * List of search session objects with on-the-fly calculated search session statuses
  */
-export interface SearchSessionsFindResponse
-  extends SavedObjectsFindResponse<SearchSessionSavedObjectAttributes>,
-    SearchSessionStatusesResponse {}
+export type SearchSessionsFindResponse =
+  SavedObjectsFindResponse<SearchSessionSavedObjectAttributes> & SearchSessionStatusesResponse;
