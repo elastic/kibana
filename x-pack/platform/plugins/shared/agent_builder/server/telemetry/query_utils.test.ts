@@ -105,11 +105,11 @@ describe('query_utils', () => {
 
       logger = loggerMock.create();
       queryUtils = new QueryUtils(esClient, soClient, logger);
-    jest.useFakeTimers().setSystemTime(new Date('2024-01-02T00:00:00.000Z'));
+      jest.useFakeTimers().setSystemTime(new Date('2024-01-02T00:00:00.000Z'));
     });
 
     afterEach(() => {
-    jest.useRealTimers();
+      jest.useRealTimers();
       jest.clearAllMocks();
     });
 
