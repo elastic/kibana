@@ -13,13 +13,14 @@ import pRetry from 'p-retry';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { createInterceptors } from './interceptors';
 import { LlmSimulator } from './llm_simulator';
-import type { HttpRequest, HttpResponse, LLMMessage, ToolMessage } from './types';
+import type { HttpRequest, HttpResponse, LLmError, LLMMessage, ToolMessage } from './types';
+import { isLlmError } from './types';
 
 type RequestHandler = (
   request: HttpRequest,
   response: HttpResponse,
   requestBody: ChatCompletionStreamParams
-) => LLMMessage;
+) => LLMMessage | LLmError;
 
 interface RequestInterceptor {
   name: string;
@@ -144,12 +145,17 @@ export class LlmProxy {
   }: {
     name: string;
     when: RequestInterceptor['when'];
-    responseMock?: LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage);
+    responseMock?:
+      | LLMMessage
+      | LLmError
+      | ((body: ChatCompletionStreamParams) => LLMMessage | LLmError);
   }): {
     waitForIntercept: () => Promise<LlmSimulator>;
     completeAfterIntercept: () => Promise<LlmSimulator>;
   } {
-    const getMockedLlmMessage = (body: ChatCompletionStreamParams): LLMMessage | undefined => {
+    const getInterceptorResponse = (
+      body: ChatCompletionStreamParams
+    ): LLMMessage | LLmError | undefined => {
       if (isFunction(responseMock)) {
         return responseMock(body);
       }
@@ -164,9 +170,8 @@ export class LlmProxy {
           when,
           handle: (request, response, requestBody) => {
             const simulator = new LlmSimulator(requestBody, response, this.log, name);
-            const llmMessage = getMockedLlmMessage(requestBody);
+            const llmMessage = getInterceptorResponse(requestBody);
             outerResolve(simulator);
-
             return llmMessage;
           },
         });
@@ -180,8 +185,11 @@ export class LlmProxy {
       completeAfterIntercept: async () => {
         const simulator = await waitForInterceptPromise;
 
-        function getParsedChunks(): Array<string | ToolMessage> {
-          const llmMessage = getMockedLlmMessage(simulator.requestBody);
+        function getParsedChunks(): LLmError | Array<string | ToolMessage> {
+          const llmMessage = getInterceptorResponse(simulator.requestBody);
+          if (isLlmError(llmMessage)) {
+            return llmMessage;
+          }
           if (!llmMessage) {
             return [];
           }
@@ -197,9 +205,16 @@ export class LlmProxy {
           return [llmMessage];
         }
 
-        const parsedChunks = getParsedChunks();
-        for (const chunk of parsedChunks) {
-          await simulator.writeChunk(chunk);
+        const chunksOrError = getParsedChunks();
+
+        if (Array.isArray(chunksOrError)) {
+          for (const chunk of chunksOrError) {
+            await simulator.writeChunk(chunk);
+          }
+        } else {
+          await simulator.writeError(chunksOrError.statusCode ?? 400, {
+            message: chunksOrError.errorMsg,
+          });
         }
 
         await simulator.complete();
