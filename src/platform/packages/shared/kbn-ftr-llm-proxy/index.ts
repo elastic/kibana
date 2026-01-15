@@ -8,7 +8,7 @@
  */
 
 export { createToolCallMessage } from './proxy/utils';
-export type { ToolMessage, LLMMessage } from './proxy/types';
+export { type ToolMessage, type LLMMessage, type LLmError, isLlmError } from './proxy/types';
 export { createInterceptors } from './proxy/interceptors';
 export { createLlmProxy, type LlmProxy } from './proxy/proxy';
 export { createOpenAiChunk, createOpenAIResponse } from './proxy/create_response';
