@@ -435,6 +435,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
                 attributes: {
                   origin: 'ui',
                   locations: [{ id: 'loc1', isServiceManaged: false }],
+                  id: 'monitor1',
                 },
                 namespaces: ['space1'],
               },
