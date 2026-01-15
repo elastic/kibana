@@ -8,7 +8,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { ControlsGroupState, LegacyIgnoreParentSettings } from '@kbn/controls-schemas';
 import type { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
 import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
 
@@ -29,19 +28,19 @@ export type SavedDashboardPanel = Omit<SavedDashboardPanelV2, 'gridData'> & { gr
  */
 export type SavedDashboardSection = TypeOf<typeof sectionSchema>;
 
-/**
- * A saved sticky dashboard control parsed directly from the Dashboard Attributes control panels JSON
- */
-export type StoredControlState = Pick<ControlsGroupState[number], 'grow' | 'type' | 'width'> & {
-  order: number; // order is generated from the array order
-  id: string; // id is required
-  explicitInput: ControlsGroupState[number]['config'] & { dataViewRefName?: string };
-};
+// /**
+//  * A saved sticky dashboard control parsed directly from the Dashboard Attributes control panels JSON
+//  */
+// export type StoredControlState = Pick<ControlsGroupState[number], 'grow' | 'type' | 'width'> & {
+//   order: number; // order is generated from the array order
+//   id: string; // id is required
+//   explicitInput: ControlsGroupState[number]['config'] & { dataViewRefName?: string };
+// };
 
-export type StoredControlGroupInput = Omit<
-  TypeOf<typeof dashboardAttributesSchema>['controlGroupInput'],
-  'panelsJSON' | 'ignoreParentSettingsJSON'
-> & {
-  panels: { [key: string]: Omit<StoredControlState, 'id'> };
-  ignoreParentSettings: LegacyIgnoreParentSettings;
-};
+// export type StoredControlGroupInput = Omit<
+//   TypeOf<typeof dashboardAttributesSchema>['controlGroupInput'],
+//   'panelsJSON' | 'ignoreParentSettingsJSON'
+// > & {
+//   panels: { [key: string]: Omit<StoredControlState, 'id'> };
+//   ignoreParentSettings: LegacyIgnoreParentSettings;
+// };

@@ -11,10 +11,23 @@ import { flow } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type {
+  ControlsGroupState,
+  StoredESQLControlExplicitInput,
+  StoredOptionsListExplicitInput,
+  StoredPinnedControls,
+  StoredPinnedControlState,
+  StoredRangeSliderExplicitInput,
+  StoredTimeSliderExplicitInput,
+} from '@kbn/controls-schemas';
+import {
+  ESQL_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from '@kbn/controls-constants';
 
 import type { DashboardPinnedPanelsState as DashboardControlsState } from '../../../../common';
-import type { StoredControlGroupInput, StoredControlState } from '../../../dashboard_saved_object';
 import { embeddableService, logger } from '../../../kibana_services';
 
 /**
@@ -32,18 +45,110 @@ export const transformControlsState: (
   return injectControlReferences(state, containerReferences);
 };
 
-export function transformControlObjectToArray(
-  controls: StoredControlGroupInput['panels']
-): Array<StoredControlState> {
-  return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
+function transformControlObjectToArray(
+  controls: StoredPinnedControls
+): Array<StoredPinnedControlState> {
+  return Object.entries(controls).map(([id, control]) => ({ ...control, id }));
 }
 
-export function transformControlProperties(controls: Array<StoredControlState>) {
+function snakeCaseControlExplicitInput(
+  type: string,
+  explicitInput: StoredPinnedControlState['explicitInput']
+) {
+  switch (type) {
+    case OPTIONS_LIST_CONTROL: {
+      const {
+        dataViewRefName,
+        displaySettings,
+        exclude,
+        existsSelected,
+        fieldName,
+        ignoreValidations,
+        runPastTimeout,
+        searchTechnique,
+        selectedOptions,
+        singleSelect,
+        sort,
+        useGlobalFilters,
+      } = explicitInput as StoredOptionsListExplicitInput;
+      return {
+        dataViewRefName, // this will be dropped, so no need to snake case
+        display_settings: displaySettings,
+        exclude,
+        exists_selected: existsSelected,
+        field_name: fieldName,
+        ignore_validations: ignoreValidations,
+        run_past_timeout: runPastTimeout,
+        search_technique: searchTechnique,
+        selected_options: selectedOptions,
+        single_select: singleSelect,
+        sort,
+        use_global_filters: useGlobalFilters,
+      };
+    }
+    case ESQL_CONTROL: {
+      const {
+        availableOptions,
+        controlType,
+        displaySettings,
+        esqlQuery,
+        exclude,
+        existsSelected,
+        runPastTimeout,
+        searchTechnique,
+        selectedOptions,
+        singleSelect,
+        sort,
+        variableName,
+        variableType,
+      } = explicitInput as StoredESQLControlExplicitInput;
+      return {
+        available_options: availableOptions,
+        control_type: controlType,
+        display_settings: displaySettings,
+        esql_query: esqlQuery,
+        exclude,
+        exists_selected: existsSelected,
+        run_past_timeout: runPastTimeout,
+        search_technique: searchTechnique,
+        selected_options: selectedOptions,
+        single_select: singleSelect,
+        sort,
+        variable_name: variableName,
+        variable_type: variableType,
+      };
+    }
+    case RANGE_SLIDER_CONTROL: {
+      const { dataViewRefName, fieldName, ignoreValidations, step, useGlobalFilters, value } =
+        explicitInput as StoredRangeSliderExplicitInput;
+      return {
+        dataViewRefName, // this will be dropped, so no need to snake case
+        field_name: fieldName,
+        ignore_validations: ignoreValidations,
+        step,
+        use_global_filters: useGlobalFilters,
+        value,
+      };
+    }
+    case TIME_SLIDER_CONTROL: {
+      const {
+        isAnchored,
+        timesliceEndAsPercentageOfTimeRange,
+        timesliceStartAsPercentageOfTimeRange,
+      } = explicitInput as StoredTimeSliderExplicitInput;
+      return {
+        is_anchored: isAnchored,
+        time_slice_end_as_percentage_of_time_range: timesliceEndAsPercentageOfTimeRange,
+        time_slice_start_as_percentage_of_time_range: timesliceStartAsPercentageOfTimeRange,
+      };
+    }
+  }
+}
+
+function transformControlProperties(controls: Array<StoredPinnedControlState>) {
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ explicitInput, id, type, grow, width }) => {
-      const { dataViewId } = explicitInput;
-      const config = 
       return {
         uid: id,
         type,

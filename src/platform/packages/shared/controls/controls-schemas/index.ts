@@ -10,23 +10,32 @@
 export { controlsGroupSchema } from './src/controls_group_schema';
 
 export type {
-  ControlWidth,
-  ControlState,
   ControlsGroupState,
+  ControlState,
+  ControlWidth,
   DataControlState,
+  HasCustomPrepend,
+  LegacyIgnoreParentSettings,
   OptionsListControlState,
+  OptionsListDisplaySettings,
   OptionsListDSLControlState,
   OptionsListESQLControlState,
-  OptionsListDisplaySettings,
   OptionsListSearchTechnique,
   OptionsListSelection,
   OptionsListSortingType,
+  PinnedControlLayoutState,
+  PinnedControlState,
   RangeSliderControlState,
   RangeSliderValue,
-  PinnedControlState,
   TimeSlice,
   TimeSliderControlState,
-  HasCustomPrepend,
-  LegacyIgnoreParentSettings,
-  PinnedControlLayoutState,
 } from './src/types';
+
+export type {
+  StoredESQLControlExplicitInput,
+  StoredOptionsListExplicitInput,
+  StoredPinnedControls,
+  StoredPinnedControlState,
+  StoredRangeSliderExplicitInput,
+  StoredTimeSliderExplicitInput,
+} from './src/stored';

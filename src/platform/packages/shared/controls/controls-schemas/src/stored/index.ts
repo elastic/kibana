@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-
-export const storedControlSchema = schema.object({
-  title: schema.maybe(schema.string()),
-  description: schema.maybe(schema.string()),
-});
-
-export const storedDataControlSchema = storedControlSchema.extends({
-  dataViewId: schema.string(),
-  fieldName: schema.string(),
-  useGlobalFilters: schema.maybe(schema.boolean()),
-  ignoreValidations: schema.maybe(schema.boolean()),
-});
+export type {
+  StoredESQLControlExplicitInput,
+  StoredOptionsListExplicitInput,
+  StoredPinnedControls,
+  StoredPinnedControlState,
+  StoredRangeSliderExplicitInput,
+  StoredTimeSliderExplicitInput,
+} from './types';
