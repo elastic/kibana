@@ -68,7 +68,7 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   end,
                   signal: runContext.abortController.signal,
                   logger: taskContext.logger.get('stream_description'),
-                  systemPromptOverride: descriptionPromptOverride,
+                  systemPrompt: descriptionPromptOverride,
                 });
 
                 taskContext.telemetry.trackDescriptionGenerated({
