@@ -25,6 +25,11 @@ export class RulesPage {
    */
   async goto(ruleId: string = '') {
     await this.page.gotoApp(`observability/alerts/rules/${ruleId}`);
+    if (!ruleId) {
+      await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
+        timeout: BIGGER_TIMEOUT,
+      });
+    }
   }
 
   /**
