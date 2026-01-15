@@ -642,7 +642,7 @@ describe('fromStoredFilter', () => {
           alias: 'Status Filter',
           negate: true,
         },
-        query: { term: { status: 'active' } },
+        query: { match_phrase: { status: 'active' } },
       };
 
       const result = fromStoredFilter(storedFilter) as AsCodeFilter;

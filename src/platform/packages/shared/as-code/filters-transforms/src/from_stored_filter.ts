@@ -156,53 +156,16 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
     };
   }
 
-  // Handle phrases filter: meta.type='phrases' with bool.should containing match_phrase clauses
+  // Handle phrases filter: meta.type='phrases' with meta.params as array of values
   if (isPhrasesFilter(storedFilter)) {
-    // Extract values from match_phrase clauses
-    const values = query.bool.should
-      .map((clause: unknown) => {
-        if (typeof clause === 'object' && clause !== null && 'match_phrase' in clause) {
-          const matchPhrase = (clause as Record<string, unknown>).match_phrase as Record<
-            string,
-            unknown
-          >;
-          const clauseField = Object.keys(matchPhrase)[0];
-          return matchPhrase[clauseField];
-        }
-        return;
-      })
-      .filter((v: unknown) => v !== undefined) as Array<string | number | boolean>;
-
-    // Validate homogeneous array
+    const values = meta.params as Array<string | number | boolean>;
+    // Validate homogeneous array, fallback to custom DSL filter on failure
     validateHomogeneousArray(values, 'Phrases filter');
 
     return {
       field,
       operator: ASCODE_FILTER_OPERATOR.IS_ONE_OF,
       value: values as string[] | number[] | boolean[],
-      ...(meta.negate && { negate: true }),
-    };
-  }
-
-  if (query.term) {
-    const value = query.term[field];
-    return {
-      field,
-      operator: ASCODE_FILTER_OPERATOR.IS,
-      value,
-      ...(meta.negate && { negate: true }),
-    };
-  }
-
-  if (query.match) {
-    const matchField = Object.keys(query.match)[0];
-    const matchValue = query.match[matchField];
-    const value = typeof matchValue === 'object' ? matchValue.query : matchValue;
-
-    return {
-      field: matchField, // Use the field from the query, not meta
-      operator: ASCODE_FILTER_OPERATOR.IS,
-      value,
       ...(meta.negate && { negate: true }),
     };
   }
