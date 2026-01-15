@@ -60,9 +60,9 @@ export async function writeDocs(
   }
 
   for (const plugin of plugins) {
-    // Note that the filtering is done here, and not above because the entire public plugin API has to
-    // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
-    // doesn't remove more links than necessary.
+    // Note that the filtering is done in this task, and not during plugin discovery, because the entire
+    // public plugin API has to be parsed in order to correctly determine reference links, and ensure that
+    // `removeBrokenLinks` doesn't remove more links than necessary.
     if (options.pluginFilter && !options.pluginFilter.includes(plugin.id)) {
       continue;
     }

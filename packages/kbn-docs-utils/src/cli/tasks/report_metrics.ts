@@ -54,9 +54,9 @@ export function reportMetrics(
   const reporter = CiStatsReporter.fromEnv(log);
 
   for (const plugin of plugins) {
-    // Note that the filtering is done here, and not above because the entire public plugin API has to
-    // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
-    // doesn't remove more links than necessary.
+    // Note that the filtering is done here (per-plugin), rather than earlier in the pipeline.
+    // This keeps the metrics task aligned with how other docs tasks process plugins and ensures
+    // that all plugin data has been collected before selectively reporting metrics.
     if (options.pluginFilter && !options.pluginFilter.includes(plugin.id)) {
       continue;
     }
@@ -184,7 +184,7 @@ export function reportMetrics(
         pluginStats.deprecatedAPIsReferencedCount === 0 &&
         (!missingApiItems[id] || Object.keys(missingApiItems[id]).length === 0);
 
-      log.info(`--- Plugin '${id}' ${passesAllChecks ? ` passes all checks ----` : '----`'}`);
+      log.info(`--- Plugin '${id}' ${passesAllChecks ? 'passes all checks ----' : '----'}`);
 
       if (!passesAllChecks) {
         log.info(`${pluginStats.isAnyType.length} API items with ANY`);
