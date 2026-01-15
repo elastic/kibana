@@ -16,11 +16,11 @@ export const ReviewRuleInstallationRequestBody = z.object({
   /**
    * Page number starting from 1
    */
-  page: z.coerce.number().int().min(1),
+  page: z.number().int().min(1).default(1),
   /**
    * Rules per page
    */
-  per_page: z.coerce.number().int().min(1).max(10_000),
+  per_page: z.number().int().min(1).max(10_000).default(20),
 
   /**
    * Filtering criteria

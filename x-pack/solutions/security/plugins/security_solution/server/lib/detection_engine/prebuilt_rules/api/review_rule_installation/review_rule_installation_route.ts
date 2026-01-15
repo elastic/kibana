@@ -6,6 +6,7 @@
  */
 
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { Logger } from '@kbn/core/server';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -13,8 +14,8 @@ import { ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodyS
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import {
-  PREBUILT_RULES_OPERATION_CONCURRENCY,
   PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
+  PREBUILT_RULES_INSTALLATION_REVIEW_CONCURRENCY,
 } from '../../constants';
 import { reviewRuleInstallationHandler } from './review_rule_installation_handler';
 
@@ -32,7 +33,7 @@ export const reviewRuleInstallationRoute = (
         },
       },
       options: {
-        tags: [routeLimitedConcurrencyTag(PREBUILT_RULES_OPERATION_CONCURRENCY)],
+        tags: [routeLimitedConcurrencyTag(PREBUILT_RULES_INSTALLATION_REVIEW_CONCURRENCY)],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
@@ -43,7 +44,11 @@ export const reviewRuleInstallationRoute = (
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(ReviewRuleInstallationRequestBodySchema),
+            body: buildRouteValidationWithZod(
+              // If the request body is undefined, pass it as an empty object to the schema
+              // to let the schema add default values.
+              z.preprocess((data: unknown) => data ?? {}, ReviewRuleInstallationRequestBodySchema)
+            ),
           },
         },
       },

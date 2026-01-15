@@ -42,10 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
-        });
+        const response = await reviewPrebuiltRulesToInstall(supertest);
 
         expect(response).toMatchObject({
           rules: [
@@ -73,16 +70,43 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await installPrebuiltRules(es, supertest, [{ rule_id: 'rule-1', version: 1 }]);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
-        });
+        const response = await reviewPrebuiltRulesToInstall(supertest);
 
         expect(response).toMatchObject({
           rules: [expect.objectContaining({ rule_id: 'rule-2', name: 'Rule 2' })],
           stats: {
             num_rules_to_install: 1,
           },
+        });
+      });
+    });
+
+    describe('Parameters defaults', () => {
+      it('called without parameters - defaults to page 1 and per_page 20', async () => {
+        const response = await reviewPrebuiltRulesToInstall(supertest);
+
+        expect(response).toMatchObject({
+          page: 1,
+          per_page: 20,
+        });
+      });
+
+      it('called with an empty object - defaults to page 1 and per_page 20', async () => {
+        const response = await reviewPrebuiltRulesToInstall(supertest);
+
+        expect(response).toMatchObject({
+          page: 1,
+          per_page: 20,
+        });
+      });
+
+      it('called with `per_page` only - respects `per_page` parameter', async () => {
+        const response = await reviewPrebuiltRulesToInstall(supertest, {
+          per_page: 100,
+        });
+
+        expect(response).toMatchObject({
+          per_page: 100,
         });
       });
     });
@@ -178,48 +202,85 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('error handling', () => {
         it('rejects invalid "page" parameter', async () => {
-          const invalidPageValues = ['', 0, -1] as number[];
+          expect(
+            await reviewPrebuiltRulesToInstall(
+              supertest,
+              {
+                page: '' as unknown as number,
+              },
+              400
+            )
+          ).toMatchObject({
+            message: '[request body]: page: Expected number, received string',
+          });
 
-          for (const value of invalidPageValues) {
-            expect(
-              await reviewPrebuiltRulesToInstall(
-                supertest,
-                {
-                  page: value,
-                  per_page: 20,
-                },
-                400
-              )
-            ).toMatchObject({
-              message: '[request body]: page: Number must be greater than or equal to 1',
-            });
-          }
+          expect(
+            await reviewPrebuiltRulesToInstall(
+              supertest,
+              {
+                page: 0,
+              },
+              400
+            )
+          ).toMatchObject({
+            message: '[request body]: page: Number must be greater than or equal to 1',
+          });
+
+          expect(
+            await reviewPrebuiltRulesToInstall(
+              supertest,
+              {
+                page: -1,
+              },
+              400
+            )
+          ).toMatchObject({
+            message: '[request body]: page: Number must be greater than or equal to 1',
+          });
         });
 
         it('rejects invalid "per_page" parameter', async () => {
-          const invalidPerPageValues = ['', 0, -1] as number[];
+          expect(
+            await reviewPrebuiltRulesToInstall(
+              supertest,
+              {
+                per_page: '' as unknown as number,
+              },
+              400
+            )
+          ).toMatchObject({
+            message: '[request body]: per_page: Expected number, received string',
+          });
 
-          for (const value of invalidPerPageValues) {
-            expect(
-              await reviewPrebuiltRulesToInstall(
-                supertest,
-                {
-                  per_page: value,
-                  page: 1,
-                },
-                400
-              )
-            ).toMatchObject({
-              message: '[request body]: per_page: Number must be greater than or equal to 1',
-            });
-          }
+          expect(
+            await reviewPrebuiltRulesToInstall(
+              supertest,
+              {
+                per_page: 0,
+              },
+              400
+            )
+          ).toMatchObject({
+            message: '[request body]: per_page: Number must be greater than or equal to 1',
+          });
+
+          expect(
+            await reviewPrebuiltRulesToInstall(
+              supertest,
+              {
+                per_page: -1,
+              },
+              400
+            )
+          ).toMatchObject({
+            message: '[request body]: per_page: Number must be greater than or equal to 1',
+          });
 
           expect(
             await reviewPrebuiltRulesToInstall(
               supertest,
               {
                 per_page: 10_001,
-                page: 1,
               },
               400
             )
@@ -257,10 +318,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
-        });
+        const response = await reviewPrebuiltRulesToInstall(supertest);
 
         expect(response.stats.tags).toEqual(['tag-a', 'tag-b', 'tag-c']);
       });
@@ -277,8 +335,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            page: 1,
-            per_page: 20,
             sort: [{ field: 'name', order: 'asc' }],
           });
 
@@ -298,8 +354,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            page: 1,
-            per_page: 20,
             sort: [{ field: 'name', order: 'desc' }],
           });
 
@@ -322,8 +376,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            page: 1,
-            per_page: 20,
             sort: [{ field: 'severity', order: 'asc' }],
           });
 
@@ -345,8 +397,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            page: 1,
-            per_page: 20,
             sort: [{ field: 'severity', order: 'desc' }],
           });
 
@@ -369,8 +419,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            page: 1,
-            per_page: 20,
             sort: [{ field: 'risk_score', order: 'asc' }],
           });
 
@@ -390,8 +438,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
           const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-            page: 1,
-            per_page: 20,
             sort: [{ field: 'risk_score', order: 'desc' }],
           });
 
@@ -421,8 +467,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const sortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           sort: [{ field: 'risk_score', order: 'asc' }],
         });
 
@@ -443,10 +487,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
-        });
+        const response = await reviewPrebuiltRulesToInstall(supertest);
 
         expect(response).toMatchObject({
           rules: [
@@ -470,8 +511,6 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
             const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
-              page: 1,
-              per_page: 20,
               filter: { fields: { name: {} } },
             });
 
@@ -796,10 +835,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-          const response = await reviewPrebuiltRulesToInstall(supertest, {
-            page: 1,
-            per_page: 20,
-          });
+          const response = await reviewPrebuiltRulesToInstall(supertest);
 
           expect(response).toMatchObject({
             stats: {
@@ -854,8 +890,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           sort: [{ field: 'name', order: 'desc' }],
           filter: { fields: { tags: { include: { values: ['tag-b'] } } } },
         });
@@ -924,10 +958,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .set('x-elastic-internal-origin', 'securitySolution')
-          .send({
-            page: 1,
-            per_page: 20,
-          })
+          .send({})
           .expect(200);
 
         expect(response.body.rules.length).toBe(1);
