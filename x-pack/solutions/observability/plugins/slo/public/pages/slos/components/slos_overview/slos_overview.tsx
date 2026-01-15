@@ -8,6 +8,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -42,13 +43,26 @@ export function SLOsOverview() {
     <EuiFlexGroup>
       <EuiFlexItem grow={2}>
         <EuiPanel hasShadow={false} hasBorder={true}>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.slo.sLOsOverview.h3.overviewLabel', {
-                defaultMessage: 'Overview',
-              })}
-            </h3>
-          </EuiTitle>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.slo.sloOverview.h3.overviewLabel', {
+                    defaultMessage: 'Overview',
+                  })}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="question"
+                content={i18n.translate('xpack.slo.sloOverview.h3.overviewTooltip', {
+                  defaultMessage: 'These statistics are filtered by your search criteria.',
+                })}
+                color="subdued"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="xs" />
           <EuiFlexGroup gutterSize="xl" justifyContent="spaceBetween">
             <OverviewItem
