@@ -9,35 +9,70 @@ import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/ty
 import type { JoinProcessor } from '../../../../types/processors';
 
 /**
- * Transpiles a Streamlang JoinProcessor into an Ingest Pipeline Set processor.
+ * Converts a JoinProcessor to an Ingest Pipeline script processor.
  *
  * @example
- * {
- *   action: 'join',
- *   from: ['field1', 'field2', 'field3'],
- *   to: 'my_joined_field',
- *   delimiter: ', ',
- * }
+ * Input:
+ *   { action: 'join', from: ['field1', 'field2'], delimiter: ', ', to: 'my_joined_field' }
  *
- * Generates:
- * {
- *   set: {
- *     field: 'my_joined_field',
- *     value: '{{{field1}}}, {{{field2}}}, {{{field3}}}',
- *   },
- * }
+ * Output:
+ *   { script: { lang: 'painless', source: "
+ *    def fields = [];
+ *    boolean allPresent = true;
+ *
+ *    if (ctx.containsKey('field1') && ctx['field1'] != null) {
+ *      fields.add(ctx['field1']);
+ *    } else {
+ *      allPresent = false;
+ *    }
+ *
+ *    if (ctx.containsKey('field2') && ctx['field2'] != null) {
+ *      fields.add(ctx['field2']);
+ *    } else {
+ *      allPresent = false;
+ *    }
+ *
+ *    if (false || allPresent) {
+ *      ctx['my_joined_field'] = fields.stream().collect(Collectors.joining(', '));
+ *    }
+ *   " } }
  */
 export const processJoinProcessor = (
-  processor: Omit<JoinProcessor, 'where' | 'action' | 'to'> & { if?: string; field: string }
+  processor: Omit<JoinProcessor, 'where' | 'action' | 'to'> & {
+    if?: string;
+    field: string;
+    tag?: string;
+  }
 ): IngestProcessorContainer => {
+  const { ignore_missing = false } = processor;
+  // Generate the script to join non-empty fields into a single string
+  // Handle `ignore_missing: false` - don't join fields if any of them are missing
+  const source = `
+def fields = [];
+boolean allPresent = true;
+${processor.from
+  .map(
+    (fromField) => `
+if (ctx.containsKey('${fromField}') && ctx['${fromField}'] != null) {
+  fields.add(ctx['${fromField}']);
+} else {
+  allPresent = false;
+}
+`
+  )
+  .join('')}
+if (${ignore_missing} || allPresent) {
+  ctx['${processor.field}'] = fields.stream().collect(Collectors.joining('${processor.delimiter}'));
+}
+  `.trim();
+
   return {
-    set: {
-      field: processor.field,
-      description: processor.description,
+    script: {
+      lang: 'painless',
+      source,
+      tag: processor.tag,
       if: processor.if,
-      value: processor.from.map((from) => `{{{${from}}}}`).join(processor.delimiter),
       ignore_failure: processor.ignore_failure,
-      tag: processor.customIdentifier,
     },
   };
 };

@@ -94,4 +94,97 @@ apiTest.describe('Cross-compatibility - Join Processor', { tag: ['@ess', '@svlOb
       expect(ingestResult[1]).toHaveProperty('my_joined_field', 'first, second, third');
     }
   );
+
+  apiTest(
+    'should not join fields with a delimiter when field is missing',
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'join',
+            from: ['field1', 'field2', 'field3'],
+            to: 'my_joined_field',
+            delimiter: ', ',
+          } as JoinProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [
+        {
+          field1: 'first',
+          field2: 'second',
+          field3: 'third',
+        },
+        {
+          field1: 'first',
+          field3: 'third',
+        },
+      ];
+
+      await testBed.ingest('ingest-e2e-test-join-missing', docs, processors);
+      const ingestResult = await testBed.getDocs('ingest-e2e-test-join-missing');
+
+      await testBed.ingest('esql-e2e-test-join-missing', docs);
+      const esqlResult = await esql.queryOnIndex('esql-e2e-test-join-missing', query);
+
+      expect(ingestResult).toHaveLength(2);
+      expect(esqlResult.documents).toHaveLength(2);
+
+      expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[0]);
+      expect(ingestResult[0]).toHaveProperty('my_joined_field', 'first, second, third');
+
+      expect(ingestResult[1]).not.toHaveProperty('my_joined_field');
+      expect(esqlResult.documentsOrdered[1]).toHaveProperty('my_joined_field', null);
+    }
+  );
+
+  apiTest(
+    'should join fields with a delimiter when field is missing and ignore_missing is true',
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'join',
+            from: ['field1', 'field2', 'field3'],
+            to: 'my_joined_field',
+            delimiter: ', ',
+            ignore_missing: true,
+          } as JoinProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [
+        {
+          field1: 'first',
+          field2: 'second',
+          field3: 'third',
+        },
+        {
+          field1: 'first',
+          field3: 'third',
+        },
+      ];
+
+      await testBed.ingest('ingest-e2e-test-join-missing-ignore', docs, processors);
+      const ingestResult = await testBed.getDocs('ingest-e2e-test-join-missing-ignore');
+
+      await testBed.ingest('esql-e2e-test-join-missing-ignore', docs);
+      const esqlResult = await esql.queryOnIndex('esql-e2e-test-join-missing-ignore', query);
+
+      expect(ingestResult).toHaveLength(2);
+      expect(esqlResult.documents).toHaveLength(2);
+
+      expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[0]);
+      expect(ingestResult[0]).toHaveProperty('my_joined_field', 'first, second, third');
+
+      expect(ingestResult[1]).toHaveProperty('my_joined_field', 'first, third');
+      expect(esqlResult.documentsOrdered[1]).toHaveProperty('my_joined_field', 'first, third');
+    }
+  );
 });

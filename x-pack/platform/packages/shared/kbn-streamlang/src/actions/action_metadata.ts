@@ -585,7 +585,7 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     }),
     usage: i18n.translate('xpack.streamlang.actionMetadata.join.usage', {
       defaultMessage:
-        'Provide `from` for the list of source fields, `delimiter` for the string to join with, and `to` for the target field.',
+        'Provide `from` for the list of source fields, `delimiter` for the string to join with, and `to` for the target field',
     }),
     examples: [
       {
@@ -597,6 +597,12 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
   delimiter: ", "
   to: my_joined_field`,
       },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.join.tips.ignoreMissing', {
+        defaultMessage:
+          'Ignore missing fields by setting ignore_missing to true. This will omit missing fields from the joined string',
+      }),
     ],
   },
 

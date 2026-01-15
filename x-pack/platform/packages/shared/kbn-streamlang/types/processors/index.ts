@@ -456,6 +456,7 @@ export interface JoinProcessor extends ProcessorBaseWithWhere {
   from: string[];
   delimiter: string;
   to: string;
+  ignore_missing?: boolean;
 }
 
 export const joinProcessorSchema = processorBaseWithWhereSchema.extend({
@@ -463,6 +464,7 @@ export const joinProcessorSchema = processorBaseWithWhereSchema.extend({
   from: z.array(StreamlangSourceField),
   delimiter: z.string(),
   to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<JoinProcessor>;
 
 export type StreamlangProcessorDefinition =

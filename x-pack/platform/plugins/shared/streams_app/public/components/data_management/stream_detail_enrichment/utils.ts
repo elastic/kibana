@@ -256,6 +256,7 @@ const defaultJoinProcessorFormState = (): JoinFormState => ({
   to: '',
   delimiter: '',
   ignore_failure: true,
+  ignore_missing: true,
   where: ALWAYS_CONDITION,
 });
 

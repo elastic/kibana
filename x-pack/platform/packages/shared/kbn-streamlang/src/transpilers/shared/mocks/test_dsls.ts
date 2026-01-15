@@ -28,8 +28,8 @@ export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
     {
       action: 'join',
-      from: ['message1', 'message2', 'message3'],
-      to: 'combined_message',
+      from: ['field1', 'field2', 'field3'],
+      to: 'my_joined_field',
       delimiter: ', ',
     } as JoinProcessor,
     {
