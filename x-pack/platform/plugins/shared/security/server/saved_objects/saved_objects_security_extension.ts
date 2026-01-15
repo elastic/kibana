@@ -1274,6 +1274,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
        */
       this.accessControlService.enforceAccessControl({
         typesRequiringAccessControl,
+        objectsRequiringAccessControl,
         typesRequiringRbac,
         authorizationResult,
         currentSpace: namespaceString,

@@ -261,6 +261,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(['dashboard']),
             typesRequiringRbac: new Set(),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).toThrow(/Access denied/);
       });
@@ -280,6 +281,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(['dashboard']),
             typesRequiringRbac: new Set(),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).toThrow(/Access denied/);
       });
@@ -299,6 +301,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(['dashboard']),
             typesRequiringRbac: new Set(),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
@@ -318,6 +321,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(['dashboard']),
             typesRequiringRbac: new Set(),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
@@ -330,6 +334,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(),
             typesRequiringRbac: new Set(),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
@@ -344,6 +349,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(),
             typesRequiringRbac: new Set(['dashboard']),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).toThrow(/Access denied/);
       });
@@ -363,6 +369,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(),
             typesRequiringRbac: new Set(['dashboard']),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).toThrow(/Access denied/);
       });
@@ -382,6 +389,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(),
             typesRequiringRbac: new Set(['dashboard']),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
@@ -401,6 +409,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(),
             typesRequiringRbac: new Set(['dashboard']),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
@@ -413,6 +422,7 @@ describe('AccessControlService', () => {
             typesRequiringAccessControl: new Set(),
             typesRequiringRbac: new Set(),
             currentSpace: 'default',
+            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });

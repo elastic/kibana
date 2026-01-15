@@ -20,20 +20,25 @@ import { SecurityAction } from '.';
 export const MANAGE_ACCESS_CONTROL_ACTION = 'manage_access_control';
 const UPDATE_ACTION = 'update';
 
-const buildAccessDeniedMessage = (rbacTypes: string[], accessControlTypes: string[]): string => {
+const buildAccessDeniedMessage = (
+  rbacTypes: string[],
+  objectsRequiringAccessControl: ObjectRequiringPrivilegeCheckResult[]
+): string => {
   const parts: string[] = ['Access denied:'];
 
   if (rbacTypes.length > 0) {
     const typeList = rbacTypes.join(', ');
     parts.push(
-      `Unable to perform operation on ${typeList}: the "update" privilege is required to change access control of objects owned by the current user.`
+      `Unable to perform manage access control for types ${typeList}. The "update" privilege is required to change access control of objects owned by the current user.`
     );
   }
 
-  if (accessControlTypes.length > 0) {
-    const typeList = accessControlTypes.join(', ');
+  if (objectsRequiringAccessControl.length > 0) {
+    const objectsRequiringAccessControlString = objectsRequiringAccessControl
+      .map((object) => `${object.type}:${object.id}`)
+      .join(', ');
     parts.push(
-      `Unable to manage access control for ${typeList}: the "manage_access_control" privilege is required to change access control of objects owned by another user.`
+      `Unable to manage access control for objects ${objectsRequiringAccessControlString}: the "manage_access_control" privilege is required to change access control of objects owned by another user.`
     );
   }
 
@@ -133,20 +138,21 @@ export class AccessControlService {
     typesRequiringRbac,
     currentSpace,
     addAuditEventFn,
+    objectsRequiringAccessControl,
   }: {
     authorizationResult: CheckAuthorizationResult<A>;
     typesRequiringAccessControl: Set<string>;
     typesRequiringRbac: Set<string>;
     currentSpace: string;
     addAuditEventFn?: (types: string[]) => void;
+    objectsRequiringAccessControl: ObjectRequiringPrivilegeCheckResult[];
   }) {
     if (authorizationResult.status === 'unauthorized') {
       const rbacTypeList = [...typesRequiringRbac].sort();
-      const accessControlTypeList = [...typesRequiringAccessControl].sort();
       const allTypes = [...new Set([...typesRequiringRbac, ...typesRequiringAccessControl])].sort();
       addAuditEventFn?.(allTypes);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(buildAccessDeniedMessage(rbacTypeList, accessControlTypeList))
+        new Error(buildAccessDeniedMessage(rbacTypeList, objectsRequiringAccessControl))
       );
     }
 
@@ -203,7 +209,7 @@ export class AccessControlService {
       const allUnauthorizedTypes = [...new Set([...rbacTypeList, ...accessControlTypeList])].sort();
       addAuditEventFn?.(allUnauthorizedTypes);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(buildAccessDeniedMessage(rbacTypeList, accessControlTypeList))
+        new Error(buildAccessDeniedMessage(rbacTypeList, objectsRequiringAccessControl))
       );
     }
   }
