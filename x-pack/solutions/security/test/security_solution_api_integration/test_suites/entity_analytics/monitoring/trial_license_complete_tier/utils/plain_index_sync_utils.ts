@@ -18,28 +18,6 @@ export const PlainIndexSyncUtils = (
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
 
-  const createIndex = async () =>
-    es.indices.create({
-      index: indexName,
-      mappings: {
-        properties: {
-          user: {
-            properties: {
-              name: {
-                type: 'keyword',
-                fields: {
-                  text: { type: 'text' },
-                },
-              },
-              role: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
-    });
-
   const addUsersToIndex = async (users: string[]) => {
     const ops = users.flatMap((name) => [{ index: {} }, { user: { name, role: 'admin' } }]);
     await es.bulk({
@@ -80,19 +58,9 @@ export const PlainIndexSyncUtils = (
     return response;
   };
 
-  const deleteIndex = async () => {
-    try {
-      await es.indices.delete({ index: indexName }, { ignore: [404] });
-    } catch (err) {
-      log.error(`Error deleting index ${indexName}: ${err}`);
-    }
-  };
-
   return {
-    createIndex,
     addUsersToIndex,
     deleteUserFromIndex,
     createEntitySourceForIndex,
-    deleteIndex,
   };
 };

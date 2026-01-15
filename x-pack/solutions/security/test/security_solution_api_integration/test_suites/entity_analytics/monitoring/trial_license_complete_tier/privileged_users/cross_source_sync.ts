@@ -16,8 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/237416
-  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users Cross-source Sync', () => {
     const index1 = 'privmon_index1';
     const indexSyncUtils = PlainIndexSyncUtils(getService, index1);
     const user1 = { name: 'user_1' };
@@ -27,12 +26,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await indexSyncUtils.createIndex();
+      await privMonUtils.createIndex(index1);
       await indexSyncUtils.addUsersToIndex([user1.name]);
     });
 
     afterEach(async () => {
-      await indexSyncUtils.deleteIndex();
+      await privMonUtils.deleteIndex(index1);
     });
 
     it('should merge sources when the same user is added through different methods (API, CSV, index)', async () => {
@@ -75,24 +74,45 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       expect(createEntitySourceResponse.status).toBe(200);
-      // Schedule the sync manually instead of using scheduleEngineAndWaitForUserCount
-      // because the user count is already 1 (from API/CSV sources), so waiting for count=1
-      // would return immediately before the index sync completes
-      await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
-
-      // Wait for the 'index' source to be merged while also verifying user count stays at 1
+      // Can't use scheduleEngineAndWaitForUserCount(1) because count is already 1 from API/CSV sources.
+      // It would return immediately before the index sync merges the 'index' source into user labels.
+      // Instead, manually trigger the sync and wait for the actual source merge to complete.
+      await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true }); // Trigger sync task
+      await privMonUtils.waitForSyncTaskRun(); // Wait for task to be scheduled in Task Manager
+      // Wait for 'index' source to be merged (user count should stay at 1, sources should be ['api', 'csv', 'index'])
+      // Timeout: 120s to fail fast
       await waitFor(
         async () => {
           const currentUsers = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
             .body as ListPrivMonUsersResponse;
           const currentUser = privMonUtils.findUser(currentUsers, user1.name);
           const sources = currentUser?.labels?.sources || [];
-          log.info(`Waiting for 'index' source. Current sources: ${JSON.stringify(sources)}`);
+          log.info(
+            `Waiting for 'index' source. Current sources: ${JSON.stringify(sources)}, user count: ${
+              currentUsers.length
+            }`
+          );
           // Verify user count remains at 1 (no duplicates created) and index source is present
-          return currentUsers.length === 1 && sources.includes('index') && sources.length === 3;
+          const hasIndexSource = sources.includes('index');
+          const hasAllThreeSources = sources.length === 3;
+          const userCountIsOne = currentUsers.length === 1;
+
+          if (!userCountIsOne) {
+            log.warning(`User count is ${currentUsers.length}, expected 1`);
+          }
+          if (!hasIndexSource) {
+            log.warning(`Index source not found. Current sources: ${JSON.stringify(sources)}`);
+          }
+          if (!hasAllThreeSources) {
+            log.warning(`Expected 3 sources, found ${sources.length}: ${JSON.stringify(sources)}`);
+          }
+
+          return userCountIsOne && hasIndexSource && hasAllThreeSources;
         },
         'wait for index source to be merged',
-        log
+        log,
+        120000, // 120 second timeout, failing fast
+        1000 // Check every 1 second
       );
 
       users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))

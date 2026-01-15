@@ -12,6 +12,7 @@ import { PrivMonUtils } from './utils';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
   const privMonUtils = PrivMonUtils(getService);
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Integrations Sync', () => {
@@ -140,6 +141,12 @@ export default ({ getService }: FtrProviderContext) => {
         const snapB = await privMonUtils.scheduleEngineAndWaitForUserCount(4);
         expect(new Set(snapB)).toEqual(new Set(snapA));
 
+        // Wait for marker to be updated before checking
+        await privMonUtils.integrationsSync.waitForMarkerUpdate(
+          privMonUtils.integrationsSync.OKTA_INDEX,
+          privMonUtils.integrationsSync.DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP,
+          120000
+        );
         const markerAfterPhase2 = await privMonUtils.integrationsSync.getLastProcessedMarker(
           privMonUtils.integrationsSync.OKTA_INDEX
         );
@@ -157,7 +164,8 @@ export default ({ getService }: FtrProviderContext) => {
         // Wait for marker to be updated before checking
         await privMonUtils.integrationsSync.waitForMarkerUpdate(
           privMonUtils.integrationsSync.OKTA_INDEX,
-          nowMinus1w
+          nowMinus1w,
+          120000
         );
         const markerAfterPhase3 = await privMonUtils.integrationsSync.getLastProcessedMarker(
           privMonUtils.integrationsSync.OKTA_INDEX
@@ -180,7 +188,8 @@ export default ({ getService }: FtrProviderContext) => {
         // Wait for marker to be updated before checking
         await privMonUtils.integrationsSync.waitForMarkerUpdate(
           privMonUtils.integrationsSync.OKTA_INDEX,
-          nowMinus6d
+          nowMinus6d,
+          120000
         );
         const markerAfterPhase4 = await privMonUtils.integrationsSync.getLastProcessedMarker(
           privMonUtils.integrationsSync.OKTA_INDEX

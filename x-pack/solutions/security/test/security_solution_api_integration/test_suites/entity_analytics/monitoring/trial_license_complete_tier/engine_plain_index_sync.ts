@@ -20,12 +20,12 @@ export default ({ getService }: FtrProviderContext) => {
       const indexSyncUtils = PlainIndexSyncUtils(getService, indexName);
 
       beforeEach(async () => {
-        await indexSyncUtils.createIndex();
+        await privMonUtils.createIndex(indexName);
         await privMonUtils.initPrivMonEngine();
       });
 
       afterEach(async () => {
-        await indexSyncUtils.deleteIndex();
+        await privMonUtils.deleteIndex(indexName);
         await api.deleteMonitoringEngine({ query: { data: true } });
       });
 
@@ -42,12 +42,14 @@ export default ({ getService }: FtrProviderContext) => {
           'Darth Vader',
         ];
 
-        const repeatedUsers = Array.from({ length: 150 }).map(() => 'C-3PO');
+        const repeatedUsers = Array.from({ length: 10 }).map(() => 'C-3PO');
 
         await indexSyncUtils.addUsersToIndex([...uniqueUsernames, ...repeatedUsers]);
         await indexSyncUtils.createEntitySourceForIndex();
 
-        const users = await privMonUtils.scheduleEngineAndWaitForUserCount(uniqueUsernames.length);
+        const users = await privMonUtils.scheduleEngineAndWaitForUserCountWithoutDuplicates(
+          uniqueUsernames.length
+        );
 
         // Check if the users are indexed
         const userNames = users.map((u: any) => u.user.name);

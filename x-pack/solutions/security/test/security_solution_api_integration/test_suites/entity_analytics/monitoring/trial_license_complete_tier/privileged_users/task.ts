@@ -18,36 +18,20 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const privMonUtils = PrivMonUtils(getService);
 
-  const createSourceIndex = async (indexName: string) =>
-    es.indices.create({
-      index: indexName,
-      mappings: {
-        properties: {
-          user: {
-            properties: {
-              name: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
-    });
-
-  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Privileged Users Monitoring task behavior', () => {
     after(async () => {
       await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
     });
 
-    describe('Index Entity Source APIs', () => {
+    describe('Index entity source updates and sync', () => {
       const index1 = 'privmon_index1';
       const index2 = 'privmon_index2';
       const user1 = { name: 'user_1' };
       const user2 = { name: 'user_2' };
 
       beforeEach(async () => {
-        await createSourceIndex(index1);
-        await createSourceIndex(index2);
+        await privMonUtils.createIndex(index1);
+        await privMonUtils.createIndex(index2);
 
         await es.index({
           index: index1,
@@ -63,8 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await es.indices.delete({ index: index1 });
-        await es.indices.delete({ index: index2 });
+        await Promise.all([privMonUtils.deleteIndex(index1), privMonUtils.deleteIndex(index2)]);
       });
 
       it('should delete privileged users when the index pattern changes', async () => {
