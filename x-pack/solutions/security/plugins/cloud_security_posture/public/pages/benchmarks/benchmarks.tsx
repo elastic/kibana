@@ -44,8 +44,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 const AddCisIntegrationButton = () => {
   const { http, fleet } = useKibana().services;
-  const canInstallPackages =
-    fleet?.authz?.integrations.all || fleet?.authz?.integrations.installPackages;
+  const canInstallPackages = fleet?.authz?.integrations.installPackages;
 
   const integrationsPath = pagePathGetters
     .integrations_all({
