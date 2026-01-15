@@ -96,6 +96,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/cps'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

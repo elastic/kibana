@@ -130,6 +130,8 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/cps'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/controls-renderer'
+  - '@kbn/shared-ux-error-boundary'
 tags:
   - plugin
   - prod

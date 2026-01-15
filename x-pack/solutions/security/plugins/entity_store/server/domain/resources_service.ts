@@ -12,7 +12,7 @@ import { ALL_ENTITY_TYPES } from './definitions/entity_type';
 export class ResourcesService {
   constructor(private logger: Logger) {}
 
-  public install(types: EntityType[] = ALL_ENTITY_TYPES) {
-    this.logger.info(`Should initialize entity store for types ${JSON.stringify(types)}`);
+  public install(entityTypes: EntityType[] = ALL_ENTITY_TYPES) {
+    this.logger.debug(`Should initialize entity store for types ${JSON.stringify(entityTypes)}`);
   }
 }

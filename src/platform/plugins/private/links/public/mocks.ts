@@ -59,5 +59,5 @@ export const getMockLinksParentApi = (state: LinksEmbeddableState): LinksParentA
   hideTitle$: new BehaviorSubject<boolean | undefined>(false),
   title$: new BehaviorSubject<string | undefined>('My Dashboard'),
   description$: new BehaviorSubject<string | undefined>(''),
-  getSerializedStateForChild: () => ({ rawState: state }),
+  getSerializedStateForChild: () => state,
 });

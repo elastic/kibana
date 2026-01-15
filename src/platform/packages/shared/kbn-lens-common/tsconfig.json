@@ -56,6 +56,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/cps",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/kql",
     "@kbn/control-group-renderer"
   ]
 }

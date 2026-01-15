@@ -6,13 +6,14 @@
  */
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../common/constants';
 import type { DataCatalog } from './data_catalog';
 
 export function registerRoutes(router: IRouter, dataCatalog: DataCatalog) {
   // GET /api/data_sources_registry/types
   router.get(
     {
-      path: '/api/data_sources_registry/types',
+      path: `${API_BASE_PATH}/types`,
       validate: {},
       security: {
         authz: {
@@ -30,7 +31,7 @@ export function registerRoutes(router: IRouter, dataCatalog: DataCatalog) {
   // GET /api/data_sources_registry/types/{id}
   router.get(
     {
-      path: '/api/data_sources_registry/types/{id}',
+      path: `${API_BASE_PATH}/types/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),

@@ -122,7 +122,9 @@
     "@kbn/controls-schemas",
     "@kbn/zod",
     "@kbn/cps",
-    "@kbn/presentation-publishing-schemas"
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/controls-renderer",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

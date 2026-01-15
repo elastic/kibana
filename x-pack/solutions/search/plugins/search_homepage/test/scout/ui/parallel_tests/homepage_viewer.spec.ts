@@ -66,4 +66,9 @@ test.describe('Homepage - Viewer', { tag: ['@svlSearch'] }, () => {
 
     await expect(page).toHaveURL(new RegExp('getting_started'));
   });
+
+  test('API keys button should be disabled', async ({ pageObjects }) => {
+    const apiKeysButton = await pageObjects.homepage.getApiKeyButton();
+    await expect(apiKeysButton).toBeDisabled();
+  });
 });

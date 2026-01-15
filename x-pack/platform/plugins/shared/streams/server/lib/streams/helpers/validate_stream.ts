@@ -15,6 +15,7 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  LowercaseProcessor,
   MathProcessor,
   ProcessorType,
   RemoveByPrefixProcessor,
@@ -23,6 +24,8 @@ import type {
   ReplaceProcessor,
   SetProcessor,
   StreamlangProcessorDefinition,
+  TrimProcessor,
+  UppercaseProcessor,
 } from '@kbn/streamlang';
 import {
   isActionBlock,
@@ -158,6 +161,24 @@ const actionStepValidators: {
       checkFieldName(field);
     }
   },
+  uppercase: (step: UppercaseProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  lowercase: (step: LowercaseProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  trim: (step: TrimProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation
   manual_ingest_pipeline: () => {},
@@ -215,17 +236,4 @@ export function validateBracketsInFieldNames(definition: Streams.ingest.all.Defi
   if (definition.ingest.processing?.steps) {
     validateSteps(definition.ingest.processing.steps);
   }
-}
-
-export function validateSettings(definition: Streams.ingest.all.Definition, isServerless: boolean) {
-  if (!isServerless) {
-    return;
-  }
-
-  const serverlessAllowList = ['index.refresh_interval'];
-  Object.keys(definition.ingest.settings).forEach((setting) => {
-    if (!serverlessAllowList.includes(setting)) {
-      throw new Error(`Setting [${setting}] is not allowed in serverless`);
-    }
-  });
 }

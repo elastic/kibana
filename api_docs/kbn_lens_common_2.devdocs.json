@@ -166,7 +166,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; type: string; phase$: ",
+          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; isExpandable?: boolean | undefined; isCustomizable?: boolean | undefined; isDuplicable?: boolean | undefined; isPinnable?: boolean | undefined; type: string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -184,21 +184,13 @@
           },
           " | undefined>; serializeState: () => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<",
-          {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          ">; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -304,13 +296,13 @@
           },
           "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
           },
-          "<",
+          "; getSerializedStateByValue: () => ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
@@ -318,23 +310,7 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          ">; getSerializedStateByValue: () => ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/lens-common-2",
-            "scope": "common",
-            "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
-          },
-          ">; viewMode$: ",
+          "; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -576,7 +552,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
+          "<object, object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -1111,7 +1087,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; type: string; phase$: ",
+          "<boolean> | undefined; OverriddenHoverActionsComponent?: React.ComponentType<{}> | undefined; isExpandable?: boolean | undefined; isCustomizable?: boolean | undefined; isDuplicable?: boolean | undefined; isPinnable?: boolean | undefined; type: string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1129,21 +1105,13 @@
           },
           " | undefined>; serializeState: () => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<",
-          {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
             "docId": "kibKbnLensCommon-2PluginApi",
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          ">; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; onEdit: ({ isNewPanel }?: { isNewPanel?: boolean | undefined; } | undefined) => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1249,13 +1217,13 @@
           },
           "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
+            "pluginId": "@kbn/lens-common-2",
+            "scope": "common",
+            "docId": "kibKbnLensCommon-2PluginApi",
+            "section": "def-common.LensSerializedAPIConfig",
+            "text": "LensSerializedAPIConfig"
           },
-          "<",
+          "; getSerializedStateByValue: () => ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
@@ -1263,23 +1231,7 @@
             "section": "def-common.LensSerializedAPIConfig",
             "text": "LensSerializedAPIConfig"
           },
-          ">; getSerializedStateByValue: () => ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/lens-common-2",
-            "scope": "common",
-            "docId": "kibKbnLensCommon-2PluginApi",
-            "section": "def-common.LensSerializedAPIConfig",
-            "text": "LensSerializedAPIConfig"
-          },
-          ">; viewMode$: ",
+          "; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1521,7 +1473,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
+          "<object, object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; getLegacySerializedState: () => ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",

@@ -108,6 +108,7 @@ dependsOn:
   - '@kbn/crypto-browser'
   - '@kbn/cps'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

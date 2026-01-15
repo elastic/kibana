@@ -11473,6 +11473,68 @@
       },
       {
         "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.ESQLCommandSummary",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLCommandSummary",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLCommandSummary.newColumns",
+            "type": "Object",
+            "tags": [],
+            "label": "newColumns",
+            "description": [
+              "\nA list of columns names which were newly created by\neach command."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLCommandSummary.metadataColumns",
+            "type": "Object",
+            "tags": [],
+            "label": "metadataColumns",
+            "description": [
+              "\nA list of metadata columns created by the FROM and TS commands\nWe are separating them here to be able to treat them differently in some contexts"
+            ],
+            "signature": [
+              "Set<string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ESQLCommandSummary.renamedColumnsPairs",
+            "type": "Object",
+            "tags": [],
+            "label": "renamedColumnsPairs",
+            "description": [
+              "\nA set of renamed columns pairs [oldName, newName]"
+            ],
+            "signature": [
+              "Set<[string, string]> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
         "id": "def-common.ESQLForkParens",
         "type": "Interface",
         "tags": [],
@@ -11691,7 +11753,7 @@
             "label": "castType",
             "description": [],
             "signature": [
-              "\"string\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"bool\" | \"datetime\" | \"int\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\""
+              "\"string\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"date_range\" | \"aggregate_metric_double\" | \"dense_vector\" | \"unsigned_long\" | \"bool\" | \"datetime\" | \"int\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"geohash\" | \"geohex\" | \"geotile\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/types.ts",
             "deprecated": false,
@@ -13152,6 +13214,34 @@
             "description": [],
             "signature": [
               "{ message: string; type: { name: string; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ValidationErrors.unknownCastingType",
+            "type": "Object",
+            "tags": [],
+            "label": "unknownCastingType",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { castType: string; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ValidationErrors.invalidInlineCast",
+            "type": "Object",
+            "tags": [],
+            "label": "invalidInlineCast",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { castType: string; valueType: string; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
             "deprecated": false,
@@ -15771,6 +15861,21 @@
             "text": "ValidationErrors"
           },
           "[K][\"type\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.ESQL_NAMED_PARAMS_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_NAMED_PARAMS_TYPE",
+        "description": [],
+        "signature": [
+          "\"function_named_parameters\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
         "deprecated": false,

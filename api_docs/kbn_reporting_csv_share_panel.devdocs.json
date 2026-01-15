@@ -33,7 +33,7 @@
             "section": "def-public.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
-          ">"
+          ", {}>"
         ],
         "path": "src/platform/packages/private/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
         "deprecated": false,

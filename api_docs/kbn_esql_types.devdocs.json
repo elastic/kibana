@@ -573,41 +573,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-types",
-            "id": "def-common.ESQLControlState.grow",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "grow",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-types",
-            "id": "def-common.ESQLControlState.width",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "width",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ControlWidthOptions",
-                "text": "ControlWidthOptions"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-types",
             "id": "def-common.ESQLControlState.singleSelect",
             "type": "CompoundType",
             "tags": [],
@@ -775,6 +740,20 @@
                 "section": "def-common.ESQLVariableType",
                 "text": "ESQLVariableType"
               }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLControlVariable.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "{ controlledBy?: string | undefined; group?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
             "deprecated": false,
