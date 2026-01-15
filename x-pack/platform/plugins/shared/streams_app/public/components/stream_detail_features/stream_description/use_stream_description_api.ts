@@ -148,6 +148,10 @@ export const useStreamDescriptionApi = ({
     [definition.stream.name, signal, streams.streamsRepositoryClient]
   );
 
+  const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] = useAsyncFn(
+    scheduleDescriptionGenerationTask
+  );
+
   const cancelDescriptionGenerationTask = useCallback(async () => {
     await streams.streamsRepositoryClient.fetch(
       'POST /internal/streams/{name}/_description_generation/_task',
@@ -218,6 +222,7 @@ export const useStreamDescriptionApi = ({
   }, [task, description]);
 
   const areButtonsDisabled =
+    isSchedulingGenerationTask ||
     task?.status === 'in_progress' ||
     task?.status === 'being_canceled' ||
     isTaskLoading ||
@@ -236,7 +241,7 @@ export const useStreamDescriptionApi = ({
     taskError,
     refreshTask,
     getDescriptionGenerationStatus,
-    scheduleDescriptionGenerationTask,
+    scheduleDescriptionGenerationTask: doScheduleGenerationTask,
     cancelDescriptionGenerationTask,
     acknowledgeDescriptionGenerationTask,
     areButtonsDisabled,
