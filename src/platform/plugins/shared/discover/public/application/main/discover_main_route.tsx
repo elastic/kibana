@@ -264,7 +264,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
                     defaultMessage: 'Discover - Session not yet saved',
                   })}
             </h1>
-            {customizationContext.displayMode !== 'embedded' ? (
+            {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
               <TabsView {...props} />
             ) : (
               <SingleTabView {...props} />

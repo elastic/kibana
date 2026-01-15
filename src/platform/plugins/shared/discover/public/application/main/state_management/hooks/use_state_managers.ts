@@ -45,7 +45,7 @@ export const useStateManagers = ({
     createTabsStorageManager({
       urlStateStorage,
       storage: services.storage,
-      enabled: true,
+      enabled: tabsEnabled,
     })
   );
 
