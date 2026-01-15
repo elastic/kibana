@@ -119,23 +119,19 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   ];
 
   const rightSideItems = [
-    ...(activeTab === RULES_TAB_NAME
-      ? [
-          <EuiButton
-            data-test-subj="createRuleButton"
-            disabled={!authorizedToCreateAnyRules}
-            fill
-            iconType="plusInCircle"
-            key="create-alert"
-            onClick={() => setRuleTypeModalVisibility(true)}
-          >
-            <FormattedMessage
-              id="xpack.observability.rules.addRuleButtonLabel"
-              defaultMessage="Create rule"
-            />
-          </EuiButton>,
-        ]
-      : []),
+    <EuiButton
+      data-test-subj="createRuleButton"
+      disabled={!authorizedToCreateAnyRules}
+      fill
+      iconType="plusInCircle"
+      key="create-alert"
+      onClick={() => setRuleTypeModalVisibility(true)}
+    >
+      <FormattedMessage
+        id="xpack.observability.rules.addRuleButtonLabel"
+        defaultMessage="Create rule"
+      />
+    </EuiButton>,
     <RulesSettingsLink />,
     <EuiButtonEmpty
       data-test-subj="documentationLink"
