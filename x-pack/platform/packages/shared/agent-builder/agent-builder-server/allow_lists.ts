@@ -32,7 +32,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
 
   // Dashboards
   'platform.dashboard.create_dashboard',
-  'platform.dashboard.update_dashboard',
+  'platform.dashboard.manage_dashboard',
+  'platform.dashboard.create_visualizations',
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.attack_discovery_search`,

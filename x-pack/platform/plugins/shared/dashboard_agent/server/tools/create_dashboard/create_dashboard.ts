@@ -6,14 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { RequestHandlerContext, SavedObjectsServiceStart } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 
 import { dashboardTools } from '../../../common';
 import {
@@ -21,6 +20,7 @@ import {
   normalizePanels,
   buildMarkdownPanel,
   getMarkdownPanelHeight,
+  assignPanelUids,
 } from '../utils';
 
 const createDashboardSchema = z.object({
@@ -37,14 +37,23 @@ const createDashboardSchema = z.object({
     ),
 });
 
-export const createDashboardTool = (
-  dashboard: DashboardPluginStart,
-  savedObjects: SavedObjectsServiceStart,
-  {
-    dashboardLocator,
-    spaces,
-  }: { dashboardLocator: DashboardAppLocator; spaces?: SpacesPluginStart }
-): BuiltinToolDefinition<typeof createDashboardSchema> => {
+/**
+ * Dashboard state stored in the tool result for later retrieval by manage_dashboard
+ */
+export interface StoredDashboardState {
+  title: string;
+  description: string;
+  markdownContent: string;
+  panels: DashboardPanel[];
+}
+
+export const createDashboardTool = ({
+  dashboardLocator,
+  spaces,
+}: {
+  dashboardLocator: DashboardAppLocator;
+  spaces?: SpacesPluginStart;
+}): BuiltinToolDefinition<typeof createDashboardSchema> => {
   return {
     id: dashboardTools.createDashboard,
     type: ToolType.builtin,
@@ -52,62 +61,71 @@ export const createDashboardTool = (
       cacheMode: 'space',
       handler: checkDashboardToolsAvailability,
     },
-    description: `Create a dashboard with the specified title, description, panels, and a markdown summary.
+    description: `Create an in-memory dashboard with the specified title, description, panels, and a markdown summary.
 
 This tool will:
 1. Accept a title and description for the dashboard
 2. Accept markdown content for a summary panel at the top
 3. Accept an array of panel configurations
-4. Create a dashboard with the markdown panel followed by visualization panels`,
+4. Generate an in-memory dashboard URL (not saved until user explicitly saves it)
+
+The dashboard is created in edit mode so the user can review and save it.`,
     schema: createDashboardSchema,
     tags: [],
     handler: async (
       { title, description, panels, markdownContent },
-      { logger, request, esClient, resultStore }
+      { logger, request, resultStore }
     ) => {
       try {
-        const coreContext = {
-          savedObjects: {
-            client: savedObjects.getScopedClient(request),
-            typeRegistry: savedObjects.getTypeRegistry(),
-          },
-        };
-
-        // Create a minimal request handler context
-        const requestHandlerContext = {
-          core: Promise.resolve(coreContext),
-          resolve: async () => ({ core: coreContext }),
-        } as unknown as RequestHandlerContext;
-
         // Build markdown panel and offset other panels accordingly
         const markdownPanel = buildMarkdownPanel(markdownContent);
         const yOffset = getMarkdownPanelHeight(markdownContent);
         const normalizedPanels = [markdownPanel, ...normalizePanels(panels, yOffset, resultStore)];
 
-        const dashboardCreateResponse = await dashboard.client.create(requestHandlerContext, {
-          data: { title, description, panels: normalizedPanels },
-        });
-
-        logger.info(`Dashboard created successfully: ${dashboardCreateResponse.id}`);
+        // Assign unique UIDs to all panels for later reference
+        const panelsWithUids = assignPanelUids(normalizedPanels);
 
         const spaceId = spaces?.spacesService?.getSpaceId(request);
-        const dashboardUrl = await dashboardLocator?.getRedirectUrl(
-          { dashboardId: dashboardCreateResponse.id },
+
+        // Generate in-memory dashboard URL - no dashboardId means unsaved/create mode
+        const dashboardUrl = await dashboardLocator.getRedirectUrl(
+          {
+            // No dashboardId means it will be an unsaved "create" dashboard
+            panels: panelsWithUids as unknown as DashboardPanel[],
+            title,
+            description,
+            viewMode: 'edit', // Allow user to edit and save
+            // TODO: Improve time range selection
+            time_range: { from: 'now-15m', to: 'now' },
+          },
           { spaceId }
         );
+
+        logger.info(`In-memory dashboard created with ${panelsWithUids.length} panels`);
+
+        const toolResultId = getToolResultId();
+
+        // Store dashboard state inside content for manage_dashboard to retrieve
+        const storedState: StoredDashboardState = {
+          title,
+          description,
+          markdownContent,
+          panels: panelsWithUids,
+        };
 
         return {
           results: [
             {
               type: ToolResultType.dashboard,
-              tool_result_id: getToolResultId(),
+              tool_result_id: toolResultId,
               data: {
-                id: dashboardCreateResponse.id,
+                id: toolResultId,
                 title,
                 content: {
                   url: dashboardUrl,
                   description,
-                  panelCount: normalizedPanels.length,
+                  panelCount: panelsWithUids.length,
+                  state: storedState,
                 },
               },
             },
