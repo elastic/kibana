@@ -33,10 +33,7 @@ import { AdditionalChargesCallout } from './additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
 import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
-import {
-  registerGrokSuggestion,
-  clearGrokSuggestion,
-} from '../../../../dev_console_helpers';
+import { registerGrokSuggestion, clearGrokSuggestion } from '../../../../dev_console_helpers';
 
 export const GrokPatternAISuggestions = ({
   aiFeatures,
@@ -80,7 +77,7 @@ export const GrokPatternAISuggestions = ({
     } else {
       clearGrokSuggestion();
     }
-    
+
     return () => {
       clearGrokSuggestion();
     };
