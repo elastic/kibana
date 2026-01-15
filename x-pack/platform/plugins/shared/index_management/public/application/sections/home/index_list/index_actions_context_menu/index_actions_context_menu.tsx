@@ -354,10 +354,17 @@ export const IndexActionsContextMenu = ({
                 <>
                   <EuiSpacer size="xs" />
                   <EuiText size="xs">
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
-                      defaultMessage="The index must have less than 2 billion documents and a single shard to be converted."
-                    />
+                    {isServerless ? (
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.serverlessError"
+                        defaultMessage="The index must have less than 2 billion documents to be converted."
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
+                        defaultMessage="The index must have less than 2 billion documents and a single shard to be converted."
+                      />
+                    )}
                   </EuiText>
                 </>
               )}
