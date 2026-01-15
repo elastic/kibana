@@ -202,7 +202,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   onDelete,
 }) => {
   const {
-    services: { application, chrome },
+    services: { chrome },
   } = useKibana();
   const [selectedItems, setSelectedItems] = useState<ActiveSource[]>([]);
   const [activePage, setActivePage] = useState(0);
@@ -213,21 +213,19 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     setActivePage(0); // Reset to first page when changing page size
   };
 
-  const navigateToWorkflows = useCallback(() => {
-    const workflowsUrl = chrome?.navLinks.get(WORKFLOWS_APP_ID)?.url;
-    if (workflowsUrl) {
-      application?.navigateToUrl(workflowsUrl);
-    }
-  }, [application, chrome]);
+  // Get workflow URL for linking
+  const workflowsUrl = useMemo(() => {
+    return chrome?.navLinks.get(WORKFLOWS_APP_ID)?.url;
+  }, [chrome]);
 
-  const navigateToTools = useCallback(
+  // Generate tools URL with search param
+  const getToolsUrl = useCallback(
     (sourceType: string) => {
-      // Navigate to Agent Builder tools section with search param
-      application?.navigateToApp(AGENT_BUILDER_APP_ID, {
-        path: `/tools?search=${encodeURIComponent(sourceType)}`,
-      });
+      const baseUrl = chrome?.navLinks.get(AGENT_BUILDER_APP_ID)?.url;
+      if (!baseUrl) return undefined;
+      return `${baseUrl}/tools?search=${encodeURIComponent(sourceType)}`;
     },
-    [application]
+    [chrome]
   );
 
   const paginatedSources = useMemo(() => {
@@ -278,7 +276,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       align: 'center',
       render: (workflows: string[]) =>
         workflows.length > 0 ? (
-          <EuiLink onClick={navigateToWorkflows} data-test-subj="workflowsLink">
+          <EuiLink href={workflowsUrl} data-test-subj="workflowsLink">
             <EuiText size="s">{workflows.length}</EuiText>
           </EuiLink>
         ) : (
@@ -293,7 +291,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       align: 'center',
       render: (agentTools: string[], source: ActiveSource) =>
         agentTools.length > 0 ? (
-          <EuiLink onClick={() => navigateToTools(source.type)} data-test-subj="toolsLink">
+          <EuiLink href={getToolsUrl(source.type)} data-test-subj="toolsLink">
             <EuiText size="s">{agentTools.length}</EuiText>
           </EuiLink>
         ) : (
