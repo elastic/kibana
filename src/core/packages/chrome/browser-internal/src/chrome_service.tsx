@@ -418,7 +418,9 @@ export class ChromeService {
           return [
             ...extensions,
             {
-              content: mountReactNode(<HeaderBreadcrumbsBadges badges={badges} />),
+              content: mountReactNode(
+                <HeaderBreadcrumbsBadges badges={badges} isFirst={extensions.length === 0} />
+              ),
             },
           ];
         }),
