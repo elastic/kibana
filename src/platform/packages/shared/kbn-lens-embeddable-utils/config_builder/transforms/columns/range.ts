@@ -70,7 +70,10 @@ export function fromRangeOrHistogramLensStateToAPI(
   return {
     operation: 'histogram',
     include_empty_rows: Boolean(column.params.includeEmptyRows),
-    granularity: column.params?.maxBars,
+    granularity:
+      column.params?.maxBars !== 'auto' && column.params?.maxBars > 7
+        ? 'auto'
+        : column.params?.maxBars,
     ...getLensAPIBucketSharedProps(column),
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };
