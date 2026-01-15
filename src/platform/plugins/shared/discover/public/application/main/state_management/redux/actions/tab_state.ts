@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
@@ -130,4 +131,27 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
     ]);
+  };
+
+/**
+ * Pause auto refresh interval if the data view is not time-based or is a rollup
+ */
+export const pauseAutoRefreshInterval: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  async function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
+    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+      const currentState = getState();
+      const globalState = selectTab(currentState, tabId).globalState;
+      if (globalState?.refreshInterval && !globalState.refreshInterval.pause) {
+        dispatch(
+          updateGlobalState({
+            tabId,
+            globalState: {
+              refreshInterval: { ...globalState.refreshInterval, pause: true },
+            },
+          })
+        );
+      }
+    }
   };

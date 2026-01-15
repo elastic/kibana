@@ -181,9 +181,11 @@ describe('Discover state', () => {
     test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
       history.push('/#?_g=(refreshInterval:(pause:!f,value:5000))');
       expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!f,value:5000))');
-      // TODO: state.actions.setDataView should be async because it calls pauseAutoRefreshInterval which is async.
-      // I found this bug while removing unnecessary awaits, but it will need to be fixed in a follow up PR.
-      state.actions.setDataView(dataViewMock);
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.assignNextDataView)({
+          dataView: dataViewMock,
+        })
+      );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
     });
@@ -483,23 +485,6 @@ describe('Discover state', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
-    });
-
-    test('setDataView', async () => {
-      const { state, runtimeStateManager } = await getState('');
-      expect(
-        selectTabRuntimeState(
-          runtimeStateManager,
-          state.getCurrentTab().id
-        ).currentDataView$.getValue()
-      ).toBeUndefined();
-      state.actions.setDataView(dataViewMock);
-      expect(
-        selectTabRuntimeState(
-          runtimeStateManager,
-          state.getCurrentTab().id
-        ).currentDataView$.getValue()
-      ).toBe(dataViewMock);
     });
 
     test('fetchData', async () => {

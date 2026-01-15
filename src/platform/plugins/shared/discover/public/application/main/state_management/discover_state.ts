@@ -23,7 +23,6 @@ import {
   noSearchSessionStorageCapabilityMessage,
 } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
@@ -215,11 +214,6 @@ export interface DiscoverStateContainer {
      */
     onChangeDataView: (id: string | DataView) => Promise<void>;
     /**
-     * Set the currently selected data view
-     * @param dataView
-     */
-    setDataView: (dataView: DataView) => void;
-    /**
      * When editing an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
@@ -255,34 +249,12 @@ export function getDiscoverStateContainer({
     getCurrentTab,
   });
 
-  const pauseAutoRefreshInterval = async (dataView: DataView) => {
-    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      const state = selectTab(internalState.getState(), tabId).globalState;
-      if (state?.refreshInterval && !state.refreshInterval.pause) {
-        internalState.dispatch(
-          injectCurrentTab(internalStateActions.updateGlobalState)({
-            globalState: {
-              refreshInterval: { ...state.refreshInterval, pause: true },
-            },
-          })
-        );
-      }
-    }
-  };
-
-  const setDataView = (dataView: DataView) => {
-    internalState.dispatch(injectCurrentTab(internalStateActions.setDataView)({ dataView }));
-    pauseAutoRefreshInterval(dataView);
-    savedSearchContainer.getState().searchSource.setField('index', dataView);
-  };
-
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
     internalState,
     runtimeStateManager,
     savedSearchContainer,
-    setDataView,
     injectCurrentTab,
     getCurrentTab,
   });
@@ -429,7 +401,10 @@ export function getDiscoverStateContainer({
       // Clear the current data view from the cache and create a new instance
       // of it, ensuring we have a new object reference to trigger a re-render
       services.dataViews.clearInstanceCache(editedDataView.id);
-      setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
+      const newDataView = await services.dataViews.create(editedDataView.toSpec(), true);
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: newDataView })
+      );
     } else {
       await updateAdHocDataViewId(editedDataView);
     }
@@ -672,7 +647,6 @@ export function getDiscoverStateContainer({
         internalState,
         runtimeStateManager,
         services,
-        setDataView,
         getCurrentTab,
       })
     );
@@ -826,7 +800,6 @@ export function getDiscoverStateContainer({
       transitionFromESQLToDataView,
       transitionFromDataViewToESQL,
       onUpdateQuery,
-      setDataView,
       updateAdHocDataViewId,
       updateESQLQuery,
     },

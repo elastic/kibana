@@ -16,6 +16,7 @@ import {
 } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { createInternalStateAsyncThunk } from '../utils';
+import { internalStateActions } from '..';
 
 export const loadDataViewList = createInternalStateAsyncThunk(
   'internalState/loadDataViewList',
@@ -34,6 +35,18 @@ export const setDataView: InternalStateThunkActionCreator<
     }
 
     currentDataView$.next(dataView);
+  };
+
+export const assignNextDataView: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  async function assignNextDataViewThunkFn(dispatch, _, { runtimeStateManager }) {
+    dispatch(setDataView({ tabId, dataView }));
+    dispatch(internalStateActions.pauseAutoRefreshInterval({ tabId, dataView }));
+
+    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const savedSearchState = stateContainer$.getValue()?.savedSearchState.getState();
+    savedSearchState?.searchSource.setField('index', dataView);
   };
 
 export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> =
