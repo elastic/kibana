@@ -287,15 +287,17 @@ function shouldAllowMultipleMetrics(config: PartitionState): boolean {
 function buildVisualizationState(
   config: PartitionState
 ): PartitionLensWithoutQueryAndFilters['state']['visualization'] {
-  const metrics = config.metrics;
-  const groupBys = config.group_by ?? [];
+  const metrics = config.metrics.map((_, index) => getAccessorName('metric', index));
+  const primaryGroups = (config.group_by ?? []).map((_, index) =>
+    getAccessorName('group_by', index)
+  );
   if (isAPIPieChartLayer(config)) {
     return {
       shape: config.type,
       layers: [
         {
-          metrics: metrics.map((_, index) => getAccessorName('metric', index)),
-          primaryGroups: groupBys.map((_, index) => getAccessorName('group_by', index)),
+          metrics,
+          primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...computeSharedPartitionLayerState(config),
           categoryDisplay: convertAPICategoryDisplayOption(config.label_position),
@@ -310,8 +312,8 @@ function buildVisualizationState(
       shape: config.type,
       layers: [
         {
-          metrics: metrics.map((_, index) => getAccessorName('metric', index)),
-          primaryGroups: groupBys.map((_, index) => getAccessorName('group_by', index)),
+          metrics,
+          primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...computeSharedPartitionLayerState(config),
           categoryDisplay: 'default',
@@ -325,8 +327,8 @@ function buildVisualizationState(
       shape: config.type,
       layers: [
         {
-          metrics: metrics.map((_, index) => getAccessorName('metric', index)),
-          primaryGroups: groupBys.map((_, index) => getAccessorName('group_by', index)),
+          metrics,
+          primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...computeSharedPartitionLayerState(config),
           categoryDisplay: 'default',
@@ -340,8 +342,8 @@ function buildVisualizationState(
       shape: config.type,
       layers: [
         {
-          metrics: metrics.map((_, index) => getAccessorName('metric', index)),
-          primaryGroups: groupBys.map((_, index) => getAccessorName('group_by', index)),
+          metrics,
+          primaryGroups,
           secondaryGroups:
             config.group_breakdown_by?.map((_, index) =>
               getAccessorName('group_breakdown_by', index)
@@ -541,7 +543,8 @@ function fromLensStateToAPIGroups(
   const vizLayer = visualization.layers[0];
 
   const groupByAccessors = getGroups(vizLayer);
-  return convertLensStateToAPIGrouping(vizLayer, layer, groupByAccessors);
+  const groups = convertLensStateToAPIGrouping(vizLayer, layer, groupByAccessors);
+  return groups?.length ? groups : undefined;
 }
 
 function fromLensStateToAPISecondaryGroups(
