@@ -34,11 +34,14 @@ jest.mock('../agent_policy', () => ({
   },
 }));
 
-import { getCommonAgentVersions, getVersionSpecificPolicies } from './version_specific_policies';
+import {
+  getAgentVersionsForVersionSpecificPolicies,
+  getVersionSpecificPolicies,
+} from './version_specific_policies';
 
-describe('getCommonAgentVersions', () => {
+describe('getAgentVersionsForVersionSpecificPolicies', () => {
   it('should return the correct common agent versions', async () => {
-    const result = await getCommonAgentVersions();
+    const result = await getAgentVersionsForVersionSpecificPolicies();
     expect(result).toEqual(['9.3', '9.2', '8.9']);
   });
 });

@@ -16,7 +16,7 @@ import { agentPolicyService } from '../agent_policy';
 
 export const AGENT_POLICY_VERSION_SEPARATOR = '#';
 
-export async function getCommonAgentVersions(): Promise<string[]> {
+export async function getAgentVersionsForVersionSpecificPolicies(): Promise<string[]> {
   const commonVersions = [];
   const kibanaVersion = appContextService.getKibanaVersion();
   const coercedKibanaVersion = coerce(kibanaVersion);
@@ -63,7 +63,7 @@ export async function getVersionSpecificPolicies(
 ): Promise<FleetServerPolicy[]> {
   const fleetServerPolicies: FleetServerPolicy[] = [];
 
-  for (const version of agentVersions ?? (await getCommonAgentVersions())) {
+  for (const version of agentVersions ?? (await getAgentVersionsForVersionSpecificPolicies())) {
     let updatedFullPolicy: FullAgentPolicy | null = null;
 
     // if none of the inputs have package level agent version conditions, it means some inputs have template level conditions, so have to recreate the full agent policy with agent version
