@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/doc-links'
   - '@kbn/securitysolution-utils'
   - '@kbn/unified-search-plugin'
+  - '@kbn/kql'
 tags:
   - shared-common
   - package
