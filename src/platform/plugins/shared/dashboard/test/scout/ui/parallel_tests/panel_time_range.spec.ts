@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import type { PageObjects } from '@kbn/scout';
 
 const KIBANA_ARCHIVE_PATH =
@@ -48,71 +48,70 @@ spaceTest.describe('Dashboard panel custom time range', { tag: tags.DEPLOYMENT_A
     await pageObjects.dashboard.waitForRenderComplete();
   };
 
-  spaceTest.describe('by value', () => {
-    spaceTest('can add a custom time range to a panel', async ({ pageObjects }) => {
-      await spaceTest.step('add by value panel', async () => {
-        await addByValueLensPanel(pageObjects);
-      });
-
-      await spaceTest.step('enable custom time range and save', async () => {
-        await pageObjects.dashboard.openCustomizePanel();
-        await pageObjects.dashboard.enableCustomTimeRange();
-        await pageObjects.dashboard.openDatePickerQuickMenu();
-        await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
-        await pageObjects.dashboard.saveCustomizePanel();
-        await pageObjects.dashboard.waitForRenderComplete();
-      });
-
-      await spaceTest.step('verify custom time range badge', async () => {
-        await pageObjects.dashboard.expectTimeRangeBadgeExists();
-      });
+  spaceTest('by value: can add a custom time range to a panel', async ({ pageObjects }) => {
+    await spaceTest.step('add by value panel', async () => {
+      await addByValueLensPanel(pageObjects);
     });
 
-    spaceTest('can remove a custom time range from a panel', async ({ pageObjects }) => {
-      await spaceTest.step('add by value panel with custom time range', async () => {
-        await addByValueLensPanel(pageObjects);
-        await pageObjects.dashboard.openCustomizePanel();
-        await pageObjects.dashboard.enableCustomTimeRange();
-        await pageObjects.dashboard.openDatePickerQuickMenu();
-        await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
-        await pageObjects.dashboard.saveCustomizePanel();
-        await pageObjects.dashboard.waitForRenderComplete();
-      });
+    await spaceTest.step('enable custom time range and save', async () => {
+      await pageObjects.dashboard.openCustomizePanel();
+      await pageObjects.dashboard.enableCustomTimeRange();
+      await pageObjects.dashboard.openDatePickerQuickMenu();
+      await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
+      await pageObjects.dashboard.saveCustomizePanel();
+      await pageObjects.dashboard.waitForRenderComplete();
+    });
 
-      await spaceTest.step('remove custom time range', async () => {
-        await pageObjects.dashboard.clickTimeRangeBadge();
-        await pageObjects.dashboard.disableCustomTimeRange();
-        await pageObjects.dashboard.saveCustomizePanel();
-        await pageObjects.dashboard.waitForRenderComplete();
-      });
-
-      await spaceTest.step('verify badge removed', async () => {
-        await pageObjects.dashboard.expectTimeRangeBadgeMissing();
-      });
+    await spaceTest.step('verify custom time range badge', async () => {
+      await pageObjects.dashboard.expectTimeRangeBadgeExists();
     });
   });
 
-  spaceTest.describe('by reference', () => {
-    spaceTest('can add a custom time range to panel', async ({ pageObjects }) => {
-      await spaceTest.step('add by reference panel', async () => {
-        await addLensPanelFromLibrary(pageObjects);
-      });
-
-      await spaceTest.step('enable custom time range and save', async () => {
-        await pageObjects.dashboard.openCustomizePanel();
-        await pageObjects.dashboard.enableCustomTimeRange();
-        await pageObjects.dashboard.openDatePickerQuickMenu();
-        await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
-        await pageObjects.dashboard.saveCustomizePanel();
-        await pageObjects.dashboard.waitForRenderComplete();
-      });
-
-      await spaceTest.step('verify custom time range badge', async () => {
-        await pageObjects.dashboard.expectTimeRangeBadgeExists();
-      });
+  spaceTest('by value: can remove a custom time range from a panel', async ({ pageObjects }) => {
+    await spaceTest.step('add by value panel with custom time range', async () => {
+      await addByValueLensPanel(pageObjects);
+      await pageObjects.dashboard.openCustomizePanel();
+      await pageObjects.dashboard.enableCustomTimeRange();
+      await pageObjects.dashboard.openDatePickerQuickMenu();
+      await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
+      await pageObjects.dashboard.saveCustomizePanel();
+      await pageObjects.dashboard.waitForRenderComplete();
     });
 
-    spaceTest('can remove a custom time range from a panel', async ({ pageObjects }) => {
+    await spaceTest.step('remove custom time range', async () => {
+      await pageObjects.dashboard.clickTimeRangeBadge();
+      await pageObjects.dashboard.disableCustomTimeRange();
+      await pageObjects.dashboard.saveCustomizePanel();
+      await pageObjects.dashboard.waitForRenderComplete();
+    });
+
+    await spaceTest.step('verify badge removed', async () => {
+      await pageObjects.dashboard.expectTimeRangeBadgeMissing();
+    });
+  });
+
+  spaceTest('by reference: can add a custom time range to panel', async ({ pageObjects }) => {
+    await spaceTest.step('add by reference panel', async () => {
+      await addLensPanelFromLibrary(pageObjects);
+    });
+
+    await spaceTest.step('enable custom time range and save', async () => {
+      await pageObjects.dashboard.openCustomizePanel();
+      await pageObjects.dashboard.enableCustomTimeRange();
+      await pageObjects.dashboard.openDatePickerQuickMenu();
+      await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
+      await pageObjects.dashboard.saveCustomizePanel();
+      await pageObjects.dashboard.waitForRenderComplete();
+    });
+
+    await spaceTest.step('verify custom time range badge', async () => {
+      await pageObjects.dashboard.expectTimeRangeBadgeExists();
+    });
+  });
+
+  spaceTest(
+    'by reference: can remove a custom time range from a panel',
+    async ({ pageObjects }) => {
       await spaceTest.step('add by reference panel with custom time range', async () => {
         await addLensPanelFromLibrary(pageObjects);
         await pageObjects.dashboard.openCustomizePanel();
@@ -133,6 +132,6 @@ spaceTest.describe('Dashboard panel custom time range', { tag: tags.DEPLOYMENT_A
       await spaceTest.step('verify badge removed', async () => {
         await pageObjects.dashboard.expectTimeRangeBadgeMissing();
       });
-    });
-  });
+    }
+  );
 });

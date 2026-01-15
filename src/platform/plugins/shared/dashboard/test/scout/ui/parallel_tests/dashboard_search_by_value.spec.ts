@@ -16,6 +16,23 @@ const KIBANA_ARCHIVE_PATH =
 const SAVED_SEARCH_NAME = 'Rendering-Test:-saved-search';
 
 spaceTest.describe('Dashboard saved searches by value', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+  const expectPanelLinkedToLibrary = async (pageObjects: { dashboard: any }, title: string) => {
+    await pageObjects.dashboard.switchToEditMode();
+    await expect
+      .poll(async () =>
+        pageObjects.dashboard.panelHasAction('embeddablePanelAction-unlinkFromLibrary', title)
+      )
+      .toBe(true);
+  };
+
+  const expectPanelNotLinkedToLibrary = async (pageObjects: { dashboard: any }, title: string) => {
+    await pageObjects.dashboard.switchToEditMode();
+    await expect
+      .poll(async () =>
+        pageObjects.dashboard.panelHasAction('embeddablePanelAction-saveToLibrary', title)
+      )
+      .toBe(true);
+  };
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(KIBANA_ARCHIVE_PATH);
     await scoutSpace.uiSettings.set({
@@ -54,8 +71,10 @@ spaceTest.describe('Dashboard saved searches by value', { tag: tags.DEPLOYMENT_A
 
       await spaceTest.step('verify initial state - one panel linked to library', async () => {
         const titles = await pageObjects.dashboard.getPanelTitles();
-        expect(titles).toHaveLength(1);
-        await pageObjects.dashboard.expectLinkedToLibrary(titles[0]);
+        await expect
+          .poll(async () => (await pageObjects.dashboard.getPanelTitles()).length)
+          .toBe(1);
+        await expectPanelLinkedToLibrary(pageObjects, titles[0]);
       });
 
       await spaceTest.step('clone the panel', async () => {
@@ -67,13 +86,15 @@ spaceTest.describe('Dashboard saved searches by value', { tag: tags.DEPLOYMENT_A
         'verify clone result - two panels with correct library status',
         async () => {
           const titles = await pageObjects.dashboard.getPanelTitles();
-          expect(titles).toHaveLength(2);
+          await expect
+            .poll(async () => (await pageObjects.dashboard.getPanelTitles()).length)
+            .toBe(2);
 
           // Original panel remains linked to library
-          await pageObjects.dashboard.expectLinkedToLibrary(titles[0]);
+          await expectPanelLinkedToLibrary(pageObjects, titles[0]);
 
           // Cloned panel is NOT linked to library (by value)
-          await pageObjects.dashboard.expectNotLinkedToLibrary(titles[1]);
+          await expectPanelNotLinkedToLibrary(pageObjects, titles[1]);
         }
       );
     }
@@ -89,8 +110,10 @@ spaceTest.describe('Dashboard saved searches by value', { tag: tags.DEPLOYMENT_A
 
       await spaceTest.step('verify initial state - panel linked to library', async () => {
         const titles = await pageObjects.dashboard.getPanelTitles();
-        expect(titles).toHaveLength(1);
-        await pageObjects.dashboard.expectLinkedToLibrary(titles[0]);
+        await expect
+          .poll(async () => (await pageObjects.dashboard.getPanelTitles()).length)
+          .toBe(1);
+        await expectPanelLinkedToLibrary(pageObjects, titles[0]);
       });
 
       await spaceTest.step('unlink panel from library', async () => {
@@ -100,10 +123,12 @@ spaceTest.describe('Dashboard saved searches by value', { tag: tags.DEPLOYMENT_A
 
       await spaceTest.step('verify unlink result - panel no longer linked', async () => {
         const titles = await pageObjects.dashboard.getPanelTitles();
-        expect(titles).toHaveLength(1);
+        await expect
+          .poll(async () => (await pageObjects.dashboard.getPanelTitles()).length)
+          .toBe(1);
 
         // Panel should now be "by value" (not linked to library)
-        await pageObjects.dashboard.expectNotLinkedToLibrary(titles[0]);
+        await expectPanelNotLinkedToLibrary(pageObjects, titles[0]);
       });
     }
   );

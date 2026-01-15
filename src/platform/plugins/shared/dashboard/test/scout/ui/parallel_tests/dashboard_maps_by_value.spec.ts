@@ -40,17 +40,7 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
     await expect.poll(async () => pageObjects.dashboard.getPanelCount()).toBe(1);
   };
 
-  const editByValueMap = async ({
-    pageObjects,
-    page,
-    saveToLibrary = false,
-    saveToDashboard = true,
-  }: {
-    pageObjects: PageObjects;
-    page: ScoutPage;
-    saveToLibrary?: boolean;
-    saveToDashboard?: boolean;
-  }) => {
+  const openMapEditorAndAddLayer = async (pageObjects: PageObjects) => {
     const [panelTitle] = await pageObjects.dashboard.getPanelTitles();
     await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
     await pageObjects.maps.waitForRenderComplete();
@@ -58,19 +48,27 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
     await pageObjects.maps.clickAddLayer();
     await pageObjects.maps.selectLayerWizardByTitle('Layer group');
     await pageObjects.maps.clickImportFileButton();
+  };
 
-    if (saveToLibrary) {
-      await pageObjects.maps.clickSaveButton();
-      await pageObjects.maps.saveFromModal(`my map ${mapCounter++}`, {
-        redirectToOrigin: saveToDashboard,
-      });
-      if (!saveToDashboard) {
-        await page.goto(dashboardUrl);
-      }
-    } else {
-      await pageObjects.maps.clickSaveAndReturnButton();
-    }
+  const saveMapByValueAndReturn = async (pageObjects: PageObjects) => {
+    await pageObjects.maps.clickSaveAndReturnButton();
+    await pageObjects.dashboard.waitForRenderComplete();
+  };
 
+  const saveMapToLibraryAndReturn = async (pageObjects: PageObjects) => {
+    await pageObjects.maps.clickSaveButton();
+    await pageObjects.maps.saveFromModal(`my map ${mapCounter++}`, {
+      redirectToOrigin: true,
+    });
+    await pageObjects.dashboard.waitForRenderComplete();
+  };
+
+  const saveMapToLibraryAndStay = async (pageObjects: PageObjects, page: ScoutPage) => {
+    await pageObjects.maps.clickSaveButton();
+    await pageObjects.maps.saveFromModal(`my map ${mapCounter++}`, {
+      redirectToOrigin: false,
+    });
+    await page.goto(dashboardUrl);
     await pageObjects.dashboard.waitForRenderComplete();
   };
 
@@ -80,34 +78,33 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
     });
 
     await spaceTest.step('verify panel count', async () => {
-      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
+      await expect.poll(async () => pageObjects.dashboard.getPanelCount()).toBe(1);
     });
   });
 
-  spaceTest(
-    'editing a map by value retains the same number of panels',
-    async ({ pageObjects, page }) => {
-      await spaceTest.step('add map panel', async () => {
-        await createAndAddMapByValue(pageObjects);
-      });
-
-      await spaceTest.step('edit map panel', async () => {
-        await editByValueMap({ pageObjects, page });
-      });
-
-      await spaceTest.step('verify panel count', async () => {
-        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
-      });
-    }
-  );
-
-  spaceTest('editing a map by value updates the panel on return', async ({ pageObjects, page }) => {
+  spaceTest('editing a map by value retains the same number of panels', async ({ pageObjects }) => {
     await spaceTest.step('add map panel', async () => {
       await createAndAddMapByValue(pageObjects);
     });
 
     await spaceTest.step('edit map panel', async () => {
-      await editByValueMap({ pageObjects, page });
+      await openMapEditorAndAddLayer(pageObjects);
+      await saveMapByValueAndReturn(pageObjects);
+    });
+
+    await spaceTest.step('verify panel count', async () => {
+      await expect.poll(async () => pageObjects.dashboard.getPanelCount()).toBe(1);
+    });
+  });
+
+  spaceTest('editing a map by value updates the panel on return', async ({ pageObjects }) => {
+    await spaceTest.step('add map panel', async () => {
+      await createAndAddMapByValue(pageObjects);
+    });
+
+    await spaceTest.step('edit map panel', async () => {
+      await openMapEditorAndAddLayer(pageObjects);
+      await saveMapByValueAndReturn(pageObjects);
     });
 
     await spaceTest.step('verify layer exists', async () => {
@@ -117,13 +114,14 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
 
   spaceTest(
     'editing a map and adding to map library updates the panel',
-    async ({ pageObjects, page }) => {
+    async ({ pageObjects }) => {
       await spaceTest.step('add map panel', async () => {
         await createAndAddMapByValue(pageObjects);
       });
 
       await spaceTest.step('edit map panel and save to library', async () => {
-        await editByValueMap({ pageObjects, page, saveToLibrary: true });
+        await openMapEditorAndAddLayer(pageObjects);
+        await saveMapToLibraryAndReturn(pageObjects);
       });
 
       await spaceTest.step('verify layer exists', async () => {
@@ -140,7 +138,8 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
       });
 
       await spaceTest.step('save to library without redirect', async () => {
-        await editByValueMap({ pageObjects, page, saveToLibrary: true, saveToDashboard: false });
+        await openMapEditorAndAddLayer(pageObjects);
+        await saveMapToLibraryAndStay(pageObjects, page);
       });
 
       await spaceTest.step('verify layer does not exist', async () => {

@@ -23,12 +23,11 @@ spaceTest.describe('Dashboard lens by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
     const lensObject = importedObjects.find(
       (savedObject) => savedObject.type === 'lens' && savedObject.title === LENS_TITLE
     );
-
-    if (!lensObject) {
-      throw new Error(`Lens saved object "${LENS_TITLE}" was not found in ${KIBANA_ARCHIVE_PATH}`);
-    }
-
-    lensSavedObjectId = lensObject.id;
+    expect(
+      lensObject,
+      `Lens saved object "${LENS_TITLE}" was not found in ${KIBANA_ARCHIVE_PATH}`
+    ).toBeTruthy();
+    lensSavedObjectId = lensObject!.id;
 
     await scoutSpace.uiSettings.setDefaultIndex(DATA_VIEW_NAME);
     await scoutSpace.uiSettings.setDefaultTime({
@@ -61,7 +60,7 @@ spaceTest.describe('Dashboard lens by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
     });
 
     await spaceTest.step('verify panel count', async () => {
-      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
+      await expect.poll(async () => pageObjects.dashboard.getPanelCount()).toBe(1);
     });
   });
 
@@ -102,7 +101,9 @@ spaceTest.describe('Dashboard lens by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
 
       await spaceTest.step('verify panel count unchanged', async () => {
         await pageObjects.dashboard.waitForRenderComplete();
-        expect(await pageObjects.dashboard.getPanelCount()).toBe(originalPanelCount);
+        await expect
+          .poll(async () => pageObjects.dashboard.getPanelCount())
+          .toBe(originalPanelCount);
       });
     }
   );
@@ -124,7 +125,9 @@ spaceTest.describe('Dashboard lens by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
 
       await spaceTest.step('verify panel count and title', async () => {
         await pageObjects.dashboard.waitForRenderComplete();
-        expect(await pageObjects.dashboard.getPanelCount()).toBe(originalPanelCount);
+        await expect
+          .poll(async () => pageObjects.dashboard.getPanelCount())
+          .toBe(originalPanelCount);
         const titles = await pageObjects.dashboard.getPanelTitles();
         expect(titles).toContain(newTitle);
       });
@@ -133,14 +136,14 @@ spaceTest.describe('Dashboard lens by value', { tag: tags.DEPLOYMENT_AGNOSTIC },
 
   spaceTest(
     'is no longer linked to a dashboard after opening Lens directly',
-    async ({ page, pageObjects, scoutSpace }) => {
+    async ({ page, pageObjects }) => {
       await spaceTest.step('open Lens editor directly', async () => {
-        await page.gotoApp('lens', { path: `/edit/${lensSavedObjectId}`, space: scoutSpace.id });
+        await page.gotoApp('lens', { hash: `/edit/${lensSavedObjectId}` });
         await pageObjects.lens.waitForLensApp();
       });
 
       await spaceTest.step('verify no return-to-origin switch', async () => {
-        await pageObjects.lens.expectReturnToOriginSwitchMissing();
+        await expect(page.testSubj.locator('returnToOriginModeSwitch')).toBeHidden();
       });
     }
   );

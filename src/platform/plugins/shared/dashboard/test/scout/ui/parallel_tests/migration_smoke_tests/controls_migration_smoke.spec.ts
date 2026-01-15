@@ -10,12 +10,10 @@
 import { spaceTest, expect, tags } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
 import {
+  findImportedSavedObjectId,
   getDashboardPanels,
-  getSavedObjectIdByTitle,
-  importSavedObjects,
   openDashboard,
-  setDefaultIndexByTitle,
-} from './utils';
+} from '../../../utils/migration_smoke_helpers';
 
 const EXPORT_PATH =
   'src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/exports/controls_dashboard_migration_test_8_0_0.json';
@@ -51,23 +49,17 @@ const getAvailableOptionsCount = async (page: ScoutPage) => {
 const getSelectionsString = async (page: ScoutPage, controlId: string) => {
   const controlButton = page.testSubj.locator(`optionsList-control-${controlId}`);
   const selections = controlButton.locator('[data-test-subj="optionsListSelections"]');
-  if ((await selections.count()) > 0) {
-    return (await selections.innerText()).trim();
-  }
-  return (await controlButton.innerText()).trim();
+  const [selectionText = ''] = await selections.allInnerTexts();
+  const buttonText = await controlButton.innerText();
+  return (selectionText || buttonText).trim();
 };
 
 spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    await importSavedObjects(kbnClient, scoutSpace.id, EXPORT_PATH);
-    dashboardId = await getSavedObjectIdByTitle(
-      kbnClient,
-      scoutSpace.id,
-      'dashboard',
-      DASHBOARD_TITLE
-    );
-    await setDefaultIndexByTitle(kbnClient, scoutSpace.id, DATA_VIEW_TITLE);
+    const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);
+    dashboardId = findImportedSavedObjectId(imported, 'dashboard', DASHBOARD_TITLE);
+    await scoutSpace.uiSettings.setDefaultIndex(DATA_VIEW_TITLE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {

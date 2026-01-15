@@ -16,9 +16,8 @@ const KIBANA_ARCHIVE_PATH =
   'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
 
 const getColorMapping = (debugState: DebugState | null) => {
-  if (!debugState) return {};
   const colorMapping: Record<string, string> = {};
-  debugState.bars?.forEach(({ name, color }) => {
+  debugState?.bars?.forEach(({ name, color }) => {
     colorMapping[name] = color;
   });
   return colorMapping;
@@ -35,10 +34,8 @@ const getChartDebugState = async (page: ScoutPage, panelIndex: number) => {
   const chart = charts[panelIndex];
   const status = chart.locator('.echChartStatus');
   const debugState = await status.getAttribute('data-ech-debug-state');
-  if (!debugState) {
-    return null;
-  }
-  return JSON.parse(debugState) as DebugState;
+  const parsed = debugState && (JSON.parse(debugState) as DebugState);
+  return parsed ?? null;
 };
 
 // eslint-disable-next-line playwright/no-skipped-test
@@ -162,7 +159,7 @@ spaceTest.describe.skip('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
 
         const mergedColorAssignments = new Map<string, Set<string>>();
         [...colorMappings1, ...colorMappings2, ...colorMappings3].forEach(([key, color]) => {
-          if (!mergedColorAssignments.has(key)) mergedColorAssignments.set(key, new Set());
+          mergedColorAssignments.set(key, mergedColorAssignments.get(key) ?? new Set());
           mergedColorAssignments.get(key)?.add(color);
         });
 

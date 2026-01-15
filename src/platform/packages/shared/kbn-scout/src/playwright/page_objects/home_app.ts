@@ -55,9 +55,7 @@ export class HomeApp {
       await addButton.click();
     }
 
-    await expect
-      .poll(() => this.isSampleDataInstalled(id), { timeout: 60_000 })
-      .toBe(true);
+    await expect.poll(() => this.isSampleDataInstalled(id), { timeout: 60_000 }).toBe(true);
   }
 
   async removeSampleDataSet(id: string) {
@@ -97,4 +95,3 @@ export class HomeApp {
     return status === 'installed' && (await removeButton.count()) > 0;
   }
 }
-

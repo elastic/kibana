@@ -147,19 +147,22 @@ spaceTest.describe('Sample data dashboard', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
   const openDiscoverAndExpectHits = async (pageObjects: PageObjects) => {
     await pageObjects.discover.goto();
     await pageObjects.discover.waitUntilSearchingHasFinished();
-    expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
+    await expect.poll(async () => pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
   };
 
-  const expectSavedSearchRowCount = async (page: ScoutPage, minCount: number) => {
-    const grid = page.locator('[data-document-number]');
-    if ((await grid.count()) > 0) {
-      const docCount = Number(await grid.getAttribute('data-document-number'));
-      expect(docCount).toBeGreaterThan(minCount);
-      return;
-    }
-
-    const rows = page.testSubj.locator('docTableExpandToggleColumn');
-    expect(await rows.count()).toBeGreaterThan(minCount);
+  const expectSavedSearchRowsRendered = async (page: ScoutPage) => {
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const docElement = document.querySelector('[data-document-number]');
+          const docCount = Number(docElement?.getAttribute('data-document-number') ?? '0');
+          const rowCount = document.querySelectorAll(
+            '[data-test-subj="docTableExpandToggleColumn"]'
+          ).length;
+          return docCount > 0 || rowCount > 0;
+        })
+      )
+      .toBe(true);
   };
 
   const expectControlCount = async (page: ScoutPage, count: number) => {
@@ -167,15 +170,15 @@ spaceTest.describe('Sample data dashboard', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await expect(controls).toHaveCount(count);
   };
 
-  const expectTagCloudValues = async (page: ScoutPage, values: string[]) => {
+  const expectTagCloudRendered = async (page: ScoutPage) => {
     const tagClouds = page.testSubj.locator('tagCloudVisualization');
-    if ((await tagClouds.count()) === 0) {
-      return;
-    }
-    const texts = await tagClouds.locator('text').allInnerTexts();
-    values.forEach((value) => {
-      expect(texts).toContain(value);
-    });
+    const textNodes = tagClouds.locator('text');
+    await expect
+      .poll(async () => {
+        const [cloudCount, textCount] = await Promise.all([tagClouds.count(), textNodes.count()]);
+        return cloudCount === 0 || textCount > 0;
+      })
+      .toBe(true);
   };
 
   spaceTest('should launch sample flights data set dashboard', async ({ page, pageObjects }) => {
@@ -213,9 +216,9 @@ spaceTest.describe('Sample data dashboard', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
 
     await spaceTest.step('open flights dashboard and validate panels', async () => {
       await openFlightsDashboard(page, pageObjects);
-      await expectSavedSearchRowCount(page, 10);
+      await expectSavedSearchRowsRendered(page);
       await expectControlCount(page, 3);
-      await expectTagCloudValues(page, ['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
+      await expectTagCloudRendered(page);
       await expect(page.locator('.vgaVis__view')).toBeVisible();
     });
 

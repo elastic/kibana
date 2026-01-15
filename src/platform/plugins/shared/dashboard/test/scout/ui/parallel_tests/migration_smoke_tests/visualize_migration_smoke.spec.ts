@@ -9,12 +9,10 @@
 
 import { spaceTest, expect, tags } from '@kbn/scout';
 import {
+  findImportedSavedObjectId,
   getDashboardPanels,
-  getSavedObjectIdByTitle,
-  importSavedObjects,
   openDashboard,
-  setDefaultIndexByTitle,
-} from './utils';
+} from '../../../utils/migration_smoke_helpers';
 
 const EXPORT_PATH =
   'src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/exports/visualize_dashboard_migration_test_7_12_1.json';
@@ -24,28 +22,25 @@ const DATA_VIEW_TITLE = 'shakespeare';
 let dashboardId = '';
 
 const getPanelDrilldownCounts = (
-  panels: Array<{ embeddableConfig?: { enhancements?: { dynamicActions?: { events?: unknown[] } } } }>
+  panels: Array<{
+    embeddableConfig?: { enhancements?: { dynamicActions?: { events?: unknown[] } } };
+  }>
 ) => {
   let panelsWithDrilldowns = 0;
   for (const panel of panels) {
     const events = panel.embeddableConfig?.enhancements?.dynamicActions?.events ?? [];
-    if (events.length > 0) panelsWithDrilldowns += 1;
+    panelsWithDrilldowns += Number(events.length > 0);
   }
 
   return { panelsWithDrilldowns };
 };
 
 spaceTest.describe('Visualize migration smoke (7.12.1)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    await importSavedObjects(kbnClient, scoutSpace.id, EXPORT_PATH);
-    dashboardId = await getSavedObjectIdByTitle(
-      kbnClient,
-      scoutSpace.id,
-      'dashboard',
-      DASHBOARD_TITLE
-    );
-    await setDefaultIndexByTitle(kbnClient, scoutSpace.id, DATA_VIEW_TITLE);
+    const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);
+    dashboardId = findImportedSavedObjectId(imported, 'dashboard', DASHBOARD_TITLE);
+    await scoutSpace.uiSettings.setDefaultIndex(DATA_VIEW_TITLE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -75,11 +70,10 @@ spaceTest.describe('Visualize migration smoke (7.12.1)', { tag: tags.DEPLOYMENT_
         await pageObjects.dashboard.switchToEditMode();
         const panelTitles = await pageObjects.dashboard.getPanelTitles();
         for (const title of panelTitles) {
-          if (title) {
-            await pageObjects.dashboard.expectExistsPanelAction('embeddablePanelAction-editPanel', title);
-          } else {
-            await pageObjects.dashboard.expectExistsPanelAction('embeddablePanelAction-editPanel');
-          }
+          await pageObjects.dashboard.expectExistsPanelAction(
+            'embeddablePanelAction-editPanel',
+            title || undefined
+          );
         }
 
         const panels = await getDashboardPanels(kbnClient, scoutSpace.id, dashboardId);
@@ -89,4 +83,3 @@ spaceTest.describe('Visualize migration smoke (7.12.1)', { tag: tags.DEPLOYMENT_
     }
   );
 });
-

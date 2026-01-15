@@ -25,12 +25,11 @@ spaceTest.describe('Dashboard panel titles', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     const lensObject = importedObjects.find(
       (savedObject) => savedObject.type === 'lens' && savedObject.title === LENS_TITLE
     );
-
-    if (!lensObject) {
-      throw new Error(`Lens saved object "${LENS_TITLE}" was not found in ${KIBANA_ARCHIVE_PATH}`);
-    }
-
-    lensSavedObjectId = lensObject.id;
+    expect(
+      lensObject,
+      `Lens saved object "${LENS_TITLE}" was not found in ${KIBANA_ARCHIVE_PATH}`
+    ).toBeTruthy();
+    lensSavedObjectId = lensObject!.id;
 
     await scoutSpace.uiSettings.setDefaultIndex(DATA_VIEW_NAME);
     await scoutSpace.uiSettings.setDefaultTime({
@@ -63,10 +62,8 @@ spaceTest.describe('Dashboard panel titles', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
   const getClonedPanelTitle = async (pageObjects: PageObjects) => {
     const titles = await pageObjects.dashboard.getPanelTitles();
     const clonedTitle = titles.find((title) => title.includes('(copy)'));
-    if (!clonedTitle) {
-      throw new Error('Cloned panel title not found after duplicating');
-    }
-    return clonedTitle;
+    expect(clonedTitle, 'Cloned panel title not found after duplicating').toBeTruthy();
+    return clonedTitle!;
   };
 
   spaceTest('by value panel can have an empty title', async ({ pageObjects }) => {
