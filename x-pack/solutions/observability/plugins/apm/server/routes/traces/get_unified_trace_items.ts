@@ -18,6 +18,7 @@ import {
   AT_TIMESTAMP,
   DURATION,
   EVENT_OUTCOME,
+  FAAS_COLDSTART,
   KIND,
   OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
@@ -71,6 +72,7 @@ const optionalFields = asMutableArray([
   OTEL_SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_TRACE_ID,
   AGENT_NAME,
+  FAAS_COLDSTART,
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -232,6 +234,7 @@ export async function getUnifiedTraceItems({
         agentName: event[AGENT_NAME],
         processorEvent: event[PROCESSOR_EVENT],
       }),
+      coldstart: event[FAAS_COLDSTART],
     } satisfies TraceItem;
   });
 

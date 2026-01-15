@@ -33,7 +33,7 @@ export function cancellableTask(
           taskContext.logger.trace(
             `Cancellable task check loop for task ${runContext.taskInstance.id}: status is ${task.status}`
           );
-          if (task.status === 'being_canceled') {
+          if (task.status === TaskStatus.BeingCanceled) {
             runContext.abortController.abort();
             await taskClient.update({
               ...task,
