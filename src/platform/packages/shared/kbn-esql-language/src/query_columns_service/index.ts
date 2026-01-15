@@ -9,7 +9,7 @@
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLAstQueryExpression } from '../..';
 import { BasicPrettyPrinter, SOURCE_COMMANDS } from '../..';
-import type { UnmappedFieldsTreatment } from '../commands/registry/types';
+import type { UnmappedFieldsStrategy } from '../commands/registry/types';
 import { type ESQLColumnData, type ESQLPolicy } from '../commands/registry/types';
 import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
 
@@ -72,7 +72,7 @@ export class QueryColumns {
     private readonly resourceRetriever?: ESQLCallbacks,
     private readonly options?: {
       invalidateColumnsCache?: boolean;
-      unmappedFieldsTreatment?: UnmappedFieldsTreatment;
+      unmappedFieldsStrategy?: UnmappedFieldsStrategy;
     }
   ) {}
 
@@ -180,7 +180,7 @@ export class QueryColumns {
         fetchFields,
         getPolicies,
         this.originalQueryText,
-        this.options?.unmappedFieldsTreatment
+        this.options?.unmappedFieldsStrategy
       );
     }
 
@@ -210,7 +210,7 @@ export class QueryColumns {
       fetchFields,
       getPolicies,
       this.originalQueryText,
-      this.options?.unmappedFieldsTreatment
+      this.options?.unmappedFieldsStrategy
     );
 
     return availableFields;

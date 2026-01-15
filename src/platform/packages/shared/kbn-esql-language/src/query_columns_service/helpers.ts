@@ -17,7 +17,7 @@ import {
   type ESQLAstCommand,
 } from '../..';
 import {
-  UnmappedFieldsTreatment,
+  UnmappedFieldsStrategy,
   type ESQLColumnData,
   type ESQLPolicy,
 } from '../commands/registry/types';
@@ -106,10 +106,10 @@ export function getUnmappedFields(
   command: ESQLAstCommand,
   previousCommands: ESQLAstCommand[],
   previousPipeFields: ESQLColumnData[],
-  unmappedFieldsTreatment?: UnmappedFieldsTreatment
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): ESQLColumnData[] {
-  // Not collect unmmaped fields if the treatment is FAIL or undefined
-  if (!unmappedFieldsTreatment || unmappedFieldsTreatment === UnmappedFieldsTreatment.FAIL) {
+  // Not collect unmmaped fields if the strategy is FAIL or undefined
+  if (!unmappedFieldsStrategy || unmappedFieldsStrategy === UnmappedFieldsStrategy.FAIL) {
     return [];
   }
 
@@ -156,7 +156,7 @@ export async function getCurrentQueryAvailableColumns(
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
   originalQueryText: string,
-  unmappedFieldsTreatment?: UnmappedFieldsTreatment
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ) {
   if (commands.length === 0) {
     return previousPipeFields;
@@ -179,7 +179,7 @@ export async function getCurrentQueryAvailableColumns(
     lastCommand,
     previousCommands,
     previousPipeFields,
-    unmappedFieldsTreatment
+    unmappedFieldsStrategy
   );
 
   const fields = [...previousPipeFields, ...unmappedFields];

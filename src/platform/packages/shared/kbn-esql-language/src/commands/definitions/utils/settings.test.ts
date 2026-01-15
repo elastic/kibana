@@ -8,48 +8,48 @@
  */
 
 import { synth } from '../../../composer';
-import { UnmappedFieldsTreatment } from '../../registry/types';
-import { getUnmappedFieldsTreatment } from './settings';
+import { UnmappedFieldsStrategy } from '../../registry/types';
+import { getUnmappedFieldsStrategy } from './settings';
 
-describe('getUnmappedFieldsTreatment', () => {
-  it('should return FAIL treatment if no headers are provided', () => {
-    const treatment = getUnmappedFieldsTreatment();
-    expect(treatment).toBe(UnmappedFieldsTreatment.FAIL);
+describe('getUnmappedFieldsStrategy', () => {
+  it('should return FAIL strategy if no headers are provided', () => {
+    const strategy = getUnmappedFieldsStrategy();
+    expect(strategy).toBe(UnmappedFieldsStrategy.FAIL);
   });
 
-  it('should return FAIL treatment if unmapped_fields setting is not provided', () => {
+  it('should return FAIL strategy if unmapped_fields setting is not provided', () => {
     const headers = [synth.header`SET timezone = "GMT+1"`];
-    const treatment = getUnmappedFieldsTreatment(headers);
-    expect(treatment).toBe(UnmappedFieldsTreatment.FAIL);
+    const strategy = getUnmappedFieldsStrategy(headers);
+    expect(strategy).toBe(UnmappedFieldsStrategy.FAIL);
   });
 
-  it('should return FAIL treatment if unmapped_fields setting is not valid', () => {
+  it('should return FAIL strategy if unmapped_fields setting is not valid', () => {
     const headers = [synth.header`SET unmapped_fields = "wrong_value"`];
-    const treatment = getUnmappedFieldsTreatment(headers);
-    expect(treatment).toBe(UnmappedFieldsTreatment.FAIL);
+    const strategy = getUnmappedFieldsStrategy(headers);
+    expect(strategy).toBe(UnmappedFieldsStrategy.FAIL);
   });
 
-  it('should return the FAIL treatment based on the unmapped_fields setting', () => {
+  it('should return the FAIL strategy based on the unmapped_fields setting', () => {
     const headers = [synth.header`SET unmapped_fields = "FAIL"`];
-    const treatment = getUnmappedFieldsTreatment(headers);
-    expect(treatment).toBe(UnmappedFieldsTreatment.FAIL);
+    const strategy = getUnmappedFieldsStrategy(headers);
+    expect(strategy).toBe(UnmappedFieldsStrategy.FAIL);
   });
 
-  it('should return the LOAD treatment based on the unmapped_fields setting', () => {
+  it('should return the LOAD strategy based on the unmapped_fields setting', () => {
     const headers = [synth.header`SET unmapped_fields = "LOAD"`];
-    const treatment = getUnmappedFieldsTreatment(headers);
-    expect(treatment).toBe(UnmappedFieldsTreatment.LOAD);
+    const strategy = getUnmappedFieldsStrategy(headers);
+    expect(strategy).toBe(UnmappedFieldsStrategy.LOAD);
   });
 
-  it('should return the NULLIFY treatment based on the unmapped_fields setting', () => {
+  it('should return the NULLIFY strategy based on the unmapped_fields setting', () => {
     const headers = [synth.header`SET unmapped_fields = "NULLIFY"`];
-    const treatment = getUnmappedFieldsTreatment(headers);
-    expect(treatment).toBe(UnmappedFieldsTreatment.NULLIFY);
+    const strategy = getUnmappedFieldsStrategy(headers);
+    expect(strategy).toBe(UnmappedFieldsStrategy.NULLIFY);
   });
 
   it('should ignore cases', () => {
     const headers = [synth.header`SET unmapped_fields = "nullify"`];
-    const treatment = getUnmappedFieldsTreatment(headers);
-    expect(treatment).toBe(UnmappedFieldsTreatment.NULLIFY);
+    const strategy = getUnmappedFieldsStrategy(headers);
+    expect(strategy).toBe(UnmappedFieldsStrategy.NULLIFY);
   });
 });

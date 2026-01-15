@@ -13,14 +13,14 @@ import { EsqlQuery } from '../../composer';
 import { esqlCommandRegistry } from '../../commands/registry';
 import { walk } from '../../ast';
 import type { ICommandCallbacks } from '../../commands/registry/types';
-import { UnmappedFieldsTreatment } from '../../commands/registry/types';
+import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { getMessageFromId } from '../../commands/definitions/utils';
 import type { ESQLAstAllCommands } from '../../types';
 import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './subqueries';
-import { getUnmappedFieldsTreatment } from '../../commands/definitions/utils/settings';
+import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
 
 /**
@@ -118,7 +118,7 @@ async function validateAst(
     messages.push(...commandMessages);
   }
 
-  const unmappedFieldsTreatmentFromHeader = getUnmappedFieldsTreatment(headerCommands);
+  const unmappedFieldsStrategyFromHeader = getUnmappedFieldsStrategy(headerCommands);
 
   /**
    * Even though we are validating single commands, we work with subqueries.
@@ -137,7 +137,7 @@ async function validateAst(
 
     const queryColumnsOptions = {
       ...options,
-      unmappedFieldsTreatment: unmappedFieldsTreatmentFromHeader,
+      unmappedFieldsStrategy: unmappedFieldsStrategyFromHeader,
     };
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
       ? await new QueryColumns(
@@ -156,9 +156,9 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
     };
 
-    const unmappedFieldsTreatment = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
-      ? unmappedFieldsTreatmentFromHeader
-      : UnmappedFieldsTreatment.FAIL;
+    const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
+      ? unmappedFieldsStrategyFromHeader
+      : UnmappedFieldsStrategy.FAIL;
 
     const commandMessages = validateCommand(
       currentCommand,
@@ -168,7 +168,7 @@ async function validateAst(
         ...callbacks,
         hasMinimumLicenseRequired,
       },
-      unmappedFieldsTreatment
+      unmappedFieldsStrategy
     );
     messages.push(...commandMessages);
   }
@@ -197,7 +197,7 @@ function validateCommand(
   references: ReferenceMaps,
   rootCommands: ESQLCommand[],
   callbacks?: ICommandCallbacks,
-  unmappedFieldsTreatment?: UnmappedFieldsTreatment
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -233,7 +233,7 @@ function validateCommand(
     policies: references.policies,
     sources: [...references.sources].map((source) => ({ name: source })),
     joinSources: references.joinIndices,
-    unmappedFieldsTreatment,
+    unmappedFieldsStrategy,
   };
 
   if (commandDefinition.methods.validate) {

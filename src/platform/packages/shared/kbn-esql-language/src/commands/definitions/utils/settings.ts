@@ -15,7 +15,7 @@ import {
   isStringLiteral,
   withAutoSuggest,
 } from '../../../..';
-import { UnmappedFieldsTreatment, type ISuggestionItem } from '../../registry/types';
+import { UnmappedFieldsStrategy, type ISuggestionItem } from '../../registry/types';
 import { SuggestionCategory } from '../../../shared/sorting/types';
 import { settings } from '../generated/settings';
 
@@ -68,13 +68,13 @@ function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
 }
 
 /**
- * Checks the headers commmands looking for an unmapped_fields setting and returns its treatment value.
+ * Checks the headers commmands looking for an unmapped_fields setting and returns its strategy value.
  * Default is FAIL.
  */
-export function getUnmappedFieldsTreatment(
+export function getUnmappedFieldsStrategy(
   headers: ESQLAstHeaderCommand[] = []
-): UnmappedFieldsTreatment {
-  let unmappedFieldsTreatment: UnmappedFieldsTreatment = UnmappedFieldsTreatment.FAIL;
+): UnmappedFieldsStrategy {
+  let unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL;
 
   headers.forEach((comand) => {
     if (comand.name.toUpperCase() === 'SET') {
@@ -82,14 +82,14 @@ export function getUnmappedFieldsTreatment(
       if (settingName?.toUpperCase() === 'UNMAPPED_FIELDS') {
         switch (settingValue?.toUpperCase()) {
           case 'NULLIFY':
-            unmappedFieldsTreatment = UnmappedFieldsTreatment.NULLIFY;
+            unmappedFieldsStrategy = UnmappedFieldsStrategy.NULLIFY;
             break;
           case 'LOAD':
-            unmappedFieldsTreatment = UnmappedFieldsTreatment.LOAD;
+            unmappedFieldsStrategy = UnmappedFieldsStrategy.LOAD;
             break;
         }
       }
     }
   });
-  return unmappedFieldsTreatment;
+  return unmappedFieldsStrategy;
 }

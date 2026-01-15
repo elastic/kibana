@@ -8,7 +8,7 @@
  */
 
 import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types';
-import { UnmappedFieldsTreatment, type ICommandContext } from '../../../registry/types';
+import { UnmappedFieldsStrategy, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getColumnExists } from '../columns';
 import { isParametrized } from '../../../../ast/is';
@@ -30,7 +30,7 @@ export class ColumnValidator {
 
   validate(): ESQLMessage[] {
     if (!this.exists) {
-      if (this.treatMissingColumnAsUnmapped) {
+      if (this.isUnmappedColumnAllowed) {
         return [errors.unmappedColumnWarning(this.column)];
       } else {
         return [errors.unknownColumn(this.column)];
@@ -51,11 +51,11 @@ export class ColumnValidator {
     return true;
   }
 
-  private get treatMissingColumnAsUnmapped(): boolean {
-    const unmappedFieldsTreatment = this.context.unmappedFieldsTreatment;
+  private get isUnmappedColumnAllowed(): boolean {
+    const unmappedFieldsStrategy = this.context.unmappedFieldsStrategy;
     return (
-      unmappedFieldsTreatment === UnmappedFieldsTreatment.LOAD ||
-      unmappedFieldsTreatment === UnmappedFieldsTreatment.NULLIFY
+      unmappedFieldsStrategy === UnmappedFieldsStrategy.LOAD ||
+      unmappedFieldsStrategy === UnmappedFieldsStrategy.NULLIFY
     );
   }
 }
