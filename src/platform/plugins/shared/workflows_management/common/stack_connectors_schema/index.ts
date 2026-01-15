@@ -179,3 +179,67 @@ export {
   McpListToolsResponseSchema,
   McpCallToolResponseSchema,
 } from './mcp';
+
+// SentinelOne connector schemas
+export {
+  SentinelOneGetAgentsParamsSchema,
+  SentinelOneIsolateHostParamsSchema,
+  SentinelOneReleaseHostParamsSchema,
+  SentinelOneGetRemoteScriptsParamsSchema,
+  SentinelOneFetchAgentFilesParamsSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  SentinelOneExecuteScriptParamsSchema,
+  SentinelOneGetRemoteScriptStatusParamsSchema,
+  SentinelOneGetRemoteScriptResultsParamsSchema,
+  SentinelOneDownloadRemoteScriptResultsParamsSchema,
+  SentinelOneGetAgentsResponseSchema,
+  SentinelOneIsolateHostResponseSchema,
+  SentinelOneReleaseHostResponseSchema,
+  SentinelOneGetRemoteScriptsResponseSchema,
+  SentinelOneFetchAgentFilesResponseSchema,
+  SentinelOneDownloadAgentFileResponseSchema,
+  SentinelOneGetActivitiesResponseSchema,
+  SentinelOneExecuteScriptResponseSchema,
+  SentinelOneGetRemoteScriptStatusResponseSchema,
+  SentinelOneGetRemoteScriptResultsResponseSchema,
+  SentinelOneDownloadRemoteScriptResultsResponseSchema,
+} from './sentinelone';
+
+// Microsoft Defender Endpoint connector schemas
+export {
+  MicrosoftDefenderEndpointGetAgentDetailsParamsSchema,
+  MicrosoftDefenderEndpointGetAgentListParamsSchema,
+  MicrosoftDefenderEndpointIsolateHostParamsSchema,
+  MicrosoftDefenderEndpointReleaseHostParamsSchema,
+  MicrosoftDefenderEndpointTestConnectorParamsSchema,
+  MicrosoftDefenderEndpointGetActionsParamsSchema,
+  MicrosoftDefenderEndpointGetLibraryFilesParamsSchema,
+  MicrosoftDefenderEndpointRunScriptParamsSchema,
+  MicrosoftDefenderEndpointCancelActionParamsSchema,
+  MicrosoftDefenderEndpointGetActionResultsParamsSchema,
+  MicrosoftDefenderEndpointGetAgentDetailsResponseSchema,
+  MicrosoftDefenderEndpointGetAgentListResponseSchema,
+  MicrosoftDefenderEndpointIsolateHostResponseSchema,
+  MicrosoftDefenderEndpointReleaseHostResponseSchema,
+  MicrosoftDefenderEndpointTestConnectorResponseSchema,
+  MicrosoftDefenderEndpointGetActionsResponseSchema,
+  MicrosoftDefenderEndpointGetLibraryFilesResponseSchema,
+  MicrosoftDefenderEndpointRunScriptResponseSchema,
+  MicrosoftDefenderEndpointCancelActionResponseSchema,
+  MicrosoftDefenderEndpointGetActionResultsResponseSchema,
+} from './microsoft_defender_endpoint';
+
+// CrowdStrike connector schemas
+export {
+  CrowdstrikeGetAgentDetailsParamsSchema,
+  CrowdstrikeGetAgentOnlineStatusParamsSchema,
+  CrowdstrikeHostActionsParamsSchema,
+  CrowdstrikeExecuteRTRCommandParamsSchema,
+  CrowdstrikeGetRTRCloudScriptsParamsSchema,
+  CrowdstrikeGetAgentDetailsResponseSchema,
+  CrowdstrikeGetAgentOnlineStatusResponseSchema,
+  CrowdstrikeHostActionsResponseSchema,
+  CrowdstrikeExecuteRTRResponseSchema,
+  CrowdstrikeGetRTRCloudScriptsResponseSchema,
+} from './crowdstrike';
