@@ -43,7 +43,11 @@ import {
   TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type {
+  CompressionStrategy,
+  TraceItem,
+  TraceItemComposite,
+} from '../../../common/waterfall/unified_trace_item';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
@@ -299,12 +303,17 @@ const resolveStatus = (eventOutcome?: EventOutcome, statusCode?: StatusCode): Ev
   }
 };
 
+const isCompressionStrategy = (value?: string): value is CompressionStrategy =>
+  value === 'exact_match' || value === 'same_kind';
+
 const resolveComposite = (
   count?: number,
   sum?: number,
   compressionStrategy?: string
-): { count: number; sum: number; compressionStrategy: string } | undefined => {
-  if (!count || !sum || !compressionStrategy) return undefined;
+): TraceItemComposite | undefined => {
+  if (!count || !sum || !isCompressionStrategy(compressionStrategy)) {
+    return undefined;
+  }
 
   return { count, sum, compressionStrategy };
 };

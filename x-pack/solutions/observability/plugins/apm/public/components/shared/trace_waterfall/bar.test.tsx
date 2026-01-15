@@ -75,8 +75,12 @@ describe('Bar', () => {
   });
 
   describe('with composite spans', () => {
-    it('applies transparent background when composite is provided', () => {
-      const segments = [{ id: 'segment-1', left: 0, width: 1, color: 'red' }];
+    it('render segments correctly when composite is provided', () => {
+      const segments = [
+        { id: 'segment-1', left: 0.1, width: 0.2, color: 'blue' },
+        { id: 'segment-2', left: 0.5, width: 0.3, color: 'green' },
+      ];
+
       const barDiv = renderBar({
         width: 50,
         left: 10,
@@ -87,6 +91,20 @@ describe('Bar', () => {
       });
 
       expect(barDiv).toHaveStyle('background-color: transparent');
+
+      const overlayContainer = barDiv.firstChild as HTMLElement;
+      expect(overlayContainer).toBeInTheDocument();
+      expect(overlayContainer.children).toHaveLength(2);
+
+      const [segment1, segment2] = Array.from(overlayContainer.children) as HTMLElement[];
+
+      expect(segment1).toHaveStyle('left: 10%');
+      expect(segment1).toHaveStyle('width: 20%');
+      expect(segment1).toHaveStyle('background-color: blue');
+
+      expect(segment2).toHaveStyle('left: 50%');
+      expect(segment2).toHaveStyle('width: 30%');
+      expect(segment2).toHaveStyle('background-color: green');
     });
 
     it('applies solid background when composite is not provided', () => {
