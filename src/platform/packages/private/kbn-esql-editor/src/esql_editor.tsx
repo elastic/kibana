@@ -695,19 +695,6 @@ const ESQLEditorInternal = function ESQLEditor({
     favoritesClient,
   ]);
 
-  const {
-    resourcesBadgeStyle,
-    resourcesLabelClickHandler,
-    resourcesLabelKeyDownHandler,
-    addResourcesDecorator,
-  } = useResourcesBadge(
-    editorRef,
-    editorModel,
-    query,
-    () => setIsIndicesBrowserOpen(true),
-    esqlCallbacks?.getSources ? async () => (await esqlCallbacks.getSources?.()) ?? [] : undefined,
-  );
-
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
       return {
@@ -1035,6 +1022,19 @@ const ESQLEditorInternal = function ESQLEditor({
       }
     },
     []
+  );
+
+  const {
+    resourcesBadgeStyle,
+    resourcesLabelClickHandler,
+    resourcesLabelKeyDownHandler,
+    addResourcesDecorator,
+  } = useResourcesBadge(
+    editorRef,
+    editorModel,
+    query,
+    openIndicesBrowser,
+    esqlCallbacks?.getSources ? async () => (await esqlCallbacks.getSources?.()) ?? [] : undefined,
   );
 
   const suggestionProvider = useMemo(
