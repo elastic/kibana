@@ -17,7 +17,15 @@ import type { DocViewsRegistry } from './doc_views_registry';
  * Represents the restorable state for all doc viewer tabs, keyed by tab ID.
  * Each tab can store its own state as needed.
  */
-export type DocViewerRestorableState = Record<string, unknown>;
+export type DocViewerTabsState = Record<string, unknown>;
+
+export interface DocViewerRestorableState {
+  /**
+   * Represents the restorable state for all doc viewer tabs, keyed by tab ID.
+   * Each tab can store its own state as needed.
+   */
+  docViewerTabsState?: DocViewerTabsState;
+}
 
 export interface FieldMapping {
   filterable?: boolean;
@@ -53,14 +61,14 @@ export interface DocViewRenderProps {
   decreaseAvailableHeightBy?: number;
 }
 
-export type DocViewerComponentProps<
-  TState extends DocViewerRestorableState = DocViewerRestorableState
-> = DocViewRenderProps & RestorableStateProviderProps<TState>;
+export type DocViewerComponentProps<TState extends object = object> = DocViewRenderProps &
+  RestorableStateProviderProps<TState>;
 
-export type DocViewerComponent<TState extends DocViewerRestorableState = DocViewerRestorableState> =
-  React.FC<DocViewerComponentProps<TState>>;
+export type DocViewerComponent<TState extends object = object> = React.FC<
+  DocViewerComponentProps<TState>
+>;
 
-export interface DocView<TState extends DocViewerRestorableState = DocViewerRestorableState> {
+export interface DocView<TState extends object = object> {
   id: string;
   order: number;
   title: string;
@@ -68,5 +76,4 @@ export interface DocView<TState extends DocViewerRestorableState = DocViewerRest
   enabled?: boolean;
 }
 
-export type DocViewFactory<TState extends DocViewerRestorableState = DocViewerRestorableState> =
-  () => DocView<TState>;
+export type DocViewFactory<TState extends object = object> = () => DocView<TState>;

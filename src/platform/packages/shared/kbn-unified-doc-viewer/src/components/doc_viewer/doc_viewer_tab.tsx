@@ -40,7 +40,13 @@ export const DocViewerTab = (props: Props) => {
 
   const onInitialStateChange = useCallback(
     (initialState: ExtractState<typeof Component>) => {
-      onInitialDocViewerStateChange?.({ ...initialDocViewerState, [id]: initialState });
+      onInitialDocViewerStateChange?.({
+        ...initialDocViewerState,
+        docViewerTabsState: {
+          ...initialDocViewerState?.docViewerTabsState,
+          [id]: initialState,
+        },
+      });
     },
     [id, initialDocViewerState, onInitialDocViewerStateChange]
   );
@@ -48,7 +54,9 @@ export const DocViewerTab = (props: Props) => {
   return (
     <KibanaSectionErrorBoundary sectionName={title}>
       <Component
-        initialState={initialDocViewerState?.[id] as ExtractState<typeof Component>}
+        initialState={
+          initialDocViewerState?.docViewerTabsState?.[id] as ExtractState<typeof Component>
+        }
         onInitialStateChange={onInitialStateChange}
         {...renderProps}
       />
