@@ -886,7 +886,28 @@ const ESQLEditorInternal = function ESQLEditor({
     [serverErrors, serverWarning, code, queryValidation]
   );
 
-  const openIndicesBrowser = useCallback(() => {
+  const handleResourceBrowserSelect = useCallback(
+    (resourceName: string, oldLength: number) => {
+      if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
+        const initialCursorPosition = browserCursorPositionRef.current;
+        const range = {
+          startLineNumber: initialCursorPosition.lineNumber,
+          startColumn: initialCursorPosition.column,
+          endLineNumber: initialCursorPosition.lineNumber,
+          endColumn: initialCursorPosition.column + oldLength,
+        };
+        editorRef.current.executeEdits('indicesBrowser', [
+          {
+            range,
+            text: resourceName,
+          },
+        ]);
+      }
+    },
+    []
+  );
+
+  const updateResourceBrowserPosition = () => {
     if (editorRef.current) {
       const cursorPosition = editorRef.current.getPosition();
       if (cursorPosition) {
@@ -911,40 +932,17 @@ const ESQLEditorInternal = function ESQLEditor({
         }
       }
     }
-  }, []);
+  };
 
-  const closeIndicesBrowser = useCallback(() => {
-    setIsIndicesBrowserOpen(false);
-  }, []);
-
-  const handleIndexSelect = useCallback(
-    (indexName: string, oldLength: number) => {
-      if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
-        const initialCursorPosition = browserCursorPositionRef.current;
-        const range = {
-          startLineNumber: initialCursorPosition.lineNumber,
-          startColumn: initialCursorPosition.column,
-          endLineNumber: initialCursorPosition.lineNumber,
-          endColumn: initialCursorPosition.column + oldLength,
-        };
-        editorRef.current.executeEdits('indicesBrowser', [
-          {
-            range,
-            text: indexName,
-          },
-        ]);
-      }
-    },
-    []
-  );
+  const openIndicesBrowser = useCallback(() => {
+    updateResourceBrowserPosition();
+    setIsIndicesBrowserOpen(true);
+  }, [updateResourceBrowserPosition]);
 
   const openFieldsBrowser = useCallback(async () => {
     if (editorRef.current && editorModel.current) {
       const position = editorRef.current.getPosition();
       if (position) {
-        // Save the cursor position for use in handleFieldSelect
-        browserCursorPositionRef.current = position;
-
         // Use the same logic as autocomplete to get fields
         const fullText = editorModel.current.getValue() || '';
         const offset = editorModel.current.getOffsetAt(position) || 0;
@@ -978,51 +976,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
         // Store the getColumnMap function in a ref so it can be used by the popup
         fieldsBrowserGetColumnMapRef.current = getColumnMap;
-
-        const editorCoords = editorRef.current.getDomNode()?.getBoundingClientRect();
-        const editorPosition = editorRef.current.getScrolledVisiblePosition(position);
-        if (editorCoords && editorPosition) {
-          const editorTop = editorCoords.top;
-          const editorLeft = editorCoords.left;
-          // Calculate the absolute position of the popover
-          const absoluteTop = editorTop + (editorPosition?.top ?? 0) - 120;
-          let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
-          if (absoluteLeft > editorCoords.width) {
-            // date picker is out of the editor
-            absoluteLeft = absoluteLeft - BROWSER_POPOVER_WIDTH;
-          }
-    
-          setBrowserPopoverPosition({ top: absoluteTop, left: absoluteLeft });
-          setIsFieldsBrowserOpen(true);
-        }
       }
     }
+    updateResourceBrowserPosition();
+    setIsFieldsBrowserOpen(true);
   }, [esqlCallbacks]);
-
-  const closeFieldsBrowser = useCallback(() => {
-    setIsFieldsBrowserOpen(false);
-  }, []);
-
-  const handleFieldSelect = useCallback(
-    (fieldName: string, oldLength: number) => {
-      if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
-        const initialCursorPosition = browserCursorPositionRef.current;
-        const range = {
-          startLineNumber: initialCursorPosition.lineNumber,
-          startColumn: initialCursorPosition.column,
-          endLineNumber: initialCursorPosition.lineNumber,
-          endColumn: initialCursorPosition.column + oldLength,
-        };
-        editorRef.current.executeEdits('fieldsBrowser', [
-          {
-            range,
-            text: fieldName,
-          },
-        ]);
-      }
-    },
-    []
-  );
 
   const {
     resourcesBadgeStyle,
@@ -1034,7 +992,6 @@ const ESQLEditorInternal = function ESQLEditor({
     editorModel,
     query,
     openIndicesBrowser,
-    esqlCallbacks?.getSources ? async () => (await esqlCallbacks.getSources?.()) ?? [] : undefined,
   );
 
   const suggestionProvider = useMemo(
@@ -1284,12 +1241,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     if (model) {
                       editorModel.current = model;
                       await addLookupIndicesDecorator();
-                      editorModel.current = model;
                       addResourcesDecorator();
-
-                      monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
-                        wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
-                      });
                     }
 
                     // Register custom commands
@@ -1519,16 +1471,16 @@ const ESQLEditorInternal = function ESQLEditor({
         <>
           <IndicesBrowserPopover
             isOpen={isIndicesBrowserOpen}
-            onClose={closeIndicesBrowser}
-            onSelectIndex={handleIndexSelect}
+            onClose={() => setIsIndicesBrowserOpen(false)}
+            onSelectIndex={handleResourceBrowserSelect}
             core={core}
             getLicense={kibana.services?.esql?.getLicense}
             position={browserPopoverPosition}
           />
           <FieldsBrowserPopover
             isOpen={isFieldsBrowserOpen}
-            onClose={closeFieldsBrowser}
-            onSelectField={handleFieldSelect}
+            onClose={() => setIsFieldsBrowserOpen(false)}
+            onSelectField={handleResourceBrowserSelect}
             getColumnMap={fieldsBrowserGetColumnMapRef.current}
             position={browserPopoverPosition}
           />

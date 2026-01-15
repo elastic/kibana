@@ -8,10 +8,10 @@
  */
 export function findCommandStringPosition(query: string, command: string) {
     const lines = query.split('\n');
-    let fromStartLineNumber = -1;
-    let fromEndLineNumber = -1;
-    let fromMinChar = -1;
-    let fromMaxChar = -1;
+    let commandStartLineNumber = -1;
+    let commandEndLineNumber = -1;
+    let commandMinChar = -1;
+    let commandMaxChar = -1;
   
     const searchString = command;
     for (let i = 0; i < lines.length; i++) {
@@ -20,19 +20,19 @@ export function findCommandStringPosition(query: string, command: string) {
       const fromIndex = lowerCaseLine.indexOf(searchString);
   
       if (fromIndex !== -1) {
-        fromStartLineNumber = i + 1;
-        fromEndLineNumber = i + 1; // "FROM" is on a single line
-        fromMinChar = fromIndex;
-        fromMaxChar = fromIndex + searchString.length + 1;
-        break; // Stop after finding the first "FROM"
+        commandStartLineNumber = i + 1;
+        commandEndLineNumber = i + 1; // command is on a single line
+        commandMinChar = fromIndex;
+        commandMaxChar = fromIndex + searchString.length + 1;
+        break; // Stop after finding the first command
       }
     }
   
     return {
-      startLineNumber: fromStartLineNumber,
-      endLineNumber: fromEndLineNumber,
-      min: fromMinChar,
-      max: fromMaxChar,
+      startLineNumber: commandStartLineNumber,
+      endLineNumber: commandEndLineNumber,
+      min: commandMinChar,
+      max: commandMaxChar,
     };
   }
   
