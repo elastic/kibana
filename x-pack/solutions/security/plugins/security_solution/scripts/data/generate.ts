@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 import { run } from '@kbn/dev-cli-runner';
@@ -33,7 +34,10 @@ import {
   resolveRuleset,
   toRuleCreateProps,
 } from './lib/ruleset';
-import { generateAndIndexAttackDiscoveries } from './lib/attack_discoveries';
+import {
+  generateAndIndexAttackDiscoveries,
+  type GeneratedAttackDiscoveryGroup,
+} from './lib/attack_discoveries';
 
 const ATTACKS_DIR = scriptsDataDir('episodes', 'attacks');
 const NOISE_DIR = scriptsDataDir('episodes', 'noise');
@@ -108,6 +112,203 @@ const parseEpisodesFlag = (value: string | undefined): Set<string> => {
       return p;
     });
   return new Set(parts);
+};
+
+const stableSampleScore = (input: string): number => {
+  // Deterministic score to pick a stable sample for --cases, without using bitwise ops.
+  const hex = crypto.createHash('sha256').update(input).digest('hex').slice(0, 8);
+  return Number.parseInt(hex, 16);
+};
+
+const clamp = (n: number, min: number, max: number): number => Math.min(max, Math.max(min, n));
+
+const getCaseTimestampIso = ({
+  discoveryTimeIso,
+  key,
+}: {
+  discoveryTimeIso: string;
+  key: string;
+}): string => {
+  // Requirement: case timestamps must be within 12 hours AFTER the attack discovery timestamp.
+  const baseMs = new Date(discoveryTimeIso).getTime();
+  const twelveHoursMs = 12 * 60 * 60 * 1000;
+  const offsetMs = stableSampleScore(key) % (twelveHoursMs + 1);
+  const tsMs = clamp(baseMs + offsetMs, baseMs, baseMs + twelveHoursMs);
+  return new Date(tsMs).toISOString();
+};
+
+const buildAttackDiscoveryCaseTitle = (d: GeneratedAttackDiscoveryGroup): string => {
+  return d.title;
+};
+
+const buildAttackDiscoveryCaseComment = (d: GeneratedAttackDiscoveryGroup): string => {
+  const title = buildAttackDiscoveryCaseTitle(d);
+  const hostLine = d.hostName ? `Host \`${d.hostName}\`` : 'Host `unknown`';
+  const userLine = d.userName ? ` User \`${d.userName}\`` : '';
+  const hostBullet = d.hostName ? `- Host: \`${d.hostName}\`` : '';
+  const userBullet = d.userName ? `- User: \`${d.userName}\`` : '';
+
+  return `## ${title}
+
+${hostLine}${userLine}
+
+### Summary
+Detected ${d.alertIds.length} alert(s) that appear related.
+
+### Details
+This synthetic attack discovery groups alerts that occurred close in time for investigation.
+
+- Alerts: ${d.alertIds.length}
+${hostBullet}
+${userBullet}
+`;
+};
+
+const createCasesFromAttackDiscoveries = async ({
+  kbnClient,
+  log,
+  discoveries,
+  alertsIndex,
+}: {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  discoveries: GeneratedAttackDiscoveryGroup[];
+  alertsIndex: string;
+}): Promise<void> => {
+  if (discoveries.length === 0) {
+    log.info(`--cases enabled, but there are no Attack Discoveries to turn into cases.`);
+    return;
+  }
+
+  const desired = Math.max(1, Math.round(discoveries.length * 0.5));
+  const selected = [...discoveries]
+    .map((d) => {
+      const key = [
+        d.discoveryTimeIso,
+        d.hostName ?? 'unknown-host',
+        d.userName ?? 'unknown-user',
+        d.alertIds.join(','),
+      ].join('|');
+      return { d, key, score: stableSampleScore(key) };
+    })
+    .sort((a, b) => a.score - b.score)
+    .slice(0, desired)
+    .map(({ d, key }) => ({ d, key }));
+
+  log.info(`--cases enabled: creating ${selected.length}/${discoveries.length} cases (~50%).`);
+
+  for (const { d, key } of selected) {
+    const title = buildAttackDiscoveryCaseTitle(d);
+    const description = `This case was opened for attack discovery: _${title}_`;
+
+    const created = await kbnClient.request<{ id: string }>({
+      method: 'POST',
+      path: '/api/cases',
+      headers: {
+        'kbn-xsrf': 'true',
+      },
+      body: {
+        title,
+        tags: [],
+        category: null,
+        severity: 'low',
+        description,
+        assignees: [],
+        connector: { id: 'none', name: 'none', type: '.none', fields: null },
+        settings: { syncAlerts: true, extractObservables: true },
+        owner: 'securitySolution',
+        customFields: [],
+      },
+    });
+
+    const caseId = created.data.id;
+    const attachments = [
+      {
+        comment: buildAttackDiscoveryCaseComment(d),
+        type: 'user',
+        owner: 'securitySolution',
+      },
+      ...d.alertIds.map((alertId) => ({
+        alertId,
+        index: alertsIndex,
+        rule: { id: null, name: null },
+        type: 'alert',
+        owner: 'securitySolution',
+      })),
+    ];
+
+    await kbnClient.request({
+      method: 'POST',
+      path: `/internal/cases/${caseId}/attachments/_bulk_create`,
+      headers: {
+        'kbn-xsrf': 'true',
+        // This matches what the UI sends and is commonly required for /internal/* routes.
+        'x-elastic-internal-origin': 'Kibana',
+      },
+      body: attachments,
+    });
+
+    // Override saved object timestamps to be near the discovery timestamp.
+    // The public Cases API always uses "now" for created_at / updated_at, so we patch the underlying saved object.
+    // IMPORTANT: do NOT write directly to `.kibana_alerting_cases` via Elasticsearch; it is a restricted index.
+    const timestampIso = getCaseTimestampIso({ discoveryTimeIso: d.discoveryTimeIso, key });
+    try {
+      // Provide `retries` so response errors are wrapped and include the response body in the error message.
+      await kbnClient.request({
+        method: 'PUT',
+        path: `/internal/security_solution/data_generator/cases/${caseId}/timestamps`,
+        retries: 1,
+        headers: {
+          'elastic-api-version': '1',
+          'kbn-xsrf': 'true',
+          'x-elastic-internal-origin': 'Kibana',
+        },
+        body: {
+          timestamp: timestampIso,
+        },
+      });
+    } catch (e) {
+      // Best-effort: case creation/attachments should still succeed even if timestamp patching fails.
+      log.warning(
+        `--cases: failed to set case timestamps for caseId=${caseId} (best-effort): ${String(
+          (e as Error).message ?? e
+        )}`
+      );
+    }
+  }
+};
+
+const clearPreviewAlertsDocumentsBestEffort = async ({
+  esClient,
+  log,
+  spaceId,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  spaceId: string;
+}): Promise<void> => {
+  // Rule preview writes into the preview alerts backing index using bulk `create`.
+  // If documents already exist with the same IDs (e.g. repeated generator runs), preview can fail with 409 conflicts.
+  // We intentionally delete *documents only* (not the index), so the preview index remains usable.
+  const previewInternalAlias = `.internal.preview.alerts-security.alerts-${spaceId}`;
+  try {
+    const exists = await esClient.indices.exists({ index: previewInternalAlias });
+    if (!exists) return;
+
+    await esClient.deleteByQuery({
+      index: previewInternalAlias,
+      conflicts: 'proceed',
+      refresh: true,
+      query: { match_all: {} },
+    });
+    log.info(`Cleared existing preview alert documents from ${previewInternalAlias}`);
+  } catch (e) {
+    log.warning(
+      `Failed to clear preview alert documents from ${previewInternalAlias} (best-effort): ${String(
+        (e as Error).message ?? e
+      )}`
+    );
+  }
 };
 
 const ensureGeneratorIndices = async ({
@@ -444,6 +645,7 @@ export const cli = () => {
       const skipAlerts = Boolean(cliContext.flags['skip-alerts']);
       const skipRulesetPreview = Boolean(cliContext.flags['skip-ruleset-preview']);
       const skipAttackDiscoveries = Boolean(cliContext.flags['skip-attack-discoveries']);
+      const createCases = Boolean(cliContext.flags.cases);
       const maxPreviewInvocations = Math.max(
         1,
         Number(cliContext.flags['max-preview-invocations'] ?? 12)
@@ -621,6 +823,7 @@ export const cli = () => {
 
         // Ensure preview index exists (some dev clusters don't allow it to be recreated automatically if deleted).
         await ensurePreviewAlertsIndexBestEffort({ esClient, log, spaceId: effectiveSpaceId });
+        await clearPreviewAlertsDocumentsBestEffort({ esClient, log, spaceId: effectiveSpaceId });
 
         if (skipAlerts) {
           log.warning(
@@ -704,7 +907,7 @@ export const cli = () => {
         log.info(`Done generating/copying canonical Security alerts for ruleset.`);
 
         if (!skipAttackDiscoveries) {
-          await generateAndIndexAttackDiscoveries({
+          const discoveries = await generateAndIndexAttackDiscoveries({
             esClient,
             log,
             spaceId: effectiveSpaceId,
@@ -714,6 +917,16 @@ export const cli = () => {
           });
 
           log.info(`Done generating synthetic Attack Discoveries.`);
+
+          if (createCases) {
+            await createCasesFromAttackDiscoveries({
+              kbnClient,
+              log,
+              discoveries,
+              alertsIndex: `.alerts-security.alerts-${effectiveSpaceId}`,
+            });
+            log.info(`Done creating cases for a subset of Attack Discoveries.`);
+          }
         } else {
           log.warning(`--skip-attack-discoveries enabled: skipping Attack Discoveries.`);
         }
@@ -746,7 +959,13 @@ export const cli = () => {
           'indexPrefix',
           'max-preview-invocations',
         ],
-        boolean: ['clean', 'skip-alerts', 'skip-ruleset-preview', 'skip-attack-discoveries'],
+        boolean: [
+          'clean',
+          'skip-alerts',
+          'skip-ruleset-preview',
+          'skip-attack-discoveries',
+          'cases',
+        ],
         alias: {
           n: 'events',
           h: 'hosts',
@@ -769,6 +988,7 @@ export const cli = () => {
           'skip-alerts': false,
           'skip-ruleset-preview': false,
           'skip-attack-discoveries': false,
+          cases: false,
         },
         allowUnexpected: false,
         help: `
@@ -786,6 +1006,7 @@ export const cli = () => {
         --skip-alerts                     Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
         --skip-ruleset-preview            Skip previews of the ruleset rules (baseline attribution only; faster)
         --skip-attack-discoveries         Skip Attack Discovery generation (faster)
+        --cases                          Create cases from ~50% of generated Attack Discoveries
 
         --username                       Kibana/Elasticsearch username (Default: elastic)
         --password                       Kibana/Elasticsearch password (Default: changeme)

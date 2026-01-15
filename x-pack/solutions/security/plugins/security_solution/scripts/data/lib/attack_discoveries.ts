@@ -95,6 +95,14 @@ export interface GenerateAttackDiscoveriesOptions {
   maxDiscoveries?: number;
 }
 
+export interface GeneratedAttackDiscoveryGroup {
+  discoveryTimeIso: string;
+  alertIds: string[];
+  hostName?: string;
+  userName?: string;
+  title: string;
+}
+
 interface AlertSummary {
   id: string;
   timestamp: string;
@@ -192,12 +200,7 @@ const groupAlertsToDiscoveries = ({
 }: {
   alerts: AlertSummary[];
   maxDiscoveries: number;
-}): Array<{
-  discoveryTimeIso: string;
-  alertIds: string[];
-  hostName?: string;
-  userName?: string;
-}> => {
+}): GeneratedAttackDiscoveryGroup[] => {
   // Focus discoveries on only a few "risky" entities. In practice, those are the host/user pairs
   // with the most alerts in the requested time range.
   //
@@ -212,12 +215,7 @@ const groupAlertsToDiscoveries = ({
     byPair.set(key, list);
   }
 
-  const discoveries: Array<{
-    discoveryTimeIso: string;
-    alertIds: string[];
-    hostName?: string;
-    userName?: string;
-  }> = [];
+  const discoveries: GeneratedAttackDiscoveryGroup[] = [];
 
   const focusPairsCount = Math.max(1, Math.min(3, byPair.size));
   const pairsByVolume = [...byPair.entries()]
@@ -348,7 +346,7 @@ export const generateAndIndexAttackDiscoveries = async ({
   alertsIndex: string;
   authenticatedUsername: string;
   opts: GenerateAttackDiscoveriesOptions;
-}) => {
+}): Promise<GeneratedAttackDiscoveryGroup[]> => {
   const maxAlertsToUse = opts.maxAlertsToUse ?? 2000;
   const maxDiscoveries = opts.maxDiscoveries ?? 200;
 
@@ -364,7 +362,7 @@ export const generateAndIndexAttackDiscoveries = async ({
     log.warning(
       `No Security alerts found in ${alertsIndex} within the requested time range. Skipping discoveries.`
     );
-    return;
+    return [];
   }
 
   const discoveryGroups = groupAlertsToDiscoveries({ alerts, maxDiscoveries });
@@ -405,6 +403,7 @@ export const generateAndIndexAttackDiscoveries = async ({
   };
 
   const bulkBody: Array<Record<string, unknown>> = [];
+  const generatedGroups: GeneratedAttackDiscoveryGroup[] = [];
 
   for (const g of discoveryGroups) {
     const discoveryKey = [
@@ -416,14 +415,15 @@ export const generateAndIndexAttackDiscoveries = async ({
     ].join('|');
 
     const generationUuid = uuidv5(discoveryKey, ID_NAMESPACE);
+    const title = buildUniqueAttackDiscoveryTitle({
+      discoveryKey,
+      hostName: g.hostName,
+      userName: g.userName,
+      discoveryTimeIso: g.discoveryTimeIso,
+    });
     const attack: AttackDiscovery = {
       alertIds: g.alertIds,
-      title: buildUniqueAttackDiscoveryTitle({
-        discoveryKey,
-        hostName: g.hostName,
-        userName: g.userName,
-        discoveryTimeIso: g.discoveryTimeIso,
-      }),
+      title,
       summaryMarkdown: `Detected ${g.alertIds.length} alert(s) that appear related.`,
       entitySummaryMarkdown: g.hostName
         ? `Host {{ host.name ${g.hostName} }}${
@@ -439,6 +439,11 @@ export const generateAndIndexAttackDiscoveries = async ({
       mitreAttackTactics: pickMitreAttackTactics(generationUuid),
       timestamp: g.discoveryTimeIso,
     };
+
+    generatedGroups.push({
+      ...g,
+      title,
+    });
 
     const now = new Date(g.discoveryTimeIso);
     const docs = transformToAlertDocuments({
@@ -484,4 +489,6 @@ export const generateAndIndexAttackDiscoveries = async ({
     }
     throw new Error(`Failed to index Attack Discoveries into ${attackDiscoveryIndex}`);
   }
+
+  return generatedGroups;
 };
