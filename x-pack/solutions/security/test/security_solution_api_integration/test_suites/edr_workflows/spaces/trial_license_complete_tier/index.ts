@@ -14,6 +14,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
   const { loadTestFile, getService } = providerContext;
 
   // Failing: See https://github.com/elastic/kibana/issues/249143
+  // Failing: See https://github.com/elastic/kibana/issues/249144
   describe.skip('Endpoint plugin spaces support', function () {
     const ingestManager = getService('ingestManager');
     const rolesUsersProvider = getService('rolesUsersProvider');
