@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Exposes public API of the Tours service during the start phase.
+ * @public
+ */
 export interface ToursStart {
   /**
    * Returns whether guided tours are allowed to be shown.
