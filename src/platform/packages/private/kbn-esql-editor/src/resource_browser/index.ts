@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { BrowserPopoverWrapper, BROWSER_POPOVER_WIDTH, BROWSER_POPOVER_HEIGHT } from './browser_popover_wrapper';
+export {
+  BrowserPopoverWrapper,
+  BROWSER_POPOVER_WIDTH,
+  BROWSER_POPOVER_HEIGHT,
+} from './browser_popover_wrapper';
 export type { BrowserPopoverWrapperProps } from './browser_popover_wrapper';
 export { IndicesBrowserPopover } from './indices_browser_popover';
 export { FieldsBrowserPopover } from './fields_browser_popover';
 export { useResourcesBadge } from './resources_badge';
 export { findCommandStringPosition } from './utils';
-

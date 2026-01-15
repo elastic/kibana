@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
   EuiFilterButton,
   EuiNotificationBadge,
   EuiButtonIcon,
@@ -20,7 +20,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState, useEffect, useMemo, useCallback, useRef, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 export const BROWSER_POPOVER_WIDTH = 400;
 export const BROWSER_POPOVER_HEIGHT = 500;
@@ -186,9 +187,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     // Filter by search value
     if (searchValue.trim()) {
       const searchLower = searchValue.toLowerCase();
-      filtered = filtered.filter((option) =>
-        option.label?.toLowerCase().includes(searchLower)
-      );
+      filtered = filtered.filter((option) => option.label?.toLowerCase().includes(searchLower));
     }
 
     // Filter by selected types
@@ -236,96 +235,98 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     />
   );
 
-    // Overwriting the border style as setting listProps.bordered to false doesn't work
-    const filterListStyles = useMemo(
-      () => css`
-        .euiSelectableListItem {
-          border-top: none;
-          border-bottom: none;
-        }
-      `,
-      []
-    );
+  // Overwriting the border style as setting listProps.bordered to false doesn't work
+  const filterListStyles = useMemo(
+    () => css`
+      .euiSelectableListItem {
+        border-top: none;
+        border-bottom: none;
+      }
+    `,
+    []
+  );
 
   return (
-      <EuiPopover
-        button={<div style={{ display: 'none' }} />}
-        isOpen={isOpen}
-        closePopover={onClose}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        panelStyle={{
-          width: BROWSER_POPOVER_WIDTH,
-          maxHeight: BROWSER_POPOVER_HEIGHT,
-          overflowY: 'auto',
-        }}
-        style={{
-          ...position,
-          position: 'absolute',
-        }}
-      >
-        <EuiSelectable
-          searchable
-          searchProps={{
-            placeholder: i18nKeys.searchPlaceholder,
-            compressed: true,
-            value: searchValue,
-            onChange: (value) => setSearchValue(value),
-            inputRef: setSearchInputRef,
-            append: (
-              <EuiPopover
-                button={filterButton}
-                isOpen={isFilterPopoverOpen}
-                closePopover={() => setIsFilterPopoverOpen(false)}
-                panelPaddingSize="none"
-                panelStyle={{ transform: `translateX(${euiTheme.size.xxxl})` }}
+    <EuiPopover
+      button={<div style={{ display: 'none' }} />}
+      isOpen={isOpen}
+      closePopover={onClose}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+      panelStyle={{
+        width: BROWSER_POPOVER_WIDTH,
+        maxHeight: BROWSER_POPOVER_HEIGHT,
+        overflowY: 'auto',
+      }}
+      style={{
+        ...position,
+        position: 'absolute',
+      }}
+    >
+      <EuiSelectable
+        searchable
+        searchProps={{
+          placeholder: i18nKeys.searchPlaceholder,
+          compressed: true,
+          value: searchValue,
+          onChange: (value) => setSearchValue(value),
+          inputRef: setSearchInputRef,
+          append: (
+            <EuiPopover
+              button={filterButton}
+              isOpen={isFilterPopoverOpen}
+              closePopover={() => setIsFilterPopoverOpen(false)}
+              panelPaddingSize="none"
+              panelStyle={{ transform: `translateX(${euiTheme.size.xxxl})` }}
+            >
+              <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
+              <EuiSelectable
+                options={typeFilterOptions}
+                onChange={handleTypeFilterChange}
+                listProps={{
+                  bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
+                }}
               >
-                <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
-                <EuiSelectable
-                  options={typeFilterOptions}
-                  onChange={handleTypeFilterChange}
-                  listProps={{
-                    bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
-                  }}
-                >
-                  {(list) => (
-                    <div css={filterListStyles} style={{ width: 250, maxHeight: 250, overflowY: 'auto' }}>
-                      {list}
-                    </div>
-                  )}
-                </EuiSelectable>
-              </EuiPopover>
-            ),
-          }}
-          options={filteredOptions}
-          onChange={handleSelectionChange}
-          isLoading={isLoading}
-          loadingMessage={i18nKeys.loading}
-          emptyMessage={i18nKeys.empty}
-          noMatchesMessage={i18nKeys.noMatches}
-        >
-          {(list, search) => (
-            <div style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}>
-              <EuiPopoverTitle paddingSize="s">
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem>{i18nKeys.title}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="cross"
-                      color="text"
-                      aria-label={i18nKeys.closeLabel}
-                      onClick={onClose}
-                      buttonRef={setCloseButtonRef}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPopoverTitle>
-              {search}
-              <div style={{ maxHeight: BROWSER_POPOVER_HEIGHT - 100, overflowY: 'auto' }}>{list}</div>
-            </div>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
+                {(list) => (
+                  <div
+                    css={filterListStyles}
+                    style={{ width: 250, maxHeight: 250, overflowY: 'auto' }}
+                  >
+                    {list}
+                  </div>
+                )}
+              </EuiSelectable>
+            </EuiPopover>
+          ),
+        }}
+        options={filteredOptions}
+        onChange={handleSelectionChange}
+        isLoading={isLoading}
+        loadingMessage={i18nKeys.loading}
+        emptyMessage={i18nKeys.empty}
+        noMatchesMessage={i18nKeys.noMatches}
+      >
+        {(list, search) => (
+          <div style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}>
+            <EuiPopoverTitle paddingSize="s">
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem>{i18nKeys.title}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    color="text"
+                    aria-label={i18nKeys.closeLabel}
+                    onClick={onClose}
+                    buttonRef={setCloseButtonRef}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverTitle>
+            {search}
+            <div style={{ maxHeight: BROWSER_POPOVER_HEIGHT - 100, overflowY: 'auto' }}>{list}</div>
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 }
-

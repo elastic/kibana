@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
-import React, { useCallback, useEffect, useRef } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { Parser } from '@kbn/esql-language';
@@ -24,7 +25,7 @@ export const useResourcesBadge = (
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>,
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>,
   query: AggregateQuery,
-  openIndicesBrowser: () => void,
+  openIndicesBrowser: () => void
 ) => {
   const { euiTheme } = useEuiTheme();
   const resourcesOpenStatusRef = useRef<boolean>(false);
@@ -82,7 +83,7 @@ export const useResourcesBadge = (
     if (collections.length > 0) {
       editorRef?.current?.createDecorationsCollection(collections);
     }
-  }, [editorModel, editorRef, query.esql, resourcesFromBadgeClassName]);
+  }, [editorRef, query.esql, resourcesFromBadgeClassName]);
 
   useEffect(
     function updateOnQueryChange() {
@@ -122,7 +123,7 @@ export const useResourcesBadge = (
 
       openIndexIndicesBrowserAtCommand(['FROM', 'TS']);
     },
-    [editorModel, editorRef, query.esql]
+    [editorModel, editorRef, query.esql, openIndicesBrowser]
   );
 
   const resourcesLabelKeyDownHandler = useCallback(
@@ -134,31 +135,31 @@ export const useResourcesBadge = (
 
       // Trigger autocomplete suggestions if current word is a command
       const handleCommandKeyDown = (commands: string[]) => {
-          commands.forEach((command) => {
-            const commandPosition = findCommandStringPosition(query.esql, command.toLowerCase());
-            if (
-              currentWord.word === command &&
-              commandPosition.startLineNumber !== -1 &&
-              commandPosition.startLineNumber === currentPosition.lineNumber &&
-              currentWord.startColumn >= commandPosition.min &&
-              currentWord.endColumn <= commandPosition.max
-            ) {
-              e.preventDefault();
-              // Move cursor to position after command
-              const positionAfterCommand = new monaco.Position(
-                commandPosition.startLineNumber,
-                commandPosition.max + 1
-              );
-              editorRef.current?.setPosition(positionAfterCommand);
-              editorRef.current?.revealPosition(positionAfterCommand);
+        commands.forEach((command) => {
+          const commandPosition = findCommandStringPosition(query.esql, command.toLowerCase());
+          if (
+            currentWord.word === command &&
+            commandPosition.startLineNumber !== -1 &&
+            commandPosition.startLineNumber === currentPosition.lineNumber &&
+            currentWord.startColumn >= commandPosition.min &&
+            currentWord.endColumn <= commandPosition.max
+          ) {
+            e.preventDefault();
+            // Move cursor to position after command
+            const positionAfterCommand = new monaco.Position(
+              commandPosition.startLineNumber,
+              commandPosition.max + 1
+            );
+            editorRef.current?.setPosition(positionAfterCommand);
+            editorRef.current?.revealPosition(positionAfterCommand);
 
-              // Trigger autocomplete suggestions
-              setTimeout(() => {
-                editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
-              }, 0);
-              return; // No need to continue checking for other commands
-            }
-          });
+            // Trigger autocomplete suggestions
+            setTimeout(() => {
+              editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+            }, 0);
+            return; // No need to continue checking for other commands
+          }
+        });
       };
 
       if (e.keyCode === monaco.KeyCode.DownArrow && !resourcesOpenStatusRef.current) {

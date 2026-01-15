@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
@@ -19,22 +19,30 @@ import { BrowserPopoverWrapper } from './browser_popover_wrapper';
 // Map ESQL field types to FieldIcon types (matching typeToEuiIconMap keys)
 const getFieldIconType = (type: string): string => {
   const typeLower = type.toLowerCase();
-  
+
   // Date types
   if (typeLower === 'date' || typeLower === 'date_nanos' || typeLower === 'date_range') {
     return 'date';
   }
-  
+
   // Counter types (metric counters) - map to number since counter isn't in typeToEuiIconMap
-  if (typeLower === 'counter_integer' || typeLower === 'counter_long' || typeLower === 'counter_double') {
+  if (
+    typeLower === 'counter_integer' ||
+    typeLower === 'counter_long' ||
+    typeLower === 'counter_double'
+  ) {
     return 'number';
   }
-  
+
   // Histogram types
-  if (typeLower === 'histogram' || typeLower === 'exponential_histogram' || typeLower === 'tdigest') {
+  if (
+    typeLower === 'histogram' ||
+    typeLower === 'exponential_histogram' ||
+    typeLower === 'tdigest'
+  ) {
     return 'histogram';
   }
-  
+
   // Numeric types
   if (
     typeLower === 'number' ||
@@ -51,27 +59,27 @@ const getFieldIconType = (type: string): string => {
   ) {
     return 'number';
   }
-  
+
   // IP types
   if (typeLower === 'ip' || typeLower === 'ip_range') {
     return 'ip';
   }
-  
+
   // Geo types
   if (typeLower === 'geo_point' || typeLower === 'geo_shape') {
     return 'geo_point';
   }
-  
+
   // Cartesian types - map to shape
   if (typeLower === 'cartesian_point' || typeLower === 'cartesian_shape') {
     return 'shape';
   }
-  
+
   // Keyword types
   if (typeLower === 'keyword' || typeLower === 'constant_keyword') {
     return 'keyword';
   }
-  
+
   // Text types
   if (
     typeLower === 'text' ||
@@ -83,22 +91,22 @@ const getFieldIconType = (type: string): string => {
   ) {
     return 'text';
   }
-  
+
   // Vector types
   if (typeLower === 'dense_vector') {
     return 'dense_vector';
   }
-  
+
   // Version
   if (typeLower === 'version') {
     return 'version';
   }
-  
+
   // Boolean
   if (typeLower === 'boolean') {
     return 'boolean';
   }
-  
+
   // Default to text for unknown types
   return 'text';
 };
@@ -106,7 +114,13 @@ const getFieldIconType = (type: string): string => {
 const getFieldTypeLabel = (type: string): string => {
   const typeLower = type.toLowerCase();
   if (typeLower.includes('date') || typeLower.includes('time')) return 'Date';
-  if (typeLower.includes('number') || typeLower.includes('long') || typeLower.includes('double') || typeLower.includes('integer')) return 'Number';
+  if (
+    typeLower.includes('number') ||
+    typeLower.includes('long') ||
+    typeLower.includes('double') ||
+    typeLower.includes('integer')
+  )
+    return 'Number';
   if (typeLower.includes('ip')) return 'IP address';
   if (typeLower.includes('geo')) return 'Geo point';
   if (typeLower.includes('keyword')) return 'Keyword';
@@ -170,7 +184,9 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
   }, []);
 
   const getTypeIcon = useCallback((typeLabel: string) => {
-    return <FieldIcon type={getFieldTypeIconType(typeLabel)} size="s" className="eui-alignMiddle" />;
+    return (
+      <FieldIcon type={getFieldTypeIconType(typeLabel)} size="s" className="eui-alignMiddle" />
+    );
   }, []);
 
   const createOptions = useCallback(
@@ -179,7 +195,9 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
         key: field.name,
         label: field.name,
         checked: selectedFields.includes(field.name) ? ('on' as const) : undefined,
-        prepend: <FieldIcon type={getFieldIconType(field.type)} size="s" className="eui-alignMiddle" />,
+        prepend: (
+          <FieldIcon type={getFieldIconType(field.type)} size="s" className="eui-alignMiddle" />
+        ),
         data: {
           type: field.type,
           typeLabel: getFieldTypeLabel(field.type),
@@ -232,4 +250,3 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
     />
   );
 };
-

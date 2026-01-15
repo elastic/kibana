@@ -735,10 +735,10 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           prepend={this.props.prependFilterBar}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
-        );
-      }
+      );
+    }
 
-      return (
+    return (
       <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
         {isBackgroundSearchEnabled && (
           <BackgroundSearchRestoredCallout isESQLQuery={isESQLQuery} state$={session.state$} />

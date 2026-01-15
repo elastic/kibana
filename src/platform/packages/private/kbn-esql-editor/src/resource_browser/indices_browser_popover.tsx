@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSelectableOption, EuiText } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
 import type { ESQLSourceResult } from '@kbn/esql-types';
@@ -130,4 +131,3 @@ export const IndicesBrowserPopover: React.FC<IndicesBrowserPopoverProps> = ({
     />
   );
 };
-

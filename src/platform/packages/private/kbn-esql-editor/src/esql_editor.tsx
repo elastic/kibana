@@ -202,7 +202,10 @@ const ESQLEditorInternal = function ESQLEditor({
   const fieldsBrowserGetColumnMapRef = useRef<(() => Promise<Map<string, any>>) | undefined>(
     undefined
   );
-  const [browserPopoverPosition, setBrowserPopoverPosition] = useState<{ top?: number; left?: number }>({});
+  const [browserPopoverPosition, setBrowserPopoverPosition] = useState<{
+    top?: number;
+    left?: number;
+  }>({});
   const browserCursorPositionRef = useRef<monaco.Position | null>(null);
 
   // Refs for dynamic dependencies that commands need to access
@@ -886,28 +889,25 @@ const ESQLEditorInternal = function ESQLEditor({
     [serverErrors, serverWarning, code, queryValidation]
   );
 
-  const handleResourceBrowserSelect = useCallback(
-    (resourceName: string, oldLength: number) => {
-      if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
-        const initialCursorPosition = browserCursorPositionRef.current;
-        const range = {
-          startLineNumber: initialCursorPosition.lineNumber,
-          startColumn: initialCursorPosition.column,
-          endLineNumber: initialCursorPosition.lineNumber,
-          endColumn: initialCursorPosition.column + oldLength,
-        };
-        editorRef.current.executeEdits('indicesBrowser', [
-          {
-            range,
-            text: resourceName,
-          },
-        ]);
-      }
-    },
-    []
-  );
+  const handleResourceBrowserSelect = useCallback((resourceName: string, oldLength: number) => {
+    if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
+      const initialCursorPosition = browserCursorPositionRef.current;
+      const range = {
+        startLineNumber: initialCursorPosition.lineNumber,
+        startColumn: initialCursorPosition.column,
+        endLineNumber: initialCursorPosition.lineNumber,
+        endColumn: initialCursorPosition.column + oldLength,
+      };
+      editorRef.current.executeEdits('indicesBrowser', [
+        {
+          range,
+          text: resourceName,
+        },
+      ]);
+    }
+  }, []);
 
-  const updateResourceBrowserPosition = () => {
+  const updateResourceBrowserPosition = useCallback(() => {
     if (editorRef.current) {
       const cursorPosition = editorRef.current.getPosition();
       if (cursorPosition) {
@@ -926,13 +926,13 @@ const ESQLEditorInternal = function ESQLEditor({
             // date picker is out of the editor
             absoluteLeft = absoluteLeft - BROWSER_POPOVER_WIDTH;
           }
-    
+
           setBrowserPopoverPosition({ top: absoluteTop, left: absoluteLeft });
           setIsIndicesBrowserOpen(true);
         }
       }
     }
-  };
+  }, []);
 
   const openIndicesBrowser = useCallback(() => {
     updateResourceBrowserPosition();
@@ -980,19 +980,14 @@ const ESQLEditorInternal = function ESQLEditor({
     }
     updateResourceBrowserPosition();
     setIsFieldsBrowserOpen(true);
-  }, [esqlCallbacks]);
+  }, [esqlCallbacks, updateResourceBrowserPosition]);
 
   const {
     resourcesBadgeStyle,
     resourcesLabelClickHandler,
     resourcesLabelKeyDownHandler,
     addResourcesDecorator,
-  } = useResourcesBadge(
-    editorRef,
-    editorModel,
-    query,
-    openIndicesBrowser,
-  );
+  } = useResourcesBadge(editorRef, editorModel, query, openIndicesBrowser);
 
   const suggestionProvider = useMemo(
     () =>
