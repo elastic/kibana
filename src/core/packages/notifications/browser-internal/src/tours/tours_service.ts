@@ -10,7 +10,7 @@
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ToursStart } from '@kbn/core-notifications-browser';
 
-export interface StartDeps {
+interface StartDeps {
   settings: SettingsStart;
 }
 
