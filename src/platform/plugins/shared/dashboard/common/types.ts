@@ -9,9 +9,9 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardState, DashboardControlsState } from '../server';
+import type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel } from '../server';
 
-export type { DashboardState, DashboardControlsState };
+export type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel };
 
 /**
  * Capabilities object for the Dashboard application.
@@ -34,8 +34,6 @@ export interface DashboardCapabilities {
  */
 export type DashboardLocatorParams = Partial<
   DashboardState & {
-    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
-
     viewMode?: ViewMode;
 
     /**

@@ -32,4 +32,5 @@ export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
 export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
 /** The complete state of a dashboard including panels, filters, and settings. */
 export type DashboardState = Writable<TypeOf<ReturnType<typeof getDashboardStateSchema>>>;
-export type DashboardControlsState = NonNullable<DashboardState['controlGroupInput']>['controls'];
+export type DashboardPinnedPanelsState = NonNullable<DashboardState['pinned_panels']>;
+export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
