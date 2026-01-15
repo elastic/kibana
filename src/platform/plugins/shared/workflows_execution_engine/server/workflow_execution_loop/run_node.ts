@@ -72,15 +72,15 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * Run monitoring in parallel with step execution to handle:
      * - Cancellation detection
      * - Timeout monitoring
-     * - Custom monitoring logic for monitorable nodes
+     * - Custom monitoring logic for monitor-able nodes
      * The order of these promises is important - we want to stop monitoring
      */
     const runMonitorPromise = runStackMonitor(params, stepExecutionRuntime, monitorAbortController);
     let runStepPromise: Promise<void> = Promise.resolve();
 
-    // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occured right before running step, etc.
+    // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occurred right before running step, etc.
     if (!monitorAbortController.signal.aborted) {
-      runStepPromise = nodeImplementation.run().then(
+      runStepPromise = Promise.resolve(nodeImplementation.run()).then(
         () => stepExecutionRuntime && handleExecutionDelay(params, stepExecutionRuntime)
       );
     }
