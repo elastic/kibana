@@ -277,7 +277,7 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
           queryString,
           column.name,
           value,
-          value == null ? 'is_null' : negate ? '-' : '+',
+          value == null ? (negate ? 'is_not_null' : 'is_null') : negate ? '-' : '+',
           column.meta?.type
         );
 
