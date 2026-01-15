@@ -291,76 +291,34 @@ describe('helpers', function () {
   });
 
   describe('filterOutWarningsOverlappingWithErrors', function () {
-    it.each([
-      {
-        description: 'should filter out warning exactly matching error range',
-        errorRange: { startLineNumber: 1, startColumn: 5, endLineNumber: 1, endColumn: 10 },
-        warningRange: { startLineNumber: 1, startColumn: 5, endLineNumber: 1, endColumn: 10 },
-        expectedWarningCount: 0,
-      },
-      {
-        description: 'should filter out warning inside error range',
-        errorRange: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 20 },
-        warningRange: { startLineNumber: 1, startColumn: 5, endLineNumber: 1, endColumn: 10 },
-        expectedWarningCount: 0,
-      },
-      {
-        description: 'should filter out warning ending inside error range',
-        errorRange: { startLineNumber: 1, startColumn: 5, endLineNumber: 1, endColumn: 15 },
-        warningRange: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 6 },
-        expectedWarningCount: 0,
-      },
-      {
-        description: 'should filter out warning starting inside error range',
-        errorRange: { startLineNumber: 1, startColumn: 5, endLineNumber: 1, endColumn: 15 },
-        warningRange: { startLineNumber: 1, startColumn: 14, endLineNumber: 1, endColumn: 20 },
-        expectedWarningCount: 0,
-      },
-      {
-        description: 'should filter out warning that contains an error',
-        errorRange: { startLineNumber: 1, startColumn: 5, endLineNumber: 1, endColumn: 10 },
-        warningRange: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 15 },
-        expectedWarningCount: 0,
-      },
-      {
-        description: 'should NOT filter out warning on different line',
-        errorRange: { startLineNumber: 1, startColumn: 5, endLineNumber: 1, endColumn: 10 },
-        warningRange: { startLineNumber: 2, startColumn: 5, endLineNumber: 2, endColumn: 10 },
-        expectedWarningCount: 1,
-      },
-      {
-        description: 'should NOT filter out warning strictly before error on same line',
-        errorRange: { startLineNumber: 1, startColumn: 10, endLineNumber: 1, endColumn: 20 },
-        warningRange: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 5 },
-        expectedWarningCount: 1,
-      },
-      {
-        description: 'should NOT filter out warning strictly after error on same line',
-        errorRange: { startLineNumber: 1, startColumn: 10, endLineNumber: 1, endColumn: 20 },
-        warningRange: { startLineNumber: 1, startColumn: 25, endLineNumber: 1, endColumn: 30 },
-        expectedWarningCount: 1,
-      },
-    ])('$description', ({ errorRange, warningRange, expectedWarningCount }) => {
-      const errors = [
-        {
-          message: 'Error',
-          severity: 1,
-          code: 'error',
-          ...errorRange,
-        },
-      ];
-      const warnings = [
-        {
-          message: 'Warning',
-          severity: 1,
-          code: 'warning',
-          ...warningRange,
-        },
-      ];
+    const createMessage = (
+      type: 'error' | 'warning',
+      [startLine, startCol, endLine, endCol]: readonly [number, number, number, number]
+    ): MonacoMessage => ({
+      message: type === 'error' ? 'Error' : 'Warning',
+      severity: 1,
+      code: type,
+      startLineNumber: startLine,
+      startColumn: startCol,
+      endLineNumber: endLine,
+      endColumn: endCol,
+    });
 
-      expect(filterOutWarningsOverlappingWithErrors(errors, warnings)).toHaveLength(
-        expectedWarningCount
-      );
+    it.each([
+      ['filter out warning with exactly matching ranges', [1, 5, 1, 10], [1, 5, 1, 10], true],
+      ['filter out warning inside error', [1, 1, 1, 20], [1, 5, 1, 10], true],
+      ['filter out warning ending inside error', [1, 5, 1, 15], [1, 1, 1, 6], true],
+      ['filter out warning starting inside error', [1, 5, 1, 15], [1, 14, 1, 20], true],
+      ['filter out warning containing error', [1, 5, 1, 10], [1, 1, 1, 15], true],
+      ['NOT filter out warning with different lines', [1, 5, 1, 10], [2, 5, 2, 10], false],
+      ['NOT filter out warning before error', [1, 10, 1, 20], [1, 1, 1, 5], false],
+      ['NOT filter out warning after error', [1, 10, 1, 20], [1, 25, 1, 30], false],
+    ] as const)(`should %s`, (description, errorRange, warningRange, shouldFilter) => {
+      const errors = [createMessage('error', errorRange)];
+      const warnings = [createMessage('warning', warningRange)];
+
+      const result = filterOutWarningsOverlappingWithErrors(errors, warnings);
+      expect(result).toHaveLength(shouldFilter ? 0 : 1);
     });
   });
 });
