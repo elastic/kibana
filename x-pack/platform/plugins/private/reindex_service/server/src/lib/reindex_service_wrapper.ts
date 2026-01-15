@@ -112,6 +112,7 @@ export class ReindexServiceWrapper {
       licensing,
       security,
       version,
+      rollupsEnabled,
       isServerless
     );
 

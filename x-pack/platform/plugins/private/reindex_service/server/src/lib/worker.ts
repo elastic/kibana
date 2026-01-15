@@ -80,6 +80,7 @@ export class ReindexWorker {
     licensing: LicensingPluginStart,
     security: SecurityPluginStart,
     version: Version,
+    rollupsEnabled: boolean = true,
     isServerless: boolean = false
   ): ReindexWorker {
     if (ReindexWorker.workerSingleton) {
@@ -93,7 +94,7 @@ export class ReindexWorker {
         licensing,
         security,
         version,
-        true, // rollupsEnabled
+        rollupsEnabled,
         isServerless
       );
     }
