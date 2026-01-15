@@ -113,6 +113,17 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     }
   }, [isOpen]);
 
+  // Reset state when popover opens
+  useEffect(() => {
+    if (isOpen) {
+      // Clear all selections and filters when popover opens
+      setSelectedItems([]);
+      setSearchValue('');
+      setSelectedTypes([]);
+      setIsFilterPopoverOpen(false);
+    }
+  }, [isOpen]);
+
   // Fetch data when popover opens
   useEffect(() => {
     if (isOpen) {
