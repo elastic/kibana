@@ -16,22 +16,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { css } from '@emotion/react';
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
-import { Status, useSearchApiKey } from '@kbn/search-api-keys-components';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 export const ConnectToElasticsearch = () => {
   const elasticsearchUrl = useElasticsearchUrl();
   const { euiTheme } = useEuiTheme();
 
-  const { status } = useSearchApiKey();
-  const hasAPIKeyManagePermissions = useMemo(() => {
-    return status !== Status.showUserPrivilegesError;
-  }, [status]);
 
   return (
     <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
