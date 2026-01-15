@@ -69,6 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Add a new ES|QL panel
         await dashboardAddPanel.clickAddEsqlPanel();
+        await esql.waitESQLEditorLoaded('ESQLEditor');
         await esql.setEsqlEditorQuery('FROM logstash-* | WHERE geo.dest == ?variable');
         await find.clickByButtonText('Run query');
         await find.clickByButtonText('Apply and close');
