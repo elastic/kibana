@@ -27,6 +27,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
         disableInteractiveElementBlocking={true}
         draggableId="agg_group_dnd_metrics_1"
         index={0}
+        isDragDisabled={false}
         key="1"
       >
         <Component />
@@ -36,6 +37,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
         disableInteractiveElementBlocking={true}
         draggableId="agg_group_dnd_metrics_3"
         index={1}
+        isDragDisabled={false}
         key="3"
       >
         <Component />

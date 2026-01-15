@@ -6,21 +6,46 @@
  */
 
 import { useMemo } from 'react';
-import type { DatasourceStates, FormBasedLayer, FramePublicAPI } from '@kbn/lens-common';
+import type {
+  DatasourceStates,
+  FormBasedLayer,
+  FramePublicAPI,
+  VisualizationState,
+} from '@kbn/lens-common';
 import { partition } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
 import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 
+const cannotConvertToEsqlTooltip = i18n.translate('xpack.lens.config.cannotConvertToEsqlTooltip', {
+  defaultMessage: 'This visualization cannot be converted to ES|QL',
+});
+
+const getEsqlConversionDisabledSettings = (tooltip: string = cannotConvertToEsqlTooltip) => ({
+  isConvertToEsqlButtonDisabled: true,
+  convertToEsqlButtonTooltip: tooltip,
+  convertibleLayers: [],
+});
+
 export const useEsqlConversion = (
-  datasourceId: 'formBased' | 'textBased',
-  datasourceStates: DatasourceStates,
-  isSingleLayerVisualization: boolean,
-  layerIds: string[],
-  textBasedMode: boolean,
+  showConvertToEsqlButton: boolean,
+  {
+    datasourceId,
+    datasourceStates,
+    layerIds,
+    visualization,
+    activeVisualization,
+  }: {
+    datasourceId: 'formBased' | 'textBased';
+    datasourceStates: DatasourceStates;
+    layerIds: string[];
+    visualization: VisualizationState;
+    activeVisualization: unknown;
+  },
   {
     framePublicAPI,
     coreStart,
@@ -32,39 +57,58 @@ export const useEsqlConversion = (
   }
 ): {
   isConvertToEsqlButtonDisabled: boolean;
+  convertToEsqlButtonTooltip: string;
   convertibleLayers: ConvertibleLayer[];
 } => {
   return useMemo(() => {
-    const datasourceState = datasourceStates[datasourceId].state;
-
-    if (!isSingleLayerVisualization || textBasedMode || !datasourceState) {
-      return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
+    if (!showConvertToEsqlButton) {
+      return getEsqlConversionDisabledSettings();
     }
 
-    // Validate datasourceState structure
-    if (
-      typeof datasourceState !== 'object' ||
-      datasourceState === null ||
-      !('layers' in datasourceState) ||
-      !datasourceState.layers
-    ) {
-      return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
+    if (!activeVisualization || !visualization?.state) {
+      return getEsqlConversionDisabledSettings();
     }
 
-    // Access the single layer safely
-    const layers = datasourceState.layers as Record<string, FormBasedLayer>;
+    const { state } = visualization;
+
+    // Guard: trendline check
+    if (hasTrendLineLayer(state)) {
+      return getEsqlConversionDisabledSettings(
+        i18n.translate('xpack.lens.config.cannotConvertToEsqlMetricWithTrendlineTooltip', {
+          defaultMessage: 'Metric visualization with a trend line are not supported in query mode',
+        })
+      );
+    }
+
+    // Guard: layer count
+    if (layerIds.length > 1) {
+      return getEsqlConversionDisabledSettings(
+        i18n.translate('xpack.lens.config.cannotConvertToEsqlMultilayerTooltip', {
+          defaultMessage: 'Multi-layer visualizations cannot be converted to query mode',
+        })
+      );
+    }
+
+    // Guard: datasource state exists and has layers
+    const datasourceState = datasourceStates[datasourceId]?.state;
+    if (!isValidDatasourceState(datasourceState)) {
+      return getEsqlConversionDisabledSettings();
+    }
+
+    // Guard: layer access
     const layerId = layerIds[0];
-
-    if (!layerId || !(layerId in layers)) {
-      return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
+    const layers = datasourceState.layers;
+    if (!layerId || !layers[layerId]) {
+      return getEsqlConversionDisabledSettings();
     }
 
     const singleLayer = layers[layerId];
-    if (!singleLayer || !singleLayer.columnOrder || !singleLayer.columns) {
-      return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
+    if (!singleLayer?.columnOrder || !singleLayer?.columns) {
+      return getEsqlConversionDisabledSettings();
     }
 
-    // Get the esAggEntries
+    // Main logic: compute esqlLayer
+
     const { columnOrder } = singleLayer;
     const columns = { ...singleLayer.columns };
     const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
@@ -90,28 +134,63 @@ export const useEsqlConversion = (
       // This prevents conversion errors from breaking the visualization
     }
 
-    const convertibleLayer: ConvertibleLayer = {
-      id: layerId,
-      icon: 'layers',
-      name: '',
-      type: layerTypes.DATA,
-      query: esqlLayer ? esqlLayer.esql : '',
-      isConvertibleToEsql: !!esqlLayer,
-    };
-
-    return {
-      isConvertToEsqlButtonDisabled: !esqlLayer,
-      convertibleLayers: [convertibleLayer],
-    };
+    return esqlLayer
+      ? {
+          isConvertToEsqlButtonDisabled: false,
+          convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
+            defaultMessage: 'Convert visualization to ES|QL',
+          }),
+          convertibleLayers: [
+            {
+              id: layerId,
+              icon: 'layers',
+              name: '',
+              type: layerTypes.DATA,
+              query: esqlLayer.esql,
+              isConvertibleToEsql: true,
+            },
+          ],
+        }
+      : getEsqlConversionDisabledSettings(
+          i18n.translate('xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip', {
+            defaultMessage: 'The visualization has unsupported settings for query mode',
+          })
+        );
   }, [
+    activeVisualization,
     coreStart.uiSettings,
     datasourceId,
     datasourceStates,
     framePublicAPI.dataViews.indexPatterns,
     framePublicAPI.dateRange,
-    isSingleLayerVisualization,
     layerIds,
+    showConvertToEsqlButton,
     startDependencies.data.nowProvider,
-    textBasedMode,
+    visualization,
   ]);
 };
+
+function hasTrendLineLayer(state: unknown) {
+  return Boolean(
+    state &&
+      typeof state === 'object' &&
+      'trendlineLayerId' in state &&
+      'trendlineMetricAccessor' in state &&
+      'trendlineTimeAccessor' in state &&
+      state.trendlineLayerId &&
+      state.trendlineMetricAccessor &&
+      state.trendlineTimeAccessor
+  );
+}
+
+function isValidDatasourceState(
+  datasourceState: unknown
+): datasourceState is { layers: Record<string, FormBasedLayer> } {
+  return Boolean(
+    datasourceState &&
+      typeof datasourceState === 'object' &&
+      datasourceState !== null &&
+      'layers' in datasourceState &&
+      (datasourceState as { layers?: unknown }).layers !== undefined
+  );
+}

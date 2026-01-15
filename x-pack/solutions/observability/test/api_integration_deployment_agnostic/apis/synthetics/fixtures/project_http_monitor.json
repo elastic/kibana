@@ -36,7 +36,9 @@
       "unsupportedKey": {
         "nestedUnsupportedKey": "unsupportedValue"
       },
-      "hash": "ekrjelkjrelkjre"
+      "hash": "ekrjelkjrelkjre",
+      "maintenance_windows": ["test-maintenance-window-1", "test-maintenance-window-2"]
+
     },
     {
       "locations": ["dev"],
@@ -80,7 +82,8 @@
         "testLocal1": "testLocalParamsValue",
         "testGlobalParam2": "testGlobalParamOverwrite"
       },
-      "max_attempts": 2
+      "max_attempts": 2,
+      "maintenance_windows": ["test-maintenance-window-1", "test-maintenance-window-2"]
     }
   ]
 }

@@ -6918,7 +6918,7 @@
         "label": "ConnectorDocument",
         "description": [],
         "signature": [
-          "{ error: string | null; name: string; features: ",
+          "{ name: string; features: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -6926,7 +6926,7 @@
             "section": "def-common.ConnectorFeatures",
             "text": "ConnectorFeatures"
           },
-          "; status: ",
+          "; error: string | null; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7080,7 +7080,7 @@
         "label": "ConnectorSyncJobDocument",
         "description": [],
         "signature": [
-          "{ error: string | null; connector: { configuration: ",
+          "{ connector: { configuration: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7112,7 +7112,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null; service_type: string | null; }; status: ",
+          " | null; service_type: string | null; }; error: string | null; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",

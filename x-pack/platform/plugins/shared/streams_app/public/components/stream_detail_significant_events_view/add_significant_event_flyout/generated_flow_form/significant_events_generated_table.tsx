@@ -16,13 +16,13 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { GeneratedEventPreview } from './generated_event_preview';
-import { SeverityBadge } from '../../severity_badge';
+import { SeverityBadge } from '../../../significant_events_discovery/components/severity_badge';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -32,7 +32,7 @@ interface Props {
   selectedQueries: StreamQueryKql[];
   isSubmitting: boolean;
   onSelectionChange: (selectedItems: StreamQueryKql[]) => void;
-  features: Omit<Feature, 'description'>[];
+  features: Omit<System, 'description'>[];
   dataViews: DataView[];
 }
 
