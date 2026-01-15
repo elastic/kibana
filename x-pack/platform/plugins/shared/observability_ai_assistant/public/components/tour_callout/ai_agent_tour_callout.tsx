@@ -62,6 +62,7 @@ export const AIAgentTourCallout = ({
     return children;
   }
 
+  // test opt-in flow
   return (
     <>
       <TourCallout
