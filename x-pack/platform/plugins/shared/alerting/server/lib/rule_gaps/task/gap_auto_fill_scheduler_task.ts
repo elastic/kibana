@@ -495,7 +495,7 @@ export function registerGapAutoFillSchedulerTask({
 
               if (gapFillsResult.state === SchedulerLoopState.CANCELLED) {
                 await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.ERROR,
+                  status: GAP_AUTO_FILL_STATUS.SUCCESS,
                   results: consolidated,
                   message: `Gap Auto Fill Scheduler cancelled by timeout | Results: ${formatConsolidatedSummary(
                     consolidated

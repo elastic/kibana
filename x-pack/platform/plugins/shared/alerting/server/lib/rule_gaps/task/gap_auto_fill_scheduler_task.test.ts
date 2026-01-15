@@ -668,7 +668,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           expect(result).toEqual({ state: {} });
           expect(logEventMock).toHaveBeenCalledWith(
             expect.objectContaining({
-              status: 'error',
+              status: 'success',
               results: [],
               message: expect.stringContaining(
                 'Gap Auto Fill Scheduler cancelled by timeout | Results: \nprocessed 0 gaps across 0 rules'
