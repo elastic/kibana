@@ -253,21 +253,24 @@ label_to_areas:
 # Maps product IDs to lists of pull request labels that prevent changelog creation for that product
 # If you run the changelog add command with the --prs option and a PR has any of these labels, the changelog is not created
 # Product IDs can be comma-separated to share the same list of labels across multiple products
-# add_blockers:
-#   kibana,cloud-serverless:
-#     - "release_note:skip"
-#     - "reverted"
-#     - "backport"
+add_blockers:
+  kibana,cloud-serverless:
+    - "release_note:skip"
+    - "reverted"
+    - "backport"
 
 # Render blockers (optional - used by the "docs-builder changelog render" command)
 # Changelogs matching the specified products and areas/types will be commented out in rendered output files
 # Dictionary key can be a single product ID or comma-separated product IDs (e.g., "elasticsearch, cloud-serverless")
 # Dictionary value contains areas and/or types that should be blocked for those products
-# render_blockers:
+render_blockers:
   # Multiple products (comma-separated) with areas and types that should be blocked
-  # "kibana, cloud-serverless":
-    # areas: # List of area values that should be blocked (commented out) during render
-    #   - Autoscaling
-    #   - Watcher
-    # types: # List of type values that should be blocked (commented out) during render
-      # - docs
+  "cloud-serverless":
+    areas: # List of area values that should be blocked (commented out) during render
+      - Autoscaling
+      - Watcher
+    types: # List of type values that should be blocked (commented out) during render
+      - docs
+  "kibana":
+    types:
+      - docs
