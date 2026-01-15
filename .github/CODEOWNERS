@@ -2696,10 +2696,10 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 
 ## Security Solution Threat Hunting areas - Kibana Cases
 
-/x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/security-threat-hunting
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/security-threat-hunting
-src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/kibana-cases
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/kibana-cases
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/kibana-cases
+src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
 
 /x-pack/solutions/observability/test/api_integration/apis/cases/ @elastic/kibana-cases
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/cases/ @elastic/kibana-cases
