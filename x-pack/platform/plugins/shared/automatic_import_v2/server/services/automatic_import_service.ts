@@ -18,6 +18,7 @@ import type {
   SavedObjectsClient,
   ElasticsearchClient,
   CoreSetup,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -165,19 +166,22 @@ export class AutomaticImportService {
     return this.savedObjectService.deleteIntegration(integrationId, options);
   }
 
-  public async createDataStream(params: CreateDataStreamParams): Promise<void> {
+  public async createDataStream(
+    params: CreateDataStreamParams,
+    request: KibanaRequest
+  ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, dataStreamParams, connectorId, authHeaders } = params;
+    const { authenticatedUser, dataStreamParams, connectorId } = params;
 
     // Schedule the data stream creation background task
     const dataStreamTaskParams: DataStreamTaskParams = {
       integrationId: dataStreamParams.integrationId,
       dataStreamId: dataStreamParams.dataStreamId,
       connectorId,
-      authHeaders,
     };
     const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
-      dataStreamTaskParams
+      dataStreamTaskParams,
+      request
     );
 
     // Insert the data stream in saved object

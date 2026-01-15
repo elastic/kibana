@@ -6,12 +6,12 @@
  */
 
 import assert from 'assert';
-import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { CoreSetup, KibanaRequest, Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
+  RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
@@ -28,10 +28,6 @@ export interface DataStreamTaskParams extends DataStreamParams {
    * Inference connector ID to use when the background task runs.
    */
   connectorId: string;
-  /**
-   * Minimal auth headers to reconstruct a scoped client as the original user.
-   */
-  authHeaders?: Record<string, string | string[]>;
 }
 
 export interface DataStreamParams {
@@ -61,13 +57,18 @@ export class TaskManagerService {
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
         cost: TaskCost.Normal,
         priority: TaskPriority.Normal,
-        createTaskRunner: ({ taskInstance }) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest }: RunContext) => ({
           run: async () => {
             assert(
               this.automaticImportSavedObjectService,
               'Automatic import saved object service not initialized'
             );
-            return this.runTask(taskInstance, core, this.automaticImportSavedObjectService);
+            return this.runTask(
+              taskInstance,
+              core,
+              this.automaticImportSavedObjectService,
+              fakeRequest as KibanaRequest
+            );
           },
           cancel: async () => this.cancelTask(taskInstance),
         }),
@@ -88,7 +89,8 @@ export class TaskManagerService {
   }
 
   public async scheduleDataStreamCreationTask(
-    params: DataStreamTaskParams
+    params: DataStreamTaskParams,
+    request: KibanaRequest
   ): Promise<{ taskId: string }> {
     assert(this.taskManager, 'TaskManager not initialized');
 
@@ -98,15 +100,18 @@ export class TaskManagerService {
     });
 
     try {
-      const taskInstance = await this.taskManager.schedule({
-        id: taskId,
-        taskType: DATA_STREAM_CREATION_TASK_TYPE,
-        params,
-        state: { task_status: TASK_STATUSES.pending },
-        scope: ['automaticImport'],
-      });
+      const taskInstance = await this.taskManager.schedule(
+        {
+          id: taskId,
+          taskType: DATA_STREAM_CREATION_TASK_TYPE,
+          params,
+          state: { task_status: TASK_STATUSES.pending },
+          scope: ['automaticImport'],
+        },
+        { request }
+      );
 
-      this.logger.info(`Task scheduled: ${taskInstance.id}`);
+      this.logger.debug(`Task scheduled: ${taskInstance.id}`);
       return { taskId: taskInstance.id };
     } catch (error: any) {
       // If task already exists (version conflict), return the existing task ID
@@ -131,7 +136,7 @@ export class TaskManagerService {
     const taskId = this.generateDataStreamTaskId(dataStreamParams);
     try {
       await this.taskManager.removeIfExists(taskId);
-      this.logger.info(`Task deleted: ${taskId}`);
+      this.logger.debug(`Task deleted: ${taskId}`);
     } catch (error) {
       this.logger.error(`Failed to remove task ${taskId}:`, error);
     }
@@ -159,7 +164,8 @@ export class TaskManagerService {
   private async runTask(
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup<AutomaticImportV2PluginStartDependencies>,
-    automaticImportSavedObjectService: AutomaticImportSavedObjectService
+    automaticImportSavedObjectService: AutomaticImportSavedObjectService,
+    request: KibanaRequest
   ) {
     assert(this.agentService, 'Agent service not initialized');
     assert(
@@ -168,8 +174,7 @@ export class TaskManagerService {
     );
 
     const { id: taskId, params } = taskInstance;
-    const { integrationId, dataStreamId, connectorId, authHeaders } =
-      params as DataStreamTaskParams;
+    const { integrationId, dataStreamId, connectorId } = params as DataStreamTaskParams;
 
     this.logger.debug(
       `Running task ${taskId} with ${JSON.stringify({ integrationId, dataStreamId, connectorId })}`
@@ -183,17 +188,11 @@ export class TaskManagerService {
       // Get core services and plugins
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      // Recreate a fake request with the original auth headers so we can run as that user
-      const fakeRequest = kibanaRequestFactory({
-        headers: authHeaders ?? {},
-        path: '/',
-      });
-
-      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
+      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const esClient = scopedClusterClient.asCurrentUser;
 
       const model = await pluginsStart.inference.getChatModel({
-        request: fakeRequest,
+        request,
         connectorId,
         chatModelOptions: {
           temperature: 0.05,
@@ -212,7 +211,7 @@ export class TaskManagerService {
         model
       );
 
-      this.logger.info(`Task ${taskId} completed successfully`);
+      this.logger.debug(`Task ${taskId} completed successfully`);
 
       // Extract and convert the pipeline to JSON string
       const pipelineString = JSON.stringify(result.current_pipeline || {});
@@ -222,6 +221,7 @@ export class TaskManagerService {
         (doc) => JSON.stringify(doc)
       );
 
+      // Update the data stream saved object with pipeline and task status
       await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
         integrationId,
         dataStreamId,
@@ -229,8 +229,8 @@ export class TaskManagerService {
         status: TASK_STATUSES.completed,
       });
 
-      this.logger.info(`Data stream ${dataStreamId} updated successfully`);
-      this.logger.info(`Task ${taskId} result: ${JSON.stringify(result)}`);
+      this.logger.debug(`Data stream ${dataStreamId} updated successfully`);
+      this.logger.debug(`Task ${taskId} result: ${JSON.stringify(result)}`);
 
       return {
         state: {
@@ -249,7 +249,7 @@ export class TaskManagerService {
 
   private async cancelTask(taskInstance: ConcreteTaskInstance) {
     // Cancel the AI task here
-    this.logger.info(`Cancelling task ${taskInstance.id}`);
+    this.logger.debug(`Cancelling task ${taskInstance.id}`);
     return { state: { task_status: TASK_STATUSES.cancelled } };
   }
 

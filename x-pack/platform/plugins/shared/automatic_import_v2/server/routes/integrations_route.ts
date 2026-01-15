@@ -163,14 +163,6 @@ const createIntegrationRoute = (
 
           await automaticImportService.createIntegration({ authenticatedUser, integrationParams });
 
-          const authHeaders: Record<string, string | string[]> = {};
-          if (request.headers.authorization) {
-            authHeaders.authorization = request.headers.authorization;
-          }
-          if (request.headers['kbn-xsrf']) {
-            authHeaders['kbn-xsrf'] = request.headers['kbn-xsrf'];
-          }
-
           if (dataStreams) {
             const dataStreamsParams: DataStreamParams[] = dataStreams.map((dataStream) => ({
               ...dataStream,
@@ -179,13 +171,15 @@ const createIntegrationRoute = (
             }));
             await Promise.all(
               dataStreamsParams.map((dataStreamParams) =>
-                automaticImportService.createDataStream({
-                  authenticatedUser,
-                  dataStreamParams,
-                  esClient,
-                  connectorId,
-                  authHeaders,
-                })
+                automaticImportService.createDataStream(
+                  {
+                    authenticatedUser,
+                    dataStreamParams,
+                    esClient,
+                    connectorId,
+                  },
+                  request
+                )
               )
             );
           }
@@ -195,7 +189,6 @@ const createIntegrationRoute = (
           };
           return response.ok({ body });
         } catch (err) {
-          logger.info(err);
           await automaticImportService.deleteIntegration(integrationId);
           logger.error(`createIntegrationRoute: Caught error:`, err);
           const automaticImportResponse = buildAutomaticImportResponse(response);
