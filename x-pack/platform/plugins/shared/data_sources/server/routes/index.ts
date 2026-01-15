@@ -28,7 +28,6 @@ import { convertSOtoAPIResponse, createDataSourceRequestSchema } from './schema'
 import { API_BASE_PATH } from '../../common/constants';
 
 // Constants
-const DEFAULT_PAGE_SIZE = 100;
 const MAX_PAGE_SIZE = 1000;
 
 function createErrorResponse(
@@ -61,7 +60,12 @@ export function registerRoutes(dependencies: RouteDependencies) {
   router.get(
     {
       path: API_BASE_PATH,
-      validate: false,
+      validate: {
+        query: schema.object({
+          per_page: schema.number({ min: 0, defaultValue: 100, max: 1000 }),
+          page: schema.number({ min: 0, defaultValue: 1 }),
+        }),
+      },
       security: {
         authz: {
           enabled: false,
@@ -69,15 +73,17 @@ export function registerRoutes(dependencies: RouteDependencies) {
         },
       },
     },
-    async (context, _request, response) => {
+    async (context, request, response) => {
       const coreContext = await context.core;
+      const query = request.query;
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
         const findResult: SavedObjectsFindResponse<DataSourceAttributes> =
           await savedObjectsClient.find({
             type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-            perPage: DEFAULT_PAGE_SIZE,
+            perPage: query.per_page,
+            page: query.page,
           });
 
         const dataSources = findResult.saved_objects.map((savedObject) => {

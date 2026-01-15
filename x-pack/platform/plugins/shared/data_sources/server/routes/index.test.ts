@@ -135,7 +135,9 @@ describe('registerRoutes', () => {
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.get.mock.calls[0][1];
-      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: { page: 1, per_page: 100 },
+      });
       const mockResponse = httpServerMock.createResponseFactory();
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
@@ -143,6 +145,7 @@ describe('registerRoutes', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         perPage: 100,
+        page: 1,
       });
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
@@ -161,7 +164,9 @@ describe('registerRoutes', () => {
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.get.mock.calls[0][1];
-      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: { page: 1, per_page: 100 },
+      });
       const mockResponse = httpServerMock.createResponseFactory();
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
@@ -171,6 +176,257 @@ describe('registerRoutes', () => {
         body: {
           message: 'Failed to list data sources: Database error',
         },
+      });
+    });
+
+    describe('pagination', () => {
+      const createMockDataSource = (id: string, name: string, type: string) => ({
+        id,
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name,
+          type,
+          config: {},
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+          workflowIds: [`workflow-${id}`],
+          toolIds: [`tool-${id}`],
+          kscIds: [`ksc-${id}`],
+        },
+        references: [],
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+      });
+
+      it('should use provided page and per_page values', async () => {
+        const mockFindResult = {
+          page: 2,
+          per_page: 10,
+          total: 25,
+          saved_objects: [
+            createMockDataSource('11', 'Data Source 11', 'github'),
+            createMockDataSource('12', 'Data Source 12', 'notion'),
+          ],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockFindResult as any);
+
+        registerRoutes(dependencies);
+
+        const routeHandler = mockRouter.get.mock.calls[0][1];
+        const mockRequest = httpServerMock.createKibanaRequest({
+          query: { page: 2, per_page: 10 },
+        });
+        const mockResponse = httpServerMock.createResponseFactory();
+
+        await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+        expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          perPage: 10,
+          page: 2,
+        });
+
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: expect.objectContaining({
+            dataSources: expect.any(Array),
+            total: 25,
+          }),
+        });
+      });
+
+      it('should handle page=0 (first page)', async () => {
+        const mockFindResult = {
+          page: 0,
+          per_page: 5,
+          total: 3,
+          saved_objects: [createMockDataSource('1', 'Data Source 1', 'github')],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockFindResult as any);
+
+        registerRoutes(dependencies);
+
+        const routeHandler = mockRouter.get.mock.calls[0][1];
+        const mockRequest = httpServerMock.createKibanaRequest({
+          query: { page: 0, per_page: 5 },
+        });
+        const mockResponse = httpServerMock.createResponseFactory();
+
+        await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+        expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          perPage: 5,
+          page: 0,
+        });
+      });
+
+      it('should paginate with per_page=1 across multiple pages', async () => {
+        const totalDataSources = 3;
+
+        // First page - should return first data source
+        const mockFindResultPage1 = {
+          page: 1,
+          per_page: 1,
+          total: totalDataSources,
+          saved_objects: [createMockDataSource('1', 'Data Source 1', 'github')],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockFindResultPage1 as any);
+
+        registerRoutes(dependencies);
+
+        const routeHandler = mockRouter.get.mock.calls[0][1];
+        const mockRequest = httpServerMock.createKibanaRequest({
+          query: { page: 1, per_page: 1 },
+        });
+        const mockResponse = httpServerMock.createResponseFactory();
+
+        await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+        expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          perPage: 1,
+          page: 1,
+        });
+
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: {
+            dataSources: expect.arrayContaining([
+              expect.objectContaining({
+                id: '1',
+                name: 'Data Source 1',
+                type: 'github',
+              }),
+            ]),
+            total: totalDataSources,
+          },
+        });
+
+        // Second page - should return second data source
+        const mockFindResultPage2 = {
+          page: 2,
+          per_page: 1,
+          total: totalDataSources,
+          saved_objects: [createMockDataSource('2', 'Data Source 2', 'notion')],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockFindResultPage2 as any);
+        mockResponse.ok.mockClear();
+
+        const mockRequestPage2 = httpServerMock.createKibanaRequest({
+          query: { page: 2, per_page: 1 },
+        });
+
+        await routeHandler(createMockContext(), mockRequestPage2, mockResponse);
+
+        expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          perPage: 1,
+          page: 2,
+        });
+
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: {
+            dataSources: expect.arrayContaining([
+              expect.objectContaining({
+                id: '2',
+                name: 'Data Source 2',
+                type: 'notion',
+              }),
+            ]),
+            total: totalDataSources,
+          },
+        });
+      });
+
+      it('should return dataSources array and total count', async () => {
+        const mockFindResult = {
+          page: 1,
+          per_page: 20,
+          total: 42,
+          saved_objects: [createMockDataSource('1', 'Test Data Source', 'github')],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockFindResult as any);
+
+        registerRoutes(dependencies);
+
+        const routeHandler = mockRouter.get.mock.calls[0][1];
+        const mockRequest = httpServerMock.createKibanaRequest({
+          query: { page: 1, per_page: 20 },
+        });
+        const mockResponse = httpServerMock.createResponseFactory();
+
+        await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: {
+            dataSources: expect.arrayContaining([
+              expect.objectContaining({
+                id: '1',
+                name: 'Test Data Source',
+                type: 'github',
+              }),
+            ]),
+            total: 42,
+          },
+        });
+      });
+
+      it('should return empty array when no data sources found', async () => {
+        const mockFindResult = {
+          page: 1,
+          per_page: 20,
+          total: 0,
+          saved_objects: [],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockFindResult as any);
+
+        registerRoutes(dependencies);
+
+        const routeHandler = mockRouter.get.mock.calls[0][1];
+        const mockRequest = httpServerMock.createKibanaRequest({
+          query: { page: 1, per_page: 20 },
+        });
+        const mockResponse = httpServerMock.createResponseFactory();
+
+        await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: {
+            dataSources: [],
+            total: 0,
+          },
+        });
+      });
+
+      it('should handle saved objects client errors with pagination', async () => {
+        const error = new Error('Elasticsearch connection failed');
+        mockSavedObjectsClient.find.mockRejectedValue(error);
+
+        registerRoutes(dependencies);
+
+        const routeHandler = mockRouter.get.mock.calls[0][1];
+        const mockRequest = httpServerMock.createKibanaRequest({
+          query: { page: 1, per_page: 20 },
+        });
+        const mockResponse = httpServerMock.createResponseFactory();
+
+        await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'Failed to list all data sources: Elasticsearch connection failed'
+        );
+
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          statusCode: 500,
+          body: {
+            message: 'Failed to list data sources: Elasticsearch connection failed',
+          },
+        });
       });
     });
   });
