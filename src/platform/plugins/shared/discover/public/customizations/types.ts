@@ -10,7 +10,10 @@
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type { DiscoverCustomizationService } from './customization_service';
-import type { DiscoverAppState } from '../application/main/state_management/redux';
+import type {
+  DiscoverAppState,
+  internalStateActions,
+} from '../application/main/state_management/redux';
 
 export interface ExtendedDiscoverStateContainer extends DiscoverStateContainer {
   /*
@@ -22,6 +25,7 @@ export interface ExtendedDiscoverStateContainer extends DiscoverStateContainer {
 export interface CustomizationCallbackContext {
   customizations: DiscoverCustomizationService;
   stateContainer: ExtendedDiscoverStateContainer;
+  internalStateActions: typeof internalStateActions;
 }
 
 export type CustomizationCallback = (

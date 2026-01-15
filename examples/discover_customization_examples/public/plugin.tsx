@@ -32,7 +32,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { internalStateActions } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import image from './discover_customization_examples.png';
 
 export interface DiscoverCustomizationExamplesSetupPlugins {
@@ -103,7 +102,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
   }
 
   start(core: CoreStart, plugins: DiscoverCustomizationExamplesStartPlugins) {
-    this.customizationCallback = ({ customizations, stateContainer }) => {
+    this.customizationCallback = ({ customizations, stateContainer, internalStateActions }) => {
       customizations.set({
         id: 'top_nav',
         defaultMenu: {

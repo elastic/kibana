@@ -20,7 +20,10 @@ import type {
 import { createCustomizationService } from './customization_service';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
 import type { DiscoverServices } from '../build_services';
-import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux';
+import {
+  fromSavedSearchToSavedObjectTab,
+  internalStateActions,
+} from '../application/main/state_management/redux';
 
 const customizationContext = createContext(createCustomizationService());
 
@@ -72,7 +75,7 @@ export const getConnectedCustomizationService = async ({
   const customizations = createCustomizationService();
   const stateContainer = getExtendedDiscoverStateContainer(originalStateContainer, services);
   const callbacks = customizationCallbacks.map((callback) =>
-    Promise.resolve(callback({ customizations, stateContainer }))
+    Promise.resolve(callback({ customizations, stateContainer, internalStateActions }))
   );
   const initialize = () => Promise.all(callbacks).then((result) => result.filter(isFunction));
 
