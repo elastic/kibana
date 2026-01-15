@@ -30,7 +30,7 @@ export function convertDatatableColumnToDataViewFieldSpec(column: DatatableColum
     name: column.name,
     type: column.meta?.type ?? 'unknown',
     esTypes: esType ? [esType] : undefined,
-    searchable: Boolean(column?.isIndexField),
+    searchable: column?.isIndexField ?? true,
     aggregatable: false,
     isNull: Boolean(column?.isNull),
     ...(timeSeriesMetric ? { timeSeriesMetric } : {}),
