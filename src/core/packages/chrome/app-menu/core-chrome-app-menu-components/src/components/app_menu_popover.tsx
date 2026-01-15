@@ -68,6 +68,7 @@ export const AppMenuPopover = ({
    * Determine the active test ID for the popover panel.
    * EuiContextMenuPanelItemDescriptor does not support data-test-subj directly,
    * so we map panel IDs to test IDs when creating the panels.
+   * TODO: Remove this implementation if EUI fix is provided: https://github.com/elastic/eui/issues/9321
    */
   const activeTestId = panelIdToTestId[activePanelId] || popoverTestId || 'app-menu-popover';
 
