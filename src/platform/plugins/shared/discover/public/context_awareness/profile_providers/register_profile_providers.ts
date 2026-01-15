@@ -17,6 +17,12 @@ import { createClassicNavRootProfileProvider } from './common/classic_nav_root_p
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs_data_source_profile';
 import { createPatternsDataSourceProfileProvider } from './common/patterns_data_source_profile';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
+import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
+import { createExampleDocumentProfileProvider } from './example/example_document_profile';
+import {
+  createExampleRootProfileProvider,
+  createExampleSolutionViewRootProfileProvider,
+} from './example/example_root_profile';
 import { createObservabilityLogsDataSourceProfileProviders } from './observability/logs_data_source_profile';
 import { createObservabilityDocumentProfileProviders } from './observability/observability_profile_providers';
 import { createObservabilityRootProfileProvider } from './observability/observability_root_profile/profile';
@@ -99,6 +105,8 @@ export const registerProfileProviders = ({
  * @returns An array of available root profile providers
  */
 const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
+  createExampleRootProfileProvider(),
+  createExampleSolutionViewRootProfileProvider(),
   createClassicNavRootProfileProvider(providerServices),
   createSecurityRootProfileProvider(providerServices),
   createObservabilityRootProfileProvider(providerServices),
@@ -110,6 +118,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
  * @returns An array of available data source profile providers
  */
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
+  createExampleDataSourceProfileProvider(),
   createPatternsDataSourceProfileProvider(providerServices),
   createDeprecationLogsDataSourceProfileProvider(),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
@@ -123,6 +132,7 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
  * @returns An array of available document profile providers
  */
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
+  createExampleDocumentProfileProvider(),
   createSecurityDocumentProfileProvider(providerServices),
   ...createObservabilityDocumentProfileProviders(providerServices),
 ];
