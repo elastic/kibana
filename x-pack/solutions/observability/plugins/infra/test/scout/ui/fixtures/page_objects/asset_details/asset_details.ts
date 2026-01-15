@@ -15,7 +15,8 @@ import { LogsTab } from './logs_tab';
 export class AssetDetailsPage {
   public readonly overviewTab: OverviewTab;
   public readonly metadataTab: MetadataTab;
-  public readonly metricsTab: MetricsTab;
+  public readonly hostMetricsTab: MetricsTab;
+  public readonly dockerMetricsTab: MetricsTab;
   public readonly logsTag: LogsTab;
 
   public readonly openAsPageButton: Locator;
@@ -24,7 +25,8 @@ export class AssetDetailsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.overviewTab = createLazyPageObject(OverviewTab, this.page, this.kbnUrl);
     this.metadataTab = createLazyPageObject(MetadataTab, this.page, this.kbnUrl);
-    this.metricsTab = createLazyPageObject(MetricsTab, this.page, this.kbnUrl);
+    this.hostMetricsTab = createLazyPageObject(MetricsTab, this.page, this.kbnUrl, 'Host');
+    this.dockerMetricsTab = createLazyPageObject(MetricsTab, this.page, this.kbnUrl, 'Docker');
     this.logsTag = createLazyPageObject(LogsTab, this.page, this.kbnUrl);
 
     this.openAsPageButton = this.page.getByTestId('infraAssetDetailsOpenAsPageButton');

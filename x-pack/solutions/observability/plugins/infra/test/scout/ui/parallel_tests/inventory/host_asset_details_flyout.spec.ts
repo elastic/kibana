@@ -216,9 +216,9 @@ test.describe(
 
     test('Metrics Tab', async ({ pageObjects: { assetDetailsPage } }) => {
       await test.step('accessible from default tab', async () => {
-        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'false');
-        await assetDetailsPage.metricsTab.clickTab();
-        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'false');
+        await assetDetailsPage.hostMetricsTab.clickTab();
+        await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
       });
 
       await test.step('quick access menu renders expected content', async () => {
@@ -230,48 +230,48 @@ test.describe(
           'Log Rate',
         ];
 
-        await expect(assetDetailsPage.metricsTab.quickAccessItems).toHaveText(quickAccessItems);
+        await expect(assetDetailsPage.hostMetricsTab.quickAccessItems).toHaveText(quickAccessItems);
       });
 
       await test.step('navigate to CPU metrics via quick access menu and render expected content', async () => {
-        await assetDetailsPage.metricsTab.clickQuickAccessItem('CPU');
-        await expect(assetDetailsPage.metricsTab.cpuSectionTitle).toBeInViewport();
+        await assetDetailsPage.hostMetricsTab.clickQuickAccessItem('CPU');
+        await expect(assetDetailsPage.hostMetricsTab.cpuSectionTitle).toBeInViewport();
 
-        await expect(assetDetailsPage.metricsTab.cpuUsageChart).toBeVisible();
-        await expect(assetDetailsPage.metricsTab.cpuUsageBreakdownChart).toBeVisible();
-        await expect(assetDetailsPage.metricsTab.cpuNormalizedLoadChart).toBeVisible();
-        await expect(assetDetailsPage.metricsTab.cpuLoadBreakdownChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.cpuUsageChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.cpuUsageBreakdownChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.cpuNormalizedLoadChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.cpuLoadBreakdownChart).toBeVisible();
       });
 
       await test.step('navigate to Memory metrics via quick access menu and render expected content', async () => {
-        await assetDetailsPage.metricsTab.clickQuickAccessItem('Memory');
-        await expect(assetDetailsPage.metricsTab.memorySectionTitle).toBeInViewport();
+        await assetDetailsPage.hostMetricsTab.clickQuickAccessItem('Memory');
+        await expect(assetDetailsPage.hostMetricsTab.memorySectionTitle).toBeInViewport();
 
-        await expect(assetDetailsPage.metricsTab.memoryUsageChart).toBeVisible();
-        await expect(assetDetailsPage.metricsTab.memoryUsageBreakdownChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.memoryUsageChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.memoryUsageBreakdownChart).toBeVisible();
       });
 
       await test.step('navigate to Network metrics via quick access menu and render expected content', async () => {
-        await assetDetailsPage.metricsTab.clickQuickAccessItem('Network');
-        await expect(assetDetailsPage.metricsTab.networkSectionTitle).toBeInViewport();
+        await assetDetailsPage.hostMetricsTab.clickQuickAccessItem('Network');
+        await expect(assetDetailsPage.hostMetricsTab.networkSectionTitle).toBeInViewport();
 
-        await expect(assetDetailsPage.metricsTab.networkChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.networkChart).toBeVisible();
       });
 
       await test.step('navigate to Disk metrics via quick access menu and render expected content', async () => {
-        await assetDetailsPage.metricsTab.clickQuickAccessItem('Disk');
-        await expect(assetDetailsPage.metricsTab.diskSectionTitle).toBeInViewport();
+        await assetDetailsPage.hostMetricsTab.clickQuickAccessItem('Disk');
+        await expect(assetDetailsPage.hostMetricsTab.diskSectionTitle).toBeInViewport();
 
-        await expect(assetDetailsPage.metricsTab.diskUsageChart).toBeVisible();
-        await expect(assetDetailsPage.metricsTab.diskIOChart).toBeVisible();
-        await expect(assetDetailsPage.metricsTab.diskThroughputChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.diskUsageChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.diskIOChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.diskThroughputChart).toBeVisible();
       });
 
       await test.step('navigate to Log metrics via quick access menu and render expected content', async () => {
-        await assetDetailsPage.metricsTab.clickQuickAccessItem('Log Rate');
-        await expect(assetDetailsPage.metricsTab.logSectionTitle).toBeInViewport();
+        await assetDetailsPage.hostMetricsTab.clickQuickAccessItem('Log Rate');
+        await expect(assetDetailsPage.hostMetricsTab.logSectionTitle).toBeInViewport();
 
-        await expect(assetDetailsPage.metricsTab.logRateChart).toBeVisible();
+        await expect(assetDetailsPage.hostMetricsTab.logRateChart).toBeVisible();
       });
     });
 
@@ -285,29 +285,29 @@ test.describe(
 
       await test.step('cpu section', async () => {
         await assetDetailsPage.overviewTab.metricsCpuShowAllButton.click();
-        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
-        await expect(assetDetailsPage.metricsTab.cpuSectionTitle).toBeInViewport();
+        await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.hostMetricsTab.cpuSectionTitle).toBeInViewport();
         await goBackToOverviewTab();
       });
 
       await test.step('memory section', async () => {
         await assetDetailsPage.overviewTab.metricsMemoryShowAllButton.click();
-        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
-        await expect(assetDetailsPage.metricsTab.memorySectionTitle).toBeInViewport();
+        await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.hostMetricsTab.memorySectionTitle).toBeInViewport();
         await goBackToOverviewTab();
       });
 
       await test.step('network section', async () => {
         await assetDetailsPage.overviewTab.metricsNetworkShowAllButton.click();
-        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
-        await expect(assetDetailsPage.metricsTab.networkSectionTitle).toBeInViewport();
+        await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.hostMetricsTab.networkSectionTitle).toBeInViewport();
         await goBackToOverviewTab();
       });
 
       await test.step('disk section', async () => {
         await assetDetailsPage.overviewTab.metricsDiskShowAllButton.click();
-        await expect(assetDetailsPage.metricsTab.tab).toHaveAttribute('aria-selected', 'true');
-        await expect(assetDetailsPage.metricsTab.diskSectionTitle).toBeInViewport();
+        await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.hostMetricsTab.diskSectionTitle).toBeInViewport();
         await goBackToOverviewTab();
       });
     });

@@ -45,7 +45,7 @@ export class MetricsTab extends AssetDetailsTab {
   public readonly logSectionTitle: Locator;
   public readonly logRateChart: Locator;
 
-  constructor(page: ScoutPage, kbnUrl: KibanaUrl) {
+  constructor(page: ScoutPage, kbnUrl: KibanaUrl, private readonly assetType: 'Host' | 'Docker') {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
 
@@ -56,9 +56,11 @@ export class MetricsTab extends AssetDetailsTab {
       .filter({ has: this.page.getByTestId('infraMetricsQuickAccessItemcpu') })
       .locator('li');
 
-    this.cpuSection = this.chartsContent.getByTestId('infraAssetDetailsHostChartsSectioncpu');
+    this.cpuSection = this.chartsContent.getByTestId(
+      `infraAssetDetails${this.assetType}ChartsSectioncpu`
+    );
     this.cpuSectionTitle = this.cpuSection.getByTestId(
-      'infraAssetDetailsHostChartsSectioncpuTitle'
+      `infraAssetDetails${this.assetType}ChartsSectioncpuTitle`
     );
     this.cpuUsageChart = this.cpuSection.getByTestId('infraAssetDetailsMetricChartcpuUsage');
     this.cpuUsageBreakdownChart = this.cpuSection.getByTestId(
@@ -71,9 +73,11 @@ export class MetricsTab extends AssetDetailsTab {
       'infraAssetDetailsMetricChartloadBreakdown'
     );
 
-    this.memorySection = this.chartsContent.getByTestId('infraAssetDetailsHostChartsSectionmemory');
+    this.memorySection = this.chartsContent.getByTestId(
+      `infraAssetDetails${this.assetType}ChartsSectionmemory`
+    );
     this.memorySectionTitle = this.memorySection.getByTestId(
-      'infraAssetDetailsHostChartsSectionmemoryTitle'
+      `infraAssetDetails${this.assetType}ChartsSectionmemoryTitle`
     );
     this.memoryUsageChart = this.memorySection.getByTestId(
       'infraAssetDetailsMetricChartmemoryUsage'
@@ -83,16 +87,18 @@ export class MetricsTab extends AssetDetailsTab {
     );
 
     this.networkSection = this.chartsContent.getByTestId(
-      'infraAssetDetailsHostChartsSectionnetwork'
+      `infraAssetDetails${this.assetType}ChartsSectionnetwork`
     );
     this.networkSectionTitle = this.networkSection.getByTestId(
-      'infraAssetDetailsHostChartsSectionnetworkTitle'
+      `infraAssetDetails${this.assetType}ChartsSectionnetworkTitle`
     );
     this.networkChart = this.networkSection.getByTestId('infraAssetDetailsMetricChartrxTx');
 
-    this.diskSection = this.chartsContent.getByTestId('infraAssetDetailsHostChartsSectiondisk');
+    this.diskSection = this.chartsContent.getByTestId(
+      `infraAssetDetails${this.assetType}ChartsSectiondisk`
+    );
     this.diskSectionTitle = this.diskSection.getByTestId(
-      'infraAssetDetailsHostChartsSectiondiskTitle'
+      `infraAssetDetails${this.assetType}ChartsSectiondiskTitle`
     );
     this.diskUsageChart = this.diskSection.getByTestId(
       'infraAssetDetailsMetricChartdiskUsageByMountPoint'
@@ -102,9 +108,11 @@ export class MetricsTab extends AssetDetailsTab {
       'infraAssetDetailsMetricChartdiskThroughputReadWrite'
     );
 
-    this.logSection = this.chartsContent.getByTestId('infraAssetDetailsHostChartsSectionlog');
+    this.logSection = this.chartsContent.getByTestId(
+      `infraAssetDetails${this.assetType}ChartsSectionlog`
+    );
     this.logSectionTitle = this.logSection.getByTestId(
-      'infraAssetDetailsHostChartsSectionlogTitle'
+      `infraAssetDetails${this.assetType}ChartsSectionlogTitle`
     );
     this.logRateChart = this.logSection.getByTestId('infraAssetDetailsMetricChartlogRate');
   }
