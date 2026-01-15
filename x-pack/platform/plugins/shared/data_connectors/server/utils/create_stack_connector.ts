@@ -16,7 +16,7 @@ import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/to
 import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
 import { getNamedMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
 import { connectorsSpecs } from '@kbn/connector-specs';
-import type { ConnectorSecrets } from '../data_types';
+import type { ConnectorSecrets } from '@kbn/data-sources-registry-plugin/common/data_types';
 
 /**
  * Builds the secrets object for a connector based on its spec
