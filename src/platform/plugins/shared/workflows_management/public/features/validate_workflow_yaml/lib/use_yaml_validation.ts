@@ -218,8 +218,6 @@ export function useYamlValidation(
               source: 'connector-id-validation',
             });
           }
-          // For valid connector-id, don't apply highlighting - show UUID as plain text
-          // Only apply error styling if there's an error
           const decorationOptions: monaco.editor.IModelDecorationOptions = {
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
             hoverMessage: validationResult.hoverMessage
