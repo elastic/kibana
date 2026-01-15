@@ -217,6 +217,12 @@ export const useStreamDescriptionApi = ({
     }
   }, [task, description]);
 
+  const areButtonsDisabled =
+    task?.status === 'in_progress' ||
+    task?.status === 'being_canceled' ||
+    isTaskLoading ||
+    isUpdating;
+
   return {
     description,
     setDescription,
@@ -233,5 +239,6 @@ export const useStreamDescriptionApi = ({
     scheduleDescriptionGenerationTask,
     cancelDescriptionGenerationTask,
     acknowledgeDescriptionGenerationTask,
+    areButtonsDisabled,
   };
 };

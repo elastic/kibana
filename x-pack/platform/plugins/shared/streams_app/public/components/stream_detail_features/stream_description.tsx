@@ -98,6 +98,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
     getDescriptionGenerationStatus,
     scheduleDescriptionGenerationTask,
     cancelDescriptionGenerationTask,
+    areButtonsDisabled,
   } = useStreamDescriptionApi({ definition, refreshDefinition });
 
   return (
@@ -133,7 +134,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                           aria-label={CANCEL_LABEL}
                           size="s"
                           isLoading={isUpdating}
-                          isDisabled={isUpdating || task?.status === 'in_progress'}
+                          isDisabled={areButtonsDisabled}
                           onClick={onCancelEdit}
                           data-test-subj="stream_description_cancel_edit_button"
                         >
@@ -148,7 +149,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                         iconSize="s"
                         fill
                         isLoading={isUpdating}
-                        isDisabled={isUpdating || task?.status === 'in_progress'}
+                        isDisabled={areButtonsDisabled}
                         onClick={() => {
                           if (!isEditing) {
                             onStartEditing();
@@ -196,7 +197,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     isLoading={isUpdating}
-                    isDisabled={isUpdating || task?.status === 'in_progress'}
+                    isDisabled={areButtonsDisabled}
                     onClick={onStartEditing}
                     data-test-subj="stream_description_manual_entry_button"
                   >
