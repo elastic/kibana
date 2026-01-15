@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT } from './kibana.add_case_comment_default_space';
 import { SET_ALERTS_STATUS_CONTRACT } from './kibana.set_alerts_status';
 import type { InternalConnectorContract } from '../../../types/latest';
 
 export const KIBANA_OVERRIDES: Record<string, InternalConnectorContract> = {
   'kibana.SetAlertsStatus': SET_ALERTS_STATUS_CONTRACT,
+  'kibana.addCaseCommentDefaultSpace': ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT,
 };
