@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/deeplinks-analytics'
   - '@kbn/presentation-util'
+  - '@kbn/presentation-util-plugin'
 tags:
   - plugin
   - prod
