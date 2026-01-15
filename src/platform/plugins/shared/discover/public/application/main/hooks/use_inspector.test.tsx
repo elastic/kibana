@@ -30,8 +30,12 @@ describe('test useInspector', () => {
     const requests = new RequestAdapter();
     const lensRequests = new RequestAdapter();
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const currentTabId = stateContainer.internalState.getState().tabs.unsafeCurrentId;
     stateContainer.internalState.dispatch(
-      internalStateActions.setExpandedDoc({ expandedDoc: {} as unknown as DataTableRecord })
+      internalStateActions.setExpandedDoc({
+        tabId: currentTabId,
+        expandedDoc: {} as unknown as DataTableRecord,
+      })
     );
     const { result } = renderHook(
       () => {
@@ -56,6 +60,8 @@ describe('test useInspector', () => {
       ...requests.getRequests(),
       ...lensRequests.getRequests(),
     ]);
-    expect(stateContainer.internalState.getState().expandedDoc).toBe(undefined);
+    const state = stateContainer.internalState.getState();
+    const tab = state.tabs.byId[currentTabId];
+    expect(tab.expandedDoc).toBe(undefined);
   });
 });

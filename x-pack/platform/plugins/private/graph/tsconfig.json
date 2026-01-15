@@ -23,7 +23,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/spaces-plugin",
-    "@kbn/unified-search-plugin",
     "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/i18n-react",
@@ -53,6 +52,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-saved-objects-api-server",
     "@kbn/licensing-types",
+    "@kbn/kql",
+    "@kbn/unified-search-plugin",
   ],
   "exclude": [
     "target/**/*",
