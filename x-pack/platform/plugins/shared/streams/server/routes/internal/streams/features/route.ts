@@ -247,7 +247,7 @@ export const featuresTaskRoute = createServerRoute({
         action: z.literal('schedule'),
         from: dateFromString,
         to: dateFromString,
-        connectorId: z
+        connector_id: z
           .string()
           .optional()
           .describe(
@@ -279,7 +279,7 @@ export const featuresTaskRoute = createServerRoute({
     const taskId = getFeaturesIdentificationTaskId(stream.name);
 
     if (params.body.action === 'schedule') {
-      const { from: start, to: end, connectorId: connectorIdParam } = params.body;
+      const { from: start, to: end, connector_id: connectorIdParam } = params.body;
 
       const connectorId = await resolveConnectorId({
         connectorId: connectorIdParam,
