@@ -30,6 +30,7 @@ import {
 import type { EntityOrEventItem } from '../types';
 import { emitGroupedItemClick } from '../../../events';
 import { displayEntityName, displayEventName } from '../utils';
+import { ActionsButton } from './actions_button';
 
 const entityUnavailableTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.entityUnavailable.tooltip',
@@ -123,6 +124,9 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
             </EuiText>
           </EuiToolTip>
         )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ActionsButton item={item} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
