@@ -54,3 +54,11 @@ export const isScriptsLibraryKqlFilterValid = (
 
   return response;
 };
+
+export const SCRIPT_LIBRARY_SORTABLE_FIELDS = [
+  'name',
+  'createdAt',
+  'createdBy',
+  'updatedAt',
+  'updatedBy',
+] as const;
