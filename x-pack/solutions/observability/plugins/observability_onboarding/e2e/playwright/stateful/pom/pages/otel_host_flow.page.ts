@@ -22,7 +22,6 @@ export class OtelHostFlowPage {
 
   public async selectPlatform(osName: string) {
     const platformLabel = this.getPlatformLabel(osName);
-    // Click the platform button in the EuiButtonGroup
     await this.page.getByRole('button', { name: platformLabel, exact: true }).click();
   }
 
