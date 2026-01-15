@@ -49,7 +49,6 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/langchain'
   - '@kbn/core-lifecycle-browser-mocks'
-  - '@kbn/core-http-server-utils'
 tags:
   - plugin
   - prod
