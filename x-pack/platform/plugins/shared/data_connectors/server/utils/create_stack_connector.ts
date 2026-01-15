@@ -16,7 +16,7 @@ import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/to
 import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
 import { getNamedMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
 import { connectorsSpecs } from '@kbn/connector-specs';
-import type { ConnectorSecrets } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
+import type { ConnectorSecrets } from '@kbn/data-sources-registry-plugin/common/data_types';
 
 /**
  * Builds the secrets object for a connector based on its spec
@@ -108,9 +108,12 @@ async function importMcpTools(
   connectorId: string,
   toolNames: string[],
   name: string,
-  toolIds: string[],
   logger: Logger
-) {
+): Promise<string[]> {
+  if (toolNames.length === 0) {
+    return [];
+  }
+
   const mcpTools = await getNamedMcpTools({
     actions,
     request,
@@ -121,6 +124,8 @@ async function importMcpTools(
   if (mcpTools === undefined) {
     throw new Error(`No imported connector tools found for ${name}`);
   }
+
+  let importedToolIds: string[] = [];
   try {
     if (mcpTools && mcpTools.length > 0) {
       const { results } = await bulkCreateMcpTools({
@@ -131,12 +136,13 @@ async function importMcpTools(
         tools: mcpTools,
         namespace: name,
       });
-      toolIds.push(...results.map((result) => result.toolId));
-      logger.info(`Imported tools in createMCPconnector: ${JSON.stringify(toolIds)}`);
+      importedToolIds = results.map((result) => result.toolId);
+      logger.info(`Imported tools for Data Source '${name}': ${JSON.stringify(importedToolIds)}`);
     }
   } catch (error) {
     throw new Error(`Error bulk importing MCP tools for ${name}: ${error}`);
   }
+  return importedToolIds;
 }
 
 export const createStackConnector = async (
@@ -172,16 +178,16 @@ export const createStackConnector = async (
   });
 
   if (connectorType === '.mcp' && stackConnectorConfig.importedTools) {
-    await importMcpTools(
+    const importedToolIds = await importMcpTools(
       registry,
       actions,
       request,
       stackConnector.id,
       stackConnectorConfig.importedTools,
       name,
-      toolIds,
       logger
     );
+    toolIds.push(...importedToolIds);
   }
   return stackConnector;
 };

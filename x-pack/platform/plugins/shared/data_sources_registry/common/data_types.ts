@@ -5,6 +5,20 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
+export type ConnectorSecrets = z.infer<typeof ConnectorSecretsSchema>;
+
+/**
+ * Schema for Stack connector secrets.
+ */
+export const ConnectorSecretsSchema = z.object({
+  token: z.string().optional(),
+  apiKey: z.string().optional(),
+  user: z.string().optional(),
+  password: z.string().optional(),
+  secretHeaders: z.record(z.string(), z.string()).optional(),
+});
+
 /**
  * OAuth providers supported by EARS
  */
@@ -70,7 +84,7 @@ export interface DataTypeDefinition {
    * Generates workflows for interacting with the third-party data source.
    * Workflows are the only model for "taking action" against the third party.
    */
-  generateWorkflows(stackConnectorId?: string, stackConnectorName?: string): WorkflowInfo[];
+  generateWorkflows(stackConnectorId?: string, dataSourceName?: string): WorkflowInfo[];
 
   /**
    * Stack connector configuration.

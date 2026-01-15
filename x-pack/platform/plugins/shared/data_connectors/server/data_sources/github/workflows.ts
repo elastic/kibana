@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export function generateGithubSearchIssuesWorkflow(stackConnectorId: string, name: string): string {
+export function generateGithubSearchIssuesWorkflow(
+  stackConnectorId: string,
+  dataSourceName: string
+): string {
   return `version: '1'
-name: '${name}.sources.github.search_issues'
+name: 'sources.github.${dataSourceName}.search_issues'
 description: 'Search for issues in a GitHub repository'
 enabled: true
 triggers:
@@ -51,9 +54,12 @@ steps:
 `;
 }
 
-export function generateGithubSearchCodeWorkflow(stackConnectorId: string, name: string): string {
+export function generateGithubSearchCodeWorkflow(
+  stackConnectorId: string,
+  dataSourceName: string
+): string {
   return `version: '1'
-name: '${name}.sources.github.search_code'
+name: 'sources.github.${dataSourceName}.search_code'
 description: 'Search for code in GitHub repositories'
 enabled: true
 triggers:
@@ -92,10 +98,10 @@ steps:
 
 export function generateGithubSearchPullRequestsWorkflow(
   stackConnectorId: string,
-  name: string
+  dataSourceName: string
 ): string {
   return `version: '1'
-name: '${name}.sources.github.search_pull_requests'
+name: 'sources.github.${dataSourceName}.search_pull_requests'
 description: 'Search for pull requests in a GitHub repository'
 enabled: true
 triggers:
@@ -142,10 +148,10 @@ steps:
 
 export function generateGithubSearchRepositoriesWorkflow(
   stackConnectorId: string,
-  name: string
+  dataSourceName: string
 ): string {
   return `version: '1'
-name: '${name}.sources.github.search_repositories'
+name: 'sources.github.${dataSourceName}.search_repositories'
 description: 'Search for GitHub repositories'
 enabled: true
 triggers:
@@ -186,9 +192,12 @@ steps:
 `;
 }
 
-export function generateGithubSearchUsersWorkflow(stackConnectorId: string, name: string): string {
+export function generateGithubSearchUsersWorkflow(
+  stackConnectorId: string,
+  dataSourceName: string
+): string {
   return `version: '1'
-name: '${name}.sources.github.search_users'
+name: 'sources.github.${dataSourceName}.search_users'
 description: 'Search for GitHub users'
 enabled: true
 triggers:
