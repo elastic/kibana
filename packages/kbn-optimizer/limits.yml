@@ -32,7 +32,7 @@ pageLoadAssetSize:
   customIntegrations: 11715
   dashboard: 19000
   dashboardEnhanced: 12500
-  dashboardMarkdown: 5056
+  dashboardMarkdown: 4994
   data: 454000
   dataQuality: 11469
   datasetQuality: 49315
@@ -45,7 +45,7 @@ pageLoadAssetSize:
   dataVisualizer: 32797
   developerToolbar: 4467
   devTools: 8109
-  discover: 28625
+  discover: 28617
   discoverEnhanced: 5660
   discoverShared: 2322
   elasticAssistant: 338870
@@ -175,7 +175,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
-  streamsApp: 26143
+  streamsApp: 25991
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
