@@ -143,22 +143,13 @@ export function ReactFlowPopover({
   const trigger = <div style={{ width: 1, height: 1, visibility: 'hidden' }} />;
 
   return (
-    <div
-      style={popoverStyle}
-      onClick={(e) => e.stopPropagation()}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
-      }}
-      role="presentation"
-    >
+    <div style={popoverStyle} onClick={(e) => e.stopPropagation()} role="presentation">
       <EuiPopover
         anchorPosition={'upCenter'}
         button={trigger}
         closePopover={onClose}
         isOpen={isOpen}
         ref={popoverRef}
-        ownFocus={false}
-        zIndex={1000}
       >
         <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
           <EuiFlexItem>
@@ -168,7 +159,7 @@ export function ReactFlowPopover({
                 {kuery && (
                   <EuiIconTip
                     position="bottom"
-                    content={i18n.translate('xpack.actions.serviceMap.kqlFilterInfo', {
+                    content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
                       defaultMessage: 'The KQL filter is not applied in the displayed stats.',
                     })}
                     type="info"

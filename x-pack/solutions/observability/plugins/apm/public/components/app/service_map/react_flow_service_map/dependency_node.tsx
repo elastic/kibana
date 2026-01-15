@@ -71,6 +71,7 @@ export const DependencyNode = memo(
               box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
               box-sizing: border-box;
               cursor: pointer;
+              pointer-events: all;
             `}
           >
             <div
@@ -86,6 +87,7 @@ export const DependencyNode = memo(
                     width: 20px;
                     height: 20px;
                     object-fit: contain;
+                    pointer-events: none;
                   `}
                 />
               )}
@@ -116,6 +118,7 @@ export const DependencyNode = memo(
               : 'transparent'};
             padding: ${euiTheme.size.xs};
             border-radius: ${euiTheme.border.radius.medium};
+            pointer-events: none;
           `}
         >
           {data.label}
