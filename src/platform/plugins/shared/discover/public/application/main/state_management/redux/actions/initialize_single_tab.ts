@@ -36,6 +36,7 @@ import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
+import { fetchData } from './tab_state';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
@@ -327,7 +328,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // tab to fetch when selected
     if (getState().tabs.unsafeCurrentId === tabId) {
       stateContainer.actions.initializeAndSync();
-      stateContainer.actions.fetchData(true);
+      dispatch(fetchData({ tabId, initial: true }));
     } else {
       dispatch(
         internalStateSlice.actions.setForceFetchOnSelect({ tabId, forceFetchOnSelect: true })

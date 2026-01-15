@@ -30,6 +30,7 @@ import {
   dataViewComplexMock,
   dataViewWithDefaultColumnMock,
 } from '../../../../../__mocks__/data_view_complex';
+import * as tabStateActions from './tab_state';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -269,7 +270,7 @@ describe('tab_state_data_view actions', () => {
   describe('onDataViewEdited', () => {
     test('onDataViewEdited - persisted data view', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
-      const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+      const fetchDataSpy = jest.spyOn(tabStateActions, 'fetchData');
 
       const selectedDataView$ = selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$;
       expect(selectedDataView$.getValue()).toEqual(dataViewMockWithTimeField);
@@ -287,7 +288,7 @@ describe('tab_state_data_view actions', () => {
 
     test('onDataViewEdited - ad-hoc data view', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
-      const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+      const fetchDataSpy = jest.spyOn(tabStateActions, 'fetchData');
 
       await internalState.dispatch(
         internalStateActions.onDataViewCreated({

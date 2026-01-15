@@ -34,6 +34,7 @@ import {
 } from '../../../../../../common/data_sources';
 import { addLog } from '../../../../../utils/add_log';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
+import { fetchData } from './tab_state';
 
 /**
  * Set the data view in the tab's runtime state
@@ -158,12 +159,35 @@ export const onDataViewCreated: InternalStateThunkActionCreator<
     }
     if (nextDataView.id) {
       await dispatch(
-        internalStateActions.changeDataView({
+        changeDataView({
           tabId,
           dataViewOrDataViewId: nextDataView,
         })
       );
     }
+  };
+
+/**
+ * Triggered when a new data view is edited
+ */
+export const onDataViewEdited: InternalStateThunkActionCreator<
+  [TabActionPayload<{ editedDataView: DataView }>],
+  Promise<void>
+> =
+  ({ tabId, editedDataView }) =>
+  async (dispatch, _, { services }) => {
+    if (editedDataView.isPersisted()) {
+      // Clear the current data view from the cache and create a new instance
+      // of it, ensuring we have a new object reference to trigger a re-render
+      services.dataViews.clearInstanceCache(editedDataView.id);
+      const newDataView = await services.dataViews.create(editedDataView.toSpec(), true);
+      dispatch(assignNextDataView({ tabId, dataView: newDataView }));
+    } else {
+      await dispatch(updateAdHocDataViewId({ tabId, editedDataView }));
+    }
+    void dispatch(internalStateActions.loadDataViewList());
+    addLog('onDataViewEdited triggers data fetching');
+    dispatch(fetchData({ tabId }));
   };
 
 /**
@@ -227,27 +251,4 @@ export const updateAdHocDataViewId: InternalStateThunkActionCreator<
     services.urlTracker.setTrackingEnabled(trackingEnabled);
 
     return nextDataView;
-  };
-
-/**
- * Triggered when a new data view is edited
- */
-export const onDataViewEdited: InternalStateThunkActionCreator<
-  [TabActionPayload<{ editedDataView: DataView }>],
-  Promise<void>
-> =
-  ({ tabId, editedDataView }) =>
-  async (dispatch, getState, { services }) => {
-    if (editedDataView.isPersisted()) {
-      // Clear the current data view from the cache and create a new instance
-      // of it, ensuring we have a new object reference to trigger a re-render
-      services.dataViews.clearInstanceCache(editedDataView.id);
-      const newDataView = await services.dataViews.create(editedDataView.toSpec(), true);
-      dispatch(internalStateActions.assignNextDataView({ tabId, dataView: newDataView }));
-    } else {
-      await dispatch(internalStateActions.updateAdHocDataViewId({ tabId, editedDataView }));
-    }
-    void dispatch(internalStateActions.loadDataViewList());
-    addLog('onDataViewEdited triggers data fetching');
-    dispatch(internalStateActions.fetchData({ tabId }));
   };

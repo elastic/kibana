@@ -32,7 +32,6 @@ import { FilterStateStore, isOfAggregateQueryType, isOfQueryType } from '@kbn/es
 import { isEqual, isFunction } from 'lodash';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../..';
-import { FetchStatus } from '../../types';
 import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
@@ -150,12 +149,6 @@ export interface DiscoverStateContainer {
    * Complex functions to update multiple containers from UI
    */
   actions: {
-    /**
-     * Triggers fetching of new data from Elasticsearch
-     * If initial is true, when SEARCH_ON_PAGE_LOAD_SETTING is set to false and it's a new saved search no fetch is triggered
-     * @param initial
-     */
-    fetchData: (initial?: boolean) => void;
     /**
      * Initializing state containers and start subscribing to changes triggering e.g. data fetching
      */
@@ -444,7 +437,7 @@ export function getDiscoverStateContainer({
       .subscribe(() => {
         internalState.dispatch(internalStateActions.markNonActiveTabsForRefetch());
         addLog('[getDiscoverStateContainer] projectRouting changes triggers data fetching');
-        fetchData();
+        internalState.dispatch(injectCurrentTab(internalStateActions.fetchData)({}));
       });
 
     const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
@@ -559,7 +552,11 @@ export function getDiscoverStateContainer({
         useFilterAndQueryServices: true,
       });
       addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
-      fetchData();
+      internalState.dispatch(
+        internalStateActions.fetchData({
+          tabId,
+        })
+      );
     });
 
     services.data.search.session.enableStorage(
@@ -633,13 +630,6 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const fetchData = (initial: boolean = false) => {
-    addLog('fetchData', { initial });
-    if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {
-      dataStateContainer.fetch();
-    }
-  };
-
   const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
     addLog('updateESQLQuery');
     const { query: currentQuery } = getCurrentTab().appState;
@@ -673,7 +663,6 @@ export function getDiscoverStateContainer({
     actions: {
       initializeAndSync,
       stopSyncing,
-      fetchData,
       createAndAppendAdHocDataView,
       onOpenSavedSearch,
       transitionFromESQLToDataView,
