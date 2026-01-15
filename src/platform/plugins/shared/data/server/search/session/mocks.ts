@@ -16,7 +16,7 @@ export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessi
   return {
     getId: jest.fn(),
     trackId: jest.fn(),
-    updateStatus: jest.fn(),
+    updateStatuses: jest.fn(),
     getSearchIdMapping: jest.fn(),
     save: jest.fn(),
     get: jest.fn(),
