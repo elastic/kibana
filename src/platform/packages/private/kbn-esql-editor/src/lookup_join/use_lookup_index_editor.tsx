@@ -43,6 +43,14 @@ export interface IndexEditorCommandArgs {
   highestPrivilege?: string; // The highest user privilege for the given index ( create, edit, read )
 }
 
+interface HoverController extends monaco.editor.IEditorContribution {
+  _contentWidget?: {
+    widget?: {
+      hide: () => void;
+    };
+  };
+}
+
 async function isCurrentAppSupported(
   currentAppId$: ApplicationStart['currentAppId$'] | undefined
 ): Promise<boolean> {
@@ -308,18 +316,31 @@ export const useLookupIndexCommand = (
     openFlyoutRef.current = openFlyout;
   }, [openFlyout]);
 
-  useEffect(function registerCommandOnMount() {
-    const disposable = monaco.editor.registerCommand(
-      COMMAND_ID,
-      async (_, args: IndexEditorCommandArgs) => {
-        const { indexName, doesIndexExist, canEditIndex, triggerSource } = args;
-        await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, triggerSource);
-      }
-    );
-    return () => {
-      disposable.dispose();
-    };
-  }, []);
+  useEffect(
+    function registerCommandOnMount() {
+      const disposable = monaco.editor.registerCommand(
+        COMMAND_ID,
+        async (_, args: IndexEditorCommandArgs) => {
+          if (editorRef.current) {
+            // Hiding the hover widget is easier in newer monaco versions, we can improve this if we update.
+            // In new versions there is a comamnd: editorRef.current.trigger('command', 'editor.action.hideHover', {});
+            const hoverController =
+              editorRef.current.getContribution<HoverController>('editor.contrib.hover');
+            if (hoverController?._contentWidget?.widget?.hide) {
+              hoverController._contentWidget.widget.hide();
+            }
+          }
+
+          const { indexName, doesIndexExist, canEditIndex, triggerSource } = args;
+          await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, triggerSource);
+        }
+      );
+      return () => {
+        disposable.dispose();
+      };
+    },
+    [editorRef]
+  );
 
   return {
     addLookupIndicesDecorator,
