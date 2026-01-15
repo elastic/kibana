@@ -1,11 +1,4 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
@@ -32,6 +25,15 @@ export interface QueryPayload {
   filter: ESQLSearchParams['filter'];
   params?: ESQLSearchParams['params'];
 }
+
+type NamedParamValue =
+  | string
+  | number
+  | Array<string | number>
+  | Record<string, string | number>
+  | undefined;
+
+type NamedParams = Array<Record<string, NamedParamValue>>;
 
 export function getQueryPayload({
   query,
@@ -64,7 +66,7 @@ export function getQueryPayload({
     return { dateStart, dateEnd, filter };
   }
 
-  const params: ESQLSearchParams['params'] = [];
+  const params: NamedParams = [];
   if (/\?_tstart/i.test(query)) {
     params.push({ _tstart: dateStart });
   }
@@ -74,3 +76,4 @@ export function getQueryPayload({
 
   return { dateStart, dateEnd, filter, ...(params.length ? { params } : {}) };
 }
+
