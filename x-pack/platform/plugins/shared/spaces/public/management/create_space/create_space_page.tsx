@@ -35,6 +35,7 @@ import type { SpacesManager } from '../../spaces_manager';
 import { UnauthorizedPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
+import { CustomizeCps } from '../components/customize_cps';
 import { CustomizeSpace } from '../components/customize_space';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
@@ -143,6 +144,10 @@ export class CreateSpacePage extends Component<Props, State> {
     }
   }
 
+  private canEditProjectRouting(): boolean {
+    return this.props.capabilities.management?.kibana?.read_project_routing ?? false;
+  }
+
   public render() {
     if (!this.props.capabilities.spaces.manage) {
       return (
@@ -222,6 +227,13 @@ export class CreateSpacePage extends Component<Props, State> {
         />
 
         <EuiSpacer />
+
+        {this.canEditProjectRouting() && (
+          <>
+            <CustomizeCps space={this.state.space} onChange={this.onSpaceChange} />
+            <EuiSpacer />
+          </>
+        )}
 
         {this.getChangeImpactWarning()}
 
@@ -393,6 +405,7 @@ export class CreateSpacePage extends Component<Props, State> {
       imageUrl,
       avatarType,
       solution,
+      projectRouting,
     } = this.state.space;
 
     const params = {
@@ -404,6 +417,7 @@ export class CreateSpacePage extends Component<Props, State> {
       disabledFeatures,
       imageUrl: avatarType === 'image' ? imageUrl : '',
       solution,
+      projectRouting,
     };
 
     const { spacesManager, eventTracker } = this.props;

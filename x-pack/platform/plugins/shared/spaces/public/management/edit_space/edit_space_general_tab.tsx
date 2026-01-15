@@ -116,9 +116,9 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   const onProjectRoutingChange = useCallback(
     (updatedSpace: Partial<Space>) => {
-      onChangeFeatures(updatedSpace);
+      onChangeSpaceSettings(updatedSpace);
     },
-    [onChangeFeatures]
+    [onChangeSpaceSettings]
   );
 
   const backToSpacesList = useCallback(() => {
@@ -136,7 +136,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   }, []);
 
   const canReadProjectRouting = () => {
-    return application?.capabilities?.management?.kibana.read_project_routing ?? false;
+    return application?.capabilities?.management?.kibana?.read_project_routing ?? false;
   };
 
   const performSave = useCallback(
@@ -331,7 +331,6 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           <EuiSpacer />
           <CustomizeCps
             space={getSpaceFromFormValues(formValues)}
-            editingExistingSpace={true}
             onChange={onProjectRoutingChange}
           />
         </>
