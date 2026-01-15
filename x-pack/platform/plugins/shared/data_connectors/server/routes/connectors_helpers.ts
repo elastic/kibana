@@ -92,7 +92,6 @@ export async function createConnectorAndRelatedResources(
       logger
     );
 
-    logger.info(`Imported tools in createConnectorAndRelatedResources: ${JSON.stringify(toolIds)}`);
     finalStackConnectorId = stackConnector.id;
   }
 

@@ -77,10 +77,6 @@ inputs:
   - name: per_page
     type: number
     default: 10
-  - name: sort
-    type: string
-    default: "indexed"
-    description: "Sort field. Valid values: indexed"
 steps:
   - name: search-code
     type: mcp.callTool
@@ -92,7 +88,7 @@ steps:
         order: "\${{inputs.order}}"
         page: "\${{inputs.page}}"
         perPage: "\${{inputs.per_page}}"
-        sort: "\${{inputs.sort}}"
+        sort: 'indexed'
 `;
 }
 
