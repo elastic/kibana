@@ -16,8 +16,6 @@ import {
   type DescriptionGenerationTaskParams,
   type GenerateDescriptionResult,
 } from '../../../../lib/tasks/task_definitions/description_generation';
-import { checkAccess } from '../../../../lib/streams/stream_crud';
-import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -65,11 +63,9 @@ export const descriptionGenerationStatusRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<DescriptionGenerationTaskResult> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
-      {
-        request,
-      }
-    );
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -77,13 +73,7 @@ export const descriptionGenerationStatusRoute = createServerRoute({
       path: { name },
     } = params;
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(
-        `Cannot generate stream description for ${name}, insufficient privileges`
-      );
-    }
+    await streamsClient.ensureStream(name);
 
     const task = await taskClient.get<DescriptionGenerationTaskParams, GenerateDescriptionResult>(
       getDescriptionGenerationTaskId(name)
@@ -153,11 +143,9 @@ export const descriptionGenerationTaskRoute = createServerRoute({
     server,
     logger,
   }): Promise<DescriptionGenerationTaskResult> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
-      {
-        request,
-      }
-    );
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -166,11 +154,7 @@ export const descriptionGenerationTaskRoute = createServerRoute({
       body,
     } = params;
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     const { action } = body;
 

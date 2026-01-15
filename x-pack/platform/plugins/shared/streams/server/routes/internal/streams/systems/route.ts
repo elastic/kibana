@@ -52,19 +52,14 @@ export const getSystemRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ system: System }> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name, systemName } = params.path;
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     const system = await systemClient.getSystem(name, systemName);
     return { system };
@@ -96,19 +91,14 @@ export const deleteSystemRoute = createServerRoute({
     server,
     logger,
   }): Promise<StorageClientDeleteResponse> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name, systemName } = params.path;
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot delete system for stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     logger.get('system_identification').debug(`Deleting system ${systemName} for stream ${name}`);
     return await systemClient.deleteSystem(name, systemName);
@@ -137,10 +127,9 @@ export const upsertSystemRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<StorageClientIndexResponse> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -153,10 +142,7 @@ export const upsertSystemRoute = createServerRoute({
       throw new StatusError(`Cannot update system name`, 400);
     }
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot update system for stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     return await systemClient.updateSystem(name, body);
   },
@@ -183,18 +169,14 @@ export const listSystemsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ systems: System[] }> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     const { systems } = await systemClient.getSystems(name);
     return { systems };
@@ -241,10 +223,9 @@ export const bulkSystemsRoute = createServerRoute({
     server,
     logger,
   }): Promise<StorageClientBulkResponse> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -253,11 +234,7 @@ export const bulkSystemsRoute = createServerRoute({
       body: { operations },
     } = params;
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot update systems for stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     logger
       .get('system_identification')
@@ -307,11 +284,9 @@ export const systemsStatusRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SystemIdentificationTaskResult> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
-      {
-        request,
-      }
-    );
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -319,11 +294,7 @@ export const systemsStatusRoute = createServerRoute({
       path: { name },
     } = params;
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot read systems for stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     const task = await taskClient.get<
       SystemIdentificationTaskParams,
@@ -394,11 +365,9 @@ export const systemsTaskRoute = createServerRoute({
     server,
     logger,
   }): Promise<SystemIdentificationTaskResult> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
-      {
-        request,
-      }
-    );
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -407,10 +376,7 @@ export const systemsTaskRoute = createServerRoute({
       body,
     } = params;
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot update systems for stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     const { action } = body;
     const taskId = getSystemsIdentificationTaskId(name);
