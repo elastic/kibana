@@ -60,7 +60,7 @@ export class FileUploadTelemetryService {
   constructor(private analytics: AnalyticsServiceStart, private location: string) {}
 
   public static generateId(): string {
-    return Math.random().toString(36).substring(2, 15);
+    return crypto.randomUUID().substring(0, 13);
   }
 
   private reportEvent(eventType: string, eventData: Record<string, unknown>) {
