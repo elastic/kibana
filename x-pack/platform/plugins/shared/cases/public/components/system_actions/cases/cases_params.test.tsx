@@ -113,6 +113,7 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
     expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
+    expect(await screen.findByTestId('auto-push-case')).toBeInTheDocument();
   });
 
   it('renders loading state of grouping by fields correctly', async () => {
@@ -178,6 +179,17 @@ describe('CasesParamsFields renders', () => {
       expect(await screen.findByText('host.ip')).toBeInTheDocument();
 
       expect(screen.queryByText('host.geo.location')).not.toBeInTheDocument();
+    });
+
+    it('renders the auto push case option correctly', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      const autoPushCase = await screen.findByTestId('auto-push-case');
+      expect(autoPushCase).not.toBeChecked();
+
+      // click and observe update
+      await user.click(autoPushCase);
+      expect(editAction.mock.calls[0][1].autoPushCase).toEqual(true);
     });
 
     it('updates grouping by field', async () => {

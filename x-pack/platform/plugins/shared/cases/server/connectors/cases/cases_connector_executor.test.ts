@@ -3172,6 +3172,7 @@ describe('CasesConnectorExecutor', () => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
+      autoPushCase: null,
     };
 
     describe('run', () => {

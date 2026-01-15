@@ -115,3 +115,10 @@ export const ATTACK_DISCOVERY_TEMPLATE_TOOLTIP = i18n.translate(
       'Attack Discovery Schedules fully manage Case actions, automatically filling in all fields for new Cases.',
   }
 );
+
+export const AUTO_PUSH_CASE_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.autoPushCaseLabel',
+  {
+    defaultMessage: 'Auto-push case to connected external system',
+  }
+);

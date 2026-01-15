@@ -87,6 +87,7 @@ describe('getCasesConnectorType', () => {
         reopenClosedCases: false,
         timeWindow: '7d',
         templateId: null,
+        autoPushCase: null,
         ...overrides,
       },
     });

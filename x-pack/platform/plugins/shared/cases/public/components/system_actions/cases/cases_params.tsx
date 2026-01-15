@@ -192,6 +192,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editSubActionProperty]
   );
 
+  const onAutoPushChange: React.EventHandler<React.ChangeEvent<HTMLInputElement>> = useCallback(
+    (event) => {
+      editSubActionProperty('autoPushCase', event.target.checked);
+    },
+    [editSubActionProperty]
+  );
+
   if (isAttackDiscoveryRuleType) {
     return (
       <EuiToolTip
@@ -280,7 +287,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         />
       )}
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={true}>
           <TemplateSelector
             key={currentConfiguration.id}
@@ -288,6 +295,16 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             templates={[defaultTemplate, ...currentConfiguration.templates]}
             onTemplateChange={onTemplateChange}
             initialTemplate={selectedTemplate}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiCheckbox
+            id={`auto-push-case-${index}`}
+            data-test-subj="auto-push-case"
+            checked={actionParams.subActionParams?.autoPushCase}
+            label={i18n.AUTO_PUSH_CASE_LABEL}
+            disabled={isLoadingCaseConfiguration}
+            onChange={onAutoPushChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -87,6 +87,7 @@ export const CasesConnectorSecretsSchema = z.object({}).strict();
 
 export const CasesConnectorRunParamsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema),
+  autoPushCase: schema.nullable(schema.boolean({ defaultValue: false })),
   groupedAlerts: schema.nullable(
     schema.arrayOf(CasesGroupedAlertsSchema, {
       defaultValue: [],
@@ -186,6 +187,7 @@ const ZReopenClosedCasesSchema = z.boolean().default(false);
 export const ZCasesConnectorRunParamsSchema = z
   .object({
     alerts: z.array(ZAlertSchema),
+    autoPushCase: z.boolean().nullable().default(false),
     groupedAlerts: z
       .array(ZCasesGroupedAlertsSchema)
       .min(0)
@@ -210,6 +212,7 @@ export const ZCasesConnectorRunParamsSchema = z
 export const CasesConnectorRuleActionParamsSchema = schema.object({
   subAction: schema.literal('run'),
   subActionParams: schema.object({
+    autoPushCase: schema.nullable(schema.boolean({ defaultValue: false })),
     groupingBy: GroupingSchema,
     reopenClosedCases: ReopenClosedCasesSchema,
     timeWindow: TimeWindowSchema,
