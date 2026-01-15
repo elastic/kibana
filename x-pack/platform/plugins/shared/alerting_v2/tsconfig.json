@@ -30,8 +30,6 @@
     "@kbn/response-ops-retry-service",
     "@kbn/esql-language",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-saved-objects-server-mocks",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-security-common",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/logging-mocks",
