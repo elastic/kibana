@@ -16,6 +16,7 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
 import type { IntlShape } from '@kbn/i18n-react';
+import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
@@ -200,8 +201,11 @@ const getExportItems = (
   };
 
   const exportItems: AppMenuPopoverItem[] = exportIntegrations
-    .filter((item) => item.shareType === 'integration')
-    .map((item) => ({
+    .filter(
+      (item: ShareActionIntents): item is typeof item & { shareType: 'integration'; id: string } =>
+        item.shareType === 'integration'
+    )
+    .map((item: ShareActionIntents & { shareType: 'integration'; id: string }) => ({
       ...mapIntegrationToMetaData(item.id),
       id: item.id,
       run: async () => {
@@ -213,18 +217,22 @@ const getExportItems = (
 
   const derivativeItems: AppMenuPopoverItem[] = exportDerivatives
     .filter(
-      (item): item is typeof item & { shareType: 'integration'; id: string } =>
+      (
+        item: ShareActionIntents
+      ): item is typeof item & { shareType: 'integration'; id: string; groupId: string } =>
         item.shareType === 'integration' && item.groupId === 'exportDerivatives'
     )
-    .map((item) => ({
-      ...mapIntegrationToMetaData(item.id),
-      id: item.id,
-      run: async () => {
-        const shareOptions = await buildShareOptions(buildShareOptionsParams);
-        const handler = await services.share?.getExportDerivativeHandler(shareOptions, item.id);
-        await handler?.();
-      },
-    }));
+    .map(
+      (item: ShareActionIntents & { shareType: 'integration'; id: string; groupId: string }) => ({
+        ...mapIntegrationToMetaData(item.id),
+        id: item.id,
+        run: async () => {
+          const shareOptions = await buildShareOptions(buildShareOptionsParams);
+          const handler = await services.share?.getExportDerivativeHandler(shareOptions, item.id);
+          await handler?.();
+        },
+      })
+    );
 
   return [...exportItems, ...derivativeItems];
 };
