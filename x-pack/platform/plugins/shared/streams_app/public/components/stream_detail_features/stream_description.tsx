@@ -98,16 +98,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
     getDescriptionGenerationStatus,
     scheduleDescriptionGenerationTask,
     cancelDescriptionGenerationTask,
-    acknowledgeDescriptionGenerationTask,
   } = useStreamDescriptionApi({ definition, refreshDefinition });
-
-  const onLoadDescription = useCallback(
-    (nextDescription: string) => {
-      setDescription(nextDescription);
-      onStartEditing();
-    },
-    [setDescription, onStartEditing]
-  );
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
@@ -183,8 +174,6 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                         getDescriptionGenerationStatus={getDescriptionGenerationStatus}
                         scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
                         cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
-                        acknowledgeDescriptionGenerationTask={acknowledgeDescriptionGenerationTask}
-                        onLoadDescription={onLoadDescription}
                         aiFeatures={aiFeatures}
                       />
                     </EuiFlexItem>
@@ -223,8 +212,6 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                     getDescriptionGenerationStatus={getDescriptionGenerationStatus}
                     scheduleDescriptionGenerationTask={scheduleDescriptionGenerationTask}
                     cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
-                    acknowledgeDescriptionGenerationTask={acknowledgeDescriptionGenerationTask}
-                    onLoadDescription={onLoadDescription}
                     aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>

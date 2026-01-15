@@ -22,8 +22,6 @@ interface DescriptionGenerationControlProps {
   getDescriptionGenerationStatus: () => Promise<DescriptionGenerationTaskResult>;
   scheduleDescriptionGenerationTask: (connectorId: string) => Promise<void>;
   cancelDescriptionGenerationTask: () => Promise<void>;
-  acknowledgeDescriptionGenerationTask: () => Promise<void>;
-  onLoadDescription: (description: string) => void;
   aiFeatures: AIFeatures | null;
   disabled?: boolean;
 }
@@ -36,8 +34,6 @@ export function DescriptionGenerationControl({
   getDescriptionGenerationStatus,
   scheduleDescriptionGenerationTask,
   cancelDescriptionGenerationTask,
-  acknowledgeDescriptionGenerationTask,
-  onLoadDescription,
   aiFeatures,
   disabled = false,
 }: DescriptionGenerationControlProps) {
