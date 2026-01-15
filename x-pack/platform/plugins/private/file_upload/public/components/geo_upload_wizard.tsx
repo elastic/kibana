@@ -15,7 +15,7 @@ import { getDataViewsService } from '../kibana_services';
 import type { OnFileSelectParameters } from './geo_upload_form';
 import { GeoUploadForm } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
-import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
+import type { GeoUploadWizardProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import type { GeoFileImporter } from '../importer/geo';
 import { hasImportPermission } from '../api';
 import { getPartialImportMessage } from './utils';
@@ -46,7 +46,7 @@ interface State {
   smallChunks: boolean;
 }
 
-export class GeoUploadWizard extends Component<FileUploadComponentProps, State> {
+export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
   private _geoFileImporter?: GeoFileImporter;
   private _isMounted = false;
   private _telemetryService?: FileUploadTelemetryService;
@@ -69,14 +69,10 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     this._isMounted = true;
     this._uploadSessionId = FileUploadTelemetryService.generateId();
     this._fileId = FileUploadTelemetryService.generateId();
-
-    // Initialize telemetry service if analytics and location are provided
-    if (this.props.analytics && this.props.location) {
-      this._telemetryService = new FileUploadTelemetryService(
-        this.props.analytics,
-        this.props.location
-      );
-    }
+    this._telemetryService = new FileUploadTelemetryService(
+      this.props.analytics,
+      this.props.location
+    );
   }
 
   componentWillUnmount() {

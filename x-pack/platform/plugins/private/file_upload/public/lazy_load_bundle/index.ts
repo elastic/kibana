@@ -21,7 +21,7 @@ export interface FileUploadGeoResults {
   docCount: number;
 }
 
-export interface FileUploadComponentProps {
+export interface GeoUploadWizardProps {
   isIndexingTriggered: boolean;
   onFileSelect: (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => void;
   onFileClear: () => void;
@@ -29,14 +29,14 @@ export interface FileUploadComponentProps {
   disableImportBtn: () => void;
   onUploadComplete: (results: FileUploadGeoResults) => void;
   onUploadError: () => void;
-  analytics?: AnalyticsServiceStart;
-  location?: string;
+  analytics: AnalyticsServiceStart;
+  location: string;
 }
 
 let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
 
 export interface LazyLoadedFileUploadModules {
-  GeoUploadWizard: React.ComponentType<FileUploadComponentProps>;
+  GeoUploadWizard: React.ComponentType<GeoUploadWizardProps>;
   IndexNameForm: React.ComponentType<IndexNameFormProps>;
   importerFactory: (format: string, options: ImportFactoryOptions) => IImporter;
   getHttp: () => HttpStart;
