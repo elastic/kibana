@@ -11,55 +11,55 @@ import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash, getTypeHashes } from '@kbn/core-test-helpers-so-type-serializer';
 import type { Root } from '@kbn/core-root-server-internal';
 import {
-        createTestServers,
-        createRootWithCorePlugins,
-        type TestElasticsearchUtils,
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 import { sortBy } from 'lodash';
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-        let esServer: TestElasticsearchUtils;
-        let root: Root;
-        let typeRegistry: ISavedObjectTypeRegistry;
+  let esServer: TestElasticsearchUtils;
+  let root: Root;
+  let typeRegistry: ISavedObjectTypeRegistry;
 
-        beforeAll(async () => {
-                const { startES } = createTestServers({
-                        adjustTimeout: (t: number) => jest.setTimeout(t),
-                });
+  beforeAll(async () => {
+    const { startES } = createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+    });
 
-                esServer = await startES();
-                root = createRootWithCorePlugins({}, { oss: false });
-                await root.preboot();
-                await root.setup();
-                const coreStart = await root.start();
-                typeRegistry = coreStart.savedObjects.getTypeRegistry();
-        });
+    esServer = await startES();
+    root = createRootWithCorePlugins({}, { oss: false });
+    await root.preboot();
+    await root.setup();
+    const coreStart = await root.start();
+    typeRegistry = coreStart.savedObjects.getTypeRegistry();
+  });
 
-        afterAll(async () => {
-                if (root) {
-                        await root.shutdown();
-                }
-                if (esServer) {
-                        await esServer.stop();
-                }
-        });
+  afterAll(async () => {
+    if (root) {
+      await root.shutdown();
+    }
+    if (esServer) {
+      await esServer.stop();
+    }
+  });
 
-        // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
-        // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
-        // The intent is to trigger a code review from the Core team to review the SO type changes.
-        // The number of types in the hashMap should never be reduced, it can only increase.
-        // Removing saved object types is forbidden after 8.8.
-        it('detecting migration related changes in registered types', () => {
-                const allTypes = typeRegistry.getAllTypes();
+  // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
+  // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
+  // The intent is to trigger a code review from the Core team to review the SO type changes.
+  // The number of types in the hashMap should never be reduced, it can only increase.
+  // Removing saved object types is forbidden after 8.8.
+  it('detecting migration related changes in registered types', () => {
+    const allTypes = typeRegistry.getAllTypes();
 
-                const hashMap = allTypes.reduce((map, type) => {
-                        map[type.name] = getMigrationHash(type);
-                        return map;
-                }, {} as Record<string, string>);
+    const hashMap = allTypes.reduce((map, type) => {
+      map[type.name] = getMigrationHash(type);
+      return map;
+    }, {} as Record<string, string>);
 
-                expect(hashMap).toMatchInlineSnapshot(`
+    expect(hashMap).toMatchInlineSnapshot(`
       Object {
         "action": "696d997e420024a8cf973da94d905c8756e1177c",
         "action_task_params": "cd91a48515202852ebf1fed0d999cd96f6b2823e",
@@ -200,25 +200,25 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "10e278fe9ae1396bfc36ae574bc387d7e696d43f",
       }
     `);
-                expect(Object.keys(hashMap).length).toEqual(SAVED_OBJECT_TYPES_COUNT);
-        });
+    expect(Object.keys(hashMap).length).toEqual(SAVED_OBJECT_TYPES_COUNT);
+  });
 
-        it('detecting modelVersions are properly defined whenever mappings change', () => {
-                const allTypes = typeRegistry.getAllTypes();
+  it('detecting modelVersions are properly defined whenever mappings change', () => {
+    const allTypes = typeRegistry.getAllTypes();
 
-                const hashMap: string[] = sortBy(allTypes, 'name').flatMap((type, index) => {
-                        const typeHashes = getTypeHashes(type);
+    const hashMap: string[] = sortBy(allTypes, 'name').flatMap((type, index) => {
+      const typeHashes = getTypeHashes(type);
 
-                        if (index < allTypes.length - 1) {
-                                const length = typeHashes[typeHashes.length - 1].length;
-                                if (length) {
-                                        typeHashes.push('='.repeat(length));
-                                }
-                        }
-                        return typeHashes;
-                });
+      if (index < allTypes.length - 1) {
+        const length = typeHashes[typeHashes.length - 1].length;
+        if (length) {
+          typeHashes.push('='.repeat(length));
+        }
+      }
+      return typeHashes;
+    });
 
-                /*
+    /*
                   PLEASE BEAR IN MIND THAT:
                    - Existing soType|semver lines should NEVER be modified => it means changes in existing migrations / modelVersions
                    - New soType|semver lines > 10.0.0 can be added => it means new modelVersions are defined for the given type
@@ -227,12 +227,12 @@ describe('checking migration metadata changes on all registered SO types', () =>
                    - If soType|schemas is defined, schemas should change whenever a new soType|semver entry is added.
                    - soType|schemas can evolve without actual changes in the soType|mappings
                  */
-                expect(hashMap).toMatchInlineSnapshot(`
+    expect(hashMap).toMatchInlineSnapshot(`
       Array [
         "action|global: 04984aae6011426601f8a2a06278e30080f6da3a",
         "action|mappings: c4a658c865d4c30b51ae9b49e1dec06d012bc213",
         "action|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "action|10.1.0: 3c54f41b897e12fd19dab0eb10357fdfaac09270",
+        "action|10.1.0: f8ff8d53d60b6ed4e77f6f33ccd7dd960271b3cd",
         "action|8.3.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
         "action|8.0.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
         "action|7.16.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
@@ -245,8 +245,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action_task_params|global: ab7a2a4b956c4f66857434cfa7f7585e77581514",
         "action_task_params|mappings: 9f8442dee2a3855191972b0cc9ecd2023cc7f60c",
         "action_task_params|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "action_task_params|10.2.0: 2035bc7823f7e76a8f1f39881abf3f492db450c6",
-        "action_task_params|10.1.0: f560b637584d5d8bd0c7e9759afc0fa6e3347734",
+        "action_task_params|10.2.0: 0828caa43e62fe442c185db60166729fc384a258",
+        "action_task_params|10.1.0: 4c95fe59d1ce0a8a4160011cd64852478b8d295f",
         "action_task_params|8.0.0: b8ecc9b8d2d4431ff32bf6f4c11ab0b33fee9507",
         "action_task_params|7.16.0: b8ecc9b8d2d4431ff32bf6f4c11ab0b33fee9507",
         "action_task_params|warning: This type uses 'migrations:' WRAPPER functions that prevent detecting changes in the implementation.",
@@ -255,18 +255,18 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ad_hoc_run_params|global: b21683e0a579fdd6de1fc018d8967473e5ecb860",
         "ad_hoc_run_params|mappings: 181dfd63349a1e5fcad63a77f404d1d96cfbfdf4",
         "ad_hoc_run_params|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "ad_hoc_run_params|10.2.0: eeccffff5f54f6d1975d164e79c286fca385e7ce",
-        "ad_hoc_run_params|10.1.0: ad66cd89a19424a6bea8d01c5c121fe5fb7b4f67",
+        "ad_hoc_run_params|10.2.0: 516041385672bbecf491c4499a47f85d44492f0d",
+        "ad_hoc_run_params|10.1.0: fd99a3e20a7a2f66fbc6a404f4c7a93d3cb2db71",
         "==================================================================",
         "alert|global: 8365bd1a75d780902feb5f272ed0d6c430d3d63f",
         "alert|mappings: 40cf55df2cd901cc9899d630d3451e1f779279a4",
         "alert|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "alert|10.6.0: cf7924e0b5c8fa75d62da6654279d8dc0490e9d8",
-        "alert|10.5.0: ee7ced6a31b0b04a0bf6f79bd5fdf716fa29fcf7",
-        "alert|10.4.0: 96df9aea87055f2affb48014720cc5c13937d31a",
-        "alert|10.3.0: 4b0a9656fbfe7285838f1b94ab6602f024bb99bf",
-        "alert|10.2.0: c60f08ebc430e390f0a659b8d7d799b46c5c5bbf",
-        "alert|10.1.0: a8f22847701dd472dad43bfdb5c33466d4267c5e",
+        "alert|10.6.0: 7402a21c6ef0389dce1d861afcb255d2c9c36ce3",
+        "alert|10.5.0: 64279350dc7c226959696a23270f99a694862449",
+        "alert|10.4.0: 5033b517a827246791f243cd14f7e4e5bbda454c",
+        "alert|10.3.0: 9daa313dc17fdb474d5e958d2a761cb7ab31c450",
+        "alert|10.2.0: da896f65c3fb37978010f2a9edf23a7b2eb8d8ac",
+        "alert|10.1.0: 748ff8bd3dce83475dcdea0a744377ea68e1ed01",
         "alert|8.8.0: c7c6c2b760dc7c6278c18d556de909c9f2170464",
         "alert|8.7.0: c7c6c2b760dc7c6278c18d556de909c9f2170464",
         "alert|8.6.0: c7c6c2b760dc7c6278c18d556de909c9f2170464",
@@ -289,40 +289,40 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "alerting_rule_template|global: a8ee387a4bc794ff6450017a92742b39b79e0446",
         "alerting_rule_template|mappings: 6556e5b0800a79f7a18c17736ac3e795f262c23b",
         "alerting_rule_template|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "alerting_rule_template|10.1.0: f68ee2bf06bce643c5d9ff273d105cee963d5d8c",
+        "alerting_rule_template|10.1.0: 83ce5d951e4ebb02dbeb2b7e25e8023c96533261",
         "=======================================================================",
         "api_key_pending_invalidation|global: 95b04002ba51622fd4512312dc80f09c2176999c",
         "api_key_pending_invalidation|mappings: 6690f4f2a071feda5eec8353cdb23c0f1624910a",
         "api_key_pending_invalidation|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "api_key_pending_invalidation|10.1.0: ba55a6e52901e8709ef7de664d96e69cff942fd3",
+        "api_key_pending_invalidation|10.1.0: 5c2576958933aef7aae52e3febca79fd2fdea6d1",
         "=============================================================================",
         "apm-custom-dashboards|global: f72017061cda1a43792af034d019b3a766eacd7a",
         "apm-custom-dashboards|mappings: 72a467c41818fc3a8f88c40a885e835485752e73",
         "apm-custom-dashboards|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "apm-custom-dashboards|10.1.0: 5f4a19734c85a25c5486f757a252f1d6c920268b",
+        "apm-custom-dashboards|10.1.0: 4b737e73ba60a1b6f7407effa96a5605a6f54ab4",
         "======================================================================",
         "apm-indices|global: e1df2aa670f5c3561f9f3e2d2daac57e4efdc8f8",
         "apm-indices|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "apm-indices|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "apm-indices|10.1.0: 221c7a36e42a9a4bc6cad51f5251b3a9a31e5151",
+        "apm-indices|10.1.0: 20c90955ac0859d881f967c7a9e48e40fb1bfdc5",
         "apm-indices|8.2.0: 84c004fc6eebfd940151abd2b003598aacebedc9",
         "apm-indices|7.16.0: fb647c9d1ddcc77e4dab5ef092898176d44714e5",
         "============================================================",
         "apm-server-schema|global: 94ff8865b2545fc0138d3c4644e0fa1e6487a8a0",
         "apm-server-schema|mappings: 35e4a67b6caf667d9a199d95dc0c28dcbfa052f0",
         "apm-server-schema|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "apm-server-schema|10.1.0: 436b57780a2f345df40762175ce9755642079e8a",
+        "apm-server-schema|10.1.0: 81bb1dcf731d2e8d58ddcf975ffb3b96ccf560b6",
         "==================================================================",
         "apm-service-group|global: d2a7f3669650f98e3568dceaf1a76cff53328fca",
         "apm-service-group|mappings: c4bc1630e59d2ad95bfd7211df9e8afdbb2202e0",
         "apm-service-group|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "apm-service-group|10.1.0: a6b439fe7dcdc037cb94a369c672650bf999246c",
+        "apm-service-group|10.1.0: 20e9ed5e3b032bcf9b7c4ee0c1e7727ae86fbc99",
         "apm-service-group|8.5.0: f766ba4a490f5e9cb55f381a6d1767964317ccfa",
         "=================================================================",
         "apm-telemetry|global: bd51c0b64f1364d6943ec3ebe8e25986a6724269",
         "apm-telemetry|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "apm-telemetry|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "apm-telemetry|10.1.0: 275124243e881876fd29acbc4dfed825390efdf7",
+        "apm-telemetry|10.1.0: cbbb77dc3839208f5e8e0e0f9528053b5f9f337f",
         "==============================================================",
         "app_search_telemetry|global: 502375c1fefa366bf692bc21ac567d390243078d",
         "app_search_telemetry|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
@@ -339,7 +339,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "background-task-node|global: 8787fb3b90f68339ef312dc1d2b035bed2613770",
         "background-task-node|mappings: 992ad079afe8a8f0193bf1cdf312322e1743a169",
         "background-task-node|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "background-task-node|10.1.0: ff5067fabbcdc21d220c491a3d32671222927aac",
+        "background-task-node|10.1.0: 429ea34f35b6e4622f24df53c71ee0003a52f7e2",
         "=====================================================================",
         "canvas-element|global: 322644c9b44be4c5bb7ddfcee30c06d5d96b9eec",
         "canvas-element|mappings: 45a69cf5d094bf0b6287c1bb771604590209ebca",
@@ -408,14 +408,14 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cases|global: 58923536ede82aed6c22799b52c4f51f4bf66aba",
         "cases|mappings: 8b47dda512f5549f92ca1c6b75f0d8ce5b92a008",
         "cases|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "cases|10.8.0: 11a4a6080410fed228ddc0cf518b1b72377d9bef",
-        "cases|10.7.0: aa0926b29680b10628ef05c77cf67564b7bff573",
-        "cases|10.6.0: 5837259ab25e4059141fce980a861f0ba977d8a2",
-        "cases|10.5.0: 3c7812d675d4223c11969bb1b49a4cc626c1bd1f",
-        "cases|10.4.0: b228632dfb5a8cae50f82c4b0fe78305fa6d1fdd",
-        "cases|10.3.0: 6bf633e6147007b80adfe8da94b3e57d6004a803",
-        "cases|10.2.0: 9b3de0b9947e9d6bfb5d63ea9d5e9df9afca2601",
-        "cases|10.1.0: 932fb3a37b3346e4c6bb6ad78dc3c0fd323b858f",
+        "cases|10.8.0: 5602da9518dd8ceadb4163fac741af7941550225",
+        "cases|10.7.0: b2fc6957d9b8ae13385cae0e7357d33249c747f7",
+        "cases|10.6.0: 6898f4e2eb361bb8dd71c7b9f3613dcde12ad6b8",
+        "cases|10.5.0: 5d1197cc3f90f90e6dfaa616cc58f3c03c9971f2",
+        "cases|10.4.0: db291a38d8eba1e6e92442694273a8da6ed305db",
+        "cases|10.3.0: 8e8e348773178d3545535d6afef4787d293b867b",
+        "cases|10.2.0: 85313a89ff2c5988aad2c0de36a44710864c8266",
+        "cases|10.1.0: ebd0480584e68da3653f5aef43c9c311ebfa3a5f",
         "cases|8.7.0: 54c152a2584673672445346cf69d72bda587cc52",
         "cases|8.5.0: a2c0c0dcdbac64d71ddb583dc02e83aa760eb784",
         "cases|8.3.0: 09aaac909eff1a6a2d944aa6c1dd297dda05b5ce",
@@ -465,7 +465,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cases-rules|global: a3544c9b5fa31bc2b7ae220916f12c7cec84ff97",
         "cases-rules|mappings: 04d0c6f0645acb4dd93ff4b100fbf591221d6462",
         "cases-rules|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "cases-rules|10.1.0: 6edbbd46c2a9cffa8c5b1e89f6c6c55774cf5add",
+        "cases-rules|10.1.0: c14e62ae95e12d3e178602d2c76a0732c7c0cbbe",
         "============================================================",
         "cases-telemetry|global: 1f8674fed2c4af09120a7fc8aebdc3b17ff73304",
         "cases-telemetry|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
@@ -489,7 +489,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cloud-security-posture-settings|global: f621eff1977d773970923bb94a0d9adfe3f038a7",
         "cloud-security-posture-settings|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "cloud-security-posture-settings|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "cloud-security-posture-settings|10.1.0: 15f07851cae3af6f1cf443ca27aafdafd6a15bec",
+        "cloud-security-posture-settings|10.1.0: 0d9770bc9c7acf5aa569264397390ed948bb3bd9",
         "================================================================================",
         "config|global: 0d5fa01ca0d5f58ab121c9b1b55cd7ea733c9dfd",
         "config|mappings: 5a9ba377c3228ff72b00057e6352ff916abd3e6b",
@@ -512,7 +512,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "connector_token|global: 9c6972571df6c56a0d542bdca734a55a7a3859e5",
         "connector_token|mappings: 8c3f381518f3a37955cc7a434e72a81c11e28f1c",
         "connector_token|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "connector_token|10.1.0: 1e5143f9dc32a6924a4066b6f69e63c254b30660",
+        "connector_token|10.1.0: fac38c883b6f68e5610dc7c7f31d467098361cbf",
         "================================================================",
         "core-usage-stats|global: 0f6c6a66d1ec3ccababd15890476caf7f6f57700",
         "core-usage-stats|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
@@ -528,9 +528,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "dashboard|global: f8f112248a59cc016bffb9d5f55c481064351400",
         "dashboard|mappings: 46e1ed9a411c9e5ef958543dd94040eacfc2de78",
         "dashboard|schemas: 5a64501668f4095f1d4e27fa8c909c061915ac54",
-        "dashboard|10.3.0: a3cba8ac1d4012a29e44364a7b1101602598572b",
-        "dashboard|10.2.0: e3e6087b64e67ee9486a138f55c8e700ea1657c0",
-        "dashboard|10.1.0: 8f91a9fada2ab272768a9c220ada8e5dbe5b1484",
+        "dashboard|10.3.0: d806544ff92efc368951ddeabad340f89a2e0727",
+        "dashboard|10.2.0: e433c9814597b64ffb9fb9184045da3aef85b709",
+        "dashboard|10.1.0: ab68d41d1475e7e171638951af59e2732df2ebe5",
         "dashboard|8.4.0: 9c2a48b37df87d7d724105d2d4eb0ca0e0b7d95d",
         "dashboard|8.0.1: 9c2a48b37df87d7d724105d2d4eb0ca0e0b7d95d",
         "dashboard|8.9.0: 9c2a48b37df87d7d724105d2d4eb0ca0e0b7d95d",
@@ -641,9 +641,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "favorites|global: 220670249bb4ea98fc6f412e6712a6ae1404585e",
         "favorites|mappings: 0632fece42d46938b33f6d3f76a4d9951ce29d4e",
         "favorites|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "favorites|10.3.0: e073eae2b191c70833f6fe27e22c68731367152a",
-        "favorites|10.2.0: 66821d12c7cea014e4112f19564d474ef76f8f8a",
-        "favorites|10.1.0: 2cc230bcdd7f0d15329e161e9200317d42d55108",
+        "favorites|10.3.0: 9096bfb1c1ff8f7dbcf90fa10e11eceb02a6124c",
+        "favorites|10.2.0: 18a4c6e80a7f34af4c967a794b4685d75a6365d3",
+        "favorites|10.1.0: f66fc51678b3494230c78a7ff2053f25d46c528f",
         "==========================================================",
         "file|global: fe6da11a76a51cdcac8ea9e611485652c7ff80cf",
         "file|mappings: e84e75a550900dc7dbb03cf8be74b79f2dc8fe46",
@@ -729,8 +729,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infra-custom-dashboards|global: 1b06d42d7dccce40b06e976e15d92489db9e815f",
         "infra-custom-dashboards|mappings: 62818be6fba4040c54ed2c35c9c353267e511b8d",
         "infra-custom-dashboards|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "infra-custom-dashboards|10.2.0: 5d84a2b39f098d271c7176635d2f3c0a28758e6f",
-        "infra-custom-dashboards|10.1.0: c8710090d4c803df7b65c2b8d647aec54dd0dca3",
+        "infra-custom-dashboards|10.2.0: 39331016db35af712cfa8788756108533ae34ce7",
+        "infra-custom-dashboards|10.1.0: de6b1c99ffda7a72da96574cd231d552a21edcd3",
         "========================================================================",
         "infrastructure-monitoring-log-view|global: 86f3c1b13141baa0bc435c67c610dcc5edfca7e1",
         "infrastructure-monitoring-log-view|mappings: d2ebcaece35eceeeb2f47b4bc4f1cb5ef834ff5a",
@@ -833,18 +833,18 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "intercept_interaction_record|global: 1139a4a2cbad8e59f751bf47d9cdcc8ea354f326",
         "intercept_interaction_record|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "intercept_interaction_record|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "intercept_interaction_record|10.1.0: 8b54d75983cb04d17e686e51dace0334bc4830e9",
+        "intercept_interaction_record|10.1.0: 11166b503156cc2d3bc5003190696d44579a872d",
         "=============================================================================",
         "intercept_trigger_record|global: 72e1f8b5588b9eca6b92ef2cfddbea44fae0ba8b",
         "intercept_trigger_record|mappings: 9631c5e6fe43653fe216695ba291e1773fdd0fd5",
         "intercept_trigger_record|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "intercept_trigger_record|10.1.0: 2ed9f2a3da3a271c18d39d129d9861809827f494",
+        "intercept_trigger_record|10.1.0: 05f676df146c27c002f419563bacd8644e23ee74",
         "=========================================================================",
         "inventory-view|global: f30fe099e5b308176dc3efce72158283b9a9e2c7",
         "inventory-view|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "inventory-view|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "inventory-view|10.2.0: 48112a659c2a5fc67b18ebe3d2af5b70fce4ff3a",
-        "inventory-view|10.1.0: 275124243e881876fd29acbc4dfed825390efdf7",
+        "inventory-view|10.2.0: 21551eca1485662c0d47106f2800642080a3d4a5",
+        "inventory-view|10.1.0: cbbb77dc3839208f5e8e0e0f9528053b5f9f337f",
         "===============================================================",
         "kql-telemetry|global: 01f852aa46dee395b7db97075eca54cdd26e842d",
         "kql-telemetry|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
@@ -858,7 +858,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "lens|global: 0267d37678684c5f234bd74f0f6ae2a5f6180eb4",
         "lens|mappings: 5edb12dfc3770ed521bc96b28103e325f04cf9f6",
         "lens|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "lens|10.1.0: e053504b39aceec3b665388bb586e89e162e5a60",
+        "lens|10.1.0: 0037e60583f0baf1928d1335e554fac29a973d09",
         "lens|8.9.0: f6592efb2500e39d1d31b1effdfad7d7ad1eca32",
         "lens|8.6.0: 54c152a2584673672445346cf69d72bda587cc52",
         "lens|8.5.0: 54c152a2584673672445346cf69d72bda587cc52",
@@ -889,9 +889,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "maintenance-window|global: a22d0b0539659a37505bdf246955a7a6cc42562d",
         "maintenance-window|mappings: 51570ab022d86a40792dd683b75121e85e045365",
         "maintenance-window|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "maintenance-window|10.3.0: 1e0ca079e928c85bc875459819261cc2513633b6",
-        "maintenance-window|10.2.0: e2b4eab0af9c37c10581b238727aa420ce7764c4",
-        "maintenance-window|10.1.0: df2621a89d9ee67224828e4366c6a5f02a589324",
+        "maintenance-window|10.3.0: 7ccd96a563d2aa1a9f507265e0b66218d95df151",
+        "maintenance-window|10.2.0: 8b7ec0806aa9cb4c4e263072562c84b14e629b9c",
+        "maintenance-window|10.1.0: 3a4b3f5f6a636c0f9f39a89cec28c08be35f76f8",
         "===================================================================",
         "map|global: 8f2dc30389e43ffb04462968115bdf1561b64216",
         "map|mappings: 0e7cc59bb2c3ef2a55ffe382abf48f410eb53f91",
@@ -949,8 +949,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "observability-onboarding-state|global: c226ba4dd0412c2d7fd7a01976461e9da00b78bf",
         "observability-onboarding-state|mappings: d6efe91e6efcc5e1b41fac37b731b715182939ce",
         "observability-onboarding-state|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "observability-onboarding-state|10.2.0: 77625458df45fb720481f7f0945f9a6e1342a19a",
-        "observability-onboarding-state|10.1.0: b3296fd32ff8e046f2db242ffbc5008b0e91ce57",
+        "observability-onboarding-state|10.2.0: 0e49db1573467cd8c071112be1dd279e614707ac",
+        "observability-onboarding-state|10.1.0: b20c234acf32f3659b7748425c3e3a67b0942bda",
         "===============================================================================",
         "osquery-manager-usage-metric|global: be27ff5c02875e5f79865cdeb8b1b250f302eb3d",
         "osquery-manager-usage-metric|mappings: d9b2407e23711db4bca18d82660c5d63333664f7",
@@ -992,8 +992,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "query|global: 5b5eb0e558237eb3c9e0f2c2e8e7ae4426d6cb42",
         "query|mappings: c778e1b62293bce1cf5241847e0f07b3b4bec842",
         "query|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
-        "query|10.2.0: ad551e6e0d41abbf59c52b5c38438b602d826f16",
-        "query|10.1.0: c98915313d7c6622714eafe7fc04c1f53d85063c",
+        "query|10.2.0: 66bf6f7c5f233b40cb63991c0da07ee16be9c59f",
+        "query|10.1.0: 41a488d8c3aa7fcfa90df65a376ccc87dc1315fc",
         "query|7.16.0: b1a3b62b35f9e5c5adef5983e5c83a0a174ac679",
         "======================================================",
         "risk-engine-configuration|global: 0ca55e55c439cebd5bad7ecec17d81a6264f4ea4",
@@ -1006,7 +1006,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "rules-settings|global: 794bff7a77c374521cf22dc4cda7693595a58279",
         "rules-settings|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "rules-settings|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "rules-settings|10.1.0: d9d99961f9cef336d770b2426aa00272091ad331",
+        "rules-settings|10.1.0: 758fc021ec2487c17932c988e6fb57bfa418267f",
         "===============================================================",
         "sample-data-telemetry|global: 50e6e53bcd52281785bcb8941276df6e3f0e902c",
         "sample-data-telemetry|mappings: 0dce4b0f6af63798025abbe44b23ad742aabf5ff",
@@ -1015,15 +1015,15 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "search|global: ce649a79d99c5ff5eb68d544635428ef87946d84",
         "search|mappings: 432d4dfdb5a33ce29d00ccdcfcda70d7c5f94b52",
         "search|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
-        "search|10.9.0: c7edaf101bdead59169311d1735b0565958a812d",
-        "search|10.8.0: e9b8e7a06ce8c93bc1480859d82a018a29a85ff4",
-        "search|10.7.0: 5d15a12f9c024d225ccff3d77a8116b43fc8d8b0",
-        "search|10.6.0: 6ffb6b8b9bf540ea70d22447182eea0f3725afc7",
-        "search|10.5.0: 08da62a471e520af9d201342ff275e1d20513175",
-        "search|10.4.0: ddbec8f57a0ac3a480492a84d477bdebe6f0c97d",
-        "search|10.3.0: bea960981316f85054eef9dc4db05a1fcc31a2bb",
-        "search|10.2.0: e979c87619c44aa25aee9d2324f91bcd5e35f1a1",
-        "search|10.1.0: f19361c17b47e76388958f9b278079980afe1f6e",
+        "search|10.9.0: 38c93dc1734100d72580a3435c2c2b5bd153fe92",
+        "search|10.8.0: 421db6108d05ed69671798ecf53569740e3bfcca",
+        "search|10.7.0: acd1560b4b2b34e18d019af005e6c6ee929a1dac",
+        "search|10.6.0: c88b63b6c8fd91ca76e386473764a067091ab9c4",
+        "search|10.5.0: c17235e99d4698a9d323630ce6363902f25baabd",
+        "search|10.4.0: d38647e540a2d8d39a65e416bcd527da4d552052",
+        "search|10.3.0: fd1b9861706165e1a35f5df55fa5a4052fceaa33",
+        "search|10.2.0: 7b2bcecf3a5c13a8670c7086738a0421e28cb6cb",
+        "search|10.1.0: d84236129b394b294b33f481c5d3592ee5b881b5",
         "search|7.9.3: 54c152a2584673672445346cf69d72bda587cc52",
         "search|7.4.0: 54c152a2584673672445346cf69d72bda587cc52",
         "search|7.0.0: 54c152a2584673672445346cf69d72bda587cc52",
@@ -1047,7 +1047,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "search_playground|global: 25d79ce10326663a05f853ea603b6be4aa85e225",
         "search_playground|mappings: 45abb3405127c77be4ffc189b4ccd8693889f2b9",
         "search_playground|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "search_playground|10.1.0: b8a140783b923da0b53b26d31a06fc623378a44d",
+        "search_playground|10.1.0: 2eee34d3f0286dcaf6ca99494cd7f58fe606da2d",
         "==================================================================",
         "security-ai-prompt|global: 8a0556102abbe92c57655433ebcb1d93e8229047",
         "security-ai-prompt|mappings: 5ee850693cdb24e6ff2dacff275ea852a5f055dd",
@@ -1064,7 +1064,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "security:reference-data|global: 7b49b5b4c94c5ec898fcb60a8f480bc3e3a615dc",
         "security:reference-data|mappings: 40ab306a680f4bca409e15d5a856d3c9d6320ee1",
         "security:reference-data|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "security:reference-data|10.1.0: eb346e9fb53007add854474c5483da87b19d6da0",
+        "security:reference-data|10.1.0: 6321fe378b8347fdf25cf5c08a2b7b49f78e3f7a",
         "========================================================================",
         "siem-detection-engine-rule-actions|global: 5f05a85a1ddc8bb56358246c46464bd0e596c1ec",
         "siem-detection-engine-rule-actions|mappings: 87daed6d63047fd8fe7b53ba6d804823184f4a51",
@@ -1102,7 +1102,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "space|mappings: d534234257efd99d22a17a7e5b59f38d98490ff5",
         "space|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
         "space|10.2.0: 36f00d2690f98cfb2f600dee6c69b2ae206de4b0",
-        "space|10.1.0: fd91cd75d6ba25d54653aa57561f2477dc460254",
+        "space|10.1.0: 5eb06d4300bcaf81bc4a3c589b09f2950951d269",
         "space|6.6.0: dfb9c6c42a6dc7783055066df268315ed4cb80f1",
         "=====================================================",
         "spaces-usage-stats|global: 5a98aab5e4f8fe76c5c0c9cc5784175bc4555680",
@@ -1149,13 +1149,13 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "task|global: 8277e4031824bb161fa73897294701786c15eb9a",
         "task|mappings: 131b7c0f6418540178fbb46ac6f5f21018c716cf",
         "task|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "task|10.7.0: 862db2dec024d5a259cd1414fd7d545634cf0401",
-        "task|10.6.0: 3e759553f2a6e8a7670fc736204b44f08486e058",
-        "task|10.5.0: 6c935f36864dc1bac9f6c06899ba87db2dfc8c42",
-        "task|10.4.0: ded00177bbb2185a7668ae522268e8d1d89d5dfb",
-        "task|10.3.0: 015c40de4e2f7a0ecaa1f949e9d89f9f5f9629fc",
-        "task|10.2.0: b378c7e886154ec0859d95fc2709781a53e01f05",
-        "task|10.1.0: c1c62683f40f1655f5bbe6ed32e3fa427cca0b73",
+        "task|10.7.0: 89039eacc51929a31afd37460fd55a6be7de95c3",
+        "task|10.6.0: 8e322fe7e329a308bdd39778a16b2c855b9e8b0e",
+        "task|10.5.0: 12d3499c48e2620d02920d6793e09ff2ac3fc6e1",
+        "task|10.4.0: 932461fbb65ac40684ba038544408ca7ccba398f",
+        "task|10.3.0: e1dd7a4f794832cff07313d3406db326c19bfb45",
+        "task|10.2.0: d573cc87e52459ec3b7885346cef9e193c215078",
+        "task|10.1.0: 06df658e5f7887e4664f939cc2e9b0e02fd44e52",
         "task|8.8.0: 9f3615a30e2caa111818c52b995961220d8e05c2",
         "task|8.5.0: 9f3615a30e2caa111818c52b995961220d8e05c2",
         "task|8.2.0: 9f3615a30e2caa111818c52b995961220d8e05c2",
@@ -1239,13 +1239,13 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
       ]
     `);
-        });
+  });
 
-        it('ensures mappings._meta virtual versions are not downgraded', () => {
-                const types = typeRegistry.getAllTypes();
-                const map = getVirtualVersionMap({ types, useModelVersionsOnly: true });
-                // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
-                expect(map).toMatchInlineSnapshot(`
+  it('ensures mappings._meta virtual versions are not downgraded', () => {
+    const types = typeRegistry.getAllTypes();
+    const map = getVirtualVersionMap({ types, useModelVersionsOnly: true });
+    // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
+    expect(map).toMatchInlineSnapshot(`
       Object {
         "action": "10.1.0",
         "action_task_params": "10.2.0",
@@ -1386,13 +1386,13 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "10.0.0",
       }
     `);
-        });
+  });
 
-        it('ensures typeMigrationVersion versions are not downgraded', () => {
-                const types = typeRegistry.getAllTypes();
-                const map = getVirtualVersionMap({ types, useModelVersionsOnly: false });
-                // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
-                expect(map).toMatchInlineSnapshot(`
+  it('ensures typeMigrationVersion versions are not downgraded', () => {
+    const types = typeRegistry.getAllTypes();
+    const map = getVirtualVersionMap({ types, useModelVersionsOnly: false });
+    // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
+    expect(map).toMatchInlineSnapshot(`
       Object {
         "action": "10.1.0",
         "action_task_params": "10.2.0",
@@ -1533,5 +1533,5 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "0.0.0",
       }
     `);
-        });
+  });
 });
