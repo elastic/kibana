@@ -8,9 +8,10 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
@@ -18,18 +19,32 @@ import type { ContextHistoryLocationState } from './services/locator';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useRootProfile } from '../../context_awareness';
 import { ScopedServicesProvider } from '../../components/scoped_services_provider';
+import { InternalStateProvider } from '../main/state_management/redux';
+import { useStateManagers } from '../main/state_management/hooks/use_state_managers';
+import type { MainRouteProps } from '../main/discover_main_route';
 
 export interface ContextUrlParams {
   dataViewId: string;
   id: string;
 }
 
-export function ContextAppRoute() {
-  const { profilesManager, ebtManager, getScopedHistory } = useDiscoverServices();
+export function ContextAppRoute({ customizationContext, stateStorageContainer }: MainRouteProps) {
+  const services = useDiscoverServices();
+  const { profilesManager, ebtManager, getScopedHistory } = services;
+  const history = useHistory();
   const scopedHistory = getScopedHistory<ContextHistoryLocationState>();
   const locationState = useMemo(
     () => scopedHistory?.location.state as ContextHistoryLocationState | undefined,
     [scopedHistory?.location.state]
+  );
+  const [urlStateStorage] = useState(
+    () =>
+      stateStorageContainer ??
+      createKbnUrlStateStorage({
+        useHash: services.uiSettings.get('state:storeInSessionStorage'),
+        history,
+        useHashQuery: customizationContext.displayMode !== 'embedded',
+      })
   );
 
   /**
@@ -56,6 +71,12 @@ export function ContextAppRoute() {
     profilesManager.createScopedProfilesManager({ scopedEbtManager })
   );
   const rootProfileState = useRootProfile();
+
+  const { internalState } = useStateManagers({
+    services,
+    urlStateStorage,
+    customizationContext,
+  });
 
   if (error) {
     return (
@@ -89,7 +110,9 @@ export function ContextAppRoute() {
       scopedEBTManager={scopedEbtManager}
     >
       <rootProfileState.AppWrapper>
-        <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />
+        <InternalStateProvider store={internalState}>
+          <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />
+        </InternalStateProvider>
       </rootProfileState.AppWrapper>
     </ScopedServicesProvider>
   );
