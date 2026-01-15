@@ -41,7 +41,6 @@ export const SearchHomepagePage = () => {
     [consolePlugin]
   );
 
-  
   return (
     <KibanaPageTemplate
       offset={0}

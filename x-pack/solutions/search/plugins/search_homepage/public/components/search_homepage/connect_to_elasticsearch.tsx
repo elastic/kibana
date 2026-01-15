@@ -27,7 +27,6 @@ export const ConnectToElasticsearch = () => {
   const elasticsearchUrl = useElasticsearchUrl();
   const { euiTheme } = useEuiTheme();
 
-
   return (
     <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
       <EuiShowFor sizes={['l', 'xl']}>
