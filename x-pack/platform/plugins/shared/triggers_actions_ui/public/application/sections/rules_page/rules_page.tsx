@@ -151,7 +151,7 @@ const RulesPage = () => {
         setBreadcrumbs([getAlertingSectionBreadcrumb('rules')]);
       }
     }
-    docTitle.change(getCurrentDocTitle(currentSection || 'rules'));
+    docTitle.change(getCurrentDocTitle('rules'));
   }, [docTitle, setBreadcrumbs, currentSection, getUrlForApp, isAppRegistered]);
 
   return (
