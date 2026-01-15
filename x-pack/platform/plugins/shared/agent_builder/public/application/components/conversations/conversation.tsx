@@ -33,7 +33,16 @@ import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 
-export const Conversation: React.FC<{}> = () => {
+interface ConversationProps {
+  /** Optional callback for modify button click (only shown in full-screen view) */
+  onModifyClick?: () => void;
+}
+
+/**
+ * Shared conversation component used by both full-screen and embedded views.
+ * Does not include ModifyPanel or split-screen layout - those are view-specific.
+ */
+export const Conversation: React.FC<ConversationProps> = ({ onModifyClick }) => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
@@ -125,7 +134,7 @@ export const Conversation: React.FC<{}> = () => {
         css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
         grow={false}
       >
-        <ConversationInput onSubmit={scrollToMostRecentRoundTop} />
+        <ConversationInput onSubmit={scrollToMostRecentRoundTop} onModifyClick={onModifyClick} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
