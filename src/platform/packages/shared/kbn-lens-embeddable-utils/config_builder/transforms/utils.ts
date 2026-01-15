@@ -101,19 +101,11 @@ export function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-function generateAdHocDataViewId(dataView: {
-  type: 'adHocDataView';
-  index: string;
-  timeFieldName: string | undefined;
-}) {
+function generateAdHocDataViewId(dataView: APIAdHocDataView) {
   return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
 }
 
-function getAdHocDataViewSpec(dataView: {
-  type: 'adHocDataView';
-  index: string;
-  timeFieldName: string | undefined;
-}) {
+function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
   return {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),
@@ -133,12 +125,9 @@ export const getAdhocDataviews = (dataviews: Record<string, APIDataView | APIAdH
   // filter out ad hoc dataViews only
   const adHocDataViewsFiltered = Object.entries(dataviews).filter(
     ([_layerId, dataViewEntry]) => dataViewEntry.type === 'adHocDataView'
-  ) as [string, { type: 'adHocDataView'; index: string; timeFieldName: string | undefined }][];
+  ) as [string, APIAdHocDataView][];
 
-  const internalReferencesMap = new Map<
-    { type: 'adHocDataView'; index: string; timeFieldName: string | undefined },
-    { layerIds: string[]; id: string }
-  >();
+  const internalReferencesMap = new Map<APIAdHocDataView, { layerIds: string[]; id: string }>();
 
   // dedupe and map multiple layer references to the same ad hoc dataview
   for (const [layerId, dataViewEntry] of adHocDataViewsFiltered) {
