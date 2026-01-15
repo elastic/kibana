@@ -15,7 +15,6 @@ import { stopExtractEntityTasks } from '../../tasks/extract_entity_task';
 import { wrapMiddlewares } from '../middleware';
 
 interface StopEntityStoreAPIResponse {
-  ok: boolean;
   stoppedTasks: string[];
 }
 
@@ -58,7 +57,6 @@ export function registerStop(router: EntityStorePluginRouter) {
 
           return res.ok({
             body: {
-              ok: true,
               stoppedTasks,
             },
           });
