@@ -64,6 +64,7 @@ describe('createPluginInitializerContext', () => {
     opaqueId = Symbol();
     instanceInfo = {
       uuid: 'instance-uuid',
+      airgapped: false,
     };
     nodeInfo = nodeServiceMock.createInternalPrebootContract();
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -151,6 +152,7 @@ describe('createPluginInitializerContext', () => {
       const manifest = createPluginManifest();
       instanceInfo = {
         uuid: 'kibana-uuid',
+        airgapped: false,
       };
       const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
@@ -229,6 +231,7 @@ describe('createPluginPrebootSetupContext', () => {
         manifest,
         instanceInfo: {
           uuid: 'instance-uuid',
+          airgapped: false,
         },
         nodeInfo,
       }),
