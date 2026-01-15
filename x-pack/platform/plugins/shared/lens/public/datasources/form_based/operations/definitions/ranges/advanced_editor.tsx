@@ -20,6 +20,7 @@ import {
   htmlIdGenerator,
   keys,
   useEuiTheme,
+  EuiFormPrepend,
 } from '@elastic/eui';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
@@ -157,9 +158,7 @@ export const RangePopover = ({
               }}
               prepend={
                 <EuiToolTip content={ltTooltipContent}>
-                  <EuiText tabIndex={0} size="s">
-                    {ltPrependLabel}
-                  </EuiText>
+                  <EuiFormPrepend label={ltPrependLabel} tabIndex={0} />
                 </EuiToolTip>
               }
               compressed
