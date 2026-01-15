@@ -441,15 +441,14 @@ export const buildColumnSuggestions = (
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {
   const fieldsSuggestions = columns.map((column) => {
-    let fieldType = column.type.charAt(0).toUpperCase() + column.type.slice(1);
+    const fieldType = column.type.charAt(0).toUpperCase() + column.type.slice(1);
+    const unmmapedSuffix = column.isUnmappedField
+      ? i18n.translate('kbn-esql-language.esql.autocomplete.unmappedFieldTypeSuffix', {
+          defaultMessage: ' - Unmapped Field',
+        })
+      : '';
 
-    if (column.isUnmappedField) {
-      fieldType += i18n.translate('kbn-esql-language.esql.autocomplete.unmappedFieldTypeSuffix', {
-        defaultMessage: ' - Unmapped Field',
-      });
-    }
-
-    const titleCaseType = `${column.name} (${fieldType})`;
+    const titleCaseType = `${column.name} (${fieldType})${unmmapedSuffix}`;
 
     // Check if the field is in the recommended fields from extensions list
     // and if so, mark it as recommended. This also ensures that recommended fields
