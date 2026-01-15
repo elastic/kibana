@@ -121,16 +121,16 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('resends a request when reload button is clicked', async () => {
-      // already sent 5 requests while setting up the component
-      const numberOfRequests = 5;
+      // already sent 6 requests while setting up the component
+      const numberOfRequests = 6;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
       await testBed.actions.errorSection.clickReloadButton();
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
     });
 
     it('renders an error section when no index name is provided', async () => {
-      // already sent 5 requests while setting up the component
-      const numberOfRequests = 5;
+      // already sent 6 requests while setting up the component
+      const numberOfRequests = 6;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
       await act(async () => {
         testBed = await setup({ httpSetup, initialEntry: '/indices/index_details' });
@@ -300,8 +300,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 9 requests while setting up the component
-        const numberOfRequests = 9;
+        // already sent 11 requests while setting up the component
+        const numberOfRequests = 11;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.stats.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -473,8 +473,8 @@ describe('<IndexDetailsPage />', () => {
           `Data streamUnable to load data stream detailsReloadLast update`
         );
 
-        // already sent 9 requests while setting up the component
-        const numberOfRequests = 9;
+        // already sent 11 requests while setting up the component
+        const numberOfRequests = 11;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.overview.reloadDataStreamDetails();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -790,8 +790,8 @@ describe('<IndexDetailsPage />', () => {
           body: '{"name":{"type":"text"}}',
         });
 
-        expect(httpSetup.get).toHaveBeenCalledTimes(11);
-        expect(httpSetup.get).toHaveBeenLastCalledWith(
+        expect(httpSetup.get).toHaveBeenCalledTimes(16);
+        expect(httpSetup.get).toHaveBeenCalledWith(
           `${API_BASE_PATH}/mapping/${testIndexName}`,
           requestOptions
         );
@@ -992,8 +992,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 10 requests while setting up the component
-        const numberOfRequests = 10;
+        // already sent 13 requests while setting up the component
+        const numberOfRequests = 13;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -1066,8 +1066,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resends a request when reload button is clicked', async () => {
-        // already sent 9 requests while setting up the component
-        const numberOfRequests = 9;
+        // already sent 11 requests while setting up the component
+        const numberOfRequests = 11;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.settings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -1118,7 +1118,7 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('reloads the settings after an update', async () => {
-        const numberOfRequests = 5;
+        const numberOfRequests = 6;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
@@ -1180,8 +1180,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('closes an index', async () => {
-      // already sent 4 requests while setting up the component
-      const numberOfRequests = 4;
+      // already sent 5 requests while setting up the component
+      const numberOfRequests = 5;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1203,8 +1203,8 @@ describe('<IndexDetailsPage />', () => {
       });
       testBed.component.update();
 
-      // already sent 8 requests while setting up the component
-      const numberOfRequests = 8;
+      // already sent 10 requests while setting up the component
+      const numberOfRequests = 10;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1216,8 +1216,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('forcemerges an index', async () => {
-      // already sent 4 requests while setting up the component
-      const numberOfRequests = 4;
+      // already sent 5 requests while setting up the component
+      const numberOfRequests = 5;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1230,8 +1230,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it('refreshes an index', async () => {
-      // already sent 4 requests while setting up the component
-      const numberOfRequests = 4;
+      // already sent 5 requests while setting up the component
+      const numberOfRequests = 5;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1243,8 +1243,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it(`clears an index's cache`, async () => {
-      // already sent 4 requests while setting up the component
-      const numberOfRequests = 4;
+      // already sent 5 requests while setting up the component
+      const numberOfRequests = 5;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1256,8 +1256,8 @@ describe('<IndexDetailsPage />', () => {
     });
 
     it(`flushes an index`, async () => {
-      // already sent 4 requests while setting up the component
-      const numberOfRequests = 4;
+      // already sent 5 requests while setting up the component
+      const numberOfRequests = 5;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1270,8 +1270,8 @@ describe('<IndexDetailsPage />', () => {
 
     it(`deletes an index`, async () => {
       jest.spyOn(testBed.routerMock.history, 'push');
-      // already sent 4 requests while setting up the component
-      const numberOfRequests = 4;
+      // already sent 5 requests while setting up the component
+      const numberOfRequests = 5;
       expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
 
       await testBed.actions.contextMenu.clickManageIndexButton();
@@ -1314,7 +1314,7 @@ describe('<IndexDetailsPage />', () => {
     });
     it('loads mappings with the encoded index name', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      expect(httpSetup.get).toHaveBeenLastCalledWith(
+      expect(httpSetup.get).toHaveBeenCalledWith(
         `${API_BASE_PATH}/mapping/${encodeURIComponent(percentSignName)}`,
         requestOptions
       );
