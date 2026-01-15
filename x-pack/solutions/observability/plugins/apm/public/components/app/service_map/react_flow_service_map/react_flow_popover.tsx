@@ -150,6 +150,7 @@ export function ReactFlowPopover({
         closePopover={onClose}
         isOpen={isOpen}
         ref={popoverRef}
+        zIndex={1000}
       >
         <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
           <EuiFlexItem>
