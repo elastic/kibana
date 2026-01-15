@@ -19,6 +19,7 @@
     "@kbn/zod",
     "@kbn/logging",
     "@kbn/zod-helpers",
+    "@kbn/task-manager-plugin",
     "@kbn/core-lifecycle-server",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-server",

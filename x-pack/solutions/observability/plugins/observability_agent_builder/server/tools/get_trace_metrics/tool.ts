@@ -11,10 +11,10 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
+  ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
@@ -40,14 +40,14 @@ const getTraceMetricsSchema = z.object({
 
 export function createGetTraceMetricsTool({
   core,
-  dataRegistry,
+  plugins,
   logger,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
     ObservabilityAgentBuilderPluginStart
   >;
-  dataRegistry: ObservabilityAgentBuilderDataRegistry;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): StaticToolRegistration<typeof getTraceMetricsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getTraceMetricsSchema> = {
@@ -94,8 +94,10 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
 
       try {
         const { items } = await getToolHandler({
+          core,
+          plugins,
           request,
-          dataRegistry,
+          logger,
           start,
           end,
           kqlFilter,

@@ -6,8 +6,11 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { StreamQueryKql, System } from '@kbn/streams-schema';
-import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
+import type {
+  StreamQueryKql,
+  System,
+  SignificantEventsQueriesGenerationTaskResult,
+} from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
@@ -26,8 +29,15 @@ interface SignificantEventsApi {
   upsertQuery: (query: StreamQueryKql) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
-  generate: (connectorId: string, system?: System) => SignificantEventsGenerateResponse;
   abort: () => void;
+  getGenerationTask: () => Promise<SignificantEventsQueriesGenerationTaskResult>;
+  scheduleGenerationTask: (
+    connectorId: string,
+    systems?: System[],
+    sampleDocsSize?: number
+  ) => Promise<SignificantEventsQueriesGenerationTaskResult>;
+  cancelGenerationTask: () => Promise<SignificantEventsQueriesGenerationTaskResult>;
+  acknowledgeGenerationTask: () => Promise<SignificantEventsQueriesGenerationTaskResult>;
 }
 
 export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
@@ -81,31 +91,72 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
         },
       });
     },
-    generate: (connectorId: string, system?: System) => {
-      const { from, to } = getLast24HoursTimeRange();
-      return streamsRepositoryClient.stream(
-        `POST /api/streams/{name}/significant_events/_generate 2023-10-31`,
+    abort: () => {
+      abort();
+      refresh();
+    },
+    getGenerationTask: async () => {
+      return streamsRepositoryClient.fetch(
+        'GET /internal/streams/{name}/significant_events/_status',
         {
           signal,
           params: {
-            path: {
-              name,
-            },
-            query: {
+            path: { name },
+          },
+        }
+      );
+    },
+    scheduleGenerationTask: async (
+      connectorId: string,
+      systems?: System[],
+      sampleDocsSize?: number
+    ) => {
+      const { from, to } = getLast24HoursTimeRange();
+      return streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/significant_events/_task',
+        {
+          signal,
+          params: {
+            path: { name },
+            body: {
+              action: 'schedule' as const,
               connectorId,
               from,
               to,
-            },
-            body: {
-              system,
+              sampleDocsSize,
+              systems,
             },
           },
         }
       );
     },
-    abort: () => {
-      abort();
-      refresh();
+    cancelGenerationTask: async () => {
+      return streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/significant_events/_task',
+        {
+          signal,
+          params: {
+            path: { name },
+            body: {
+              action: 'cancel' as const,
+            },
+          },
+        }
+      );
+    },
+    acknowledgeGenerationTask: async () => {
+      return streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/significant_events/_task',
+        {
+          signal,
+          params: {
+            path: { name },
+            body: {
+              action: 'acknowledge' as const,
+            },
+          },
+        }
+      );
     },
   };
 }
