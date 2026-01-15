@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { joi2JsonInternal } from '../../parse';
 import { processDiscriminator } from './discriminator';
 import { createCtx } from '../context';
+import { cloneDeep } from 'lodash';
 
 test.each([
   [
@@ -107,20 +108,56 @@ test.each([
   expect(ctx.getSharedSchemas()).toMatchObject(resultSharedSchemas);
 });
 
-it('throws if any schema has no ID', () => {
+describe('throws if any schema has no ID', () => {
+  it('first schema has no ID', () => {
+    const parsed = joi2JsonInternal(
+      schema
+        .discriminatedUnion('type', [
+          schema.object({ type: schema.literal('num'), value: schema.number() }),
+          schema.object(
+            { type: schema.literal('str'), value: schema.string() },
+            { meta: { id: 'my-str-my-team' } }
+          ),
+        ])
+        .getSchema()
+    );
+    const ctx = createCtx({ sharedSchemas: new Map(Object.entries(parsed.schemas)) });
+    expect(() => processDiscriminator(ctx, parsed)).toThrow(
+      'When using schema.discriminator ensure that every entry schema has an ID.'
+    );
+  });
+  it('other schema has no ID', () => {
+    const parsed = joi2JsonInternal(
+      schema
+        .discriminatedUnion('type', [
+          schema.object(
+            { type: schema.literal('str'), value: schema.string() },
+            { meta: { id: 'my-str-my-team' } }
+          ),
+          schema.object({ type: schema.literal('num'), value: schema.number() }),
+        ])
+        .getSchema()
+    );
+    const ctx = createCtx({ sharedSchemas: new Map(Object.entries(parsed.schemas)) });
+    expect(() => processDiscriminator(ctx, parsed)).toThrow(
+      'When using schema.discriminator ensure that every entry schema has an ID.'
+    );
+  });
+});
+
+it.each([
+  schema.oneOf([
+    schema.object({ type: schema.literal('str'), value: schema.string() }),
+    schema.object({ type: schema.literal('num'), value: schema.number() }),
+  ]),
+  schema.union([
+    schema.object({ type: schema.literal('str'), value: schema.string() }),
+    schema.object({ type: schema.literal('num'), value: schema.number() }),
+  ]),
+])('does not alter other union types %#', (inputSchema) => {
   const ctx = createCtx();
-  const parsed = joi2JsonInternal(
-    schema
-      .discriminatedUnion('type', [
-        schema.object(
-          { type: schema.literal('str'), value: schema.string() },
-          { meta: { id: 'my-str-my-team' } }
-        ),
-        schema.object({ type: schema.literal('num'), value: schema.number() }),
-      ])
-      .getSchema()
-  );
-  expect(() => processDiscriminator(ctx, parsed)).toThrow(
-    'When using schema.discriminator ensure that every entry schema has an ID.'
-  );
+  const parsed = joi2JsonInternal(inputSchema.getSchema());
+  const parsedCopy = cloneDeep(parsed);
+  processDiscriminator(ctx, parsedCopy);
+  expect(parsedCopy).toEqual(parsed);
 });

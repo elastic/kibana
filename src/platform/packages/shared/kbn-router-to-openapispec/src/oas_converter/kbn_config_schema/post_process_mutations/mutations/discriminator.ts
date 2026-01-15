@@ -17,8 +17,12 @@ import { isReferenceObject } from '../../../common';
 const { META_FIELD_X_OAS_DISCRIMINATOR, META_FIELD_X_OAS_DISCRIMINATOR_CATCH_ALL } = metaFields;
 
 export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
-  if (!schema.anyOf?.length)
-    throw new Error(`Unexpected state, anyOf is empty. This is likely a bug.`);
+  const firstSchema = isReferenceObject(schema.anyOf?.[0])
+    ? ctx.derefSharedSchema(schema.anyOf?.[0].$ref)
+    : schema.anyOf?.[0];
+  if (!firstSchema) return;
+  if (!(META_FIELD_X_OAS_DISCRIMINATOR in firstSchema)) return;
+
   if (!schema.anyOf?.every((entry) => isReferenceObject(entry))) {
     throw new Error(
       dedent`When using schema.discriminator ensure that every entry schema has an ID.
@@ -43,8 +47,6 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
       Debug details: expected reference object, got ${JSON.stringify(schema)}.`
     );
   }
-  const firstSchema = ctx.derefSharedSchema(schema.anyOf?.[0].$ref) as OpenAPIV3.SchemaObject;
-  if (!(META_FIELD_X_OAS_DISCRIMINATOR in firstSchema)) return;
 
   const propertyName = firstSchema[
     META_FIELD_X_OAS_DISCRIMINATOR as keyof OpenAPIV3.SchemaObject
@@ -60,7 +62,10 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
 
   ((schema.oneOf ?? []) as OpenAPIV3.ReferenceObject[]).forEach((entry, idx) => {
     const sharedSchema = ctx.derefSharedSchema(entry.$ref);
-    if (!sharedSchema) throw new Error(`Shared schema ${entry.$ref} not found.`);
+    if (!sharedSchema)
+      throw new Error(
+        `Shared schema ${entry.$ref} not found. This is likely a bug in the OAS generator.`
+      );
     if (META_FIELD_X_OAS_DISCRIMINATOR_CATCH_ALL in sharedSchema) {
       catchAllIdx = idx;
       return;
