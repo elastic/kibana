@@ -59,12 +59,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     !isResuming;
 
   const handleConfirm = useCallback(() => {
-    resumeRound({ confirm: true });
-  }, [resumeRound]);
+    resumeRound({ promptId: pendingPrompt!.id, confirm: true });
+  }, [resumeRound, pendingPrompt]);
 
   const handleCancel = useCallback(() => {
-    resumeRound({ confirm: false });
-  }, [resumeRound]);
+    resumeRound({ promptId: pendingPrompt!.id, confirm: false });
+  }, [resumeRound, pendingPrompt]);
 
   // Track if this round has ever been in a loading state during this session
   useEffect(() => {

@@ -2,26 +2,57 @@
   "id": "@kbn/security-form-components",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.createFieldValidator",
+        "id": "def-public.ContrastKeyPadMenu",
+        "type": "Function",
+        "tags": [],
+        "label": "ContrastKeyPadMenu",
+        "description": [],
+        "signature": [
+          "({ name, isDisabled, }: ",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "public",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-public.ContrastKeyPadMenuProps",
+            "text": "ContrastKeyPadMenuProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-public.ContrastKeyPadMenu.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  name,\n  isDisabled = false,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-form-components",
+                "scope": "public",
+                "docId": "kibKbnSecurityFormComponentsPluginApi",
+                "section": "def-public.ContrastKeyPadMenuProps",
+                "text": "ContrastKeyPadMenuProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-public.createFieldValidator",
         "type": "Function",
         "tags": [],
         "label": "createFieldValidator",
@@ -30,9 +61,9 @@
           "(options: ",
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.ValidateOptions",
+            "section": "def-public.ValidateOptions",
             "text": "ValidateOptions"
           },
           ") => ",
@@ -44,7 +75,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.createFieldValidator.$1",
+            "id": "def-public.createFieldValidator.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -52,9 +83,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/security-form-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecurityFormComponentsPluginApi",
-                "section": "def-common.ValidateOptions",
+                "section": "def-public.ValidateOptions",
                 "text": "ValidateOptions"
               }
             ],
@@ -69,7 +100,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.FormChangesProvider",
+        "id": "def-public.FormChangesProvider",
         "type": "Function",
         "tags": [],
         "label": "FormChangesProvider",
@@ -78,9 +109,9 @@
           "React.ProviderExoticComponent<React.ProviderProps<",
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.FormChangesProps",
+            "section": "def-public.FormChangesProps",
             "text": "FormChangesProps"
           },
           " | undefined>>"
@@ -92,7 +123,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormChangesProvider.$1",
+            "id": "def-public.FormChangesProvider.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -109,7 +140,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.FormField",
+        "id": "def-public.FormField",
         "type": "Function",
         "tags": [
           "throws"
@@ -122,17 +153,17 @@
           "({\n  as,\n  validate,\n  onBlur,\n  ...rest\n}: ",
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.FormFieldProps",
+            "section": "def-public.FormFieldProps",
             "text": "FormFieldProps"
           },
           "<T> & Omit<React.PropsWithoutRef<React.ComponentProps<T>>, keyof ",
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.FormFieldProps",
+            "section": "def-public.FormFieldProps",
             "text": "FormFieldProps"
           },
           "<T>>) => React.JSX.Element"
@@ -143,7 +174,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormField.$1",
+            "id": "def-public.FormField.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  as,\n  validate,\n  onBlur,\n  ...rest\n}",
@@ -151,17 +182,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/security-form-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecurityFormComponentsPluginApi",
-                "section": "def-common.FormFieldProps",
+                "section": "def-public.FormFieldProps",
                 "text": "FormFieldProps"
               },
               "<T> & Omit<React.PropsWithoutRef<React.ComponentProps<T>>, keyof ",
               {
                 "pluginId": "@kbn/security-form-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecurityFormComponentsPluginApi",
-                "section": "def-common.FormFieldProps",
+                "section": "def-public.FormFieldProps",
                 "text": "FormFieldProps"
               },
               "<T>>"
@@ -177,7 +208,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.FormLabel",
+        "id": "def-public.FormLabel",
         "type": "Function",
         "tags": [
           "throws",
@@ -191,9 +222,9 @@
           "(props: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.FormLabelProps",
+            "section": "def-public.FormLabelProps",
             "text": "FormLabelProps"
           },
           ">) => React.JSX.Element"
@@ -204,7 +235,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormLabel.$1",
+            "id": "def-public.FormLabel.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -213,9 +244,9 @@
               "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-form-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecurityFormComponentsPluginApi",
-                "section": "def-common.FormLabelProps",
+                "section": "def-public.FormLabelProps",
                 "text": "FormLabelProps"
               },
               ">"
@@ -231,7 +262,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.FormRow",
+        "id": "def-public.FormRow",
         "type": "Function",
         "tags": [
           "throws",
@@ -253,9 +284,9 @@
           " & { display?: \"row\" | \"center\" | \"columnCompressed\" | \"centerCompressed\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & React.HTMLAttributes<HTMLDivElement>)) & ",
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.FormRowProps",
+            "section": "def-public.FormRowProps",
             "text": "FormRowProps"
           },
           ") => React.JSX.Element"
@@ -266,7 +297,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormRow.$1",
+            "id": "def-public.FormRow.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -283,9 +314,9 @@
               " & { display?: \"row\" | \"center\" | \"columnCompressed\" | \"centerCompressed\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & React.HTMLAttributes<HTMLDivElement>)) & ",
               {
                 "pluginId": "@kbn/security-form-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecurityFormComponentsPluginApi",
-                "section": "def-common.FormRowProps",
+                "section": "def-public.FormRowProps",
                 "text": "FormRowProps"
               }
             ],
@@ -300,7 +331,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.OptionalText",
+        "id": "def-public.OptionalText",
         "type": "Function",
         "tags": [],
         "label": "OptionalText",
@@ -317,7 +348,54 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.useFormChanges",
+        "id": "def-public.ThemeKeyPadMenu",
+        "type": "Function",
+        "tags": [],
+        "label": "ThemeKeyPadMenu",
+        "description": [],
+        "signature": [
+          "({ name, isDisabled, isThemeOverridden, }: ",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "public",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-public.ThemeKeyPadMenuProps",
+            "text": "ThemeKeyPadMenuProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/security/form_components/src/theme_keypad_menu.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-public.ThemeKeyPadMenu.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  name,\n  isDisabled = false,\n  isThemeOverridden = false,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-form-components",
+                "scope": "public",
+                "docId": "kibKbnSecurityFormComponentsPluginApi",
+                "section": "def-public.ThemeKeyPadMenuProps",
+                "text": "ThemeKeyPadMenuProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/security/form_components/src/theme_keypad_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-public.useFormChanges",
         "type": "Function",
         "tags": [],
         "label": "useFormChanges",
@@ -328,9 +406,9 @@
           "() => ",
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.FormChangesProps",
+            "section": "def-public.FormChangesProps",
             "text": "FormChangesProps"
           }
         ],
@@ -343,7 +421,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.useFormChangesContext",
+        "id": "def-public.useFormChangesContext",
         "type": "Function",
         "tags": [
           "throws"
@@ -356,9 +434,9 @@
           "() => ",
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.FormChangesProps",
+            "section": "def-public.FormChangesProps",
             "text": "FormChangesProps"
           }
         ],
@@ -373,7 +451,46 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.FormChangesProps",
+        "id": "def-public.ContrastKeyPadMenuProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContrastKeyPadMenuProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-public.ContrastKeyPadMenuProps.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-public.ContrastKeyPadMenuProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-public.FormChangesProps",
         "type": "Interface",
         "tags": [],
         "label": "FormChangesProps",
@@ -384,7 +501,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormChangesProps.count",
+            "id": "def-public.FormChangesProps.count",
             "type": "number",
             "tags": [],
             "label": "count",
@@ -397,7 +514,7 @@
           },
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormChangesProps.report",
+            "id": "def-public.FormChangesProps.report",
             "type": "Function",
             "tags": [],
             "label": "report",
@@ -408,9 +525,9 @@
               "(isEqual: boolean) => ",
               {
                 "pluginId": "@kbn/security-form-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecurityFormComponentsPluginApi",
-                "section": "def-common.RevertFunction",
+                "section": "def-public.RevertFunction",
                 "text": "RevertFunction"
               },
               " | undefined"
@@ -422,7 +539,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-form-components",
-                "id": "def-common.FormChangesProps.report.$1",
+                "id": "def-public.FormChangesProps.report.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "isEqual",
@@ -438,7 +555,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.FormFieldProps",
+        "id": "def-public.FormFieldProps",
         "type": "Interface",
         "tags": [],
         "label": "FormFieldProps",
@@ -446,9 +563,9 @@
         "signature": [
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.FormFieldProps",
+            "section": "def-public.FormFieldProps",
             "text": "FormFieldProps"
           },
           "<T>"
@@ -459,7 +576,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormFieldProps.as",
+            "id": "def-public.FormFieldProps.as",
             "type": "Uncategorized",
             "tags": [],
             "label": "as",
@@ -473,7 +590,7 @@
           },
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormFieldProps.name",
+            "id": "def-public.FormFieldProps.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -484,7 +601,7 @@
           },
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormFieldProps.validate",
+            "id": "def-public.FormFieldProps.validate",
             "type": "CompoundType",
             "tags": [],
             "label": "validate",
@@ -492,9 +609,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/security-form-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecurityFormComponentsPluginApi",
-                "section": "def-common.ValidateOptions",
+                "section": "def-public.ValidateOptions",
                 "text": "ValidateOptions"
               },
               " | ",
@@ -510,7 +627,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.FormLabelProps",
+        "id": "def-public.FormLabelProps",
         "type": "Interface",
         "tags": [],
         "label": "FormLabelProps",
@@ -521,7 +638,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormLabelProps.for",
+            "id": "def-public.FormLabelProps.for",
             "type": "string",
             "tags": [],
             "label": "for",
@@ -537,7 +654,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.FormRowProps",
+        "id": "def-public.FormRowProps",
         "type": "Interface",
         "tags": [],
         "label": "FormRowProps",
@@ -548,7 +665,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.FormRowProps.name",
+            "id": "def-public.FormRowProps.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -567,7 +684,60 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.ValidateOptions",
+        "id": "def-public.ThemeKeyPadMenuProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThemeKeyPadMenuProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/form_components/src/theme_keypad_menu.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-public.ThemeKeyPadMenuProps.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/security/form_components/src/theme_keypad_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-public.ThemeKeyPadMenuProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/form_components/src/theme_keypad_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-public.ThemeKeyPadMenuProps.isThemeOverridden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isThemeOverridden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/form_components/src/theme_keypad_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-public.ValidateOptions",
         "type": "Interface",
         "tags": [],
         "label": "ValidateOptions",
@@ -578,7 +748,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.ValidateOptions.required",
+            "id": "def-public.ValidateOptions.required",
             "type": "string",
             "tags": [],
             "label": "required",
@@ -592,7 +762,7 @@
           },
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.ValidateOptions.pattern",
+            "id": "def-public.ValidateOptions.pattern",
             "type": "Object",
             "tags": [],
             "label": "pattern",
@@ -606,7 +776,7 @@
           },
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.ValidateOptions.minLength",
+            "id": "def-public.ValidateOptions.minLength",
             "type": "Object",
             "tags": [],
             "label": "minLength",
@@ -620,7 +790,7 @@
           },
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.ValidateOptions.maxLength",
+            "id": "def-public.ValidateOptions.maxLength",
             "type": "Object",
             "tags": [],
             "label": "maxLength",
@@ -634,7 +804,7 @@
           },
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.ValidateOptions.min",
+            "id": "def-public.ValidateOptions.min",
             "type": "Object",
             "tags": [],
             "label": "min",
@@ -648,7 +818,7 @@
           },
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.ValidateOptions.max",
+            "id": "def-public.ValidateOptions.max",
             "type": "Object",
             "tags": [],
             "label": "max",
@@ -668,7 +838,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.ReportFunction",
+        "id": "def-public.ReportFunction",
         "type": "Type",
         "tags": [],
         "label": "ReportFunction",
@@ -677,9 +847,9 @@
           "(isEqual: boolean) => ",
           {
             "pluginId": "@kbn/security-form-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityFormComponentsPluginApi",
-            "section": "def-common.RevertFunction",
+            "section": "def-public.RevertFunction",
             "text": "RevertFunction"
           },
           " | undefined"
@@ -691,7 +861,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-form-components",
-            "id": "def-common.ReportFunction.$1",
+            "id": "def-public.ReportFunction.$1",
             "type": "boolean",
             "tags": [],
             "label": "isEqual",
@@ -705,7 +875,7 @@
       },
       {
         "parentPluginId": "@kbn/security-form-components",
-        "id": "def-common.RevertFunction",
+        "id": "def-public.RevertFunction",
         "type": "Type",
         "tags": [],
         "label": "RevertFunction",
@@ -721,6 +891,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

@@ -9,7 +9,6 @@
 
 import type { ControlWidth, PinnedControlLayoutState } from '@kbn/controls-schemas/src/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { DashboardPanel, DashboardSection } from '../../../server';
 
 export interface DashboardChildren {
@@ -42,5 +41,5 @@ export interface DashboardLayout {
 }
 
 export interface DashboardChildState {
-  [uuid: string]: SerializedPanelState<object>;
+  [uuid: string]: object;
 }

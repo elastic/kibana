@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FeatureType } from '@kbn/streams-schema';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
@@ -102,14 +101,11 @@ interface StreamsSchemaUpdatedProps {
   stream_type: StreamType;
 }
 
-export type CountByFeatureType = Record<FeatureType, number>;
-
 interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   duration_ms: number;
   input_tokens_used: number;
   output_tokens_used: number;
   count: number;
-  count_by_feature_type: CountByFeatureType;
   features_selected: number;
   features_total: number;
   stream_name: string;
@@ -118,21 +114,18 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
 
 interface StreamsSignificantEventsCreatedProps {
   count: number;
-  count_by_feature_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
-  count_by_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationDeletedProps {
   count: number;
-  count_by_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
