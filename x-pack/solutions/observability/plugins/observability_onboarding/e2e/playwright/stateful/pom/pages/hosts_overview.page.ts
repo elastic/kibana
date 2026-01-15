@@ -35,7 +35,9 @@ export class HostsOverviewPage {
     const cpuCell = hostRow.locator('[data-test-subj="hostsView-tableRow-cpuUsage"]');
     await expect(cpuCell).toBeVisible();
 
-    const cpuText = await cpuCell.textContent();
-    expect(cpuText).toMatch(/\d+%$/);
+    // Get the first child element which contains the actual value (not the separator)
+    const cpuValue = cpuCell.locator('> div').first();
+    const cpuText = await cpuValue.textContent();
+    expect(cpuText).toMatch(/\d+(\.\d+)?%$/);
   }
 }
