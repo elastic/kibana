@@ -119,7 +119,6 @@ interface FieldsBrowserPopoverProps {
   onClose: () => void;
   onSelectField: (fieldName: string, oldLength: number) => void;
   getColumnMap?: GetColumnMapFn;
-  anchorElement?: HTMLElement;
   position?: { top?: number; left?: number };
 }
 
@@ -128,7 +127,6 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
   onClose,
   onSelectField,
   getColumnMap,
-  anchorElement,
   position,
 }) => {
   const fetchData = useCallback(async (): Promise<ESQLFieldWithMetadata[]> => {
@@ -218,7 +216,6 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       onSelect={onSelectField}
-      anchorElement={anchorElement}
       position={position}
       fetchData={fetchData}
       getTypeKey={getTypeKey}

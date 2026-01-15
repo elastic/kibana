@@ -93,13 +93,12 @@ import {
   IndicesBrowserPopover,
   FieldsBrowserPopover,
   useResourcesBadge,
+  BROWSER_POPOVER_WIDTH,
 } from './resource_browser';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
-
-export const RESOURCES_AREA_WIDTH = 320;
 
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
@@ -199,9 +198,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [abortController, setAbortController] = useState(new AbortController());
   const [isVisorOpen, setIsVisorOpen] = useState(false);
   const [isIndicesBrowserOpen, setIsIndicesBrowserOpen] = useState(false);
-  const indicesBrowserAnchorRef = useRef<HTMLElement | null>(null);
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
-  const fieldsBrowserAnchorRef = useRef<HTMLElement | null>(null);
   const fieldsBrowserGetColumnMapRef = useRef<(() => Promise<Map<string, any>>) | undefined>(
     undefined
   );
@@ -912,16 +909,6 @@ const ESQLEditorInternal = function ESQLEditor({
         const editorCoords = editorRef.current.getDomNode()?.getBoundingClientRect();
         const editorPosition = editorRef.current.getScrolledVisiblePosition(cursorPosition);
         if (editorCoords && editorPosition) {
-          // Create a temporary anchor element at the cursor position
-          const anchor = document.createElement('div');
-          anchor.style.position = 'absolute';
-          anchor.style.left = `${editorCoords.left + editorPosition.left}px`;
-          anchor.style.top = `${editorCoords.top + editorPosition.top + 20}px`;
-          anchor.style.width = '1px';
-          anchor.style.height = '1px';
-          document.body.appendChild(anchor);
-          indicesBrowserAnchorRef.current = anchor;
-
           const editorTop = editorCoords.top;
           const editorLeft = editorCoords.left;
           // Calculate the absolute position of the popover
@@ -929,7 +916,7 @@ const ESQLEditorInternal = function ESQLEditor({
           let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
           if (absoluteLeft > editorCoords.width) {
             // date picker is out of the editor
-            absoluteLeft = absoluteLeft - RESOURCES_AREA_WIDTH;
+            absoluteLeft = absoluteLeft - BROWSER_POPOVER_WIDTH;
           }
     
           setBrowserPopoverPosition({ top: absoluteTop, left: absoluteLeft });
@@ -941,10 +928,6 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const closeIndicesBrowser = useCallback(() => {
     setIsIndicesBrowserOpen(false);
-    if (indicesBrowserAnchorRef.current) {
-      document.body.removeChild(indicesBrowserAnchorRef.current);
-      indicesBrowserAnchorRef.current = null;
-    }
   }, []);
 
   const handleIndexSelect = useCallback(
@@ -1012,16 +995,6 @@ const ESQLEditorInternal = function ESQLEditor({
         const editorCoords = editorRef.current.getDomNode()?.getBoundingClientRect();
         const editorPosition = editorRef.current.getScrolledVisiblePosition(position);
         if (editorCoords && editorPosition) {
-          // Create a temporary anchor element at the cursor position
-          const anchor = document.createElement('div');
-          anchor.style.position = 'absolute';
-          anchor.style.left = `${editorCoords.left + editorPosition.left}px`;
-          anchor.style.top = `${editorCoords.top + editorPosition.top + 20}px`;
-          anchor.style.width = '1px';
-          anchor.style.height = '1px';
-          document.body.appendChild(anchor);
-          fieldsBrowserAnchorRef.current = anchor;
-
           const editorTop = editorCoords.top;
           const editorLeft = editorCoords.left;
           // Calculate the absolute position of the popover
@@ -1029,7 +1002,7 @@ const ESQLEditorInternal = function ESQLEditor({
           let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
           if (absoluteLeft > editorCoords.width) {
             // date picker is out of the editor
-            absoluteLeft = absoluteLeft - RESOURCES_AREA_WIDTH;
+            absoluteLeft = absoluteLeft - BROWSER_POPOVER_WIDTH;
           }
     
           setBrowserPopoverPosition({ top: absoluteTop, left: absoluteLeft });
@@ -1041,10 +1014,6 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const closeFieldsBrowser = useCallback(() => {
     setIsFieldsBrowserOpen(false);
-    if (fieldsBrowserAnchorRef.current) {
-      document.body.removeChild(fieldsBrowserAnchorRef.current);
-      fieldsBrowserAnchorRef.current = null;
-    }
   }, []);
 
   const handleFieldSelect = useCallback(
@@ -1129,18 +1098,6 @@ const ESQLEditorInternal = function ESQLEditor({
       editorRef.current?.dispose();
       editorModel.current = undefined;
       editorRef.current = undefined;
-
-      // Cleanup indices browser anchor
-      if (indicesBrowserAnchorRef.current) {
-        document.body.removeChild(indicesBrowserAnchorRef.current);
-        indicesBrowserAnchorRef.current = null;
-      }
-
-      // Cleanup fields browser anchor
-      if (fieldsBrowserAnchorRef.current) {
-        document.body.removeChild(fieldsBrowserAnchorRef.current);
-        fieldsBrowserAnchorRef.current = null;
-      }
     };
   }, []);
 
@@ -1566,7 +1523,6 @@ const ESQLEditorInternal = function ESQLEditor({
             onSelectIndex={handleIndexSelect}
             core={core}
             getLicense={kibana.services?.esql?.getLicense}
-            anchorElement={indicesBrowserAnchorRef.current || undefined}
             position={browserPopoverPosition}
           />
           <FieldsBrowserPopover
@@ -1574,7 +1530,6 @@ const ESQLEditorInternal = function ESQLEditor({
             onClose={closeFieldsBrowser}
             onSelectField={handleFieldSelect}
             getColumnMap={fieldsBrowserGetColumnMapRef.current}
-            anchorElement={fieldsBrowserAnchorRef.current || undefined}
             position={browserPopoverPosition}
           />
         </>

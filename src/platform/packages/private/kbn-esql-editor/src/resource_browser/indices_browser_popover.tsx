@@ -46,7 +46,6 @@ interface IndicesBrowserPopoverProps {
   onSelectIndex: (indexName: string, oldLength: number) => void;
   core: CoreStart;
   getLicense?: () => Promise<ILicense | undefined>;
-  anchorElement?: HTMLElement;
   position?: { top?: number; left?: number };
 }
 
@@ -56,7 +55,6 @@ export const IndicesBrowserPopover: React.FC<IndicesBrowserPopoverProps> = ({
   onSelectIndex,
   core,
   getLicense,
-  anchorElement,
   position,
 }) => {
   const fetchData = useCallback(async () => {
@@ -132,7 +130,6 @@ export const IndicesBrowserPopover: React.FC<IndicesBrowserPopoverProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       onSelect={onSelectIndex}
-      anchorElement={anchorElement}
       position={position}
       fetchData={fetchData}
       getTypeKey={getTypeKey}

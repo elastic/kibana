@@ -21,14 +21,13 @@ import {
 } from '@elastic/eui';
 import React, { useState, useEffect, useMemo, useCallback, useRef, ReactNode } from 'react';
 
-const POPOVER_WIDTH = 400;
-const POPOVER_HEIGHT = 500;
+export const BROWSER_POPOVER_WIDTH = 400;
+export const BROWSER_POPOVER_HEIGHT = 500;
 
 export interface BrowserPopoverWrapperProps<TItem> {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (selectedItems: string, oldLength: number) => void;
-  anchorElement?: HTMLElement;
   position?: { top?: number; left?: number };
   // Data fetching
   fetchData: () => Promise<TItem[]>;
@@ -59,7 +58,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   isOpen,
   onClose,
   onSelect,
-  anchorElement,
   position,
   fetchData,
   getTypeKey,
@@ -231,8 +229,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     </EuiFilterButton>
   );
 
-  const button = anchorElement ? undefined : <div style={{ display: 'none' }} />;
-
   return (
     <div
       style={{
@@ -250,14 +246,14 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       role="button"
     >
       <EuiPopover
-        button={button}
+        button={<div style={{ display: 'none' }} />}
         isOpen={isOpen}
         closePopover={onClose}
         panelPaddingSize="none"
         anchorPosition="downLeft"
         panelStyle={{
-          width: POPOVER_WIDTH,
-          maxHeight: POPOVER_HEIGHT,
+          width: BROWSER_POPOVER_WIDTH,
+          maxHeight: BROWSER_POPOVER_HEIGHT,
         }}
       >
         <EuiSelectable
@@ -304,7 +300,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
           noMatchesMessage={i18nKeys.noMatches}
         >
           {(list, search) => (
-            <div style={{ width: POPOVER_WIDTH, maxHeight: POPOVER_HEIGHT }}>
+            <div style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}>
               <EuiPopoverTitle paddingSize="s">
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem>{i18nKeys.title}</EuiFlexItem>
@@ -320,7 +316,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
                 </EuiFlexGroup>
               </EuiPopoverTitle>
               {search}
-              <div style={{ maxHeight: POPOVER_HEIGHT - 100, overflowY: 'auto' }}>{list}</div>
+              <div style={{ maxHeight: BROWSER_POPOVER_HEIGHT - 100, overflowY: 'auto' }}>{list}</div>
             </div>
           )}
         </EuiSelectable>
