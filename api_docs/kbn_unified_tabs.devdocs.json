@@ -278,13 +278,7 @@
             "label": "recentlyClosedItems",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/unified-tabs",
-                "scope": "public",
-                "docId": "kibKbnUnifiedTabsPluginApi",
-                "section": "def-public.TabItem",
-                "text": "TabItem"
-              },
+              "RecentlyClosedTabItem",
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",

@@ -69,12 +69,12 @@ export function QueriesTable() {
       ),
     },
     {
-      field: 'query.stream_name',
+      field: 'stream_name',
       name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.streamColumn', {
         defaultMessage: 'Stream',
       }),
       render: (_: unknown, item: SignificantEventItem) => (
-        <EuiBadge color="hollow">{item.query.stream_name || '--'}</EuiBadge>
+        <EuiBadge color="hollow">{item.stream_name || '--'}</EuiBadge>
       ),
     },
     {
