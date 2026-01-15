@@ -10,7 +10,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         class="css-7edsv3-icvContainerStyles"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-grow-1-InputControlVis"
@@ -102,7 +102,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -175,7 +175,7 @@ exports[`Clear btns enabled when there are values 1`] = `
         class="css-7edsv3-icvContainerStyles"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-grow-1-InputControlVis"
@@ -267,7 +267,7 @@ exports[`Clear btns enabled when there are values 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -341,7 +341,7 @@ exports[`Renders list control 1`] = `
         class="css-7edsv3-icvContainerStyles"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-grow-1-InputControlVis"
@@ -433,7 +433,7 @@ exports[`Renders list control 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -508,7 +508,7 @@ exports[`Renders range control 1`] = `
         class="css-7edsv3-icvContainerStyles"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-grow-1-InputControlVis"
@@ -655,7 +655,7 @@ exports[`Renders range control 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
