@@ -13,6 +13,7 @@ import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import type { SystemClient } from './system/system_client';
+import type { FeatureClient } from './feature';
 
 export class StreamsService {
   constructor(
@@ -26,11 +27,13 @@ export class StreamsService {
     attachmentClient,
     queryClient,
     systemClient,
+    featureClient,
   }: {
     request: KibanaRequest;
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
     systemClient: SystemClient;
+    featureClient: FeatureClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
@@ -44,6 +47,7 @@ export class StreamsService {
       queryClient,
       logger,
       systemClient,
+      featureClient,
       scopedClusterClient,
       lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: createStreamsStorageClient(scopedClusterClient.asInternalUser, logger),
