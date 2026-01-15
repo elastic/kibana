@@ -10,12 +10,14 @@ import type { Filter, Query } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { esql } from '@kbn/esql-language';
 import {
   ESQL_GROUPING_KEY_COLUMN,
   ESQL_GROUPING_COUNT_COLUMN,
 } from '../../alerts_table/grouping_settings/esql_transformer';
-import { buildESQLWithKQLQuery } from '../../../../common/utils/esql';
+import { escapeKQLStringParam } from '../../../../../common/utils/kql';
 import { useKibana } from '../../../../common/lib/kibana';
+import { filterToKql } from './filter_to_kql';
 
 export interface UseBuildEsqlQueryProps {
   /**
@@ -52,6 +54,8 @@ export interface UseBuildEsqlQueryProps {
  */
 export const useBuildEsqlQuery = (props: UseBuildEsqlQueryProps): string => {
   const { from, to, defaultFilters, globalFilters, globalQuery, dataView } = props;
+  // eslint-disable-next-line no-console
+  console.log(`[useBuildEsqlQuery] globalFilters: ${JSON.stringify(globalFilters, null, 2)}`);
   const {
     services: { uiSettings },
   } = useKibana();
@@ -60,21 +64,15 @@ export const useBuildEsqlQuery = (props: UseBuildEsqlQueryProps): string => {
     // Get index pattern from dataView
     const indexPattern = dataView.getIndexPattern();
 
-    // Build the base ES|QL query
-    // Format: FROM index_pattern | WHERE ... | EVAL ... | STATS ... | SORT ... | LIMIT ...
-    // Note: Must include columns named 'grouping_key' and 'count' for the transformer
-    const baseQuery = `FROM ${indexPattern}
-| WHERE @timestamp >= "${from}" AND @timestamp <= "${to}"
-| EVAL ${ESQL_GROUPING_KEY_COLUMN} = CASE(
-    kibana.alert.attack_ids IS NULL, "NO_ATTACK_ID",
-    kibana.alert.attack_ids
-  )
-| STATS
-    ${ESQL_GROUPING_COUNT_COLUMN} = COUNT(*),
-    latest_timestamp = MAX(@timestamp)
-  BY ${ESQL_GROUPING_KEY_COLUMN}
-| SORT latest_timestamp DESC
-| LIMIT 1000`;
+    // Start building the ES|QL query using the Composer API
+    // This provides secure parameterization and prevents injection attacks
+    let query = esql.from(indexPattern);
+
+    // Build WHERE conditions dynamically
+    // Start with time range filter - use string interpolation for date values
+    // The Composer API will parse and validate the query, preventing injection
+    const whereConditions: string[] = [];
+    whereConditions.push(`@timestamp >= "${from}" AND @timestamp <= "${to}"`);
 
     // Combine defaultFilters and globalFilters, then filter out disabled filters
     const allFilters = [...defaultFilters, ...globalFilters];
@@ -94,12 +92,12 @@ export const useBuildEsqlQuery = (props: UseBuildEsqlQueryProps): string => {
       kqlParts.push(`(${globalKqlQuery})`);
     }
 
-    // Extract KQL from filters
+    // Convert filters to KQL query strings
     if (enabledFilters.length > 0) {
       try {
-        // Build ES query from filters
+        // Build ES query from filters (for validation)
         const esQueryConfig = getEsQueryConfig(uiSettings);
-        const filterQuery = buildQueryFromFilters(enabledFilters, dataView, {
+        buildQueryFromFilters(enabledFilters, dataView, {
           allowLeadingWildcards: esQueryConfig.allowLeadingWildcards,
           queryStringOptions: esQueryConfig.queryStringOptions,
           dateFormatTZ: esQueryConfig.dateFormatTZ,
@@ -108,22 +106,11 @@ export const useBuildEsqlQuery = (props: UseBuildEsqlQueryProps): string => {
           caseInsensitive: esQueryConfig.caseInsensitive,
         });
 
-        // Convert ES query to KQL string for ES|QL KQL() function
-        // For now, we'll use a simplified approach: extract KQL from filters if available
-        // Otherwise, we'll need to convert the ES query DSL to KQL (complex conversion)
-        // For simplicity, we'll try to extract KQL expressions from filter meta.query
+        // Convert each filter to KQL and add to kqlParts
         enabledFilters.forEach((filter) => {
-          // Some filters have KQL in meta.query
-          if (filter.meta?.query) {
-            kqlParts.push(filter.meta.query);
-          }
-          // For match_phrase filters, construct KQL
-          else if (filter.query?.match_phrase) {
-            const field = Object.keys(filter.query.match_phrase)[0];
-            const value = filter.query.match_phrase[field];
-            if (typeof value === 'string') {
-              kqlParts.push(`${field}: "${value}"`);
-            }
+          const kql = filterToKql(filter);
+          if (kql) {
+            kqlParts.push(kql);
           }
         });
       } catch (error) {
@@ -132,12 +119,50 @@ export const useBuildEsqlQuery = (props: UseBuildEsqlQueryProps): string => {
       }
     }
 
-    // Combine all KQL parts and add to ES|QL query if any exist
+    // Combine all KQL parts and add as KQL() function if any exist
     if (kqlParts.length > 0) {
       const kqlQuery = kqlParts.join(' AND ');
-      return buildESQLWithKQLQuery(baseQuery, kqlQuery);
+      // Escape the KQL string for safe inclusion in ES|QL
+      const escapedKql = escapeKQLStringParam(kqlQuery);
+      // Add KQL() function call to WHERE conditions
+      whereConditions.push(`KQL("${escapedKql}")`);
     }
 
-    return baseQuery;
+    // Apply WHERE clause with all conditions combined
+    // Using string syntax - the Composer API will parse and validate it
+    if (whereConditions.length > 0) {
+      query = query.where(whereConditions.join(' AND '));
+    }
+
+    // Add EVAL command to create grouping key
+    // Using string syntax to avoid column name quoting issues
+    query = query.pipe(
+      `EVAL ${ESQL_GROUPING_KEY_COLUMN} = CASE(
+        kibana.alert.attack_ids IS NULL, "NO_ATTACK_ID",
+        kibana.alert.attack_ids
+      )`
+    );
+
+    // Add STATS command to aggregate by grouping key
+    query = query.pipe(
+      `STATS
+        ${ESQL_GROUPING_COUNT_COLUMN} = COUNT(*),
+        latest_timestamp = MAX(@timestamp)
+        BY ${ESQL_GROUPING_KEY_COLUMN}`
+    );
+
+    // Add SORT command
+    query = query.sort(['latest_timestamp', 'DESC']);
+
+    // Add LIMIT command
+    query = query.limit(1000);
+
+    const finalQuery = query.print('basic');
+    // eslint-disable-next-line no-console
+    console.log(`[useBuildEsqlQuery] query: ${JSON.stringify(finalQuery, null, 2)}`);
+
+    // Return the final query string
+    // Using 'basic' format for compact output suitable for API requests
+    return finalQuery;
   }, [from, to, defaultFilters, globalFilters, globalQuery, dataView, uiSettings]);
 };
