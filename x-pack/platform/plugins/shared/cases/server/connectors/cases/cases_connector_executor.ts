@@ -782,10 +782,6 @@ export class CasesConnectorExecutor {
       })
     );
 
-    console.log(
-      `[CasesConnector][CasesConnectorExecutor][upsertCases] The total number of created cases is ${bulkCreateCasesResponse.cases.length}`
-    );
-
     for (const theCase of bulkCreateCasesResponse.cases) {
       if (groupedAlertsWithCaseId.has(theCase.id)) {
         const data = groupedAlertsWithCaseId.get(theCase.id) as GroupedAlertsWithCaseId;

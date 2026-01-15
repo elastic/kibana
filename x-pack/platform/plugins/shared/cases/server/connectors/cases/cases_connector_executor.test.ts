@@ -78,6 +78,7 @@ describe('CasesConnectorExecutor', () => {
 
   const params: CasesConnectorRunParams = {
     alerts,
+    autoPushCase: null,
     groupedAlerts: null,
     groupingBy,
     owner,
