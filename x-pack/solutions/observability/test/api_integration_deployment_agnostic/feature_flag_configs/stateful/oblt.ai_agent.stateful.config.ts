@@ -11,7 +11,6 @@ import { services } from '../../services';
 export default createStatefulFeatureFlagTestConfig<typeof services>({
   services,
   testFiles: [require.resolve('./oblt.ai_agent.index.ts')],
-  kbnServerArgs: ['--feature_flags.overrides.aiAssistant.aiAgents.enabled=true'],
   junit: {
     reportName:
       'Stateful Observability - Deployment-agnostic Feature Flag Observability Agent Builder API Integration Tests',

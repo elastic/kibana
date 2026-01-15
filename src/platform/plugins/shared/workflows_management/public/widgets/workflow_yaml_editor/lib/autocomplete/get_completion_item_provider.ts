@@ -19,25 +19,57 @@ export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provid
 const INSERT_AS_SNIPPET = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
 
 /**
+ * Deprecated type aliases that should NOT be shown in autocomplete suggestions.
+ * These are kept for backward compatibility (existing workflows still validate)
+ * but we don't want users to use them in new workflows.
+ */
+const DEPRECATED_TYPE_ALIASES = new Set([
+  'kibana.createCaseDefaultSpace',
+  'kibana.getCaseDefaultSpace',
+  'kibana.updateCaseDefaultSpace',
+  'kibana.addCaseCommentDefaultSpace',
+]);
+
+/**
+ * Get the deduplication key for a suggestion.
+ * Uses filterText if available (contains the actual connector type),
+ * otherwise falls back to the label.
+ */
+function getDeduplicationKey(suggestion: monaco.languages.CompletionItem): string {
+  // Prefer filterText as it contains the actual technical name (e.g., 'kibana.createCaseDefaultSpace')
+  // even when the label shows a cleaner display name (e.g., 'kibana.createCase')
+  if (suggestion.filterText) {
+    return suggestion.filterText;
+  }
+  return typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
+}
+
+/**
  * Add suggestions to a deduplicated map, preferring suggestions with snippets over plain text.
+ * Filters out deprecated type aliases so they don't appear in autocomplete.
  */
 function mapSuggestions(
   map: Map<string, monaco.languages.CompletionItem>,
   suggestions: monaco.languages.CompletionItem[]
 ): void {
   for (const suggestion of suggestions) {
-    const key = typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
-    const existing = map.get(key);
+    const key = getDeduplicationKey(suggestion);
 
-    if (existing) {
-      const existingHasSnippet = existing.insertTextRules === INSERT_AS_SNIPPET;
-      const currentHasSnippet = suggestion.insertTextRules === INSERT_AS_SNIPPET;
+    // Skip deprecated type aliases - they still work for backward compatibility
+    // but we don't want to suggest them to users
+    if (!DEPRECATED_TYPE_ALIASES.has(key)) {
+      const existing = map.get(key);
 
-      if (currentHasSnippet && !existingHasSnippet) {
+      if (existing) {
+        const existingHasSnippet = existing.insertTextRules === INSERT_AS_SNIPPET;
+        const currentHasSnippet = suggestion.insertTextRules === INSERT_AS_SNIPPET;
+
+        if (currentHasSnippet && !existingHasSnippet) {
+          map.set(key, suggestion);
+        }
+      } else {
         map.set(key, suggestion);
       }
-    } else {
-      map.set(key, suggestion);
     }
   }
 }

@@ -12,7 +12,8 @@ import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/cons
 
 /* eslint-disable @kbn/eslint/scout_max_one_describe */
 
-apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/248929
+apiTest.describe.skip('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
   apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
