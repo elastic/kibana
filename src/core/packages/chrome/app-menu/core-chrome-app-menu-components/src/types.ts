@@ -11,6 +11,12 @@ import type { EuiButtonColor, EuiButtonProps, EuiHideForProps, IconType } from '
 import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
 
 /**
+ * Type for the function that runs when an app menu item is clicked
+ * @param triggerElement - The HTML element that triggered the action. Do not use this to open popovers. Use `items` property to define popover items instead.
+ */
+export type AppMenuRunAction = (triggerElement: HTMLElement) => void;
+
+/**
  * Subset of SplitButtonWithNotificationProps.
  */
 type BaseSplitProps = Pick<
@@ -42,7 +48,7 @@ export type AppMenuSplitButtonProps =
       /**
        * Function to run when the item is clicked. Only used if `items` is not provided.
        */
-      run: () => void;
+      run: AppMenuRunAction;
     })
   | (BaseSplitProps & {
       /**
@@ -114,7 +120,7 @@ export type AppMenuItemCommon =
       /**
        * Function to run when the item is clicked. Only used if `items` is not provided.
        */
-      run: () => void;
+      run: AppMenuRunAction;
       /**
        * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
        */
