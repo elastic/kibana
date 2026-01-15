@@ -8737,7 +8737,7 @@
               "\nReturns when element specified by locator satisfies the\n[`state`](https://playwright.dev/docs/api/class-locator#locator-wait-for-option-state) option.\n\nIf target element already satisfies the condition, the method returns immediately. Otherwise, waits for up to\n[`timeout`](https://playwright.dev/docs/api/class-locator#locator-wait-for-option-timeout) milliseconds until the\ncondition is met.\n\n**Usage**\n\n```js\nconst orderSent = page.locator('#order-sent');\nawait orderSent.waitFor();\n```\n"
             ],
             "signature": [
-              "(options?: { state?: \"hidden\" | \"visible\" | \"detached\" | \"attached\" | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
+              "(options?: { state?: \"hidden\" | \"visible\" | \"attached\" | \"detached\" | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
@@ -8764,7 +8764,7 @@
                       "\nDefaults to `'visible'`. Can be either:\n- `'attached'` - wait for element to be present in DOM.\n- `'detached'` - wait for element to not be present in DOM.\n- `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element\n  without any content or with `display:none` has an empty bounding box and is not considered visible.\n- `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or\n  `visibility:hidden`. This is opposite to the `'visible'` option."
                     ],
                     "signature": [
-                      "\"hidden\" | \"visible\" | \"detached\" | \"attached\" | undefined"
+                      "\"hidden\" | \"visible\" | \"attached\" | \"detached\" | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
