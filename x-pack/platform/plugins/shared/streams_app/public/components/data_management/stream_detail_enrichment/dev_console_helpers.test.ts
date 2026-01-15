@@ -15,10 +15,33 @@ import {
 import type { InteractiveModeSnapshot } from './state_management/interactive_mode_machine';
 import type { SimulationActorSnapshot } from './state_management/simulation_state_machine';
 
+// Mock the EUI functions
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  copyToClipboard: jest.fn(() => true),
+}));
+
 describe('dev_console_helpers', () => {
+  // Suppress console logs during tests
+  // eslint-disable-next-line no-console
+  const originalLog = console.log;
+  // eslint-disable-next-line no-console
+  const originalError = console.error;
+
   beforeEach(() => {
     clearGrokSuggestion();
     clearDissectSuggestion();
+    // eslint-disable-next-line no-console
+    console.log = jest.fn();
+    // eslint-disable-next-line no-console
+    console.error = jest.fn();
+  });
+
+  afterEach(() => {
+    // eslint-disable-next-line no-console
+    console.log = originalLog;
+    // eslint-disable-next-line no-console
+    console.error = originalError;
   });
 
   describe('registerGrokSuggestion', () => {
@@ -117,7 +140,7 @@ describe('dev_console_helpers', () => {
   });
 
   describe('no suggestion available', () => {
-    it('should return null when no suggestion is registered', () => {
+    it('should return data with null suggestion when no suggestion is registered', () => {
       const mockSimulationSnapshot = {
         context: {
           samples: [{ message: 'test' }],
@@ -133,7 +156,10 @@ describe('dev_console_helpers', () => {
 
       const result = copyFn();
 
-      expect(result).toBeNull();
+      expect(result).toMatchObject({
+        suggestionType: 'pipeline',
+        suggestion: null,
+      });
     });
   });
 });
