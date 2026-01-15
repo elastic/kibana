@@ -124,6 +124,13 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 - `--skip-alerts`: Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
 - `--skip-ruleset-preview`: Skip previews of the ruleset rules (baseline attribution only; faster)
 - `--skip-attack-discoveries`: Skip Attack Discovery generation (faster)
+- `--cases`: Create Kibana cases from **~50%** of generated Attack Discoveries
+  - Creates a case per selected discovery and attaches:
+    - a markdown summary comment
+    - all discovery alert IDs as alert attachments (from `.alerts-security.alerts-<spaceId>`)
+  - The case title is set to the generated Attack Discovery title.
+  - Backdates **Created on** (`created_at`) to a deterministic time within **0–12 hours after** the discovery timestamp.
+    - `updated_at` is intentionally not modified, so **Updated on** reflects real runtime activity (attachments, edits, etc.).
 
 ### Kibana/Elasticsearch connection
 
