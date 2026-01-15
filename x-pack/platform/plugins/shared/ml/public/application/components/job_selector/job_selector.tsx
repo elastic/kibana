@@ -23,6 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../locator';
 import type { Dictionary } from '../../../../common/types/common';
 import { IdBadges } from './id_badges';
+import { AnomalyResultsViewSelector } from '../anomaly_results_view_selector';
+import type { ExplorerJob } from '../../explorer/explorer_utils';
 
 import { BADGE_LIMIT } from './job_selector_flyout';
 import type {
@@ -94,7 +96,7 @@ export interface JobSelectorProps {
   }) => void;
   selectedJobIds?: string[];
   selectedGroups?: GroupObj[];
-  selectedJobs?: MlSummaryJob[];
+  selectedJobs?: MlSummaryJob[] | ExplorerJob[];
 }
 
 export interface JobSelectionMaps {
@@ -163,6 +165,12 @@ export function JobSelector({
     return (
       <>
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <AnomalyResultsViewSelector
+              viewId={singleSelection ? 'timeseriesexplorer' : 'explorer'}
+              selectedJobs={selectedJobs}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {selectedIds.length > 0 ? (
               <EuiFlexGroup
