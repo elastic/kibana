@@ -8,7 +8,7 @@
 import { expect, type ScoutPage } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { createLlmProxy, type LlmProxy } from './llm_proxy';
+import { createLlmProxy, createToolCallMessage, type LlmProxy } from '@kbn/ftr-llm-proxy';
 
 export interface PartitionSuggestion {
   name: string;
@@ -152,15 +152,13 @@ export function setupPartitionLogsInterceptor(
   partitions: PartitionSuggestion[],
   interceptorName?: string
 ): void {
-  void llmProxy.interceptWithFunctionRequest({
-    name: 'partition_logs',
-    arguments: () =>
-      JSON.stringify({
-        index: 'logs',
-        partitions,
-      }),
+  void llmProxy.intercept({
+    name: interceptorName ?? 'partition_logs with mock suggestions',
     when: partitionLogsWhenCondition,
-    interceptorName: interceptorName ?? 'partition_logs with mock suggestions',
+    responseMock: createToolCallMessage('partition_logs', {
+      index: 'logs',
+      partitions,
+    }),
   });
 }
 
