@@ -27,24 +27,23 @@ export const getTransformIn = ({
 }: LensTransformDependencies): LensTransformIn => {
   return function transformIn(config) {
     const configWithStoredTitles = transformTitlesIn(config);
-    const { enhancementsState: enhancements = null, enhancementsReferences = [] } =
-      configWithStoredTitles.enhancements
-        ? transformEnhancementsIn?.(configWithStoredTitles.enhancements) ?? {}
-        : {};
-    const enhancementsState = enhancements ? { enhancements } : {};
+    const enhancementsResult =
+      transformEnhancementsIn && config.enhancements
+        ? transformEnhancementsIn(config.enhancements)
+        : { state: undefined, references: [] };
 
     if (isByRefLensConfig(configWithStoredTitles)) {
       const { savedObjectId: id, ...rest } = configWithStoredTitles;
       return {
         state: rest,
-        ...enhancementsState,
+        ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
         references: [
           {
             name: LENS_SAVED_OBJECT_REF_NAME,
             type: DOC_TYPE,
             id: id!,
           },
-          ...enhancementsReferences,
+          ...enhancementsResult.references,
         ],
       } satisfies LensByRefTransformInResult;
     }
@@ -59,8 +58,8 @@ export const getTransformIn = ({
       // when not supported, no transform is needed
       return {
         state,
-        ...enhancementsState,
-        references: [...references, ...enhancementsReferences],
+        ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
+        references: [...references, ...enhancementsResult.references],
       } satisfies LensByValueTransformInResult;
     }
 
@@ -79,8 +78,8 @@ export const getTransformIn = ({
 
     return {
       state,
-      ...enhancementsState,
-      references: [...references, ...enhancementsReferences],
+      ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
+      references: [...references, ...enhancementsResult.references],
     } satisfies LensByValueTransformInResult;
   };
 };

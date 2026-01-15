@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { Reference } from '@kbn/content-management-utils';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
-import { type StoredTitles } from '@kbn/presentation-publishing-schemas';
+import type {
+  EmbeddableTransforms,
+  TransformEnhancementsIn,
+  TransformEnhancementsOut,
+} from '@kbn/embeddable-plugin/common';
 import { transformTitlesIn, transformTitlesOut } from '@kbn/presentation-publishing';
+import { type StoredTitles } from '@kbn/presentation-publishing-schemas';
 import type { ImageConfig, ImageEmbeddableState } from '../server';
 
 type StoredImageEmbeddableState = { imageConfig: ImageConfig } & StoredTitles & {
@@ -18,22 +21,22 @@ type StoredImageEmbeddableState = { imageConfig: ImageConfig } & StoredTitles & 
   };
 
 export function getTransforms(
-  transformEnhancementsIn: EnhancementsRegistry['transformIn'],
-  transformEnhancementsOut: EnhancementsRegistry['transformOut']
+  transformEnhancementsIn: TransformEnhancementsIn,
+  transformEnhancementsOut: TransformEnhancementsOut
 ): EmbeddableTransforms<StoredImageEmbeddableState, ImageEmbeddableState> {
   return {
     transformIn: (state: ImageEmbeddableState) => {
       const stateWithStoredTitles = transformTitlesIn(state);
-      const { enhancementsState, enhancementsReferences } = stateWithStoredTitles.enhancements
+      const enhancementResult = state.enhancements
         ? transformEnhancementsIn(state.enhancements)
-        : { enhancementsState: undefined, enhancementsReferences: [] };
+        : { state: undefined, references: [] };
 
       return {
         state: {
           ...stateWithStoredTitles,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+          ...(enhancementResult.state ? { enhancements: enhancementResult.state } : {}),
         },
-        references: enhancementsReferences,
+        references: enhancementResult.references,
       };
     },
     transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {

@@ -9,8 +9,8 @@
 
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import { transformTitlesIn } from '@kbn/presentation-publishing';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableState,
@@ -26,26 +26,28 @@ function isByRefState(state: object): state is SearchEmbeddableByReferenceState 
   return 'savedObjectId' in state;
 }
 
-export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
+export function getTransformIn(
+  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']
+) {
   function transformIn(state: SearchEmbeddableState): {
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
   } {
     const stateWithStoredTitles = transformTitlesIn(state);
 
-    const { enhancementsState, enhancementsReferences } = stateWithStoredTitles.enhancements
-      ? transformEnhancementsIn(stateWithStoredTitles.enhancements)
-      : { enhancementsState: undefined, enhancementsReferences: [] };
+    const enhancementsResult = state.enhancements
+      ? transformEnhancementsIn(state.enhancements)
+      : { state: undefined, references: [] };
 
     if (isByRefState(stateWithStoredTitles)) {
       const { savedObjectId, ...rest } = stateWithStoredTitles;
       return {
         state: {
           ...rest,
-          ...(enhancementsState
+          ...(enhancementsResult.state
             ? {
                 enhancements:
-                  enhancementsState as StoredSearchEmbeddableByReferenceState['enhancements'],
+                  enhancementsResult.state as StoredSearchEmbeddableByReferenceState['enhancements'],
               }
             : {}),
         },
@@ -55,7 +57,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
             type: SavedSearchType,
             id: savedObjectId,
           },
-          ...enhancementsReferences,
+          ...enhancementsResult.references,
         ],
       };
     }
@@ -69,9 +71,10 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     return {
       state: {
         ...stateWithStoredTitles,
-        ...(enhancementsState
+        ...(enhancementsResult.state
           ? {
-              enhancements: enhancementsState as StoredSearchEmbeddableByValueState['enhancements'],
+              enhancements:
+                enhancementsResult.state as StoredSearchEmbeddableByValueState['enhancements'],
             }
           : {}),
         attributes: {
@@ -81,7 +84,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
           references,
         },
       },
-      references: [...references, ...enhancementsReferences],
+      references: [...references, ...enhancementsResult.references],
     };
   }
   return transformIn;

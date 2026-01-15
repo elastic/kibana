@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import { transformTitlesIn } from '@kbn/presentation-publishing';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesIn } from '../../content_management/transform_map_attributes_in';
@@ -15,15 +15,17 @@ import type { StoredMapEmbeddableState } from './types';
 
 export const MAP_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
+export function getTransformIn(
+  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']
+) {
   function transformIn(state: MapEmbeddableState): {
     state: StoredMapEmbeddableState;
     references: Reference[];
   } {
     const stateWithStoredTitles = transformTitlesIn(state);
-    const { enhancementsState, enhancementsReferences } = stateWithStoredTitles.enhancements
-      ? transformEnhancementsIn(stateWithStoredTitles.enhancements)
-      : { enhancementsState: undefined, enhancementsReferences: [] };
+    const enhancementsResult = state.enhancements
+      ? transformEnhancementsIn(state.enhancements)
+      : { state: undefined, references: [] };
 
     // by ref
     if ((stateWithStoredTitles as MapByReferenceState).savedObjectId) {
@@ -31,7 +33,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       return {
         state: {
           ...rest,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+          ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
         } as StoredMapEmbeddableState,
         references: [
           {
@@ -39,7 +41,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
             type: MAP_SAVED_OBJECT_TYPE,
             id: savedObjectId!,
           },
-          ...enhancementsReferences,
+          ...enhancementsResult.references,
         ],
       };
     }
@@ -53,19 +55,19 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       return {
         state: {
           ...stateWithStoredTitles,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+          ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
           attributes,
         } as StoredMapEmbeddableState,
-        references: [...references, ...enhancementsReferences],
+        references: [...references, ...enhancementsResult.references],
       };
     }
 
     return {
       state: {
         ...stateWithStoredTitles,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+        ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
       } as StoredMapEmbeddableState,
-      references: enhancementsReferences,
+      references: enhancementsResult.references,
     };
   }
   return transformIn;
