@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export const createPrebuiltRuleAssetsClient = () => {
-  return {
-    fetchLatestAssets: jest.fn(),
-    fetchLatestVersions: jest.fn(),
-    fetchAssetsByVersion: jest.fn(),
-    fetchTagsByVersion: jest.fn(),
-  };
-};
+export const EXPECTED_MAX_TAGS = 65536;
