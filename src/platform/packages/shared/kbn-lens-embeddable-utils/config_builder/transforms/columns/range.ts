@@ -9,7 +9,10 @@
 
 import type { RangeIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
-import { LENS_RANGE_DEFAULT_INTERVAL } from '../../schema/constants';
+import {
+  LENS_HISTOGRAM_GRANULARITY_MAX,
+  LENS_RANGE_DEFAULT_INTERVAL,
+} from '../../schema/constants';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
@@ -71,7 +74,7 @@ export function fromRangeOrHistogramLensStateToAPI(
     operation: 'histogram',
     include_empty_rows: Boolean(column.params.includeEmptyRows),
     granularity:
-      column.params?.maxBars !== 'auto' && column.params?.maxBars > 7
+      column.params?.maxBars !== 'auto' && column.params?.maxBars > LENS_HISTOGRAM_GRANULARITY_MAX
         ? 'auto'
         : column.params?.maxBars,
     ...getLensAPIBucketSharedProps(column),
