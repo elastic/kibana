@@ -81,7 +81,7 @@ export function validateConnectorIds(
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        beforeMessage: `${instance.name}`,
+        beforeMessage: `✓ ${instance.name}`,
         afterMessage: null,
         hoverMessage: null,
       };
