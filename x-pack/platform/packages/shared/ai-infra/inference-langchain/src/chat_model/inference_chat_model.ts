@@ -193,7 +193,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },
-      timeout: 8888, // --@@ options.timeout ?? this.timeout,
+      timeout: options.timeout ?? this.timeout,
     };
   }
 

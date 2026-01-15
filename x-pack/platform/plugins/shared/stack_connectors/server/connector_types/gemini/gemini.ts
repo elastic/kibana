@@ -269,9 +269,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
     const token = await this.getAccessToken();
 
-    // @TODO: remove
-    console.log(`--@@gemini streamAPI timeout`, timeout);
-
     const response = await this.request(
       {
         url: `${this.url}${path}`,
