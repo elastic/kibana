@@ -111,24 +111,52 @@ describe('Bar', () => {
       const barDiv = renderBar({
         width: 50,
         left: 10,
-        color: 'red',
+        color: 'blue',
       });
 
-      expect(barDiv).toHaveStyle('background-color: red');
+      expect(barDiv).toHaveStyle('background-color: blue');
     });
   });
 
   describe('getCompositeBarStyle helper', () => {
-    it('returns striped gradient pattern', () => {
-      const result = getCompositeBarStyle('red', 60000, { count: 9, sum: 45000 });
+    it('returns solid background when duration is undefined', () => {
+      const result = getCompositeBarStyle('blue', undefined, { count: 9, sum: 45000 });
+
+      expect(result.backgroundColor).toBe('blue');
+      expect(result.backgroundImage).toBeUndefined();
+    });
+
+    it('returns solid background when duration is zero', () => {
+      const result = getCompositeBarStyle('blue', 0, { count: 9, sum: 45000 });
+
+      expect(result.backgroundColor).toBe('blue');
+      expect(result.backgroundImage).toBeUndefined();
+    });
+
+    it('returns solid background when composite is undefined', () => {
+      const result = getCompositeBarStyle('blue', 60000, undefined);
+
+      expect(result.backgroundColor).toBe('blue');
+      expect(result.backgroundImage).toBeUndefined();
+    });
+
+    it('returns solid background when composite.count is zero', () => {
+      const result = getCompositeBarStyle('blue', 60000, { count: 0, sum: 45000 });
+
+      expect(result.backgroundColor).toBe('blue');
+      expect(result.backgroundImage).toBeUndefined();
+    });
+
+    it('returns striped gradient pattern when duration and composite are correctly provided', () => {
+      const result = getCompositeBarStyle('blue', 60000, { count: 9, sum: 45000 });
 
       expect(result.backgroundColor).toBe('transparent');
       expect(result.backgroundImage).toContain('repeating-linear-gradient');
-      expect(result.backgroundImage).toContain('red');
+      expect(result.backgroundImage).toContain('blue');
     });
 
     it('calculates correct percentages when sum equals duration', () => {
-      const result = getCompositeBarStyle('green', 100000, { count: 4, sum: 100000 });
+      const result = getCompositeBarStyle('blue', 100000, { count: 4, sum: 100000 });
 
       // percNumItems = 100 / 4 = 25%
       // percDuration = 25 * 1 = 25%
@@ -136,7 +164,7 @@ describe('Bar', () => {
     });
 
     it('calculates narrower stripes when sum is less than duration', () => {
-      const result = getCompositeBarStyle('purple', 100000, { count: 10, sum: 50000 });
+      const result = getCompositeBarStyle('blue', 100000, { count: 10, sum: 50000 });
 
       // percNumItems = 100 / 10 = 10%
       // percDuration = 10 * 0.5 = 5%

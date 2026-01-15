@@ -34,11 +34,6 @@ export function Bar({
 }) {
   const { euiTheme } = useEuiTheme();
 
-  const barStyle =
-    duration && composite && composite.count > 0
-      ? getCompositeBarStyle(color, duration, composite)
-      : { backgroundColor: color };
-
   return (
     <div
       css={css`
@@ -47,7 +42,7 @@ export function Bar({
         width: ${width}%;
         margin-left: ${left}%;
       `}
-      style={barStyle}
+      style={getCompositeBarStyle(color, duration, composite)}
     >
       {segments?.length ? <BarSegments segments={segments} /> : null}
     </div>
@@ -56,9 +51,11 @@ export function Bar({
 
 export function getCompositeBarStyle(
   color: string,
-  duration: number,
-  composite: { count: number; sum: number }
+  duration?: number,
+  composite?: { count: number; sum: number }
 ) {
+  if (!duration || !composite || composite.count === 0) return { backgroundColor: color };
+
   const percNumItems = 100.0 / composite.count;
   const spanSumRatio = composite.sum / duration;
   const percDuration = percNumItems * spanSumRatio;
