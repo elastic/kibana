@@ -11,3 +11,5 @@ export { AssetDetailFlyout } from './asset_detail_flyout';
 export { PostureOverview } from './posture_overview';
 export { PrivilegesOverview } from './privileges_overview';
 export { UnknownKnownsOverview } from './unknown_knowns_overview';
+export { DriftEventsTable } from './drift_events_table';
+export { SnapshotComparison } from './snapshot_comparison';

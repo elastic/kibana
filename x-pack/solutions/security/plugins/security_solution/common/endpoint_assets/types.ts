@@ -466,6 +466,12 @@ export interface DriftSummaryResponse {
     severity: string;
   }>;
   time_range: string;
+  /** Current page number (1-based) */
+  page?: number;
+  /** Number of items per page */
+  page_size?: number;
+  /** Total number of recent changes matching filters */
+  total_recent_changes?: number;
 }
 
 export interface UnknownKnownsSummaryResponse {
@@ -634,4 +640,86 @@ export interface AssetTransformConfig {
   frequency: string;
   sync_delay: string;
   query_filter?: Record<string, unknown>;
+}
+
+// =============================================================================
+// Snapshot Comparison Types
+// =============================================================================
+
+/**
+ * Individual field difference between two snapshots
+ */
+export interface FieldDiff {
+  /** Dot-notation path to the field (e.g., "endpoint.posture.firewall_enabled") */
+  field_path: string;
+  /** Value from Date A snapshot */
+  value_a: unknown;
+  /** Value from Date B snapshot */
+  value_b: unknown;
+  /** Type of change detected */
+  change_type: 'added' | 'removed' | 'modified';
+}
+
+/**
+ * Comparison result for a single asset between two snapshots
+ */
+export interface AssetComparison {
+  /** Host ID for correlation */
+  host_id: string;
+  /** Host name for display */
+  host_name: string;
+  /** Whether asset exists in Date A snapshot */
+  exists_in_a: boolean;
+  /** Whether asset exists in Date B snapshot */
+  exists_in_b: boolean;
+  /** Whether any field differences were detected */
+  has_changes: boolean;
+  /** Count of changed fields */
+  change_count: number;
+  /** List of field-level differences */
+  diffs: FieldDiff[];
+  /** Full document from Date A (optional, for detailed view) */
+  document_a?: Record<string, unknown>;
+  /** Full document from Date B (optional, for detailed view) */
+  document_b?: Record<string, unknown>;
+}
+
+/**
+ * Response from snapshot comparison API
+ */
+export interface SnapshotCompareResponse {
+  /** Date A being compared (YYYY-MM-DD) */
+  date_a: string;
+  /** Date B being compared (YYYY-MM-DD) */
+  date_b: string;
+  /** Total number of assets across both snapshots */
+  total_assets: number;
+  /** Number of assets with at least one field change */
+  assets_with_changes: number;
+  /** Number of assets present in B but not A */
+  assets_added: number;
+  /** Number of assets present in A but not B */
+  assets_removed: number;
+  /** List of asset comparisons */
+  comparisons: AssetComparison[];
+}
+
+/**
+ * Information about an available snapshot
+ */
+export interface SnapshotInfo {
+  /** Snapshot date (YYYY-MM-DD) */
+  date: string;
+  /** Full index name */
+  index_name: string;
+  /** Number of documents in the snapshot */
+  document_count: number;
+}
+
+/**
+ * Response from list snapshots API
+ */
+export interface ListSnapshotsResponse {
+  /** Available snapshots sorted by date descending */
+  snapshots: SnapshotInfo[];
 }

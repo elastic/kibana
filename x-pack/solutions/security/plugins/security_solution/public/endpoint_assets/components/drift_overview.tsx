@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,55 +16,68 @@ import {
   EuiProgress,
   EuiText,
   EuiLoadingSpinner,
-  EuiBasicTable,
-  EuiHealth,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { DriftCategory, DriftSeverity } from '../../../common/endpoint_assets';
 import { useDriftSummary } from '../hooks/use_drift_summary';
-import type { DriftEvent } from '../../../common/endpoint_assets';
+import { useDriftEvents } from '../hooks/use_drift_events';
+import { DriftEventsTable } from './drift_events_table';
+import { DriftFilters } from './drift_filters';
+import { SnapshotComparison } from './snapshot_comparison';
 import * as i18n from '../pages/translations';
 
-interface RecentChangeRow {
-  timestamp: string;
-  host_name: string;
-  category: string;
-  change: string;
-  severity: string;
-}
-
-const getSeverityColor = (severity: string): string => {
-  switch (severity) {
-    case 'critical':
-      return 'danger';
-    case 'high':
-      return 'danger';
-    case 'medium':
-      return 'warning';
-    default:
-      return 'success';
-  }
-};
-
-const getCategoryLabel = (category: string): string => {
-  switch (category) {
-    case 'persistence':
-      return i18n.DRIFT_CATEGORY_PERSISTENCE;
-    case 'privileges':
-      return i18n.DRIFT_CATEGORY_PRIVILEGES;
-    case 'network':
-      return i18n.DRIFT_CATEGORY_NETWORK;
-    case 'software':
-      return i18n.DRIFT_CATEGORY_SOFTWARE;
-    case 'posture':
-      return i18n.DRIFT_CATEGORY_POSTURE;
-    default:
-      return category;
-  }
-};
-
 export const DriftOverview: React.FC = React.memo(() => {
-  const { data, loading, error } = useDriftSummary({ timeRange: '24h' });
+  const [timeRange, setTimeRange] = useState('24h');
+  const [selectedCategories, setSelectedCategories] = useState<DriftCategory[]>([]);
+  const [selectedSeverities, setSelectedSeverities] = useState<DriftSeverity[]>([]);
+  const [selectedHostId, setSelectedHostId] = useState('');
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  const { data: summaryData, loading: summaryLoading, error } = useDriftSummary({ timeRange });
+  const { data: eventsData, loading: eventsLoading, refresh } = useDriftEvents({
+    timeRange,
+    categories: selectedCategories,
+    severities: selectedSeverities,
+    hostId: selectedHostId,
+    page: page + 1,
+    pageSize,
+  });
+
+  useEffect(() => {
+    setPage(0);
+  }, [timeRange, selectedCategories, selectedSeverities, selectedHostId]);
+
+  const handleTimeRangeChange = useCallback((newTimeRange: string) => {
+    setTimeRange(newTimeRange);
+  }, []);
+
+  const handleCategoryChange = useCallback((categories: DriftCategory[]) => {
+    setSelectedCategories(categories);
+  }, []);
+
+  const handleSeverityChange = useCallback((severities: DriftSeverity[]) => {
+    setSelectedSeverities(severities);
+  }, []);
+
+  const handleHostChange = useCallback((hostId: string) => {
+    setSelectedHostId(hostId);
+  }, []);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  const handlePageSizeChange = useCallback((newPageSize: number) => {
+    setPageSize(newPageSize);
+    setPage(0);
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    refresh();
+  }, [refresh]);
+
+  const loading = summaryLoading;
 
   if (loading) {
     return (
@@ -76,7 +89,7 @@ export const DriftOverview: React.FC = React.memo(() => {
     );
   }
 
-  if (error || !data) {
+  if (error || !summaryData) {
     return (
       <EuiPanel hasBorder>
         <EuiText color="danger">{i18n.DRIFT_ERROR_LOADING}</EuiText>
@@ -84,14 +97,12 @@ export const DriftOverview: React.FC = React.memo(() => {
     );
   }
 
-  console.log({ data });
   const {
     total_events,
     events_by_category,
     events_by_severity,
     assets_with_changes,
-    recent_changes,
-  } = data;
+  } = summaryData;
 
   if (total_events === 0) {
     return (
@@ -108,44 +119,6 @@ export const DriftOverview: React.FC = React.memo(() => {
     );
   }
 
-  const recentChanges: RecentChangeRow[] = (recent_changes ?? []).map((change) => ({
-    timestamp: change.timestamp,
-    host_name: change.host_name,
-    category: change.category,
-    change: `${change.action}: ${change.item_name}`,
-    severity: change.severity,
-  }));
-
-  const columns: Array<EuiBasicTableColumn<RecentChangeRow>> = [
-    {
-      field: 'timestamp',
-      name: i18n.DRIFT_COLUMN_TIME,
-      width: '150px',
-      render: (timestamp: string) => new Date(timestamp).toLocaleTimeString(),
-    },
-    {
-      field: 'host_name',
-      name: i18n.DRIFT_COLUMN_HOST,
-    },
-    {
-      field: 'category',
-      name: i18n.DRIFT_COLUMN_CATEGORY,
-      render: (category: string) => getCategoryLabel(category),
-    },
-    {
-      field: 'change',
-      name: i18n.DRIFT_COLUMN_CHANGE,
-    },
-    {
-      field: 'severity',
-      name: i18n.DRIFT_COLUMN_SEVERITY,
-      width: '100px',
-      render: (severity: string) => (
-        <EuiHealth color={getSeverityColor(severity)}>{severity.toUpperCase()}</EuiHealth>
-      ),
-    },
-  ];
-
   const totalCategoryEvents =
     events_by_category.persistence +
     events_by_category.privileges +
@@ -155,6 +128,22 @@ export const DriftOverview: React.FC = React.memo(() => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexItem>
+        <DriftFilters
+          selectedCategories={selectedCategories}
+          selectedSeverities={selectedSeverities}
+          selectedTimeRange={timeRange}
+          selectedHostId={selectedHostId}
+          availableHosts={summaryData?.top_changed_assets ?? []}
+          onCategoryChange={handleCategoryChange}
+          onSeverityChange={handleSeverityChange}
+          onTimeRangeChange={handleTimeRangeChange}
+          onHostChange={handleHostChange}
+          onRefresh={handleRefresh}
+          isLoadingHosts={summaryLoading}
+        />
+      </EuiFlexItem>
+
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
@@ -319,10 +308,34 @@ export const DriftOverview: React.FC = React.memo(() => {
               </EuiTitle>
               <EuiSpacer size="m" />
 
-              <EuiBasicTable<RecentChangeRow> items={recentChanges} columns={columns} compressed />
+              <DriftEventsTable
+                events={eventsData?.events ?? []}
+                loading={eventsLoading}
+                pagination={{
+                  pageIndex: page,
+                  pageSize,
+                  totalItemCount: eventsData?.total ?? 0,
+                }}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFlexItem>
+
+      {/* Historical Snapshot Comparison Section */}
+      <EuiFlexItem>
+        <EuiSpacer size="xl" />
+        <EuiTitle size="m">
+          <h2>{i18n.SNAPSHOT_COMPARISON_TITLE}</h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" size="s">
+          {i18n.SNAPSHOT_COMPARISON_DESCRIPTION}
+        </EuiText>
+        <EuiSpacer size="m" />
+        <SnapshotComparison />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

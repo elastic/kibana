@@ -16,10 +16,14 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 const TIME_RANGE_TO_MS: Record<string, number> = {
   '1h': 60 * 60 * 1000,
+  '4h': 4 * 60 * 60 * 1000,
   '24h': 24 * 60 * 60 * 1000,
   '7d': 7 * 24 * 60 * 60 * 1000,
   '30d': 30 * 24 * 60 * 60 * 1000,
 };
+
+const VALID_CATEGORIES = ['privileges', 'persistence', 'network', 'software', 'posture'] as const;
+const VALID_SEVERITIES = ['critical', 'high', 'medium', 'low'] as const;
 
 export const registerDriftSummaryRoute = (
   router: SecuritySolutionPluginRouter,
@@ -44,12 +48,18 @@ export const registerDriftSummaryRoute = (
               time_range: schema.oneOf(
                 [
                   schema.literal('1h'),
+                  schema.literal('4h'),
                   schema.literal('24h'),
                   schema.literal('7d'),
                   schema.literal('30d'),
                 ],
                 { defaultValue: '24h' }
               ),
+              categories: schema.maybe(schema.string()),
+              severities: schema.maybe(schema.string()),
+              host_id: schema.maybe(schema.string()),
+              page: schema.maybe(schema.number({ min: 1, defaultValue: 1 })),
+              page_size: schema.maybe(schema.number({ min: 1, max: 100, defaultValue: 10 })),
             }),
           },
         },
@@ -60,10 +70,43 @@ export const registerDriftSummaryRoute = (
         try {
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const { time_range: timeRange } = request.query;
+          const {
+            time_range: timeRange,
+            categories: categoriesParam,
+            severities: severitiesParam,
+            host_id: hostId,
+            page = 1,
+            page_size: pageSize = 10,
+          } = request.query;
 
           const timeRangeMs = TIME_RANGE_TO_MS[timeRange] || TIME_RANGE_TO_MS['24h'];
           const rangeStart = Date.now() - timeRangeMs;
+
+          // Parse and validate categories
+          const categories = categoriesParam
+            ? categoriesParam.split(',').filter((c): c is (typeof VALID_CATEGORIES)[number] =>
+                VALID_CATEGORIES.includes(c as (typeof VALID_CATEGORIES)[number])
+              )
+            : [];
+
+          // Parse and validate severities
+          const severities = severitiesParam
+            ? severitiesParam.split(',').filter((s): s is (typeof VALID_SEVERITIES)[number] =>
+                VALID_SEVERITIES.includes(s as (typeof VALID_SEVERITIES)[number])
+              )
+            : [];
+
+          // Build filter clauses for category, severity, and host
+          const filterClauses: Array<Record<string, unknown>> = [];
+          if (categories.length > 0) {
+            filterClauses.push({ terms: { 'drift.category': categories } });
+          }
+          if (severities.length > 0) {
+            filterClauses.push({ terms: { 'drift.severity': severities } });
+          }
+          if (hostId) {
+            filterClauses.push({ term: { 'host.id': hostId } });
+          }
 
           const result = await esClient.search({
             index: 'endpoint-drift-events-*',
@@ -80,6 +123,7 @@ export const registerDriftSummaryRoute = (
                     },
                   },
                 ],
+                filter: filterClauses.length > 0 ? filterClauses : undefined,
               },
             },
             aggs: {
@@ -186,11 +230,14 @@ export const registerDriftSummaryRoute = (
               event_count: bucket.doc_count,
             })) ?? [];
 
-          // Fetch recent changes (top 10 most recent events)
+          // Fetch recent changes with pagination
+          const from = (page - 1) * pageSize;
           const recentEventsResult = await esClient.search({
             index: 'endpoint-drift-events-*',
-            size: 10,
+            size: pageSize,
+            from,
             sort: [{ '@timestamp': 'desc' }],
+            track_total_hits: true,
             query: {
               bool: {
                 must: [
@@ -203,6 +250,7 @@ export const registerDriftSummaryRoute = (
                     },
                   },
                 ],
+                filter: filterClauses.length > 0 ? filterClauses : undefined,
               },
             },
             _source: [
@@ -233,6 +281,10 @@ export const registerDriftSummaryRoute = (
             };
           });
 
+          // Get total count for pagination
+          const totalHits = recentEventsResult.hits.total;
+          const totalCount = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
+
           const summaryResponse: DriftSummaryResponse = {
             total_events: totalEventsAgg?.value ?? 0,
             events_by_category: eventsByCategory,
@@ -241,6 +293,9 @@ export const registerDriftSummaryRoute = (
             top_changed_assets: topChangedAssets,
             recent_changes: recentChanges,
             time_range: timeRange,
+            page,
+            page_size: pageSize,
+            total_recent_changes: totalCount,
           };
 
           return response.ok({

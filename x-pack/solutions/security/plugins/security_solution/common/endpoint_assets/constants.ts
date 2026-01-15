@@ -239,6 +239,10 @@ export const ENDPOINT_ASSETS_ROUTES = {
   TRANSFORM_STATUS: `${ENDPOINT_ASSETS_API_BASE}/transform/status`,
   TRANSFORM_START: `${ENDPOINT_ASSETS_API_BASE}/transform/start`,
   TRANSFORM_STOP: `${ENDPOINT_ASSETS_API_BASE}/transform/stop`,
+  /** List available Entity Store host snapshots */
+  SNAPSHOT_LIST: `${ENDPOINT_ASSETS_API_BASE}/snapshot/list`,
+  /** Compare two Entity Store host snapshots by date */
+  SNAPSHOT_COMPARE: `${ENDPOINT_ASSETS_API_BASE}/snapshot/compare`,
 } as const;
 
 // =============================================================================

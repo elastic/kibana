@@ -315,6 +315,89 @@ export const DRIFT_NO_CHANGES = i18n.translate(
   }
 );
 
+export const DRIFT_FILTER_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterTimeRange',
+  {
+    defaultMessage: 'Time Range',
+  }
+);
+
+export const DRIFT_FILTER_CATEGORY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterCategory',
+  {
+    defaultMessage: 'Category',
+  }
+);
+
+export const DRIFT_FILTER_SEVERITY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterSeverity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const DRIFT_FILTER_HOST_SEARCH = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterHostSearch',
+  {
+    defaultMessage: 'Search hosts',
+  }
+);
+
+export const DRIFT_FILTER_HOST_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterHostSearchPlaceholder',
+  {
+    defaultMessage: 'Search by host name...',
+  }
+);
+
+export const DRIFT_FILTER_ALL_HOSTS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterAllHosts',
+  {
+    defaultMessage: 'All hosts',
+  }
+);
+
+export const DRIFT_FILTER_HOST = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterHost',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const DRIFT_FILTER_REFRESH = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftFilterRefresh',
+  {
+    defaultMessage: 'Refresh',
+  }
+);
+
+export const DRIFT_SHOWING_RESULTS = (count: number, total: number) =>
+  i18n.translate('xpack.securitySolution.endpointAssets.driftShowingResults', {
+    defaultMessage: 'Showing {count} of {total} events',
+    values: { count, total },
+  });
+
+export const DRIFT_NO_RESULTS_FILTERED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftNoResultsFiltered',
+  {
+    defaultMessage: 'No events match your filter criteria',
+  }
+);
+
+export const DRIFT_SEVERITY_MEDIUM = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftSeverityMedium',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+
+export const DRIFT_SEVERITY_LOW = i18n.translate(
+  'xpack.securitySolution.endpointAssets.driftSeverityLow',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
 // Unknown Knowns (Dormant Risk) Translations
 export const TAB_UNKNOWN_KNOWNS = i18n.translate(
   'xpack.securitySolution.endpointAssets.tabUnknownKnowns',
@@ -482,5 +565,212 @@ export const UNKNOWN_KNOWNS_NO_RISKS_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'No old SSH keys, dormant users, or external scheduled tasks were detected across your fleet.',
+  }
+);
+
+// Snapshot Comparison Translations
+export const SNAPSHOT_COMPARISON_TITLE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotComparisonTitle',
+  {
+    defaultMessage: 'Historical Snapshot Comparison',
+  }
+);
+
+export const SNAPSHOT_COMPARISON_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotComparisonDescription',
+  {
+    defaultMessage:
+      'Compare endpoint asset configurations between two dates to identify changes over time.',
+  }
+);
+
+export const SNAPSHOT_COMPARE_FROM = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotCompareFrom',
+  {
+    defaultMessage: 'Compare From',
+  }
+);
+
+export const SNAPSHOT_COMPARE_TO = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotCompareTo',
+  {
+    defaultMessage: 'Compare To',
+  }
+);
+
+export const SNAPSHOT_VIEW_CHANGES_ONLY = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotViewChangesOnly',
+  {
+    defaultMessage: 'Changes Only',
+  }
+);
+
+export const SNAPSHOT_VIEW_FULL = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotViewFull',
+  {
+    defaultMessage: 'Full Comparison',
+  }
+);
+
+export const SNAPSHOT_TOTAL_ASSETS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotTotalAssets',
+  {
+    defaultMessage: 'Total Assets',
+  }
+);
+
+export const SNAPSHOT_CHANGED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotChanged',
+  {
+    defaultMessage: 'Changed',
+  }
+);
+
+export const SNAPSHOT_ADDED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotAdded',
+  {
+    defaultMessage: 'Added',
+  }
+);
+
+export const SNAPSHOT_REMOVED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotRemoved',
+  {
+    defaultMessage: 'Removed',
+  }
+);
+
+export const SNAPSHOT_ASSET_COMPARISON = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotAssetComparison',
+  {
+    defaultMessage: 'Asset Comparison',
+  }
+);
+
+export const SNAPSHOT_NO_SNAPSHOTS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotNoSnapshots',
+  {
+    defaultMessage: 'No Snapshots Available',
+  }
+);
+
+export const SNAPSHOT_NO_SNAPSHOTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotNoSnapshotsDescription',
+  {
+    defaultMessage:
+      'Entity Store snapshots are created daily. Please wait for the snapshot task to run, or ensure the Entity Store is enabled and configured.',
+  }
+);
+
+export const SNAPSHOT_ONE_SNAPSHOT = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotOneSnapshot',
+  {
+    defaultMessage: 'Only One Snapshot Available',
+  }
+);
+
+export const SNAPSHOT_ONE_SNAPSHOT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotOneSnapshotDescription',
+  {
+    defaultMessage:
+      'Snapshot comparison requires at least two snapshots. The next snapshot will be created at 00:01 UTC.',
+  }
+);
+
+export const SNAPSHOT_SELECT_DATE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotSelectDate',
+  {
+    defaultMessage: 'Select a date...',
+  }
+);
+
+export const SNAPSHOT_SELECT_DATES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotSelectDates',
+  {
+    defaultMessage: 'Select two dates to compare snapshots',
+  }
+);
+
+export const SNAPSHOT_NO_CHANGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotNoChanges',
+  {
+    defaultMessage: 'No changes detected between the selected dates',
+  }
+);
+
+export const SNAPSHOT_COLUMN_HOST = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnHost',
+  {
+    defaultMessage: 'Host Name',
+  }
+);
+
+export const SNAPSHOT_COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnStatus',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const SNAPSHOT_COLUMN_CHANGES = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnChanges',
+  {
+    defaultMessage: 'Changes',
+  }
+);
+
+export const SNAPSHOT_COLUMN_FIELD = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnField',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const SNAPSHOT_COLUMN_CHANGE_TYPE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotColumnChangeType',
+  {
+    defaultMessage: 'Change',
+  }
+);
+
+export const SNAPSHOT_STATUS_ADDED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotStatusAdded',
+  {
+    defaultMessage: 'Added',
+  }
+);
+
+export const SNAPSHOT_STATUS_REMOVED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotStatusRemoved',
+  {
+    defaultMessage: 'Removed',
+  }
+);
+
+export const SNAPSHOT_STATUS_MODIFIED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotStatusModified',
+  {
+    defaultMessage: 'Modified',
+  }
+);
+
+export const SNAPSHOT_STATUS_UNCHANGED = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotStatusUnchanged',
+  {
+    defaultMessage: 'Unchanged',
+  }
+);
+
+export const SNAPSHOT_ERROR_LOADING = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotErrorLoading',
+  {
+    defaultMessage: 'Error loading snapshots',
+  }
+);
+
+export const SNAPSHOT_ERROR_COMPARING = i18n.translate(
+  'xpack.securitySolution.endpointAssets.snapshotErrorComparing',
+  {
+    defaultMessage: 'Error comparing snapshots',
   }
 );

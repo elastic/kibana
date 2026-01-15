@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export {
-  registerPostureComparisonTask,
-  startPostureComparisonTask,
-  removePostureComparisonTask,
-  getPostureComparisonTaskState,
-} from './posture_comparison/posture_comparison_task';
+// Endpoint Assets tasks - currently no active tasks
+// The posture comparison task was removed in favor of Entity Store snapshot comparison

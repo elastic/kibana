@@ -131,7 +131,6 @@ import {
   registerEntityStoreSnapshotTask,
   registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
-import { registerPostureComparisonTask } from './lib/endpoint_assets';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -373,13 +372,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
       config: this.config,
-    });
-
-    registerPostureComparisonTask({
-      getStartServices: core.getStartServices,
-      taskManager: plugins.taskManager,
-      logger: this.logger,
-      telemetry: core.analytics,
     });
 
     const requestContextFactory = new RequestContextFactory({
