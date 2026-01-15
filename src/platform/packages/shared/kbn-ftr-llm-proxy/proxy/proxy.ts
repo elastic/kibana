@@ -198,11 +198,7 @@ export class LlmProxy {
         const simulator = await waitForInterceptPromise;
         const stream = simulator.stream;
 
-        function getParsedChunks(): LLmError | Array<string | ToolMessage> {
-          const llmMessage = getInterceptorResponse(simulator.requestBody);
-          if (isLlmError(llmMessage)) {
-            return llmMessage;
-          }
+        function getParsedChunks(llmMessage: LLMMessage): Array<string | ToolMessage> {
           if (!llmMessage) {
             return [];
           }
@@ -218,22 +214,24 @@ export class LlmProxy {
           return [llmMessage];
         }
 
-        // TODO
-        await simulator.writeError(chunksOrError.statusCode ?? 400, {
-          message: chunksOrError.errorMsg,
-        });
+        const llmMessage = getInterceptorResponse(simulator.requestBody);
 
-        if (stream) {
-          const parsedChunks = getParsedChunks();
-          for (const chunk of parsedChunks) {
-            await simulator.writeChunk(chunk);
-          }
+        if (isLlmError(llmMessage)) {
+          await simulator.writeError(llmMessage.statusCode ?? 400, {
+            message: llmMessage.errorMsg,
+          });
         } else {
-          const llmMessage = getMockedLlmMessage(simulator.requestBody);
-          await simulator.writeResponse(llmMessage);
-        }
+          if (stream) {
+            const parsedChunks = getParsedChunks(llmMessage);
+            for (const chunk of parsedChunks) {
+              await simulator.writeChunk(chunk);
+            }
+          } else {
+            await simulator.writeResponse(llmMessage);
+          }
 
-        await simulator.complete();
+          await simulator.complete();
+        }
 
         return simulator;
       },
