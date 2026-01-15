@@ -8770,6 +8770,20 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.timezone",
+            "type": "string",
+            "tags": [],
+            "label": "timezone",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SearchSourceFields.parent",
             "type": "Object",
             "tags": [],
@@ -10062,7 +10076,7 @@
             "section": "def-common.ProjectRouting",
             "text": "ProjectRouting"
           },
-          "; parent?: ",
+          "; timezone?: string | undefined; parent?: ",
           {
             "pluginId": "data",
             "scope": "common",
