@@ -168,7 +168,7 @@ test.describe('Scout ui test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
 
   test('should complete a basic user flow', async ({ pageObjects }) => {
     await pageObjects.demo.goto();
-    await expect(pageObjects.demo).toBeDefined();
+    await expect(pageObjects.demo.pageElement).toBeVisible();
   });
 });
 `;
@@ -204,7 +204,7 @@ spaceTest.describe(
 
     spaceTest('should complete a basic flow', async ({ pageObjects }) => {
       await pageObjects.demo.goto();
-      await expect(pageObjects.demo).toBeDefined();
+      await expect(pageObjects.demo.pageElement).toBeHidden();
     });
   }
 );
@@ -231,10 +231,14 @@ export function generateUiPageObjectsIndexContent(copyrightHeader: string): stri
 }
 
 export function generateUiDemoPageContent(scoutPackage: string, copyrightHeader: string): string {
-  return `${copyrightHeader}import type { ScoutPage } from '${scoutPackage}';
+  return `${copyrightHeader}import type { ScoutPage, Locator } from '${scoutPackage}';
 
 export class DemoPage {
-  constructor(private readonly page: ScoutPage) {}
+  public someElement: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.someElement = this.page.testSubj.locator('some-data-test-subj');
+  }
 
   async goto() {
     await this.page.gotoApp('not_implemented');

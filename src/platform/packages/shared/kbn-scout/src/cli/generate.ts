@@ -77,22 +77,22 @@ async function createDirectoryStructure(
     const apiConstantsPath = Path.resolve(apiFixturesDir, 'constants.ts');
     const apiFixturesIndexPath = Path.resolve(apiFixturesDir, 'index.ts');
 
+    // create scout/api/fixtures dir
     await Fsp.mkdir(apiFixturesDir, { recursive: true });
-    log.debug('created dir', apiFixturesDir);
+    // create scout/api/tests dir
     await Fsp.mkdir(apiTestsDir, { recursive: true });
-    log.debug('created dir', apiTestsDir);
+    // create scout/api/playwright.config.ts file
     const apiConfigContent = generateConfigContent(scoutPackage, './tests', copyrightHeader);
     await Fsp.writeFile(apiConfigPath, apiConfigContent);
-    log.debug('created file', apiConfigPath);
+    // create scout/api/fixtures/constants.ts file
     const apiConstantsContent = generateApiConstantsContent(copyrightHeader);
     await Fsp.writeFile(apiConstantsPath, apiConstantsContent);
-    log.debug('created file', apiConstantsPath);
+    // create scout/api/fixtures/index.ts file
     const apiFixturesIndexContent = generateApiFixturesIndexContent(scoutPackage, copyrightHeader);
     await Fsp.writeFile(apiFixturesIndexPath, apiFixturesIndexContent);
-    log.debug('created file', apiFixturesIndexPath);
+    // create scout/api/tests/example.spec.ts file
     const apiSpecContent = generateApiSpecContent(scoutPackage, copyrightHeader);
     await Fsp.writeFile(apiExampleSpecPath, apiSpecContent);
-    log.debug('created file', apiExampleSpecPath);
   }
 
   if (testType === 'ui' || testType === 'both') {
@@ -274,6 +274,10 @@ export const generateCmd: Command<void> = {
         relativePath.replace(/\\\\/g, '/'),
         'test/scout'
       )}`
+    );
+    log.write('\n');
+    log.warning(
+      '!!! Remember to register your plugin/package in .buildkite/pipelines/pull_request/scout_tests.yml before opening PR !!!'
     );
   },
 };
