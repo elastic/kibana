@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { type ConnectorContractUnion } from '../..';
+import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
   BaseConnectorStepSchema,
   DataSetStepSchema,
@@ -71,6 +72,10 @@ function createRecursiveStepSchema(
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
 
+    // Generate alias schemas for backward compatibility
+    // These allow old type names to still validate, but they won't appear in autocomplete
+    const aliasSchemas = generateAliasSchemas(connectors, stepSchema, loose);
+
     // Return discriminated union with all step types
     // This creates proper JSON schema validation that Monaco YAML can handle
     return z.discriminatedUnion('type', [
@@ -82,6 +87,7 @@ function createRecursiveStepSchema(
       DataSetStepSchema,
       httpSchema,
       ...connectorSchemas,
+      ...aliasSchemas,
     ]);
   });
 
@@ -102,4 +108,36 @@ function generateStepSchemaForConnector(
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
     ...(connector.configSchema && connector.configSchema.shape),
   });
+}
+
+/**
+ * Generate schemas for backward-compatible type aliases.
+ * These schemas use the old type names but reference the same connector definition.
+ * They are included in validation but not shown in autocomplete suggestions.
+ */
+function generateAliasSchemas(
+  connectors: ConnectorContractUnion[],
+  stepSchema: z.ZodType,
+  loose: boolean = false
+): ReturnType<typeof generateStepSchemaForConnector>[] {
+  const aliasSchemas: ReturnType<typeof generateStepSchemaForConnector>[] = [];
+
+  for (const [oldType, newType] of Object.entries(KIBANA_TYPE_ALIASES)) {
+    // Find the connector with the new type name
+    const connector = connectors.find((c) => c.type === newType);
+    if (connector) {
+      // Create a schema with the old type name but same params/output
+      aliasSchemas.push(
+        BaseConnectorStepSchema.extend({
+          // Mark as deprecated in description so it's clear this is a legacy alias
+          type: z.literal(oldType).describe(`Deprecated: Use ${newType} instead`),
+          'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
+          with: connector.paramsSchema,
+          'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+        })
+      );
+    }
+  }
+
+  return aliasSchemas;
 }
