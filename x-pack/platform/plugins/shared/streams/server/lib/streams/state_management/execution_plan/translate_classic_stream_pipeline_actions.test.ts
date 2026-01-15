@@ -1047,6 +1047,7 @@ function emptyActionsByType(): ActionsByType {
     delete_queries: [],
     unlink_assets: [],
     unlink_systems: [],
+    unlink_features: [],
     update_ingest_settings: [],
     update_failure_store: [],
   };

@@ -6,13 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { last } from 'lodash';
 import type { LlmProxy } from './proxy';
-import type { ToolMessage } from './types';
+import type { ToolMessage, LLmError } from './types';
 
 type LLMMessage = string[] | ToolMessage | string | undefined;
-type LLMResponseFnOrString = LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage);
+type LLMResponseFnOrString =
+  | LLMMessage
+  | LLmError
+  | ((body: ChatCompletionStreamParams) => LLMMessage);
 
 export function createInterceptors(proxy: LlmProxy) {
   return {

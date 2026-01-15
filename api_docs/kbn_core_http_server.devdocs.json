@@ -7645,6 +7645,18 @@
                 "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
               },
               {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-internal/src/router.ts"
               },
@@ -8995,6 +9007,10 @@
               {
                 "plugin": "contentConnectors",
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -13105,6 +13121,10 @@
                 "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
               },
               {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/server-internal/src/lifecycle/auth.ts"
               },
@@ -16656,8 +16676,8 @@
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/query.ts"
               },
               {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/server/autocomplete/value_suggestions_route.ts"
+                "plugin": "kql",
+                "path": "src/platform/plugins/shared/kql/server/autocomplete/value_suggestions_route.ts"
               },
               {
                 "plugin": "telemetry",
