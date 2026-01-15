@@ -290,6 +290,40 @@
       },
       {
         "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.IndexLifecycleManagementPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexLifecycleManagementPluginStart",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.IndexLifecycleManagementPluginStart.apiService",
+            "type": "Object",
+            "tags": [],
+            "label": "apiService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.PublicApiServiceSetup",
+                "text": "PublicApiServiceSetup"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
         "id": "def-common.MigrateAction",
         "type": "Interface",
         "tags": [],
@@ -575,6 +609,74 @@
             "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/policies.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.PublicApiServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublicApiServiceSetup",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/services/public_api_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.PublicApiServiceSetup.getPolicies",
+            "type": "Function",
+            "tags": [],
+            "label": "getPolicies",
+            "description": [
+              "\nFetches all ILM policies available in Index Lifecycle Management."
+            ],
+            "signature": [
+              "(options?: { signal?: AbortSignal | undefined; } | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/index-lifecycle-management-common-shared",
+                "scope": "common",
+                "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+                "section": "def-common.PolicyFromES",
+                "text": "PolicyFromES"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/services/public_api_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+                "id": "def-common.PublicApiServiceSetup.getPolicies.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/services/public_api_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+                    "id": "def-common.PublicApiServiceSetup.getPolicies.$1.signal",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "signal",
+                    "description": [],
+                    "signature": [
+                      "AbortSignal | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/services/public_api_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

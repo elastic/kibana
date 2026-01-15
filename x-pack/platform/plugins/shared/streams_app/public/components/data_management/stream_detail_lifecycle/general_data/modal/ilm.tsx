@@ -17,12 +17,12 @@ import {
   EuiSelectable,
   EuiText,
   EuiHealth,
-  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import type { IngestStreamLifecycleAll } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { getFormattedError } from '../../../../../util/errors';
+import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 
 export interface PhaseProps {
   description: string;
@@ -104,7 +104,6 @@ export function IlmField({
   setSaveButtonDisabled,
   readOnly,
 }: ModalOptions) {
-  const { euiTheme } = useEuiTheme();
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(initialValue) ? initialValue.ilm.policy : undefined
   );
@@ -116,12 +115,13 @@ export function IlmField({
     setSelectedPolicy(isIlmLifecycle(initialValue) ? initialValue.ilm.policy : undefined);
   }, [initialValue]);
 
-  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
+  const { ilmPhases } = useIlmPhasesColorAndDescription();
+
   const phaseToIndicatorColors = {
-    hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
-    warm: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
-    cold: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
-    frozen: euiTheme.colors.vis.euiColorVis4,
+    hot: ilmPhases.hot.color,
+    warm: ilmPhases.warm.color,
+    cold: ilmPhases.cold.color,
+    frozen: ilmPhases.frozen.color,
   };
 
   useEffect(() => {

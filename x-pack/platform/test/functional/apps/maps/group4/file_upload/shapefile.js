@@ -60,6 +60,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should add as document layer', async () => {
+      await maps.setView(0, 0, 1);
       await geoFileUpload.addFileAsDocumentLayer();
       await maps.waitForLayersToLoad();
 

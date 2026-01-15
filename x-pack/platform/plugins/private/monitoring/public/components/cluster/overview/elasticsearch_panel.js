@@ -92,11 +92,7 @@ function getBadgeColorFromLogLevel(level) {
 
 function renderLogs(props) {
   if (!props.logs.enabled) {
-    return (
-      <EuiDescriptionList>
-        <Reason reason={props.logs.reason} />
-      </EuiDescriptionList>
-    );
+    return <Reason reason={props.logs.reason} />;
   }
 
   return (

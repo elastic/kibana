@@ -192,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for data grid in full screen', async () => {
       await testSubjects.click('dataGridFullScreenButton');
       await a11y.testAppSnapshot();
-      await browser.pressKeys(browser.keys.ESCAPE);
+      await testSubjects.click('dataGridFullScreenButton');
     });
 
     it('a11y test for field statistics data grid view', async () => {

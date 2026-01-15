@@ -5,54 +5,34 @@
  * 2.0.
  */
 import { termQuery } from '@kbn/es-query';
-import type {
-  IStorageClient,
-  StorageClientDeleteResponse,
-  StorageClientIndexResponse,
-} from '@kbn/storage-adapter';
-import type { Feature } from '@kbn/streams-schema';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IStorageClient } from '@kbn/storage-adapter';
+import type { BaseFeature, Feature, FeatureStatus } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
-import { FeatureNotFoundError } from '../errors/feature_not_found_error';
+import { isNotFoundError } from '@kbn/es-errors';
 import {
   STREAM_NAME,
-  FEATURE_DESCRIPTION,
-  FEATURE_FILTER,
-  FEATURE_NAME,
   FEATURE_UUID,
+  FEATURE_LAST_SEEN,
+  FEATURE_STATUS,
+  FEATURE_EVIDENCE,
+  FEATURE_CONFIDENCE,
+  FEATURE_DESCRIPTION,
+  FEATURE_TYPE,
+  FEATURE_NAME,
+  FEATURE_VALUE,
+  FEATURE_TAGS,
+  FEATURE_META,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
+import { StatusError } from '../errors/status_error';
 
 interface FeatureBulkIndexOperation {
   index: { feature: Feature };
 }
 interface FeatureBulkDeleteOperation {
-  delete: { feature: { name: string } };
-}
-
-function getFeatureUuid(streamName: string, featureName: string) {
-  return objectHash({
-    [STREAM_NAME]: streamName,
-    [FEATURE_NAME]: featureName,
-  });
-}
-
-function fromStorage(link: StoredFeature): Feature {
-  return {
-    name: link[FEATURE_NAME],
-    description: link[FEATURE_DESCRIPTION],
-    filter: link[FEATURE_FILTER],
-  };
-}
-
-function toStorage(name: string, feature: Feature): StoredFeature {
-  return {
-    [STREAM_NAME]: name,
-    [FEATURE_UUID]: getFeatureUuid(name, feature.name),
-    [FEATURE_NAME]: feature.name,
-    [FEATURE_DESCRIPTION]: feature.description,
-    [FEATURE_FILTER]: feature.filter,
-  };
+  delete: { id: string };
 }
 
 export type FeatureBulkOperation = FeatureBulkIndexOperation | FeatureBulkDeleteOperation;
@@ -64,77 +44,15 @@ export class FeatureClient {
     }
   ) {}
 
-  async syncFeatureList(
-    name: string,
-    features: Feature[]
-  ): Promise<{ deleted: Feature[]; indexed: Feature[] }> {
-    const featuresResponse = await this.clients.storageClient.search({
-      size: 10_000,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [...termQuery(STREAM_NAME, name)],
-        },
-      },
-    });
-
-    const existingFeatures = featuresResponse.hits.hits.map((hit) => {
-      return hit._source;
-    });
-
-    const nextFeatures = features.map((feature) => {
-      return toStorage(name, feature);
-    });
-
-    const nextIds = new Set(nextFeatures.map((feature) => feature[FEATURE_UUID]));
-    const featuresDeleted = existingFeatures.filter(
-      (feature) => !nextIds.has(feature[FEATURE_UUID])
-    );
-
-    const operations: FeatureBulkOperation[] = [
-      ...featuresDeleted.map((feature) => ({ delete: { feature: fromStorage(feature), name } })),
-      ...nextFeatures.map((feature) => ({ index: { feature: fromStorage(feature), name } })),
-    ];
-
-    if (operations.length) {
-      await this.bulk(name, operations);
-    }
-
-    return {
-      deleted: featuresDeleted.map((feature) => fromStorage(feature)),
-      indexed: features,
-    };
-  }
-
-  async linkFeature(name: string, feature: Feature): Promise<Feature> {
-    const document = toStorage(name, feature);
-
-    await this.clients.storageClient.index({
-      id: document[FEATURE_UUID],
-      document,
-    });
-
-    return feature;
-  }
-
-  async unlinkFeature(name: string, feature: Feature): Promise<void> {
-    const id = getFeatureUuid(name, feature.name);
-
-    const { result } = await this.clients.storageClient.delete({ id });
-    if (result === 'not_found') {
-      throw new FeatureNotFoundError(`Feature ${feature.name} not found for stream ${name}`);
-    }
-  }
-
   async clean() {
     await this.clients.storageClient.clean();
   }
 
-  async bulk(name: string, operations: FeatureBulkOperation[]) {
+  async bulk(stream: string, operations: FeatureBulkOperation[]) {
     return await this.clients.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
-          const document = toStorage(name, operation.index.feature);
+          const document = toStorage(stream, operation.index.feature);
           return {
             index: {
               document,
@@ -143,43 +61,42 @@ export class FeatureClient {
           };
         }
 
-        const id = getFeatureUuid(name, operation.delete.feature.name);
-        return {
-          delete: {
-            _id: id,
-          },
-        };
+        return { delete: { _id: operation.delete.id } };
       }),
+      throwOnFail: true,
     });
   }
 
-  async getFeature(name: string, featureName: string): Promise<Feature> {
-    const id = getFeatureUuid(name, featureName);
-    const hit = await this.clients.storageClient.get({ id });
+  async getFeatures(
+    stream: string,
+    filters?: { status?: FeatureStatus[]; type?: string[] }
+  ): Promise<{ hits: Feature[]; total: number }> {
+    const filterClauses: QueryDslQueryContainer[] = [...termQuery(STREAM_NAME, stream)];
 
-    return fromStorage(hit._source!);
-  }
+    if (filters?.type?.length) {
+      filterClauses.push({
+        bool: {
+          should: filters.type.flatMap((type) => termQuery(FEATURE_TYPE, type)),
+          minimum_should_match: 1,
+        },
+      });
+    }
 
-  async deleteFeature(name: string, featureName: string): Promise<StorageClientDeleteResponse> {
-    const id = getFeatureUuid(name, featureName);
-    return await this.clients.storageClient.delete({ id });
-  }
+    if (filters?.status?.length) {
+      filterClauses.push({
+        bool: {
+          should: filters.status.flatMap((status) => termQuery(FEATURE_STATUS, status)),
+          minimum_should_match: 1,
+        },
+      });
+    }
 
-  async updateFeature(name: string, feature: Feature): Promise<StorageClientIndexResponse> {
-    const id = getFeatureUuid(name, feature.name);
-    return await this.clients.storageClient.index({
-      document: toStorage(name, feature),
-      id,
-    });
-  }
-
-  async getFeatures(name: string): Promise<{ hits: Feature[]; total: number }> {
     const featuresResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: true,
       query: {
         bool: {
-          filter: [...termQuery(STREAM_NAME, name)],
+          filter: filterClauses,
         },
       },
     });
@@ -189,4 +106,75 @@ export class FeatureClient {
       total: featuresResponse.hits.total.value,
     };
   }
+
+  async getFeature(stream: string, id: string) {
+    const hit = await this.clients.storageClient.get({ id }).catch((err) => {
+      if (isNotFoundError(err)) {
+        throw new StatusError(`Feature ${id} not found`, 404);
+      }
+      throw err;
+    });
+
+    const source = hit._source!;
+    if (source[STREAM_NAME] !== stream) {
+      throw new StatusError(`Feature ${id} not found`, 404);
+    }
+    return fromStorage(source);
+  }
+
+  async deleteFeature(stream: string, id: string) {
+    const feature = await this.getFeature(stream, id);
+    return await this.clients.storageClient.delete({ id: feature.id });
+  }
+
+  async deleteFeatures(stream: string) {
+    const features = await this.getFeatures(stream);
+    return await this.clients.storageClient.bulk({
+      operations: features.hits.map((feature) => ({
+        delete: { _id: feature.id },
+      })),
+    });
+  }
+}
+
+function toStorage(stream: string, feature: Feature): StoredFeature {
+  return {
+    [FEATURE_TYPE]: feature.type,
+    [FEATURE_UUID]: getFeatureId(stream, feature),
+    [FEATURE_NAME]: feature.name,
+    [FEATURE_DESCRIPTION]: feature.description,
+    [FEATURE_VALUE]: feature.value,
+    [FEATURE_CONFIDENCE]: feature.confidence,
+    [FEATURE_EVIDENCE]: feature.evidence,
+    [FEATURE_STATUS]: feature.status,
+    [FEATURE_LAST_SEEN]: feature.last_seen,
+    [FEATURE_TAGS]: feature.tags,
+    [STREAM_NAME]: stream,
+    [FEATURE_META]: feature.meta,
+  };
+}
+
+function fromStorage(feature: StoredFeature): Feature {
+  return {
+    id: feature[FEATURE_UUID],
+    type: feature[FEATURE_TYPE],
+    name: feature[FEATURE_NAME],
+    description: feature[FEATURE_DESCRIPTION],
+    value: feature[FEATURE_VALUE],
+    confidence: feature[FEATURE_CONFIDENCE],
+    evidence: feature[FEATURE_EVIDENCE],
+    status: feature[FEATURE_STATUS],
+    last_seen: feature[FEATURE_LAST_SEEN],
+    tags: feature[FEATURE_TAGS],
+    meta: feature[FEATURE_META],
+  };
+}
+
+export function getFeatureId(stream: string, feature: BaseFeature): string {
+  return objectHash({
+    [FEATURE_TYPE]: feature.type,
+    [STREAM_NAME]: stream,
+    [FEATURE_NAME]: feature.name,
+    [FEATURE_VALUE]: feature.value,
+  });
 }

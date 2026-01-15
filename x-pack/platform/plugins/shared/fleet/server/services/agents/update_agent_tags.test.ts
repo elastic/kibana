@@ -180,7 +180,7 @@ describe('update_agent_tags', () => {
     expect(errorResults.operations[1].error).toEqual('error reason');
   });
 
-  it('should throw error on version conflicts', async () => {
+  it('should retry error on version conflicts', async () => {
     esClient.updateByQuery.mockReset();
     esClient.updateByQuery.mockResolvedValue({
       failures: [],

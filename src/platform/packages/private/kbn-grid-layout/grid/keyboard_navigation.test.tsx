@@ -46,7 +46,8 @@ const getPanelHandle = (panelId: string, interactionType: 'resize' | 'drag' = 'd
 
 describe('Keyboard navigation', () => {
   window.HTMLElement.prototype.scrollIntoView = jest.fn();
-  Object.defineProperty(window, 'scrollY', { value: 0, writable: false });
+  window.HTMLElement.prototype.scrollTo = jest.fn();
+  Object.defineProperty(document.documentElement, 'scrollTop', { value: 0, writable: false });
   Object.defineProperty(document.body, 'scrollHeight', { value: 2000, writable: false });
 
   const pressEnter = async () => {

@@ -10,6 +10,12 @@
 import type { ScoutPage } from '..';
 import { expect } from '..';
 
+export enum DateUnitSelector {
+  Seconds = 's',
+  Minutes = 'm',
+  Hours = 'h',
+}
+
 export class DatePicker {
   constructor(private readonly page: ScoutPage) {}
 
@@ -44,13 +50,17 @@ export class DatePicker {
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
     await this.showStartEndTimes();
     // we start with end date
-    await this.page.testSubj.click('superDatePickerendDatePopoverButton');
+    // Note: Playwright fails to click 'superDatePickerendDatePopoverButton' because <span class="...">Now</span>
+    // element inside <div data-euiportal="true"> subtree repeatedly intercepts pointer events, preventing
+    // the click despite the target element is visible, enabled, and stable. Using { force: true } to bypass these checks.
+    // eslint-disable-next-line playwright/no-force-option
+    await this.page.testSubj.locator('superDatePickerendDatePopoverButton').click({ force: true });
     await this.page.testSubj.click('superDatePickerAbsoluteTab');
     const inputFrom = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputFrom.clear();
     await inputFrom.fill(to);
     await this.page.testSubj.click('parseAbsoluteDateFormat');
-    await this.page.testSubj.click('superDatePickerendDatePopoverButton');
+    await this.page.keyboard.press('Escape');
     // and later change start date
     await this.page.testSubj.click('superDatePickerstartDatePopoverButton');
     await this.page.testSubj.click('superDatePickerAbsoluteTab');
@@ -69,5 +79,31 @@ export class DatePicker {
       `Date picker 'end date' should be set correctly`
     ).toHaveText(to);
     await this.page.testSubj.click('querySubmitButton');
+  }
+
+  async getTimeConfig(): Promise<{ start: string; end: string }> {
+    await this.showStartEndTimes();
+    const start = await this.page.testSubj.innerText('superDatePickerstartDatePopoverButton');
+    const end = await this.page.testSubj.innerText('superDatePickerendDatePopoverButton');
+    return { start, end };
+  }
+
+  async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
+    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
+    // Check if refresh is already running
+    const toggleButton = this.page.testSubj.locator('superDatePickerToggleRefreshButton');
+    const isPaused = (await toggleButton.getAttribute('aria-checked')) === 'false';
+    if (isPaused) {
+      await toggleButton.click();
+    }
+    // Set interval
+    const intervalInput = this.page.testSubj.locator('superDatePickerRefreshIntervalInput');
+    await intervalInput.clear();
+    await intervalInput.fill(interval.toString());
+    const timeUnit = this.page.testSubj.locator('superDatePickerRefreshIntervalUnitsSelect');
+    await timeUnit.selectOption({ value: dateUnit });
+    await intervalInput.press('Enter');
+
+    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
   }
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { load } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod';
@@ -23,6 +24,22 @@ export const zodStringWithDurationValidation = z
       }
     ),
   });
+
+export const zodStringWithYamlValidation = z.string().refine(
+  (val) => {
+    try {
+      load(val);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  },
+  {
+    message: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.yamlValidationMessage', {
+      defaultMessage: 'Must be a valid YAML string',
+    }),
+  }
+);
 
 export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
@@ -252,5 +269,23 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         ),
       },
     ],
+  },
+  {
+    name: 'agent.internal',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsTitle', {
+      defaultMessage: 'Advanced internal YAML settings',
+    }),
+    description: () => (
+      <FormattedMessage
+        id="xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsDescription"
+        defaultMessage="Control advanced agent internal settings and feature flags. No stability guarantee is provided for these settings."
+      />
+    ),
+    api_field: {
+      name: 'agent_internal',
+    },
+    schema: zodStringWithYamlValidation,
+    type: 'yaml',
+    example_value: `'agent:\n internal:\n runtime:\n default: otel'`,
   },
 ];

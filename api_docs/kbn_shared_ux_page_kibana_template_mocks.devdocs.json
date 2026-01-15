@@ -930,7 +930,7 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "{ \"data-test-subj\": any; title: any; description: any; href: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
+          "{ href: any; \"data-test-subj\": any; title: any; description: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
         "deprecated": false,

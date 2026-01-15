@@ -1,0 +1,302 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createAgentlessPoliciesRequestExample:
+          description: 'Example request to create agentless policies'
+          value:
+            package:
+              name: ess_billing
+              version: 1.6.0
+            name: ess_billing-1
+            description: test
+            namespace: default
+            inputs:
+              ESS Billing-cel:
+                enabled: true
+                vars:
+                  organization_id: '1234'
+                  api_key: '<REPLACE_WITH_YOUR_API_KEY>'
+                streams:
+                  ess_billing.billing:
+                    enabled: true
+                    vars:
+                      lookbehind: 365
+                      hide_sensitive: true
+                      http_client_timeout: 30s
+                      tags:
+                        - forwarded
+                        - billing
+                  ess_billing.credits:
+                    enabled: false
+        createAgentlessPoliciesWithAWSCloudConnectorExample:
+          description: 'Example request to create agentless policy with AWS cloud connector'
+          value:
+            package:
+              name: cloud_security_posture
+              version: 3.1.1
+            name: cspm-aws-policy
+            description: CSPM integration for AWS with cloud connector
+            namespace: default
+            cloud_connector:
+              target_csp: aws
+            inputs:
+              cspm-cloudbeat/cis_aws:
+                enabled: true
+                vars:
+                  cloud_formation_template: 'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml'
+                streams:
+                  cloud_security_posture.findings:
+                    enabled: true
+                    vars:
+                      role_arn: 'arn:aws:iam::123456789012:role/TestRole'
+                      external_id:
+                        id: ABCDEFGHIJKLMNOPQRST
+                        isSecretRef: true
+                      aws.credentials.type: 'cloud_connector'
+                      aws.account_type: 'organization-account'
+                      aws.supports_cloud_connectors: true
+              cspm-cloudbeat/cis_gcp:
+                enabled: false
+              cspm-cloudbeat/cis_azure:
+                enabled: false
+            vars:
+              posture: cspm
+              deployment: aws
+        createAgentlessPoliciesWithAzureCloudConnectorExample:
+          description: 'Example request to create agentless policy with Azure cloud connector'
+          value:
+            package:
+              name: cloud_security_posture
+              version: 3.1.1
+            name: cspm-azure-policy
+            description: CSPM integration for Azure with cloud connector
+            namespace: default
+            cloud_connector:
+              target_csp: azure
+            inputs:
+              cspm-cloudbeat/cis_azure:
+                enabled: true
+                streams:
+                  cloud_security_posture.findings:
+                    enabled: true
+                    vars:
+                      tenant_id:
+                        id: tenant-secret-id
+                        isSecretRef: true
+                      client_id:
+                        id: client-secret-id
+                        isSecretRef: true
+                      azure_credentials_cloud_connector_id:
+                        value: 'existing-azure-credentials-connector-id'
+                        type: 'text'
+                      azure.account_type: 'organization-account'
+              cspm-cloudbeat/cis_aws:
+                enabled: false
+              cspm-cloudbeat/cis_gcp:
+                enabled: false
+            vars:
+              posture: cspm
+              deployment: azure
+        createAgentlessPoliciesReuseAWSCloudConnectorExample:
+          description: 'Example request to create agentless policy reusing an existing AWS cloud connector'
+          value:
+            package:
+              name: cloud_security_posture
+              version: 3.1.1
+            name: cspm-aws-reuse-policy
+            description: CSPM integration for AWS reusing existing cloud connector
+            namespace: default
+            cloud_connector:
+              target_csp: aws
+              cloud_connector_id: 'existing-aws-connector-id'
+            inputs:
+              cspm-cloudbeat/cis_aws:
+                enabled: true
+                vars:
+                  cloud_formation_template: 'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml'
+                streams:
+                  cloud_security_posture.findings:
+                    enabled: true
+                    vars:
+                      role_arn: 'arn:aws:iam::123456789012:role/TestRole'
+                      external_id:
+                        id: ABCDEFGHIJKLMNOPQRST
+                        isSecretRef: true
+                      aws.credentials.type: 'cloud_connector'
+                      aws.account_type: 'organization-account'
+                      aws.supports_cloud_connectors: true
+              cspm-cloudbeat/cis_gcp:
+                enabled: false
+              cspm-cloudbeat/cis_azure:
+                enabled: false
+            vars:
+              posture: cspm
+              deployment: aws
+
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          createAgentlessPoliciesResponseExample:
+            description: 'Example response showing the successful result of communication initialisation over MCP protocol'
+            value:
+              item:
+                id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                version: WzE0OTgsMV0=
+                name: ess_billing-1
+                namespace: default
+                description: test
+                package:
+                  name: ess_billing
+                  title: Elasticsearch Service Billing
+                  version: 1.6.0
+                enabled: true
+                inputs:
+                  ESS Billing-cel:
+                    enabled: true
+                    vars:
+                      organization_id: '1234'
+                      api_key:
+                        id: QY1sWpoBbWcMW-edr0Ee
+                        isSecretRef: true
+                      url: 'https://billing.elastic-cloud.com'
+                    streams:
+                      ess_billing.billing:
+                        enabled: true
+                        vars:
+                          lookbehind: 365
+                          hide_sensitive: true
+                          http_client_timeout: 30s
+                          tags:
+                            - forwarded
+                            - billing
+                      ess_billing.credits:
+                        enabled: false
+                supports_agentless: true
+                secret_references:
+                  - id: QY1sWpoBbWcMW-edr0Ee
+                revision: 1
+                created_at: '2025-11-06T18:27:43.541Z'
+                created_by: test_user
+                updated_at: '2025-11-06T18:27:43.541Z'
+                updated_by: test_user
+          createAgentlessPoliciesWithAWSCloudConnectorResponseExample:
+            description: 'Example response for AWS cloud connector integration'
+            value:
+              item:
+                id: aws-policy-12345
+                version: WzE0OTgsMV0=
+                name: cspm-aws-policy
+                namespace: default
+                description: CSPM integration for AWS with cloud connector
+                package:
+                  name: cloud_security_posture
+                  title: Cloud Security Posture Management
+                  version: 3.1.1
+                enabled: true
+                inputs:
+                  cspm-cloudbeat/cis_aws:
+                    enabled: true
+                    vars:
+                      cloud_formation_template: 'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml'
+                    streams:
+                      cloud_security_posture.findings:
+                        enabled: true
+                        vars:
+                          role_arn: 'arn:aws:iam::123456789012:role/TestRole'
+                          external_id:
+                            id: secret-external-id-123
+                            isSecretRef: true
+                          aws.credentials.type: 'cloud_connector'
+                          aws.account_type: 'organization-account'
+                  cspm-cloudbeat/cis_gcp:
+                    enabled: false
+                  cspm-cloudbeat/cis_azure:
+                    enabled: false
+                vars:
+                  posture: cspm
+                  deployment: aws
+                supports_agentless: true
+                supports_cloud_connector: true
+                cloud_connector_id: aws-connector-67890
+                secret_references:
+                  - id: secret-external-id-123
+                revision: 1
+                created_at: '2025-11-06T18:27:43.541Z'
+                created_by: test_user
+                updated_at: '2025-11-06T18:27:43.541Z'
+                updated_by: test_user
+          createAgentlessPoliciesWithAzureCloudConnectorResponseExample:
+            description: 'Example response for Azure cloud connector integration'
+            value:
+              item:
+                id: azure-policy-12345
+                version: WzE0OTgsMV0=
+                name: cspm-azure-policy
+                namespace: default
+                description: CSPM integration for Azure with cloud connector
+                package:
+                  name: cloud_security_posture
+                  title: Cloud Security Posture Management
+                  version: 3.1.1
+                enabled: true
+                inputs:
+                  cspm-cloudbeat/cis_azure:
+                    enabled: true
+                    streams:
+                      cloud_security_posture.findings:
+                        enabled: true
+                        vars:
+                          tenant_id:
+                            id: tenant-secret-id-123
+                            isSecretRef: true
+                          client_id:
+                            id: client-secret-id-456
+                            isSecretRef: true
+                          azure_credentials_cloud_connector_id:
+                            value: 'existing-azure-credentials-connector-id'
+                            type: 'text'
+                          azure.account_type: 'organization-account'
+                  cspm-cloudbeat/cis_aws:
+                    enabled: false
+                  cspm-cloudbeat/cis_gcp:
+                    enabled: false
+                vars:
+                  posture: cspm
+                  deployment: azure
+                supports_agentless: true
+                supports_cloud_connector: true
+                cloud_connector_id: azure-connector-67890
+                secret_references:
+                  - id: tenant-secret-id-123
+                  - id: client-secret-id-456
+                revision: 1
+                created_at: '2025-11-06T18:27:43.541Z'
+                created_by: test_user
+                updated_at: '2025-11-06T18:27:43.541Z'
+                updated_by: test_user
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  409:
+    description: 'Conflict'
+    content:
+      application/json:
+        examples:
+          conflictErrorResponseExample:
+            description: 'Example of a conflict error response'
+            value:
+              statusCode: 409
+              error: 'Conflict'
+              message: 'An error message describing what went wrong'

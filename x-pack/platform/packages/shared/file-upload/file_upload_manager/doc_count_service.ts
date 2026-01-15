@@ -9,7 +9,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { AnalysisResult } from '@kbn/file-upload-common';
-import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
+import type { FileUploadPluginStartApi } from '@kbn/file-upload-plugin/public/api';
 import type { Subscription } from 'rxjs';
 import { catchError, exhaustMap, finalize, from, map, takeWhile, throwError, timer } from 'rxjs';
 
@@ -22,7 +22,7 @@ export class DocCountService {
   private initialDocCount: number = 0;
 
   constructor(
-    private fileUpload: FileUploadStartApi,
+    private fileUpload: FileUploadPluginStartApi,
     private onIndexSearchable: (indexName: string) => void,
     private onAllDocsSearchable: (indexName: string) => void
   ) {}

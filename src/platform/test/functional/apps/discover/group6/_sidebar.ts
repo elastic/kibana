@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const testQuery = `from logstash-* | limit 10000`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
         await unifiedFieldList.openSidebarFieldFilter();
         options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');

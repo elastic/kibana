@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { uniq } from 'lodash/fp';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { SetAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_ALERT_TAGS_URL,
 } from '../../../../../common/constants';
-import { buildSiemResponse } from '../utils';
-import { validateAlertTagsArrays } from './helpers';
+import { setAlertTagsHandler } from '../common/set_alert_tags_handler';
 
 export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -24,7 +22,7 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [ALERTS_API_READ],
         },
       },
     })
@@ -38,82 +36,20 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
         },
       },
       async (context, request, response) => {
-        const { tags, ids } = request.body;
-        const core = await context.core;
         const securitySolution = await context.securitySolution;
-        const esClient = core.elasticsearch.client.asCurrentUser;
-        const siemClient = securitySolution?.getAppClient();
-        const siemResponse = buildSiemResponse(response);
-        const validationErrors = validateAlertTagsArrays(tags, ids);
         const spaceId = securitySolution?.getSpaceId() ?? 'default';
+        const getIndexPattern = async () => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
-        if (validationErrors.length) {
-          return siemResponse.error({ statusCode: 400, body: validationErrors });
-        }
-
-        if (!siemClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-
-        const tagsToAdd = uniq(tags.tags_to_add);
-        const tagsToRemove = uniq(tags.tags_to_remove);
-
-        const painlessScript = {
-          params: { tagsToAdd, tagsToRemove },
-          source: `List newTagsArray = [];
-        if (ctx._source["kibana.alert.workflow_tags"] != null) {
-          for (tag in ctx._source["kibana.alert.workflow_tags"]) {
-            if (!params.tagsToRemove.contains(tag)) {
-              newTagsArray.add(tag);
-            }
-          }
-          for (tag in params.tagsToAdd) {
-            if (!newTagsArray.contains(tag)) {
-              newTagsArray.add(tag)
-            }
-          }
-          ctx._source["kibana.alert.workflow_tags"] = newTagsArray;
-        } else {
-          ctx._source["kibana.alert.workflow_tags"] = params.tagsToAdd;
-        }
-        `,
-          lang: 'painless',
-        };
-
-        const bulkUpdateRequest = [];
-        for (const id of ids) {
-          bulkUpdateRequest.push(
-            {
-              update: {
-                _index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-                _id: id,
-              },
-            },
-            {
-              script: painlessScript,
-            }
-          );
-        }
-
-        try {
-          const body = await esClient.updateByQuery({
-            index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-            refresh: true,
-            script: painlessScript,
-            query: {
-              bool: {
-                filter: { terms: { _id: ids } },
-              },
-            },
-          });
-          return response.ok({ body });
-        } catch (err) {
-          const error = transformError(err);
-          return siemResponse.error({
-            body: error.message,
-            statusCode: error.statusCode,
-          });
-        }
+        return setAlertTagsHandler({
+          context,
+          request,
+          response,
+          getIndexPattern,
+          validateSiemClient: async (ctx) => {
+            const secSolution = await ctx.securitySolution;
+            return secSolution?.getAppClient() != null;
+          },
+        });
       }
     );
 };

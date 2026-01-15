@@ -7,7 +7,7 @@
 
 export { getReviewFields } from './src/review/get_review_fields';
 export { getGrokPattern } from './src/review/get_grok_pattern';
-export { unwrapPatternDefinitions } from './src/review/unwrap_pattern_definitions';
+export { unwrapPatternDefinitions } from '@kbn/streamlang/types/utils/grok_pattern_definitions';
 export { getGrokProcessor, type GrokProcessorResult } from './src/review/get_grok_processor';
 export { mergeGrokProcessors } from './src/review/merge_grok_processors';
 export { groupMessagesByPattern } from './src/group_messages';

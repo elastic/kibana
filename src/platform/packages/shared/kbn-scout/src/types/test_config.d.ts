@@ -11,7 +11,9 @@ import type { ServerlessProjectType } from '@kbn/es';
 
 export interface ScoutTestConfig {
   serverless: boolean;
+  uiam: boolean;
   projectType?: ServerlessProjectType;
+  organizationId?: string;
   isCloud: boolean;
   cloudHostName?: string;
   cloudUsersFilePath: string;

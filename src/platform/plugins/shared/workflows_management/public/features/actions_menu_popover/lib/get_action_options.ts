@@ -8,13 +8,22 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
+import { isDynamicConnector } from '@kbn/workflows';
+import type {
+  ActionsMenuGroup,
+  WorkflowsExtensionsPublicPluginStart,
+} from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
-import type { ActionConnectorGroup, ActionOptionData } from '../types';
+import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
 
-export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
+export function getActionOptions(
+  euiTheme: UseEuiTheme['euiTheme'],
+  workflowsExtensions: WorkflowsExtensionsPublicPluginStart
+): ActionOptionData[] {
   const connectors = getAllConnectors();
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
@@ -62,6 +71,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
       },
     ],
   };
+
   const kibanaGroup: ActionOptionData = {
     iconType: 'logoKibana',
     id: 'kibana',
@@ -85,7 +95,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     }),
   };
   const externalGroup: ActionOptionData = {
-    iconType: 'apps',
+    iconType: 'plugs',
     iconColor: euiTheme.colors.vis.euiColorVis0,
     id: 'external',
     label: i18n.translate('workflows.actionsMenu.external', {
@@ -95,6 +105,40 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
       defaultMessage: 'Automate actions in external systems and apps.',
     }),
     options: [],
+  };
+  const aiGroup: ActionOptionData = {
+    iconType: AssistantIcon,
+    id: 'ai',
+    label: i18n.translate('workflows.actionsMenu.ai', {
+      defaultMessage: 'AI',
+    }),
+    description: i18n.translate('workflows.actionsMenu.aiDescription', {
+      defaultMessage: 'Use AI to automate your workflows and get insights into your data',
+    }),
+    options: [],
+  };
+  const dataTransformationGroup: ActionOptionData = {
+    iconType: 'pencil',
+    iconColor: euiTheme.colors.vis.euiColorVis0,
+    id: 'data',
+    label: i18n.translate('workflows.actionsMenu.dataTransformation', {
+      defaultMessage: 'Data transformation',
+    }),
+    description: i18n.translate('workflows.actionsMenu.dataTransformationDescription', {
+      defaultMessage: 'Manipulate and convert your data',
+    }),
+    options: [
+      {
+        id: 'data.set',
+        label: i18n.translate('workflows.actionsMenu.dataSet', {
+          defaultMessage: 'Set Variables',
+        }),
+        description: i18n.translate('workflows.actionsMenu.dataSetDescription', {
+          defaultMessage: 'Define or compute variables to use in your workflow',
+        }),
+        iconType: 'tableOfContents',
+      },
+    ],
   };
   const flowControlGroup: ActionOptionData = {
     iconType: 'branch',
@@ -154,10 +198,27 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     options: [],
   };
 
+  const stepGroups: Record<ActionsMenuGroup, ActionGroup> = {
+    elasticsearch: elasticSearchGroup,
+    external: externalGroup,
+    ai: aiGroup,
+    kibana: kibanaGroup,
+    data: dataTransformationGroup,
+  };
+
   const baseTypeInstancesCount: Record<string, number> = {};
 
   for (const connector of connectors) {
-    if (connector.type.startsWith('elasticsearch.')) {
+    const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
+    if (customStepDefinition) {
+      const group = stepGroups[customStepDefinition.actionsMenuGroup ?? 'kibana'];
+      group.options.push({
+        id: customStepDefinition.id,
+        label: customStepDefinition.label,
+        description: customStepDefinition.description,
+        iconType: customStepDefinition.icon ?? group.iconType,
+      });
+    } else if (connector.type.startsWith('elasticsearch.')) {
       elasticSearchGroup.options.push({
         id: connector.type,
         label: connector.description || connector.type,
@@ -171,7 +232,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         description: connector.type,
         iconType: 'logoKibana',
       });
-    } else {
+    } else if (isDynamicConnector(connector)) {
       const [baseType, subtype] = connector.type.split('.');
       let groupOption = externalGroup;
       if (subtype) {
@@ -216,6 +277,8 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     triggersGroup,
     elasticSearchGroup,
     kibanaGroup,
+    aiGroup,
+    dataTransformationGroup,
     externalGroup,
     httpRequest,
     flowControlGroup,

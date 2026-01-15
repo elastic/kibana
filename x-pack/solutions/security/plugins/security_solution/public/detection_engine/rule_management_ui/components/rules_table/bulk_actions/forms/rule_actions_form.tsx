@@ -11,8 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   RuleAction,
   ActionTypeRegistryContract,
+  ActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
 import { RuleActionsField } from '../../../../../../common/components/rule_actions_field';
 import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
@@ -46,7 +48,8 @@ export interface RuleActionsFormData {
 }
 
 const getFormSchema = (
-  actionTypeRegistry: ActionTypeRegistryContract
+  actionTypeRegistry: ActionTypeRegistryContract,
+  connectors?: ActionConnector[]
 ): FormSchema<RuleActionsFormData> => ({
   actions: {
     validations: [
@@ -54,7 +57,7 @@ const getFormSchema = (
         // Debounced validator not explicitly necessary here as the `RuleActionsFormData` form doesn't exhibit the same
         // behavior as the `ActionsStepRule` form outlined in https://github.com/elastic/kibana/issues/142217, however
         // additional renders are prevented so using for consistency
-        validator: debouncedValidateRuleActionsField(actionTypeRegistry),
+        validator: debouncedValidateRuleActionsField(actionTypeRegistry, connectors),
       },
     ],
   },
@@ -79,10 +82,15 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
   const {
     services: {
       triggersActionsUi: { actionTypeRegistry },
+      http,
     },
   } = useKibana();
 
-  const formSchema = useMemo(() => getFormSchema(actionTypeRegistry), [actionTypeRegistry]);
+  const { data: connectors } = useLoadConnectors({ http });
+  const formSchema = useMemo(
+    () => getFormSchema(actionTypeRegistry, connectors),
+    [actionTypeRegistry, connectors]
+  );
 
   const { form } = useForm({
     schema: formSchema,

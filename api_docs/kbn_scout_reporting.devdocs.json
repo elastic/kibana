@@ -813,6 +813,54 @@
     "functions": [
       {
         "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.computeTestID",
+        "type": "Function",
+        "tags": [],
+        "label": "computeTestID",
+        "description": [],
+        "signature": [
+          "(testFilePath: string, testTitle: string) => string"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.computeTestID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "testFilePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.computeTestID.$2",
+            "type": "string",
+            "tags": [],
+            "label": "testTitle",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
         "id": "def-common.excapeHtmlCharacters",
         "type": "Function",
         "tags": [],
@@ -932,39 +980,6 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-reporting",
-        "id": "def-common.getTestIDForTitle",
-        "type": "Function",
-        "tags": [],
-        "label": "getTestIDForTitle",
-        "description": [],
-        "signature": [
-          "(title: string) => string"
-        ],
-        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/test_id_generator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.getTestIDForTitle.$1",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/test_id_generator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1307,7 +1322,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"playwright\" | \"jest\" | \"ftr\""
+              "\"cypress\" | \"playwright\" | \"jest\" | \"ftr\""
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
             "deprecated": false,

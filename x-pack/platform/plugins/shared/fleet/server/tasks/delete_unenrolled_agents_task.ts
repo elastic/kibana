@@ -26,7 +26,7 @@ import { AGENTS_INDEX } from '../../common/constants';
 import { settingsService } from '../services';
 
 export const TYPE = 'fleet:delete-unenrolled-agents-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.1';
 const TITLE = 'Fleet Delete Unenrolled Agents Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '1h';
@@ -102,7 +102,7 @@ export class DeleteUnenrolledAgentsTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[DeleteUnenrolledAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[DeleteUnenrolledAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   public async deleteUnenrolledAgents({
@@ -165,7 +165,7 @@ export class DeleteUnenrolledAgentsTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;

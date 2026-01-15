@@ -27,6 +27,9 @@ describe('skipQueryForDetectionsPage', () => {
       skipQueryForDetectionsPage(TableId.alertsOnAlertsPage, ['auditbeat-*', 'filebeat-*'])
     ).toBe(true);
     expect(
+      skipQueryForDetectionsPage(TableId.alertsOnAttacksPage, ['auditbeat-*', 'filebeat-*'])
+    ).toBe(true);
+    expect(
       skipQueryForDetectionsPage(TableId.alertsOnRuleDetailsPage, ['auditbeat-*', 'filebeat-*'])
     ).toBe(true);
   });
@@ -34,6 +37,12 @@ describe('skipQueryForDetectionsPage', () => {
   test('Make sure to NOT skip the query when it is a timeline from a detection pages with the siem-signals', () => {
     expect(
       skipQueryForDetectionsPage(TableId.alertsOnAlertsPage, [
+        'auditbeat-*',
+        '.siem-signals-rainbow-butterfly',
+      ])
+    ).toBe(false);
+    expect(
+      skipQueryForDetectionsPage(TableId.alertsOnAttacksPage, [
         'auditbeat-*',
         '.siem-signals-rainbow-butterfly',
       ])

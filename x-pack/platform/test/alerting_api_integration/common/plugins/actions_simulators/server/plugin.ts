@@ -16,6 +16,7 @@ import type {
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server/plugin';
 import type { ActionType } from '@kbn/actions-plugin/server';
+import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
@@ -24,11 +25,13 @@ import { initPlugin as initJira } from './jira_simulation';
 import { initPlugin as initResilient } from './resilient_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
+import { initPlugin as initSFCServer } from './single_file_connector_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
 import { initPlugin as initTorq } from './torq_simulation';
 import { initPlugin as initUnsecuredAction } from './unsecured_actions_simulation';
 import { initPlugin as initTines } from './tines_simulation';
+import { TestSingleFileConnector } from './test_spec_connector';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -95,6 +98,11 @@ export async function getServiceNowServer(): Promise<http.Server> {
   return await initServiceNow();
 }
 
+export async function getSFCServer(): Promise<http.Server> {
+  const { httpServer } = await initSFCServer();
+  return httpServer;
+}
+
 interface FixtureSetupDeps {
   actions: ActionsPluginSetupContract;
   features: FeaturesPluginSetup;
@@ -149,6 +157,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
     });
+
+    // register a single file connector
+    actions.registerType(createConnectorTypeFromSpec(TestSingleFileConnector, actions));
 
     const router = core.http.createRouter();
 

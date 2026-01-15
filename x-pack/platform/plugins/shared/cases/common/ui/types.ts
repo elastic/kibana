@@ -186,6 +186,8 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  from: string;
+  to: string;
 }
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;

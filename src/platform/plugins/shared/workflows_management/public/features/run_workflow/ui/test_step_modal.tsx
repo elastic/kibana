@@ -23,10 +23,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { z } from '@kbn/zod/v4';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 export function TestStepModal({
@@ -48,8 +48,8 @@ export function TestStepModal({
   const id = 'json-editor-schema';
 
   const jsonSchema = useMemo(() => {
-    return zodToJsonSchema(initialcontextOverride.schema, {
-      $refStrategy: 'none',
+    return z.toJSONSchema(initialcontextOverride.schema, {
+      target: 'draft-7',
     });
   }, [initialcontextOverride.schema]);
 

@@ -69,7 +69,20 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-common",
+        "id": "def-common.AIChatExperience",
+        "type": "Enum",
+        "tags": [],
+        "label": "AIChatExperience",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/ai_chat_experience.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/ai-assistant-common",
@@ -79,7 +92,7 @@
         "label": "AssistantScope",
         "description": [],
         "signature": [
-          "\"search\" | \"observability\" | \"all\""
+          "\"search\" | \"all\" | \"observability\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
         "deprecated": false,

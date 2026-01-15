@@ -1,0 +1,145 @@
+{
+  "id": "@kbn/edot-collector",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/edot-collector",
+        "id": "def-server.ensureEdotCollector",
+        "type": "Function",
+        "tags": [],
+        "label": "ensureEdotCollector",
+        "description": [
+          "\nEnsures the EDOT Collector (Elastic Distribution of OpenTelemetry Collector) is running in Gateway mode.\nReads configuration from kibana.dev.yml, generates EDOT Collector configuration,\nand starts the Docker container.\n"
+        ],
+        "signature": [
+          "({\n  log,\n  signal,\n  configPath,\n  grpcPort = 4317,\n  httpPort = 4318,\n}: { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; signal: AbortSignal; configPath?: string | undefined; grpcPort?: number | undefined; httpPort?: number | undefined; }) => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/edot-collector",
+            "id": "def-server.ensureEdotCollector.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  log,\n  signal,\n  configPath,\n  grpcPort = 4317,\n  httpPort = 4318,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/edot-collector",
+                "id": "def-server.ensureEdotCollector.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/edot-collector",
+                "id": "def-server.ensureEdotCollector.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal"
+                ],
+                "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/edot-collector",
+                "id": "def-server.ensureEdotCollector.$1.configPath",
+                "type": "string",
+                "tags": [],
+                "label": "configPath",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/edot-collector",
+                "id": "def-server.ensureEdotCollector.$1.grpcPort",
+                "type": "number",
+                "tags": [],
+                "label": "grpcPort",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/edot-collector",
+                "id": "def-server.ensureEdotCollector.$1.httpPort",
+                "type": "number",
+                "tags": [],
+                "label": "httpPort",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

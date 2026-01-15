@@ -62,7 +62,7 @@ apiTest.describe(
         templateType: '{{{ }}}',
         description: 'should reject {{{ }}} template syntax',
       },
-    ].forEach(({ templateValue, templateTo, templateType, description }) => {
+    ].forEach(({ templateValue, templateTo, description }) => {
       apiTest(`${description}`, async () => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -148,7 +148,7 @@ apiTest.describe(
       expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'inactive');
     });
 
-    apiTest('should throw error if value and copy_from are missing', async ({ testBed }) => {
+    apiTest('should throw error if value and copy_from are missing', async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -173,7 +173,7 @@ apiTest.describe(
       );
     });
 
-    apiTest('should throw error if value and copy_from are both present', async ({ testBed }) => {
+    apiTest('should throw error if value and copy_from are both present', async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {

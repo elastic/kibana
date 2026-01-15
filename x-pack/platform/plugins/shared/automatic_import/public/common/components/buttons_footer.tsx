@@ -30,6 +30,7 @@ interface ButtonsFooterProps {
   onBack?: () => void;
   hideCancel?: boolean;
   isNextDisabled?: boolean;
+  isNextLoading?: boolean;
 }
 export const ButtonsFooter = React.memo<ButtonsFooterProps>(
   ({
@@ -40,6 +41,7 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
     onBack,
     hideCancel = false,
     isNextDisabled = false,
+    isNextLoading = false,
   }) => {
     const integrationsUrl = useKibana().services.application.getUrlForApp('integrations');
     return (
@@ -103,6 +105,7 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
                         color="primary"
                         onClick={onNext}
                         isDisabled={isNextDisabled}
+                        isLoading={isNextLoading}
                         data-test-subj="buttonsFooter-nextButton"
                       >
                         {nextButtonText || (

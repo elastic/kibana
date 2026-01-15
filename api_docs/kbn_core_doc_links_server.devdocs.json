@@ -79,6 +79,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-doc-links-server",
+        "id": "def-server.DocLinksServicePreboot",
+        "type": "Type",
+        "tags": [],
+        "label": "DocLinksServicePreboot",
+        "description": [],
+        "signature": [
+          "DocLinksServiceSetup"
+        ],
+        "path": "src/core/packages/doc-links/server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-doc-links-server",
         "id": "def-server.DocLinksServiceStart",
         "type": "Type",
         "tags": [],

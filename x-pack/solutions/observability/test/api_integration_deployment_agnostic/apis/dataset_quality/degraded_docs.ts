@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, timerange } from '@kbn/synthtrace-client';
 import type { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';

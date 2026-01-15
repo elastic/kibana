@@ -33,6 +33,7 @@ const enabledActionTypes = [
   'test.index-record',
   'test.noop',
   'test.rate-limit',
+  '.alienvault-otx',
 ];
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -65,6 +66,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
+      rules: {
+        pathname: '/app/rules',
+      },
     },
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),
@@ -86,7 +90,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'stackAlertsPage',
           'ruleTagFilter',
           'ruleStatusFilter',
+          'unifiedRulesPage',
         ])}`,
+        `--uiSettings.overrides.workflows:ui:enabled=true`,
+        `--workflowsManagement.enabled=true`,
+        `--workflowsExecutionEngine.enabled=true`,
+        `--xpack.stack_connectors.enableExperimental=${JSON.stringify(['connectorsFromSpecs'])}`,
         `--xpack.alerting.rules.minimumScheduleInterval.value="5s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
         `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,

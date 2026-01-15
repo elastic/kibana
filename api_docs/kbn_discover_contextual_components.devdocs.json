@@ -79,6 +79,49 @@
       },
       {
         "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.createResourceFieldsWithOtelFallback",
+        "type": "Function",
+        "tags": [],
+        "label": "createResourceFieldsWithOtelFallback",
+        "description": [
+          "\nEnhanced version that uses OTel field fallbacks and returns resource fields with actual field names.\nThis ensures badges display the correct field names (e.g., 'resource.attributes.service.name'\ninstead of 'service.name' when the document uses OTel format)."
+        ],
+        "signature": [
+          "({ row, dataView, core, share, fieldFormats, }: Omit<ResourceFieldsProps, \"fields\" | \"getAvailableFields\">) => ",
+          {
+            "pluginId": "@kbn/discover-contextual-components",
+            "scope": "public",
+            "docId": "kibKbnDiscoverContextualComponentsPluginApi",
+            "section": "def-public.ResourceFieldDescriptor",
+            "text": "ResourceFieldDescriptor"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.createResourceFieldsWithOtelFallback.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  row,\n  dataView,\n  core,\n  share,\n  fieldFormats,\n}",
+            "description": [],
+            "signature": [
+              "Omit<ResourceFieldsProps, \"fields\" | \"getAvailableFields\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
         "id": "def-public.formatJsonDocumentForContent",
         "type": "Function",
         "tags": [],

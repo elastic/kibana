@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart, type UseEuiTheme } from '@elastic/eui';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
@@ -85,6 +85,7 @@ export interface VisualizeInput extends EmbeddableInput {
   filters?: Filter[];
   timeRange?: TimeRange;
   timeslice?: [number, number];
+  projectRouting?: ProjectRouting;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -616,6 +617,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         query: this.input.query,
         filters: this.input.filters,
         disableWarningToasts: true,
+        projectRouting: this.input.projectRouting,
       },
       variables: {
         embeddableTitle: this.getTitle(),

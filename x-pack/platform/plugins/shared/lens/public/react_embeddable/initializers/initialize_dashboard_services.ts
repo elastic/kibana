@@ -25,10 +25,10 @@ import type {
   LensSharedProps,
   IntegrationCallbacks,
   LensInternalApi,
-  LensApi,
-  LensSerializedState,
 } from '@kbn/lens-common';
-import { isTextBasedLanguage, transformOutputState } from '../helper';
+import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
@@ -59,12 +59,12 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
 export interface DashboardServicesConfig {
   api: PublishesWritableTitle &
     PublishesWritableDescription &
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
+    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
     Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   anyStateChange$: Observable<void>;
   getLatestState: () => SerializedProps;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 }
 
 /**
@@ -133,17 +133,13 @@ export function initializeDashboardServices(
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
         return {
-          rawState: {
-            ...currentState,
-            savedObjectId: newId,
-          },
+          ...currentState,
+          savedObjectId: newId,
         };
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return {
-          rawState: transformOutputState(byValueRuntimeState),
-        };
+        return transformToApiConfig(byValueRuntimeState);
       },
     },
     anyStateChange$: merge(
@@ -172,7 +168,7 @@ export function initializeDashboardServices(
         disableTriggers: internalApi.disableTriggers$.getValue(),
       };
     },
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       titleManager.reinitializeState(lastSaved);
       internalApi.updateDisabledTriggers(lastSaved?.disableTriggers);
       internalApi.updateOverrides(lastSaved?.overrides);

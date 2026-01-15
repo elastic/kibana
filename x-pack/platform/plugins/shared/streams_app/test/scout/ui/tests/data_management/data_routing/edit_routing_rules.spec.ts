@@ -12,10 +12,6 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
 test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
-
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     // Clear existing rules
@@ -32,39 +28,54 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
   test.afterAll(async ({ apiServices }) => {
     // Clear existing rules
     await apiServices.streams.clearStreamChildren('logs');
-    await apiServices.streams.disable();
   });
 
   test('should edit an existing routing rule', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+    const rountingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
     // Update condition
     await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
     await pageObjects.streams.updateRoutingRule();
 
     // Verify success
-    await expect(page.getByText('service.name')).toBeVisible();
-    await expect(page.getByText('equals')).toBeVisible();
-    await expect(page.getByText('updated-service')).toBeVisible();
+    const routingRule = page.getByTestId('routingRule-logs.edit-test');
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'service.name'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText(
+      'equals'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
+      'updated-service'
+    );
   });
 
   test('should cancel editing routing rule', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+    const rountingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
     // Update and cancel changes
     await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
     await pageObjects.streams.cancelRoutingRule();
 
     // Verify success
-    await expect(page.getByText('service.name')).toBeVisible();
-    await expect(page.getByText('equals')).toBeVisible();
-    await expect(page.getByText('test-service')).toBeVisible();
+    const routingRule = page.getByTestId('routingRule-logs.edit-test');
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'service.name'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText(
+      'equals'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
+      'test-service'
+    );
   });
 
-  test('should switch between editing different rules', async ({ page, pageObjects }) => {
+  test('should switch between editing different rules', async ({ pageObjects }) => {
     // Create another test rule
     await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('logs.edit-test-2');
+    await pageObjects.streams.fillRoutingRuleName('edit-test-2');
     await pageObjects.streams.fillConditionEditor({
       field: 'log.level',
       value: 'info',
@@ -79,10 +90,10 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.streams.clickEditRoutingRule('logs.edit-test-2');
 
     // Should now be editing the second rule
-    await expect(page.getByTestId('streamsAppConditionEditorValueText')).toHaveValue('info');
+    expect(await pageObjects.streams.conditionEditorValueComboBox.getSelectedValue()).toBe('info');
   });
 
-  test('should remove routing rule with confirmation', async ({ page, pageObjects }) => {
+  test('should remove routing rule with confirmation', async ({ pageObjects }) => {
     await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
 
     await pageObjects.streams.removeRoutingRule();
@@ -94,7 +105,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.toasts.waitFor();
   });
 
-  test('should cancel rule removal', async ({ page, pageObjects }) => {
+  test('should cancel rule removal', async ({ pageObjects }) => {
     await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
     await pageObjects.streams.removeRoutingRule();
 

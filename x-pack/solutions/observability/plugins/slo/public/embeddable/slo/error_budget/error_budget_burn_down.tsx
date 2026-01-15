@@ -108,6 +108,7 @@ export function SloErrorBudget({
   }
 
   const hasGroupBy = slo.instanceId !== ALL_VALUE;
+
   return (
     <div data-shared-item="" ref={containerRef} style={{ width: '100%', padding: 10 }}>
       <EuiFlexGroup direction="column" gutterSize="xs">

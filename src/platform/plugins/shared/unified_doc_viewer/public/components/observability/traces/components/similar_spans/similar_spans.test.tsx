@@ -28,7 +28,7 @@ jest.mock('../../../../content_framework/chart', () => ({
   ),
 }));
 
-jest.mock('../../hooks/use_data_sources', () => ({
+jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
     indexes: { apm: { traces: 'test-index' } },
   }),

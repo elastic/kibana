@@ -7,11 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { Decorator } from '@storybook/react';
+import { Subject } from 'rxjs';
+import { EuiProvider } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+
+const uiSettings = {
+  get: (setting: string) => {
+    switch (setting) {
+      case 'dateFormat':
+        return 'MMM D, YYYY @ HH:mm:ss.SSS';
+      case 'dateFormat:scaled':
+        return [['', 'HH:mm:ss.SSS']];
+    }
+  },
+  get$: () => new Subject(),
+};
+
+const coreMock = {
+  uiSettings,
+} as unknown as CoreStart;
+const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,27 +40,12 @@ const queryClient = new QueryClient({
   },
 });
 
-export const decorators: Decorator[] = [
-  (Story) => (
-    <QueryClientProvider client={queryClient}>
-      <Story />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  ),
-];
-
-export const parameters = {
-  docs: {
-    page: () => {
-      <>
-        <Title />
-        <Subtitle />
-        <Description />
-        <Primary />
-        <QueryClientProvider client={queryClient}>
-          <Stories />
-        </QueryClientProvider>
-      </>;
-    },
-  },
+export const StorybookProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  return (
+    <KibanaReactContext.Provider>
+      <QueryClientProvider client={queryClient}>
+        <EuiProvider colorMode="light">{children}</EuiProvider>
+      </QueryClientProvider>
+    </KibanaReactContext.Provider>
+  );
 };

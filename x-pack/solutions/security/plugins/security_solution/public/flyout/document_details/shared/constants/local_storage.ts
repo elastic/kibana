@@ -11,4 +11,7 @@ export const FLYOUT_STORAGE_KEYS = {
   RIGHT_PANEL_SELECTED_TABS: 'securitySolution.documentDetailsFlyout.rightPanel.selectedTabs.v8.14',
   TABLE_TAB_STATE: 'securitySolution.documentDetailsFlyout.tableTabState.v8.19',
   TABLE_TAB_TOUR: 'securitySolution.documentDetailsFlyout.tableTabTourState.v8.19',
+  PREVALENCE_TIME_RANGE: 'securitySolution.documentDetailsFlyout.prevalenceTimeRange',
+  THREAT_INTELLIGENCE_TIME_RANGE:
+    'securitySolution.documentDetailsFlyout.threatIntelligenceTimeRange',
 };

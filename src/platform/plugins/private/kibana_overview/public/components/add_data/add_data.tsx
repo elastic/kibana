@@ -77,6 +77,7 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => {
 
 AddData.propTypes = {
   addBasePath: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   features: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

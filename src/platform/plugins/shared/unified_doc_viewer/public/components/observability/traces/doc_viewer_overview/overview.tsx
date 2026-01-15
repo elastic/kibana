@@ -22,7 +22,7 @@ import {
   TRANSACTION_TYPE,
 } from '@kbn/apm-types';
 import { getFlattenedTraceDocumentOverview } from '@kbn/discover-utils';
-import type { TraceIndexes } from '@kbn/discover-utils/src';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import type { ScrollableSectionWrapperApi } from '../../../doc_viewer_logs_overview/scrollable_section_wrapper';
@@ -37,11 +37,11 @@ import { SpanLinks } from '../components/span_links';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { TraceWaterfall } from '../components/trace_waterfall';
 import { isTransaction } from '../helpers';
-import { DataSourcesProvider } from '../hooks/use_data_sources';
-import { TraceRootItemProvider } from './hooks/use_fetch_trace_root_item';
+import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
+import { TraceRootSpanProvider } from './hooks/use_fetch_trace_root_span';
 
 export type OverviewProps = DocViewRenderProps & {
-  indexes: TraceIndexes;
+  indexes: ObservabilityIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -104,7 +104,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
 
     return (
       <DataSourcesProvider indexes={indexes}>
-        <TraceRootItemProvider traceId={traceId}>
+        <TraceRootSpanProvider traceId={traceId}>
           <div
             ref={setContainerRef}
             css={
@@ -149,7 +149,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
             />
             {docId ? <SpanLinks traceId={traceId} docId={docId} /> : null}
           </div>
-        </TraceRootItemProvider>
+        </TraceRootSpanProvider>
       </DataSourcesProvider>
     );
   }

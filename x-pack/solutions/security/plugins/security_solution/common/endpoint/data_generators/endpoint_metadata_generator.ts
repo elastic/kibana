@@ -121,6 +121,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     const agentId = this.seededUUIDv4();
     const isIsolated = overrides?.Endpoint?.state?.isolation ?? this.randomBoolean(0.3);
     const capabilities: EndpointCapabilities[] = ['isolation'];
+    const hostOs = merge(this.randomOsFields(), overrides?.host?.os ?? {}) as OSFields;
 
     // v8.4 introduced additional endpoint capabilities
     if (gte(agentVersion, '8.4.0')) {
@@ -144,6 +145,16 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     // v8.15 introduced `scan` capability
     if (gte(agentVersion, '8.15.0')) {
       capabilities.push('scan');
+    }
+
+    // v9.3.0 introduced memory dump capability
+    if (gte(agentVersion, '9.3.0')) {
+      capabilities.push('memdump_process');
+
+      // v9.3.0 does not support kernel memory dumps for MacOs
+      if ((hostOs.platform ?? '').toLowerCase() !== 'macos') {
+        capabilities.push('memdump_kernel');
+      }
     }
 
     const hostMetadataDoc: HostMetadataInterface = {
@@ -180,7 +191,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
         architecture: this.randomString(10),
         ip: this.randomArray(3, () => this.randomIP()),
         mac: this.randomArray(3, () => this.randomMac()),
-        os: this.randomOsFields(),
+        os: hostOs,
       },
       Endpoint: {
         status: EndpointStatus.enrolled,

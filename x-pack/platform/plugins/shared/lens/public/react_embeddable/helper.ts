@@ -17,8 +17,8 @@ import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
+import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type {
-  LensByValueSerializedState,
   LensRuntimeState,
   LensSerializedState,
   StructuredDatasourceStates,
@@ -27,10 +27,14 @@ import type {
   FormBasedPersistedState,
   TextBasedPersistedState,
 } from '@kbn/lens-common';
+import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 import type { LensEmbeddableStartServices } from './types';
+import { getLensBuilder } from '../lazy_builder';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -68,7 +72,7 @@ export async function deserializeState(
     attributeService,
     ...services
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
-  { savedObjectId, ...state }: LensSerializedState
+  { savedObjectId, ...state }: LensSerializedAPIConfig
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
 
@@ -89,7 +93,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformInitialState(state) as LensRuntimeState;
+  const newState = transformFromApiConfig(state) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -162,12 +166,72 @@ export function getStructuredDatasourceStates(
   };
 }
 
-export function transformInitialState(state: LensSerializedState): LensSerializedState {
-  // TODO add api conversion
-  return state;
+export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
+  const builder = getLensBuilder();
+
+  if (!builder) {
+    // builder not enabled, return the state as is
+    return state as LensSerializedState;
+  }
+
+  const chartType = builder.getType(state.attributes);
+
+  if (!builder.isSupported(chartType)) {
+    return state as LensSerializedState;
+  }
+
+  if (!state.attributes) {
+    // Not sure if this is possible
+    throw new Error('attributes are missing');
+  }
+
+  // check if already converted
+  if (!isLensAPIFormat(state.attributes)) {
+    return state as LensSerializedState;
+  }
+
+  const attributes = builder.fromAPIFormat(state.attributes);
+
+  return {
+    ...state,
+    attributes,
+  };
 }
 
-export function transformOutputState(state: LensSerializedState): LensByValueSerializedState {
-  // TODO add api conversion
-  return state;
+export function transformToApiConfig(state: LensSerializedState): LensByValueSerializedAPIConfig {
+  if (state.savedObjectId) {
+    return {
+      ...state,
+      attributes: undefined,
+    };
+  }
+
+  const builder = getLensBuilder();
+
+  if (!builder) {
+    // builder not enabled, return the state as is
+    return state as LensByValueSerializedAPIConfig;
+  }
+
+  const chartType = builder.getType(state.attributes);
+
+  if (!builder.isSupported(chartType)) {
+    // TODO: remove this once all formats are supported
+    return state as LensByValueSerializedAPIConfig;
+  }
+
+  if (!state.attributes) {
+    // This should only ever handle by-value state.
+    throw new Error('attributes are missing');
+  }
+
+  const apiConfigAttributes = builder.toAPIFormat({
+    ...state.attributes,
+    visualizationType: state.attributes.visualizationType ?? LENS_UNKNOWN_VIS,
+  });
+
+  return {
+    ...state,
+    attributes: apiConfigAttributes,
+  };
 }

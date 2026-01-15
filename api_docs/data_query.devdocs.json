@@ -513,9 +513,9 @@
               },
               "[], store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
@@ -556,9 +556,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/es-query",
+                    "pluginId": "@kbn/es-query-constants",
                     "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
+                    "docId": "kibKbnEsQueryConstantsPluginApi",
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   }
@@ -1272,9 +1272,9 @@
           },
           "<S>, syncConfig: { time?: boolean | undefined; refreshInterval?: boolean | undefined; filters?: boolean | ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -1388,9 +1388,9 @@
                 "signature": [
                   "boolean | ",
                   {
-                    "pluginId": "@kbn/es-query",
+                    "pluginId": "@kbn/es-query-constants",
                     "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
+                    "docId": "kibKbnEsQueryConstantsPluginApi",
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },

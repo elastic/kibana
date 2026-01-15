@@ -280,6 +280,84 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing",
+        "id": "def-server.OTLPSpanProcessor",
+        "type": "Class",
+        "tags": [],
+        "label": "OTLPSpanProcessor",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/tracing",
+            "scope": "server",
+            "docId": "kibKbnTracingPluginApi",
+            "section": "def-server.OTLPSpanProcessor",
+            "text": "OTLPSpanProcessor"
+          },
+          " extends ",
+          "BatchSpanProcessor"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.OTLPSpanProcessor.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.OTLPSpanProcessor.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tracing-config",
+                    "scope": "common",
+                    "docId": "kibKbnTracingConfigPluginApi",
+                    "section": "def-common.OTLPExportConfig",
+                    "text": "OTLPExportConfig"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.OTLPSpanProcessor.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "protocol",
+                "description": [],
+                "signature": [
+                  "\"http\" | \"grpc\""
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/otlp_span_processor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [

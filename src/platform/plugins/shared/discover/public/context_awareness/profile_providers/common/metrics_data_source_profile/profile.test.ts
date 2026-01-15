@@ -9,12 +9,9 @@
 import { DataSourceType } from '../../../../../common/data_sources';
 import type { MetricsExperienceDataSourceProfileProvider } from './profile';
 import { METRICS_DATA_SOURCE_PROFILE_ID, createMetricsDataSourceProfileProvider } from './profile';
-import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import type { ContextWithProfileId } from '../../../profile_service';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
-
-const mockServices = createProfileProviderSharedServicesMock();
 
 const RESOLUTION_MATCH = {
   isMatch: true,
@@ -42,10 +39,7 @@ describe('metricsDataSourceProfileProvider', () => {
 
   let provider: MetricsExperienceDataSourceProfileProvider;
 
-  const createProvider = () =>
-    createMetricsDataSourceProfileProvider({
-      ...mockServices,
-    });
+  const createProvider = () => createMetricsDataSourceProfileProvider();
 
   describe('matches', () => {
     beforeEach(() => {
@@ -56,7 +50,8 @@ describe('metricsDataSourceProfileProvider', () => {
       'TS metrics-*',
       'TS metrics-* | LIMIT 10',
       'TS metrics-* | SORT @timestamp DESC',
-      'TS logs-* | LIMIT 5 | SORT @timestamp',
+      'TS metrics-* | WHERE host.name="foo"',
+      'TS metrics-* | LIMIT 5 | SORT @timestamp',
     ])('when query contains only supported commands: %s', async (query) => {
       const result = await provider.resolve(
         createParams({
@@ -104,8 +99,6 @@ describe('metricsDataSourceProfileProvider', () => {
 
     it.each([
       'FROM metrics-* | STATS count() BY @timestamp',
-      'FROM metrics-* | WHERE host.name="foo"',
-      'TS metrics-* | WHERE host.name="foo"',
       'TS metrics-* | STATS count() BY @timestamp',
     ])('when query contains commands that are not supported: %s', async (query) => {
       const result = await provider.resolve(

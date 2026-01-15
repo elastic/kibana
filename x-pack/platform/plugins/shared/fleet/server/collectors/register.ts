@@ -28,6 +28,7 @@ import type { AgentsPerOutputType } from './agents_per_output';
 import { getAgentsPerOutput } from './agents_per_output';
 import type { IntegrationsDetails } from './integrations_collector';
 import { getIntegrationsDetails } from './integrations_collector';
+import { getModifiedILMs } from './modified_ilms';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -50,6 +51,7 @@ export interface FleetUsage extends Usage, AgentData {
   fleet_server_logs_top_errors?: string[];
   agents_per_output_type: AgentsPerOutputType[];
   integrations_details: IntegrationsDetails[];
+  modified_ilms: string[];
 }
 
 export const fetchFleetUsage = async (
@@ -77,6 +79,7 @@ export const fetchFleetUsage = async (
     deployment_id: appContextService.getCloud()?.deploymentId,
     integrations_details: await getIntegrationsDetails(soClient),
     agentless_agents: await getAgentUsage(soClient, esClient, true),
+    modified_ilms: await getModifiedILMs(),
   };
   return usage;
 };

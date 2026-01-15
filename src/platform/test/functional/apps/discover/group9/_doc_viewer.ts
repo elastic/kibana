@@ -290,7 +290,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
 
         expect(
-          fieldNames.join(',').startsWith('@message,@tags,@timestamp,agent,bytes,clientip')
+          fieldNames.join(',').startsWith('@message,@message.raw,@tags,@tags.raw,@timestamp,agent')
         ).to.be(true);
       });
 
@@ -319,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
 
         expect(
-          fieldNames.join(',').startsWith('@message,@tags,@timestamp,agent,bytes,clientip')
+          fieldNames.join(',').startsWith('@message,@message.raw,@tags,@tags.raw,@timestamp,agent')
         ).to.be(true);
 
         await showOnlySelectedFieldsSwitch.click();
@@ -343,7 +343,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after switching from showing only selected', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',').startsWith('agent,@message,@tags');
+          return fieldNames.join(',').startsWith('agent,@message,@message.raw');
         });
       });
     });

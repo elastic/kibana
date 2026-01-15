@@ -727,7 +727,7 @@
               "The type of serverless project or project focus for the deployment."
             ],
             "signature": [
-              "\"search\" | \"security\" | \"stack\" | \"oblt\" | undefined"
+              "\"stack\" | \"search\" | \"security\" | \"oblt\" | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/ready_to_help/ready_to_help.tsx",
             "deprecated": false,

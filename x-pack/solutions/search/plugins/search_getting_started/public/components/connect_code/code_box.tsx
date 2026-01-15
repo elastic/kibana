@@ -45,7 +45,13 @@ export const CodeBox = ({ selectedLanguage, codeBlockLanguage }: Props) => {
   }, [selectedExample, codeParams]);
 
   return (
-    <EuiCodeBlock isCopyable fontSize="m" language={codeBlockLanguage} overflowHeight={700}>
+    <EuiCodeBlock
+      isCopyable
+      fontSize="m"
+      language={codeBlockLanguage}
+      overflowHeight={700}
+      data-test-subj="gettingStartedExampleCode"
+    >
       {codeExample}
     </EuiCodeBlock>
   );

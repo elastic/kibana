@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -73,7 +73,9 @@
     "@kbn/failure-store-modal",
     "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/streams-schema",
+    "@kbn/streams-plugin"
   ],
   "exclude": [
     "target/**/*"

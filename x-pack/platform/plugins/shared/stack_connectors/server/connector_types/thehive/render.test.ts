@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { renderParameterTemplates } from './render';
-import { SUB_ACTION } from '../../../common/thehive/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/thehive';
 import Mustache from 'mustache';
 
 const params = {

@@ -8,11 +8,11 @@
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { Logger } from '@kbn/logging';
-import { CrowdstrikeInitRTRResponseSchema } from '../../../common/crowdstrike/schema';
+import { CrowdstrikeInitRTRResponseSchema } from '@kbn/connector-schemas/crowdstrike';
 import type {
   CrowdstrikeInitRTRParams,
   RelaxedCrowdstrikeBaseApiResponse,
-} from '../../../common/crowdstrike/types';
+} from '@kbn/connector-schemas/crowdstrike';
 
 export class CrowdStrikeSessionManager {
   private currentBatchId: string | null = null;

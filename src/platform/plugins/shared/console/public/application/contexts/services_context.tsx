@@ -11,7 +11,6 @@ import React, { createContext, useContext, useEffect } from 'react';
 import type { NotificationsSetup, DocLinksStart, HttpSetup } from '@kbn/core/public';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -31,7 +30,6 @@ interface ContextServices {
   esHostService: EsHostService;
   http: HttpSetup;
   autocompleteInfo: AutocompleteInfo;
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
   application: ApplicationStart;

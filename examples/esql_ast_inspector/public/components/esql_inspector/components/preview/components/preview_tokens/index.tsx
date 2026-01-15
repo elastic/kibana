@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import { EuiDataGrid, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { Parser } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-language';
 import { useEsqlInspector } from '../../../../context';
 import { useBehaviorSubject } from '../../../../../../hooks/use_behavior_subject';
 

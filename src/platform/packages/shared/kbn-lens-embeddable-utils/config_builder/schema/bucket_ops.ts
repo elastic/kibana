@@ -97,7 +97,8 @@ export const bucketTermsOperationSchema = schema.object({
       meta: {
         description: 'Fields to be used for the terms',
       },
-    })
+    }),
+    { minSize: 1, maxSize: 4 }
   ),
   /**
    * Size of the terms
@@ -126,7 +127,8 @@ export const bucketTermsOperationSchema = schema.object({
           meta: {
             description: 'Values to include',
           },
-        })
+        }),
+        { maxSize: 100 }
       ),
       as_regex: schema.maybe(
         schema.boolean({
@@ -147,7 +149,8 @@ export const bucketTermsOperationSchema = schema.object({
           meta: {
             description: 'Values to exclude',
           },
-        })
+        }),
+        { maxSize: 100 }
       ),
       as_regex: schema.maybe(
         schema.boolean({
@@ -253,7 +256,7 @@ export const bucketFiltersOperationSchema = schema.object({
   /**
    * Filters
    */
-  filters: schema.arrayOf(filterWithLabelSchema),
+  filters: schema.arrayOf(filterWithLabelSchema, { maxSize: 100 }),
 });
 
 export const bucketHistogramOperationSchema = schema.object({
@@ -364,7 +367,8 @@ export const bucketRangesOperationSchema = schema.object({
           },
         })
       ),
-    })
+    }),
+    { maxSize: 100 }
   ),
 });
 

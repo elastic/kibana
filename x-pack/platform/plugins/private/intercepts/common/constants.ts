@@ -23,3 +23,8 @@ export const API_USAGE_COUNTER_TYPE = 'interceptApi' as const;
 export const API_USAGE_ERROR_TYPE = 'interceptApiError' as const;
 
 export const USAGE_COLLECTION_DOMAIN_ID = 'intercepts' as const;
+
+/**
+ * Local storage key for product intercepts
+ */
+export const INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY = 'intercepts.prompter.clientCache' as const;

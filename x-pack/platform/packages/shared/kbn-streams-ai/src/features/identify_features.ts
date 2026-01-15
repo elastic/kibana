@@ -4,156 +4,71 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+
+import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BoundInferenceClient } from '@kbn/inference-common';
-import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams, Feature } from '@kbn/streams-schema';
-import type { Condition } from '@kbn/streamlang';
-import pLimit from 'p-limit';
-import { IdentifySystemsPrompt } from './prompt';
-import { clusterLogs } from '../cluster_logs/cluster_logs';
-import conditionSchemaText from '../shared/condition_schema.text';
-import { generateStreamDescription } from '../description/generate_description';
+import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import { type BaseFeature, type Streams, baseFeatureSchema } from '@kbn/streams-schema';
+import { withSpan } from '@kbn/apm-utils';
+import { createIdentifyFeaturesPrompt } from './prompt';
+import { sumTokens } from '../helpers/sum_tokens';
 
-const CONCURRENT_DESCRIPTION_REQUESTS = 5;
-
-/**
- * Identifies features in a stream, by:
- * - describing the dataset (via sampled documents)
- * - clustering docs together on similarity
- * - asking the LLM to identify features by creating
- * queries and validating the resulting clusters
- */
-export async function identifyFeatures({
-  stream,
-  features,
-  start,
-  end,
-  esClient,
-  kql,
-  inferenceClient,
-  logger,
-  dropUnmapped = false,
-}: {
+export interface IdentifyFeaturesOptions {
   stream: Streams.all.Definition;
-  features?: Feature[];
   start: number;
   end: number;
   esClient: ElasticsearchClient;
-  kql?: string;
   inferenceClient: BoundInferenceClient;
+  prompt: string;
   logger: Logger;
-  dropUnmapped?: boolean;
-}): Promise<{ features: Feature[] }> {
-  const [analysis, initialClustering] = await Promise.all([
-    describeDataset({
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      kql: kql || undefined,
-    }),
-    clusterLogs({
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      partitions:
-        features?.map((feature) => {
-          return {
-            name: feature.name,
-            condition: feature.filter,
-          };
-        }) ?? [],
-      logger,
-      dropUnmapped,
-    }),
-  ]);
+  signal: AbortSignal;
+}
 
-  const response = await executeAsReasoningAgent({
-    maxSteps: 3,
-    input: {
-      stream: {
-        name: stream.name,
-        description: stream.description || 'This stream has no description.',
-      },
-      dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true, dropUnmapped })
-      ),
-      initial_clustering: JSON.stringify(initialClustering),
-      condition_schema: conditionSchemaText,
-    },
-    prompt: IdentifySystemsPrompt,
-    inferenceClient,
-    finalToolChoice: {
-      function: 'finalize_systems',
-    },
-    toolCallbacks: {
-      validate_systems: async (toolCall) => {
-        const clustering = await clusterLogs({
-          start,
-          end,
-          esClient,
-          index: stream.name,
-          logger,
-          partitions: toolCall.function.arguments.systems.map((system) => {
-            return {
-              name: system.name,
-              condition: system.filter as Condition,
-            };
-          }),
-          dropUnmapped,
-        });
+export async function identifyFeatures({
+  stream,
+  prompt,
+  inferenceClient,
+  logger,
+  start,
+  end,
+  esClient,
+  signal,
+}: IdentifyFeaturesOptions): Promise<{
+  features: BaseFeature[];
+  tokensUsed: ChatCompletionTokenCount;
+}> {
+  logger.debug(`Identifying features for stream ${stream.name}`);
 
-        return {
-          response: {
-            systems: clustering.map((cluster) => {
-              return {
-                name: cluster.name,
-                clustering: cluster.clustering,
-              };
-            }),
-          },
-        };
-      },
-      finalize_systems: async (toolCall) => {
-        return {
-          response: {},
-        };
-      },
-    },
+  const { hits: sampleDocuments } = await getSampleDocuments({
+    esClient,
+    index: stream.name,
+    start,
+    end,
+    size: 20,
   });
 
-  const limiter = pLimit(CONCURRENT_DESCRIPTION_REQUESTS);
+  const response = await withSpan('invoke_prompt', () =>
+    inferenceClient.prompt({
+      input: {
+        sample_documents: JSON.stringify(sampleDocuments),
+      },
+      prompt: createIdentifyFeaturesPrompt({ systemPrompt: prompt }),
+      finalToolChoice: {
+        function: 'finalize_features',
+      },
+      abortSignal: signal,
+    })
+  );
+
+  const features = response.toolCalls
+    .flatMap((toolCall) => toolCall.function.arguments.features)
+    .filter((feature) => {
+      const result = baseFeatureSchema.safeParse(feature);
+      return result.success;
+    });
 
   return {
-    features: await Promise.all(
-      response.toolCalls.flatMap((toolCall) =>
-        toolCall.function.arguments.systems.map(async (args) => {
-          const feature = {
-            ...args,
-            filter: args.filter as Condition,
-            description: '',
-          };
-
-          const description = await limiter(async () => {
-            return await generateStreamDescription({
-              stream,
-              start,
-              end,
-              esClient,
-              inferenceClient,
-              feature,
-            });
-          });
-
-          return {
-            ...feature,
-            description,
-          };
-        })
-      )
-    ),
+    features,
+    tokensUsed: sumTokens({ prompt: 0, completion: 0, total: 0, cached: 0 }, response.tokens),
   };
 }

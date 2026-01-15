@@ -8,6 +8,7 @@
 import { omit } from 'lodash';
 
 import { schema } from '@kbn/config-schema';
+import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
 
 import { lensCMUpdateOptionsSchema, lensItemDataSchema } from '../../../../content_management';
 import { lensItemDataSchemaV0 } from '../../../../content_management/v0';
@@ -32,6 +33,7 @@ export const lensUpdateRequestQuerySchema = schema.object(
 );
 
 export const lensUpdateRequestBodySchema = schema.oneOf([
+  lensApiStateSchema,
   lensItemDataSchema,
   lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
 ]);

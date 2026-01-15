@@ -6,10 +6,13 @@
  */
 
 // Observability-specific test framework
-export { test, spaceTest } from './src/playwright';
+export { test, apiTest, spaceTest } from './src/playwright';
 
 // re-exported test framework from @kbn/scout
-export { expect, lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
+export { expect, lighthouseTest, tags } from '@kbn/scout';
+
+// Custom global setup hook with profiling support
+export { globalSetupHook } from './src/playwright/global_hooks/profiling_setup';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
@@ -81,3 +84,6 @@ export type { RoleApiCredentials } from '@kbn/scout';
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from '@kbn/scout';
+
+// Re-exported utility for overriding synthtrace clients
+export { getSynthtraceClient } from '@kbn/scout';

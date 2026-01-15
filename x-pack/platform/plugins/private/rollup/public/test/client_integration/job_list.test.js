@@ -5,10 +5,23 @@
  * 2.0.
  */
 
-import { mockHttpRequest, pageHelpers } from './helpers';
+import React from 'react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { Provider } from 'react-redux';
+import { Route, Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 
-import { act } from 'react-dom/test-utils';
-import { getRouter, setHttp, init as initDocumentation } from '../../crud_app/services';
+import { mockHttpRequest, wrapComponent } from './helpers';
+
+import {
+  getRouter,
+  registerRouter,
+  setHttp,
+  init as initDocumentation,
+} from '../../crud_app/services';
+import { createRollupJobsStore } from '../../crud_app/store';
+import { JobList } from '../../crud_app/sections';
 import { JOBS } from './helpers/constants';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 
@@ -28,81 +41,75 @@ jest.mock('../../kibana_services', () => {
   };
 });
 
-const { setup } = pageHelpers.jobList;
-
 describe('<JobList />', () => {
   describe('detail panel', () => {
-    let component;
-    let table;
-    let exists;
     let startMock;
+    let history;
 
-    beforeAll(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+    const renderJobList = () => {
+      const store = createRollupJobsStore();
+      history = createMemoryHistory({ initialEntries: ['/'] });
+      const WrappedJobList = wrapComponent(JobList);
+
+      // Used by getRouterLinkProps() consumers.
+      registerRouter({ history });
+
+      renderWithI18n(
+        <Provider store={store}>
+          <Router history={history}>
+            <Route path="/" component={WrappedJobList} />
+          </Router>
+        </Provider>
+      );
+    };
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
       startMock = coreMock.createStart();
       setHttp(startMock.http);
       initDocumentation(docLinksServiceMock.createStartContract());
-    });
 
-    afterAll(() => {
-      jest.useRealTimers();
-    });
-
-    beforeEach(async () => {
       mockHttpRequest(startMock.http, { jobs: JOBS });
+      renderJobList();
 
-      await act(async () => {
-        ({ component, exists, table } = setup());
-      });
-
-      component.update();
+      // Wait for the initial loadJobs() side effects to settle (UI boundary).
+      await screen.findByTestId('rollupDeprecationCallout');
     });
 
-    afterEach(() => {
-      startMock.http.get.mockClear();
+    test('should have a deprecation callout', async () => {
+      expect(await screen.findByTestId('rollupDeprecationCallout')).toBeInTheDocument();
     });
 
-    test('should have a deprecation callout', () => {
-      expect(exists('rollupDeprecationCallout')).toBe(true);
+    test('should open the detail panel when clicking on a job in the table', async () => {
+      const jobId = JOBS.jobs[0].config.id;
+
+      expect(screen.queryByTestId('rollupJobDetailFlyout')).not.toBeInTheDocument();
+
+      fireEvent.click(await screen.findByText(jobId));
+
+      expect(await screen.findByTestId('rollupJobDetailFlyout')).toBeInTheDocument();
     });
 
-    test('should open the detail panel when clicking on a job in the table', () => {
-      const { rows } = table.getMetaData('rollupJobsListTable');
-      const button = rows[0].columns[1].reactWrapper.find('button');
-
-      expect(exists('rollupJobDetailFlyout')).toBe(false); // make sure it is not shown
-
-      button.simulate('click');
-
-      expect(exists('rollupJobDetailFlyout')).toBe(true);
-    });
-
-    test('should add the Job id to the route query params when opening the detail panel', () => {
-      const { rows } = table.getMetaData('rollupJobsListTable');
-      const button = rows[0].columns[1].reactWrapper.find('button');
+    test('should add the Job id to the route query params when opening the detail panel', async () => {
+      const jobId = JOBS.jobs[0].config.id;
 
       expect(getRouter().history.location.search).toEqual('');
 
-      button.simulate('click');
+      fireEvent.click(await screen.findByText(jobId));
 
-      const {
-        jobs: [
-          {
-            config: { id: jobId },
-          },
-        ],
-      } = JOBS;
-      expect(getRouter().history.location.search).toEqual(`?job=${jobId}`);
+      await waitFor(() => {
+        expect(getRouter().history.location.search).toEqual(`?job=${jobId}`);
+      });
     });
 
-    test('should open the detail panel whenever a job id is added to the query params', () => {
-      expect(exists('rollupJobDetailFlyout')).toBe(false); // make sure it is not shown
+    test('should open the detail panel whenever a job id is added to the query params', async () => {
+      expect(screen.queryByTestId('rollupJobDetailFlyout')).not.toBeInTheDocument();
 
-      getRouter().history.replace({ search: `?job=bar` });
+      act(() => {
+        getRouter().history.replace({ search: `?job=bar` });
+      });
 
-      component.update();
-
-      expect(exists('rollupJobDetailFlyout')).toBe(true);
+      expect(await screen.findByTestId('rollupJobDetailFlyout')).toBeInTheDocument();
     });
   });
 });

@@ -94,7 +94,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
   }, [euiTheme]);
 
   const containerStyles = useMemo(() => {
-    const editModeOutline = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
+    const editModeOutline = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`;
     const viewModeOutline = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
 
     return css`

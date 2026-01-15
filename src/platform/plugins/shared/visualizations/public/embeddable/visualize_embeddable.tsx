@@ -23,6 +23,7 @@ import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
   apiIsOfType,
+  apiPublishesProjectRouting,
   apiPublishesTimeRange,
   apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
@@ -65,7 +66,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     // Runtime state may contain title loaded from saved object
     // Initialize titleManager with serialized state
     // to avoid tracking runtime state title as serialized state title
-    const titleManager = initializeTitleManager(initialState.rawState);
+    const titleManager = initializeTitleManager(initialState);
 
     // Initialize dynamic actions
     const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
@@ -216,9 +217,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
         };
       },
       onReset: async (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        timeRangeManager.reinitializeState(lastSaved?.rawState);
-        titleManager.reinitializeState(lastSaved?.rawState);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
 
         if (!lastSaved) return;
         const lastSavedRuntimeState = await deserializeState(lastSaved);
@@ -325,6 +326,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 filters: data.filters,
               }
             : {};
+          const projectRouting = apiPublishesProjectRouting(parentApi)
+            ? data.projectRouting
+            : undefined;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
           const settings = apiPublishesSettings(parentApi)
@@ -360,6 +364,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           getExpressionParams = async () => {
             return await getExpressionRendererProps({
               unifiedSearch,
+              projectRouting,
               vis: vis$.getValue(),
               settings,
               disableTriggers,

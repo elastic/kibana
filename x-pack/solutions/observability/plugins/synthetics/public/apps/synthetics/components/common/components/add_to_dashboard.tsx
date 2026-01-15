@@ -21,12 +21,12 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
-import type { OverviewStatsEmbeddableCustomState } from '../../../../embeddables/stats_overview/stats_overview_embeddable_factory';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../embeddables/constants';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/constants';
 import { selectOverviewState } from '../../../state';
 import type { OverviewMonitorsEmbeddableCustomState } from '../../../../embeddables/monitors_overview/monitors_embeddable_factory';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../../../common/embeddables/stats_overview/constants';
+import type { OverviewStatsEmbeddableCustomState } from '../../../../../../common/embeddables/stats_overview/types';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -61,7 +61,7 @@ export const useAddToDashboard = ({
       const stateTransfer = embeddable.getStateTransfer();
 
       const state = {
-        serializedState: { rawState: embeddableInput },
+        serializedState: embeddableInput,
         type,
       };
 

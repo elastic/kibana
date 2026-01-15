@@ -12,6 +12,7 @@ import type { Query } from '@kbn/es-query';
 import { fromFilterAPIToLensState, fromFilterLensStateToAPI } from './filter';
 import type {
   LensApiAllMetricOperations,
+  LensApiAllMetricOrFormulaOperations,
   LensApiReferableMetricOperations,
 } from '../../schema/metric_ops';
 import type {
@@ -20,7 +21,7 @@ import type {
   AnyMetricLensStateColumn,
   ReferableMetricLensStateColumn,
 } from './types';
-import type { LensApiAllOperations } from '../../schema';
+import type { LensApiAllOperations, LensApiBucketOperations } from '../../schema';
 
 export const LENS_EMPTY_AS_NULL_DEFAULT_VALUE = false;
 
@@ -35,10 +36,11 @@ export function getLensStateMetricSharedProps(
   },
   dataType: DataType = 'number'
 ) {
+  const filter = fromFilterAPIToLensState(options.filter);
   return {
     dataType,
     isBucketed: false,
-    filter: fromFilterAPIToLensState(options.filter),
+    ...(filter ? { filter } : {}),
     ...(options.time_scale ? { timeScale: options.time_scale } : {}),
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),
@@ -65,9 +67,9 @@ export function getLensAPIMetricSharedProps(options: {
   };
 }
 
-export function getLensStateBucketSharedProps(options: { label?: string; field: string }) {
+export function getLensStateBucketSharedProps(options: { label?: string; field?: string }) {
   return {
-    sourceField: options.field,
+    sourceField: options.field ?? '',
     label: options.label ?? LENS_DEFAULT_LABEL,
     customLabel: Boolean(options.label),
     isBucketed: true,
@@ -96,6 +98,9 @@ export function isAPIColumnOfType<C extends LensApiAllOperations>(
   return column.operation === type;
 }
 
+const bucketTypes = ['date_histogram', 'histogram', 'terms', 'range', 'filters'] as const;
+const referenceTypes = ['moving_average', 'cumulative_sum', 'differences', 'counter_rate'] as const;
+
 const referrableTypes = [
   'sum',
   'min',
@@ -109,6 +114,34 @@ const referrableTypes = [
   'last_value',
   'percentile_rank',
 ] as const;
+
+export function isAPIColumnOfBucketType(
+  column: LensApiAllOperations
+): column is LensApiBucketOperations {
+  return bucketTypes.some((type) =>
+    isAPIColumnOfType<Extract<LensApiBucketOperations, { operation: typeof type }>>(type, column)
+  );
+}
+
+export function isAPIColumnOfMetricType(
+  column: LensApiAllOperations
+): column is LensApiAllMetricOrFormulaOperations {
+  return !isAPIColumnOfBucketType(column);
+}
+
+export function isAPIColumnOfReferenceType(
+  column: LensApiAllOperations
+): column is Extract<
+  LensApiAllMetricOrFormulaOperations,
+  { operation: (typeof referenceTypes)[number] }
+> {
+  return referenceTypes.some((type) =>
+    isAPIColumnOfType<Extract<LensApiAllMetricOrFormulaOperations, { operation: typeof type }>>(
+      type,
+      column
+    )
+  );
+}
 
 export function isApiColumnOfReferableType(
   column: LensApiAllMetricOperations

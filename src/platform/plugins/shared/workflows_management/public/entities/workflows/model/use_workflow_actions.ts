@@ -139,10 +139,7 @@ export function useWorkflowActions() {
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.filter((w) => !ids.includes(w.id)),
-              _pagination: {
-                ...data._pagination,
-                total: data._pagination.total - ids.length,
-              },
+              total: data.total - ids.length,
             };
 
             queryClient.setQueryData(queryKey, optimisticData);

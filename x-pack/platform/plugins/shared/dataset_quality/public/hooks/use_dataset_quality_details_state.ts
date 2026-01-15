@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import { useSelector } from '@xstate/react';
+import type { FailureStore } from '@kbn/streams-schema';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 import { indexNameToDataStreamParts } from '../../common/utils';
 import type { BasicDataStream } from '../../common/types';
@@ -27,6 +28,8 @@ export const useDatasetQualityDetailsState = () => {
     isIndexNotFoundError,
     expandedQualityIssue,
     view,
+    streamDefinition,
+    streamsUrls,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -166,18 +169,21 @@ export const useDatasetQualityDetailsState = () => {
 
   const updateFailureStore = useCallback(
     ({
-      failureStoreEnabled,
-      customRetentionPeriod,
+      failureStoreDataQualityConfig,
+      failureStoreStreamConfig,
     }: {
-      failureStoreEnabled: boolean;
-      customRetentionPeriod?: string;
+      failureStoreDataQualityConfig?: {
+        failureStoreEnabled: boolean;
+        customRetentionPeriod?: string;
+      };
+      failureStoreStreamConfig?: FailureStore;
     }) => {
       service.send({
         type: 'UPDATE_FAILURE_STORE',
         data: {
           ...dataStreamDetails,
-          hasFailureStore: failureStoreEnabled,
-          customRetentionPeriod,
+          failureStoreDataQualityConfig,
+          failureStoreStreamConfig,
         },
       });
     },
@@ -220,5 +226,7 @@ export const useDatasetQualityDetailsState = () => {
     defaultRetentionPeriod,
     customRetentionPeriod,
     canUserManageFailureStore,
+    streamDefinition,
+    streamsUrls,
   };
 };

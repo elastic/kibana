@@ -6,7 +6,9 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "from": "",
-      "size": ""
+      "size": [
+        "100"
+      ]
     },
     "methods": [
       "GET"

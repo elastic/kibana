@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
-  ExternalServiceValidation,
-} from './types';
+} from '@kbn/connector-schemas/jira';
+import type { ExternalServiceValidation } from './types';
 
 import * as i18n from './translations';
-import { incidentSchemaObjectProperties } from './schema';
-import { validateKeysAllowed } from '../lib/validators';
 
 export const validateCommonConfig = (
   configObject: JiraPublicConfigurationType,
@@ -37,13 +34,4 @@ export const validateCommonSecrets = (
 export const validate: ExternalServiceValidation = {
   config: validateCommonConfig,
   secrets: validateCommonSecrets,
-};
-
-export const validateOtherFieldsKeys = (key: string, ctx: z.RefinementCtx) => {
-  validateKeysAllowed({
-    key,
-    ctx,
-    disallowList: incidentSchemaObjectProperties,
-    fieldName: 'otherFields',
-  });
 };

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { AxiosError, type AxiosResponse } from 'axios';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { resilientFields, incidentTypes, severity } from './mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ResilientConnector } from './resilient';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { RESILIENT_CONNECTOR_ID } from './constants';
-import { PushToServiceIncidentSchema } from './schema';
+import { CONNECTOR_ID, PushToServiceIncidentSchema } from '@kbn/connector-schemas/resilient';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 jest.mock('axios');
@@ -90,7 +90,7 @@ describe('IBM Resilient connector', () => {
   const logger = loggingSystemMock.createLogger();
   const connector = new ResilientConnector(
     {
-      connector: { id: '1', type: RESILIENT_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       configurationUtilities: actionsConfigMock.create(),
       logger,
       services: actionsMock.createServices(),
@@ -171,6 +171,32 @@ describe('IBM Resilient connector', () => {
       });
       await expect(connector.getIncident({ id: '1' }, connectorUsageCollector)).rejects.toThrow(
         'Unable to get incident with id 1. Error: An error has occurred'
+      );
+    });
+
+    it('should read message from response body if available', async () => {
+      requestMock.mockImplementation(() => {
+        const err = new AxiosError('An error has occurred');
+        err.response = {
+          status: 400,
+          data: { message: 'A test error message' },
+        } as AxiosResponse;
+        throw err;
+      });
+
+      await expect(
+        connector.createIncident(
+          {
+            name: 'title',
+            description: 'desc',
+            incidentTypes: [1001],
+            severityCode: 6,
+            additionalFields: null,
+          },
+          connectorUsageCollector
+        )
+      ).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to create incident. Error: Status code: 400. Message: API Error: A test error message.'
       );
     });
   });

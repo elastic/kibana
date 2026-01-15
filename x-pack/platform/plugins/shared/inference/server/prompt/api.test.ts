@@ -81,13 +81,16 @@ describe('createPromptApi', () => {
     mockCallbackApi = jest.fn();
     mockCreateChatCompleteCallbackApi.mockReturnValue(mockCallbackApi);
 
-    promptApi = createPromptApi({
+    const callbackApi = createChatCompleteCallbackApi({
       request,
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
       regexWorker,
       esClient: mockEsClient,
+    });
+    promptApi = createPromptApi({
+      callbackApi,
     });
   });
 

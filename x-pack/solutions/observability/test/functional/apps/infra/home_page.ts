@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
-import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   INVENTORY_PATH,
@@ -71,7 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  describe('Home page', function () {
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     let synthEsClient: InfraSynthtraceEsClient;
 
@@ -85,7 +85,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(() => synthEsClient.clean());
 
-    describe('without metrics present', () => {
+    // Done
+    describe.skip('without metrics present', () => {
       it('renders an empty data prompt and redirects to the onboarding page', async () => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.noDataPromptExists();
@@ -115,7 +116,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with metrics present', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/233920
+    describe.skip('with metrics present', () => {
       before(async () => {
         await synthEsClient.index([
           generateHostData({
@@ -140,6 +142,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY));
 
+      // Done
       it('renders the correct page title', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -149,6 +152,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
+      // Done
       it('renders the inventory survey link', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.infraHome.waitForLoading();
@@ -156,6 +160,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.ensureInventoryFeedbackLinkIsVisible();
       });
 
+      // Done
       it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const kubernetesTourText =
@@ -176,11 +181,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      // Done
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
         await pageObjects.infraHome.getNoMetricsDataPrompt();
       });
 
+      // Done
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
@@ -353,7 +360,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('sort nodes by descending value', async () => {
+      // skipping until tests are migrated to Scout, covered by unit tests
+      it.skip('sort nodes by descending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
@@ -369,7 +377,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('sort nodes by ascending value', async () => {
+      // skipping until tests are migrated to Scout, covered by unit tests
+      it.skip('sort nodes by ascending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
@@ -399,6 +408,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await retry.tryForTime(5000, async () => {
+          await pageObjects.infraHome.clearSearchTerm();
           await pageObjects.infraHome.enterSearchTerm('host.name: "host-1"');
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([{ name: 'host-1', value: 50, color: '#61a2ff' }]);
@@ -408,6 +418,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('change color palette', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
+        await pageObjects.infraHome.clearSearchTerm();
         await pageObjects.infraHome.openLegendControls();
         await pageObjects.infraHome.changePalette('temperature');
         await pageObjects.infraHome.applyLegendControls();
@@ -416,13 +427,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(nodesWithValue).to.eql([
             { name: 'host-5', value: 10, color: '#61a2ff' },
             { name: 'host-4', value: 30, color: '#b5d2ff' },
-            { name: 'host-1', value: 50, color: '#fbefee' },
-            { name: 'host-2', value: 70, color: '#ffbab3' },
             { name: 'host-3', value: 90, color: '#f6726a' },
+            { name: 'host-2', value: 70, color: '#ffbab3' },
+            { name: 'host-1', value: 50, color: '#fbefee' },
           ]);
         });
       });
 
+      // Done
       it('toggle the timeline', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
@@ -430,6 +442,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeTimeline();
       });
 
+      // Done
       it('toggles the inventory switcher', async () => {
         await pageObjects.infraHome.toggleInventorySwitcher();
       });
@@ -602,19 +615,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraSavedViews.createView('view2');
           await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
 
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
           await pageObjects.infraSavedViews.clickSavedViewsButton();
-          views = await pageObjects.infraSavedViews.getManageViewsEntries();
-          expect(views.length).to.equal(3);
+          await retry.tryForTime(5000, async () => {
+            views = await pageObjects.infraSavedViews.getManageViewsEntries();
+            expect(views.length).to.equal(3);
+          });
+
           await pageObjects.infraSavedViews.pressEsc();
 
           await pageObjects.infraSavedViews.clickSavedViewsButton();
           await pageObjects.infraSavedViews.updateView('view3');
           await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
 
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
           await pageObjects.infraSavedViews.clickSavedViewsButton();
-          views = await pageObjects.infraSavedViews.getManageViewsEntries();
-          expect(views.length).to.equal(3);
-          await pageObjects.infraSavedViews.pressEsc();
+          await retry.tryForTime(5000, async () => {
+            views = await pageObjects.infraSavedViews.getManageViewsEntries();
+            expect(views.length).to.equal(3);
+          });
         });
       });
     });

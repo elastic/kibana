@@ -7,15 +7,17 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { TestProviders } from '../../../../common/mock';
 
 const mockShowAssistantOverlay = jest.fn();
-const mockOnRegenerate = jest.fn();
 const mockOnChangeShowAnonymizedValues = jest.fn();
 const mockSetConnectorId = jest.fn();
 const mockClosePopover = jest.fn();
 const mockOpenPopover = jest.fn();
+const mockOpenAgentBuilderFlyout = jest.fn();
+const mockUseAgentBuilderAvailability = jest.fn(() => ({ isAgentBuilderEnabled: false }));
 
 jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
   useAskAiAssistant: () => ({
@@ -23,28 +25,53 @@ jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
   }),
 }));
 
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
+}));
+
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
+  useAgentBuilderAttachment: () => ({
+    openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
+  }),
+}));
+
+jest.mock(
+  '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management',
+  () => ({
+    AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="anonymizationSettingsModal">
+        <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
+          {'Close'}
+        </button>
+      </div>
+    ),
+  })
+);
+
 describe('EntityHighlightsSettings', () => {
   const defaultProps = {
-    onRegenerate: mockOnRegenerate,
     showAnonymizedValues: false,
     onChangeShowAnonymizedValues: mockOnChangeShowAnonymizedValues,
     setConnectorId: mockSetConnectorId,
     connectorId: 'test-connector',
+    connectorName: 'Elastic Managed LLM',
     entityType: 'user',
     entityIdentifier: 'test-user',
     assistantResult: {
       aiResponse: 'Test AI response',
       replacements: { anonymized_user: 'test-user' },
-      formattedEntitySummary: '{"user": "test-user"}',
+      summaryAsText: '{"user": "test-user"}',
     },
     closePopover: mockClosePopover,
     openPopover: mockOpenPopover,
     isLoading: false,
     isPopoverOpen: true,
+    isAssistantVisible: true,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentBuilderEnabled: false });
   });
 
   it('renders the settings button', () => {
@@ -62,39 +89,6 @@ describe('EntityHighlightsSettings', () => {
 
     fireEvent.click(screen.getByLabelText('Entity highlights settings menu'));
     expect(mockOpenPopover).toHaveBeenCalled();
-  });
-
-  it('renders regenerate menu item', () => {
-    render(<EntityHighlightsSettings {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByText('Regenerate')).toBeInTheDocument();
-  });
-
-  it('calls onRegenerate when regenerate is clicked', () => {
-    render(<EntityHighlightsSettings {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    fireEvent.click(screen.getByLabelText('Regenerate'));
-    expect(mockOnRegenerate).toHaveBeenCalled();
-  });
-
-  it('disables regenerate button when loading', () => {
-    render(<EntityHighlightsSettings {...defaultProps} isLoading={true} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByLabelText('Regenerate')).toBeDisabled();
-  });
-
-  it('disables regenerate button when no assistant result', () => {
-    render(<EntityHighlightsSettings {...defaultProps} assistantResult={null} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByLabelText('Regenerate')).toBeDisabled();
   });
 
   it('renders anonymized values switch', () => {
@@ -121,7 +115,7 @@ describe('EntityHighlightsSettings', () => {
       assistantResult: {
         aiResponse: 'Test AI response',
         replacements: {},
-        formattedEntitySummary: '{"user": "test-user"}',
+        summaryAsText: '{"user": "test-user"}',
       },
     };
 
@@ -161,12 +155,70 @@ describe('EntityHighlightsSettings', () => {
     expect(screen.getByLabelText('Ask AI Assistant')).toBeDisabled();
   });
 
-  it('renders connector selector', () => {
+  it('disables Ask AI Assistant when no assistant result', () => {
+    render(<EntityHighlightsSettings {...defaultProps} assistantResult={null} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByLabelText('Ask AI Assistant')).toBeDisabled();
+  });
+
+  it('enables Ask AI Assistant when assistant result exists and not loading', () => {
+    render(<EntityHighlightsSettings {...defaultProps} isLoading={false} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByLabelText('Ask AI Assistant')).not.toBeDisabled();
+  });
+
+  it('disables Ask AI Assistant when agent builder is enabled and no assistant result', () => {
+    mockUseAgentBuilderAvailability.mockImplementation(() => ({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    }));
+
+    render(<EntityHighlightsSettings {...defaultProps} assistantResult={null} />, {
+      wrapper: TestProviders,
+    });
+
+    const agentButton = screen.getByTestId('newAgentBuilderAttachment');
+    expect(agentButton).toBeDisabled();
+
+    fireEvent.click(agentButton);
+    expect(mockOpenAgentBuilderFlyout).not.toHaveBeenCalled();
+  });
+
+  it('enables Ask AI Assistant when agent builder is enabled and assistant result exists', () => {
+    mockUseAgentBuilderAvailability.mockImplementation(() => ({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    }));
+
+    render(<EntityHighlightsSettings {...defaultProps} isLoading={false} />, {
+      wrapper: TestProviders,
+    });
+    const agentButton = screen.getByTestId('newAgentBuilderAttachment');
+
+    expect(agentButton).not.toBeDisabled();
+
+    fireEvent.click(agentButton);
+    expect(mockOpenAgentBuilderFlyout).toHaveBeenCalled();
+  });
+
+  it('renders connector selector', async () => {
     render(<EntityHighlightsSettings {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
-    expect(screen.getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('entity-highlights-settings-connector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    });
   });
 
   it('disables settings button when loading', () => {
@@ -191,5 +243,38 @@ describe('EntityHighlightsSettings', () => {
     });
 
     expect(screen.getByRole('switch')).not.toBeChecked();
+  });
+
+  it('renders the anonymization settings button', () => {
+    render(<EntityHighlightsSettings {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByTestId('anonymizationSettings')).toBeInTheDocument();
+  });
+
+  it('opens the anonymization settings modal when the settings button is clicked', async () => {
+    render(<EntityHighlightsSettings {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    await userEvent.click(screen.getByTestId('anonymizationSettings'));
+    await waitFor(() =>
+      expect(screen.getByTestId('anonymizationSettingsModal')).toBeInTheDocument()
+    );
+  });
+
+  it('closes the anonymization settings modal when onClose is triggered', async () => {
+    render(<EntityHighlightsSettings {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    await userEvent.click(screen.getByTestId('anonymizationSettings'));
+    await waitFor(() => expect(screen.getByTestId('anonymizationSettingsModal')).toBeVisible());
+
+    await userEvent.click(screen.getByTestId('closeAnonymizationSettingsModal'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('anonymizationSettingsModal')).not.toBeInTheDocument()
+    );
   });
 });

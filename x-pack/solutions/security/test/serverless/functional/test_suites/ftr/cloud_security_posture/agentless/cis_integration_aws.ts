@@ -12,9 +12,7 @@ import {
   AWS_INPUT_TEST_SUBJECTS,
 } from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'settings',
     'common',
@@ -33,7 +31,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let mockApiServer: http.Server;
 
     before(async () => {
+      const { setupMockServer } = await import('./mock_agentless_api');
+      const mockAgentlessApiService = setupMockServer();
       mockApiServer = mockAgentlessApiService.listen(8089);
+
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;

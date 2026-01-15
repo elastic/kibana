@@ -2,12 +2,12 @@
 $schema: https://moonrepo.dev/schemas/workspace.json
 
 projects:
-    # for now we can list explicitly, it's faster than resolving globs
   globs:
-    - src/platform/packages/shared/kbn-monaco/moon.yml
-    - src/platform/packages/private/kbn-ui-shared-deps-src/moon.yml
-    - src/platform/packages/private/kbn-ui-shared-deps-npm/moon.yml
     - moon.yml # because we do linking at the root level, every project is project will appear as a dependency
+    - src/**/moon.yml
+    - x-pack/**/moon.yml
+    - examples/**/moon.yml
+    - packages/**/moon.yml
 vcs:
   defaultBranch: main
   manager: git
@@ -28,5 +28,6 @@ unstable_remote:
   auth:
     headers:
       Authorization: "Basic ${MOON_REMOTE_CACHE_TOKEN}"
+
 
 telemetry: false

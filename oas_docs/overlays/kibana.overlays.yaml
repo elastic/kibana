@@ -15,26 +15,6 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
-# Add an introduction to spaces
-  - target: '$'
-    description: Add an extra page about spaces
-    update:
-      x-topics:
-        - title: Kibana spaces
-          content: |
-            Spaces enable you to organize your dashboards and other saved objects into meaningful categories.
-            You can use the default space or create your own spaces.
-
-            To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
-            For example:
-
-            ```
-            curl -X GET "http://localhost:5601/s/marketing/api/data_views"
-            ```
-
-            If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
-
-            To learn more, check out [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces).
 # Add tag descriptions that are specific to the Stack APIs
   - target: '$.tags[?(@.name=="cases")]'
     description: Change tag description and displayName
@@ -101,6 +81,22 @@ actions:
     update:
       description: >
         Enables you to invalidate user sessions for security and session management purposes.
+  - target: '$.tags[?(@.name=="agent builder")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
+        
+        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+
+        **Elastic Agent Builder requires an Enterprise subscription.**
+      externalDocs:
+        description: Learn about working with Agent Builder programmatically
+        url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
+      # externalDocs:
+        # description: 
+        # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
+      x-displayName: 'Agent Builder'
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
@@ -119,6 +115,7 @@ actions:
                 $ref: "../examples/copy_saved_objects_request2.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -143,6 +140,7 @@ actions:
                 $ref: "../examples/resolve_copy_saved_objects_request2.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -170,6 +168,7 @@ actions:
                 $ref: "../examples/update_saved_objects_spaces_request1.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:

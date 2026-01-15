@@ -18,6 +18,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { processAllRuleGaps } from '../process_all_rule_gaps';
 import { updateGapsBatch } from './update_gaps_batch';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
+import { backfillInitiator } from '../../../../common/constants';
 
 jest.mock('../process_all_rule_gaps');
 jest.mock('./update_gaps_batch');
@@ -75,6 +76,7 @@ describe('updateGaps', () => {
         actionsClient: mockActionsClient,
         backfillSchedule,
         shouldRefetchAllBackfills: true,
+        initiator: backfillInitiator.USER,
       });
 
       expect(processAllRuleGapsMock).toHaveBeenCalledWith({
@@ -97,6 +99,7 @@ describe('updateGaps', () => {
         ruleId,
         eventLogClient: mockEventLogClient,
         alertingEventLogger: expect.any(AlertingEventLogger),
+        initiator: backfillInitiator.USER,
       });
     });
 
@@ -114,6 +117,7 @@ describe('updateGaps', () => {
         gaps,
         backfillSchedule,
         shouldRefetchAllBackfills: true,
+        initiator: backfillInitiator.USER,
       });
       expect(processAllRuleGapsMock).not.toHaveBeenCalled();
       expect(updateGapsBatchMock).toHaveBeenCalledWith({
@@ -127,6 +131,7 @@ describe('updateGaps', () => {
         ruleId,
         eventLogClient: mockEventLogClient,
         alertingEventLogger: expect.any(AlertingEventLogger),
+        initiator: backfillInitiator.USER,
       });
     });
 
@@ -145,6 +150,7 @@ describe('updateGaps', () => {
         gaps,
         backfillSchedule,
         shouldRefetchAllBackfills: true,
+        initiator: backfillInitiator.USER,
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith(

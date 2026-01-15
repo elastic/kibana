@@ -1,0 +1,42 @@
+{
+  "id": "@kbn/es-query-constants",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/es-query-constants",
+        "id": "def-common.FilterStateStore",
+        "type": "Enum",
+        "tags": [],
+        "label": "FilterStateStore",
+        "description": [
+          "\n  Filter,\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query-constants/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

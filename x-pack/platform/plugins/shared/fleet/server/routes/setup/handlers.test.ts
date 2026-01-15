@@ -41,6 +41,7 @@ jest.mock('../../services/setup', () => {
 jest.mock('../../services/fleet_server');
 jest.mock('../../services/secrets', () => ({
   isSecretStorageEnabled: jest.fn().mockResolvedValue(true),
+  isSSLSecretStorageEnabled: jest.fn().mockResolvedValue(true),
   isActionSecretStorageEnabled: jest.fn().mockResolvedValue(true),
 }));
 
@@ -205,6 +206,7 @@ describe('FleetStatusHandler', () => {
       isReady: true,
       is_secrets_storage_enabled: true,
       is_space_awareness_enabled: false,
+      is_ssl_secrets_storage_enabled: true,
       missing_optional_features: [],
       missing_requirements: [],
       is_action_secrets_storage_enabled: true,
@@ -228,6 +230,7 @@ describe('FleetStatusHandler', () => {
       isReady: false,
       is_secrets_storage_enabled: true,
       is_space_awareness_enabled: false,
+      is_ssl_secrets_storage_enabled: true,
       missing_optional_features: [],
       missing_requirements: ['api_keys', 'fleet_server'],
       is_action_secrets_storage_enabled: true,
@@ -260,6 +263,7 @@ describe('FleetStatusHandler', () => {
       isReady: true,
       is_secrets_storage_enabled: true,
       is_space_awareness_enabled: false,
+      is_ssl_secrets_storage_enabled: true,
       missing_optional_features: [],
       missing_requirements: [],
       is_action_secrets_storage_enabled: true,

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from 'expect';
 
@@ -18,12 +17,8 @@ import type {
   RuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { deleteAllAlerts, deleteAllRules, createRule } from '@kbn/detections-response-ftr-services';
 import { createRuleWithExceptionEntries, getSimpleRule } from '../../../../utils';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  createRule,
-} from '../../../../../../config/services/detections_response';
 import {
   createListsIndex,
   deleteAllExceptions,

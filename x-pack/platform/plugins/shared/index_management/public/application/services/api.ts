@@ -48,6 +48,7 @@ import { httpService } from './http';
 import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
 import type { Fields } from '../components/mappings_editor/types';
+import type { UserStartPrivilegesResponse } from '../../../server/lib/types';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -122,12 +123,14 @@ export async function updateDSFailureStore(
   data: {
     dsFailureStore: boolean;
     customRetentionPeriod?: string;
+    retentionDisabled?: boolean;
   }
 ) {
   const body = {
     dsFailureStore: data.dsFailureStore,
     dataStreams,
     customRetentionPeriod: data.customRetentionPeriod,
+    retentionDisabled: data.retentionDisabled,
   };
 
   return sendRequest({
@@ -510,4 +513,11 @@ export const cancelReindex = (sourceIndexName: string) => {
 
 export const getReindexStatus = (sourceIndexName: string) => {
   return reindexService.getReindexStatus(sourceIndexName);
+};
+
+export const useUserPrivileges = (indexName: string) => {
+  return useRequest<UserStartPrivilegesResponse>({
+    path: `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
+    method: 'get',
+  });
 };

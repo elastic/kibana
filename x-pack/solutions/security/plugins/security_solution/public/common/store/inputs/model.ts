@@ -102,8 +102,7 @@ export interface UrlInputsModelInputs {
 export interface UrlInputsModel {
   global: UrlInputsModelInputs;
   timeline: UrlInputsModelInputs;
-  // serverless only
-  valueReport?: UrlInputsModelInputs;
+  valueReport: UrlInputsModelInputs;
   // TODO: remove ? when isSocTrendsEnabled feature flag is removed
   socTrends?: UrlInputsModelInputs;
 }

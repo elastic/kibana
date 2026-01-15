@@ -38,10 +38,9 @@ import type {
 import { getSuggestions } from './suggestions';
 import type { GaugeVisualizationState } from './constants';
 import { GROUP_ID, LENS_GAUGE_ID } from './constants';
-import { GaugeToolbar, GaugeFlyoutToolbar } from './toolbar_component';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
-import { getAccessorsFromState } from './utils';
+import { getAccessorsFromState, getDefaultPalette } from './utils';
 import {
   GAUGE_GOAL_GT_MAX,
   GAUGE_METRIC_GT_MAX,
@@ -50,6 +49,8 @@ import {
   GAUGE_MIN_GT_METRIC,
   GAUGE_MIN_NE_MAX,
 } from '../../user_messages_ids';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { GaugeStyleSettings } from './toolbar_component';
 
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -228,13 +229,17 @@ export const getGaugeVisualization = ({
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-        ticksPosition: 'auto',
+        colorMode: 'palette',
+        palette:
+          mainPalette?.type === 'legacyPalette'
+            ? mainPalette.value
+            : getDefaultPalette(paletteService),
+        ticksPosition: 'bands',
         labelMajorMode: 'auto',
       }
     );
   },
-  getSuggestions,
+  getSuggestions: (params) => getSuggestions({ ...params, paletteService }),
 
   getConfiguration({ state, frame }) {
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
@@ -412,12 +417,8 @@ export const getGaugeVisualization = ({
     return <GaugeDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  ToolbarComponent(props) {
-    return <GaugeToolbar {...props} />;
-  },
-
   FlyoutToolbarComponent(props) {
-    return <GaugeFlyoutToolbar {...props} />;
+    return <FlyoutToolbar {...props} contentMap={{ style: GaugeStyleSettings }} />;
   },
 
   getSupportedLayers(state, frame) {

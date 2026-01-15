@@ -8,8 +8,8 @@
 import Boom from '@hapi/boom';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
-import { muteAlertParamsSchema } from './schemas';
-import type { MuteAlertParams } from './types';
+import { muteAlertQuerySchema, muteAlertParamsSchema } from './schemas';
+import type { MuteAlertQuery, MuteAlertParams } from './types';
 import type { Rule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -19,7 +19,7 @@ import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(
   context: RulesClientContext,
-  params: MuteAlertParams
+  { params, query }: { params: MuteAlertParams; query: MuteAlertQuery }
 ): Promise<void> {
   const ruleId = params.alertId;
   try {
@@ -28,16 +28,23 @@ export async function muteInstance(
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
+  try {
+    muteAlertQuerySchema.validate(query);
+  } catch (error) {
+    throw Boom.badRequest(`Failed to validate body: ${error.message}`);
+  }
+
   return await retryIfConflicts(
     context.logger,
     `rulesClient.muteInstance('${ruleId}')`,
-    async () => await muteInstanceWithOCC(context, params)
+    async () => await muteInstanceWithOCC(context, params, query)
   );
 }
 
 async function muteInstanceWithOCC(
   context: RulesClientContext,
-  { alertId: ruleId, alertInstanceId }: MuteAlertParams
+  { alertId: ruleId, alertInstanceId }: MuteAlertParams,
+  { validateAlertsExistence }: MuteAlertQuery
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     RULE_SAVED_OBJECT_TYPE,
@@ -76,9 +83,27 @@ async function muteInstanceWithOCC(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
+  if (validateAlertsExistence) {
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+    const isExistingAlert = await context.alertsService?.isExistingAlert({
+      indices,
+      alertId: alertInstanceId,
+      ruleId,
+    });
+
+    if (!isExistingAlert) {
+      throw Boom.notFound(
+        `Alert instance with id "${alertInstanceId}" does not exist for rule with id "${ruleId}"`
+      );
+    }
+  }
+
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
     mutedInstanceIds.push(alertInstanceId);
+
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
@@ -89,5 +114,14 @@ async function muteInstanceWithOCC(
         updatedAt: new Date().toISOString(),
       }),
     });
+
+    if (indices && indices.length > 0) {
+      await context.alertsService?.muteAlertInstance({
+        ruleId,
+        alertInstanceId,
+        indices,
+        logger: context.logger,
+      });
+    }
   }
 }

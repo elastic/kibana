@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { Markdown } from '@kbn/shared-ux-markdown';
 import { getFilteredGroups } from './get_filtered_groups';
+import { HIGHLIGHT_TOKEN } from './highlight_matches';
 
 describe('getFilteredGroups', () => {
   const sections = {
@@ -23,15 +23,15 @@ describe('getFilteredGroups', () => {
         items: [
           {
             label: 'Section two item 1 blah blah',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 1 description `} />
-            ),
+            description: {
+              markdownContent: `## Section two item 1 description `,
+            },
           },
           {
             label: 'Section two item 2',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 2 description `} />
-            ),
+            description: {
+              markdownContent: `## Section two item 2 description `,
+            },
           },
         ],
       },
@@ -40,15 +40,15 @@ describe('getFilteredGroups', () => {
         items: [
           {
             label: 'Section three  item 1',
-            description: (
-              <Markdown readOnly markdownContent={`## Section three  item 1 description `} />
-            ),
+            description: {
+              markdownContent: `## Section three  item 1 description `,
+            },
           },
           {
             label: 'Section three  item 2',
-            description: (
-              <Markdown readOnly markdownContent={`## Section three  item 2 description `} />
-            ),
+            description: {
+              markdownContent: `## Section three  item 2 description `,
+            },
           },
         ],
       },
@@ -72,14 +72,96 @@ describe('getFilteredGroups', () => {
   test('Should return the section two as it gets it if the search string is asking for this', () => {
     const filteredSections = getFilteredGroups('tWo', false, sections);
     expect(filteredSections).toStrictEqual([
-      { ...sections.groups[1], options: sections.groups[1].items },
+      {
+        ...sections.groups[1],
+        label: `Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN}`,
+        description: '',
+        items: [
+          {
+            label: `Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN} item 1 blah blah`,
+            description: {
+              markdownContent: `## Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN} item 1 description `,
+            },
+          },
+          {
+            label: `Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN} item 2`,
+            description: {
+              markdownContent: `## Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN} item 2 description `,
+            },
+          },
+        ],
+      },
     ]);
   });
 
   test('Should return the section two filtered on the search string if it is allowed to search in description', () => {
     const filteredSections = getFilteredGroups('Section two item 1 blah blah', true, sections);
     expect(filteredSections).toStrictEqual([
-      { ...sections.groups[1], options: [sections.groups[1].items[0]] },
+      {
+        ...sections.groups[1],
+        label: 'Section two',
+        description: '',
+        items: [
+          {
+            label: `${HIGHLIGHT_TOKEN}Section two item 1 blah blah${HIGHLIGHT_TOKEN}`,
+            description: {
+              markdownContent: '## Section two item 1 description ',
+            },
+          },
+        ],
+      },
+    ]);
+  });
+
+  test('Should prioritize items that match on label over items that match on description', () => {
+    const documentation = {
+      groups: [
+        {
+          label: 'Section one',
+          description: 'Values',
+          items: [],
+        },
+        {
+          label: 'Section two',
+          items: [
+            {
+              label: 'Section two item 1 blah blah',
+              description: {
+                markdownContent: 'Values',
+              },
+            },
+            {
+              label: 'Values',
+              description: {
+                markdownContent: `## Section two item 2 description `,
+              },
+            },
+          ],
+        },
+      ],
+      initialSection: <span>Here is the initial section</span>,
+    };
+    const filteredSections = getFilteredGroups('Values', true, documentation);
+    expect(filteredSections).toStrictEqual([
+      {
+        ...documentation.groups[1],
+        label: 'Section two',
+        description: '',
+        items: [
+          {
+            label: `${HIGHLIGHT_TOKEN}Values${HIGHLIGHT_TOKEN}`,
+            description: {
+              markdownContent: '## Section two item 2 description ',
+            },
+          },
+          {
+            label: 'Section two item 1 blah blah',
+            description: {
+              markdownContent: `${HIGHLIGHT_TOKEN}Values${HIGHLIGHT_TOKEN}`,
+            },
+          },
+        ],
+      },
     ]);
   });
 });

@@ -265,6 +265,38 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchHomepage",
+        "id": "def-common.SEARCH_HOMEPAGE_V2_UI_FLAG",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_HOMEPAGE_V2_UI_FLAG",
+        "description": [],
+        "signature": [
+          "\"searchHomepage:searchHomepageV2Enabled\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchHomepage",
+        "id": "def-common.WORKFLOWS_UI_SETTING_ENABLED_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_UI_SETTING_ENABLED_ID",
+        "description": [
+          "\nUI Setting id for Workflows, to show/hide related elements"
+        ],
+        "signature": [
+          "\"workflows:ui:enabled\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

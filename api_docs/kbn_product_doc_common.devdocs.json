@@ -153,6 +153,156 @@
       },
       {
         "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.getResourceTypeFromArtifactName",
+        "type": "Function",
+        "tags": [],
+        "label": "getResourceTypeFromArtifactName",
+        "description": [
+          "\nDetermines the resource type from an artifact name."
+        ],
+        "signature": [
+          "(artifactName: string) => ",
+          {
+            "pluginId": "@kbn/product-doc-common",
+            "scope": "common",
+            "docId": "kibKbnProductDocCommonPluginApi",
+            "section": "def-common.ResourceType",
+            "text": "ResourceType"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.getResourceTypeFromArtifactName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "artifactName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.getSecurityLabsArtifactName",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecurityLabsArtifactName",
+        "description": [
+          "\nGenerates the artifact name for Security Labs content.\nFormat: security-labs-{version}[--{inferenceId}].zip\nVersion uses date format: YYYY.MM.DD"
+        ],
+        "signature": [
+          "({ version, excludeExtension, inferenceId, }: { version: string; excludeExtension?: boolean | undefined; inferenceId?: string | undefined; }) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.getSecurityLabsArtifactName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  version,\n  excludeExtension = false,\n  inferenceId,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/product-doc-common",
+                "id": "def-common.getSecurityLabsArtifactName.$1.version",
+                "type": "string",
+                "tags": [],
+                "label": "version",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/product-doc-common",
+                "id": "def-common.getSecurityLabsArtifactName.$1.excludeExtension",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "excludeExtension",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/product-doc-common",
+                "id": "def-common.getSecurityLabsArtifactName.$1.inferenceId",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.getSecurityLabsIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecurityLabsIndexName",
+        "description": [
+          "\nReturns the index name for Security Labs content.\nFormat: .kibana_ai_security_labs[-{inferenceId}]"
+        ],
+        "signature": [
+          "(inferenceId?: string | undefined) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.getSecurityLabsIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
         "id": "def-common.isArtifactContentFilePath",
         "type": "Function",
         "tags": [],
@@ -186,6 +336,41 @@
       },
       {
         "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.isValidSecurityLabsVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidSecurityLabsVersion",
+        "description": [
+          "\nValidates a Security Labs version string (YYYY.MM.DD format)."
+        ],
+        "signature": [
+          "(version: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.isValidSecurityLabsVersion.$1",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
         "id": "def-common.parseArtifactName",
         "type": "Function",
         "tags": [],
@@ -201,6 +386,41 @@
           {
             "parentPluginId": "@kbn/product-doc-common",
             "id": "def-common.parseArtifactName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "artifactName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.parseSecurityLabsArtifactName",
+        "type": "Function",
+        "tags": [],
+        "label": "parseSecurityLabsArtifactName",
+        "description": [
+          "\nParses a Security Labs artifact name to extract version and optional inference ID."
+        ],
+        "signature": [
+          "(artifactName: string) => { version: string; inferenceId?: string | undefined; resourceType: \"security_labs\"; } | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/artifact.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.parseSecurityLabsArtifactName.$1",
             "type": "string",
             "tags": [],
             "label": "artifactName",
@@ -491,8 +711,72 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.ResourceType",
+        "type": "Type",
+        "tags": [],
+        "label": "ResourceType",
+        "description": [
+          "\nResource types for knowledge base artifacts.\n- `product_doc`: Elastic product documentation (Kibana, Elasticsearch, etc.)\n- `security_labs`: Elastic Security Labs content"
+        ],
+        "signature": [
+          "\"product_doc\" | \"security_labs\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/resource_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.securityLabsIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "securityLabsIndexPattern",
+        "description": [
+          "\nIndex pattern for Security Labs content."
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.securityLabsIndexPrefix",
+        "type": "string",
+        "tags": [],
+        "label": "securityLabsIndexPrefix",
+        "description": [
+          "\nIndex name prefix for Security Labs content."
+        ],
+        "signature": [
+          "\".kibana_ai_security_labs\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.ResourceTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "ResourceTypes",
+        "description": [],
+        "signature": [
+          "{ readonly productDoc: \"product_doc\"; readonly securityLabs: \"security_labs\"; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/resource_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

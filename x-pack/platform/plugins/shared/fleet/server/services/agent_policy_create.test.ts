@@ -77,8 +77,9 @@ describe('createAgentPolicyWithPackages', () => {
     mockedPackagePolicyService.buildPackagePolicyFromPackage.mockImplementation(
       (soClient, packageToInstall) => Promise.resolve(getPackagePolicy(packageToInstall))
     );
-    mockIncrementPackageName.mockImplementation((soClient: any, pkg: string) =>
-      Promise.resolve(`${pkg}-1`)
+    mockIncrementPackageName.mockImplementation(
+      (soClient: any, packageName: string, spaceIds: string[]) =>
+        Promise.resolve(`${packageName}-1`)
     );
     mockedPackagePolicyService.create.mockImplementation((soClient, esClient, newPolicy) =>
       Promise.resolve({
@@ -235,6 +236,7 @@ describe('createAgentPolicyWithPackages', () => {
         namespace: 'default',
         supports_agentless: true,
         monitoring_enabled: [],
+        keep_monitoring_alive: true,
       },
       expect.objectContaining({ skipDeploy: true })
     );

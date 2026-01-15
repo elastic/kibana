@@ -35,7 +35,7 @@ import type {
   RuleActionParam,
   RuleActionParams,
 } from '@kbn/alerting-types';
-import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import type { ActionConnector, UserConfiguredActionConnector } from '@kbn/alerts-ui-shared';
 import {
   checkActionFormActionTypeEnabled,
   getAvailableActionVariables,
@@ -171,6 +171,15 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     );
   }, [actionType, connectors]);
 
+  const hasConnectorConfig = (
+    currentConnector: ActionConnector
+  ): currentConnector is UserConfiguredActionConnector<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > => 'config' in currentConnector;
+
+  const connectorConfig = connector && hasConnectorConfig(connector) ? connector.config : undefined;
+
   const onDelete = (id: string) => {
     dispatch({ type: 'removeAction', payload: { uuid: id } });
   };
@@ -193,7 +202,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     async (params: RuleActionParam) => {
       const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
         .get(action.actionTypeId)
-        ?.validateParams(params);
+        ?.validateParams(params, connectorConfig);
 
       dispatch({
         type: 'setActionParamsError',
@@ -203,7 +212,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         },
       });
     },
-    [actionTypeRegistry, action, dispatch]
+    [actionTypeRegistry, action, dispatch, connectorConfig]
   );
 
   const onStoredActionParamsChange = useCallback(

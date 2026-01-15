@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import type { ToolCall, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { ToolCallOfToolOptions } from '@kbn/inference-common';
@@ -25,6 +27,7 @@ export function validateToolCalls({
   tools,
 }: ToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCall[] {
   const validator = new Ajv();
+  addFormats(validator, { mode: 'fast' });
 
   if (toolCalls.length && toolChoice === ToolChoiceType.none) {
     throw createToolValidationError(
@@ -39,7 +42,10 @@ export function validateToolCalls({
     const tool = tools?.[toolCall.function.name];
 
     if (!tool) {
-      throw createToolNotFoundError(toolCall.function.name);
+      throw createToolNotFoundError({
+        name: toolCall.function.name,
+        args: toolCall.function.arguments,
+      });
     }
 
     const toolSchema = tool.schema ?? { type: 'object', properties: {} };

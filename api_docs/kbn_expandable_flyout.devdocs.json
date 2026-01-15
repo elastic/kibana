@@ -610,7 +610,9 @@
               "\nCallback function to let application's code the flyout is closed"
             ],
             "signature": [
-              "((event: KeyboardEvent | MouseEvent | TouchEvent) => void) | undefined"
+              "((event: ",
+              "EuiFlyoutCloseEvent",
+              ") => void) | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/index.tsx",
             "deprecated": false,

@@ -427,6 +427,44 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.createRequestHandlerContext",
+            "type": "Function",
+            "tags": [],
+            "label": "createRequestHandlerContext",
+            "description": [
+              "{@link RequestHandlerContextFactory}"
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => Promise<",
+              "CoreRequestHandlerContext",
+              ">"
+            ],
+            "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-lifecycle-server",
+                "id": "def-server.CoreSetup.createRequestHandlerContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
             "id": "def-server.CoreSetup.plugins",
             "type": "Object",
             "tags": [],

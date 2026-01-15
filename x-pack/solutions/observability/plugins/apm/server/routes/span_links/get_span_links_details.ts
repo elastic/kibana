@@ -6,8 +6,8 @@
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { chunk, compact, isEmpty, keyBy } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { chunk } from 'lodash';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -34,6 +34,7 @@ import { getBufferedTimerange } from './utils';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
+import { compactMap } from '../../utils/compact_map';
 
 async function fetchSpanLinksDetails({
   apmEventClient,
@@ -47,7 +48,7 @@ async function fetchSpanLinksDetails({
   spanLinks: SpanLink[];
   start: number;
   end: number;
-}) {
+}): Promise<SpanLinkDetails[]> {
   const { startWithBuffer, endWithBuffer } = getBufferedTimerange({
     start,
     end,
@@ -131,85 +132,76 @@ async function fetchSpanLinksDetails({
     { skipProcessorEventFilter: true }
   );
 
-  const spanIdsMap = keyBy(spanLinks, 'span.id');
+  const spanIdsMap = spanLinks.reduce<Record<string, SpanLink>>((acc, link) => {
+    acc[link.span.id] = link;
+    return acc;
+  }, {});
 
-  return response.hits.hits
-    .filter((hit) => {
-      // The above query might return other spans from the same transaction because siblings spans share the same transaction.id
-      // so, if it is a span we need to guarantee that the span.id is the same as the span links ids
-      if (hit.fields[PROCESSOR_EVENT]?.[0] === ProcessorEvent.span) {
-        const spanLink = unflattenKnownApmEventFields(hit.fields, [
-          ...requiredFields,
-          ...requiredSpanFields,
-        ]);
+  return compactMap(response.hits.hits, (hit) => {
+    const commonEvent = accessKnownApmEventFields(hit.fields).requireFields(requiredFields);
 
-        const hasSpanId = Boolean(spanIdsMap[spanLink.span.id] || false);
-        return hasSpanId;
-      }
-      return true;
-    })
-    .map((hit) => {
-      const commonEvent = unflattenKnownApmEventFields(hit.fields, requiredFields);
-      if (commonEvent.processor?.event) {
-        const commonDetails = {
-          serviceName: commonEvent.service.name,
-          environment: commonEvent.service.environment as Environment,
-          transactionId: commonEvent.transaction?.id,
+    const commonDetails = {
+      serviceName: commonEvent[SERVICE_NAME],
+      environment: commonEvent[SERVICE_ENVIRONMENT] as Environment,
+    };
+
+    switch (commonEvent[PROCESSOR_EVENT]) {
+      case ProcessorEvent.transaction: {
+        const event = commonEvent.requireFields(requiredTxFields);
+
+        return {
+          traceId: event[TRACE_ID],
+          spanId: event[TRANSACTION_ID],
+          details: {
+            ...commonDetails,
+            transactionId: event[TRANSACTION_ID],
+            agentName: event[AGENT_NAME],
+            spanName: event[TRANSACTION_NAME],
+            duration: event[TRANSACTION_DURATION],
+          },
         };
-        if (commonEvent.processor.event === ProcessorEvent.transaction) {
-          const event = unflattenKnownApmEventFields(hit.fields, [
-            ...requiredFields,
-            ...requiredTxFields,
-          ]);
-          return {
-            traceId: event.trace.id,
-            spanId: event.transaction.id,
-            transactionId: event.transaction.id,
-            details: {
-              ...commonDetails,
-              agentName: event.agent.name,
-              spanName: event.transaction.name,
-              duration: event.transaction.duration.us,
-            },
-          };
-        } else {
-          const event = unflattenKnownApmEventFields(hit.fields, [
-            ...requiredFields,
-            ...requiredSpanFields,
-          ]);
-
-          return {
-            traceId: event.trace.id,
-            spanId: event.span.id,
-            details: {
-              ...commonDetails,
-              agentName: event.agent.name,
-              spanName: event.span.name,
-              duration: event.span.duration.us,
-              spanSubtype: event.span.subtype,
-              spanType: event.span.type,
-            },
-          };
-        }
       }
 
-      const event = unflattenKnownApmEventFields(hit.fields, [
-        ...requiredFields,
-        ...requiredUnprocessedOtelSpanFields,
-      ]);
+      case ProcessorEvent.span: {
+        const event = commonEvent.requireFields(requiredSpanFields);
 
-      return {
-        traceId: event.trace.id,
-        spanId: event.span.id,
-        details: {
-          serviceName: commonEvent.service.name,
-          agentName: event.service.language.name as AgentName,
-          spanName: event.span.name,
-          duration: parseOtelDuration(event.duration),
-          environment: event.service.environment as Environment,
-        },
-      };
-    });
+        // The above query might return other spans from the same transaction because siblings spans share the same transaction.id
+        // so, if it is a span we need to guarantee that the span.id is the same as the span links ids
+        if (!spanIdsMap[event[SPAN_ID]]) {
+          return null;
+        }
+
+        return {
+          traceId: event[TRACE_ID],
+          spanId: event[SPAN_ID],
+          details: {
+            ...commonDetails,
+            transactionId: event[TRANSACTION_ID],
+            agentName: event[AGENT_NAME],
+            spanName: event[SPAN_NAME],
+            duration: event[SPAN_DURATION],
+            spanSubtype: event[SPAN_SUBTYPE],
+            spanType: event[SPAN_TYPE],
+          },
+        };
+      }
+
+      default: {
+        const event = commonEvent.requireFields(requiredUnprocessedOtelSpanFields);
+
+        return {
+          traceId: event[TRACE_ID],
+          spanId: event[SPAN_ID],
+          details: {
+            ...commonDetails,
+            agentName: event[SERVICE_LANGUAGE_NAME] as AgentName,
+            spanName: event[SPAN_NAME],
+            duration: parseOtelDuration(event.duration),
+          },
+        };
+      }
+    }
+  });
 }
 
 export async function getSpanLinksDetails({
@@ -248,21 +240,9 @@ export async function getSpanLinksDetails({
   // Creates a map for all span links details found
   const spanLinksDetailsMap = linkedSpans.reduce<Record<string, SpanLinkDetails>>(
     (acc, spanLink) => {
-      if (spanLink.transactionId) {
-        const key = `${spanLink.traceId}:${spanLink.transactionId}`;
-        acc[key] = {
-          traceId: spanLink.traceId,
-          spanId: spanLink.transactionId,
-          details: spanLink.details,
-        };
-      } else {
-        const key = `${spanLink.traceId}:${spanLink.spanId}`;
-        acc[key] = {
-          traceId: spanLink.traceId,
-          spanId: spanLink.spanId,
-          details: spanLink.details,
-        };
-      }
+      const key = `${spanLink.traceId}:${spanLink.spanId}`;
+
+      acc[key] = spanLink;
 
       return acc;
     },
@@ -272,16 +252,15 @@ export async function getSpanLinksDetails({
   // It's important to keep the original order of the span links,
   // so loops trough the original list merging external links and links with details.
   // external links are links that the details were not found in the ES query.
-  return compact(
-    spanLinks.map((item) => {
-      const key = `${item.trace.id}:${item.span.id}`;
-      const details = spanLinksDetailsMap[key];
-      if (details) {
-        return details;
-      }
+  return compactMap(spanLinks, (item) => {
+    const key = `${item.trace.id}:${item.span.id}`;
+    const details = spanLinksDetailsMap[key];
 
-      // When kuery is not set, returns external links, if not hides this item.
-      return isEmpty(kuery) ? { traceId: item.trace.id, spanId: item.span.id } : undefined;
-    })
-  );
+    if (details) {
+      return details;
+    }
+
+    // When kuery is not set, we return external links, else we hide this item.
+    return !kuery.length ? { traceId: item.trace.id, spanId: item.span.id } : undefined;
+  });
 }

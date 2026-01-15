@@ -321,7 +321,19 @@ describe('RRule Scheduling Integration', () => {
         taskType: 'workflow:scheduled',
         schedule,
         params: {
-          workflowId: 'test-workflow',
+          workflow: {
+            id: 'test-workflow',
+            name: 'Test Workflow',
+            enabled: true,
+            definition: {
+              triggers: [trigger],
+              steps: [],
+              name: 'Test Workflow',
+              enabled: false,
+              version: '1',
+            },
+            yaml: '',
+          },
           spaceId: 'default',
           triggerType: 'scheduled',
         },

@@ -7,12 +7,12 @@
 
 import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public';
+import type { DashboardSearchResponseBody } from '@kbn/dashboard-plugin/server';
 import type { ApmPluginStartDeps } from '../plugin';
 import { FETCH_STATUS } from './use_fetcher';
 
 export interface SearchDashboardsResult {
-  data: SearchDashboardsResponse['hits'];
+  data: DashboardSearchResponseBody['dashboards'];
   status: FETCH_STATUS;
 }
 
@@ -34,13 +34,13 @@ export function useDashboardFetcher(query?: string): SearchDashboardsResult {
       });
       try {
         const findDashboardsService = await dashboard?.findDashboardsService();
-        const data = await findDashboardsService.search({
+        const { dashboards } = await findDashboardsService.search({
           search: query ?? '',
-          size: 1000,
+          per_page: 1000,
         });
 
         setResult({
-          data: data.hits,
+          data: dashboards,
           status: FETCH_STATUS.SUCCESS,
         });
       } catch {

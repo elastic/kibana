@@ -5,18 +5,42 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { BarSegments } from './bar_segments';
 
-export function Bar({ width, left, color }: { width: number; left: number; color: string }) {
+export interface BarSegment {
+  id: string;
+  left: number;
+  width: number;
+  color: string;
+}
+
+export function Bar({
+  width,
+  left,
+  color,
+  segments,
+}: {
+  width: number;
+  left: number;
+  color: string;
+  segments?: BarSegment[];
+}) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <div
       css={css`
-        height: 12px;
+        position: relative;
+        height: ${euiTheme.size.base};
         background-color: ${color};
         width: ${width}%;
         margin-left: ${left}%;
       `}
-    />
+    >
+      {segments?.length ? <BarSegments segments={segments} /> : null}
+    </div>
   );
 }

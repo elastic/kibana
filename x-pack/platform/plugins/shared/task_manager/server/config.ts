@@ -78,6 +78,13 @@ const requestTimeoutsConfig = schema.object({
   update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
 });
 
+const validateDuration = (duration: string) => {
+  try {
+    parseIntervalAsMillisecond(duration);
+  } catch (err) {
+    return `string is not a valid duration: ${duration}`;
+  }
+};
 export const configSchema = schema.object(
   {
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
@@ -106,6 +113,10 @@ export const configSchema = schema.object(
     /* Allows for old kibana config to start kibana without crashing since ephemeral tasks are deprecated*/
     ephemeral_tasks: schema.maybe(schema.any()),
     event_loop_delay: eventLoopDelaySchema,
+    invalidate_api_key_task: schema.object({
+      interval: schema.string({ validate: validateDuration, defaultValue: '5m' }),
+      removalDelay: schema.string({ validate: validateDuration, defaultValue: '1h' }),
+    }),
     kibanas_per_partition: schema.number({
       defaultValue: DEFAULT_KIBANAS_PER_PARTITION,
       min: 1,

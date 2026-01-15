@@ -442,7 +442,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -489,7 +489,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -520,7 +520,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -643,7 +643,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -695,7 +695,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -789,7 +789,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -839,7 +839,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -905,7 +905,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -963,7 +963,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -994,7 +994,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1334,7 +1334,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1344,7 +1344,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>; docs: ",
           "ZodArray",
@@ -1438,7 +1438,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1452,7 +1452,7 @@
           "ZodUnknown",
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }, { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",
@@ -1472,7 +1472,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1486,7 +1486,7 @@
           "ZodUnknown",
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",
@@ -1502,7 +1502,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1516,7 +1516,7 @@
           "ZodUnknown",
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }; }, { integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",
@@ -1604,7 +1604,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1614,7 +1614,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>; connectorId: ",
           "ZodString",
@@ -1664,7 +1664,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1674,7 +1674,7 @@
           },
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; currentPipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
@@ -1766,7 +1766,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1776,7 +1776,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
@@ -1788,7 +1788,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1802,7 +1802,7 @@
           "ZodUnknown",
           ", \"strip\">[]; }, { pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",
@@ -1818,7 +1818,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1832,7 +1832,7 @@
           "ZodUnknown",
           ", \"strip\">[]; }; }, { results: { pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",
@@ -2094,7 +2094,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2104,7 +2104,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
@@ -2116,7 +2116,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2126,7 +2126,7 @@
           },
           "[] | undefined; }; }, { rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; }>"
         ],
@@ -2268,7 +2268,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2278,7 +2278,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>; docs: ",
           "ZodArray",
@@ -2372,7 +2372,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2386,7 +2386,7 @@
           "ZodUnknown",
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }, { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",
@@ -2622,7 +2622,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2632,7 +2632,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
@@ -2644,7 +2644,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2654,7 +2654,7 @@
           },
           "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }, { pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }>; }, \"strip\", ",
           "ZodTypeAny",
@@ -2666,7 +2666,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2676,7 +2676,7 @@
           },
           "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }, { results: { pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }>"
         ],
@@ -2820,7 +2820,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2830,7 +2830,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>; docs: ",
           "ZodArray",
@@ -2924,7 +2924,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2938,7 +2938,7 @@
           "ZodUnknown",
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }, { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",
@@ -2958,7 +2958,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2972,7 +2972,7 @@
           "ZodUnknown",
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",
@@ -3072,7 +3072,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -3082,7 +3082,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>"
         ],
@@ -3166,7 +3166,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -3176,7 +3176,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>; connectorId: ",
           "ZodString",
@@ -3226,7 +3226,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -3236,7 +3236,7 @@
           },
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; currentPipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
@@ -3328,7 +3328,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -3338,7 +3338,7 @@
           },
           "[] | undefined; }, { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
@@ -3350,7 +3350,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -3364,7 +3364,7 @@
           "ZodUnknown",
           ", \"strip\">[]; }, { pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",
@@ -3380,7 +3380,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -3394,7 +3394,7 @@
           "ZodUnknown",
           ", \"strip\">[]; }; }, { results: { pipeline: { processors: ",
           "ESProcessorItemInput",
-          "[]; version?: number | undefined; name?: string | undefined; description?: string | undefined; on_failure?: ",
+          "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
           "[] | undefined; }; docs: ",
           "objectInputType",

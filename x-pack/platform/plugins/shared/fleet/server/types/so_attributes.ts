@@ -19,7 +19,12 @@ import type {
   OutputPreset,
   AgentlessPolicy,
 } from '../../common/types';
-import type { AgentStatus, AgentType, FleetServerAgentComponent } from '../../common/types/models';
+import type {
+  AgentStatus,
+  AgentType,
+  AgentUpgrade,
+  FleetServerAgentComponent,
+} from '../../common/types/models';
 
 import type {
   PackagePolicy,
@@ -35,7 +40,11 @@ import type {
   KafkaTopicWhenType,
   SimpleSOAssetType,
 } from '../../common/types';
-import type { CloudProvider, CloudConnectorVars } from '../../common/types/models/cloud_connector';
+import type {
+  CloudProvider,
+  CloudConnectorVars,
+  AccountType,
+} from '../../common/types/models/cloud_connector';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -95,6 +104,7 @@ export interface AgentSOAttributes {
   packages?: string[];
   namespaces?: string[];
   last_known_status?: AgentStatus;
+  upgrade?: AgentUpgrade;
 }
 
 export interface FleetProxySOAttributes {
@@ -263,12 +273,19 @@ export interface SettingsSOAttributes {
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
   action_secret_storage_requirements_met?: boolean;
+  ssl_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
     enabled: boolean;
     is_preconfigured: boolean;
   };
+  ilm_migration_status?: {
+    logs?: 'success' | null;
+    metrics?: 'success' | null;
+    synthetics?: 'success' | null;
+  };
+  integration_knowledge_enabled?: boolean;
 }
 
 export interface SpaceSettingsSOAttributes {
@@ -295,8 +312,8 @@ export interface CloudConnectorSOAttributes {
   name: string;
   namespace?: string;
   cloudProvider: CloudProvider;
+  accountType?: AccountType;
   vars: CloudConnectorVars;
-  packagePolicyCount: number;
   created_at: string;
   updated_at: string;
 }

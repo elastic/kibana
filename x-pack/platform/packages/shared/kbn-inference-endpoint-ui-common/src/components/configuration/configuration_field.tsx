@@ -7,25 +7,40 @@
 
 import React, { useEffect, useState } from 'react';
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiButton,
+  EuiButtonIcon,
   EuiFieldText,
   EuiFieldPassword,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormControlLayout,
+  EuiFormRow,
   EuiSwitch,
   EuiTextArea,
   EuiFieldNumber,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
-import type { ConfigEntryView } from '../../types/types';
-import { FieldType } from '../../types/types';
+import { FieldType, type Map, type ConfigEntryView } from '../../types/types';
+import {
+  ADD_LABEL,
+  DELETE_LABEL,
+  HEADERS_KEY_LABEL,
+  HEADERS_VALUE_LABEL,
+  ADD_HEADERS_SWITCH_LABEL,
+  VIEW_HEADERS_SWITCH_LABEL,
+  HIDE_HEADERS_SWITCH_LABEL,
+  HEADERS_DUPLICATE_KEY_MESSAGE,
+} from '../../translations';
 import { ensureBooleanType, ensureCorrectTyping, ensureStringType } from './configuration_utils';
 
 interface ConfigurationFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
-  setConfigValue: (value: number | string | boolean | null) => void;
+  setConfigValue: (value: number | string | boolean | null | Map) => void;
   isEdit?: boolean;
   isPreconfigured?: boolean;
 }
@@ -33,10 +48,14 @@ interface ConfigurationFieldProps {
 interface ConfigInputFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
-  validateAndSetConfigValue: (value: string | boolean) => void;
+  validateAndSetConfigValue: (value: string | boolean | Map) => void;
   isEdit?: boolean;
   isPreconfigured?: boolean;
 }
+
+const KEY_INDEX = 0;
+const VALUE_INDEX = 1;
+
 export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   isLoading,
@@ -200,6 +219,193 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   );
 };
 
+const emptyHeaders: Map = { '': '' };
+const emptyHeadersList: Array<[string, string]> = [['', '']];
+
+function getInitialHeadersList(
+  value: string | number | Map | boolean | null,
+  defaultValue: string | number | Map | boolean | null
+): Array<[string, string]> {
+  try {
+    const headersObj =
+      value && Object.keys(value).length > 0
+        ? value
+        : defaultValue && Object.keys(defaultValue).length > 0
+        ? defaultValue
+        : emptyHeaders;
+    const headersList: Array<[string, string]> = Object.entries(headersObj as Map);
+    return headersList.length > 0 ? headersList : emptyHeadersList;
+  } catch (e) {
+    return emptyHeadersList;
+  }
+}
+
+const checkForDuplicateKeys = (headersList: string[][]) =>
+  headersList.some((header, index) => {
+    return (
+      header[KEY_INDEX] !== '' &&
+      headersList.findIndex((h) => h[KEY_INDEX] === header[KEY_INDEX]) !== index
+    );
+  });
+
+export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
+  configEntry,
+  isLoading,
+  validateAndSetConfigValue,
+  isEdit = false,
+}) => {
+  const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
+  const [showHeaderInputs, setShowHeaderInputs] = useState<boolean>(false);
+  const [headersList, setHeadersList] = useState<string[][]>(
+    getInitialHeadersList(value, defaultValue)
+  );
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+  const onChange = (e: EuiSwitchEvent) => {
+    setShowHeaderInputs(e.target.checked);
+  };
+
+  const handleHeaderChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    headerIndex: number,
+    elementIndex: number
+  ) => {
+    setHeadersList((prevHeadersList) => {
+      const newHeaders = [...prevHeadersList];
+      newHeaders[headerIndex][elementIndex] = e.target.value;
+      return newHeaders;
+    });
+  };
+
+  const onBlur = () => {
+    // Check for duplicate keys
+    const hasDuplicateKeys = checkForDuplicateKeys(headersList);
+
+    if (hasDuplicateKeys) {
+      setErrorMessage(HEADERS_DUPLICATE_KEY_MESSAGE);
+    }
+
+    if (!hasDuplicateKeys && errorMessage) {
+      setErrorMessage(undefined);
+    }
+
+    const isEmptyHeadersList =
+      headersList.length === 1 && headersList[0][0] === '' && headersList[0][1] === '';
+    // Update the config value when user is done typing - only if the headers list is not empty
+    if (!isEmptyHeadersList && !hasDuplicateKeys) {
+      const headersObj = Object.fromEntries(headersList);
+      validateAndSetConfigValue(headersObj);
+    }
+  };
+
+  return (
+    <>
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={'config-field-map-type'}>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow error={errorMessage} isInvalid={!!errorMessage}>
+            <EuiSwitch
+              data-test-subj={`${key}-switch-${showHeaderInputs ? 'checked' : 'unchecked'}`}
+              label={
+                showHeaderInputs
+                  ? HIDE_HEADERS_SWITCH_LABEL
+                  : isEdit
+                  ? VIEW_HEADERS_SWITCH_LABEL
+                  : ADD_HEADERS_SWITCH_LABEL
+              }
+              checked={showHeaderInputs}
+              onChange={(e) => onChange(e)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        {showHeaderInputs
+          ? headersList.map((header, index) => (
+              <EuiFlexItem key={`${key}-header-${index}`}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem>
+                    <EuiFormRow label={HEADERS_KEY_LABEL}>
+                      <EuiFieldText
+                        onBlur={onBlur}
+                        data-test-subj={`${key}-key-${index}`}
+                        isInvalid={!isValid}
+                        disabled={isLoading || (isEdit && !updatable)}
+                        value={header[0]}
+                        onChange={(e) => {
+                          handleHeaderChange(e, index, KEY_INDEX);
+                        }}
+                        aria-label={HEADERS_KEY_LABEL}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow label={HEADERS_VALUE_LABEL}>
+                      <EuiFieldText
+                        onBlur={onBlur}
+                        data-test-subj={`${key}-value-${index}`}
+                        disabled={isLoading || (isEdit && !updatable)}
+                        value={header[1]}
+                        onChange={(e) => {
+                          handleHeaderChange(e, index, VALUE_INDEX);
+                        }}
+                        aria-label={HEADERS_VALUE_LABEL}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      disabled={isLoading || (isEdit && !updatable)}
+                      display="base"
+                      color="danger"
+                      css={{ marginTop: '22px' }}
+                      onClick={() => {
+                        const newHeaders = headersList.toSpliced(index, 1);
+                        const hasDuplicateKeys = checkForDuplicateKeys(newHeaders);
+                        const headersObj = Object.fromEntries(newHeaders);
+                        if (!hasDuplicateKeys && errorMessage) {
+                          setErrorMessage(undefined);
+                        }
+                        setHeadersList(newHeaders);
+                        validateAndSetConfigValue(
+                          Object.keys(headersObj).length > 0 ? headersObj : ''
+                        );
+                      }}
+                      iconType="minusInCircle"
+                      aria-label={DELETE_LABEL}
+                      data-test-subj={`${key}-delete-button-${index}`}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ))
+          : null}
+        <EuiFlexItem grow={false}>
+          <span>
+            <EuiButton
+              size="s"
+              disabled={
+                !showHeaderInputs ||
+                isLoading ||
+                (isEdit && !updatable) ||
+                (!isEdit &&
+                  headersList.length === 1 &&
+                  (headersList[0][0] === '' || headersList[0][1] === ''))
+              }
+              iconType="plusInCircle"
+              onClick={() => {
+                const newHeaders = [...headersList, ['', '']];
+                setHeadersList(newHeaders);
+              }}
+              data-test-subj={`${key}-add-button`}
+              aria-label={ADD_LABEL}
+            >
+              {ADD_LABEL}
+            </EuiButton>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+};
+
 export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   configEntry,
   isLoading,
@@ -207,8 +413,12 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   isEdit,
   isPreconfigured,
 }) => {
-  const validateAndSetConfigValue = (value: number | string | boolean) => {
-    setConfigValue(ensureCorrectTyping(configEntry.type, value));
+  const validateAndSetConfigValue = (value: number | string | boolean | Map) => {
+    setConfigValue(
+      configEntry.type === FieldType.STRING && value === ''
+        ? null
+        : ensureCorrectTyping(configEntry.type, value)
+    );
   };
 
   const { key, type, sensitive } = configEntry;
@@ -229,6 +439,16 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
     case FieldType.BOOLEAN:
       return (
         <ConfigSwitchField
+          isLoading={isLoading}
+          configEntry={configEntry}
+          validateAndSetConfigValue={validateAndSetConfigValue}
+        />
+      );
+
+    case FieldType.MAP:
+      return (
+        <ConfigInputMapField
+          isEdit={isEdit}
           isLoading={isLoading}
           configEntry={configEntry}
           validateAndSetConfigValue={validateAndSetConfigValue}

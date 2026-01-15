@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
+
 interface ActionBase {
   id: string;
   label: string;
@@ -16,7 +18,7 @@ interface ActionBase {
 }
 
 export interface ActionGroup extends ActionBase {
-  iconType: string;
+  iconType: IconType;
   options: ActionOptionData[];
 }
 
@@ -27,7 +29,7 @@ export interface ActionConnectorGroup extends ActionBase {
 
 export interface ActionOption extends ActionBase {
   id: string;
-  iconType: string;
+  iconType: IconType;
 }
 
 export interface ActionConnectorOption extends ActionBase {

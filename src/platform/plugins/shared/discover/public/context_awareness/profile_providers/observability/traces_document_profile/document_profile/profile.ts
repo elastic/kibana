@@ -75,5 +75,5 @@ const getFieldValues = <TRecord extends DataTableRecord, TField extends string>(
   field: TField & keyof TRecord['flattened']
 ): TRecord['flattened'][TField][] => {
   const value = record.flattened[field];
-  return Array.isArray(value) ? value : [value];
+  return (Array.isArray(value) ? value : [value]) as TRecord['flattened'][TField][];
 };

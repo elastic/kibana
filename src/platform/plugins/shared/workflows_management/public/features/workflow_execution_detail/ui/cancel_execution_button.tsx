@@ -48,6 +48,7 @@ export const CancelExecutionButton: React.FC<CancelExecutionButtonProps> = ({ ex
       data-test-subj="cancelExecutionButton"
       disabled={!canCancelWorkflow}
       size="s"
+      fullWidth
     >
       <FormattedMessage
         id="workflowsManagement.executionDetail.cancelButton"

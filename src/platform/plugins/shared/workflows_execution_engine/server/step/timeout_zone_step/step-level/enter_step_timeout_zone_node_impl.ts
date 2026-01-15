@@ -22,11 +22,11 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
   ) {}
 
   public async run(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
+    this.stepExecutionRuntime.startStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  public monitor(monitoredContext: StepExecutionRuntime): Promise<void> {
+  public monitor(monitoredContext: StepExecutionRuntime): void {
     const timeoutMs = parseDuration(this.node.timeout);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const stepExecution = this.stepExecutionRuntime.stepExecution!;
@@ -40,7 +40,5 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
         `TimeoutError: Step execution exceeded the configured timeout of ${this.node.timeout}.`
       );
     }
-
-    return Promise.resolve();
   }
 }

@@ -23,6 +23,7 @@ import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { PLUGIN_ID } from '@kbn/reporting-server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -71,6 +72,44 @@ describe('Reporting Plugin', () => {
 
     expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalledWith(PLUGIN_ID);
     expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
+  });
+
+  it('registers feature usage when export types are registered', () => {
+    const licensing = licensingMock.createSetup();
+    plugin.setup(coreSetup, { ...pluginSetup, licensing });
+    expect(licensing.featureUsage.register).toHaveBeenCalledTimes(8);
+    expect(licensing.featureUsage.register).toHaveBeenCalledWith(
+      `Reporting: csv_searchsource scheduled export`,
+      'gold'
+    );
+    expect(licensing.featureUsage.register).toHaveBeenCalledWith(
+      `Reporting: csv_v2 scheduled export`,
+      'gold'
+    );
+    expect(licensing.featureUsage.register).toHaveBeenCalledWith(
+      `Reporting: printablePdfV2 scheduled export`,
+      'gold'
+    );
+    expect(licensing.featureUsage.register).toHaveBeenCalledWith(
+      `Reporting: printablePdfV2 single export`,
+      'gold'
+    );
+    expect(licensing.featureUsage.register).toHaveBeenCalledWith(
+      `Reporting: printablePdf scheduled export`,
+      'gold'
+    );
+    expect(licensing.featureUsage.register).toHaveBeenCalledWith(
+      `Reporting: printablePdf single export`,
+      'gold'
+    );
+    expect(licensing.featureUsage.register).toHaveBeenCalledWith(
+      `Reporting: pngV2 scheduled export`,
+      'gold'
+    );
+    expect(licensing.featureUsage.register).toHaveBeenCalledWith(
+      `Reporting: pngV2 single export`,
+      'gold'
+    );
   });
 
   it('registers telemetry task when usage collection is defined', async () => {

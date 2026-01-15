@@ -37,6 +37,7 @@ toc:
           - file: connectors-kibana/bedrock-action-type.md
           - file: connectors-kibana/elastic-managed-llm.md
           - file: connectors-kibana/gemini-action-type.md
+          - file: connectors-kibana/mcp-action-type.md
           - file: connectors-kibana/openai-action-type.md
       - file: connectors-kibana/elastic-connectors.md
         children:
@@ -69,6 +70,16 @@ toc:
           - file: connectors-kibana/cases-webhook-action-type.md
           - file: connectors-kibana/xmatters-action-type.md
           - file: connectors-kibana/xsoar-action-type.md
+      - file: connectors-kibana/data-context-sources-connectors.md
+        children:
+          - file: connectors-kibana/abuseipdb-action-type.md
+          - file: connectors-kibana/alienvault-otx-action-type.md
+          - file: connectors-kibana/brave-search-action-type.md
+          - file: connectors-kibana/greynoise-action-type.md
+          - file: connectors-kibana/notion-action-type.md
+          - file: connectors-kibana/shodan-action-type.md
+          - file: connectors-kibana/urlvoid-action-type.md
+          - file: connectors-kibana/virustotal-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
   - file: kibana-plugins.md
   - file: commands.md
@@ -76,6 +87,5 @@ toc:
       - file: commands/kibana-encryption-keys.md
       - file: commands/kibana-setup.md
       - file: commands/kibana-verification-code.md
-  - file: osquery-exported-fields.md
   - file: osquery-manager-prebuilt-packs.md
   - file: case-analytics-indices-schema.md

@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 import { useDataView } from './use_data_view';
 import { buildBrowserFields } from '../utils/build_browser_fields';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -16,7 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 const emptyFields = {};
 
 export const useBrowserFields = (
-  scope: DataViewManagerScopeName = DataViewManagerScopeName.default,
+  scope: PageScope = PageScope.default,
   /**
    * @deprecated remove when newDataViewPickerEnabled is removed
    */

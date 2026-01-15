@@ -39,7 +39,7 @@
           },
           ", \"id\">>; }) => ",
           "Observable",
-          "<{ lastInteractedInterceptId: number; }>) | undefined; }"
+          "<{ lastInteractedInterceptId: number | null; } | { lastInteractedInterceptId: null; }>) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/public/plugin.ts",
         "deprecated": false,
@@ -54,7 +54,9 @@
         "label": "InterceptWithoutRunId",
         "description": [],
         "signature": [
-          "{ id: string; onProgress?: ((evt: InterceptProgressEvent) => void) | undefined; steps: [StartingInterceptStep, ...InterceptSteps[], CompletionInterceptStep]; onFinish: (evt: InterceptCompletionEvent) => void; onDismiss?: ((evt: InterceptDismissalEvent) => void) | undefined; }"
+          "{ id: string; onProgress?: ((evt: InterceptProgressEvent) => void) | undefined; steps: [StartingInterceptStep, ...",
+          "InterceptSteps",
+          "[], CompletionInterceptStep]; onFinish: (evt: InterceptCompletionEvent) => void; onDismiss?: ((evt: InterceptDismissalEvent) => void) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/intercept_dialog_api.ts",
         "deprecated": false,

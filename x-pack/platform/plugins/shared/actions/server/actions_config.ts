@@ -11,14 +11,24 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/pipeable';
 
-import type { ActionsConfig, CustomHostSettings } from './config';
+import {
+  getSSLSettingsFromConfig,
+  type CustomHostSettings,
+  type ProxySettings,
+  type SSLSettings,
+} from '@kbn/actions-utils';
+import type { ActionsConfig } from './config';
 import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import type { AwsSesConfig, ProxySettings, ResponseSettings, SSLSettings } from './types';
-import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
+import type { AwsSesConfig, ResponseSettings } from './types';
 import type { ValidateEmailAddressesOptions } from '../common';
-import { validateEmailAddresses, invalidEmailsAsMessage } from '../common';
+import {
+  validateEmailAddresses,
+  invalidEmailsAsMessage,
+  DEFAULT_EMAIL_BODY_LENGTH,
+  MAX_EMAIL_BODY_LENGTH,
+} from '../common';
 export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {
@@ -64,6 +74,7 @@ export interface ActionsConfigurationUtilities {
   };
   getAwsSesConfig: () => AwsSesConfig;
   getEnabledEmailServices: () => string[];
+  getMaxEmailBodyLength: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -266,6 +277,11 @@ export function getActionsConfigurationUtilities(
       }
 
       return ['*'];
+    },
+    getMaxEmailBodyLength() {
+      const configuredLength = config.email?.maximum_body_length ?? DEFAULT_EMAIL_BODY_LENGTH;
+      const nonNegativeLength = Math.max(0, configuredLength);
+      return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
     },
   };
 }

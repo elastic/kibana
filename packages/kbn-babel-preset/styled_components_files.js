@@ -23,7 +23,6 @@ module.exports = {
     /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
     /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-src[\/\\]/,
 
-    /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]assistant_overlay[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]settings[\/\\]assistant_settings.tsx/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]data_anonymization_editor[\/\\]context_editor[\/\\]get_columns[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]components[\/\\]fleet_server_hosts_form.tsx/,
@@ -176,7 +175,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]and_or_badge[\/\\]rounded_badge_antenna.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]auto_download[\/\\]auto_download.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]conditions_table[\/\\]index.stories.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]drag_and_drop[\/\\]draggable_wrapper.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]drag_and_drop[\/\\]droppable_wrapper.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]drag_and_drop[\/\\]provider_container.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]empty_value[\/\\]empty_value.test.tsx/,

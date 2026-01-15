@@ -108,13 +108,13 @@ describe('When on the Event Filters list page', () => {
       expect(renderResult.getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
       expect(
         renderResult.getAllByTestId(
-          'EventFiltersListPage-card-decorator-processDescendantIndication'
+          'EventFiltersListPage-card-decorator-processDescendantsIndication'
         )
       ).toHaveLength(2);
     });
 
     it('should display additional `event.category is process` entry in tooltip', async () => {
-      const prefix = 'EventFiltersListPage-card-decorator-processDescendantIndicationTooltip';
+      const prefix = 'EventFiltersListPage-card-decorator-processDescendantsIndicationTooltip';
 
       await renderWithData();
 

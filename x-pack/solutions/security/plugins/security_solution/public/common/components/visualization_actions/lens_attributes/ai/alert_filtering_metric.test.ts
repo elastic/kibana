@@ -8,6 +8,7 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import { getAlertFilteringMetricLensAttributes } from './alert_filtering_metric';
 import type { ExtraOptions } from '../../types';
+import { getAlertIndexFilter } from './helpers';
 
 interface FormulaColumn {
   params: {
@@ -32,10 +33,12 @@ interface MathColumn {
 describe('getAlertFilteringMetricLensAttributes', () => {
   const defaultEuiTheme = {} as EuiThemeComputed;
   const defaultTotalAlerts = 1000;
+  const defaultSignalIndexName = '.alerts-security.alerts-default';
 
   const defaultArgs = {
     euiTheme: defaultEuiTheme,
     totalAlerts: defaultTotalAlerts,
+    signalIndexName: defaultSignalIndexName,
   };
 
   it('returns lens attributes with correct basic structure, datasource, column, and visualization configurations', () => {
@@ -107,19 +110,21 @@ describe('getAlertFilteringMetricLensAttributes', () => {
         type: 'index-pattern',
       },
     ]);
-    const mockFilters = [
+    const mockFilters: ExtraOptions['filters'] = [
       { meta: { alias: 'test filter', disabled: false, negate: false } },
-    ] as ExtraOptions['filters'];
-    expect(getAlertFilteringMetricLensAttributes(defaultArgs).state.filters).toEqual([]);
+    ];
+    expect(getAlertFilteringMetricLensAttributes(defaultArgs).state.filters).toEqual([
+      getAlertIndexFilter(defaultSignalIndexName),
+    ]);
     expect(
       getAlertFilteringMetricLensAttributes({ ...defaultArgs, extraOptions: {} }).state.filters
-    ).toEqual([]);
+    ).toEqual([getAlertIndexFilter(defaultSignalIndexName)]);
     expect(
       getAlertFilteringMetricLensAttributes({
         ...defaultArgs,
         extraOptions: { filters: mockFilters },
       }).state.filters
-    ).toEqual(mockFilters);
+    ).toEqual([getAlertIndexFilter(defaultSignalIndexName), ...mockFilters]);
     const testCases = [500, 0, 1000000];
     testCases.forEach((totalAlerts) => {
       const testResult = getAlertFilteringMetricLensAttributes({ ...defaultArgs, totalAlerts });
@@ -147,6 +152,43 @@ describe('getAlertFilteringMetricLensAttributes', () => {
     };
     expect(
       getAlertFilteringMetricLensAttributes({ ...defaultArgs, extraOptions }).state.filters
-    ).toEqual(extraOptions.filters);
+    ).toEqual([getAlertIndexFilter(defaultSignalIndexName), ...(extraOptions.filters ?? [])]);
+  });
+
+  it('includes alert index filter in filters array', () => {
+    const result = getAlertFilteringMetricLensAttributes(defaultArgs);
+    const expectedFilter = getAlertIndexFilter(defaultSignalIndexName);
+    expect(result.state.filters).toContainEqual(expectedFilter);
+  });
+
+  it('handles different signal index names correctly', () => {
+    const testCases = [
+      '.alerts-security.alerts-default',
+      '.alerts-security.alerts-custom-space',
+      'custom-alerts-index',
+    ];
+
+    testCases.forEach((signalIndexName) => {
+      const result = getAlertFilteringMetricLensAttributes({
+        ...defaultArgs,
+        signalIndexName,
+      });
+      const expectedFilter = getAlertIndexFilter(signalIndexName);
+      expect(result.state.filters).toContainEqual(expectedFilter);
+    });
+  });
+
+  it('combines alert index filter with extra options filters', () => {
+    const mockFilters: ExtraOptions['filters'] = [
+      { meta: { alias: 'extra filter', disabled: false, negate: false } },
+    ];
+    const result = getAlertFilteringMetricLensAttributes({
+      ...defaultArgs,
+      extraOptions: { filters: mockFilters },
+    });
+
+    expect(result.state.filters).toHaveLength(2);
+    expect(result.state.filters[0]).toEqual(getAlertIndexFilter(defaultSignalIndexName));
+    expect(result.state.filters[1]).toEqual(mockFilters[0]);
   });
 });

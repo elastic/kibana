@@ -63,3 +63,36 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:d7f3cca6-e2aa-4921-aee8-12d2ad3873ca",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.16.0"
+      },
+      "task": {
+        "attempts": 0,
+        "ownerId": null,
+        "params": "{\"alertId\":\"d7f3cca6-e2aa-4921-aee8-12d2ad3873ca\",\"spaceId\":\"default\"}",
+        "retryAt": null,
+        "runAt": "2021-11-05T16:21:52.148Z",
+        "schedule": {
+					"interval": "1d"
+				},
+        "scheduledAt": "2021-11-05T15:28:42.055Z",
+        "scope": [
+					"alerting"
+				],
+        "startedAt": null,
+        "status": "running",
+        "taskType": "alerting:example.always-firing"
+      },
+      "references": [],
+      "type": "task",
+      "updated_at": "2021-11-05T16:21:37.629Z"
+    }
+  }
+}

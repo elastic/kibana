@@ -26,7 +26,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import type { DeploymentAgnosticCommonServices } from '../services';
 import { services } from '../services';
-import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
+import {
+  AI_ASSISTANT_SNAPSHOT_REPO_PATH,
+  STREAMS_SNAPSHOT_REPO_PATH,
+  LOCAL_PRODUCT_DOC_PATH,
+} from './common_paths';
 
 interface CreateTestConfigOptions<T> {
   esServerArgs?: string[];
@@ -100,7 +104,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
+          preferCached: true,
         },
       }),
       testFiles: options.testFiles,
@@ -128,7 +133,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
-          `path.repo=${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`,
+          `path.repo=${AI_ASSISTANT_SNAPSHOT_REPO_PATH},${STREAMS_SNAPSHOT_REPO_PATH}`,
         ],
         files: [
           // Passing the roles that are equivalent to the ones we have in serverless

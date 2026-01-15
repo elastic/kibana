@@ -15,9 +15,14 @@ import { isProviderTechPreview } from '../../../../utils/reranker_helper';
 export interface EndpointInfoProps {
   inferenceId: string;
   endpointInfo: InferenceInferenceEndpointInfo;
+  isCloudEnabled?: boolean;
 }
 
-export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpointInfo }) => (
+export const EndpointInfo: React.FC<EndpointInfoProps> = ({
+  inferenceId,
+  endpointInfo,
+  isCloudEnabled,
+}) => (
   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap>

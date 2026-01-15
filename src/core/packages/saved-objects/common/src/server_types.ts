@@ -38,6 +38,22 @@ export type SavedObjectAttributeSingle =
 export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 
 /**
+ * Definition of the Saved Object access control interface
+ *
+ * @public
+ */
+
+export interface SavedObjectAccessControl {
+  /** The ID of the user who owns this object. */
+  owner: string;
+  /**
+   * The access mode of the object. `write_restricted` is editable only by the owner and admin users.
+   * Access mode `default` is editable by all users with write access to the object.
+   */
+  accessMode: 'write_restricted' | 'default';
+}
+
+/**
  * The data for a Saved Object is stored as an object in the `attributes`
  * property.
  *
@@ -114,6 +130,14 @@ export interface SavedObject<T = unknown> {
    * make their edits to the copy.
    */
   managed?: boolean;
+
+  /**
+   * Access control information of the saved object.
+   * This can be be used to customize access to the object in addition to RBAC, e.g.
+   * to set an object to read-only mode, where it is only editable by the owner of
+   * the object (or an admin), even if other users are granted write access via a role.
+   */
+  accessControl?: SavedObjectAccessControl;
 }
 
 /**
@@ -134,6 +158,6 @@ export interface SavedObjectsRawDocSource {
   references?: SavedObjectReference[];
   originId?: string;
   managed?: boolean;
-
+  accessControl?: SavedObjectAccessControl;
   [typeMapping: string]: any;
 }

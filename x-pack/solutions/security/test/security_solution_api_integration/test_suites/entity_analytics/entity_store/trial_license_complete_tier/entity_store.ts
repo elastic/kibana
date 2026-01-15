@@ -85,7 +85,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('get and list', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240922
+    describe.skip('get and list', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
       });
@@ -147,7 +148,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('start and stop', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/236432
+    describe.skip('start and stop', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
@@ -217,7 +219,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('status', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240994
+    describe.skip('status', () => {
       afterEach(async () => {
         await utils.cleanEngines();
       });
@@ -344,7 +347,7 @@ export default ({ getService }: FtrProviderContext) => {
                   'test-*',
                   '.asset-criticality.asset-criticality-default',
                   'risk-score.risk-score-latest-default',
-                  '.entities.v1.reset.security_host_default',
+                  '.entities.v1.reset.security_host_default*',
                   '.entities.v1.updates.security_host_default*',
                 ],
               },

@@ -9,7 +9,7 @@ import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { noop } from 'rxjs';
 import type { InferenceExecutor } from '../../utils/inference_executor';
-import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType, InferenceConnectorType } from '@kbn/inference-common';
 import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
 import { addNoToolUsageDirective } from './prompts';
 import { lastValueFrom, toArray } from 'rxjs';
@@ -17,7 +17,11 @@ describe('bedrockClaudeAdapter', () => {
   const logger = loggerMock.create();
   const executorMock = {
     invoke: jest.fn(),
-  } as InferenceExecutor & { invoke: jest.MockedFn<InferenceExecutor['invoke']> };
+    getConnector: jest.fn(),
+  } as InferenceExecutor & {
+    invoke: jest.MockedFn<InferenceExecutor['invoke']>;
+    getConnector: jest.MockedFn<InferenceExecutor['getConnector']>;
+  };
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
@@ -30,6 +34,14 @@ describe('bedrockClaudeAdapter', () => {
           tokenStream: new PassThrough(),
         },
       };
+    });
+    executorMock.getConnector.mockReset();
+    executorMock.getConnector.mockReturnValue({
+      type: InferenceConnectorType.Bedrock,
+      name: 'bedrock-connector',
+      connectorId: 'test-connector-id',
+      config: {},
+      capabilities: {},
     });
   });
 

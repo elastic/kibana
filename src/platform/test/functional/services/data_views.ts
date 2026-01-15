@@ -30,20 +30,37 @@ export class DataViewsService extends FtrService {
     changeTimestampField, // optionally override default timestamp field
   }: DataViewOptions) {
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
-    await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    if (hasTimeField) {
-      await this.retry.waitFor('timestamp field loaded', async () => {
-        const timestampField = await this.testSubjects.find('timestampField');
-        return !(await timestampField.elementHasClass('euiComboBox-isDisabled'));
+
+    await this.retry.waitFor('data view title input to be valid', async () => {
+      await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
       });
 
-      if (changeTimestampField) {
-        await this.comboBox.set('timestampField', changeTimestampField);
+      await this.testSubjects.waitForAttributeToChange(
+        'createIndexPatternTitleInput',
+        'data-is-validating',
+        '0'
+      );
+
+      const isInvalid = await this.testSubjects.getAttribute(
+        'createIndexPatternTitleInput',
+        'aria-invalid'
+      );
+
+      return isInvalid !== 'true';
+    });
+
+    await this.testSubjects.waitForAttributeToChange('timestampField', 'data-is-loading', '0');
+
+    if (await this.testSubjects.isEnabled('timestampField > comboBoxSearchInput')) {
+      if (!hasTimeField) {
+        await this.comboBox.set('timestampField', "--- I don't want to use the time filter ---");
+      } else if (changeTimestampField) {
+        await this.comboBox.set('timestampField', changeTimestampField!);
       }
     }
+
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
   }

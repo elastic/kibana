@@ -5,41 +5,17 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { castArray, last } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { type Error } from '@kbn/apm-types';
+import type { Logger } from '@kbn/logging';
+import { last } from 'lodash';
 import type { APMConfig } from '../..';
-import {
-  ID,
-  ERROR_CULPRIT,
-  ERROR_EXC_HANDLED,
-  ERROR_EXC_MESSAGE,
-  ERROR_EXC_TYPE,
-  ERROR_GROUP_ID,
-  ERROR_ID,
-  ERROR_LOG_LEVEL,
-  ERROR_LOG_MESSAGE,
-  PARENT_ID,
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_ID,
-  TIMESTAMP_US,
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../common/es_fields/apm';
-import type {
-  WaterfallError,
-  WaterfallSpan,
-  WaterfallTransaction,
-} from '../../../common/waterfall/typings';
+import type { WaterfallSpan, WaterfallTransaction } from '../../../common/waterfall/typings';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { compactMap } from '../../utils/compact_map';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
-import { ApmDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
+import { getApmTraceErrorQuery, requiredFields } from './get_apm_trace_error_query';
 import { getTraceDocsPerPage } from './get_trace_docs_per_page';
 
 export type TraceDoc = WaterfallTransaction | WaterfallSpan;
@@ -47,33 +23,11 @@ export type TraceDoc = WaterfallTransaction | WaterfallSpan;
 export interface TraceItems {
   exceedsMax: boolean;
   traceDocs: TraceDoc[];
-  errorDocs: WaterfallError[];
+  errorDocs: Error[];
   spanLinksCountById: Record<string, number>;
   traceDocsTotal: number;
   maxTraceItems: number;
 }
-
-export const requiredFields = asMutableArray([
-  TIMESTAMP_US,
-  TRACE_ID,
-  SERVICE_NAME,
-  ERROR_ID,
-  ERROR_GROUP_ID,
-  PROCESSOR_EVENT,
-  ID,
-] as const);
-
-export const optionalFields = asMutableArray([
-  PARENT_ID,
-  TRANSACTION_ID,
-  SPAN_ID,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  ERROR_CULPRIT,
-  ERROR_LOG_MESSAGE,
-  ERROR_EXC_MESSAGE,
-  ERROR_EXC_HANDLED,
-  ERROR_EXC_TYPE,
-] as const);
 
 export async function getTraceItems({
   traceId,
@@ -132,69 +86,49 @@ export async function getTraceItems({
 }
 
 export const MAX_ITEMS_PER_PAGE = 10000; // 10000 is the max allowed by ES
-const excludedLogLevels = ['debug', 'info', 'warning'];
 
-export async function getApmTraceError({
-  apmEventClient,
-  traceId,
-  docId,
-  start,
-  end,
-}: {
+export async function getApmTraceError(params: {
   apmEventClient: APMEventClient;
   traceId: string;
   docId?: string;
   start: number;
   end: number;
 }) {
-  const response = await apmEventClient.search('get_errors_docs', {
-    apm: {
-      sources: [
-        {
-          documentType: ApmDocumentType.ErrorEvent,
-          rollupInterval: RollupInterval.None,
-        },
-      ],
-    },
-    track_total_hits: false,
-    size: 1000,
-    query: {
-      bool: {
-        filter: [
-          ...termQuery(TRACE_ID, traceId),
-          ...termQuery(SPAN_ID, docId),
-          ...rangeQuery(start, end),
-        ],
-        must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
-      },
-    },
-    fields: [...requiredFields, ...optionalFields],
-    _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
-  });
+  const response = await getApmTraceErrorQuery(params);
 
-  return response.hits.hits.map((hit) => {
+  return compactMap(response.hits.hits, (hit): Error | undefined => {
     const errorSource = 'error' in hit._source ? hit._source : undefined;
+    const event = hit.fields
+      ? accessKnownApmEventFields(hit.fields).requireFields(requiredFields)
+      : undefined;
 
-    const { _id: id, ...event } = unflattenKnownApmEventFields(hit.fields, requiredFields);
+    if (!event) {
+      return undefined;
+    }
 
-    const waterfallErrorEvent: WaterfallError = {
-      ...event,
-      id: castArray(id)[0] as string,
+    const { _id: id, parent, error, ...unflattened } = event.unflatten();
+
+    return {
+      id,
       parent: {
-        ...event?.parent,
-        id: event?.parent?.id ?? event?.span?.id,
+        id: parent?.id ?? unflattened.span?.id,
       },
+      trace: unflattened.trace,
+      span: unflattened.span,
+      transaction: unflattened.transaction,
+      timestamp: unflattened.timestamp,
+      service: { name: unflattened.service.name },
       error: {
-        ...(event.error ?? {}),
         exception:
           (errorSource?.error.exception?.length ?? 0) > 0
-            ? errorSource?.error.exception
-            : event?.error.exception && [event.error.exception],
+            ? errorSource?.error?.exception?.[0]
+            : error.exception,
+        grouping_key: error?.grouping_key,
+        culprit: error?.culprit,
+        id: error?.id,
         log: errorSource?.error.log,
       },
     };
-
-    return waterfallErrorEvent;
   });
 }
 

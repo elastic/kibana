@@ -106,8 +106,8 @@ function parseColumns(extractedColumns: EsqlColumn[]): {
         fieldName: columnName,
         meta: { type: 'string' },
       });
-      columnNames.push(columnName);
     }
+    columnNames.push(columnName);
   });
 
   return { columnList, columns: columnNames };

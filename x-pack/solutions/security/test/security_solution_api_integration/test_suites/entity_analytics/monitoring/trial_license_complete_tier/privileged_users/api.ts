@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { PrivMonUtils } from '../utils';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
@@ -19,10 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const privmonUtils = PrivMonUtils(getService);
 
   describe('@ess @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
-    const kibanaServer = getService('kibanaServer');
-
     beforeEach(async () => {
-      await enablePrivmonSetting(kibanaServer);
       await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
       await privmonUtils.initPrivMonEngine();
     });
@@ -45,21 +41,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(user.event.ingested).to.be.a('string');
         expect(user.id).to.be.a('string');
         expect(user.user.name).to.be('test_user1');
-      });
-
-      it('should not create a user if the advanced setting is disabled', async () => {
-        await disablePrivmonSetting(kibanaServer);
-        log.info(`creating a user with advanced setting disabled`);
-        const res = await entityAnalyticsApi.createPrivMonUser({
-          body: { user: { name: 'test_user2' } },
-        });
-
-        if (res.status !== 403) {
-          log.error(`Creating privmon user with advanced setting disabled should fail`);
-          log.error(JSON.stringify(res.body));
-        }
-
-        expect(res.status).eql(403);
       });
 
       it('should not create a user if the maximum user limit is reached', async () => {
@@ -189,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
         const listed = listRes.body as ListPrivMonUsersResponse;
         listed.forEach((user) => {
           privmonUtils.assertIsPrivileged(user, true);
-          expect(user['@timestamp']).to.be.a('string');
+          expect(user.event?.['@timestamp']).to.be.a('string');
           expect(user.event?.ingested).to.be.a('string');
           expect(user.labels?.sources).to.contain('csv');
         });

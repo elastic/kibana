@@ -11,13 +11,8 @@ import { useEuiTheme } from '../../../hooks';
 
 import { TTYPlayerLineMarkerType } from '.';
 
-const isAmsterdam = (euiThemeName: string) => {
-  return euiThemeName?.toLowerCase().includes('amsterdam');
-};
-
 export const useStyles = (progress: number) => {
   const { euiTheme, euiVars } = useEuiTheme();
-  const themeName = euiTheme.themeName;
   const cached = useMemo(() => {
     const { border } = euiTheme;
 
@@ -41,9 +36,7 @@ export const useStyles = (progress: number) => {
       if (selected) {
         return euiVars.terminalOutputMarkerAccent;
       }
-      return isAmsterdam(themeName)
-        ? euiTheme.colors.vis.euiColorVis1
-        : euiTheme.colors.vis.euiColorVis2;
+      return euiTheme.colors.vis.euiColorVis2;
     };
 
     const marker = (type: TTYPlayerLineMarkerType, selected: boolean): CSSObject => ({
@@ -133,7 +126,6 @@ export const useStyles = (progress: number) => {
     euiVars.terminalOutputMarkerWarning,
     euiVars.terminalOutputSliderBackground,
     progress,
-    themeName,
   ]);
 
   return cached;

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import type { SearchAlertsResult } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import type { LlmProxy } from '../../utils/create_llm_proxy';

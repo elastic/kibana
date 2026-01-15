@@ -471,6 +471,13 @@ interface InternalUnifiedDataTableProps {
    * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
    */
   shouldKeepAdHocDataViewImmutable?: boolean;
+
+  /**
+   * Callback fired when full screen mode is toggled
+   * @param isFullScreen - boolean indicating if the grid is in full screen mode
+   */
+
+  onFullScreenChange?: (isFullScreen: boolean) => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -555,6 +562,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellPopover = false,
       customBulkActions,
       shouldKeepAdHocDataViewImmutable,
+      onFullScreenChange,
     },
     ref
   ) => {
@@ -982,6 +990,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           onResize,
           sortedColumns,
           disableCellActions,
+          dataGridRef,
         }),
       [
         cellActionsHandling,
@@ -1385,6 +1394,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 cellContext={cellContextWithInTableSearchSupport}
                 renderCellPopover={renderCustomPopover}
                 virtualizationOptions={virtualizationOptions}
+                onFullScreenChange={onFullScreenChange}
               />
             )}
           </div>

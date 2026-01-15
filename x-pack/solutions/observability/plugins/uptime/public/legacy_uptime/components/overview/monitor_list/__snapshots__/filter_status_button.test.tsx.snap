@@ -2,7 +2,7 @@
 
 exports[`FilterStatusButton renders without errors for valid props 1`] = `
 <div
-  class="euiFilterButton__wrapper css-nbqv3o-wrapper-withNext-hasToggle"
+  class="euiFilterButton__wrapper css-1anz60t-wrapper-withNext-hasToggle"
 >
   <button
     aria-pressed="true"

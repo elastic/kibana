@@ -12479,7 +12479,7 @@
               "\nIf set, the component will only re-render if any of the listed properties change.\nWhen set to `['data', 'error']`, the component will only re-render when the `data` or `error` properties change.\nWhen set to `'all'`, the component will re-render whenever a query is updated.\nBy default, access to properties will be tracked, and the component will only re-render when one of the tracked properties change."
             ],
             "signature": [
-              "\"all\" | (\"error\" | \"data\" | \"status\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"isInitialLoading\" | \"remove\" | \"refetch\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"fetchStatus\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isRefetching\" | \"isStale\")[] | undefined"
+              "\"all\" | (\"error\" | \"status\" | \"data\" | \"remove\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"isInitialLoading\" | \"refetch\" | \"isRefetching\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"fetchStatus\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isStale\")[] | undefined"
             ],
             "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
             "deprecated": false,
@@ -12533,11 +12533,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_incident_types.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_severity.tsx"
+                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_fields.tsx"
               },
               {
                 "plugin": "cases",
@@ -12674,20 +12670,12 @@
                 "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/hooks/use_fetch_unified_alerts_fields.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/public/hooks/use_find_maintenance_windows.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/public/hooks/use_get_rule_types.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/public/hooks/use_get_maintenance_window.ts"
-              },
-              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/hooks/use_load_rules_query.ts"
+              },
+              {
+                "plugin": "@kbn/response-ops-rules-apis",
+                "path": "src/platform/packages/shared/response-ops/rules-apis/hooks/use_find_templates_query.ts"
               },
               {
                 "plugin": "@kbn/response-ops-rules-apis",
@@ -12718,12 +12706,44 @@
                 "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
               },
               {
+                "plugin": "@kbn/elastic-assistant",
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_tags.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_bulk_get_user_profiles.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_suggest_user_profiles.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_get_case_configurations_query.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_categories.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases_metrics.tsx"
+              },
+              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_get_supported_action_connectors.tsx"
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_get_case_configurations_query.tsx"
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_get_current_user_profile.ts"
               },
               {
                 "plugin": "cases",
@@ -12743,43 +12763,11 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_incident_types.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_severity.tsx"
+                "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/resilient/use_get_fields.tsx"
               },
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/servicenow/use_get_choices.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_tags.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_categories.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_suggest_user_profiles.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_get_current_user_profile.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_bulk_get_user_profiles.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases_metrics.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
               },
               {
                 "plugin": "cases",
@@ -12835,10 +12823,6 @@
               },
               {
                 "plugin": "@kbn/elastic-assistant",
-                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/capabilities/use_capabilities.tsx"
-              },
-              {
-                "plugin": "@kbn/elastic-assistant",
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/use_load_connectors/index.tsx"
               },
               {
@@ -12870,6 +12854,26 @@
                 "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/hooks/use_providers.ts"
               },
               {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/public/application/hooks/use_connectors.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/public/application/hooks/use_edit_active_source_flyout.ts"
+              },
+              {
+                "plugin": "maintenanceWindows",
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/hooks/use_find_maintenance_windows.ts"
+              },
+              {
+                "plugin": "maintenanceWindows",
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/hooks/use_get_rule_types.ts"
+              },
+              {
+                "plugin": "maintenanceWindows",
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/hooks/use_get_maintenance_window.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_live_query_details.ts"
               },
@@ -12884,6 +12888,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/action_results/action_results_summary.tsx"
               },
               {
                 "plugin": "osquery",
@@ -12926,8 +12934,12 @@
                 "path": "x-pack/platform/plugins/shared/stack_connectors/public/common/auth/use_secret_headers.tsx"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/public/connector_types/slack_api/use_valid_channels.tsx"
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_features/stream_features/hooks/use_stream_features.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_significant_events.ts"
               },
               {
                 "plugin": "osquery",
@@ -12975,11 +12987,11 @@
               },
               {
                 "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/public/pages/slos/hooks/use_fetch_slos_overview.ts"
+                "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_fetch_global_diagnosis.ts"
               },
               {
                 "plugin": "slo",
-                "path": "x-pack/solutions/observability/plugins/slo/public/hooks/use_fetch_global_diagnosis.ts"
+                "path": "x-pack/solutions/observability/plugins/slo/public/pages/slos/hooks/use_fetch_slos_overview.ts"
               },
               {
                 "plugin": "searchPlayground",
@@ -13059,39 +13071,23 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connectors_query.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/ingest_manager_integration/endpoint_policy_edit_extension/components/fleet_integration_artifacts_card.tsx"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connector_types_query.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/ingest_manager_integration/endpoint_package_custom_extension/components/fleet_artifacts_card.tsx"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml/hooks/use_installed_security_jobs.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_find_attack_discoveries/index.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_ai_connectors.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13103,7 +13099,23 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml/hooks/use_installed_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_suggest_users.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13115,11 +13127,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/management/services/policies/hooks.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_list.tsx"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/common/use_get_saved_query.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13127,15 +13135,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_find_attack_discoveries/index.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/services/policies/hooks.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/policy_list.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13167,6 +13171,26 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/pages/use_get_missing_index_privileges/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connectors_query.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connector_types_query.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/dashboards/logic/use_get_migration_dashboards.ts"
               },
               {
@@ -13183,11 +13207,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/ingest_manager_integration/endpoint_policy_edit_extension/components/fleet_integration_artifacts_card.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/policy/view/ingest_manager_integration/endpoint_package_custom_extension/components/fleet_artifacts_card.tsx"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/unified_alerts/hooks/use_search_unified_alerts.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14827,7 +14847,7 @@
         "label": "MutationStatus",
         "description": [],
         "signature": [
-          "\"error\" | \"success\" | \"idle\" | \"loading\""
+          "\"error\" | \"success\" | \"loading\" | \"idle\""
         ],
         "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
         "deprecated": false,

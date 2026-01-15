@@ -1303,7 +1303,11 @@
             "section": "def-public.UnifiedFieldListRestorableState",
             "text": "UnifiedFieldListRestorableState"
           },
-          ">) => void) | undefined; } & ",
+          ">) => void) | undefined; initialExistingFieldsInfo?: ",
+          "FetchedExistingFieldsInfo",
+          " | undefined; onInitialExistingFieldsInfoChange?: ((info: ",
+          "FetchedExistingFieldsInfo",
+          " | undefined) => void) | undefined; } & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -1928,6 +1932,58 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.ExistingFieldsFetcherParams.initialExistingFieldsInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "initialExistingFieldsInfo",
+            "description": [
+              "\nCustom container for existing fields info map"
+            ],
+            "signature": [
+              "FetchedExistingFieldsInfo",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.ExistingFieldsFetcherParams.onInitialExistingFieldsInfoChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onInitialExistingFieldsInfoChange",
+            "description": [],
+            "signature": [
+              "((info: ",
+              "FetchedExistingFieldsInfo",
+              " | undefined) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-field-list",
+                "id": "def-public.ExistingFieldsFetcherParams.onInitialExistingFieldsInfoChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "info",
+                "description": [],
+                "signature": [
+                  "FetchedExistingFieldsInfo",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1939,7 +1995,7 @@
         "tags": [],
         "label": "ExistingFieldsInfo",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+        "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1959,7 +2015,7 @@
                 "text": "ExistenceFetchStatus"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1973,7 +2029,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1994,7 +2050,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2005,7 +2061,7 @@
             "tags": [],
             "label": "numberOfFetches",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2019,7 +2075,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4120,7 +4176,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -4575,7 +4631,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4583,7 +4639,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4591,7 +4647,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4599,7 +4655,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4607,7 +4663,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4615,7 +4671,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4623,7 +4679,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4631,7 +4687,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -6148,7 +6204,11 @@
             "section": "def-public.UnifiedFieldListRestorableState",
             "text": "UnifiedFieldListRestorableState"
           },
-          ">) => void) | undefined; }"
+          ">) => void) | undefined; initialExistingFieldsInfo?: ",
+          "FetchedExistingFieldsInfo",
+          " | undefined; onInitialExistingFieldsInfoChange?: ((info: ",
+          "FetchedExistingFieldsInfo",
+          " | undefined) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
         "deprecated": false,

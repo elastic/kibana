@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { DataTypeDefinition } from './data_catalog';
+import type { DataCatalog } from './data_catalog';
+import type { DataTypeDefinition } from '../common/data_types';
 
 export interface DataSourcesRegistryPluginSetup {
   register: (dataType: DataTypeDefinition) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataSourcesRegistryPluginStart {}
+export interface DataSourcesRegistryPluginStart {
+  getCatalog: () => DataCatalog;
+}

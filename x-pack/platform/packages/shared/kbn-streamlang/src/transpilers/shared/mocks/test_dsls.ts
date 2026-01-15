@@ -5,20 +5,48 @@
  * 2.0.
  */
 
-import type { StreamlangDSL } from '../../../../types/streamlang';
 import type {
-  RenameProcessor,
-  SetProcessor,
-  GrokProcessor,
-  DateProcessor,
-  DissectProcessor,
-  ManualIngestPipelineProcessor,
   AppendProcessor,
   ConvertProcessor,
+  DateProcessor,
+  DissectProcessor,
+  GrokProcessor,
+  ManualIngestPipelineProcessor,
+  MathProcessor,
+  RenameProcessor,
+  SetProcessor,
+  DropDocumentProcessor,
+  ReplaceProcessor,
+  UppercaseProcessor,
+  LowercaseProcessor,
+  TrimProcessor,
 } from '../../../../types/processors';
+import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'uppercase',
+      from: 'message',
+      to: 'message_uppercase',
+    } as UppercaseProcessor,
+    {
+      action: 'lowercase',
+      from: 'message',
+      to: 'message_lowercase',
+    } as LowercaseProcessor,
+    {
+      action: 'trim',
+      from: 'message',
+      to: 'message_trimmed',
+    } as TrimProcessor,
+    {
+      action: 'drop_document',
+      where: {
+        field: 'https.status_code',
+        eq: 200,
+      },
+    } as DropDocumentProcessor,
     // Convert a field to a different type
     {
       action: 'convert',
@@ -30,6 +58,18 @@ export const comprehensiveTestDSL: StreamlangDSL = {
         eq: 404,
       },
     } as ConvertProcessor,
+    // Replace a string pattern
+    {
+      action: 'replace',
+      from: 'message',
+      pattern: 'error',
+      replacement: 'warning',
+      to: 'clean_message',
+      where: {
+        field: 'log_level',
+        eq: 'ERROR',
+      },
+    } as ReplaceProcessor,
     // Rename a field
     {
       action: 'rename',
@@ -42,6 +82,18 @@ export const comprehensiveTestDSL: StreamlangDSL = {
       to: 'attributes.status',
       value: 'active',
     } as SetProcessor,
+    // Math processor - simple arithmetic
+    {
+      action: 'math',
+      expression: 'price * quantity',
+      to: 'total',
+    } as MathProcessor,
+    // Math processor - with dotted field paths
+    {
+      action: 'math',
+      expression: 'attributes.price * attributes.quantity + attributes.tax',
+      to: 'attributes.total',
+    } as MathProcessor,
     // Grok parsing
     {
       action: 'grok',
@@ -80,7 +132,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
     } as SetProcessor,
     // Multiple steps under a condition (where block)
     {
-      where: {
+      condition: {
         field: 'attributes.env',
         eq: 'prod',
         steps: [
@@ -94,7 +146,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
     },
     // Nested conditionals
     {
-      where: {
+      condition: {
         or: [
           { field: 'attributes.a', eq: 1 }, // condition A
           { field: 'attributes.b', eq: 2 }, // condition B
@@ -106,7 +158,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
             value: 'prod-env',
           } as SetProcessor,
           {
-            where: {
+            condition: {
               field: 'attributes.department',
               eq: 'legal',
               steps: [
@@ -167,7 +219,7 @@ export const notConditionsTestDSL: StreamlangDSL = {
       },
     } as SetProcessor,
     {
-      where: {
+      condition: {
         not: {
           or: [
             { field: 'attributes.a', eq: 1 },

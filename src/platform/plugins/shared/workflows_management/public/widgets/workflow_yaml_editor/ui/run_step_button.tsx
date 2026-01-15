@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { selectIsYamlSyntaxValid } from '../lib/store/selectors';
+import { selectIsYamlSyntaxValid } from '../../../entities/workflows/store/workflow_detail/selectors';
 
 const Text = {
   run: i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.tooltip', {

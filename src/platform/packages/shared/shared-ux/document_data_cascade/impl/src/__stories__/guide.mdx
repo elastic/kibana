@@ -1,0 +1,59 @@
+
+import { Story, Controls } from '@storybook/addon-docs';
+import { DataCascade, DataCascadeRow, DataCascadeRowCell } from '../components';
+
+# Data Cascade
+
+The data cascade component in Kibana presents information as a list of expandable or collapsible cells. 
+It supports up to 3 levels of nesting and is highly customizable and suitable for diverse applications across all Elastic solutions,
+including data tables and dashboards. 
+
+The shared component itself is a wrapper, establishing a generic behavior and styling for the cell.
+
+## Style
+
+#### Outline
+The data cascade groups, presented as a list of cells, form a single outlined component. Each cell within this component is an individual box. 
+When a cell is expanded, its borders must remain visible to clearly show the hierarchical relationships between the different levels. 
+Even if there’s only one group in a list, it should remain outlined. 
+Content slot within a cell should also be considered a level (a "null" level) and outlined to demonstrate its hierarchical position.
+
+
+## Component composition
+
+The Data Cascade component is composed of three main parts: `DataCascade`, `DataCascadeRow`, and `DataCascadeRowCell`. 
+These components are required to build a functional data cascade.
+
+One can think of the `DataCascade` as the table, `DataCascadeRow` as the table row, and `DataCascadeRowCell` as the table cell. That been said we'd put
+them together as follows:
+
+
+```tsx
+import { DataCascade, DataCascadeRow, DataCascadeRowCell } from '@kbn/shared-ux-document-data-cascade';
+
+<DataCascade {...dataCascadeProps}>
+  <DataCascadeRow {...dataCascadeRowProps}>
+    <DataCascadeRowCell {...dataCascadeRowCellProps}>
+      {({ data }) => {
+        // your custom component cell rendering logic
+      }}
+    </DataCascadeRowCell>
+  </DataCascadeRow>
+</DataCascade>
+```
+
+Which would in turn yield something of this sort; 
+
+<Story id="data-cascade-configuration-examples--cascade-nested-grid-implementation" />
+
+
+## Features
+
+The cascade component by default supports up to 3 levels of visual nesting, for the data it's rendering, further more all levels of rendering are 
+virtualized for performance, and it's also possible to have a cell's content virtualized, and connect it to the overall virtualization strategy,
+such that the scroll of the entire component also controls the cell and it turns determines the content the cell renders.
+
+## Component Props
+
+{/* Note: Excluding `query` from the controls as it's not a prop of the component, but rather a simulation of user input for generating group by fields. */}
+<Controls exclude={['query']} />

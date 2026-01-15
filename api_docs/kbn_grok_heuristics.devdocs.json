@@ -99,7 +99,7 @@
         "tags": [],
         "label": "getGrokProcessor",
         "description": [
-          "\nGenerates a GROK processor definition by combining extracted tokens and\nthe result of an LLM review. It constructs a root GROK pattern and\noptionally defines custom pattern definitions for fields with multiple\ncolumns, ensuring patterns are validated and adjusted based on example\nvalues."
+          "\nGenerates a GROK processor definition by combining extracted tokens and\nthe result of an LLM review. It constructs a root GROK pattern and\noptionally defines custom pattern definitions for fields with multiple\ncolumns, ensuring patterns are validated and adjusted based on example\nvalues.\n\nSpecial handling: Multi-column groupings that end with GREEDYDATA are\ncollapsed to a single GREEDYDATA field instead of creating a complex\ncustom pattern definition (since all preceding patterns are redundant)."
         ],
         "signature": [
           "(nodes: ",
@@ -369,15 +369,15 @@
         "signature": [
           "(grokProcessor: Pick<",
           {
-            "pluginId": "@kbn/grok-heuristics",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnGrokHeuristicsPluginApi",
-            "section": "def-common.GrokProcessorResult",
-            "text": "GrokProcessorResult"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.GrokProcessor",
+            "text": "GrokProcessor"
           },
           ", \"patterns\" | \"pattern_definitions\">) => string[]"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/unwrap_pattern_definitions.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/utils/grok_pattern_definitions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -393,15 +393,15 @@
             "signature": [
               "Pick<",
               {
-                "pluginId": "@kbn/grok-heuristics",
+                "pluginId": "@kbn/streamlang",
                 "scope": "common",
-                "docId": "kibKbnGrokHeuristicsPluginApi",
-                "section": "def-common.GrokProcessorResult",
-                "text": "GrokProcessorResult"
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.GrokProcessor",
+                "text": "GrokProcessor"
               },
               ", \"patterns\" | \"pattern_definitions\">"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/unwrap_pattern_definitions.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/utils/grok_pattern_definitions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

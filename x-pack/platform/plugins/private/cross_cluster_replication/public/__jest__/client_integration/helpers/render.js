@@ -23,6 +23,9 @@ import { MemoryRouter, Routes, Route } from '@kbn/shared-ux-router';
  *   routePath: '/follower_indices/edit/:id',
  * });
  */
+/**
+ * @returns {import('@testing-library/react').RenderResult & { user: import('@testing-library/user-event').UserEvent }}
+ */
 export const renderWithRouter = (
   Component,
   { store, onRouter, initialEntries = ['/'], routePath = '/', defaultProps = {}, ...props } = {}

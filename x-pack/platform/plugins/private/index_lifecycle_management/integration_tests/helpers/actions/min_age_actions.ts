@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import type { Phase } from '../../../common/types';
 import { createFormSetValueAction } from './form_set_value_action';
 
-export const createMinAgeActions = (testBed: TestBed, phase: Phase) => {
-  const { exists } = testBed;
+export const createMinAgeActions = (phase: Phase) => {
   return {
-    hasMinAgeInput: () => exists(`${phase}-selectedMinimumAge`),
-    setMinAgeValue: createFormSetValueAction(testBed, `${phase}-selectedMinimumAge`),
-    setMinAgeUnits: createFormSetValueAction(testBed, `${phase}-selectedMinimumAgeUnits`),
-    hasRolloverTipOnMinAge: () => exists(`${phase}-rolloverMinAgeInputIconTip`),
+    hasMinAgeInput: () => Boolean(screen.queryByTestId(`${phase}-selectedMinimumAge`)),
+    setMinAgeValue: createFormSetValueAction(`${phase}-selectedMinimumAge`),
+    setMinAgeUnits: createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`),
+    hasRolloverTipOnMinAge: () =>
+      Boolean(screen.queryByTestId(`${phase}-rolloverMinAgeInputIconTip`)),
   };
 };

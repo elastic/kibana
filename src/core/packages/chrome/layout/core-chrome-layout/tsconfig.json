@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -26,6 +26,5 @@
     "@kbn/core-overlays-browser",
     "@kbn/core-chrome-layout-components",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/core-chrome-layout-feature-flags",
   ]
 }

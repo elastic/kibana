@@ -7,7 +7,6 @@
 
 import expect from 'expect';
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   cleanupDatastreams,
   cleanupIngestPipelines,
@@ -19,7 +18,8 @@ import {
   randomIngestPipeline,
   taskHasRun,
   waitFor,
-} from '../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TASK_ID = 'security:indices-metadata-telemetry:1.0.0';
 const NUM_INDICES = 5;

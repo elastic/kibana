@@ -58,24 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // not yet implemented for monaco https://github.com/elastic/kibana/issues/186001
-    describe.skip('copy/pasting cURL commands into the console', () => {
-      it('should convert cURL commands into the console request format', async () => {
-        await PageObjects.console.enterText(
-          `\n curl -XGET "http://localhost:9200/_search?pretty" -d'\n{"query": {"match_all": {}}}'`
-        );
-        await PageObjects.console.copyRequestsToClipboard();
-        await PageObjects.console.clearEditorText();
-        await PageObjects.console.pasteClipboardValue();
-        await retry.try(async () => {
-          const actualRequest = await PageObjects.console.getEditorText();
-          expect(actualRequest.trim()).to.eql('GET /_search?pretty\n {"query": {"match_all": {}}}');
-        });
-      });
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/193895
-    describe.skip('console history', () => {
+    describe('console history', () => {
       const sendRequest = async (request: string) => {
         await PageObjects.console.enterText(request);
         await PageObjects.console.clickPlay();

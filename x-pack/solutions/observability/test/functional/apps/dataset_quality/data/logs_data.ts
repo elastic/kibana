@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateLongId, generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
+import { generateLongId, generateShortId, log, timerange } from '@kbn/synthtrace-client';
 import moment from 'moment';
 
 enum LogLevel {
@@ -218,6 +218,43 @@ export function createFailedLogRecord({
               'trace.id': generateShortId(),
               'agent.name': 'synth-agent',
             })
+            .timestamp(timestamp),
+        ]);
+    });
+}
+
+export function createMalformedFieldRecord({
+  to,
+  count = 1,
+  dataset,
+  namespace = defaultNamespace,
+}: {
+  to: string;
+  count?: number;
+  dataset: string;
+  namespace?: string;
+}) {
+  return timerange(moment(to).subtract(count, 'minute'), moment(to))
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) => {
+      return Array(count)
+        .fill(0)
+        .flatMap(() => [
+          log
+            .create()
+            .dataset(dataset)
+            .message('Log with malformed numeric field')
+            .logLevel('info')
+            .service(SERVICE_NAMES[0])
+            .namespace(namespace)
+            .defaults({
+              'trace.id': generateShortId(),
+              'agent.name': 'synth-agent',
+              // This will cause a malformed field error because num is mapped as 'long'
+              // but we're sending a non-numeric string value
+              numeric_field: 'not_a_number',
+            } as Record<string, unknown>)
             .timestamp(timestamp),
         ]);
     });

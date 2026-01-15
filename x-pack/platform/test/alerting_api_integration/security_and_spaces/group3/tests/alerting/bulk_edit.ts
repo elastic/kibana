@@ -1048,7 +1048,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(200);
         expect(response.body.errors.length).to.eql(1);
 
-        expect(response.body.errors[0].message).to.eql('Cannot use the same system action twice');
+        expect(response.body.errors[0].message).to.eql(
+          'Cannot use action system-connector-test.system-action more than once for this rule'
+        );
       });
     });
 

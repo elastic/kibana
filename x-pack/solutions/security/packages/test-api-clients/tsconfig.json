@@ -1,18 +1,11 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core-http-common",
     "@kbn/openapi-common",
@@ -22,6 +15,8 @@
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-lists-common",
-    "@kbn/osquery-plugin"
+    "@kbn/osquery-plugin",
+    "@kbn/tooling-log",
+    "@kbn/fleet-plugin"
   ]
 }

@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { TinesStoryObjectSchema } from '../../../common/tines/schema';
+import { TinesStoryObjectSchema } from '@kbn/connector-schemas/tines';
 
 // Tines response base schema
 export const TinesBaseApiResponseSchema = z.object({

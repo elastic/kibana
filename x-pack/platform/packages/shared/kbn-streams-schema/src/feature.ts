@@ -5,18 +5,49 @@
  * 2.0.
  */
 
-import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
-import { streamObjectNameSchema } from './shared/stream_object_name';
 
-export interface Feature {
+const featureStatus = ['active', 'stale', 'expired'] as const;
+export type FeatureStatus = (typeof featureStatus)[number];
+
+export const featureStatusSchema = z.enum(featureStatus);
+
+export interface BaseFeature {
+  type: string;
   name: string;
   description: string;
-  filter: Condition;
+  value: Record<string, any>;
+  confidence: number;
+  evidence: string[];
+  tags: string[];
+  meta: Record<string, any>;
 }
 
-export const featureSchema: z.Schema<Feature> = z.object({
-  name: streamObjectNameSchema,
+export interface Feature extends BaseFeature {
+  id: string;
+  status: FeatureStatus;
+  last_seen: string;
+}
+
+export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
+  type: z.string(),
+  name: z.string(),
   description: z.string(),
-  filter: conditionSchema,
+  value: z.record(z.string(), z.any()),
+  confidence: z.number().min(0).max(100),
+  evidence: z.array(z.string()),
+  tags: z.array(z.string()),
+  meta: z.record(z.string(), z.any()),
 });
+
+export const featureSchema: z.Schema<Feature> = baseFeatureSchema.and(
+  z.object({
+    id: z.string(),
+    status: featureStatusSchema,
+    last_seen: z.string(),
+  })
+);
+
+export function isFeature(feature: any): feature is Feature {
+  return featureSchema.safeParse(feature).success;
+}

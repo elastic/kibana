@@ -16,7 +16,7 @@ const TEST_SUBJ = Object.freeze({
 
 export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
   // TODO: currently runscript and cancel are not supported in Endpoint
-  Exclude<ConsoleResponseActionCommands, 'runscript' | 'cancel'>,
+  Exclude<ConsoleResponseActionCommands, 'runscript' | 'cancel' | 'memory-dump'>,
   string
 > => {
   return {

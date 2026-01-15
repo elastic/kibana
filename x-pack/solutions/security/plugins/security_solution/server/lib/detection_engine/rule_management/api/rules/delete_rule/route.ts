@@ -8,6 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import type { DeleteRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   DeleteRuleRequestQuery,
@@ -26,7 +27,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_ALL],
         },
       },
     })

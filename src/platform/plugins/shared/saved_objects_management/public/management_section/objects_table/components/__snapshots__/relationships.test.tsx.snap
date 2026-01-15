@@ -153,6 +153,7 @@ exports[`Relationships should render dashboards normally 1`] = `
         }
       }
       searchFormat="eql"
+      tableCaption="Saved objects related to MyDashboard"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -359,6 +360,7 @@ exports[`Relationships should render index patterns normally 1`] = `
         }
       }
       searchFormat="eql"
+      tableCaption="Saved objects related to MyIndexPattern*"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -448,6 +450,7 @@ exports[`Relationships should render invalid relations 1`] = `
       pagination={true}
       rowProps={[Function]}
       searchFormat="eql"
+      tableCaption="Invalid relationships for MyIndexPattern*"
       tableLayout="fixed"
     />
     <EuiSpacer />
@@ -542,6 +545,7 @@ exports[`Relationships should render invalid relations 1`] = `
         }
       }
       searchFormat="eql"
+      tableCaption="Saved objects related to MyIndexPattern*"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -707,6 +711,7 @@ exports[`Relationships should render searches normally 1`] = `
         }
       }
       searchFormat="eql"
+      tableCaption="Saved objects related to MySearch"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -866,6 +871,7 @@ exports[`Relationships should render visualizations normally 1`] = `
         }
       }
       searchFormat="eql"
+      tableCaption="Saved objects related to MyViz"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>

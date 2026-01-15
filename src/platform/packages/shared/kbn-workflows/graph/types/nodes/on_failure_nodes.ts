@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { GraphNodeSchema } from './base';
 import { WorkflowRetrySchema } from '../../../spec/schema';
 
 export const EnterContinueNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-continue'),
-
+  configuration: z.object({
+    condition: z.union([z.string(), z.boolean()]),
+  }),
   exitNodeId: z.string(),
 });
 export type EnterContinueNode = z.infer<typeof EnterContinueNodeSchema>;

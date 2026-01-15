@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Parser, mutate, BasicPrettyPrinter, synth } from '@kbn/esql-ast';
+import { Parser, mutate, BasicPrettyPrinter, synth } from '@kbn/esql-language';
 import { isString } from 'lodash/fp';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { escapeKQLStringParam } from '../../../common/utils/kql';

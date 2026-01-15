@@ -39,7 +39,6 @@ describe('Case View Page files tab', () => {
     renderWithTestingProviders(<CaseViewFiles caseData={caseData} />);
 
     expect((await screen.findAllByTestId('cases-files-add')).length).toBe(2);
-    expect(await screen.findByTestId('cases-files-search')).toBeInTheDocument();
   });
 
   it('should render the files table', async () => {
@@ -89,18 +88,15 @@ describe('Case View Page files tab', () => {
   });
 
   it('search by word triggers calls to useGetCaseFiles', async () => {
-    renderWithTestingProviders(<CaseViewFiles caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewFiles caseData={caseData} searchTerm="search" />);
 
     expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
-
-    await userEvent.type(screen.getByTestId('cases-files-search'), 'Foobar{enter}');
-
     await waitFor(() =>
       expect(useGetCaseFilesMock).toHaveBeenCalledWith({
         caseId: basicCase.id,
         page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
         perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
-        searchTerm: 'Foobar',
+        searchTerm: 'search',
       })
     );
   });

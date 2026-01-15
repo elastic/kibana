@@ -18,10 +18,12 @@ import {
   EuiFlexItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useStreamEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
 import { DATA_SOURCES_I18N } from './translations';
 import { AddDataSourcesContextMenu } from './add_data_sources_context_menu';
 import { DataSource } from './data_source';
+import { CompleteSimulationBadge, PartialSimulationBadge } from './data_source_card';
 
 interface DataSourcesFlyoutProps {
   onClose: () => void;
@@ -47,7 +49,24 @@ export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
-          <EuiCallOut size="s" title={DATA_SOURCES_I18N.flyout.infoDescription} iconType="pin" />
+          <EuiCallOut title={DATA_SOURCES_I18N.flyout.infoDescription} iconType="pin">
+            <FormattedMessage
+              id="xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.partialSimulationDisclaimer"
+              tagName="p"
+              defaultMessage="{partialSimulationBadge} means this data source can only simulate the part of the pipeline that includes the newly added processors, because the original, unprocessed data content is not guaranteed."
+              values={{
+                partialSimulationBadge: <PartialSimulationBadge />,
+              }}
+            />
+            <FormattedMessage
+              id="xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.completeSimulationDisclaimer"
+              tagName="p"
+              defaultMessage="{completeSimulationBadge} means this data source can simulate the whole pipeline, since the original data content is guaranteed."
+              values={{
+                completeSimulationBadge: <CompleteSimulationBadge />,
+              }}
+            />
+          </EuiCallOut>
         }
       >
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

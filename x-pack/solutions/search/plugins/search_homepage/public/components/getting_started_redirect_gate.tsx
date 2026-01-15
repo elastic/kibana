@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { GETTING_STARTED_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
-import { useSearchGettingStartedFeatureFlag } from '../hooks/use_search_getting_started_feature_flag';
 
 interface Props {
   coreStart: CoreStart;
@@ -16,13 +15,23 @@ interface Props {
 }
 
 export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
-  const isGettingStartedEnabled = useSearchGettingStartedFeatureFlag();
+  const hasRedirected = useRef(false);
+  const visited = localStorage.getItem(GETTING_STARTED_LOCALSTORAGE_KEY);
+  const shouldRedirect = !visited || visited === 'false';
+  // Check if we should redirect BEFORE rendering children to avoid race condition
+
   useEffect(() => {
-    const visited = localStorage.getItem(GETTING_STARTED_LOCALSTORAGE_KEY);
-    if (isGettingStartedEnabled && (!visited || visited === 'false')) {
+    if (shouldRedirect && !hasRedirected.current) {
+      hasRedirected.current = true;
       coreStart.application.navigateToApp('searchGettingStarted');
     }
-  }, [coreStart, isGettingStartedEnabled]);
+  }, [coreStart, shouldRedirect]);
+
+  if (shouldRedirect) {
+    // Don't render children if we're going to redirect immediately.
+    // This prevents mounting the homepage (with its console) only to unmount it milliseconds later.
+    return null;
+  }
 
   return <>{children}</>;
 };

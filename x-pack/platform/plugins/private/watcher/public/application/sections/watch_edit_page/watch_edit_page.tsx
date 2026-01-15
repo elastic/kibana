@@ -137,6 +137,7 @@ export const WatchEditPage = ({
 
         if (has(watchTypes, type) && isFunction(watchTypes[type])) {
           const WatchType = watchTypes[type];
+          // @ts-expect-error upgrade typescript v5.9.3
           dispatch({ command: 'setWatch', payload: new WatchType() });
         } else {
           dispatch({ command: 'setError', payload: { message: 'Invalid watch type' } });

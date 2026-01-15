@@ -24,5 +24,12 @@ module.exports = {
     no_deprecated_imports: require('./rules/no_deprecated_imports'),
     deployment_agnostic_test_context: require('./rules/deployment_agnostic_test_context'),
     scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
+    scout_max_one_describe: require('./rules/scout_max_one_describe'),
+    scout_test_file_naming: require('./rules/scout_test_file_naming'),
+    scout_require_api_client_in_api_test: require('./rules/scout_require_api_client_in_api_test'),
+    scout_require_global_setup_hook_in_parallel_tests: require('./rules/scout_require_global_setup_hook_in_parallel_tests'),
+    scout_no_es_archiver_in_parallel_tests: require('./rules/scout_no_es_archiver_in_parallel_tests'),
+    require_kbn_fs: require('./rules/require_kbn_fs'),
+    require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
   },
 };

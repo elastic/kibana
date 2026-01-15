@@ -30,8 +30,8 @@ function createMockProc() {
 
   const proc = Object.assign(emitter, {
     pid: 1234,
-    exit: jest.fn(function (this: NodeJS.Process, code?: number) {
-      originalExit(code);
+    exit: jest.fn(function (this: NodeJS.Process, ...args: any[]) {
+      originalExit(...args);
     }),
     kill: jest.fn(),
   }) as unknown as MockedProcess;
@@ -91,6 +91,22 @@ describe('createCleanupBeforeExit', () => {
 
     expect(originalExit).toHaveBeenCalledWith(0);
     expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('does not override an existing process.exitCode', () => {
+    const { proc, originalExit } = createMockProc();
+    const cleanupBeforeExit = createCleanupBeforeExit(proc);
+    const handler = jest.fn();
+
+    proc.exitCode = 1;
+
+    cleanupBeforeExit(handler);
+
+    proc.exit();
+
+    expect(originalExit).toHaveBeenCalled();
+
+    expect(originalExit.mock.lastCall.length).toBe(0);
   });
 
   it('only runs cleanup once for multiple signals', async () => {

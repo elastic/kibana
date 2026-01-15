@@ -318,7 +318,7 @@
         "label": "EntityDefinition",
         "description": [],
         "signature": [
-          "{ id: string; type: string; version: string; name: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; }; filter?: string | undefined; capabilities?: ",
+          "{ id: string; type: string; name: string; version: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; }; capabilities?: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -326,7 +326,7 @@
             "section": "def-common.EntityStoreCapability",
             "text": "EntityStoreCapability"
           },
-          "[] | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "[] | undefined; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -349,7 +349,7 @@
         "label": "EntityDefinitionUpdate",
         "description": [],
         "signature": [
-          "{ version: string; type?: string | undefined; filter?: string | undefined; name?: string | undefined; capabilities?: ",
+          "{ version: string; type?: string | undefined; name?: string | undefined; capabilities?: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -357,7 +357,7 @@
             "section": "def-common.EntityStoreCapability",
             "text": "EntityStoreCapability"
           },
-          "[] | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "[] | undefined; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -1078,7 +1078,7 @@
           "ZodTypeAny",
           ", { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }, { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }>, \"many\">>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; type: string; version: string; name: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; }; filter?: string | undefined; capabilities?: ",
+          ", { id: string; type: string; name: string; version: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; }; capabilities?: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -1086,7 +1086,7 @@
             "section": "def-common.EntityStoreCapability",
             "text": "EntityStoreCapability"
           },
-          "[] | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "[] | undefined; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -1094,7 +1094,7 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }[] | undefined; }, { id: string; type: string; version: string; name: string; indexPatterns: string[]; identityFields: (string | { field: string; optional: false; })[]; displayNameTemplate: string; latest: { timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; }; filter?: string | undefined; capabilities?: ",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }[] | undefined; }, { id: string; type: string; name: string; version: string; indexPatterns: string[]; identityFields: (string | { field: string; optional: false; })[]; displayNameTemplate: string; latest: { timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; }; capabilities?: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -1102,7 +1102,7 @@
             "section": "def-common.EntityStoreCapability",
             "text": "EntityStoreCapability"
           },
-          "[] | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "[] | undefined; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -1130,13 +1130,7 @@
           "ZodOptional",
           "<",
           "ZodString",
-          ">; filter: ",
-          "ZodOptional",
-          "<",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">>; name: ",
+          ">; name: ",
           "ZodOptional",
           "<",
           "ZodString",
@@ -1156,7 +1150,13 @@
             "section": "def-common.EntityStoreCapability",
             "text": "EntityStoreCapability"
           },
-          ">, \"many\">>>; description: ",
+          ">, \"many\">>>; filter: ",
+          "ZodOptional",
+          "<",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">>; description: ",
           "ZodOptional",
           "<",
           "ZodOptional",
@@ -1444,7 +1444,7 @@
           "ZodString",
           ", string, string>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { version: string; type?: string | undefined; filter?: string | undefined; name?: string | undefined; capabilities?: ",
+          ", { version: string; type?: string | undefined; name?: string | undefined; capabilities?: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -1452,7 +1452,7 @@
             "section": "def-common.EntityStoreCapability",
             "text": "EntityStoreCapability"
           },
-          "[] | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "[] | undefined; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -1460,7 +1460,7 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; identityFields?: ({ field: string; optional: false; } | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }[] | undefined; }, { version: string; type?: string | undefined; filter?: string | undefined; name?: string | undefined; capabilities?: ",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; identityFields?: ({ field: string; optional: false; } | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\" | \"ilm_policy\"; }[] | undefined; }, { version: string; type?: string | undefined; name?: string | undefined; capabilities?: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -1468,7 +1468,7 @@
             "section": "def-common.EntityStoreCapability",
             "text": "EntityStoreCapability"
           },
-          "[] | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "[] | undefined; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",

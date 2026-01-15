@@ -228,9 +228,15 @@ export default function ({ getService }: FtrProviderContext) {
           layout: 'preserve_layout',
           objectType: 'dashboard',
         });
-        expect(soResult.body._source.scheduled_report.payload).to.eql(
-          '{"browserTimezone":"UTC","layout":{"id":"preserve_layout"},"objectType":"dashboard","title":"test PDF allowed","version":"7.14.0","locatorParams":[{"id":"canvas","params":{},"version":"7.14.0"}],"isDeprecated":false}'
-        );
+        expect(JSON.parse(soResult.body._source.scheduled_report.payload)).to.eql({
+          browserTimezone: 'UTC',
+          layout: { id: 'preserve_layout' },
+          objectType: 'dashboard',
+          title: 'test PDF allowed',
+          version: '7.14.0',
+          locatorParams: [{ id: 'canvas', params: {}, version: '7.14.0' }],
+          isDeprecated: false,
+        });
         expect(soResult.body._source.scheduled_report.schedule).to.eql({
           rrule: {
             dtstart: '2025-06-01T13:00:00.000Z',
@@ -291,9 +297,15 @@ export default function ({ getService }: FtrProviderContext) {
           layout: 'preserve_layout',
           objectType: 'visualization',
         });
-        expect(soResult.body._source.scheduled_report.payload).to.eql(
-          '{"browserTimezone":"UTC","layout":{"id":"preserve_layout"},"objectType":"visualization","title":"test PDF allowed","version":"7.14.0","locatorParams":[{"id":"canvas","params":{},"version":"7.14.0"}],"isDeprecated":false}'
-        );
+        expect(JSON.parse(soResult.body._source.scheduled_report.payload)).to.eql({
+          browserTimezone: 'UTC',
+          layout: { id: 'preserve_layout' },
+          objectType: 'visualization',
+          title: 'test PDF allowed',
+          version: '7.14.0',
+          locatorParams: [{ id: 'canvas', params: {}, version: '7.14.0' }],
+          isDeprecated: false,
+        });
         expect(soResult.body._source.scheduled_report.schedule).to.eql({
           rrule: {
             freq: 1,
@@ -306,6 +318,44 @@ export default function ({ getService }: FtrProviderContext) {
         const taskResult = await reportingAPI.getTask(res.body.job.id);
         expect(taskResult.status).to.eql(200);
         testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
+      });
+
+      it('applies the correct email notification settings to the scheduled report', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF with email',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'visualization',
+            version: '7.14.0',
+          },
+          { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+          undefined,
+          {
+            email: {
+              to: ['user@example.com'],
+              subject: 'Report: {{title}} - {{date}}',
+              message: 'Your scheduled report {{title}} is ready. Generated at {{date}}.',
+            },
+          }
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('test PDF with email');
+        expect(soResult.body._source.scheduled_report.notification).to.eql({
+          email: {
+            to: ['user@example.com'],
+            subject: 'Report: {{title}} - {{date}}',
+            message: 'Your scheduled report {{title}} is ready. Generated at {{date}}.',
+          },
+        });
+        scheduledReportIds.push(res.body.job.id);
         scheduledReportTaskIds.push(res.body.job.id);
       });
     });

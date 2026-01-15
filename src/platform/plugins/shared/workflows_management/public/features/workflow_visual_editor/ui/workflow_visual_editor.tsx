@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useResizeObserver } from '@elastic/eui';
-import type { NodeTypes, ReactFlowInstance } from '@xyflow/react';
+import { useEuiTheme, useResizeObserver } from '@elastic/eui';
+import type { ColorMode, NodeTypes, ReactFlowInstance } from '@xyflow/react';
 import { Background, Controls, ReactFlow } from '@xyflow/react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
@@ -37,6 +37,7 @@ export function WorkflowVisualEditor({
   workflow: WorkflowYaml;
   stepExecutions?: WorkflowStepExecutionDto[];
 }) {
+  const { colorMode, euiTheme } = useEuiTheme();
   // TODO: call fitView(), when container is resized
   const containerRef = useRef<HTMLDivElement | null>(null);
   const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null);
@@ -98,9 +99,13 @@ export function WorkflowVisualEditor({
         proOptions={{
           hideAttribution: true,
         }}
+        colorMode={colorMode.toLowerCase() as ColorMode}
       >
         <Controls orientation="horizontal" />
-        <Background bgColor="#F7F8FC" color="#CAD3E2" />
+        <Background
+          bgColor={euiTheme.colors.backgroundBasePlain}
+          color={euiTheme.colors.textSubdued}
+        />
       </ReactFlow>
     </div>
   );

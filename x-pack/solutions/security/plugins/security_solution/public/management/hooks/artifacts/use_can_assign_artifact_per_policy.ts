@@ -25,11 +25,11 @@ export const useCanAssignArtifactPerPolicy = (
   item: ArtifactFormComponentProps['item'],
   mode: ArtifactFormComponentProps['mode'],
   hasItemBeenUpdated: boolean,
-  licenseType: 'platinumPlus' | 'enterprise' = 'platinumPlus'
+  requiredLicense: 'platinumPlus' | 'enterprise' = 'platinumPlus'
 ): boolean => {
   const license = useLicense();
   const hasRequiredLicense =
-    licenseType === 'platinumPlus' ? license.isPlatinumPlus() : license.isEnterprise();
+    requiredLicense === 'platinumPlus' ? license.isPlatinumPlus() : license.isEnterprise();
   const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
   const [wasByPolicy, setWasByPolicy] = useState(isArtifactByPolicy(item));
 

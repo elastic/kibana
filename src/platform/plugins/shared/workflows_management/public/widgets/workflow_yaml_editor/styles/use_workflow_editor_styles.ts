@@ -12,6 +12,8 @@ import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
+export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
+
 /**
  * Hook that provides memoized CSS styles for the workflow YAML editor component
  */
@@ -144,12 +146,17 @@ export const useWorkflowEditorStyles = () => {
         },
       }),
 
-    editorContainer: css({
-      flex: '1 1 0',
-      minWidth: 0,
-      overflowY: 'auto',
-      minHeight: 0,
-    }),
+    editorContainer: ({ euiTheme }: UseEuiTheme) =>
+      css({
+        flex: '1 1 0',
+        minWidth: 0,
+        overflowY: 'auto',
+        minHeight: 0,
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
+          backgroundColor: euiTheme.colors.backgroundBasePlain,
+        },
+      }),
 
     validationErrorsContainer: css({
       flexShrink: 0,
@@ -160,6 +167,7 @@ export const useWorkflowEditorStyles = () => {
     stepActionsContainer: css({
       position: 'absolute',
       zIndex: 1002, // Above the highlighting and pseudo-element
+      transform: 'translateY(4px) translateX(-28px)', // 24px to match width + 4px padding inside decoration
     }),
 
     downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>

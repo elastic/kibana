@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useIngestSampleData } from '../hooks/use_ingest_data';
 import { useSampleDataStatus } from '../hooks/use_sample_data_status';
 import { useKibana } from '../hooks/use_kibana';
@@ -35,11 +34,16 @@ export const SampleDataActionButton = ({
   hasRequiredLicense = false,
 }: SampleDataActionButtonProps) => {
   const usageTracker = useUsageTracker();
-  const { ingestSampleData, isLoading } = useIngestSampleData();
+  const { ingestSampleData } = useIngestSampleData();
   const { share, uiSettings } = useKibana().services;
-  const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
+  const {
+    isInstalled,
+    indexName,
+    dashboardId,
+    isLoading: isStatusLoading,
+    isInstalling,
+  } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
-  const isAgentBuilderAvailable = uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false);
 
   const onInstallButtonClick = useCallback(() => {
     usageTracker.click(clickEvent);
@@ -76,11 +80,9 @@ export const SampleDataActionButton = ({
   }, [share, indexName]);
 
   const navigateToAgentBuilder = useCallback(async () => {
-    if (isAgentBuilderAvailable) {
-      const agentBuilderLocator = share.url.locators.get('AGENT_BUILDER_LOCATOR_ID');
-      await agentBuilderLocator?.navigate({});
-    }
-  }, [share, isAgentBuilderAvailable]);
+    const agentBuilderLocator = share.url.locators.get('AGENT_BUILDER_LOCATOR_ID');
+    await agentBuilderLocator?.navigate({});
+  }, [share]);
 
   if (isStatusLoading) {
     return null;
@@ -112,21 +114,17 @@ export const SampleDataActionButton = ({
           <EuiContextMenuPanel
             css={{ minWidth: 250 }}
             items={[
-              ...(isAgentBuilderAvailable
-                ? [
-                    <EuiContextMenuItem
-                      key="agentBuilder"
-                      onClick={navigateToAgentBuilder}
-                      icon="comment"
-                      data-test-subj="agentBuilderMenuItem"
-                    >
-                      <FormattedMessage
-                        id="xpack.searchHomepage.shared.createIndex.ingestSampleData.linkToAgentBuilder"
-                        defaultMessage="Agents"
-                      />
-                    </EuiContextMenuItem>,
-                  ]
-                : []),
+              <EuiContextMenuItem
+                key="agentBuilder"
+                onClick={navigateToAgentBuilder}
+                icon="comment"
+                data-test-subj="agentBuilderMenuItem"
+              >
+                <FormattedMessage
+                  id="xpack.searchHomepage.shared.createIndex.ingestSampleData.linkToAgentBuilder"
+                  defaultMessage="Agents"
+                />
+              </EuiContextMenuItem>,
               <EuiContextMenuItem key="discover" onClick={navigateToDiscover} icon="discoverApp">
                 <FormattedMessage
                   id="xpack.searchHomepage.sampleData.linkToDiscover"
@@ -173,7 +171,7 @@ export const SampleDataActionButton = ({
       iconType="download"
       size="s"
       data-test-subj="installSampleBtn"
-      isLoading={isLoading}
+      isLoading={isInstalling}
       disabled={!hasRequiredLicense}
       onClick={onInstallButtonClick}
     >

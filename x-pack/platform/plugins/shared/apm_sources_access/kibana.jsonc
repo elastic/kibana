@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/apm-sources-access-plugin",
   "owner": [
-    "@elastic/obs-ux-infra_services-team"
+    "@elastic/obs-presentation-team"
   ],
   "group": "platform",
   "visibility": "shared",

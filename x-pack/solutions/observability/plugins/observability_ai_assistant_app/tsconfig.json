@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -45,9 +45,9 @@
     "@kbn/tooling-log",
     "@kbn/babel-register",
     "@kbn/expect",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/alerting-plugin",
-    "@kbn/apm-synthtrace",
+    "@kbn/synthtrace",
     "@kbn/esql-datagrid",
     "@kbn/alerting-comparators",
     "@kbn/core-lifecycle-browser",
@@ -57,13 +57,11 @@
     "@kbn/config-schema",
     "@kbn/es-query",
     "@kbn/rule-registry-plugin",
-    "@kbn/esql-validation-autocomplete",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/field-types",
     "@kbn/security-plugin",
     "@kbn/observability-plugin",
     "@kbn/actions-plugin",
-    "@kbn/stack-connectors-plugin",
     "@kbn/features-plugin",
     "@kbn/serverless",
     "@kbn/task-manager-plugin",
@@ -88,7 +86,10 @@
     "@kbn/traced-es-client",
     "@kbn/licensing-types",
     "@kbn/utility-types-jest",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/connector-schemas",
+    "@kbn/agent-builder-plugin",
+    "@kbn/object-utils",
   ],
   "exclude": ["target/**/*"]
 }

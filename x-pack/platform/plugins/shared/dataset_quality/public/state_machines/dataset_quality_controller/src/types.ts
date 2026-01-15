@@ -184,6 +184,10 @@ export type DatasetQualityControllerEvent =
       type: 'UPDATE_TYPES';
       types: DataStreamType[];
     }
+  | {
+      type: 'UPDATE_FAILURE_STORE';
+      dataStream: DataStreamStat;
+    }
   | DoneInvokeEvent<GetDataStreamsTypesPrivilegesResponse>
   | DoneInvokeEvent<DataStreamDocsStat[]>
   | DoneInvokeEvent<NonAggregatableDatasets>

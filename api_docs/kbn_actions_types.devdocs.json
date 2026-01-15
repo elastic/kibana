@@ -127,6 +127,20 @@
           },
           {
             "parentPluginId": "@kbn/actions-types",
+            "id": "def-common.ActionType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-types",
             "id": "def-common.ActionType.subFeature",
             "type": "string",
             "tags": [],
@@ -149,13 +163,55 @@
             "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-types",
+            "id": "def-common.ActionType.allowMultipleSystemActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowMultipleSystemActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/actions-types",
+        "id": "def-common.ACTION_TYPE_SOURCES",
+        "type": "Enum",
+        "tags": [],
+        "label": "ACTION_TYPE_SOURCES",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/actions-types",
+        "id": "def-common.ActionTypeSource",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionTypeSource",
+        "description": [],
+        "signature": [
+          "\"spec\" | \"yml\" | \"stack\""
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/actions-types",
         "id": "def-common.AsApiContract",

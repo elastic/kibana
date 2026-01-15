@@ -81,6 +81,38 @@
           },
           {
             "parentPluginId": "@kbn/sample-log-parser",
+            "id": "def-common.SampleParserClient.listLoghubSystems",
+            "type": "Function",
+            "tags": [],
+            "label": "listLoghubSystems",
+            "description": [],
+            "signature": [
+              "() => Promise<string[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/sample-log-parser",
+            "id": "def-common.SampleParserClient.listServerlessSystems",
+            "type": "Function",
+            "tags": [],
+            "label": "listServerlessSystems",
+            "description": [],
+            "signature": [
+              "() => Promise<string[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/sample-log-parser",
             "id": "def-common.SampleParserClient.getLogGenerators",
             "type": "Function",
             "tags": [],

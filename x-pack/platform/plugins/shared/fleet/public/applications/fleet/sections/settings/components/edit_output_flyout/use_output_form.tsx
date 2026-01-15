@@ -329,15 +329,18 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const diskQueuePathInput = useInput(
     output?.shipper?.disk_queue_path ?? '',
     undefined,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueEnabledInput.value ?? false
   );
   const diskQueueMaxSizeInput = useNumberInput(
     output?.shipper?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE,
     undefined,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueEnabledInput.value ?? false
   );
   const diskQueueEncryptionEnabled = useSwitchInput(
     output?.shipper?.disk_queue_encryption_enabled ?? false,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueEnabledInput.value ?? false
   );
   const loadBalanceEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
@@ -352,7 +355,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     });
   const compressionLevelInput = useSelectInput(
     options,
+    // @ts-expect-error upgrade typescript v5.9.3
     `${output?.shipper?.compression_level}` ?? options[0].value,
+    // @ts-expect-error upgrade typescript v5.9.3
     !diskQueueCompressionEnabled.value ?? false
   );
 

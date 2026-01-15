@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { internalEsqlRoutes } from './internal/esql/route';
-import { dashboardRoutes } from './dashboards/route';
 import { crudRoutes } from './streams/crud/route';
 import { enablementRoutes } from './streams/enablement/route';
 import { managementRoutes } from './streams/management/route';
@@ -14,41 +12,47 @@ import { internalSchemaRoutes } from './internal/streams/schema/route';
 import { internalProcessingRoutes } from './internal/streams/processing/route';
 import { ingestRoutes } from './streams/ingest/route';
 import { internalLifecycleRoutes } from './internal/streams/lifecycle/route';
-import { groupRoutes } from './streams/group/route';
 import { contentRoutes } from './content/route';
-import { internalDashboardRoutes } from './internal/dashboards/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
-import { featureRoutes as internalFeaturesRoutes } from './internal/streams/features/route';
+import { systemRoutes as internalSystemsRoutes } from './internal/streams/systems/route';
+import { internalPromptsRoutes } from './internal/streams/prompts/route';
+import { internalSignificantEventsRoutes } from './internal/streams/significant_events/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
-import { ruleRoutes } from './rules/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
 import { internalIngestRoutes } from './internal/streams/ingest/route';
+import { connectorRoutes } from './internal/connectors/route';
+import { docCountsRoutes } from './streams/doc_counts/route';
+import { attachmentRoutes } from './attachments/route';
+import { internalAttachmentRoutes } from './internal/attachments/route';
+import { featureRoutes as internalFeatureRoutes } from './internal/streams/features/route';
 
 export const streamsRouteRepository = {
   // internal APIs
-  ...internalEsqlRoutes,
-  ...internalDashboardRoutes,
   ...internalCrudRoutes,
   ...internalManagementRoutes,
   ...internalSchemaRoutes,
   ...internalLifecycleRoutes,
   ...internalProcessingRoutes,
   ...failureStoreRoutes,
-  ...internalFeaturesRoutes,
+  ...internalSystemsRoutes,
+  ...internalPromptsRoutes,
+  ...internalSignificantEventsRoutes,
   ...internalIngestRoutes,
+  ...connectorRoutes,
+  ...internalAttachmentRoutes,
+  ...internalFeatureRoutes,
   // public APIs
-  ...dashboardRoutes,
+  ...docCountsRoutes,
   ...crudRoutes,
   ...enablementRoutes,
   ...managementRoutes,
   ...ingestRoutes,
-  ...groupRoutes,
   ...contentRoutes,
   ...significantEventsRoutes,
   ...queryRoutes,
-  ...ruleRoutes,
+  ...attachmentRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;

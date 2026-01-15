@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AGENT_STATUS_CHANGE_DATA_STREAM_NAME } from './agent';
+
 export { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from './plugin';
 export {
   INGEST_SAVED_OBJECT_INDEX,
@@ -31,6 +33,7 @@ export * from './secrets';
 export * from './uninstall_token';
 export * from './space_awareness';
 export * from './security_search_ai_lake';
+export * from './cloud_connector';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible
@@ -65,3 +68,5 @@ export const REQUEST_DIAGNOSTICS_TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3 hours;
 export * from './mappings';
 
 export const AUTO_UPGRADE_DEFAULT_RETRIES = ['30m', '1h', '2h', '4h', '8h', '16h', '24h'];
+
+export const FLEET_LOG_INDICES = [AGENT_STATUS_CHANGE_DATA_STREAM_NAME];

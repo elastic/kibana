@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Lazy import to avoid bundling large generated file in main plugin bundle
+import { getKibanaConnectors } from '../spec/kibana';
+import { KIBANA_TYPE_ALIASES } from '../spec/kibana/aliases';
 
 /**
  * Builds a Kibana HTTP request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
+// eslint-disable-next-line complexity
 export function buildKibanaRequestFromAction(
   actionType: string,
   params: Record<string, unknown>,
@@ -55,12 +57,14 @@ export function buildKibanaRequestFromAction(
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GENERATED_KIBANA_CONNECTORS } = require('./generated/kibana_connectors');
+  const kibanaConnectors = getKibanaConnectors();
+
+  // Resolve alias if the action type uses an old name (backward compatibility)
+  const resolvedActionType = KIBANA_TYPE_ALIASES[actionType] ?? actionType;
 
   // Find the connector definition for this action type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const connector = GENERATED_KIBANA_CONNECTORS.find((c: any) => c.type === actionType);
+  const connector = kibanaConnectors.find((c: any) => c.type === resolvedActionType);
 
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)
@@ -69,7 +73,7 @@ export function buildKibanaRequestFromAction(
     const headerParamKeys = new Set<string>(connector.parameterTypes?.headerParams || []);
 
     // Determine method (allow user override)
-    const method = params.method || connector.methods[0]; // User can override method
+    const method = typeof params.method === 'string' ? params.method : connector.methods[0]; // User can override method
 
     // Choose the best pattern based on available parameters
     let selectedPattern = selectBestPattern(connector.patterns, params);

@@ -59,12 +59,15 @@ interface FieldSummaryProps {
   toggleEditMode: () => void;
   stream: Streams.ingest.all.Definition;
   onChange: (field: Partial<SchemaField>) => void;
+  enableGeoPointSuggestions?: boolean;
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  const { field, isEditing, toggleEditMode, onChange, stream } = props;
+  const { field, isEditing, toggleEditMode, onChange, stream, enableGeoPointSuggestions } = props;
 
   const router = useStreamsAppRouter();
+
+  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
 
   return (
     <>
@@ -160,6 +163,8 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               field={field}
               isEditing={isEditing}
               onTypeChange={(type) => onChange({ type })}
+              streamType={streamType}
+              enableGeoPointSuggestions={enableGeoPointSuggestions}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

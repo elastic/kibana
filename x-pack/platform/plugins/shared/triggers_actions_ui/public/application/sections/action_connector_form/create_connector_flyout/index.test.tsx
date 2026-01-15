@@ -734,4 +734,131 @@ describe('CreateConnectorFlyout', () => {
       expect(onClose).toHaveBeenCalled();
     });
   });
+
+  describe('initial connector', () => {
+    const initialConnector = {
+      actionTypeId: 'initial-connector',
+      name: 'Initial connector',
+      isDeprecated: false,
+      config: {
+        testTextField: 'Prefilled initial value',
+      },
+      secrets: {},
+      isMissingSecrets: false,
+      isConnectorTypeDeprecated: false,
+    };
+
+    const initialActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: 'initial-connector',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+    });
+
+    beforeEach(() => {
+      actionTypeRegistry.get.mockReturnValue(initialActionTypeModel);
+      actionTypeRegistry.has.mockReturnValue(true);
+
+      loadActionTypes.mockResolvedValue([
+        {
+          id: initialActionTypeModel.id,
+          name: 'Test initial connector',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting', 'siem'],
+        },
+      ]);
+    });
+
+    it('opens directly the connector form with prefilled fields', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+          initialConnector={initialConnector}
+        />
+      );
+
+      expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
+      expect(await screen.findByTestId('nameInput')).toHaveValue('Initial connector');
+
+      expect(await screen.findByTestId('test-connector-text-field')).toHaveValue(
+        'Prefilled initial value'
+      );
+      expect(await screen.findByTestId('create-connector-flyout-close-btn')).toBeInTheDocument();
+    });
+
+    it('saves the connector correctly with updated fields', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+          initialConnector={initialConnector}
+        />
+      );
+
+      const testConnectorTextField = await screen.findByTestId('test-connector-text-field');
+      expect(testConnectorTextField).toBeInTheDocument();
+
+      await userEvent.click(testConnectorTextField);
+      await userEvent.clear(testConnectorTextField);
+      await userEvent.paste('Updated value');
+
+      await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith('/api/actions/connector', {
+          body: JSON.stringify({
+            name: 'Initial connector',
+            config: { testTextField: 'Updated value' },
+            secrets: {},
+            connector_type_id: 'initial-connector',
+          }),
+        });
+      });
+
+      expect(onConnectorCreated).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('spec connector', () => {
+    const specActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      id: 'spec-connector',
+      source: 'spec',
+      actionConnectorFields: lazy(() => import('../connector_mock')),
+    });
+
+    beforeEach(() => {
+      actionTypeRegistry.get.mockReturnValue(specActionTypeModel);
+      actionTypeRegistry.has.mockReturnValue(true);
+
+      loadActionTypes.mockResolvedValue([
+        {
+          id: specActionTypeModel.id,
+          name: 'Test spec connector',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting', 'siem'],
+        },
+      ]);
+    });
+
+    it('does not show the save and test', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      expect(screen.queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
+    });
+  });
 });

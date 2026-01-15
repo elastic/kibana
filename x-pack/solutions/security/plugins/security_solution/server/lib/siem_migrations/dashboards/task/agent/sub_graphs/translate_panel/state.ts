@@ -19,6 +19,7 @@ export const translateDashboardPanelState = Annotation.Root({
   resources: Annotation<MigrationResources>(),
   elastic_panel: Annotation<object | undefined>(), // The visualization panel object
   index_pattern: Annotation<string | undefined>(),
+  index_mapping: Annotation<Record<string, object> | undefined>(),
   includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
     default: () => false,

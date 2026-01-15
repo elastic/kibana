@@ -451,6 +451,39 @@
       },
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.runInvalidate",
+        "type": "Function",
+        "tags": [],
+        "label": "runInvalidate",
+        "description": [],
+        "signature": [
+          "(opts: RunInvalidateOpts) => Promise<number>"
+        ],
+        "path": "x-pack/platform/plugins/shared/task_manager/server/invalidate_api_keys/lib/run_invalidate.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.runInvalidate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "RunInvalidateOpts"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/invalidate_api_keys/lib/run_invalidate.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.throwRetryableError",
         "type": "Function",
         "tags": [],
@@ -2268,7 +2301,7 @@
         "TaskScheduling",
         ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
         "TaskStore",
-        ", \"get\" | \"aggregate\" | \"bulkGet\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { getRegisteredTypes: () => string[]; registerEncryptedSavedObjectsClient: (client: ",
+        ", \"get\" | \"aggregate\" | \"fetch\" | \"bulkGet\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { getRegisteredTypes: () => string[]; registerEncryptedSavedObjectsClient: (client: ",
         {
           "pluginId": "@kbn/encrypted-saved-objects-shared",
           "scope": "common",
@@ -2276,7 +2309,9 @@
           "section": "def-common.EncryptedSavedObjectsClient",
           "text": "EncryptedSavedObjectsClient"
         },
-        ") => void; }"
+        ") => void; registerApiKeyInvalidateFn: (fn?: ",
+        "ApiKeyInvalidationFn",
+        " | undefined) => void; }"
       ],
       "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
       "deprecated": false,

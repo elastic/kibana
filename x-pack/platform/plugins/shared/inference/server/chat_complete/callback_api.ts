@@ -12,6 +12,7 @@ import {
   createInferenceRequestError,
   getConnectorFamily,
   getConnectorProvider,
+  getConnectorDefaultModel,
   type ChatCompleteCompositeResponse,
   MessageRole,
 } from '@kbn/inference-common';
@@ -26,8 +27,10 @@ import {
   chunksIntoMessage,
   getInferenceExecutor,
   handleCancellation,
+  handleLifecycleCallbacks,
   streamToResponse,
 } from './utils';
+import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { anonymizeMessages } from './anonymization/anonymize_messages';
@@ -42,6 +45,7 @@ interface CreateChatCompleteApiOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  callbackManager?: InferenceCallbackManager;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -76,6 +80,7 @@ export function createChatCompleteCallbackApi({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+  callbackManager,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -151,6 +156,7 @@ export function createChatCompleteCallbackApi({
                   tools,
                   toolChoice,
                   model: {
+                    id: modelName ?? getConnectorDefaultModel(connector),
                     family: getConnectorFamily(connector),
                     provider: getConnectorProvider(connector),
                   },
@@ -190,6 +196,7 @@ export function createChatCompleteCallbackApi({
           initialDelay: retryConfiguration.initialDelay,
           errorFilter: getRetryFilter(retryConfiguration.retryOn),
         }),
+        callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
         abortSignal ? handleCancellation(abortSignal) : identity
       );
 

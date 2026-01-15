@@ -11,15 +11,16 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { HistogramProps } from './histogram';
 import { Histogram } from './histogram';
 import React from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { getLensVisMock } from '../../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { UnifiedHistogramInput$ } from '../../types';
+import type { UnifiedHistogramFetch$ } from '../../types';
 import { act } from 'react-dom/test-utils';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import { getLensProps, useLensProps } from './hooks/use_lens_props';
+import { getFetch$Mock, getFetchParamsMock } from '../../__mocks__/fetch_params';
 
 const getMockLensAttributes = async () => {
   const query = {
@@ -48,26 +49,43 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  const fetch$: UnifiedHistogramInput$ = new Subject();
-  const props: CombinedProps = {
-    services: unifiedHistogramServicesMock,
-    request: {
-      searchSessionId: '123',
-    },
-    isPlainRecord,
-    chart: {
-      hidden: false,
-      timeInterval: 'auto',
-    },
+  const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
+  const fetchParams = getFetchParamsMock({
+    searchSessionId: '123',
     dataView: dataViewWithTimefieldMock,
-    getTimeRange: () => ({
+    timeRange: {
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
-    }),
+    },
+    relativeTimeRange: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+  });
+  const lensVisMock = await getLensVisMock({
+    dataView: fetchParams.dataView,
+    isPlainRecord: fetchParams.isESQLQuery,
+    timeInterval: fetchParams.timeInterval,
+    filters: fetchParams.filters,
+    query: fetchParams.query,
+    columns: [],
+    breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+  });
+
+  const props: CombinedProps = {
+    services: unifiedHistogramServicesMock,
+    chart: {
+      hidden: false,
+      timeInterval: fetchParams.timeInterval,
+    },
     fetch$,
-    visContext: (await getMockLensAttributes())!,
     onLoad: jest.fn(),
     withDefaultActions: undefined,
+    dataView: fetchParams.dataView,
+    abortController: fetchParams.abortController,
+    isPlainRecord: fetchParams.isESQLQuery,
+    bucketInterval: undefined,
+    visContext: lensVisMock.visContext!,
   };
   const Wrapper = (wrapperProps: CombinedProps) => {
     const lensPropsContext = useLensProps(wrapperProps);
@@ -77,10 +95,10 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
   const component = mountWithIntl(<Wrapper {...props} />);
 
   act(() => {
-    fetch$?.next({ type: 'fetch' });
+    fetch$?.next({ fetchParams, lensVisServiceState: lensVisMock.lensService.state$.getValue() });
   });
 
-  return { props, fetch$, component: component.update() };
+  return { props, fetch$, fetchParams, component: component.update(), lensVisMock };
 }
 
 describe('Histogram', () => {
@@ -90,22 +108,25 @@ describe('Histogram', () => {
   });
 
   it('should only update lens.EmbeddableComponent props when fetch$ is triggered', async () => {
-    const { component, props, fetch$ } = await mountComponent();
+    const { component, fetch$, fetchParams, lensVisMock } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     expect(component.find(embeddable).exists()).toBe(true);
     let lensProps = component.find(embeddable).props();
     const originalProps = getLensProps({
-      searchSessionId: props.request?.searchSessionId,
-      getTimeRange: props.getTimeRange,
+      searchSessionId: fetchParams.searchSessionId,
+      timeRange: fetchParams.timeRange,
+      esqlVariables: fetchParams.esqlVariables,
       attributes: (await getMockLensAttributes())!.attributes,
       onLoad: lensProps.onLoad!,
+      lastReloadRequestTime: fetchParams.lastReloadRequestTime,
     });
     expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
-    component.setProps({ request: { ...props.request, searchSessionId: '321' } }).update();
-    lensProps = component.find(embeddable).props();
-    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
+    const updatedFetchParams = { ...fetchParams, searchSessionId: '321' };
     await act(async () => {
-      fetch$.next({ type: 'fetch' });
+      fetch$.next({
+        fetchParams: updatedFetchParams,
+        lensVisServiceState: lensVisMock.lensService.state$.getValue(),
+      });
     });
     component.update();
     lensProps = component.find(embeddable).props();

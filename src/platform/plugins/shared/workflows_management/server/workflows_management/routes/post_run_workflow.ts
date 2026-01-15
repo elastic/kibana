@@ -13,6 +13,8 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
+import { preprocessAlertInputs } from '../utils/preprocess_alert_inputs';
 
 export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.post(
@@ -29,7 +31,7 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
         }),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
         const spaceId = spaces.getSpaceId(request);
@@ -60,6 +62,15 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
           });
         }
         const { inputs } = request.body as { inputs: Record<string, unknown> };
+
+        let processedInputs = inputs;
+        const event = inputs.event as { triggerType?: string; alertIds?: unknown[] } | undefined;
+        const hasAlertTrigger =
+          event?.triggerType === 'alert' && event?.alertIds && event.alertIds.length > 0;
+        if (hasAlertTrigger) {
+          processedInputs = await preprocessAlertInputs(inputs, context, spaceId, logger);
+        }
+
         const workflowForExecution: WorkflowExecutionEngineModel = {
           id: workflow.id,
           name: workflow.name,
@@ -70,7 +81,7 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
         const workflowExecutionId = await api.runWorkflow(
           workflowForExecution,
           spaceId,
-          inputs,
+          processedInputs,
           request
         );
         return response.ok({
@@ -81,6 +92,6 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }

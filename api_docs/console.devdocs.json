@@ -379,7 +379,25 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; } & { url: ",
+              ") => Promise<void>; getExportHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "IntlShape",
+              ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -421,26 +439,6 @@
                 "text": "UsageCollectionStart"
               },
               " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "console",
-            "id": "def-public.AppStartUIPluginDependencies.dataViews",
-            "type": "Object",
-            "tags": [],
-            "label": "dataViews",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "public",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-public.DataViewsServicePublic",
-                "text": "DataViewsServicePublic"
-              }
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,

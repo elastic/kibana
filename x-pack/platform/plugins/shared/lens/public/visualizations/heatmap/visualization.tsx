@@ -34,11 +34,12 @@ import {
   LEGEND_FUNCTION,
   LENS_HEATMAP_ID,
 } from './constants';
-import { HeatmapToolbar, HeatmapFlyoutToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { FormBasedPersistedState } from '../..';
 import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { HeatmapStyleSettings, HeatmapLegendSettings } from './toolbar_component';
 
 interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -277,12 +278,16 @@ export const getHeatmapVisualization = ({
     return <HeatmapDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  ToolbarComponent(props) {
-    return <HeatmapToolbar {...props} />;
-  },
-
   FlyoutToolbarComponent(props) {
-    return <HeatmapFlyoutToolbar {...props} />;
+    return (
+      <FlyoutToolbar
+        {...props}
+        contentMap={{
+          style: HeatmapStyleSettings,
+          legend: HeatmapLegendSettings,
+        }}
+      />
+    );
   },
 
   getSupportedLayers() {

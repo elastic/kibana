@@ -5,4 +5,19 @@
  * 2.0.
  */
 
-export { FieldsStatsGrid } from './fields_stats_grid';
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+
+export const FieldsStatsGrid = withSuspense(
+  React.lazy(() =>
+    import('./fields_stats_grid').then(({ FieldsStatsGrid: FieldsStatsGridComponent }) => ({
+      default: FieldsStatsGridComponent,
+    }))
+  )
+);
+
+export function getFieldsStatsGrid() {
+  // TODO this function should take in Kibana services
+  // then wrap in <KibanaContextProvider services={{ ...services }}>
+  return FieldsStatsGrid;
+}

@@ -13,11 +13,16 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { internalStateActions } from '../../state_management/redux';
 
 describe('SelectedVSAvailableCallout', () => {
   it('should render the callout if in ES|QL mode and the selected columns are less than the available ones', async () => {
     const stateContainer = getDiscoverStateMock({});
-    stateContainer.appState.update({ query: { esql: 'select *' } });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: 'select *' } },
+      })
+    );
     const component = mountWithIntl(
       <DiscoverTestProvider stateContainer={stateContainer}>
         <SelectedVSAvailableCallout

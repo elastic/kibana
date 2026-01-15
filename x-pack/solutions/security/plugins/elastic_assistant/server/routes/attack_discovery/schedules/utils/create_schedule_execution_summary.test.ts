@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import { createScheduleExecutionSummary } from './create_schedule_execution_summary';
 import { getInternalAttackDiscoveryScheduleMock } from '../../../../__mocks__/attack_discovery_schedules.mock';

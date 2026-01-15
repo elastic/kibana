@@ -16,7 +16,6 @@ export function getTransforms(
   transformEnhancementsOut: EnhancementsRegistry['transformOut']
 ) {
   return {
-    transformOutInjectsReferences: true,
     transformIn: (state: ImageEmbeddableState) => {
       const { enhancementsState, enhancementsReferences } = state.enhancements
         ? transformEnhancementsIn(state.enhancements)

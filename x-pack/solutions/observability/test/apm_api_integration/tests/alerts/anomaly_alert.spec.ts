@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { AnomalyDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';

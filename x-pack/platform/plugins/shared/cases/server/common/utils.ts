@@ -91,6 +91,7 @@ export const transformNewCase = ({
   category: newCase.category ?? null,
   customFields: newCase.customFields ?? [],
   observables: [],
+  total_observables: 0,
   incremental_id: undefined,
 });
 
@@ -227,7 +228,6 @@ type NewCommentArgs = AttachmentRequest & {
 export const transformNewComment = ({
   createdDate,
   email,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   username,
   profile_uid: profileUid,

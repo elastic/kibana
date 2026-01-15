@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type {
+  ChromeSetup,
   ChromeStart,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
@@ -19,8 +21,11 @@ import type {
   SolutionNavigationDefinitions,
   SolutionId,
 } from '@kbn/core-chrome-browser';
-import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { Observable } from 'rxjs';
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InternalChromeSetup extends ChromeSetup {}
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -35,9 +40,7 @@ export interface InternalChromeStart extends ChromeStart {
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getLegacyHeaderComponentForFixedLayout(opts?: {
-    projectSideNavVersion: 'v1' | 'v2';
-  }): JSX.Element;
+  getLegacyHeaderComponentForFixedLayout(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header UI
@@ -62,16 +65,14 @@ export interface InternalChromeStart extends ChromeStart {
    * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectHeaderComponentForGridLayout(opts: {
-    includeSideNav: 'v1' | 'v2' | false;
-  }): JSX.Element;
+  getProjectHeaderComponentForGridLayout(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the new project side navigation UI
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectSideNavV2ComponentForGridLayout(): JSX.Element;
+  getProjectSideNavComponentForGridLayout(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header banner UI
@@ -109,6 +110,12 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getBodyClasses$(): Observable<string[]>;
+
+  /**
+   * Used only by the rendering service to render the global footer UI (devbar)
+   * @internal
+   */
+  getGlobalFooter$(): Observable<ReactNode>;
 
   /**
    * Used only by the serverless plugin to customize project-style chrome.
@@ -189,10 +196,5 @@ export interface InternalChromeStart extends ChromeStart {
      * will be replaced with the legacy Kibana navigation.
      */
     changeActiveSolutionNavigation(id: SolutionId | null): void;
-
-    /**
-     * Used to manage the navigation tour state and start/stop the tour.
-     */
-    navigationTourManager: NavigationTourManager;
   };
 }

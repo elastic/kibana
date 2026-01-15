@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
+import { generateShortId, log, timerange } from '@kbn/synthtrace-client';
 import {
   ANOTHER_1024_CHARS,
   CONSISTENT_TAGS,
@@ -15,9 +15,13 @@ import {
   createDegradedFieldsRecord,
   defaultNamespace,
   getInitialTestLogs,
+  createMalformedFieldRecord,
 } from './data';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
+import {
+  logsSynthMappings,
+  logsSynthMalformedMappings,
+} from './custom_mappings/custom_synth_mappings';
 import { logsNginxMappings } from './custom_mappings/custom_integration_mappings';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -694,6 +698,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               nonIntegrationCustomName
             )}`
           );
+
+          // Should not display Modify Field Value accordion for dataQuality view
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutModifyFieldValueAccordion')
+          ).to.be(false);
+
+          // Should not display Increase Field Character Limit accordion for dataQuality view
+          expect(
+            await testSubjects.exists(
+              'datasetQualityDetailsFlyoutIncreaseFieldCharacterLimitAccordion'
+            )
+          ).to.be(false);
         });
 
         it('should show possible mitigation section with different manual options for integrations', async () => {
@@ -759,6 +775,92 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               integrationSpecificCustomName
             )}`
           );
+
+          // Should not display Modify Field Value accordion for dataQuality view
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutModifyFieldValueAccordion')
+          ).to.be(false);
+
+          // Should not display Increase Field Character Limit accordion for dataQuality view
+          expect(
+            await testSubjects.exists(
+              'datasetQualityDetailsFlyoutIncreaseFieldCharacterLimitAccordion'
+            )
+          ).to.be(false);
+        });
+        it('should show mitigations for wired streams', async () => {
+          await PageObjects.datasetQuality.navigateToDetailsV2({
+            dataStream: degradedDatasetWithLimitDataStreamName,
+            view: 'wired',
+            expandedQualityIssue: {
+              name: 'test_field',
+              type: 'degraded',
+            },
+          });
+
+          await PageObjects.datasetQuality.waitUntilPossibleMitigationsLoaded();
+
+          // Possible Mitigation Section should exist
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
+          );
+
+          // Should NOT display Edit/Create Component Template Link option for wired streams
+          await testSubjects.missingOrFail(
+            'datasetQualityManualMitigationsCustomComponentTemplateLink'
+          );
+
+          // Should NOT display Edit/Create Ingest Pipeline Link option for wired streams
+          expect(
+            await testSubjects.exists('datasetQualityManualMitigationsPipelineAccordion')
+          ).to.be(false);
+
+          // Should display Modify Field Value accordion
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutModifyFieldValueAccordion')
+          ).to.be(true);
+
+          // Should display Increase Field Character Limit accordion
+          expect(
+            await testSubjects.exists(
+              'datasetQualityDetailsFlyoutIncreaseFieldCharacterLimitAccordion'
+            )
+          ).to.be(true);
+        });
+
+        it('should show mitigations for classic streams', async () => {
+          await PageObjects.datasetQuality.navigateToDetailsV2({
+            dataStream: degradedDatasetWithLimitDataStreamName,
+            view: 'classic',
+            expandedQualityIssue: {
+              name: 'test_field',
+              type: 'degraded',
+            },
+          });
+
+          await PageObjects.datasetQuality.waitUntilPossibleMitigationsLoaded();
+
+          // Possible Mitigation Section should exist
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
+          );
+
+          // Should display Edit/Create Ingest Pipeline Link option for wired streams
+          expect(
+            await testSubjects.exists('datasetQualityManualMitigationsPipelineAccordion')
+          ).to.be(true);
+
+          // Should display Modify Field Value accordion
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutModifyFieldValueAccordion')
+          ).to.be(true);
+
+          // Should display Increase Field Character Limit accordion
+          expect(
+            await testSubjects.exists(
+              'datasetQualityDetailsFlyoutIncreaseFieldCharacterLimitAccordion'
+            )
+          ).to.be(true);
         });
       });
 
@@ -1070,6 +1172,223 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail(
             'datasetQualityDetailsDegradedFieldFlyoutIncreaseFieldLimitPanel'
           );
+        });
+      });
+
+      describe('field malformed', () => {
+        const malformedDatasetName = 'synth.malformed';
+        const malformedDataStreamName = `${type}-${malformedDatasetName}-${defaultNamespace}`;
+        const malformedComponentTemplateName = 'logs-synth-malformed@mappings';
+
+        before(async () => {
+          await synthtrace.createComponentTemplate({
+            name: malformedComponentTemplateName,
+            mappings: logsSynthMalformedMappings(malformedDatasetName),
+          });
+
+          await esClient.indices.putIndexTemplate({
+            name: malformedDataStreamName,
+            _meta: {
+              managed: false,
+              description: 'custom synth template for malformed field tests.',
+            },
+            priority: 500,
+            index_patterns: [malformedDataStreamName],
+            composed_of: [
+              malformedComponentTemplateName,
+              'logs@mappings',
+              'logs@settings',
+              'ecs@mappings',
+            ],
+            allow_auto_create: true,
+            data_stream: {
+              hidden: false,
+            },
+          });
+
+          await synthtrace.index([
+            createMalformedFieldRecord({
+              to: new Date().toISOString(),
+              count: 5,
+              dataset: malformedDatasetName,
+            }),
+          ]);
+        });
+
+        after(async () => {
+          await synthtrace.clean();
+          await esClient.indices.deleteIndexTemplate({
+            name: malformedDataStreamName,
+          });
+          await synthtrace.deleteComponentTemplate(malformedComponentTemplateName);
+        });
+
+        it('should display cause as "Field malformed" when a field has type mismatch', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: malformedDataStreamName,
+            expandedDegradedField: 'numeric_field',
+          });
+
+          await retry.tryForTime(5000, async () => {
+            const fieldMalformedMessageExists = await PageObjects.datasetQuality.doesTextExist(
+              'datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause',
+              'Field malformed'
+            );
+            expect(fieldMalformedMessageExists).to.be(true);
+          });
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
+
+        it('should show possible mitigation section with manual options for non integrations', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: malformedDataStreamName,
+            expandedDegradedField: 'numeric_field',
+          });
+
+          await PageObjects.datasetQuality.waitUntilPossibleMitigationsLoaded();
+
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
+          );
+
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist'
+          );
+
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
+          );
+
+          await testSubjects.existOrFail(
+            'datasetQualityManualMitigationsCustomComponentTemplateLink'
+          );
+
+          await testSubjects.existOrFail('datasetQualityManualMitigationsPipelineAccordion');
+
+          const button = await testSubjects.find(
+            'datasetQualityManualMitigationsCustomComponentTemplateLink'
+          );
+          const componentTemplateUrl = await button.getAttribute('data-test-url');
+
+          expect(componentTemplateUrl).to.be(
+            `/data/index_management/templates/${malformedDataStreamName}`
+          );
+
+          const nonIntegrationCustomName = `${type}@custom`;
+
+          const pipelineInputBox = await testSubjects.find(
+            'datasetQualityManualMitigationsPipelineName'
+          );
+          const pipelineValue = await pipelineInputBox.getAttribute('value');
+
+          expect(pipelineValue).to.be(nonIntegrationCustomName);
+
+          const pipelineLink = await testSubjects.find(
+            'datasetQualityManualMitigationsPipelineLink'
+          );
+          const pipelineLinkURL = await pipelineLink.getAttribute('data-test-url');
+
+          expect(pipelineLinkURL).to.be(
+            `/app/management/ingest/ingest_pipelines/?pipeline=${encodeURIComponent(
+              nonIntegrationCustomName
+            )}`
+          );
+
+          // Should not display Change field type accordion processing tab link for dataQuality view
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutChangeFieldTypeInSchemaAccordion')
+          ).to.be(false);
+
+          // Should not display Create Convert Processor accordion tab link for dataQuality view
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutCreateConvertProcessorAccordion')
+          ).to.be(false);
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
+
+        it('should show mitigations for wired streams', async () => {
+          await PageObjects.datasetQuality.navigateToDetailsV2({
+            dataStream: malformedDataStreamName,
+            view: 'wired',
+            expandedQualityIssue: {
+              name: 'numeric_field',
+              type: 'degraded',
+            },
+          });
+
+          await PageObjects.datasetQuality.waitUntilPossibleMitigationsLoaded();
+
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
+          );
+
+          // Should not display the issue does not exist warning
+          await testSubjects.missingOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist'
+          );
+
+          // Should NOT display Edit/Create Component Template Link option for wired streams
+          await testSubjects.missingOrFail(
+            'datasetQualityManualMitigationsCustomComponentTemplateLink'
+          );
+
+          // Should NOT display Edit/Create Ingest Pipeline Link option for wired streams
+          expect(
+            await testSubjects.exists('datasetQualityManualMitigationsPipelineAccordion')
+          ).to.be(false);
+
+          // Should display Change field type accordion processing tab link
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutChangeFieldTypeInSchemaAccordion')
+          ).to.be(true);
+
+          // Should display Create Convert Processor accordion processing tab link
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutCreateConvertProcessorAccordion')
+          ).to.be(true);
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
+
+        it('should show mitigations for classic streams', async () => {
+          await PageObjects.datasetQuality.navigateToDetailsV2({
+            dataStream: malformedDataStreamName,
+            view: 'classic',
+            expandedQualityIssue: {
+              name: 'numeric_field',
+              type: 'degraded',
+            },
+          });
+
+          await PageObjects.datasetQuality.waitUntilPossibleMitigationsLoaded();
+
+          // Possible Mitigation Section should exist
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
+          );
+
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist'
+          );
+
+          // Should display Edit/Create Ingest Pipeline Link option for classic streams
+          expect(
+            await testSubjects.exists('datasetQualityManualMitigationsPipelineAccordion')
+          ).to.be(true);
+
+          // Should display Change field type in schema accordion processing tab link
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutChangeFieldTypeInSchemaAccordion')
+          ).to.be(true);
+
+          // Should display Create Convert Processor accordion processing tab link
+          expect(
+            await testSubjects.exists('datasetQualityDetailsFlyoutCreateConvertProcessorAccordion')
+          ).to.be(true);
+
+          await PageObjects.datasetQuality.closeFlyout();
         });
       });
 

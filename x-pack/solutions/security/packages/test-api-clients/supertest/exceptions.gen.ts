@@ -14,6 +14,9 @@
  *   version: Bundle (no version)
  */
 
+import supertest_ from 'supertest';
+import type SuperTest from 'supertest';
+import { format as formatUrl } from 'url';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -43,208 +46,217 @@ import type { UpdateExceptionListItemRequestBodyInput } from '@kbn/securitysolut
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-
-  return {
-    /**
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
+  /**
       * An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
 > info
 > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
 
       */
-    createExceptionList(props: CreateExceptionListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/exception_lists', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  createExceptionList(props: CreateExceptionListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/exception_lists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Create an exception item and associate it with the specified exception list.
 > info
 > Before creating exception items, you must create an exception list.
 
       */
-    createExceptionListItem(props: CreateExceptionListItemProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/exception_lists/items', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Create exception items that apply to a single detection rule.
-     */
-    createRuleExceptionListItems(
-      props: CreateRuleExceptionListItemsProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(
-          getRouteUrlForSpace(
-            replaceParams('/api/detection_engine/rules/{id}/exceptions', props.params),
-            kibanaSpace
-          )
+  createExceptionListItem(props: CreateExceptionListItemProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/exception_lists/items', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Create exception items that apply to a single detection rule.
+   */
+  createRuleExceptionListItems(
+    props: CreateRuleExceptionListItemsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/detection_engine/rules/{id}/exceptions', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * An exception list groups exception items and can be associated with detection rules. A shared exception list can apply to multiple detection rules.
 > info
 > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
 
       */
-    createSharedExceptionList(
-      props: CreateSharedExceptionListProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/api/exceptions/shared', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Delete an exception list using the `id` or `list_id` field.
-     */
-    deleteExceptionList(props: DeleteExceptionListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/exception_lists', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Delete an exception list item using the `id` or `item_id` field.
-     */
-    deleteExceptionListItem(props: DeleteExceptionListItemProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/exception_lists/items', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Duplicate an existing exception list.
-     */
-    duplicateExceptionList(props: DuplicateExceptionListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/exception_lists/_duplicate', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Export an exception list and its associated items to an NDJSON file.
-     */
-    exportExceptionList(props: ExportExceptionListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/exception_lists/_export', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get a list of all exception list items in the specified list.
-     */
-    findExceptionListItems(props: FindExceptionListItemsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/exception_lists/items/_find', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get a list of all exception list containers.
-     */
-    findExceptionLists(props: FindExceptionListsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/exception_lists/_find', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Import an exception list and its associated items from an NDJSON file.
-     */
-    importExceptionList(props: ImportExceptionListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/exception_lists/_import', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get the details of an exception list using the `id` or `list_id` field.
-     */
-    readExceptionList(props: ReadExceptionListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/exception_lists', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get the details of an exception list item using the `id` or `item_id` field.
-     */
-    readExceptionListItem(props: ReadExceptionListItemProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/exception_lists/items', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get a summary of the specified exception list.
-     */
-    readExceptionListSummary(
-      props: ReadExceptionListSummaryProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .get(getRouteUrlForSpace('/api/exception_lists/summary', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Update an exception list using the `id` or `list_id` field.
-     */
-    updateExceptionList(props: UpdateExceptionListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(getRouteUrlForSpace('/api/exception_lists', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Update an exception list item using the `id` or `item_id` field.
-     */
-    updateExceptionListItem(props: UpdateExceptionListItemProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(getRouteUrlForSpace('/api/exception_lists/items', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
+  createSharedExceptionList(
+    props: CreateSharedExceptionListProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/api/exceptions/shared', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Delete an exception list using the `id` or `list_id` field.
+   */
+  deleteExceptionList(props: DeleteExceptionListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/exception_lists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Delete an exception list item using the `id` or `item_id` field.
+   */
+  deleteExceptionListItem(props: DeleteExceptionListItemProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/exception_lists/items', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Duplicate an existing exception list.
+   */
+  duplicateExceptionList(props: DuplicateExceptionListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/exception_lists/_duplicate', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Export an exception list and its associated items to an NDJSON file.
+   */
+  exportExceptionList(props: ExportExceptionListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/exception_lists/_export', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get a list of all exception list items in the specified list.
+   */
+  findExceptionListItems(props: FindExceptionListItemsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/exception_lists/items/_find', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get a list of all exception list containers.
+   */
+  findExceptionLists(props: FindExceptionListsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/exception_lists/_find', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Import an exception list and its associated items from an NDJSON file.
+   */
+  importExceptionList(props: ImportExceptionListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/exception_lists/_import', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get the details of an exception list using the `id` or `list_id` field.
+   */
+  readExceptionList(props: ReadExceptionListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/exception_lists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get the details of an exception list item using the `id` or `item_id` field.
+   */
+  readExceptionListItem(props: ReadExceptionListItemProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/exception_lists/items', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get a summary of the specified exception list.
+   */
+  readExceptionListSummary(props: ReadExceptionListSummaryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/exception_lists/summary', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Update an exception list using the `id` or `list_id` field.
+   */
+  updateExceptionList(props: UpdateExceptionListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(getRouteUrlForSpace('/api/exception_lists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Update an exception list item using the `id` or `item_id` field.
+   */
+  updateExceptionListItem(props: UpdateExceptionListItemProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(getRouteUrlForSpace('/api/exception_lists/items', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+});
+
+export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
+  const supertestService = getService('supertest');
+  const config = getService('config');
+
+  return {
+    ...securitySolutionApiServiceFactory(supertestService),
+    withUser: (user: { username: string; password: string }) => {
+      const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+      return securitySolutionApiServiceFactory(
+        supertest_.agent(kbnUrl).auth(user.username, user.password)
+      );
     },
   };
 }

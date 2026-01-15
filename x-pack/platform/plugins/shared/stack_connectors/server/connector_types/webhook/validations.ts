@@ -9,10 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { SSLCertType } from '../../../common/auth/constants';
-import type { ConnectorTypeConfigType } from './types';
 
-import { AuthType } from '../../../common/auth/constants';
+import type { ConnectorTypeConfigType } from '@kbn/connector-schemas/webhook';
+import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth';
 import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
 
 function validateUrl(configuredUrl: string) {
