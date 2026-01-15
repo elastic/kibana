@@ -81,10 +81,10 @@ export function getUnmappedFieldsStrategy(
       const { settingName, settingValue } = getSettingData(comand as ESQLAstSetHeaderCommand);
       if (settingName?.toUpperCase() === 'UNMAPPED_FIELDS') {
         switch (settingValue?.toUpperCase()) {
-          case 'NULLIFY':
+          case UnmappedFieldsStrategy.NULLIFY:
             unmappedFieldsStrategy = UnmappedFieldsStrategy.NULLIFY;
             break;
-          case 'LOAD':
+          case UnmappedFieldsStrategy.LOAD:
             unmappedFieldsStrategy = UnmappedFieldsStrategy.LOAD;
             break;
         }
