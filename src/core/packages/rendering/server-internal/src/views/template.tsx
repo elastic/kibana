@@ -62,6 +62,7 @@ export const Template: FunctionComponent<Props> = ({
           darkMode={darkMode}
           themeName={injectedMetadata.theme.name}
           stylesheetPaths={stylesheetPaths}
+          uiPublicUrl={uiPublicUrl}
         />
         {scriptPaths.map((path) => (
           <script key={path} src={path} />
