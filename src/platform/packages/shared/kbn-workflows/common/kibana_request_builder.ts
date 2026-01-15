@@ -8,8 +8,7 @@
  */
 
 import { getKibanaConnectors } from '../spec/kibana';
-
-// Lazy import to avoid bundling large generated file in main plugin bundle
+import { KIBANA_TYPE_ALIASES } from '../spec/kibana/aliases';
 
 /**
  * Builds a Kibana HTTP request from connector definitions
@@ -60,9 +59,12 @@ export function buildKibanaRequestFromAction(
   // Lazy load the generated connectors to avoid main bundle bloat
   const kibanaConnectors = getKibanaConnectors();
 
+  // Resolve alias if the action type uses an old name (backward compatibility)
+  const resolvedActionType = KIBANA_TYPE_ALIASES[actionType] ?? actionType;
+
   // Find the connector definition for this action type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const connector = kibanaConnectors.find((c: any) => c.type === actionType);
+  const connector = kibanaConnectors.find((c: any) => c.type === resolvedActionType);
 
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)

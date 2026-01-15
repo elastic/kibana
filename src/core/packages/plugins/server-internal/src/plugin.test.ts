@@ -95,6 +95,7 @@ beforeEach(() => {
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
   instanceInfo = {
     uuid: 'instance-uuid',
+    airgapped: false,
   };
   nodeInfo = nodeServiceMock.createInternalPrebootContract();
   runtimeResolver = createRuntimePluginContractResolverMock();
