@@ -159,7 +159,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           return response.customError({
             statusCode: 400,
             body: {
-              message: `Data source of type "${type}" not found`,
+              message: `Data source type "${type}" not found`,
             },
           });
         }

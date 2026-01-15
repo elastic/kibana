@@ -252,8 +252,8 @@ describe('createConnectorAndRelatedResources', () => {
       expect.objectContaining({
         id: 'test_type.test-workflow',
         type: 'workflow',
-        description: 'Workflow tool for test_type data connector',
-        tags: ['data-connector', 'test_type'],
+        description: 'Workflow tool for test_type data source',
+        tags: ['data-source', 'test_type'],
         configuration: {
           workflow_id: 'workflow-1',
         },

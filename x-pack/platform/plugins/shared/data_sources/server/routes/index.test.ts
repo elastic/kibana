@@ -47,7 +47,7 @@ describe('registerRoutes', () => {
       deleteWorkflows: jest.fn(),
     },
   };
-  const mockDataSourcesRegistry = {
+  const mockDataCatalog = {
     getCatalog: jest.fn(),
   };
 
@@ -57,7 +57,7 @@ describe('registerRoutes', () => {
       actions: {
         getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
       },
-      dataSourcesRegistry: mockDataSourcesRegistry,
+      dataCatalog: mockDataCatalog,
       agentBuilder: {
         tools: {
           getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
@@ -248,7 +248,7 @@ describe('registerRoutes', () => {
         generateWorkflows: jest.fn(),
       };
 
-      mockDataSourcesRegistry.getCatalog.mockReturnValue({
+      mockDataCatalog.getCatalog.mockReturnValue({
         get: jest.fn().mockReturnValue(mockDataSource),
       });
 
@@ -285,7 +285,7 @@ describe('registerRoutes', () => {
     });
 
     it('should return 400 if data source type not found', async () => {
-      mockDataSourcesRegistry.getCatalog.mockReturnValue({
+      mockDataCatalog.getCatalog.mockReturnValue({
         get: jest.fn().mockReturnValue(undefined),
       });
 
@@ -318,7 +318,7 @@ describe('registerRoutes', () => {
         generateWorkflows: jest.fn(),
       };
 
-      mockDataSourcesRegistry.getCatalog.mockReturnValue({
+      mockDataCatalog.getCatalog.mockReturnValue({
         get: jest.fn().mockReturnValue(mockDataSource),
       });
 

@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/data_connectors'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/data_sources'],
 };
