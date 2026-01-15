@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GetSLOResponse } from '@kbn/slo-schema';
+import type { GetSLOResponse, IndicatorType } from '@kbn/slo-schema';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
@@ -24,9 +24,16 @@ export interface Props {
   slo?: GetSLOResponse;
   isEditMode: boolean;
   onFlyoutClose?: () => void;
+  allowedIndicatorTypes?: IndicatorType[];
 }
 
-export function SloEditForm({ slo, initialValues, onFlyoutClose, isEditMode }: Props) {
+export function SloEditForm({
+  slo,
+  initialValues,
+  onFlyoutClose,
+  isEditMode,
+  allowedIndicatorTypes,
+}: Props) {
   assertValidProps({ isEditMode, slo, onFlyoutClose });
 
   const form = useForm<CreateSLOForm>({
@@ -60,7 +67,12 @@ export function SloEditForm({ slo, initialValues, onFlyoutClose, isEditMode }: P
               title: i18n.translate('xpack.slo.sloEdit.definition.title', {
                 defaultMessage: 'Define SLI',
               }),
-              children: <SloEditFormIndicatorSection isEditMode={isEditMode} />,
+              children: (
+                <SloEditFormIndicatorSection
+                  isEditMode={isEditMode}
+                  allowedIndicatorTypes={allowedIndicatorTypes}
+                />
+              ),
               status: isIndicatorSectionValid ? 'complete' : 'incomplete',
             },
             {

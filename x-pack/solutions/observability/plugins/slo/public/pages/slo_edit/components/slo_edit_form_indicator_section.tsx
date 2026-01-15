@@ -7,6 +7,7 @@
 
 import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { IndicatorType } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import React, { useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -24,13 +25,24 @@ import { TimesliceMetricIndicatorTypeForm } from './indicator_section/timeslice_
 
 interface SloEditFormIndicatorSectionProps {
   isEditMode: boolean;
+  allowedIndicatorTypes?: IndicatorType[];
 }
 
-export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicatorSectionProps) {
+export function SloEditFormIndicatorSection({
+  isEditMode,
+  allowedIndicatorTypes,
+}: SloEditFormIndicatorSectionProps) {
   const { control, watch } = useFormContext<CreateSLOForm>();
   useUnregisterFields({ isEditMode });
 
   const indicatorType = watch('indicator.type');
+
+  const filteredSliOptions = useMemo(() => {
+    if (!allowedIndicatorTypes || allowedIndicatorTypes.length === 0) {
+      return SLI_OPTIONS;
+    }
+    return SLI_OPTIONS.filter((option) => allowedIndicatorTypes.includes(option.value));
+  }, [allowedIndicatorTypes]);
 
   const indicatorTypeForm = useMemo(() => {
     switch (indicatorType) {
@@ -73,7 +85,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
                   {...field}
                   required
                   data-test-subj="sloFormIndicatorTypeSelect"
-                  options={SLI_OPTIONS}
+                  options={filteredSliOptions}
                   aria-label={indicatorLabel}
                 />
               )}

@@ -27,6 +27,7 @@
       "observabilityShared",
       "exploratoryView",
       "ruleRegistry",
+      "slo",
       "triggersActionsUi",
       "share",
       "unifiedSearch",

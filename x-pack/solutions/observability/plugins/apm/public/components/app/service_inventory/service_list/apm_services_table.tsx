@@ -15,11 +15,16 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ApmRuleType } from '@kbn/rule-data-utils';
+import rison from '@kbn/rison';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
+import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
@@ -44,11 +49,13 @@ import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transact
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
+import { OTHER_SERVICE_NAME } from '../../../shared/links/apm/max_groups_message';
 import { ListMetric } from '../../../shared/list_metric';
 import type {
   ITableColumn,
   SortFunction,
   TableSearchBar,
+  TableActions,
   VisibleItemsStartEnd,
 } from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
@@ -66,6 +73,7 @@ export function getServiceColumns({
   breakpoints,
   showHealthStatusColumn,
   showAlertsColumn,
+  showSlosColumn,
   link,
   serviceOverflowCount,
 }: {
@@ -73,6 +81,7 @@ export function getServiceColumns({
   showTransactionTypeColumn: boolean;
   showHealthStatusColumn: boolean;
   showAlertsColumn: boolean;
+  showSlosColumn: boolean;
   comparisonDataLoading: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
@@ -322,16 +331,94 @@ export function ApmServicesTable({
   onChangeItemIndices,
 }: Props) {
   const breakpoints = useBreakpoints();
-  const { core } = useApmPluginContext();
+  const { core, plugins } = useApmPluginContext();
+  const { slo } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
+  const { capabilities } = core.application;
+
+  const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
+  const canSaveApmAlerts = !!(capabilities.apm.save && canSaveAlerts);
+  const canWriteSlos = !!capabilities.slo?.write;
+  const showActionsColumn = canSaveApmAlerts || canWriteSlos;
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
   const { query } = useApmParams('/services');
-  const { kuery } = query;
+  const { kuery, environment } = query;
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
+
+  const [alertFlyoutState, setAlertFlyoutState] = useState<{
+    isOpen: boolean;
+    ruleType: ApmRuleType | null;
+    serviceName: string | undefined;
+  }>({
+    isOpen: false,
+    ruleType: null,
+    serviceName: undefined,
+  });
+
+  type SloIndicatorType = 'sli.apm.transactionDuration' | 'sli.apm.transactionErrorRate';
+  const [sloFlyoutState, setSloFlyoutState] = useState<{
+    isOpen: boolean;
+    indicatorType: SloIndicatorType | null;
+    serviceName: string | undefined;
+  }>({
+    isOpen: false,
+    indicatorType: null,
+    serviceName: undefined,
+  });
+
+  const openAlertFlyout = useCallback((ruleType: ApmRuleType, serviceName: string) => {
+    setAlertFlyoutState({
+      isOpen: true,
+      ruleType,
+      serviceName,
+    });
+  }, []);
+
+  const closeAlertFlyout = useCallback(() => {
+    setAlertFlyoutState({
+      isOpen: false,
+      ruleType: null,
+      serviceName: undefined,
+    });
+  }, []);
+
+  const openSloFlyout = useCallback((indicatorType: SloIndicatorType, serviceName: string) => {
+    setSloFlyoutState({
+      isOpen: true,
+      indicatorType,
+      serviceName,
+    });
+  }, []);
+
+  const closeSloFlyout = useCallback(() => {
+    setSloFlyoutState({
+      isOpen: false,
+      indicatorType: null,
+      serviceName: undefined,
+    });
+  }, []);
+
+  const CreateSloFlyout =
+    sloFlyoutState.isOpen && sloFlyoutState.indicatorType && sloFlyoutState.serviceName
+      ? slo?.getCreateSLOFormFlyout({
+          initialValues: {
+            name: `APM SLO for ${sloFlyoutState.serviceName}`,
+            indicator: {
+              type: sloFlyoutState.indicatorType,
+              params: {
+                service: sloFlyoutState.serviceName,
+                environment: environment === 'ENVIRONMENT_ALL' ? '*' : environment,
+              },
+            },
+          },
+          onClose: closeSloFlyout,
+          allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+        })
+      : null;
 
   const serviceColumns = useMemo(() => {
     return getServiceColumns({
@@ -375,6 +462,169 @@ export function ApmServicesTable({
       techPreview: true,
     };
   }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
+
+  const serviceActions: TableActions<ServiceListItem> = useMemo(() => {
+    const actions: TableActions<ServiceListItem> = [];
+
+    // Add alerts group if user has alerting write permissions
+    if (canSaveApmAlerts) {
+      actions.push({
+        groupLabel: i18n.translate('xpack.apm.servicesTable.actions.alertsGroupLabel', {
+          defaultMessage: 'Alerts',
+        }),
+        actions: [
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createThresholdRule', {
+              defaultMessage: 'Create threshold rule',
+            }),
+            items: [
+              {
+                name: i18n.translate('xpack.apm.servicesTable.actions.createLatencyRule', {
+                  defaultMessage: 'Latency',
+                }),
+                onClick: (item) => {
+                  openAlertFlyout(ApmRuleType.TransactionDuration, item.serviceName);
+                },
+              },
+              {
+                name: i18n.translate(
+                  'xpack.apm.servicesTable.actions.createFailedTransactionRateRule',
+                  {
+                    defaultMessage: 'Failed transaction rate',
+                  }
+                ),
+                onClick: (item) => {
+                  openAlertFlyout(ApmRuleType.TransactionErrorRate, item.serviceName);
+                },
+              },
+            ],
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createAnomalyRule', {
+              defaultMessage: 'Create anomaly rule',
+            }),
+            onClick: (item) => {
+              openAlertFlyout(ApmRuleType.Anomaly, item.serviceName);
+            },
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createErrorCountRule', {
+              defaultMessage: 'Create error count rule',
+            }),
+            onClick: (item) => {
+              openAlertFlyout(ApmRuleType.ErrorCount, item.serviceName);
+            },
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.manageRules', {
+              defaultMessage: 'Manage rules',
+            }),
+            icon: 'tableOfContents',
+            onClick: (item) => {
+              const { basePath } = core.http;
+              const rulesUrl = basePath.prepend(
+                `/app/observability/alerts/rules?_a=${rison.encode({
+                  search: `service.name:${item.serviceName}`,
+                  type: [
+                    'apm.anomaly',
+                    'apm.error_rate',
+                    'apm.transaction_error_rate',
+                    'apm.transaction_duration',
+                  ],
+                })}`
+              );
+              window.location.href = rulesUrl;
+            },
+          },
+        ],
+      });
+    }
+
+    // Add SLOs group if user has SLO write permissions
+    if (canWriteSlos) {
+      actions.push({
+        groupLabel: i18n.translate('xpack.apm.servicesTable.actions.slosGroupLabel', {
+          defaultMessage: 'SLOs',
+        }),
+        actions: [
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createLatencySlo', {
+              defaultMessage: 'Create APM latency SLO',
+            }),
+            onClick: (item) => {
+              openSloFlyout('sli.apm.transactionDuration', item.serviceName);
+            },
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.createAvailabilitySlo', {
+              defaultMessage: 'Create APM availability SLO',
+            }),
+            onClick: (item) => {
+              openSloFlyout('sli.apm.transactionErrorRate', item.serviceName);
+            },
+          },
+          {
+            name: i18n.translate('xpack.apm.servicesTable.actions.manageSlos', {
+              defaultMessage: 'Manage SLOs',
+            }),
+            icon: 'tableOfContents',
+            onClick: (item) => {
+              const { basePath } = core.http;
+              const slosUrl = basePath.prepend(
+                `/app/slos?search=${rison.encode({
+                  filters: [
+                    {
+                      meta: {
+                        alias: null,
+                        disabled: false,
+                        key: 'service.name',
+                        negate: false,
+                        params: { query: item.serviceName },
+                        type: 'phrase',
+                      },
+                      query: {
+                        match_phrase: { 'service.name': item.serviceName },
+                      },
+                    },
+                    {
+                      meta: {
+                        alias: null,
+                        disabled: false,
+                        key: 'slo.indicator.type',
+                        negate: false,
+                        params: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+                        type: 'phrases',
+                      },
+                      query: {
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            {
+                              match_phrase: {
+                                'slo.indicator.type': 'sli.apm.transactionDuration',
+                              },
+                            },
+                            {
+                              match_phrase: {
+                                'slo.indicator.type': 'sli.apm.transactionErrorRate',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                })}`
+              );
+              window.location.href = slosUrl;
+            },
+          },
+        ],
+      });
+    }
+
+    return actions;
+  }, [openAlertFlyout, openSloFlyout, core.http, canSaveApmAlerts, canWriteSlos]);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -432,8 +682,23 @@ export function ApmServicesTable({
           onChangeRenderedItems={onChangeRenderedItems}
           onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
+          {...(showActionsColumn && {
+            actions: serviceActions,
+            isActionsDisabled: (item: ServiceListItem) => item.serviceName === OTHER_SERVICE_NAME,
+          })}
         />
       </EuiFlexItem>
+      <AlertingFlyout
+        addFlyoutVisible={alertFlyoutState.isOpen}
+        setAddFlyoutVisibility={(visible) => {
+          if (!visible) {
+            closeAlertFlyout();
+          }
+        }}
+        ruleType={alertFlyoutState.ruleType}
+        serviceName={alertFlyoutState.serviceName}
+      />
+      {CreateSloFlyout}
     </EuiFlexGroup>
   );
 }

@@ -6,8 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenu,
+  useEuiTheme,
+} from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -57,6 +65,142 @@ export interface TableSearchBar<T> {
   techPreview?: boolean;
 }
 
+export interface TableActionSubItem<T> {
+  name: string;
+  onClick: (item: T) => void;
+  icon?: string;
+}
+
+export interface TableAction<T> {
+  name: string;
+  onClick?: (item: T) => void;
+  icon?: string;
+  items?: Array<TableActionSubItem<T>>;
+}
+
+export interface TableActionGroup<T> {
+  groupLabel: string;
+  actions: Array<TableAction<T>>;
+}
+
+export type TableActions<T> = Array<TableActionGroup<T>>;
+
+function ActionsCell<T extends object>({
+  item,
+  actions,
+  disabled = false,
+}: {
+  item: T;
+  actions: TableActions<T>;
+  disabled?: boolean;
+}) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [activePanelId, setActivePanelId] = useState(0);
+  const { euiTheme } = useEuiTheme();
+
+  const togglePopover = useCallback(() => {
+    setIsPopoverOpen((prev) => !prev);
+  }, []);
+
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+    setActivePanelId(0);
+  }, []);
+
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+    const result: EuiContextMenuPanelDescriptor[] = [];
+    let subPanelId = 1;
+
+    const mainPanelItems: EuiContextMenuPanelDescriptor['items'] = [];
+
+    actions.forEach((group, groupIndex) => {
+      mainPanelItems.push({
+        name: group.groupLabel,
+        isSeparator: false,
+        disabled: true,
+        css: {
+          fontWeight: 700,
+          color: euiTheme.colors.text,
+          borderBottom: euiTheme.border.thin,
+          marginTop: groupIndex > 0 ? euiTheme.size.m : 0,
+        },
+        'data-test-subj': `apmManagedTableActionsMenuGroup-${group.groupLabel.replace(/\s+/g, '')}`,
+      });
+
+      group.actions.forEach((action) => {
+        if (action.items && action.items.length > 0) {
+          const currentSubPanelId = subPanelId++;
+
+          mainPanelItems.push({
+            name: action.name,
+            icon: action.icon,
+            panel: currentSubPanelId,
+            'data-test-subj': `apmManagedTableActionsMenuItem-${action.name.replace(/\s+/g, '')}`,
+          });
+
+          result.push({
+            id: currentSubPanelId,
+            title: action.name,
+            items: action.items.map((subItem) => ({
+              name: subItem.name,
+              icon: subItem.icon,
+              onClick: () => {
+                subItem.onClick(item);
+                closePopover();
+              },
+              'data-test-subj': `apmManagedTableActionsMenuItem-${subItem.name.replace(
+                /\s+/g,
+                ''
+              )}`,
+            })),
+          });
+        } else {
+          mainPanelItems.push({
+            name: action.name,
+            icon: action.icon,
+            onClick: action.onClick
+              ? () => {
+                  action.onClick!(item);
+                  closePopover();
+                }
+              : undefined,
+            'data-test-subj': `apmManagedTableActionsMenuItem-${action.name.replace(/\s+/g, '')}`,
+          });
+        }
+      });
+    });
+
+    result.unshift({
+      id: 0,
+      items: mainPanelItems,
+    });
+
+    return result;
+  }, [actions, item, closePopover, euiTheme]);
+
+  return (
+    <EuiPopover
+      button={
+        <EuiButtonIcon
+          data-test-subj="apmManagedTableActionsCellButton"
+          aria-label={i18n.translate('xpack.apm.managedTable.actionsAriaLabel', {
+            defaultMessage: 'Actions',
+          })}
+          iconType="boxesVertical"
+          onClick={togglePopover}
+          color="text"
+          isDisabled={disabled}
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+    >
+      <EuiContextMenu initialPanelId={activePanelId} panels={panels} />
+    </EuiPopover>
+  );
+}
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 function defaultSortFn<T>(items: T[], sortField: keyof T, sortDirection: SortDirection) {
@@ -106,6 +250,9 @@ function UnoptimizedManagedTable<T extends object>(props: {
 
   tableCaption?: string;
 
+  actions?: TableActions<T>;
+  isActionsDisabled?: (item: T) => boolean;
+
   rowProps?: (item: T) => Record<string, unknown>;
 
   'data-test-subj'?: string;
@@ -153,7 +300,32 @@ function UnoptimizedManagedTable<T extends object>(props: {
       placeholder: 'Search...',
       onChangeSearchQuery: () => {},
     },
+    actions,
+    isActionsDisabled,
   } = props;
+
+  const columnsWithActions = useMemo(() => {
+    if (!actions || actions.length === 0) {
+      return columns;
+    }
+
+    const actionsColumn: ITableColumn<T> = {
+      name: i18n.translate('xpack.apm.managedTable.actionsColumnName', {
+        defaultMessage: 'Actions',
+      }),
+      width: '80px',
+      align: 'center',
+      render: (item: T) => (
+        <ActionsCell
+          item={item}
+          actions={actions}
+          disabled={isActionsDisabled ? isActionsDisabled(item) : false}
+        />
+      ),
+    };
+
+    return [...columns, actionsColumn];
+  }, [columns, actions, isActionsDisabled]);
 
   const {
     urlParams: {
@@ -340,7 +512,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
               : noItemsMessage
           }
           items={renderedItems}
-          columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+          columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
           rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
           sorting={sorting}
           onChange={onTableChange}
@@ -356,3 +528,4 @@ function UnoptimizedManagedTable<T extends object>(props: {
 const ManagedTable = React.memo(UnoptimizedManagedTable) as typeof UnoptimizedManagedTable;
 
 export { ManagedTable, UnoptimizedManagedTable };
+export type { TableAction, TableActionGroup, TableActions };
