@@ -74,22 +74,22 @@ describe('validateSettingsWithDryRun', () => {
     } as unknown as IScopedClusterClient;
   });
 
-  it('returns valid when settings pass dry_run validation', async () => {
+  it('does not throw when settings pass dry_run validation', async () => {
     mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
       .fn()
       .mockResolvedValue({
         data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
       });
 
-    const result = await validateSettingsWithDryRun({
-      scopedClusterClient: mockScopedClusterClient,
-      streamName: 'logs-test-default',
-      settings: { 'index.refresh_interval': { value: '5s' } },
-      isServerless: true,
-    });
+    await expect(
+      validateSettingsWithDryRun({
+        scopedClusterClient: mockScopedClusterClient,
+        streamName: 'logs-test-default',
+        settings: { 'index.refresh_interval': { value: '5s' } },
+        isServerless: true,
+      })
+    ).resolves.toBeUndefined();
 
-    expect(result.isValid).toBe(true);
-    expect(result.errors).toHaveLength(0);
     expect(
       mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
     ).toHaveBeenCalledWith({
@@ -99,7 +99,7 @@ describe('validateSettingsWithDryRun', () => {
     });
   });
 
-  it('returns invalid when settings fail dry_run validation', async () => {
+  it('throws when settings fail dry_run validation', async () => {
     const errorMessage =
       'index setting [index.refresh_interval=1s] should be either -1 or equal to or greater than 5s';
     mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings = jest
@@ -114,44 +114,41 @@ describe('validateSettingsWithDryRun', () => {
         ],
       });
 
-    const result = await validateSettingsWithDryRun({
-      scopedClusterClient: mockScopedClusterClient,
-      streamName: 'logs-test-default',
-      settings: { 'index.refresh_interval': { value: '1s' } },
-      isServerless: true,
-    });
-
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].message).toContain('Invalid stream settings');
-    expect(result.errors[0].message).toContain(errorMessage);
+    await expect(
+      validateSettingsWithDryRun({
+        scopedClusterClient: mockScopedClusterClient,
+        streamName: 'logs-test-default',
+        settings: { 'index.refresh_interval': { value: '1s' } },
+        isServerless: true,
+      })
+    ).rejects.toThrow(`Invalid stream settings: ${errorMessage}`);
   });
 
-  it('skips validation when there are no settings to validate', async () => {
-    const result = await validateSettingsWithDryRun({
-      scopedClusterClient: mockScopedClusterClient,
-      streamName: 'logs-test-default',
-      settings: {},
-      isServerless: true,
-    });
+  it('does not call ES when there are no settings to validate', async () => {
+    await expect(
+      validateSettingsWithDryRun({
+        scopedClusterClient: mockScopedClusterClient,
+        streamName: 'logs-test-default',
+        settings: {},
+        isServerless: true,
+      })
+    ).resolves.toBeUndefined();
 
-    expect(result.isValid).toBe(true);
-    expect(result.errors).toHaveLength(0);
     expect(
       mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
     ).not.toHaveBeenCalled();
   });
 
-  it('skips validation when all settings are null', async () => {
-    const result = await validateSettingsWithDryRun({
-      scopedClusterClient: mockScopedClusterClient,
-      streamName: 'logs-test-default',
-      settings: { 'index.refresh_interval': { value: null as unknown as string } },
-      isServerless: true,
-    });
+  it('does not call ES when all settings are null', async () => {
+    await expect(
+      validateSettingsWithDryRun({
+        scopedClusterClient: mockScopedClusterClient,
+        streamName: 'logs-test-default',
+        settings: { 'index.refresh_interval': { value: null as unknown as string } },
+        isServerless: true,
+      })
+    ).resolves.toBeUndefined();
 
-    expect(result.isValid).toBe(true);
-    expect(result.errors).toHaveLength(0);
     expect(
       mockScopedClusterClient.asCurrentUser.indices.putDataStreamSettings
     ).not.toHaveBeenCalled();

@@ -241,7 +241,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       return allowlistValidation;
     }
 
-    const [settingsValidation] = await Promise.all([
+    await Promise.all([
       validateSettingsWithDryRun({
         scopedClusterClient: this.dependencies.scopedClusterClient,
         streamName: this._definition.name,
@@ -250,10 +250,6 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       }),
       validateSimulation(this._definition, this.dependencies.scopedClusterClient),
     ]);
-
-    if (!settingsValidation.isValid) {
-      return settingsValidation;
-    }
 
     return { isValid: true, errors: [] };
   }

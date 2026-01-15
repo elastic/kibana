@@ -54,7 +54,7 @@ export async function validateSettingsWithDryRun({
   streamName: string;
   settings: IngestStreamSettings;
   isServerless: boolean;
-}): Promise<ValidationResult> {
+}): Promise<void> {
   const formattedSettings = formatSettings(settings, isServerless);
 
   const settingsToValidate = Object.fromEntries(
@@ -62,7 +62,7 @@ export async function validateSettingsWithDryRun({
   );
 
   if (Object.keys(settingsToValidate).length === 0) {
-    return { isValid: true, errors: [] };
+    return;
   }
 
   const response = (await scopedClusterClient.asCurrentUser.indices.putDataStreamSettings({
@@ -72,19 +72,11 @@ export async function validateSettingsWithDryRun({
   })) as DataStreamSettingsResponse;
 
   if (!response.data_streams || response.data_streams.length === 0) {
-    return {
-      isValid: false,
-      errors: [new Error(`Failed to validate stream settings for "${streamName}"`)],
-    };
+    throw new Error(`Failed to validate stream settings for "${streamName}"`);
   }
 
-  const errors = response.data_streams
-    .filter(({ error }) => Boolean(error))
-    .map(({ error }) => new Error(`Invalid stream settings: ${error}`));
-
-  if (errors.length > 0) {
-    return { isValid: false, errors };
+  const error = response.data_streams.find(({ error: err }) => Boolean(err))?.error;
+  if (error) {
+    throw new Error(`Invalid stream settings: ${error}`);
   }
-
-  return { isValid: true, errors: [] };
 }

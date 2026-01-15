@@ -544,7 +544,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const shouldValidateSettingsWithDryRun =
       existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
 
-    const [settingsValidation] = await Promise.all([
+    await Promise.all([
       shouldValidateSettingsWithDryRun
         ? validateSettingsWithDryRun({
             scopedClusterClient: this.dependencies.scopedClusterClient,
@@ -552,13 +552,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             settings: inheritedSettings,
             isServerless: this.dependencies.isServerless,
           })
-        : Promise.resolve({ isValid: true, errors: [] } as ValidationResult),
+        : Promise.resolve(),
       validateSimulation(this._definition, this.dependencies.scopedClusterClient),
     ]);
-
-    if (!settingsValidation.isValid) {
-      return settingsValidation;
-    }
 
     return { isValid: true, errors: [] };
   }
