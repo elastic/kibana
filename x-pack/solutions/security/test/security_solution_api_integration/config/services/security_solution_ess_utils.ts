@@ -63,8 +63,6 @@ export function SecuritySolutionESSUtils({
       return Promise.resolve();
     },
 
-    createUser,
-
     /**
      * Deletes specified users by username
      * @param names[]
@@ -74,8 +72,6 @@ export function SecuritySolutionESSUtils({
         await security.user.delete(name);
       }
     },
-
-    createRole,
 
     /**
      * Deletes specified roles by name

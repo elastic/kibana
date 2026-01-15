@@ -18,9 +18,7 @@ export interface SecuritySolutionUtilsInterface {
 }
 
 export interface SecuritySolutionESSUtilsInterface extends SecuritySolutionUtilsInterface {
-  createUser: (user: User) => Promise<any>;
   deleteUsers: (userNames: string[]) => Promise<any>;
-  createRole: (name: string, role: Role) => Promise<any>;
   deleteRoles: (roleNames: string[]) => Promise<any>;
 }
 
