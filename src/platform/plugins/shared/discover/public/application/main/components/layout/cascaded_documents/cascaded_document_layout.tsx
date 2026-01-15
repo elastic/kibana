@@ -22,8 +22,6 @@ import { EsqlQuery } from '@kbn/esql-language';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
@@ -32,11 +30,7 @@ import {
 } from './blocks';
 import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
-import {
-  useDataCascadeRowExpansionHandlers,
-  useGroupedCascadeData,
-  useScopedESQLQueryFetchClient,
-} from './hooks';
+import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
 
 export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'> {
@@ -48,15 +42,11 @@ const ESQLDataCascade = React.memo(
   ({ rows, dataView, togglePopover, queryMeta, ...props }: ESQLDataCascadeProps) => {
     const {
       cascadedDocumentsState,
-      esqlQuery,
       esqlVariables,
-      timeRange,
       viewModeToggle,
       cascadeGroupingChangeHandler,
       registerCascadeRequestsInspectorAdapter,
     } = useCascadedDocumentsContext();
-    const { scopedProfilesManager } = useScopedServices();
-    const { expressions } = useDiscoverServices();
 
     const cascadeRequestsInspectorAdapter = useRef<RequestAdapter>(new RequestAdapter());
 
@@ -71,23 +61,12 @@ const ESQLDataCascade = React.memo(
       esqlVariables,
     });
 
-    const fetchCascadeData = useScopedESQLQueryFetchClient({
-      query: esqlQuery,
-      dataView,
-      data: props.services.data,
-      esqlVariables,
-      expressions,
-      timeRange,
-      scopedProfilesManager,
-      inspectorAdapters: { requests: cascadeRequestsInspectorAdapter.current },
-    });
-
     const {
       onCascadeGroupNodeExpanded,
       onCascadeGroupNodeCollapsed,
       onCascadeLeafNodeExpanded,
       onCascadeLeafNodeCollapsed,
-    } = useDataCascadeRowExpansionHandlers({ cascadeFetchClient: fetchCascadeData });
+    } = useDataCascadeRowExpansionHandlers({ dataView });
 
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
       viewModeToggle,

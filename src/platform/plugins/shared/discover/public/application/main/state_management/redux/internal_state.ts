@@ -507,6 +507,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
             listenerApi.dispatch(
               injectCurrentTab(internalStateSlice.actions.setCascadedDocumentsState)({
                 cascadedDocumentsState: {
+                  ...cascadedDocumentsState,
                   availableCascadeGroups,
                   selectedCascadeGroups: computeSelectedCascadeGroups(availableCascadeGroups),
                 },

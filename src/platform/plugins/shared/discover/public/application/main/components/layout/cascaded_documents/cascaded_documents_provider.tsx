@@ -18,8 +18,10 @@ import type {
   internalStateActions,
 } from '../../../state_management/redux';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
+import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
 
 export interface CascadedDocumentsContext {
+  cascadedDocumentsFetcher: CascadedDocumentsFetcher;
   cascadedDocumentsState: CascadedDocumentsState;
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;

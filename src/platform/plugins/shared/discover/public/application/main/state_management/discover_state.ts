@@ -557,10 +557,12 @@ export function getDiscoverStateContainer({
       const availableCascadeGroups = getESQLStatsQueryMeta(
         (appState.query as AggregateQuery).esql
       ).groupByFields.map((group) => group.field);
+      const currentTabState = getCurrentTab();
 
       internalState.dispatch(
         injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
           cascadedDocumentsState: {
+            ...currentTabState.cascadedDocumentsState,
             availableCascadeGroups,
             selectedCascadeGroups: [availableCascadeGroups[0]].filter(Boolean),
           },

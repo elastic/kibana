@@ -81,6 +81,7 @@ describe('tab mapping utils', () => {
           },
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
+            "cascadedDocumentsMap": Object {},
             "selectedCascadeGroups": Array [],
           },
           "controlGroupState": undefined,
@@ -165,6 +166,7 @@ describe('tab mapping utils', () => {
           },
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
+            "cascadedDocumentsMap": Object {},
             "selectedCascadeGroups": Array [],
           },
           "controlGroupState": undefined,
