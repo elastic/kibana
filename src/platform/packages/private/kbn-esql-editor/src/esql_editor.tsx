@@ -169,10 +169,19 @@ const ESQLEditorInternal = function ESQLEditor({
     queryLength: 0,
     queryLines: 0,
     interactionId: 0,
-    triggerTime: 0,
-    fetchStartTime: 0,
-    fetchEndTime: 0,
+    computeStart: 0,
+    computeEnd: 0,
   });
+  // Map lets us store per-version timing and evict the oldest entry efficiently.
+  const suggestionsVersionTimingRef = useRef<
+    Map<
+      number,
+      { timestamp: number; queryLength: number; queryLines: number; interactionId: number }
+    >
+  >(new Map());
+  // Cap version history to avoid unbounded growth.
+  const MAX_VERSION_TIMINGS = 50;
+  const SUGGESTIONS_SAMPLE_RATE = 30;
 
   // Init latency: component mount → editor ready
   const initTrackingRef = useRef({
@@ -282,56 +291,27 @@ const ESQLEditorInternal = function ESQLEditor({
     startLatencyTracking(tracking, queryText, interactionId);
   }, []);
 
-  const trackSuggestionsLatencyStart = useCallback((queryText: string) => {
-    const tracking = suggestionsTrackingRef.current;
-    const interactionId = interactionIdRef.current;
+  // Track text version timestamps so we can correlate keystrokes with provider compute timing.
+  const recordSuggestionsVersionTiming = useCallback(
+    (model: monaco.editor.ITextModel) => {
+      const versionId = model.getAlternativeVersionId();
 
-    // First sample: allow overwrite (last keystroke wins)
-    // This ensures we capture "first menu showing" even if early keystrokes don't trigger suggestions
-    if (!tracking.hasFirstSample) {
-      startLatencyTracking(tracking, queryText, interactionId);
-      tracking.fetchStartTime = 0;
-      tracking.fetchEndTime = 0;
-      tracking.triggerTime = 0;
-      return;
-    }
+      suggestionsVersionTimingRef.current.set(versionId, {
+        timestamp: performance.now(),
+        queryLength: model.getValueLength(),
+        queryLines: model.getLineCount(),
+        interactionId: interactionIdRef.current,
+      });
 
-    // After first sample: first wins + 10% sampling
-    if (tracking.startTime > 0 || interactionId % 10 !== 0) return;
-
-    startLatencyTracking(tracking, queryText, interactionId);
-    tracking.fetchStartTime = 0;
-    tracking.fetchEndTime = 0;
-    tracking.triggerTime = 0;
-  }, []);
-
-  const markSuggestionsTriggered = useCallback(() => {
-    const tracking = suggestionsTrackingRef.current;
-    if (tracking.startTime === 0 || tracking.triggerTime > 0) return;
-
-    tracking.triggerTime = performance.now();
-  }, []);
-
-  const markSuggestionsComputeStart = useCallback(() => {
-    const tracking = suggestionsTrackingRef.current;
-    if (tracking.startTime === 0 || tracking.fetchStartTime > 0) return;
-
-    tracking.fetchStartTime = performance.now();
-    if (tracking.triggerTime === 0) {
-      tracking.triggerTime = tracking.fetchStartTime;
-    }
-  }, []);
-
-  const markSuggestionsReady = useCallback(() => {
-    const tracking = suggestionsTrackingRef.current;
-    if (tracking.startTime === 0 || tracking.fetchEndTime > 0) return;
-
-    if (tracking.fetchStartTime === 0) {
-      tracking.fetchStartTime = performance.now();
-    }
-
-    tracking.fetchEndTime = performance.now();
-  }, []);
+      if (suggestionsVersionTimingRef.current.size > MAX_VERSION_TIMINGS) {
+        const oldestKey = suggestionsVersionTimingRef.current.keys().next().value;
+        if (oldestKey !== undefined) {
+          suggestionsVersionTimingRef.current.delete(oldestKey);
+        }
+      }
+    },
+    [interactionIdRef]
+  );
 
   const trackValidationLatencyStart = useCallback((queryText: string) => {
     const tracking = validationTrackingRef.current;
@@ -359,9 +339,8 @@ const ESQLEditorInternal = function ESQLEditor({
   const resetSuggestionsTracking = useCallback(() => {
     const tracking = suggestionsTrackingRef.current;
     resetTracking(tracking);
-    tracking.triggerTime = 0;
-    tracking.fetchStartTime = 0;
-    tracking.fetchEndTime = 0;
+    tracking.computeStart = 0;
+    tracking.computeEnd = 0;
   }, []);
 
   const resetValidationTracking = useCallback(() => {
@@ -508,10 +487,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const triggerSuggestions = useCallback(() => {
     setTimeout(() => {
-      markSuggestionsTriggered();
       editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
     }, 0);
-  }, [markSuggestionsTriggered]);
+  }, []);
 
   const maybeTriggerSuggestions = useCallback(() => {
     const { current: editor } = editorRef;
@@ -725,12 +703,32 @@ const ESQLEditorInternal = function ESQLEditor({
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
       onSuggestionsWithCustomCommandShown: (commands) =>
         telemetryService.trackSuggestionsWithCustomCommandShown(commands),
-      onSuggestionsComputeStart: () => {
-        markSuggestionsComputeStart();
-      },
-      onSuggestionsReady: () => {
-        markSuggestionsReady();
-        const result = endSuggestionsLatencyTracking(suggestionsTrackingRef.current);
+      onSuggestionsReady: (computeStart: number, computeEnd: number) => {
+        const tracking = suggestionsTrackingRef.current;
+        const model = editorModel.current;
+
+        if (!model) return;
+
+        const versionId = model.getAlternativeVersionId();
+        const versionTiming = suggestionsVersionTimingRef.current.get(versionId);
+
+        // Best-effort: provider can run before the version timestamp is recorded.
+        if (!versionTiming) return;
+
+        if (
+          shouldSkipLatencySampling(tracking, versionTiming.interactionId, SUGGESTIONS_SAMPLE_RATE)
+        ) {
+          return;
+        }
+
+        tracking.computeStart = computeStart;
+        tracking.computeEnd = computeEnd;
+        tracking.startTime = versionTiming.timestamp;
+        tracking.queryLength = versionTiming.queryLength;
+        tracking.queryLines = versionTiming.queryLines;
+        tracking.interactionId = versionTiming.interactionId;
+
+        const result = endSuggestionsLatencyTracking(tracking);
 
         if (!result) {
           resetSuggestionsTracking();
@@ -744,7 +742,7 @@ const ESQLEditorInternal = function ESQLEditor({
         });
       },
     }),
-    [markSuggestionsComputeStart, markSuggestionsReady, resetSuggestionsTracking, telemetryService]
+    [resetSuggestionsTracking, telemetryService]
   );
 
   const onClickQueryHistory = useCallback(
@@ -1378,7 +1376,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
                     editor.onDidChangeModelContent(async () => {
                       trackInputLatencyOnKeystroke(editor.getValue() ?? '');
-                      trackSuggestionsLatencyStart(editor.getValue() ?? '');
+                      if (editorModel.current) {
+                        recordSuggestionsVersionTiming(editorModel.current);
+                      }
                       await addLookupIndicesDecorator();
                       maybeTriggerSuggestions();
                     });

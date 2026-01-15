@@ -34,21 +34,23 @@ interface BaseTracking {
 }
 
 export interface SuggestionsTracking extends BaseTracking {
-  triggerTime: number;
-  fetchStartTime: number;
-  fetchEndTime: number;
+  computeStart: number;
+  computeEnd: number;
 }
 
 // First event always captured. Subsequent events use deterministic 10% sampling
 // based on interactionId (every 10th interaction is sampled)
 export const shouldSkipLatencySampling = (
   tracking: BaseTracking,
-  interactionId: number
+  interactionId: number,
+  sampleRatePercent: number = 10
 ): boolean => {
   if (tracking.startTime > 0) return true;
   if (!tracking.hasFirstSample) return false;
+  if (sampleRatePercent >= 100) return false;
 
-  return interactionId % 10 !== 0;
+  const bucketSize = Math.max(1, Math.round(100 / sampleRatePercent));
+  return interactionId % bucketSize !== 0;
 };
 
 export const startLatencyTracking = (
@@ -72,8 +74,7 @@ interface LatencyTrackingResult {
 
 interface SuggestionsLatencyResult extends LatencyTrackingResult {
   keystrokeToTriggerDuration: number;
-  fetchDuration: number;
-  postFetchDuration: number;
+  computeDuration: number;
 }
 
 export const endLatencyTracking = (tracking: BaseTracking): LatencyTrackingResult | null => {
@@ -94,42 +95,49 @@ export const endLatencyTracking = (tracking: BaseTracking): LatencyTrackingResul
 };
 
 const resetSuggestionsFields = (tracking: SuggestionsTracking): void => {
-  tracking.triggerTime = 0;
-  tracking.fetchStartTime = 0;
-  tracking.fetchEndTime = 0;
+  tracking.computeStart = 0;
+  tracking.computeEnd = 0;
 };
+
+// Drop measurements where keystroke→compute time exceeds this threshold (likely stale/unrelated)
+const STALE_THRESHOLD_MS = 10_000;
 
 export const endSuggestionsLatencyTracking = (
   tracking: SuggestionsTracking
 ): SuggestionsLatencyResult | null => {
-  const { triggerTime, fetchStartTime, fetchEndTime, startTime } = tracking;
-  if (fetchStartTime === 0 || fetchEndTime === 0) return null;
+  const { computeStart, computeEnd, startTime } = tracking;
 
-  const endTime = performance.now();
+  if (computeStart === 0 || computeEnd === 0) {
+    return null;
+  }
+
   const baseResult = endLatencyTracking(tracking);
 
   if (!baseResult) {
     resetSuggestionsFields(tracking);
+
     return null;
   }
 
-  const safeTriggerTime = triggerTime || fetchStartTime;
-  const keystrokeToTriggerDuration = safeTriggerTime - startTime;
-  const fetchDuration = fetchEndTime - fetchStartTime;
-  const postFetchDuration = endTime - fetchEndTime;
+  // Best-effort: keystroke timing is captured in the editor and may be stale if provider runs later.
+  const keystrokeToTriggerDuration = computeStart - startTime;
+  const computeDuration = computeEnd - computeStart;
 
   resetSuggestionsFields(tracking);
 
-  // Guard against out-of-order timestamps (e.g. fetchEndTime recorded before fetchStartTime).
-  if (keystrokeToTriggerDuration < 0 || fetchDuration < 0 || postFetchDuration < 0) {
+  // Guard against timing mismatches (negative values) or stale measurements (> threshold)
+  if (
+    keystrokeToTriggerDuration < 0 ||
+    keystrokeToTriggerDuration > STALE_THRESHOLD_MS ||
+    computeDuration < 0
+  ) {
     return null;
   }
 
   return {
     ...baseResult,
     keystrokeToTriggerDuration,
-    fetchDuration,
-    postFetchDuration,
+    computeDuration,
   };
 };
 

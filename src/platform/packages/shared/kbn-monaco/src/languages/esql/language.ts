@@ -155,15 +155,16 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
 
-        deps?.telemetry?.onSuggestionsComputeStart?.();
+        const computeStart = performance.now();
         const suggestions = await suggest(fullText, offset, deps);
+        const computeEnd = performance.now();
 
         const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
         if (suggestionsWithCustomCommands.length) {
           deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
         }
 
-        deps?.telemetry?.onSuggestionsReady?.();
+        deps?.telemetry?.onSuggestionsReady?.(computeStart, computeEnd);
 
         return wrapAsMonacoSuggestions(suggestions, fullText);
       },

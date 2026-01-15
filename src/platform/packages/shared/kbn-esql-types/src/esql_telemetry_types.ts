@@ -10,8 +10,7 @@
 export interface ESQLTelemetryCallbacks {
   onDecorationHoverShown?: (hoverMessage: string) => void;
   onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
-  onSuggestionsComputeStart?: () => void; // Called right before the suggestions fetch starts.
-  onSuggestionsReady?: () => void; // Called after suggestions data is ready for rendering.
+  onSuggestionsReady?: (computeStart: number, computeEnd: number) => void;
 }
 
 export enum QuerySource {
@@ -52,8 +51,7 @@ export type InputLatencyPayload = BaseLatencyPayload;
 
 export interface SuggestionsLatencyPayload extends BaseLatencyPayload {
   keystrokeToTriggerDuration: number;
-  fetchDuration: number;
-  postFetchDuration: number;
+  computeDuration: number;
 }
 
 export type ValidationLatencyPayload = BaseLatencyPayload;

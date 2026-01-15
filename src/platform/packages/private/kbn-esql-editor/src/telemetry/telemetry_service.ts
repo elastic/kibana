@@ -52,6 +52,8 @@ export class ESQLEditorTelemetryService {
 
   private _reportPerformanceEvent(eventData: PerformanceMetricEvent) {
     try {
+      // eslint-disable-next-line no-console
+      console.log('[esql][performance_metric]', eventData);
       reportPerformanceMetricEvent(this._analytics, eventData);
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -234,8 +236,7 @@ export class ESQLEditorTelemetryService {
       meta: {
         ...baseEvent.meta,
         keystroke_to_trigger_ms: Math.round(payload.keystrokeToTriggerDuration),
-        fetch_ms: Math.round(payload.fetchDuration),
-        post_fetch_ms: Math.round(payload.postFetchDuration),
+        compute_ms: Math.round(payload.computeDuration),
       },
     });
   }
