@@ -55,25 +55,18 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds agent id as default observables type [#238533]({{kib-pull}}238533).
 
 **Connectivity**:
-* Introduces a connector for web search via Brave Search [#245329]({{kib-pull}}245329).
-* The webhook connector now allows the following HTTP request methods: POST(default), PUT, PATCH, GET, or DELETE [#238072]({{kib-pull}}238072).
+* Introduces a Brave Search connector  [#245329]({{kib-pull}}245329).
+* The webhook connector now supports the following HTTP request methods: POST(default), PUT, PATCH, GET, and DELETE [#238072]({{kib-pull}}238072).
 
 **Dashboards and Visualizations**:
-* Removes the **Supporting visualization** section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under **Appearance**. [#245979]({{kib-pull}}245979).
-% !!TODO!! The above PR had a lengthy release note description:
-% Removed the "Supporting visualization" section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under "Appearance". The "Type" field has been renamed to "Background chart" and the "Panel" option has been renamed to "None".
-* Updates the color settings in the Primary Metric editor.  [#243608]({{kib-pull}}243608).
-% !!TODO!! The above PR had a lengthy release note description:
-% Reorganizes and renames color settings in the Primary Metric dimension editor. For numeric metrics, the "Color by value" and "Color mapping"/"Color" settings are now located under the "Background chart" field. The settings have been renamed as follows: "Color by value" is now "Color mode," and "Color mapping" is now "Dynamic color mapping".
-* Enables the flyout toolbar for visualization configuration: appearance, titles and text, axis, and legend settings in Lens. [#240804]({{kib-pull}}240804).
-% !!TODO!! The above PR had a lengthy release note description:
-% In **dashboard visualization in-line editing** and **Lens workspace**, the 'Appearance', 'Titles and text', 'Axis', and 'Legend' settings have been moved from a popover into a dedicated flyout panel.
+* Adds support for chaining variable controls. You can now set up variable controls to depend on the values selected for another variable control [#242909]({{kib-pull}}242909).
+* Removes the **Supporting visualization** section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under **Appearance** [#245979]({{kib-pull}}245979).
+* Reorganizes and renames color settings in the Primary Metric dimension editor. For numeric metrics, the "Color by value" and "Color mapping"/"Color" settings are now located under the "Background chart" field. The settings have been renamed as follows: "Color by value" is now "Color mode," and "Color mapping" is now "Dynamic color mapping" [#243608]({{kib-pull}}243608).
+* In **dashboard visualization in-line editing** and **Lens workspace**, the 'Appearance', 'Titles and text', 'Axis', and 'Legend' settings have been moved from a popover into a dedicated flyout panel [#240804]({{kib-pull}}240804).
 * Moves the Lens visualization toolbar from the workspace section to the configuration panel. [#239879]({{kib-pull}}239879).
 * Moves the Lens visualization toolbar in the edit flyout from the visualization parameters section to the flyout header. [#239176]({{kib-pull}}239176).
 * Moves the **Save as** and **Reset** options under the top nav **Save** button when the dashboard is in edit mode. [#237211]({{kib-pull}}237211).
-* Updates the Lens configuration panel to display layers as tabs instead of vertically stacked panels. [#235372]({{kib-pull}}235372).
-% !!TODO!! The above PR had a lengthy release note description:
-% The Lens configuration flyout has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines.
+* The Lens configuration flyout has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines [#235372]({{kib-pull}}235372).
 
 **Data ingestion and Fleet**:
 * Adds integration knowledge opt out UI setting and enable feature flag [#245080]({{kib-pull}}245080).
@@ -94,38 +87,33 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fleet agent list table now persists state of filters while navigating within a session [#228875]({{kib-pull}}228875).
 
 **Discover**:
-* Supports chain controls [#242909]({{kib-pull}}242909).
-* Support subqueries in pretty printer [#241473]({{kib-pull}}241473).
-* Adds subqueries support for walker and visitor [#241451]({{kib-pull}}241451).
-* Support subqueries in AST [#241227]({{kib-pull}}241227).
-* Computed suggestions for expression [#246421]({{kib-pull}}246421).
-* Toggle Icon type for add/remove field column [#246024]({{kib-pull}}246024).
-* Show multi-fields in the DocViewer by default [#245890]({{kib-pull}}245890).
-* Adds example plugin tests [#245792]({{kib-pull}}245792).
-* Supports filtering for multivalue fields [#245554]({{kib-pull}}245554).
-* Adds “Copy as Markdown” option for selected results [#245545]({{kib-pull}}245545).
-* Don't make redundant requests when breakdown or chart interval changes [#245523]({{kib-pull}}245523).
-* String-Only Suggestions for Like and RLike Operators [#244903]({{kib-pull}}244903).
-* Lookup index editor - New layout and controls [#244480]({{kib-pull}}244480).
-* Precise validation and autocomplete for CASE [#244280]({{kib-pull}}244280).
+* Adds an option to the document viewer to add or remove a field in the main documents table [#246024]({{kib-pull}}246024).
+* Adds a “Copy as Markdown” option for selected results [#245545]({{kib-pull}}245545).
+* Optimizes performance by avoiding redundant requests when breakdown or chart interval changes [#245523]({{kib-pull}}245523).
+* Shows multi-fields in the document viewer by default in {{esql}} mode [#245890]({{kib-pull}}245890).
+* Adds support for filtering multivalue fields by interacting with the results table in {{esql}} mode [#245554]({{kib-pull}}245554).
+* Improves the lookup index editor interface available from the {{esql}} mode [#244480]({{kib-pull}}244480).
+* Saving an {{esql}} query's visualization to a dashboard now brings any related controls along with it [#237070]({{kib-pull}}237070).
+
+
+**{{esql}} editor**:
+* Adds a **Quick search** functionality that helps you turn free-text inputs into {{esql}} WHERE clauses [#242123]({{kib-pull}}242123).
+* Adds support for multi-value variables using MV_CONTAINS functions [#239266]({{kib-pull}}239266).
+* Adds inline suggestions to {{esql}} queries  [#235162]({{kib-pull}}235162).
+* Allows selecting field data type in the lookup index editor interface of the {{esql}} editor [#241637]({{kib-pull}}241637).
+* Adds support for subqueries [#241921]({{kib-pull}}241921).
+* Adds support for expressions in functions [#236343]({{kib-pull}}236343).
+* Improves computed suggestions for expressions [#246421]({{kib-pull}}246421).
+* Renders string-only suggestions for Like and RLike operators [#244903]({{kib-pull}}244903).
+* Improves validation and autocomplete suggestions for the CASE function [#244280]({{kib-pull}}244280).
 * Adds context-aware suggestion ordering with categorization [#243312]({{kib-pull}}243312).
-* Suggest adding curly braces after the WITH keyword for Rerank and Completion [#243047]({{kib-pull}}243047).
-* Support new exponential_histogram ES Field type [#242748]({{kib-pull}}242748).
-* Wrap the fork subcommands inside the parens node [#242369]({{kib-pull}}242369).
-* Adds support for subqueries in FROM clauses across tools [#242166]({{kib-pull}}242166).
-* Simplified search visor [#242123]({{kib-pull}}242123).
-* Supports subqueries in our apps [#241921]({{kib-pull}}241921).
-* Subquery Autocomplete Support With Context Awareness And Nesting Restrictions [#241912]({{kib-pull}}241912).
-* Index editor - Allow selecting column type [#241637]({{kib-pull}}241637).
-* Adds Subquery Support for Columns After and Validation [#241567]({{kib-pull}}241567).
-* Making the Expression Suggestor More Semantically Intelligent [#241081]({{kib-pull}}241081).
-* Lookup join ON expressions client side validation [#240930]({{kib-pull}}240930).
-* Support Expressions in Lookup Join Autocomplete [#240735]({{kib-pull}}240735).
-* Applies the breakdown first and then the date_histogram [#239685]({{kib-pull}}239685).
-* Supports multi values variables in MV_CONTAINS [#239266]({{kib-pull}}239266).
-* Discover to dashboard with controls, saving the histogram [#237070]({{kib-pull}}237070).
-* Support expressions in functions [#236343]({{kib-pull}}236343).
-* Displays inline suggestions [#235162]({{kib-pull}}235162).
+* Suggests adding curly braces after the `WITH` keyword for RERANK and COMPLETION commands [#243047]({{kib-pull}}243047).
+* Adds support for new exponential_histogram {{es}} field type [#242748]({{kib-pull}}242748).
+* Wraps the fork subcommands inside a`parens` node [#242369]({{kib-pull}}242369).
+* Improves the quality of context-based suggestions [#241081]({{kib-pull}}241081).
+* Adds autocomplete suggestions for expressions in LOOKUP JOIN commands [#240735]({{kib-pull}}240735).
+* Applies the breakdown field before applying time bucketing in STATS BY commands to preserve consistent sorting across buckets in {{esql}} queries [#239685]({{kib-pull}}239685).
+
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.3.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -317,16 +305,17 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * 233750 msi commands [#236994]({{kib-pull}}236994).
 
 **Discover**:
-* Fixes not recognized GROK patterns [#246871]({{kib-pull}}246871).
-* Fixes default app state handling when detecting unsaved changes [#246664]({{kib-pull}}246664).
-* Fixes Discover tab initialization [#245752]({{kib-pull}}245752).
-* Fixes truncation for longer text in table [#241440]({{kib-pull}}241440).
-* Fixes the autocomplete of timeseries sources after comma [#241402]({{kib-pull}}241402).
-* Adds FORK with KEEP/STATS in the transformational commands [#240011]({{kib-pull}}240011).
+* Fixes an issue in Discover where default app state could trigger unsaved changes in saved Discover sessions, such as default columns applied through the `defaultColumns` advanced setting. [#246664]({{kib-pull}}246664).
+* Fixes an issue with Discover tabs that occurs when navigating to a different tab while the previous tab is still initializing [#245752]({{kib-pull}}245752).
+* Fixes truncation for longer text in the Discover table [#241440]({{kib-pull}}241440).
+* Fixes missing fields when using combined filters with the `ignoreFilterIfFieldNotInIndex` advanced setting enabled [#238945]({{kib-pull}}238945).
+
+**{{esql}} editor**:
 * Displays the available options when editing an existing variable control [#239315]({{kib-pull}}239315).
-* Fixes KEEP behavior in ESQL when a query initially returns no results [#239063]({{kib-pull}}239063).
-* Fixes missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting [#238945]({{kib-pull}}238945).
-* This is a serverless feature, so this bug was only affecting serverless. Let's mention it only there [#237575]({{kib-pull}}237575).
+* Fixes unrecognized GROK patterns [#246871]({{kib-pull}}246871).
+* Fixes KEEP behavior in {{esql}} when a query initially returns no results [#239063]({{kib-pull}}239063).
+* Adds FORK with KEEP/STATS in the transformational commands [#240011]({{kib-pull}}240011).
+* Fixes the autocomplete of timeseries sources after a comma [#241402]({{kib-pull}}241402).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.3.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
