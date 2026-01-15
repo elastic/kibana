@@ -68,7 +68,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   logger: taskContext.logger,
                 });
 
-                const { featurePromptOverride, descriptionPromptOverride } =
+                const { descriptionPromptOverride, systemsPromptOverride } =
                   await promptsConfigService.getPrompt();
 
                 const results = await identifySystemsWithDescription({
@@ -80,8 +80,8 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   stream,
                   systems,
                   signal: runContext.abortController.signal,
-                  systemsPromptOverride: featurePromptOverride,
-                  descriptionPromptOverride,
+                  descriptionPrompt: descriptionPromptOverride,
+                  systemsPrompt: systemsPromptOverride,
                   dropUnmapped: true,
                 });
 
