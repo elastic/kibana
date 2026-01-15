@@ -13,13 +13,11 @@ import { CreateIndexButton } from '../../sections/home/index_list/create_index/c
 import type { ExtensionsService } from '../../../services/extensions_service';
 
 export const NoMatch = ({
-  loadIndices,
   filter,
   resetFilter,
   extensionsService,
   share,
 }: {
-  loadIndices: () => void;
   filter: string;
   resetFilter: () => void;
   extensionsService: ExtensionsService;
@@ -66,11 +64,7 @@ export const NoMatch = ({
   if (extensionsService.emptyListContent) {
     return extensionsService.emptyListContent.renderContent({
       createIndexButton: (
-        <CreateIndexButton
-          loadIndices={loadIndices}
-          share={share}
-          dataTestSubj="createIndexButtonEmptyList"
-        />
+        <CreateIndexButton share={share} dataTestSubj="createIndexButtonEmptyList" />
       ),
     });
   }
@@ -94,13 +88,7 @@ export const NoMatch = ({
           />
         </p>
       }
-      actions={
-        <CreateIndexButton
-          loadIndices={loadIndices}
-          share={share}
-          dataTestSubj="createIndexButtonEmptyList"
-        />
-      }
+      actions={<CreateIndexButton share={share} dataTestSubj="createIndexButtonEmptyList" />}
     />
   );
 };

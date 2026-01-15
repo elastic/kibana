@@ -15,12 +15,11 @@ import { CreateIndexModal } from './create_index_modal';
 import { useAppContext } from '../../../../app_context';
 
 export interface CreateIndexButtonProps {
-  loadIndices: () => void;
   share?: SharePluginStart;
   dataTestSubj?: string;
 }
 
-export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIndexButtonProps) => {
+export const CreateIndexButton = ({ share, dataTestSubj }: CreateIndexButtonProps) => {
   const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
   const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
 
@@ -51,10 +50,7 @@ export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIn
         />
       </EuiButton>
       {createIndexModalOpen && (
-        <CreateIndexModal
-          closeModal={() => setCreateIndexModalOpen(false)}
-          loadIndices={loadIndices}
-        />
+        <CreateIndexModal closeModal={() => setCreateIndexModalOpen(false)} />
       )}
     </>
   );
