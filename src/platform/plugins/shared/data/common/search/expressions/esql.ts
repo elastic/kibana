@@ -26,7 +26,8 @@ import {
   fixESQLQueryWithVariables,
   getNamedParams,
   mapVariableToColumn,
-  isIndexField,
+  isComputedColumn,
+  getQuerySummary,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
@@ -368,6 +369,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             ? []
             : body.values;
 
+          // Get query summary to identify computed columns
+          const querySummary = getQuerySummary(query);
+
           const allColumns =
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
@@ -398,7 +402,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                   },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
-                isIndexField: isIndexField(name, query),
+                isComputedColumn: isComputedColumn(name, querySummary),
               };
             }) ?? [];
 

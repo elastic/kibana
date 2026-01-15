@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Decorator } from '@storybook/react';
 import type { HttpStart } from '@kbn/core/public';
-import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import type { AutocompleteStart } from '@kbn/kql/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 

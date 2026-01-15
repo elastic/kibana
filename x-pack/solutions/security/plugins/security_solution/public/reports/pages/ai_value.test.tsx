@@ -105,7 +105,7 @@ jest.mock('../../common/hooks/use_global_filter_query', () => ({
 // Mock Lens components
 jest.mock('../../common/components/visualization_actions/lens_embeddable', () => ({
   LensEmbeddable: (props: Record<string, unknown>) => (
-    <div data-testid="lens-embeddable" {...props} />
+    <div data-testid="lens-embeddable" data-shared-item {...props} />
   ),
 }));
 
@@ -349,16 +349,26 @@ describe('AIValue', () => {
         },
         isExportMode: true,
       });
-    });
 
-    it('should not render the header of the page', () => {
       render(
         <TestProviders>
           <AIValue />
         </TestProviders>
       );
+    });
 
+    it('should not render the header of the page', () => {
       expect(screen.queryByTestId('header-page')).not.toBeInTheDocument();
+    });
+
+    it('should have data-shared-items-container with data-shared-items-count matching the number of data-shared-item children', () => {
+      const container = screen.queryByTestId('aiValuePage');
+      expect(container).toBeInTheDocument();
+
+      const sharedItems = container?.querySelectorAll('[data-shared-item]') ?? [];
+      const sharedItemsCount = sharedItems.length;
+
+      expect(container).toHaveAttribute('data-shared-items-count', String(sharedItemsCount));
     });
   });
 });

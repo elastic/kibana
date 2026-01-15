@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getQuerySummary, isIndexField } from './get_query_summary';
+import { getQuerySummary, isComputedColumn } from './get_query_summary';
 
 describe('getQuerySummary', () => {
   it('returns new columns from ROW command', () => {
@@ -162,34 +162,34 @@ describe('getQuerySummary', () => {
   });
 });
 
-describe('isIndexField', () => {
-  it('returns true for original index fields', () => {
+describe('isComputedColumn', () => {
+  it('returns false for original index fields', () => {
     const query = 'FROM index | WHERE price > 100';
-    expect(isIndexField('price', query)).toBe(true);
+    expect(isComputedColumn('price', getQuerySummary(query))).toBe(false);
   });
 
-  it('returns false for fields created with EVAL', () => {
+  it('returns true for fields created with EVAL', () => {
     const query = 'FROM index | EVAL computed = price * 2';
-    expect(isIndexField('computed', query)).toBe(false);
+    expect(isComputedColumn('computed', getQuerySummary(query))).toBe(true);
   });
 
-  it('returns false for fields created with STATS', () => {
+  it('returns true for fields created with STATS', () => {
     const query = 'FROM index | STATS avg_price = AVG(price)';
-    expect(isIndexField('avg_price', query)).toBe(false);
+    expect(isComputedColumn('avg_price', getQuerySummary(query))).toBe(true);
   });
 
-  it('returns false for fields created with RENAME', () => {
+  it('returns true for fields created with RENAME', () => {
     const query = 'FROM index | RENAME old_name AS new_name';
-    expect(isIndexField('new_name', query)).toBe(false);
+    expect(isComputedColumn('new_name', getQuerySummary(query))).toBe(true);
   });
 
-  it('returns true for fields used in BY clause', () => {
+  it('returns false for fields used in BY clause', () => {
     const query = 'FROM index | STATS avg = AVG(price) BY category';
-    expect(isIndexField('category', query)).toBe(true);
+    expect(isComputedColumn('category', getQuerySummary(query))).toBe(false);
   });
 
-  it('returns false for metadata fields', () => {
+  it('returns true for metadata fields', () => {
     const query = 'FROM index METADATA _id | KEEP _id';
-    expect(isIndexField('_id', query)).toBe(false);
+    expect(isComputedColumn('_id', getQuerySummary(query))).toBe(true);
   });
 });

@@ -59,11 +59,10 @@ export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
 export {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
-  mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
-export { isIndexField } from './utils/get_query_summary';
+export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
 
 // Callback functions
 export * from './utils/callbacks';
