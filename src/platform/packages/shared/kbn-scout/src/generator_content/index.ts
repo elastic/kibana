@@ -109,15 +109,15 @@ import { apiTest, expect, tags } from '${scoutPackage}';
 import { testData } from '../fixtures';
 
 apiTest.describe('Scout api test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+  let viewerApiCredentials: RoleApiCredentials;
   apiTest.beforeAll(async ({ requestAuth }) => {
-    adminApiCredentials = await requestAuth.getApiKey('admin');
+    viewerApiCredentials = await requestAuth.getApiKey('viewer');
   });
 
   apiTest('should complete a basic api flow', async ({ apiClient }) => {
     const response = await apiClient.post('kibana/api', {
       headers: {
-        ...adminApiCredentials.apiKeyHeader,
+        ...viewerApiCredentials.apiKeyHeader,
         ...testData.COMMON_HEADERS,
       },
       responseType: 'json',
