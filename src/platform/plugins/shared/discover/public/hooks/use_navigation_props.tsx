@@ -26,6 +26,7 @@ export interface UseNavigationProps {
   savedSearchId?: string;
   // provided by embeddable only
   filters?: Filter[];
+  isEmbeddableView: boolean;
 }
 
 const getStateParams = ({
@@ -85,8 +86,8 @@ export const useNavigationProps = ({
   columns,
   savedSearchId,
   filters,
+  isEmbeddableView,
 }: UseNavigationProps) => {
-  const isEmbeddableView = !!filters;
   const services = useDiscoverServices();
   const [singleDocHref, setSingleDocHref] = useState('');
   const [contextViewHref, setContextViewHref] = useState('');

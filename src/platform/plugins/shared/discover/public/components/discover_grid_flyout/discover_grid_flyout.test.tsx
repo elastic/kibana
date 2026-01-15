@@ -105,6 +105,7 @@ describe('Discover flyout', function () {
         : currentRecords[0],
       hits: currentRecords,
       filters: [], // to signal embeddable view
+      isEmbeddableView: true,
       query,
       onAddColumn: jest.fn(),
       onClose,

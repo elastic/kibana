@@ -27,6 +27,7 @@ import { useProfileAccessor } from '../../context_awareness';
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
 export interface DiscoverGridFlyoutProps extends Pick<DocViewerProps, 'onUpdateSelectedTabId'> {
+  isEmbeddableView?: boolean;
   savedSearchId?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
@@ -55,6 +56,7 @@ export function DiscoverGridFlyout({
   columns,
   columnsMeta,
   savedSearchId,
+  isEmbeddableView = false,
   filters,
   query,
   initialTabId,
@@ -81,6 +83,7 @@ export function DiscoverGridFlyout({
     columns,
     filters,
     savedSearchId,
+    isEmbeddableView,
   });
 
   const getDocViewerAccessor = useProfileAccessor('getDocViewer', {

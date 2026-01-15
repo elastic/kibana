@@ -82,6 +82,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         initialTabId={initialTabId}
         query={props.query}
         filters={props.filters}
+        isEmbeddableView={true}
         docViewerRef={docViewerRef}
       />
     ),
