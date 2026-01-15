@@ -41,30 +41,56 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
     const index = await this.getIndexName();
     const packages = await this.getSecurityLogsPackages();
     if (packages) {
-      const ragIntegrations = packages.reduce<RuleMigrationIntegration[]>((acc, pkg) => {
-        const logsDataStreams = pkg.data_streams?.filter(({ type }) => type === 'logs');
-        // Only include packages that have logs data streams
-        if (logsDataStreams?.length) {
-          acc.push({
-            title: pkg.title,
-            id: pkg.name,
-            description: pkg?.description || '',
-            data_streams: logsDataStreams.map((stream) => ({
-              dataset: stream.dataset,
-              index_pattern: `${stream.type}-${stream.dataset}-*`,
-              title: stream.title,
-            })),
-            elser_embedding: [
-              pkg.title,
-              pkg.description,
-              ...logsDataStreams.map((stream) => stream.title),
-            ].join(' - '),
-          });
-        }
-        return acc;
-      }, []);
+      const ragIntegrations = await Promise.all(
+        packages.map(async (pkg) => {
+          const logsDataStreams = pkg.data_streams?.filter(({ type }) => type === 'logs');
+          // Only include packages that have logs data streams
+          if (logsDataStreams?.length) {
+            let fieldsMetadata: Record<string, Record<string, unknown>> | undefined;
 
-      if (ragIntegrations.length === 0) {
+            // Fetch fields metadata for the package
+            try {
+              if (this.dependencies.packageService) {
+                fieldsMetadata =
+                  await this.dependencies.packageService.asInternalUser.getPackageFieldsMetadata({
+                    packageName: pkg.name,
+                  });
+              }
+            } catch (error) {
+              this.logger.warn(
+                `Failed to fetch fields metadata for package ${pkg.name}: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+              // Continue without fields_metadata if fetch fails
+            }
+
+            return {
+              title: pkg.title,
+              id: pkg.name,
+              description: pkg?.description || '',
+              data_streams: logsDataStreams.map((stream) => ({
+                dataset: stream.dataset,
+                index_pattern: `${stream.type}-${stream.dataset}-*`,
+                title: stream.title,
+              })),
+              elser_embedding: [
+                pkg.title,
+                pkg.description,
+                ...logsDataStreams.map((stream) => stream.title),
+              ].join(' - '),
+              fields_metadata: fieldsMetadata,
+            };
+          }
+          return null;
+        })
+      );
+
+      const validIntegrations = ragIntegrations.filter(
+        (integration): integration is RuleMigrationIntegration => integration !== null
+      );
+
+      if (validIntegrations.length === 0) {
         this.logger.debug('No security integrations with logs data streams found to index');
         return;
       }
@@ -73,7 +99,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         .bulk(
           {
             refresh: 'wait_for',
-            operations: ragIntegrations.flatMap(({ id, ...doc }) => [
+            operations: validIntegrations.flatMap(({ id, ...doc }) => [
               { update: { _index: index, _id: id } },
               { doc, doc_as_upsert: true },
             ]),

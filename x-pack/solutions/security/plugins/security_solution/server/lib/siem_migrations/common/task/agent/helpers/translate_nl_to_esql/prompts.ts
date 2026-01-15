@@ -56,10 +56,12 @@ export const NL_TO_ESQL_INDEX_PATTERN_PROMPT = ChatPromptTemplate.fromMessages<{
 }>([
   [
     'system',
-    `When translating a Natural Language query into an ESQL query,  give preference to below provided index pattern.
+    `When translating a Natural Language query into an ESQL query,  give preference to below provided index pattern. Its fields metadata is also provided. Use that information to guide your translation.
+     If you do not find any fields, use ECS fields names.
 
-     Index Pattern: {index_pattern}
 
+    Index Pattern: {index_pattern}
+    Fields Metadata: {fields_metadata}
 `,
   ],
 ]);

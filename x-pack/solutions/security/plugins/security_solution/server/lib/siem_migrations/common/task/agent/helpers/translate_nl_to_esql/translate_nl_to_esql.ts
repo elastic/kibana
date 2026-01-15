@@ -19,6 +19,7 @@ export interface GetNLToESQLQueryParams {
 export interface NLToESQLQueryInput {
   query: string;
   indexPattern?: string;
+  fieldsMetadata?: object;
 }
 
 export interface NLToESQLQueryOutput {
@@ -37,6 +38,7 @@ export const getNLToESQLQuery: NodeHelperCreator<
     });
     const indexPatternPrompt = await NL_TO_ESQL_INDEX_PATTERN_PROMPT.format({
       index_pattern: input.indexPattern,
+      fields_metadata: JSON.stringify(input.fieldsMetadata ?? {}),
     });
     const response = await esqlKnowledgeBase.translate(
       input.indexPattern ? `${indexPatternPrompt}\n${mainPrompt}` : mainPrompt
