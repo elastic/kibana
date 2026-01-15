@@ -82,8 +82,8 @@ function getAggregationTemplate({
   placeholderName,
   customFunction,
 }: {
-  type?: MetricField['type'];
-  instrument?: MetricField['instrument'];
+  type: MetricField['type'];
+  instrument: MetricField['instrument'];
   placeholderName: string;
   customFunction?: string;
 }): string {
@@ -128,7 +128,7 @@ export function createMetricAggregation({
   placeholderName = 'metricName',
   customFunction,
 }: {
-  type?: MetricField['type'];
+  type: MetricField['type'];
   instrument?: MetricField['instrument'];
   metricName?: string;
   placeholderName?: string;
