@@ -62,6 +62,7 @@ const render = async () => {
         rowIndex: 'mock-index',
         rowId: 'mock-id',
         columns: ['mock-column'],
+        isEmbeddableView: true,
       }),
     {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (
