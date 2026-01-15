@@ -11,15 +11,15 @@ import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 
+import * as catchErrorModule from './catch_error';
+import * as handleExecutionDelayModule from './handle_execution_delay';
 import { runNode } from './run_node';
+import * as runStackMonitorModule from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeImplementation } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
-import * as catchErrorModule from './catch_error';
-import * as handleExecutionDelayModule from './handle_execution_delay';
-import * as runStackMonitorModule from './run_stack_monitor/run_stack_monitor';
 
 jest.mock('./run_stack_monitor/run_stack_monitor');
 jest.mock('./catch_error');
@@ -51,7 +51,7 @@ describe('runNode', () => {
         // Don't abort by default - let the step run to completion
       }
     );
-    
+
     mockCatchError.mockResolvedValue(undefined);
     mockHandleExecutionDelay.mockResolvedValue(undefined);
 
