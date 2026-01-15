@@ -8,20 +8,28 @@
  */
 
 import { v4 } from 'uuid';
-import type { Reference } from '@kbn/content-management-utils';
 import { type DashboardState, isDashboardSection } from '../../../common';
 import type { DashboardPanel } from '../../../server';
 import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
-  getReferences: (id: string) => Reference[]
+  controls: DashboardState['controlGroupInput']
 ) {
+  const childState: DashboardChildState = {};
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
+    controls: Object.values((controls ?? { controls: {} }).controls).reduce(
+      (prev, control, index) => {
+        const controlId = control.uid ?? v4();
+        const { width, grow, type, config } = control;
+        childState[controlId] = config; // push to child state
+        return { ...prev, [controlId]: { type, width, grow, order: index } };
+      },
+      {}
+    ),
   };
-  const childState: DashboardChildState = {};
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
     const panelId = panel.uid ?? v4();
@@ -33,10 +41,7 @@ export function deserializeLayout(
       },
     };
     childState[panelId] = {
-      rawState: {
-        ...panel.config,
-      },
-      references: getReferences(panelId),
+      ...panel.config,
     };
   }
 

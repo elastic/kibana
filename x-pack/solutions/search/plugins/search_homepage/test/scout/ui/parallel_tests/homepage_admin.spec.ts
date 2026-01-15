@@ -25,6 +25,11 @@ test.describe('Homepage - Admin', { tag: ['@svlSearch'] }, () => {
     await expect(manageLink).toBeEnabled();
   });
 
+  test('API keys button should be enabled', async ({ pageObjects }) => {
+    const apiKeysButton = await pageObjects.homepage.getApiKeyButton();
+    await expect(apiKeysButton).toBeEnabled();
+  });
+
   test('Should open connection details flyout', async ({ pageObjects }) => {
     await pageObjects.homepage.clickConnectionDetailsButton();
 

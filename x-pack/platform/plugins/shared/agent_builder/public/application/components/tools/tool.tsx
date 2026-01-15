@@ -31,7 +31,6 @@ import { FormProvider, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pushFlyoutPaddingStyles } from '../../../common.styles';
-import { docLinks } from '../../../../common/doc_links';
 import type {
   CreateToolPayload,
   CreateToolResponse,
@@ -50,12 +49,12 @@ import {
   getUpdatePayloadFromData,
   getToolTypeDefaultValues,
 } from './form/registry/tools_form_registry';
-import { OPEN_TEST_FLYOUT_QUERY_PARAM, TOOL_TYPE_QUERY_PARAM } from './create_tool';
-import { ToolTestFlyout } from './execute/test_tools';
+import { TOOL_TYPE_QUERY_PARAM, TEST_TOOL_ID_QUERY_PARAM } from './create_tool';
 import { ToolEditContextMenu } from './form/components/tool_edit_context_menu';
 import { ToolForm, ToolFormMode } from './form/tool_form';
 import type { ToolFormData } from './form/types/tool_form_types';
-import { useFlyoutState } from '../../hooks/use_flyout_state';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
+import { useToolsActions } from '../../context/tools_provider';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -91,16 +90,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
   const deferNavigateToAgentBuilderUrl = useCallback(
     (...args: Parameters<typeof navigateToAgentBuilderUrl>) => {
       defer(() => navigateToAgentBuilderUrl(...args));
     },
     [navigateToAgentBuilderUrl]
-  );
-  const [openTestFlyoutParam, setOpenTestFlyoutParam] = useQueryState<boolean>(
-    OPEN_TEST_FLYOUT_QUERY_PARAM,
-    { defaultValue: false }
   );
   const [urlToolType, setUrlToolType] = useQueryState<ToolType>(TOOL_TYPE_QUERY_PARAM);
 
@@ -115,12 +111,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { control, reset, formState, handleSubmit, getValues } = form;
   const { errors, isDirty, isSubmitSuccessful } = formState;
   const [isCancelling, setIsCancelling] = useState(false);
-  const {
-    isOpen: showTestFlyout,
-    openFlyout: openTestFlyout,
-    closeFlyout: closeTestFlyout,
-  } = useFlyoutState(false);
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+  const { testTool } = useToolsActions();
   const { services } = useKibana();
   const {
     application: { navigateToUrl },
@@ -131,14 +123,6 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const currentToolId = useWatch({ name: 'toolId', control });
   const toolType = useWatch({ name: 'type', control });
-
-  // Handle opening test tool flyout on navigation
-  useEffect(() => {
-    if (openTestFlyoutParam && currentToolId && !showTestFlyout) {
-      openTestFlyout();
-      setOpenTestFlyoutParam(false);
-    }
-  }, [openTestFlyoutParam, currentToolId, showTestFlyout, setOpenTestFlyoutParam, openTestFlyout]);
 
   const handleCancel = useCallback(() => {
     setIsCancelling(true);
@@ -155,13 +139,14 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     ) => {
       if (mode === ToolFormMode.View) return;
       setSubmittingButtonId(buttonId);
+      let response: CreateToolResponse | UpdateToolResponse | undefined;
       try {
         if (mode === ToolFormMode.Edit) {
           const updatePayload = getUpdatePayloadFromData(data);
-          await saveTool(updatePayload);
+          response = await saveTool(updatePayload);
         } else {
           const createPayload = getCreatePayloadFromData(data);
-          await saveTool(createPayload);
+          response = await saveTool(createPayload);
         }
       } finally {
         setSubmittingButtonId(undefined);
@@ -169,20 +154,32 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       if (navigateToListView) {
         deferNavigateToAgentBuilderUrl(appPaths.tools.list);
       }
+      return response;
     },
     [mode, saveTool, deferNavigateToAgentBuilderUrl]
   );
 
   const handleTestTool = useCallback(() => {
-    openTestFlyout();
-  }, [openTestFlyout]);
+    if (currentToolId) {
+      testTool(currentToolId);
+    }
+  }, [currentToolId, testTool]);
 
   const handleSaveAndTest = useCallback(
     async (data: ToolFormData) => {
-      await handleSave(data, { navigateToListView: false, buttonId: BUTTON_IDS.SAVE_AND_TEST });
-      handleTestTool();
+      const response = await handleSave(data, {
+        navigateToListView: false,
+        buttonId: BUTTON_IDS.SAVE_AND_TEST,
+      });
+      if (mode === ToolFormMode.Create && response) {
+        deferNavigateToAgentBuilderUrl(appPaths.tools.list, {
+          [TEST_TOOL_ID_QUERY_PARAM]: response.id,
+        });
+      } else {
+        handleTestTool();
+      }
     },
-    [handleSave, handleTestTool]
+    [handleSave, handleTestTool, mode, deferNavigateToAgentBuilderUrl]
   );
 
   useEffect(() => {
@@ -336,7 +333,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                   values={{
                     learnMoreLink: (
                       <EuiLink
-                        href={docLinks.tools}
+                        href={docLinksService.tools}
                         target="_blank"
                         aria-label={i18n.translate(
                           'xpack.agentBuilder.tools.createToolDocumentationAriaLabel',
@@ -418,15 +415,6 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           </KibanaPageTemplate.BottomBar>
         </KibanaPageTemplate>
       </FormProvider>
-      {showTestFlyout && currentToolId && (
-        <ToolTestFlyout
-          toolId={currentToolId}
-          formMode={mode}
-          onClose={() => {
-            closeTestFlyout();
-          }}
-        />
-      )}
     </>
   );
 };

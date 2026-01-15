@@ -53,6 +53,12 @@ export type {
   DynamicConnectorContract,
   BaseConnectorContract,
   HttpMethod,
+  StepPropertyHandler,
+  PropertyCompletionFn,
+  PropertyValidationFn,
+  PropertyValidationResult,
+  PropertyCompletionOption,
+  PropertyValidationContext,
 } from './v1';
 
 // exported full to use enum as values
@@ -63,6 +69,7 @@ export {
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
+  TerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';

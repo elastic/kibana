@@ -21,6 +21,7 @@ describe('Expand panel action', () => {
     action = new ExpandPanelAction();
     context = {
       embeddable: {
+        isExpandable: true,
         uuid: 'superId',
         parentApi: {
           expandPanel: jest.fn(),

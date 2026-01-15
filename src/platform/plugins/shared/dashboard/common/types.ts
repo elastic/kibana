@@ -9,9 +9,9 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardState } from '../server';
+import type { DashboardState, DashboardControlsState } from '../server';
 
-export type { DashboardState };
+export type { DashboardState, DashboardControlsState };
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -23,8 +23,6 @@ export interface DashboardCapabilities {
 export type DashboardLocatorParams = Partial<
   DashboardState & {
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
-
-    references?: DashboardState['references'] & SerializableRecord;
 
     viewMode?: ViewMode;
 

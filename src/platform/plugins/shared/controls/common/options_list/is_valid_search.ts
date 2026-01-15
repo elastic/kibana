@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OptionsListSearchTechnique } from '@kbn/controls-schemas';
 import { getIpRangeQuery, getIsValidFullIp } from './ip_search';
-import type { OptionsListSearchTechnique } from './suggestions_searching';
 
 /**
  * ipaddr is a fairly large library - therefore, this function needs to be separate from
