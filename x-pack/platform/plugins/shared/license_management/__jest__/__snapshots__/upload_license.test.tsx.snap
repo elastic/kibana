@@ -17,7 +17,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           Upload your license
         </h1>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiText emotion-euiText-m"
@@ -32,7 +32,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           </p>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiForm"
@@ -70,7 +70,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -132,7 +132,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           Upload your license
         </h1>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiText emotion-euiText-m"
@@ -147,7 +147,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           </p>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiForm"
@@ -214,7 +214,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -276,7 +276,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           Upload your license
         </h1>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiText emotion-euiText-m"
@@ -291,7 +291,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           </p>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiForm"
@@ -358,7 +358,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -420,7 +420,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           Upload your license
         </h1>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiText emotion-euiText-m"
@@ -435,7 +435,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           </p>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiForm"
@@ -502,7 +502,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -564,7 +564,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           Upload your license
         </h1>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiText emotion-euiText-m"
@@ -579,7 +579,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           </p>
         </div>
         <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
           class="euiForm"
@@ -646,7 +646,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"

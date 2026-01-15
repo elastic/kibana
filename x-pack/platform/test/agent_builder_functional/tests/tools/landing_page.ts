@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
 
 export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProviderContext) {
@@ -21,7 +20,8 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
     });
 
     it('should bulk delete tools from the table', async () => {
-      const ids = [`ftr.esql.${Date.now()}.a`, `ftr.esql.${Date.now()}.b`];
+      const timestamp = Date.now();
+      const ids = [`ftr.esql.${timestamp}.a`, `ftr.esql.${timestamp}.b`];
       for (const id of ids) {
         await supertest
           .post('/api/agent_builder/tools')
@@ -38,11 +38,19 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
       await agentBuilder.navigateToToolsLanding();
       await testSubjects.existOrFail('agentBuilderToolsTable');
+
+      // Search for our specific tools to filter the table (avoids pagination issues)
+      const search = agentBuilder.toolsSearch();
+      await search.type(`ftr.esql.${timestamp}`);
+
+      // Wait for the first tool to appear (ensures search has filtered the results)
+      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${ids[0]}`);
+
       await agentBuilder.bulkDeleteTools(ids);
 
       await testSubjects.existOrFail('agentBuilderToolsTable');
       for (const id of ids) {
-        expect(await agentBuilder.isToolInTable(id)).to.be(false);
+        await testSubjects.missingOrFail(`agentBuilderToolsTableRow-${id}`);
       }
     });
   });
