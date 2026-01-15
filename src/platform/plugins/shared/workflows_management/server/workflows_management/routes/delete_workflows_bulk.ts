@@ -14,6 +14,8 @@ import { WORKFLOW_DELETE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 import { withLicenseCheck } from '../lib/with_license_check';
 
+const MAX_BULK_DELETE_BATCH_SIZE = 1000;
+
 export function registerDeleteWorkflowsBulkRoute({
   router,
   api,
@@ -27,7 +29,7 @@ export function registerDeleteWorkflowsBulkRoute({
       security: WORKFLOW_DELETE_SECURITY,
       validate: {
         body: schema.object({
-          ids: schema.arrayOf(schema.string()),
+          ids: schema.arrayOf(schema.string(), { maxSize: MAX_BULK_DELETE_BATCH_SIZE }),
         }),
       },
     },
