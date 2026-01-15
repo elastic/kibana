@@ -11,11 +11,7 @@ import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE } from '../../../common';
 import { searchSessionSavedObjectMigrations } from './search_session_migration';
-import {
-  SCHEMA_SEARCH_SESSION_V1,
-  SCHEMA_SEARCH_SESSION_V2,
-  SCHEMA_SEARCH_SESSION_V8_8_O,
-} from './search_session_schema';
+import { SCHEMA_SEARCH_SESSION_V1, SCHEMA_SEARCH_SESSION_V8_8_O } from './search_session_schema';
 
 export const searchSessionSavedObjectType: SavedObjectsType = {
   name: SEARCH_SESSION_TYPE,
@@ -47,13 +43,6 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
   },
   modelVersions: {
     1: {
-      changes: [],
-      schemas: {
-        forwardCompatibility: SCHEMA_SEARCH_SESSION_V1.extends({}, { unknowns: 'ignore' }),
-        create: SCHEMA_SEARCH_SESSION_V1,
-      },
-    },
-    2: {
       changes: [
         {
           type: 'mappings_addition',
@@ -63,8 +52,8 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
         },
       ],
       schemas: {
-        forwardCompatibility: SCHEMA_SEARCH_SESSION_V2.extends({}, { unknowns: 'ignore' }),
-        create: SCHEMA_SEARCH_SESSION_V2,
+        forwardCompatibility: SCHEMA_SEARCH_SESSION_V1.extends({}, { unknowns: 'ignore' }),
+        create: SCHEMA_SEARCH_SESSION_V1,
       },
     },
   },

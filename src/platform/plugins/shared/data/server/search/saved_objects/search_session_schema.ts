@@ -32,9 +32,7 @@ export const SCHEMA_SEARCH_SESSION_V8_8_O = schema.object({
   isCanceled: schema.maybe(schema.boolean()),
 });
 
-export const SCHEMA_SEARCH_SESSION_V1 = SCHEMA_SEARCH_SESSION_V8_8_O;
-
-export const SCHEMA_SEARCH_SESSION_V2 = SCHEMA_SEARCH_SESSION_V1.extends({
+export const SCHEMA_SEARCH_SESSION_V1 = SCHEMA_SEARCH_SESSION_V8_8_O.extends({
   status: schema.maybe(schema.string()),
   idMapping: schema.mapOf(
     schema.string(),
