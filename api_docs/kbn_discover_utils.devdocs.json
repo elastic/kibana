@@ -4858,6 +4858,20 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.body.text",
+            "type": "string",
+            "tags": [],
+            "label": "'body.text'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.LogDocumentOverview.error.message",
             "type": "string",
             "tags": [],

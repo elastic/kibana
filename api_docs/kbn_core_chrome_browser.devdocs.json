@@ -1642,6 +1642,21 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.ChromeSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeSetup",
+        "description": [
+          "\nChromeSetup exposes APIs available during the setup phase."
+        ],
+        "path": "src/core/packages/chrome/browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-public.ChromeStart",
         "type": "Interface",
         "tags": [],
@@ -1943,6 +1958,65 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.getAppMenu$",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppMenu$",
+            "description": [
+              "\nGet an observable of the current app menu configuration"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "AppMenuConfig",
+              " | undefined>"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.setAppMenu",
+            "type": "Function",
+            "tags": [],
+            "label": "setAppMenu",
+            "description": [
+              "\nSet the app menu configuration for the current application.\n"
+            ],
+            "signature": [
+              "(config?: ",
+              "AppMenuConfig",
+              " | undefined) => void"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.ChromeStart.setAppMenu.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "AppMenuConfig",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeStart.getBreadcrumbsAppendExtensions$",
             "type": "Function",
             "tags": [],
@@ -1990,6 +2064,45 @@
                 "description": [],
                 "signature": [
                   "ChromeBreadcrumbsAppendExtension"
+                ],
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.setBreadcrumbsBadges",
+            "type": "Function",
+            "tags": [],
+            "label": "setBreadcrumbsBadges",
+            "description": [
+              "\nSet badges to be displayed in the breadcrumbs area.\nThe badges will always be displayed as the last {@link ChromeBreadcrumbsAppendExtension} in the breadcrumbs.\nBy default, when navigating within the same application, badges are not cleared automatically, you need to handle\ntheir removal manually.\n"
+            ],
+            "signature": [
+              "(badges: ",
+              "ChromeBreadcrumbsBadge",
+              "[]) => void"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.ChromeStart.setBreadcrumbsBadges.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "badges",
+                "description": [
+                  "- Array of {@link ChromeBreadcrumbsBadge } to display in the breadcrumbs area."
+                ],
+                "signature": [
+                  "ChromeBreadcrumbsBadge",
+                  "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
@@ -2999,6 +3112,24 @@
           " | \"securitySolutionUI\" | \"workplace_ai\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.ChromeBreadcrumbsBadge",
+        "type": "Type",
+        "tags": [],
+        "label": "ChromeBreadcrumbsBadge",
+        "description": [],
+        "signature": [
+          "EuiBadgeProps",
+          " & { badgeText: string; toolTipProps?: Partial<",
+          "EuiToolTipProps",
+          "> | undefined; renderCustomBadge?: ((props: { badgeText: string; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>) | undefined; }"
+        ],
+        "path": "src/core/packages/chrome/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

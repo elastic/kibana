@@ -123,6 +123,10 @@ export type AppMenuItemCommon =
        * Width of the popover in pixels.
        */
       popoverWidth?: never;
+      /**
+       * A unique identifier for the popover, used for testing purposes. Maps to `data-test-subj` attribute.
+       */
+      popoverTestId?: never;
     })
   | (AppMenuItemBase & {
       /**
@@ -137,6 +141,10 @@ export type AppMenuItemCommon =
        * Width of the popover in pixels.
        */
       popoverWidth?: number;
+      /**
+       * A unique identifier for the popover, used for testing purposes. Maps to `data-test-subj` attribute.
+       */
+      popoverTestId?: string;
     });
 
 /**
@@ -160,7 +168,7 @@ export type AppMenuPopoverItem = Omit<AppMenuItemType, 'iconType' | 'hidden' | '
   /**
    * Adds a separator line above or below the item in the popover menu.
    */
-  seperator?: 'above' | 'below';
+  separator?: 'above' | 'below';
 };
 
 /**

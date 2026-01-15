@@ -1,0 +1,134 @@
+{
+  "id": "@kbn/core-chrome-app-menu",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-app-menu",
+        "id": "def-public.AppMenu",
+        "type": "Function",
+        "tags": [],
+        "label": "AppMenu",
+        "description": [
+          "\nA declarative React component for managing the application menu in Kibana's chrome header.\n"
+        ],
+        "signature": [
+          "({ setAppMenu, config }: ",
+          "AppMenuProps",
+          ") => null"
+        ],
+        "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-app-menu",
+            "id": "def-public.AppMenu.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ setAppMenu, config }",
+            "description": [],
+            "signature": [
+              "AppMenuProps"
+            ],
+            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-app-menu",
+        "id": "def-public.AppMenuProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuProps",
+        "description": [],
+        "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-app-menu",
+            "id": "def-public.AppMenuProps.setAppMenu",
+            "type": "Function",
+            "tags": [],
+            "label": "setAppMenu",
+            "description": [
+              "\nThe setAppMenu function from ChromeStart."
+            ],
+            "signature": [
+              "(config?: ",
+              "AppMenuConfig",
+              " | undefined) => void"
+            ],
+            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-app-menu",
+                "id": "def-public.AppMenuProps.setAppMenu.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "AppMenuConfig",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-app-menu",
+            "id": "def-public.AppMenuProps.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [
+              "\nThe app menu configuration to display in the chrome header.\nWhen undefined, clears the app menu."
+            ],
+            "signature": [
+              "AppMenuConfig",
+              " | undefined"
+            ],
+            "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
