@@ -23,7 +23,7 @@ export interface GraphPopoverState {
   state: PopoverState;
 }
 
-export const useGraphPopover = (id: string): GraphPopoverState => {
+export const useGraphPopoverState = (id: string): GraphPopoverState => {
   const [isOpen, setIsOpen] = useState(false);
   const [anchorElement, setAnchorElement] = useState<HTMLElement | null>(null);
 
