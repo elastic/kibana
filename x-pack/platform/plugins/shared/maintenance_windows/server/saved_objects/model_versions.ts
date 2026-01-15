@@ -5,9 +5,39 @@
  * 2.0.
  */
 
-import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectsModelVersionMap,
+} from '@kbn/core-saved-objects-server';
+import type { TypeOf } from '@kbn/config-schema';
 import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
 import { transformRRuleToCustomSchedule } from '../routes/schemas/schedule';
+
+type MaintenanceWindowV1 = TypeOf<typeof rawMaintenanceWindowSchemaV1>;
+type MaintenanceWindowV2 = TypeOf<typeof rawMaintenanceWindowSchemaV2>;
+
+const scheduleAndScopeBackfill: SavedObjectModelDataBackfillFn<
+  MaintenanceWindowV1,
+  MaintenanceWindowV2
+> = (doc) => {
+  // Add schedule and scope objects to existing maintenance windows
+  let schedule;
+  let scope;
+  if (doc.attributes?.duration && doc.attributes?.rRule) {
+    const scheduleWithoutCustom = transformRRuleToCustomSchedule({
+      duration: doc.attributes.duration,
+      rRule: doc.attributes.rRule,
+    });
+
+    schedule = { custom: scheduleWithoutCustom };
+  }
+  if (doc.attributes?.scopedQuery) {
+    scope = {
+      alerting: doc.attributes.scopedQuery,
+    };
+  }
+  return { attributes: { ...doc.attributes, schedule, scope } };
+};
 
 export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -62,25 +92,7 @@ export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
     changes: [
       {
         type: 'data_backfill',
-        backfillFn: (doc) => {
-          // Add schedule and scope objects to existing maintenance windows
-          let schedule = doc.attributes.schedule;
-          let scope = doc.attributes.scope;
-          if (doc.attributes.duration && doc.attributes.rRule && !doc.attributes.schedule) {
-            const scheduleWithoutCustom = transformRRuleToCustomSchedule({
-              duration: doc.attributes.duration,
-              rRule: doc.attributes.rRule,
-            });
-
-            schedule = { custom: scheduleWithoutCustom };
-          }
-          if (doc.attributes.scopedQuery && !doc.attributes.scope) {
-            scope = {
-              alerting: doc.attributes.scopedQuery,
-            };
-          }
-          return { attributes: { ...doc.attributes, schedule, scope } };
-        },
+        backfillFn: scheduleAndScopeBackfill,
       },
     ],
     schemas: {

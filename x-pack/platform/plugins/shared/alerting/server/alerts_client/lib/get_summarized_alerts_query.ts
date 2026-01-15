@@ -319,7 +319,7 @@ export const getQueryByScopedQueries = ({
   const searches: MsearchRequestItem[] = [];
 
   maintenanceWindows.forEach(({ id, scope }) => {
-    if (!scope) {
+    if (!scope?.alerting) {
       return;
     }
 

@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B. V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements.  Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { maintenanceWindowModelVersions } from './model_versions';
 import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
 import { transformRRuleToCustomSchedule } from '../routes/schemas/schedule';
@@ -164,53 +157,6 @@ describe('maintenanceWindowModelVersions', () => {
         });
       });
 
-      it('should not transform schedule when schedule already exists', () => {
-        const existingSchedule = {
-          custom: {
-            duration: '30m',
-            start: '2026-01-08T12:01:17.327Z',
-            timezone: 'Europe/London',
-            recurring: {
-              end: '2026-01-08T23:59:59.999Z',
-              every: '1h',
-            },
-          },
-        };
-
-        const mockDocument = {
-          id: 'test-id',
-          type: 'maintenance-window',
-          attributes: {
-            duration: 3600000,
-            rRule: {
-              dtstart: '2026-01-08T12:01:17.327Z',
-              tzid: 'Europe/London',
-              freq: 4,
-              interval: 1,
-              until: '2026-01-08T23:59:59.999Z',
-            },
-            schedule: existingSchedule,
-            enabled: true,
-          },
-          version: '1',
-          namespaces: ['default'],
-          originId: 'test-origin',
-        };
-
-        const result =
-          version4?.changes[0]?.type === 'data_backfill'
-            ? version4.changes[0].backfillFn(mockDocument, {} as any)
-            : null;
-
-        expect(mockTransformRRuleToCustomSchedule).not.toHaveBeenCalled();
-        expect(result).toEqual({
-          attributes: {
-            ...mockDocument.attributes,
-            schedule: existingSchedule,
-          },
-        });
-      });
-
       it('should transform scopedQuery to scope when scope does not exist', () => {
         const mockDocument = {
           id: 'test-id',
@@ -259,59 +205,6 @@ describe('maintenanceWindowModelVersions', () => {
             scope: {
               alerting: { kql: 'test: query' },
             },
-          },
-        });
-      });
-
-      it('should not transform scope when scope already exists', () => {
-        const existingScope = { alerting: { kql: 'existing' } };
-        const existingSchedule = {
-          custom: {
-            duration: '30m',
-            start: '2026-01-08T12:01:17.327Z',
-            timezone: 'Europe/London',
-            recurring: {
-              end: '2026-01-08T23:59:59.999Z',
-              every: '1h',
-            },
-          },
-        };
-
-        const mockDocument = {
-          id: 'test-id',
-          type: 'maintenance-window',
-          attributes: {
-            duration: 3600000,
-            rRule: {
-              dtstart: '2026-01-08T12:01:17.327Z',
-              tzid: 'Europe/London',
-              freq: 4,
-              interval: 1,
-              until: '2026-01-08T23:59:59.999Z',
-            },
-            scopedQuery: { kql: 'test: query' },
-            schedule: existingSchedule,
-            scope: existingScope,
-            enabled: true,
-          },
-          references: [],
-          migrationVersion: {},
-          coreMigrationVersion: '8.0.0',
-          typeMigrationVersion: '8.0.0',
-          updated_at: '2023-01-01T00:00:00.000Z',
-          version: '1',
-          namespaces: ['default'],
-          originId: 'test-origin',
-        };
-
-        const result =
-          version4?.changes[0]?.type === 'data_backfill'
-            ? version4.changes[0].backfillFn(mockDocument, {} as any)
-            : null;
-
-        expect(result).toEqual({
-          attributes: {
-            ...mockDocument.attributes,
           },
         });
       });
