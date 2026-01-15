@@ -326,6 +326,10 @@ export function ServiceMapWithReactFlow({
             height={heightWithPadding}
             serviceName={serviceName}
             status={status}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
           />
         </div>
       </EuiPanel>

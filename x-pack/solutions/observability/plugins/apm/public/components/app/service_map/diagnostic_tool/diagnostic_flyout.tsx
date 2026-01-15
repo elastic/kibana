@@ -60,6 +60,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   } = useAnyOfApmParams(
     '/services/{serviceName}/service-map',
     '/service-map',
+    '/react-flow-service-map',
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -114,10 +115,10 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       }
     } catch (error) {
       notifications?.toasts.addDanger({
-        title: i18n.translate('xpack.apm.diagnosticFlyout.errorTitle', {
+        title: i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.errorTitle', {
           defaultMessage: 'Failed to run diagnostic',
         }),
-        text: i18n.translate('xpack.apm.diagnosticFlyout.errorMessage', {
+        text: i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.errorMessage', {
           defaultMessage: 'An error occurred while running the diagnostic. Please try again.',
         }),
       });
@@ -224,7 +225,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
             data-test-subj="apmDiagnosticRunButton"
             onClick={handleRunDiagnostic}
           >
-            {i18n.translate('xpack.apm.diagnosticFlyout.closeButtonLabel', {
+            {i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.closeButtonLabel', {
               defaultMessage: 'Run diagnostic',
             })}
           </EuiButton>
@@ -252,7 +253,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
             }
             fill
           >
-            {i18n.translate('xpack.apm.storageExplorer.downloadReport', {
+            {i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.downloadReport', {
               defaultMessage: 'Download report',
             })}
           </EuiButton>

@@ -14,6 +14,7 @@ import type { ServiceMapNodeData } from './service_node';
 // Edge data interface
 export interface ServiceMapEdgeData {
   isBidirectional?: boolean;
+  [key: string]: unknown; // Allow additional properties
 }
 
 /**
@@ -111,12 +112,11 @@ export function transformElements(
         type: isService ? 'service' : 'dependency',
         position: { x: 0, y: 0 },
         data: {
-          id: nodeData.id,
+          ...nodeData,
           label,
           agentName: nodeData['agent.name'],
           spanType: nodeData['span.type'],
           spanSubtype: nodeData['span.subtype'],
-          serviceAnomalyStats: nodeData.serviceAnomalyStats,
           isService,
         },
       });

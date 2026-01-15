@@ -42,6 +42,7 @@ export function DiagnosticConfigurationForm({
   } = useAnyOfApmParams(
     '/services/{serviceName}/service-map',
     '/service-map',
+    '/react-flow-service-map',
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });

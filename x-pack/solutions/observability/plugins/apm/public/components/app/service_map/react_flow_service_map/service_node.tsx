@@ -14,18 +14,18 @@ import {
   getServiceHealthStatusColor,
   ServiceHealthStatus,
 } from '../../../../../common/service_health_status';
-import type { AgentName, SpanType, SpanSubtype } from '../../../../../common/es_fields/apm';
 
 export interface ServiceMapNodeData {
   id: string;
   label: string;
-  agentName?: AgentName;
-  spanType?: SpanType;
-  spanSubtype?: SpanSubtype;
+  agentName?: string;
+  spanType?: string;
+  spanSubtype?: string;
   serviceAnomalyStats?: {
     healthStatus?: ServiceHealthStatus;
   };
   isService: boolean;
+  [key: string]: unknown; // Allow additional properties for popover content
 }
 
 // Custom Service Node component (circular)
@@ -46,14 +46,10 @@ export const ServiceNode = memo(
 
     const borderWidth = useMemo(() => {
       const status = data.serviceAnomalyStats?.healthStatus;
-      if (status === ServiceHealthStatus.warning) return euiTheme.border.width.medium;
+      if (status === ServiceHealthStatus.warning) return euiTheme.border.width.thick;
       if (status === ServiceHealthStatus.critical) return euiTheme.border.width.thick;
-      return euiTheme.border.width.medium;
-    }, [
-      data.serviceAnomalyStats?.healthStatus,
-      euiTheme.border.width.medium,
-      euiTheme.border.width.thick,
-    ]);
+      return euiTheme.border.width.thick;
+    }, [data.serviceAnomalyStats?.healthStatus, euiTheme.border.width.thick]);
 
     const iconUrl = useMemo(() => {
       if (data.agentName) {
@@ -87,7 +83,7 @@ export const ServiceNode = memo(
               width: ${CIRCLE_SIZE}px;
               height: ${CIRCLE_SIZE}px;
               border-radius: 50%;
-              border: ${borderWidth ?? euiTheme.border.width.medium} solid ${borderColor};
+              border: ${borderWidth ?? euiTheme.border.width.thin} solid ${borderColor};
               background: ${euiTheme.colors.backgroundBasePlain};
               display: flex;
               align-items: center;

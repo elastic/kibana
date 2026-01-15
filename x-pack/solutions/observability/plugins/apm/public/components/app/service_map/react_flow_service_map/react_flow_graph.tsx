@@ -28,12 +28,14 @@ import type cytoscape from 'cytoscape';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { Environment } from '../../../../../common/environment_rt';
 
 import type { ServiceMapNodeData } from './service_node';
 import { ServiceNode } from './service_node';
 import { DependencyNode } from './dependency_node';
 import { transformElements, type ServiceMapEdgeData } from './transform_data';
 import { applyLayout, type LayoutDirection } from './apply_layout';
+import { ReactFlowPopover } from './react_flow_popover';
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
@@ -48,19 +50,23 @@ interface ReactFlowGraphProps {
   height: number;
   serviceName?: string;
   status: FETCH_STATUS;
+  environment: Environment;
+  kuery: string;
+  start: string;
+  end: string;
 }
 
 const layoutDirectionOptions = [
   {
     id: 'LR',
-    label: i18n.translate('xpack.apm.serviceMap.layoutDirection.horizontal', {
+    label: i18n.translate('xpack.actions.serviceMap.layoutDirection.horizontal', {
       defaultMessage: 'Horizontal',
     }),
     iconType: 'sortRight',
   },
   {
     id: 'TB',
-    label: i18n.translate('xpack.apm.serviceMap.layoutDirection.vertical', {
+    label: i18n.translate('xpack.actions.serviceMap.layoutDirection.vertical', {
       defaultMessage: 'Vertical',
     }),
     iconType: 'sortDown',
@@ -68,13 +74,33 @@ const layoutDirectionOptions = [
 ];
 
 // Inner component that uses React Flow hooks
-function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) {
+function ReactFlowGraphInner({
+  elements,
+  height,
+  status,
+  environment,
+  kuery,
+  start,
+  end,
+  serviceName,
+}: ReactFlowGraphProps) {
   const { euiTheme } = useEuiTheme();
-  const { fitView } = useReactFlow();
+  const reactFlowInstance = useReactFlow();
+  const { fitView } = reactFlowInstance;
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<ServiceMapNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<ServiceMapEdgeData>>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('LR');
+  const [selectedNodeForPopover, setSelectedNodeForPopover] =
+    useState<Node<ServiceMapNodeData> | null>(null);
+  const popoverOpenTimeRef = React.useRef<number>(0);
+  const lastViewportRef = React.useRef({ x: 0, y: 0, zoom: 1 });
+  const reactFlowInstanceRef = React.useRef(reactFlowInstance);
+
+  // Update ref when reactFlowInstance changes
+  React.useEffect(() => {
+    reactFlowInstanceRef.current = reactFlowInstance;
+  }, [reactFlowInstance]);
 
   const primaryColor = euiTheme.colors.primary;
 
@@ -150,10 +176,17 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
 
   // Handle node click - update edges with highlight colors
   const handleNodeClick: NodeMouseHandler<Node<ServiceMapNodeData>> = useCallback(
-    (_, node) => {
+    (event, node) => {
+      event.stopPropagation();
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
+      setSelectedNodeForPopover(newSelectedId ? node : null);
+      // Track when popover opens and store current viewport
+      if (newSelectedId) {
+        popoverOpenTimeRef.current = Date.now();
+        lastViewportRef.current = reactFlowInstanceRef.current.getViewport();
+      }
     },
     [selectedNodeId, setEdges, applyEdgeHighlighting]
   );
@@ -162,7 +195,51 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
   const handlePaneClick = useCallback(() => {
     setSelectedNodeId(null);
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
+    setSelectedNodeForPopover(null);
   }, [setEdges, applyEdgeHighlighting]);
+
+  // Handle viewport changes (pan/zoom) - close popover
+  const handleMove = useCallback(() => {
+    if (!selectedNodeForPopover) return;
+
+    // Small delay to prevent closing from click-triggered move events
+    const timeSinceOpen = Date.now() - popoverOpenTimeRef.current;
+    if (timeSinceOpen < 100) return;
+
+    // Get current viewport
+    const currentViewport = reactFlowInstanceRef.current.getViewport();
+    const lastViewport = lastViewportRef.current;
+
+    // Check if there's actual meaningful movement (> 5px or zoom change > 0.01)
+    const deltaX = Math.abs(currentViewport.x - lastViewport.x);
+    const deltaY = Math.abs(currentViewport.y - lastViewport.y);
+    const deltaZoom = Math.abs(currentViewport.zoom - lastViewport.zoom);
+
+    if (deltaX > 5 || deltaY > 5 || deltaZoom > 0.01) {
+      lastViewportRef.current = currentViewport;
+      setSelectedNodeId(null);
+      setSelectedNodeForPopover(null);
+
+      // Reset edges
+      setEdges((currentEdges) =>
+        currentEdges.map((edge) => ({
+          ...edge,
+          style: { stroke: EDGE_COLOR_DEFAULT, strokeWidth: 1 },
+          markerEnd: {
+            ...(edge.markerEnd as EdgeMarker),
+            color: EDGE_COLOR_DEFAULT,
+          },
+          markerStart: edge.data?.isBidirectional
+            ? {
+                ...(edge.markerStart as EdgeMarker),
+                color: EDGE_COLOR_DEFAULT,
+              }
+            : undefined,
+          zIndex: 0,
+        }))
+      );
+    }
+  }, [selectedNodeForPopover, setEdges]);
 
   const containerStyle = useMemo(
     () => ({
@@ -197,6 +274,7 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
         onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeClick}
         onPaneClick={handlePaneClick}
+        onMove={handleMove}
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.2, duration: 200 }}
@@ -210,12 +288,12 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Panel position="top-right">
           <EuiToolTip
-            content={i18n.translate('xpack.apm.serviceMap.layoutDirection.tooltip', {
+            content={i18n.translate('xpack.actions.serviceMap.layoutDirection.tooltip', {
               defaultMessage: 'Change layout orientation',
             })}
           >
             <EuiButtonGroup
-              legend={i18n.translate('xpack.apm.serviceMap.layoutDirection.legend', {
+              legend={i18n.translate('xpack.actions.serviceMap.layoutDirection.legend', {
                 defaultMessage: 'Layout direction',
               })}
               options={layoutDirectionOptions}
@@ -254,6 +332,18 @@ function ReactFlowGraphInner({ elements, height, status }: ReactFlowGraphProps) 
           <EuiLoadingSpinner size="xl" />
         </div>
       )}
+      <ReactFlowPopover
+        selectedNode={selectedNodeForPopover}
+        focusedServiceName={serviceName}
+        environment={environment}
+        kuery={kuery}
+        start={start}
+        end={end}
+        onClose={() => {
+          setSelectedNodeId(null);
+          setSelectedNodeForPopover(null);
+        }}
+      />
     </div>
   );
 }

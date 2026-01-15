@@ -33,6 +33,7 @@ export function DependencyContents({ elementData, environment, start, end }: Con
 
   const { query } = useAnyOfApmParams(
     '/service-map',
+    '/react-flow-service-map',
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
@@ -94,7 +95,7 @@ export function DependencyContents({ elementData, environment, start, end }: Con
             });
           }}
         >
-          {i18n.translate('xpack.apm.serviceMap.dependencyDetailsButtonText', {
+          {i18n.translate('xpack.actions.serviceMap.dependencyDetailsButtonText', {
             defaultMessage: 'Dependency Details',
           })}
         </EuiButton>

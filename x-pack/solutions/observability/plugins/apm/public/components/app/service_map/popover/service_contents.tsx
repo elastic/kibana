@@ -34,6 +34,7 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
 
   const { query } = useAnyOfApmParams(
     '/service-map',
+    '/react-flow-service-map',
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
@@ -114,7 +115,7 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
           href={detailsUrl}
           fill={true}
         >
-          {i18n.translate('xpack.apm.serviceMap.serviceDetailsButtonText', {
+          {i18n.translate('xpack.actions.serviceMap.serviceDetailsButtonText', {
             defaultMessage: 'Service Details',
           })}
         </EuiButton>
@@ -126,7 +127,7 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
           href={focusUrl}
           onClick={onFocusClick}
         >
-          {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
+          {i18n.translate('xpack.actions.serviceMap.focusMapButtonText', {
             defaultMessage: 'Focus map',
           })}
         </EuiButton>

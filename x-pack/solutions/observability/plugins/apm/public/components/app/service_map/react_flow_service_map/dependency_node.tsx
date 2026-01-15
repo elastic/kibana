@@ -10,13 +10,12 @@ import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { useEuiTheme, transparentize, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { css } from '@emotion/react';
-import type { SpanType, SpanSubtype } from '../../../../../common/es_fields/apm';
 
-interface DependencyMapNodeData {
+interface DependencyMapNodeData extends Record<string, any> {
   id: string;
   label: string;
-  spanType?: SpanType;
-  spanSubtype?: SpanSubtype;
+  spanType: string;
+  spanSubtype: string;
 }
 
 // Diamond dimensions
@@ -64,7 +63,7 @@ export const DependencyNode = memo(
               width: ${DIAMOND_SIZE}px;
               height: ${DIAMOND_SIZE}px;
               transform: rotate(45deg);
-              border: ${euiTheme.border.width.medium} solid ${borderColor};
+              border: ${euiTheme.border.width.thick} solid ${borderColor};
               background: ${euiTheme.colors.backgroundBasePlain};
               display: flex;
               align-items: center;
