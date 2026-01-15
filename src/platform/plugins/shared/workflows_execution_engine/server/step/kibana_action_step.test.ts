@@ -86,7 +86,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     it('should extract fetcher options and not include them in request body', async () => {
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test Case',
@@ -164,7 +164,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     it('should work without fetcher options', async () => {
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test Case',
@@ -198,7 +198,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -234,7 +234,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -263,7 +263,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -297,7 +297,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -329,7 +329,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -362,7 +362,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -399,7 +399,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
