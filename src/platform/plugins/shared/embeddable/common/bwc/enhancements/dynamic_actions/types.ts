@@ -7,7 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const prefix = 'dynamicActions.';
+import type { SerializableRecord } from '@kbn/utility-types';
 
-/** Returns prefixed telemetry metric key for all dynamic action metrics. */
-export const getMetricKey = (path: string) => `${prefix}${path}`;
+export type SerializedAction<Config extends SerializableRecord = SerializableRecord> = {
+  readonly factoryId: string;
+  readonly name: string;
+  readonly config: Config;
+};
+
+export type SerializedEvent = {
+  eventId: string;
+  triggers: string[];
+  action: SerializedAction;
+};
+
+export type DynamicActionsState = {
+  events: SerializedEvent[];
+};

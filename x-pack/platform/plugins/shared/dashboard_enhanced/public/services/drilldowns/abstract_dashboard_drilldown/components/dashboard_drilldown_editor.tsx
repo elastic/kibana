@@ -13,22 +13,22 @@ import {
   DashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
 
-import { txtChooseDestinationDashboard } from './i18n';
-import type { Config as DrilldownConfig } from '../../types';
+import { i18n } from '@kbn/i18n';
+import type { DashboardDrilldownConfig } from '../types';
 
 const DashboardDrilldownOptions = withSuspense(DashboardDrilldownOptionsComponent, null);
 
-export interface DashboardDrilldownConfigProps {
+export interface DashboardDrilldownEditorProps {
   dashboards: Array<EuiComboBoxOptionOption<string>>;
   onDashboardSelect: (dashboardId: string) => void;
   onSearchChange: (searchString: string) => void;
   isLoading: boolean;
   error?: string;
-  config: DrilldownConfig;
-  onConfigChange: (changes: Partial<DrilldownConfig>) => void;
+  config: DashboardDrilldownConfig;
+  onConfigChange: (changes: Partial<DashboardDrilldownConfig>) => void;
 }
 
-export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> = ({
+export const DashboardDrilldownEditor: React.FC<DashboardDrilldownEditorProps> = ({
   dashboards,
   onDashboardSelect,
   onSearchChange,
@@ -36,12 +36,22 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
   error,
   config,
   onConfigChange,
-}: DashboardDrilldownConfigProps) => {
+}: DashboardDrilldownEditorProps) => {
   const selectedTitle = dashboards.find((item) => item.value === config.dashboardId)?.label || '';
 
   return (
     <>
-      <EuiFormRow label={txtChooseDestinationDashboard} fullWidth isInvalid={!!error} error={error}>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.dashboard.components.DashboardDrilldownConfig.chooseDestinationDashboard',
+          {
+            defaultMessage: 'Choose destination dashboard',
+          }
+        )}
+        fullWidth
+        isInvalid={!!error}
+        error={error}
+      >
         <EuiComboBox<string>
           async
           selectedOptions={
