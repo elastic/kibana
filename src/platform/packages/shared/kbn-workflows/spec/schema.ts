@@ -533,7 +533,7 @@ export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 /* --- Workflow --- */
 // Base schema without transform - can be extended (used in generate_yaml_schema_from_connectors.ts)
 const WorkflowSchemaBase = z.object({
-  version: z.literal('1').default('1').describe('The version of the workflow schema'),
+  version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
   name: z.string().min(1),
   description: z.string().optional(),
   settings: WorkflowSettingsSchema.optional(),
@@ -573,7 +573,6 @@ export const WorkflowSchema = WorkflowSchemaBase.transform((data) => {
   const { inputs: _, ...rest } = data;
   return {
     ...rest,
-    version: '1' as const,
     ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
   };
 });
@@ -630,11 +629,11 @@ const WorkflowSchemaForAutocompleteBase = z
   })
   .passthrough();
 
-// Final schema with transform to always set version
+// Final schema with transform - ensure version default is applied
 export const WorkflowSchemaForAutocomplete = WorkflowSchemaForAutocompleteBase.transform(
   (data) => ({
     ...data,
-    version: '1' as const,
+    version: data.version ?? '1',
   })
 );
 

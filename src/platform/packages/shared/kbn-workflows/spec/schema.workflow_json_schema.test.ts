@@ -6,8 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+/* eslint-disable import/no-nodejs-modules */
+// We only use Node.js modules in this test file to read example yaml files
 
-import { normalizeInputsToJsonSchema } from './lib/input_conversion';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { parse } from 'yaml';
+import { applyInputDefaults, normalizeInputsToJsonSchema } from './lib/input_conversion';
 import { WorkflowSchema } from './schema';
 // Note: getWorkflowContextSchema is in the plugin, not in the package
 // For this test, we'll test the schema parsing and normalization directly
@@ -329,5 +334,58 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     const normalizedInputs = normalizeInputsToJsonSchema(parsedWorkflow.inputs);
     expect(normalizedInputs?.properties?.customer.properties?.email.format).toBe('email');
     expect(normalizedInputs?.properties?.customer.additionalProperties).toBe(false);
+  });
+
+  it('should parse and validate workflow with $ref references and apply defaults', () => {
+    // Read the example workflow YAML file
+    const yamlPath = join(__dirname, 'examples', 'example_test_workflow_with_ref.yaml');
+    const yamlContent = readFileSync(yamlPath, 'utf8');
+    const workflowData = parse(yamlContent);
+
+    // Test 1: Parse the workflow
+    const parseResult = WorkflowSchema.safeParse(workflowData);
+    expect(parseResult.success).toBe(true);
+    if (!parseResult.success) {
+      return;
+    }
+
+    const parsedWorkflow = parseResult.data;
+
+    // Test 2: Verify the $ref reference exists in inputs
+    expect(parsedWorkflow.inputs).toBeDefined();
+    expect(parsedWorkflow.inputs?.properties).toBeDefined();
+    expect(parsedWorkflow.inputs?.properties?.user).toBeDefined();
+    expect(parsedWorkflow.inputs?.properties?.user.$ref).toBe('#/definitions/UserSchema');
+
+    // Test 3: Verify the definition exists
+    expect(parsedWorkflow.inputs?.definitions).toBeDefined();
+    expect(parsedWorkflow.inputs?.definitions?.UserSchema).toBeDefined();
+    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.name).toBeDefined();
+    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.email).toBeDefined();
+    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.age).toBeDefined();
+
+    // Test 4: Verify defaults are defined in the schema
+    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.name.default).toBe(
+      'John Doe'
+    );
+    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.email.default).toBe(
+      'john.doe@example.com'
+    );
+    expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.age.default).toBe(30);
+
+    // Test 5: Normalize inputs (should preserve $ref and definitions)
+    const normalizedInputs = normalizeInputsToJsonSchema(parsedWorkflow.inputs);
+    expect(normalizedInputs).toBeDefined();
+    expect(normalizedInputs?.properties?.user.$ref).toBe('#/definitions/UserSchema');
+    expect(normalizedInputs?.definitions?.UserSchema).toBeDefined();
+
+    // Test 6: Apply defaults - should resolve $ref and apply defaults
+    const inputsWithDefaults = applyInputDefaults(undefined, normalizedInputs!);
+    expect(inputsWithDefaults).toBeDefined();
+    expect(inputsWithDefaults?.user).toBeDefined();
+    const user = inputsWithDefaults?.user as { name: string; email: string; age: number };
+    expect(user.name).toBe('John Doe');
+    expect(user.email).toBe('john.doe@example.com');
+    expect(user.age).toBe(30);
   });
 });

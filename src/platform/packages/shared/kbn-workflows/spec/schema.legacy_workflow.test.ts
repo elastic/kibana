@@ -6,7 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+/* eslint-disable import/no-nodejs-modules */
+// We only use Node.js modules in this test file to read example yaml files
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { parse } from 'yaml';
 import { WorkflowSchema, WorkflowSchemaForAutocomplete } from './schema';
 
 describe('Legacy workflow format (backward compatibility)', () => {
@@ -108,6 +113,21 @@ describe('Legacy workflow format (backward compatibility)', () => {
       expect(result.data.inputs?.required).toContain('username');
       expect(result.data.inputs?.properties?.username?.default).toBe('admin');
       expect(result.data.inputs?.properties?.age?.default).toBe(25);
+    }
+  });
+
+  it('should parse and validate legacy security workflow YAML file', () => {
+    const yamlPath = join(__dirname, 'examples', 'example_security_workflow_legacy.yaml');
+    const yamlContent = readFileSync(yamlPath, 'utf8');
+    const workflowData = parse(yamlContent);
+
+    const result = WorkflowSchema.safeParse(workflowData);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.inputs?.properties).toBeDefined();
+      expect(result.data.inputs?.properties?.analystEmail).toBeDefined();
+      expect(result.data.inputs?.properties?.severity?.default).toBe('medium');
+      expect(result.data.inputs?.properties?.priority?.default).toBe('P2');
     }
   });
 });
