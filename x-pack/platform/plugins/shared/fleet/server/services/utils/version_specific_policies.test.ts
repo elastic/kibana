@@ -45,19 +45,16 @@ describe('getCommonAgentVersions', () => {
 
 describe('getVersionSpecificPolicies', () => {
   const soClient = {} as any;
+  const fleetServerPolicy = { data: { inputs: [] } } as any;
   it('should create version specific policies with common agent versions and package level condition', async () => {
-    const policies = await getVersionSpecificPolicies(
-      soClient,
-      { data: { inputs: [] } },
-      {
-        id: 'policy1',
-        inputs: [
-          {
-            meta: { package: { agentVersion: '>=9.3.0' } },
-          },
-        ],
-      }
-    );
+    const policies = await getVersionSpecificPolicies(soClient, fleetServerPolicy, {
+      id: 'policy1',
+      inputs: [
+        {
+          meta: { package: { agentVersion: '>=9.3.0' } },
+        },
+      ],
+    } as any);
     expect(policies).toEqual([
       {
         data: {
@@ -91,7 +88,7 @@ describe('getVersionSpecificPolicies', () => {
   it('should create version specific policies with custom agent versions and package level condition', async () => {
     const policies = await getVersionSpecificPolicies(
       soClient,
-      { data: { inputs: [] } },
+      fleetServerPolicy,
       {
         id: 'policy1',
         inputs: [
@@ -99,7 +96,7 @@ describe('getVersionSpecificPolicies', () => {
             meta: { package: { agentVersion: '>=9.3.0' } },
           },
         ],
-      },
+      } as any,
       ['9.4', '9.1']
     );
     expect(policies).toEqual([
@@ -127,11 +124,10 @@ describe('getVersionSpecificPolicies', () => {
   });
 
   it('should create version specific policies with common agent versions and template level condition', async () => {
-    const policies = await getVersionSpecificPolicies(
-      soClient,
-      { data: { inputs: [] } },
-      { id: 'policy1', inputs: [{}] }
-    );
+    const policies = await getVersionSpecificPolicies(soClient, fleetServerPolicy, {
+      id: 'policy1',
+      inputs: [{}],
+    } as any);
     expect(policies).toEqual([
       {
         data: {
@@ -165,8 +161,8 @@ describe('getVersionSpecificPolicies', () => {
   it('should create version specific policies with custom agent versions and template level condition', async () => {
     const policies = await getVersionSpecificPolicies(
       soClient,
-      { data: { inputs: [] } },
-      { id: 'policy1', inputs: [{}] },
+      fleetServerPolicy,
+      { id: 'policy1', inputs: [{}] } as any,
       ['9.4', '9.1']
     );
     expect(policies).toEqual([
