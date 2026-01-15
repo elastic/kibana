@@ -50,6 +50,10 @@ import {
   createGetMetricChangePointsTool,
 } from './get_metric_change_points/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
+import {
+  OBSERVABILITY_GET_CORRELATIONS_TOOL_ID,
+  createGetCorrelationsTool,
+} from './get_correlations/tool';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -72,6 +76,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+  OBSERVABILITY_GET_CORRELATIONS_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -103,6 +108,7 @@ export async function registerTools({
     createGetLogChangePointsTool({ core, plugins, logger }),
     createGetMetricChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
+    createGetCorrelationsTool({ core, dataRegistry, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {

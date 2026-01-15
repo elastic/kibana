@@ -212,4 +212,16 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
+
+  apmCorrelations: (params: {
+    request: KibanaRequest;
+    start: string;
+    end: string;
+    kqlFilter?: string;
+    type: 'latency' | 'failures';
+    serviceName: string;
+    transactionName: string;
+    transactionType: string;
+    environment: string;
+  }) => Promise<any>;
 }

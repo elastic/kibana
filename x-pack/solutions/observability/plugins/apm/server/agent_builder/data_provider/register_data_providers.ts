@@ -21,6 +21,7 @@ import {
 } from '../../routes/assistant_functions/get_changepoints';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
+import { getCorrelations } from '../tools/get_correlations';
 
 export function registerDataProviders({
   core,
@@ -180,6 +181,38 @@ export function registerDataProviders({
         rollupInterval: getRollupIntervalForTimeRange(startMs, endMs),
         useDurationSummary: true, // Note: This will not work for pre 8.7 data. See: https://github.com/elastic/kibana/issues/167578
         searchQuery,
+      });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmCorrelations',
+    async ({
+      request,
+      start,
+      end,
+      kqlFilter,
+      type,
+      serviceName,
+      transactionName,
+      transactionType,
+      environment,
+    }) => {
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
+
+      const startMs = parseDatemath(start);
+      const endMs = parseDatemath(end);
+
+      return getCorrelations({
+        apmEventClient,
+        start: startMs,
+        end: endMs,
+        kqlFilter,
+        type,
+        serviceName,
+        transactionName,
+        transactionType,
+        environment,
       });
     }
   );
