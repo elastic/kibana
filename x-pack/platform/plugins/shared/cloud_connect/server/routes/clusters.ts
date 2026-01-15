@@ -107,10 +107,22 @@ export const registerClustersRoute = ({
 
         if (axios.isAxiosError(error)) {
           const errorData = error.response?.data;
+          const apiStatusCode = error.response?.status;
+
+          // Extract error message from backend response
+          const errorMessage =
+            errorData?.errors?.[0]?.message ||
+            errorData?.message ||
+            'Failed to retrieve cluster details';
+
+          // Use 500 for 401 errors to prevent Kibana logout
+          // For all other errors, use the status code from the API
+          const statusCode = apiStatusCode === 401 ? 500 : apiStatusCode || 500;
+
           return response.customError({
-            statusCode: 500,
-            body: errorData || {
-              message: 'Failed to retrieve cluster details',
+            statusCode,
+            body: {
+              message: errorMessage,
             },
           });
         }
