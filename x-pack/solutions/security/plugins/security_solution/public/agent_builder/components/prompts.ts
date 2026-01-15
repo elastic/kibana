@@ -84,9 +84,10 @@ export const RULE_ATTACHMENT_PROMPT = `Review the detection rule provided and he
 - Query logic and data sources
 - MITRE ATT&CK mappings
 - Rule schedule and lookback periods
-- Tags and categorization
-- Severity and risk score settings
+- Tags
+- Rule name
+- Rule description
 
-Format your response in markdown with clear sections and easy to copy code blocks.
+Put each suggested field into copyable code block of new field value in markdown with named sections.
 
 Question:`;
