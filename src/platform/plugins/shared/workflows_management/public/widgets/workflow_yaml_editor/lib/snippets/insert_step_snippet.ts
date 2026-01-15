@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type Document, isMap, isPair, isScalar, isSeq, type Pair, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { isBuiltInStepType } from '@kbn/workflows';
-import { type Document, type Pair, isMap, isPair, isScalar, isSeq, parseDocument } from 'yaml';
-import { getStepNodeAtPosition, getStepNodesWithType } from '../../../../../common/lib/yaml';
-import { getIndentLevelFromLineNumber } from '../get_indent_level';
-import { prependIndentToLines } from '../prepend_indent_to_lines';
-import { getMonacoRangeFromYamlNode } from '../utils';
 import { generateBuiltInStepSnippet } from './generate_builtin_step_snippet';
 import { generateConnectorSnippet } from './generate_connector_snippet';
 import {
@@ -23,6 +19,10 @@ import {
   getInsertRangeAndTextForSteps,
   getSectionKeyInfo,
 } from './snippet_insertion_utils';
+import { getStepNodeAtPosition, getStepNodesWithType } from '../../../../../common/lib/yaml';
+import { getIndentLevelFromLineNumber } from '../get_indent_level';
+import { prependIndentToLines } from '../prepend_indent_to_lines';
+import { getMonacoRangeFromYamlNode } from '../utils';
 
 /**
  * Finds the steps pair in the YAML document, even if it's empty or has empty items
@@ -45,7 +45,6 @@ function getStepsPair(yamlDocument: Document): Pair | null {
   return isPair(stepsPair) ? stepsPair : null;
 }
 
-
 /**
  * Finds the step node to insert after based on cursor position or last step
  */
@@ -63,17 +62,17 @@ function findStepNodeToInsertAfter(
     const isOnStepsKeyLine = cursorLine === stepsKeyRange.startLineNumber;
     const isOnCommentLine = cursorLineTrimmed.startsWith('#');
     const isOnEmptyLine = cursorLineTrimmed === '';
-    
+
     if (isOnStepsKeyLine || isOnCommentLine || isOnEmptyLine) {
       return null;
     }
-    
+
     const stepAtCursor = getStepNodeAtPosition(document, model.getOffsetAt(cursorPosition));
     if (stepAtCursor) {
       return stepAtCursor;
     }
   }
-  
+
   return stepNodes.length > 0 ? stepNodes[stepNodes.length - 1] : null;
 }
 
@@ -96,14 +95,15 @@ function handleFlowArrayReplacement(
     return { replaceRange: null, indentLevel: 0, isReplacingFlowArray: false };
   }
 
-  const replaceRange = stepsKeyRange.startLineNumber === sequenceRange.startLineNumber
-    ? new monaco.Range(
-        stepsKeyRange.startLineNumber,
-        1,
-        stepsKeyRange.startLineNumber,
-        model.getLineMaxColumn(stepsKeyRange.startLineNumber)
-      )
-    : sequenceRange;
+  const replaceRange =
+    stepsKeyRange.startLineNumber === sequenceRange.startLineNumber
+      ? new monaco.Range(
+          stepsKeyRange.startLineNumber,
+          1,
+          stepsKeyRange.startLineNumber,
+          model.getLineMaxColumn(stepsKeyRange.startLineNumber)
+        )
+      : sequenceRange;
 
   return {
     replaceRange,
@@ -129,7 +129,8 @@ function getInsertPointAfterStep(
 
   if (cursorPosition) {
     const { lineNumber: cursorLine, column: cursorColumn } = cursorPosition;
-    const isAfterStep = cursorLine > stepRange.endLineNumber ||
+    const isAfterStep =
+      cursorLine > stepRange.endLineNumber ||
       (cursorLine === stepRange.endLineNumber && cursorColumn > stepRange.endColumn);
     if (isAfterStep && cursorLine <= stepRange.endLineNumber + 10) {
       insertAtLineNumber = cursorLine;
@@ -209,9 +210,14 @@ function getInsertPointFromCursor(
   cursorPosition: monaco.Position,
   stepsKeyRange: monaco.Range,
   stepNodes: ReturnType<typeof getStepNodesWithType>
-): { insertAtLineNumber: number; indentLevel: number; insertAfterComment: boolean; commentCount?: number } | null {
+): {
+  insertAtLineNumber: number;
+  indentLevel: number;
+  insertAfterComment: boolean;
+  commentCount?: number;
+} | null {
   const cursorLine = cursorPosition.lineNumber;
-  
+
   if (cursorLine < stepsKeyRange.startLineNumber) {
     return null;
   }
@@ -256,7 +262,11 @@ function getInsertPointFromCursor(
   if (stepNodes.length > 0) {
     const lastStepNode = stepNodes[stepNodes.length - 1];
     const lastStepRange = getMonacoRangeFromYamlNode(model, lastStepNode);
-    if (lastStepRange && cursorLine >= lastStepRange.endLineNumber && cursorLine <= lastStepRange.endLineNumber + 10) {
+    if (
+      lastStepRange &&
+      cursorLine >= lastStepRange.endLineNumber &&
+      cursorLine <= lastStepRange.endLineNumber + 10
+    ) {
       return {
         insertAtLineNumber: cursorLine,
         indentLevel: getIndentLevelFromLineNumber(model, lastStepRange.startLineNumber),
@@ -264,10 +274,13 @@ function getInsertPointFromCursor(
       };
     }
   }
-  
+
   const lineIndent = getIndentLevelFromLineNumber(model, cursorLine);
-  const indentLevel = lineIndent > 0 ? lineIndent : getIndentLevelFromLineNumber(model, stepsKeyRange.startLineNumber) + 2;
-  
+  const indentLevel =
+    lineIndent > 0
+      ? lineIndent
+      : getIndentLevelFromLineNumber(model, stepsKeyRange.startLineNumber) + 2;
+
   return {
     insertAtLineNumber: cursorLine + 1,
     indentLevel,
@@ -313,7 +326,7 @@ export function insertStepSnippet(
     );
 
     model.pushEditOperations(null, [{ range, text }], () => null);
-    if (editor) { 
+    if (editor) {
       editor.pushUndoStop();
     }
 
@@ -326,8 +339,14 @@ export function insertStepSnippet(
   }
   const stepsKeyRange = sectionInfo.range;
   const expectedIndent = sectionInfo.indentLevel;
-  
-  const stepNode = findStepNodeToInsertAfter(document, model, cursorPosition, stepNodes, stepsKeyRange);
+
+  const stepNode = findStepNodeToInsertAfter(
+    document,
+    model,
+    cursorPosition,
+    stepNodes,
+    stepsKeyRange
+  );
 
   let { replaceRange, indentLevel, isReplacingFlowArray } = handleFlowArrayReplacement(
     model,
@@ -379,12 +398,13 @@ export function insertStepSnippet(
 
   const insertText = prependIndentToLines(snippetText, indentLevel);
 
-  const finalInsertText = replaceRange && isReplacingFlowArray && stepsKeyRange
-    ? (replaceRange.startLineNumber === stepsKeyRange.startLineNumber && 
-       replaceRange.endLineNumber === stepsKeyRange.startLineNumber
+  const finalInsertText =
+    replaceRange && isReplacingFlowArray && stepsKeyRange
+      ? replaceRange.startLineNumber === stepsKeyRange.startLineNumber &&
+        replaceRange.endLineNumber === stepsKeyRange.startLineNumber
         ? `steps:\n${insertText}`
-        : `\n${insertText}`)
-    : insertText;
+        : `\n${insertText}`
+      : insertText;
 
   const { range, text } = getInsertRangeAndTextForSteps(
     model,

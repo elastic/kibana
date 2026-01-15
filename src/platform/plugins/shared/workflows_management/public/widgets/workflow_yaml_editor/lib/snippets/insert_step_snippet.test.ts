@@ -420,11 +420,14 @@ steps:
     // Normalize the expected text (remove any existing trailing newlines) and add the comment line
     let expectedTextWithoutNewline = prependIndentToLines(snippetText, 2);
     // Remove trailing newlines without regex
-    while (expectedTextWithoutNewline.length > 0 && expectedTextWithoutNewline[expectedTextWithoutNewline.length - 1] === '\n') {
+    while (
+      expectedTextWithoutNewline.length > 0 &&
+      expectedTextWithoutNewline[expectedTextWithoutNewline.length - 1] === '\n'
+    ) {
       expectedTextWithoutNewline = expectedTextWithoutNewline.slice(0, -1);
     }
     // The insertion includes the comment line to preserve it
-    const expectedText = expectedTextWithoutNewline + '\n  ## Hello\n';
+    const expectedText = `${expectedTextWithoutNewline}\n  ## Hello\n`;
     expect(callArgs[1][0].text).toBe(expectedText);
     expect(callArgs[2]).toBeInstanceOf(Function);
   });
@@ -638,7 +641,7 @@ steps:
       [
         {
           range: expect.any(monaco.Range),
-          text: '\n' + prependIndentToLines(snippetText, 2),
+          text: `\n${prependIndentToLines(snippetText, 2)}`,
         },
       ],
       expect.any(Function)

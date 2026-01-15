@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
 import { isMap, isNode, isPair, isScalar, isSeq, type Pair, type Range } from 'yaml';
+import { monaco } from '@kbn/monaco';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
 import { getMonacoRangeFromYamlRange } from '../utils';
 
@@ -54,7 +54,12 @@ function handleInsertAfterComment(
 
   if (nextLineContent === null) {
     const lineEndColumn = model.getLineMaxColumn(insertAtLineNumber);
-    const range = new monaco.Range(insertAtLineNumber, lineEndColumn, insertAtLineNumber, lineEndColumn);
+    const range = new monaco.Range(
+      insertAtLineNumber,
+      lineEndColumn,
+      insertAtLineNumber,
+      lineEndColumn
+    );
     return { range, text: `\n${insertText}` };
   }
 
@@ -99,7 +104,10 @@ function handleInsertAfterItem(
 /**
  * Creates a replacement range for an empty item line
  */
-export function createReplacementRange(model: monaco.editor.ITextModel, lineNumber: number): monaco.Range {
+export function createReplacementRange(
+  model: monaco.editor.ITextModel,
+  lineNumber: number
+): monaco.Range {
   const nextLineNumber = lineNumber + 1;
   if (nextLineNumber <= model.getLineCount()) {
     return new monaco.Range(lineNumber, 1, nextLineNumber, 1);
@@ -232,7 +240,12 @@ export function getInsertRangeAndTextForTriggers(
     if (insertAtLineNumber === model.getLineCount() + 1) {
       const lastLineNumber = model.getLineCount();
       const lastLineEndColumn = model.getLineMaxColumn(lastLineNumber);
-      const range = new monaco.Range(lastLineNumber, lastLineEndColumn, lastLineNumber, lastLineEndColumn);
+      const range = new monaco.Range(
+        lastLineNumber,
+        lastLineEndColumn,
+        lastLineNumber,
+        lastLineEndColumn
+      );
       return { range, text: `\n${insertText}` };
     }
     const range = new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber, 1);
@@ -258,9 +271,8 @@ export function getInsertRangeAndTextForSteps(
   isReplacingFlowArray?: boolean
 ): { range: monaco.Range; text: string } {
   if (replaceRange) {
-    const text = isReplacingFlowArray && !insertText.startsWith('steps:\n') 
-      ? `\n${insertText}` 
-      : insertText;
+    const text =
+      isReplacingFlowArray && !insertText.startsWith('steps:\n') ? `\n${insertText}` : insertText;
     return { range: replaceRange, text };
   }
 
@@ -284,7 +296,7 @@ export function getInsertRangeAndTextForSteps(
   }
 
   const targetLine = getLineContent(model, insertAtLineNumber);
-  
+
   if (targetLine && targetLine.trim()) {
     const normalizedText = removeTrailingNewlines(insertText);
     const isComment = targetLine.trim().startsWith('#');
