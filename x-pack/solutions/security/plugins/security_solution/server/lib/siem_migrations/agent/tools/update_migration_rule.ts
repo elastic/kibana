@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { StaticToolRegistration } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import { SIEM_MIGRATIONS_ASSISTANT_USER } from '../../../../../common/siem_migrations/constants';
 import type { SiemMigrationsClientGetter } from './create_client_factory';
 

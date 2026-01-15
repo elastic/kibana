@@ -6,13 +6,8 @@
  */
 
 export {
-  registerSiemMigrationAgent,
+  registerSiemMigrationTools as registerSiemMigrationAgent,
   SIEM_MIGRATION_AGENT_ID,
 } from './register_siem_migration_agent';
 
-export {
-  SIEM_MIGRATION_TOOL_IDS,
-  SIEM_MIGRATION_GET_MIGRATIONS_TOOL_ID,
-  SIEM_MIGRATION_GET_RULES_TOOL_ID,
-  SIEM_MIGRATION_UPDATE_RULE_TOOL_ID,
-} from './tools';
+export { SIEM_MIGRATION_TOOL_IDS } from './tools';

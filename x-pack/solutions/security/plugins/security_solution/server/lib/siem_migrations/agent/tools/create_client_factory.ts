@@ -6,16 +6,34 @@
  */
 
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { IRequestContextFactory } from '../../../../request_context_factory';
+import type { SecuritySolutionApiRequestHandlerContext } from '../../../../types';
 import type { SiemMigrationsService } from '../../siem_migrations_service';
 import type { SiemRuleMigrationsClient } from '../../rules/siem_rule_migrations_service';
 import type {
   SecuritySolutionPluginStart,
   SecuritySolutionPluginStartDependencies,
 } from '../../../../plugin_contract';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { createDetectionRulesClient } from '../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
+import type { ProductFeaturesService } from '../../../product_features_service';
 
 export type SiemMigrationsClientGetter = (
   request: KibanaRequest
 ) => Promise<SiemRuleMigrationsClient>;
+
+export type SecuritySolutionContextGetter = (params: {
+  request: KibanaRequest;
+  esClient: IScopedClusterClient;
+}) => Promise<{
+  securitySolutionContext: SecuritySolutionApiRequestHandlerContext;
+  savedObjectsClient: SavedObjectsClientContract;
+  rulesClient: RulesClient;
+}>;
 
 /**
  * Creates a factory function that produces scoped SIEM migrations clients.
@@ -55,5 +73,59 @@ export function createSiemMigrationsClientFactory({
         telemetry: coreStart.analytics,
       },
     });
+  };
+}
+
+/**
+ * Creates a factory function that produces Security Solution context and related clients.
+ * This factory is used by tools that need access to Security Solution services like detection rules client.
+ */
+export function createSecuritySolutionContextFactory({
+  core,
+  requestContextFactory,
+  plugins: { licensing, productFeaturesService, ml },
+}: {
+  core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>;
+  requestContextFactory: IRequestContextFactory;
+  plugins: {
+    licensing: LicensingPluginSetup;
+    productFeaturesService: ProductFeaturesService;
+  };
+}): SecuritySolutionContextGetter {
+  return async ({ request, esClient }) => {
+    const [coreStart, plugins] = await core.getStartServices();
+
+    const currentUser = coreStart.security.authc.getCurrentUser(request);
+    if (!currentUser) {
+      throw new Error('User must be authenticated to access Security Solution services');
+    }
+
+    const rulesClient = await plugins.alerting.getRulesClientWithRequest(request);
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+
+    const license = await plugins.licensing.getLicense();
+    const actionsClient = await plugins.actions.getActionsClientWithRequest(request);
+
+    const mlAuthz = buildMlAuthz({
+      license,
+      ml,
+      request,
+      savedObjectsClient,
+    });
+
+    const detectionRulesClient = createDetectionRulesClient({
+      rulesClient,
+      actionsClient,
+      savedObjectsClient,
+      mlAuthz,
+      productFeaturesService,
+      license,
+    });
+
+    return {
+      detectionRulesClient,
+      savedObjectsClient,
+      rulesClient,
+    };
   };
 }

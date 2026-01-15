@@ -160,9 +160,8 @@ export const entityRiskScoreTool = (
         } catch (error) {
           return {
             status: 'unavailable',
-            reason: `Failed to check risk score index availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
+            reason: `Failed to check risk score index availability: ${error instanceof Error ? error.message : 'Unknown error'
+              }`,
           };
         }
       },

@@ -53,6 +53,9 @@ import {
   SUMMARY_TAB_LABEL,
 } from '../../../common/components/details_flyout/translation';
 import { UpdatedByLabel } from '../../../common/components/updated_by_label';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useMigrationRuleAttachment } from './use_migration_rule_attachment';
+import { SIEM_MIGRATION_RULE_ATTACHMENT_TYPE_ID } from '../../../../../common/constants';
 
 interface MigrationRuleDetailsFlyoutProps {
   migrationRule: RuleMigrationRule;
@@ -79,6 +82,8 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
     const { mutateAsync: updateMigrationRule } = useUpdateMigrationRule(migrationRule);
+
+    const { openAgentBuilderFlyout } = useMigrationRuleAttachment(migrationRule);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const isLoading = isDataLoading || isUpdating;
@@ -266,7 +271,20 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
                 {CLOSE_BUTTON_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <NewAgentBuilderAttachment
+                    onClick={openAgentBuilderFlyout}
+                    telemetry={{
+                      pathway: 'siem_migration_rule_flyout',
+                      attachments: [SIEM_MIGRATION_RULE_ATTACHMENT_TYPE_ID],
+                    }}
+                  />
+                </EuiFlexItem>
+                {ruleActions && <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>}
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>

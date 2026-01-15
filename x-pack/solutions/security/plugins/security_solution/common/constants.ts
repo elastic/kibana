@@ -704,4 +704,6 @@ export enum SecurityAgentBuilderAttachments {
   rule = 'security.rule',
 }
 
+export const SIEM_MIGRATION_RULE_ATTACHMENT_TYPE_ID = 'security.siem_migration.rule' as const;
+
 export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;

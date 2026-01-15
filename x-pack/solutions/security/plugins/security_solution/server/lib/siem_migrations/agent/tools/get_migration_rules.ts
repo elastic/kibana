@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { StaticToolRegistration } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { SiemMigrationsClientGetter } from './create_client_factory';
 
 export const SIEM_MIGRATION_GET_RULES_TOOL_ID = 'security.siem_migration.get_migration_rules';
@@ -67,13 +67,13 @@ export function createGetMigrationRulesTool(
           },
           elastic_rule: rule.elastic_rule
             ? {
-                title: rule.elastic_rule.title,
-                query: rule.elastic_rule.query,
-                query_language: rule.elastic_rule.query_language,
-                description: rule.elastic_rule.description,
-                severity: rule.elastic_rule.severity,
-                prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
-              }
+              title: rule.elastic_rule.title,
+              query: rule.elastic_rule.query,
+              query_language: rule.elastic_rule.query_language,
+              description: rule.elastic_rule.description,
+              severity: rule.elastic_rule.severity,
+              prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
+            }
             : null,
           comments: rule.comments,
         }));

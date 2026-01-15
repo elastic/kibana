@@ -82,7 +82,6 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
-      "onechat"
     ],
     "requiredBundles": [
       "esUiShared",
