@@ -62,7 +62,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
-  const wrappedChildren = chrome ? chrome.wrapInChromeProvider(children) : children;
+  const wrappedChildren = chrome ? chrome.wrapInChromeProvider?.(children) : children;
   const rootContextProvider = (
     <KibanaErrorBoundaryProvider analytics={props.analytics}>
       <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
