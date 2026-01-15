@@ -20,11 +20,23 @@ export function getOptions(type: LinkType, options: LinkOptions) {
       ...(typeof dashboardOptions?.open_in_new_tab === 'boolean' && {
         open_in_new_tab: dashboardOptions.open_in_new_tab,
       }),
+      // <9.4 stored as openInNewTab
+      ...(typeof (dashboardOptions as { openInNewTab?: boolean })?.openInNewTab === 'boolean' && {
+        open_in_new_tab: (dashboardOptions as { openInNewTab?: boolean }).openInNewTab,
+      }),
       ...(typeof dashboardOptions?.use_filters === 'boolean' && {
         use_filters: dashboardOptions.use_filters,
       }),
+      // <9.4 stored as useCurrentFilters
+      ...(typeof (dashboardOptions as { useCurrentFilters?: boolean })?.useCurrentFilters === 'boolean' && {
+        use_filters: (dashboardOptions as { useCurrentFilters?: boolean }).useCurrentFilters,
+      }),
       ...(typeof dashboardOptions?.use_time_range === 'boolean' && {
         use_time_range: dashboardOptions.use_time_range,
+      }),
+      // <9.4 stored as useCurrentDateRange
+      ...(typeof (dashboardOptions as { useCurrentDateRange?: boolean })?.useCurrentDateRange === 'boolean' && {
+        use_time_range: (dashboardOptions as { useCurrentDateRange?: boolean }).useCurrentDateRange,
       }),
     };
   }
