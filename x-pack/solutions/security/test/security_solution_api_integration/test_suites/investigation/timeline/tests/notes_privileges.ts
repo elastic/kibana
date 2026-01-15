@@ -19,9 +19,6 @@ const cannotWriteRoles = [...canOnlyReadRoles, ...cannotAccessRoles];
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const utils = getService('securitySolutionUtils');
-  const config = getService('config');
-  const isServerless = config.get('serverless');
-  const isEss = !isServerless;
   const supertestCache = new Map<(typeof roles.roles)[number]['name'], TestAgent>();
 
   describe('Notes privileges', () => {
@@ -32,10 +29,6 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     after(async () => {
-      if (isEss) {
-        await utils.deleteUsers(roles.roles.map(({ name }) => name));
-        await utils.deleteRoles(roles.roles.map(({ name }) => name));
-      }
       await utils.cleanUpCustomRole();
     });
 

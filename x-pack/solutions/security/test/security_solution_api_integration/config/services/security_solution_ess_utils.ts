@@ -8,11 +8,11 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import type { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
-import type { SecuritySolutionESSUtilsInterface, Role, User } from './types';
+import type { SecuritySolutionUtilsInterface, Role, User } from './types';
 
 export function SecuritySolutionESSUtils({
   getService,
-}: FtrProviderContextWithSpaces): SecuritySolutionESSUtilsInterface {
+}: FtrProviderContextWithSpaces): SecuritySolutionUtilsInterface {
   const config = getService('config');
   const search = getService('search');
   const supertestWithoutAuth = getService('supertest');
@@ -61,26 +61,6 @@ export function SecuritySolutionESSUtils({
     cleanUpCustomRole: () => {
       // In ESS this is a no-op
       return Promise.resolve();
-    },
-
-    /**
-     * Deletes specified users by username
-     * @param names[]
-     */
-    async deleteUsers(names: string[]): Promise<void> {
-      for (const name of names) {
-        await security.user.delete(name);
-      }
-    },
-
-    /**
-     * Deletes specified roles by name
-     * @param roles[]
-     */
-    async deleteRoles(roles: string[]): Promise<void> {
-      for (const role of roles) {
-        await security.role.delete(role);
-      }
     },
   };
 }

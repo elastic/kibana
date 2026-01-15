@@ -17,11 +17,6 @@ export interface SecuritySolutionUtilsInterface {
   createSearch: (role?: string) => Promise<SearchService>;
 }
 
-export interface SecuritySolutionESSUtilsInterface extends SecuritySolutionUtilsInterface {
-  deleteUsers: (userNames: string[]) => Promise<any>;
-  deleteRoles: (roleNames: string[]) => Promise<any>;
-}
-
 interface FeaturesPrivileges {
   [featureId: string]: string[];
 }
