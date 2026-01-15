@@ -2454,7 +2454,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
 > warn
 > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
->Invalidation of the old API key is dependent on the bulk action. Please refer to the [API key behavior](https://www.elastic.co/guide/en/security/current/detections-api-key-behavior.html) for more details.
+>Invalidation of the old API key is dependent on the bulk action. Refer to the [API key behavior](https://www.elastic.co/guide/en/security/current/detections-api-key-behavior.html) for more details.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
