@@ -28,14 +28,16 @@ export function getOptions(type: LinkType, options: LinkOptions) {
         use_filters: dashboardOptions.use_filters,
       }),
       // <9.4 stored as useCurrentFilters
-      ...(typeof (dashboardOptions as { useCurrentFilters?: boolean })?.useCurrentFilters === 'boolean' && {
+      ...(typeof (dashboardOptions as { useCurrentFilters?: boolean })?.useCurrentFilters ===
+        'boolean' && {
         use_filters: (dashboardOptions as { useCurrentFilters?: boolean }).useCurrentFilters,
       }),
       ...(typeof dashboardOptions?.use_time_range === 'boolean' && {
         use_time_range: dashboardOptions.use_time_range,
       }),
       // <9.4 stored as useCurrentDateRange
-      ...(typeof (dashboardOptions as { useCurrentDateRange?: boolean })?.useCurrentDateRange === 'boolean' && {
+      ...(typeof (dashboardOptions as { useCurrentDateRange?: boolean })?.useCurrentDateRange ===
+        'boolean' && {
         use_time_range: (dashboardOptions as { useCurrentDateRange?: boolean }).useCurrentDateRange,
       }),
     };

@@ -26,7 +26,7 @@ import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/cont
 import { trackUiMetric } from '../../services/kibana_services';
 import type { LinksParentApi, ResolvedLink } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { DashboardLink } from '../../../server';
+import type { DashboardLink } from '../../../server';
 
 export interface DashboardLinkProps {
   link: ResolvedLink;
