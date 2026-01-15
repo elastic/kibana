@@ -62,7 +62,7 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      machineType: n2-highcpu-64
+      machineType: n2-highcpu-32
       preemptible: true
       diskSizeGb: 105
     key: linting
