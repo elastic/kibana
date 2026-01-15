@@ -17,7 +17,7 @@ const _allowedExperimentalValues = {
   enableAutoInstallContentPackages: true,
   enableOtelIntegrations: true,
   enableAgentStatusAlerting: true,
-  enableAgentPrivilegeLevelChange: false,
+  enableAgentPrivilegeLevelChange: true,
   installIntegrationsKnowledge: true,
   enableFleetPolicyRevisionsCleanupTask: true,
   agentlessPoliciesAPI: true, // When enabled, agentless policies API will be enabled.
