@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import type { IClusterClient } from '@kbn/core-elasticsearch-server';
 import type {
   FakeRawRequest,
@@ -26,6 +27,14 @@ import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchClient,
+  ISearchOptions,
+} from '@kbn/search-types';
+import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -47,6 +56,7 @@ export interface BaseExportTypeStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
+  data: DataPluginStart;
   screenshotting?: ScreenshottingStart;
 }
 
@@ -107,7 +117,7 @@ export abstract class ExportType<
     }
   }
 
-  protected async getSavedObjectsClient(request: KibanaRequest) {
+  private async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = this.startDeps;
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
@@ -124,6 +134,23 @@ export abstract class ExportType<
         logger.debug(`Request uses default Space`);
       }
     }
+  }
+
+  private getNoOpSearchSessionsClient(): SearchStrategyDependencies['searchSessionsClient'] {
+    return {
+      getId: async () => '',
+      save: async () => undefined,
+      get: async () => ({ id: '', attributes: {}, references: [], type: '' } as any),
+      find: async () => ({ saved_objects: [], total: 0 } as any),
+      update: async () => ({ id: '', attributes: {}, references: [], type: '' }),
+      cancel: async () => ({}),
+      delete: async () => ({}),
+      extend: async () => ({ id: '', attributes: {}, references: [], type: '' }),
+      status: async () => ({ status: 'complete' } as any),
+      trackId: async () => {},
+      getSearchIdMapping: async () => new Map(),
+      getConfig: () => ({} as any),
+    };
   }
 
   protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
@@ -176,6 +203,42 @@ export abstract class ExportType<
       port: serverInfo.port,
       uuid: this.context.env.instanceUuid,
       protocol: serverInfo.protocol,
+    };
+  }
+
+  protected async getInternalSearchClient(
+    dataPluginStart: DataPluginStart,
+    request: KibanaRequest
+  ): Promise<ISearchClient> {
+    const internalSearchStrategy = dataPluginStart.search.searchAsInternalUser;
+
+    const searchDeps = {
+      savedObjectsClient: await this.getSavedObjectsClient(request),
+      uiSettingsClient: await this.getUiSettingsClient(request),
+      esClient: this.startDeps.esClient.asScoped(request),
+      searchSessionsClient: this.getNoOpSearchSessionsClient(),
+      request,
+    };
+
+    return {
+      search: <
+        SearchStrategyRequest extends IKibanaSearchRequest,
+        SearchStrategyResponse extends IKibanaSearchResponse
+      >(
+        searchRequest: SearchStrategyRequest,
+        options: ISearchOptions = {}
+      ) =>
+        internalSearchStrategy.search(
+          searchRequest,
+          options,
+          searchDeps
+        ) as Observable<SearchStrategyResponse>,
+      cancel: (id: string, options?: ISearchOptions) =>
+        internalSearchStrategy.cancel?.(id, options || {}, searchDeps) || Promise.resolve(),
+
+      extend: (id: string, keepAlive: string, options?: ISearchOptions) =>
+        internalSearchStrategy.extend?.(id, keepAlive, options || {}, searchDeps) ||
+        Promise.resolve(),
     };
   }
 }

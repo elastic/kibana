@@ -28,8 +28,6 @@ import type {
 } from '@kbn/reporting-server';
 import { ExportType, getFieldFormats } from '@kbn/reporting-server';
 
-import { createInternalSearchClient } from '../internal_es_client';
-
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   data: DataPluginStart;
@@ -86,14 +84,8 @@ export class CsvSearchSourceExportType extends ExportType<
     const es = this.startDeps.esClient.asScoped(request);
     const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
 
-    const internalSearchClientDeps = {
-      savedObjectsClient: await this.getSavedObjectsClient(request),
-      uiSettingsClient: uiSettings,
-      esClient: es,
-    };
-
     const dataClient = useInternalUser
-      ? createInternalSearchClient(internalSearchClientDeps, dataPluginStart, request)
+      ? await this.getInternalSearchClient(dataPluginStart, request)
       : dataPluginStart.search.asScoped(request);
 
     const clients = {
