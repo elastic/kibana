@@ -69,22 +69,20 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
-import type { SuggestionsTracking } from './helpers';
 import {
   clearCacheWhenOld,
-  endLatencyTracking,
-  endSuggestionsLatencyTracking,
   filterDataErrors,
   getEditorOverwrites,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
   parseErrors,
   parseWarning,
-  resetTracking,
-  shouldSkipLatencySampling,
-  startLatencyTracking,
   useDebounceWithOptions,
 } from './helpers';
+import { useSuggestionsLatencyTracking } from './use_suggestions_latency_tracking';
+import { useInputLatencyTracking } from './use_input_latency_tracking';
+import { useValidationLatencyTracking } from './use_validation_latency_tracking';
+import { useInitLatencyTracking } from './use_init_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import { useRestorableState, withRestorableState } from './restorable_state';
@@ -143,52 +141,6 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const sessionIdRef = useRef<string>(uuidv4());
   const interactionIdRef = useRef(0);
-
-  // Input latency: keystroke → React re-render
-  const inputTrackingRef = useRef({
-    hasFirstSample: false,
-    startTime: 0,
-    queryLength: 0,
-    queryLines: 0,
-    interactionId: 0,
-  });
-
-  // Validation latency: validation execution only (excludes debounce delay)
-  const validationTrackingRef = useRef({
-    hasFirstSample: false,
-    startTime: 0,
-    queryLength: 0,
-    queryLines: 0,
-    interactionId: 0,
-  });
-
-  // Suggestions latency: keystroke → suggestions data ready
-  const suggestionsTrackingRef = useRef<SuggestionsTracking>({
-    hasFirstSample: false,
-    startTime: 0,
-    queryLength: 0,
-    queryLines: 0,
-    interactionId: 0,
-    computeStart: 0,
-    computeEnd: 0,
-  });
-
-  // Map lets us store per-version timing and evict the oldest entry efficiently.
-  const suggestionsVersionTimingRef = useRef<
-    Map<
-      number,
-      { timestamp: number; queryLength: number; queryLines: number; interactionId: number }
-    >
-  >(new Map());
-  // Cap version history to avoid unbounded growth.
-  const MAX_VERSION_TIMINGS = 50;
-  const SUGGESTIONS_SAMPLE_RATE = 30;
-
-  // Init latency: component mount → editor ready
-  const initTrackingRef = useRef({
-    complete: false,
-    startTime: performance.now(),
-  });
 
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const isFirstFocusRef = useRef<boolean>(true);
@@ -283,70 +235,28 @@ const ESQLEditorInternal = function ESQLEditor({
     [onTextLangQueryChange]
   );
 
-  const trackInputLatencyOnKeystroke = useCallback((queryText: string) => {
-    const interactionId = ++interactionIdRef.current;
-    const tracking = inputTrackingRef.current;
+  const { onSuggestionsReady, recordSuggestionsVersionTiming, resetSuggestionsTracking } =
+    useSuggestionsLatencyTracking({
+      editorModelRef: editorModel,
+      telemetryService,
+      sessionIdRef,
+      interactionIdRef,
+    });
 
-    if (shouldSkipLatencySampling(tracking, interactionId)) return;
+  const { trackInputLatencyOnKeystroke, reportInputLatency } = useInputLatencyTracking({
+    telemetryService,
+    sessionIdRef,
+    interactionIdRef,
+  });
 
-    startLatencyTracking(tracking, queryText, interactionId);
-  }, []);
+  const { trackValidationLatencyStart, trackValidationLatencyEnd, resetValidationTracking } =
+    useValidationLatencyTracking({
+      telemetryService,
+      sessionIdRef,
+      interactionIdRef,
+    });
 
-  // Track text version timestamps so we can correlate keystrokes with provider compute timing.
-  const recordSuggestionsVersionTiming = useCallback(
-    (model: monaco.editor.ITextModel) => {
-      const versionId = model.getAlternativeVersionId();
-
-      suggestionsVersionTimingRef.current.set(versionId, {
-        timestamp: performance.now(),
-        queryLength: model.getValueLength(),
-        queryLines: model.getLineCount(),
-        interactionId: interactionIdRef.current,
-      });
-
-      if (suggestionsVersionTimingRef.current.size > MAX_VERSION_TIMINGS) {
-        const oldestKey = suggestionsVersionTimingRef.current.keys().next().value;
-        if (oldestKey !== undefined) {
-          suggestionsVersionTimingRef.current.delete(oldestKey);
-        }
-      }
-    },
-    [interactionIdRef]
-  );
-
-  const trackValidationLatencyStart = useCallback((queryText: string) => {
-    const tracking = validationTrackingRef.current;
-
-    if (shouldSkipLatencySampling(tracking, interactionIdRef.current)) return;
-
-    startLatencyTracking(tracking, queryText, interactionIdRef.current);
-  }, []);
-
-  const trackValidationLatencyEnd = useCallback(
-    (active: boolean) => {
-      if (!active) return;
-
-      const result = endLatencyTracking(validationTrackingRef.current);
-      if (!result) return;
-
-      telemetryService.trackValidationLatency({
-        ...result,
-        sessionId: sessionIdRef.current,
-      });
-    },
-    [telemetryService]
-  );
-
-  const resetSuggestionsTracking = useCallback(() => {
-    const tracking = suggestionsTrackingRef.current;
-    resetTracking(tracking);
-    tracking.computeStart = 0;
-    tracking.computeEnd = 0;
-  }, []);
-
-  const resetValidationTracking = useCallback(() => {
-    resetTracking(validationTrackingRef.current);
-  }, []);
+  const { reportInitLatency } = useInitLatencyTracking({ telemetryService, sessionIdRef });
 
   const resetPendingTracking = useCallback(() => {
     resetValidationTracking();
@@ -443,14 +353,8 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [isLoading]);
 
   useEffect(() => {
-    const result = endLatencyTracking(inputTrackingRef.current);
-    if (!result) return;
-
-    telemetryService.trackInputLatency({
-      ...result,
-      sessionId: sessionIdRef.current,
-    });
-  }, [code, telemetryService]);
+    reportInputLatency();
+  }, [code, reportInputLatency]);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -704,47 +608,9 @@ const ESQLEditorInternal = function ESQLEditor({
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
       onSuggestionsWithCustomCommandShown: (commands) =>
         telemetryService.trackSuggestionsWithCustomCommandShown(commands),
-      onSuggestionsReady: (computeStart: number, computeEnd: number) => {
-        const tracking = suggestionsTrackingRef.current;
-        const model = editorModel.current;
-
-        if (!model) return;
-
-        const versionId = model.getAlternativeVersionId();
-        const versionTiming = suggestionsVersionTimingRef.current.get(versionId);
-
-        // Best-effort: without a Monaco request id we drop when timing is missing
-        // (e.g. provider runs before the change event, manual invoke, or version evicted).
-        if (!versionTiming) return;
-
-        if (
-          shouldSkipLatencySampling(tracking, versionTiming.interactionId, SUGGESTIONS_SAMPLE_RATE)
-        ) {
-          return;
-        }
-
-        tracking.computeStart = computeStart;
-        tracking.computeEnd = computeEnd;
-        tracking.startTime = versionTiming.timestamp;
-        tracking.queryLength = versionTiming.queryLength;
-        tracking.queryLines = versionTiming.queryLines;
-        tracking.interactionId = versionTiming.interactionId;
-
-        const result = endSuggestionsLatencyTracking(tracking);
-
-        if (!result) {
-          resetSuggestionsTracking();
-
-          return;
-        }
-
-        telemetryService.trackSuggestionsLatency({
-          ...result,
-          sessionId: sessionIdRef.current,
-        });
-      },
+      onSuggestionsReady,
     }),
-    [resetSuggestionsTracking, telemetryService]
+    [onSuggestionsReady, telemetryService]
   );
 
   const onClickQueryHistory = useCallback(
@@ -935,6 +801,7 @@ const ESQLEditorInternal = function ESQLEditor({
       invalidateColumnsCache?: boolean;
     }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
+
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const { warnings: parserWarnings, errors: parserErrors } = await parseMessages({
         invalidateColumnsCache,
@@ -1026,6 +893,7 @@ const ESQLEditorInternal = function ESQLEditor({
   useDebounceWithOptions(
     async () => {
       if (!editorModel.current) return;
+
       const subscription = { active: true };
       trackValidationLatencyStart(code);
 
@@ -1293,12 +1161,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   onBlur={() => setLabelInFocus(false)}
                   editorDidMount={async (editor) => {
                     // Track editor init time once per mount
-                    if (!initTrackingRef.current.complete) {
-                      const initDuration = performance.now() - initTrackingRef.current.startTime;
-
-                      telemetryService.trackInitLatency(initDuration, sessionIdRef.current);
-                      initTrackingRef.current.complete = true;
-                    }
+                    reportInitLatency();
 
                     editorRef.current = editor;
                     const model = editor.getModel();
