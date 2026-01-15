@@ -50,10 +50,10 @@ import { apiPublishesProjectRouting } from './publishes_project_routing';
 
 // TODO Avoid redefining this here, fix circular dependency with presentation-containers
 interface HasSections {
-  getPanelSection$: (uuid: string) => Observable<string | undefined>;
+  panelSection$: (uuid: string) => Observable<string | undefined>;
 }
 const apiHasSections = (api: unknown): api is HasSections => {
-  return typeof (api as HasSections)?.getPanelSection$ === 'function';
+  return typeof (api as HasSections)?.panelSection$ === 'function';
 };
 
 function filterByMetaData<FilterType extends ESQLControlVariable | Filter>(
@@ -88,7 +88,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
 
   const sectionId$ =
     apiHasUniqueId(api) && apiHasParentApi(api) && apiHasSections(api.parentApi)
-      ? api.parentApi.getPanelSection$(api.uuid)
+      ? api.parentApi.panelSection$(api.uuid)
       : of(undefined);
 
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {

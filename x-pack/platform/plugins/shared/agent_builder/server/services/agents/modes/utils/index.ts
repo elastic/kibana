@@ -12,3 +12,15 @@ export { prepareConversation } from './prepare_conversation';
 export { selectTools } from './select_tools';
 export { getPendingRound } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
+export {
+  prepareAttachmentPresentation,
+  getAttachmentSystemPrompt,
+  type AttachmentPresentation,
+  type AttachmentPresentationMode,
+  type AttachmentPresentationConfig,
+} from './attachment_presentation';
+export {
+  cleanToolCallHistory,
+  isCleanedResult,
+  estimateCleaningSavings,
+} from './clean_tool_history';

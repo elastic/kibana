@@ -37,7 +37,7 @@ export const AppMenuComponent = ({ config, visible = true }: AppMenuItemsProps) 
   const showMoreButtonId = 'show-more';
 
   const headerLinksProps = {
-    'data-test-subj': 'top-nav',
+    'data-test-subj': 'app-menu',
     gutterSize: 'xs' as const,
     popoverBreakpoints: 'none' as const,
     className: 'kbnTopNavMenu__wrapper',
