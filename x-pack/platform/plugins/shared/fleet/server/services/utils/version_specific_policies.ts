@@ -91,7 +91,7 @@ export function hasAgentVersionConditionInInputTemplate(
   assetsMap: PackagePolicyAssetsMap
 ): boolean {
   let hasVersionConditionInInputTemplate = false;
-  assetsMap?.forEach((assetBuffer?: Buffer, assetPath: string) => {
+  assetsMap?.forEach((assetBuffer: Buffer | undefined, assetPath: string) => {
     if (assetPath.endsWith('.hbs') && assetBuffer?.toString().includes('_meta.agent.version')) {
       hasVersionConditionInInputTemplate = true;
     }
