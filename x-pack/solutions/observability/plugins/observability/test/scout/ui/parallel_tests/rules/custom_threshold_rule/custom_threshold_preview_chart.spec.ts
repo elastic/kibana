@@ -8,7 +8,7 @@ import { expect } from '@kbn/scout-oblt';
 import { test } from '../../../fixtures';
 
 // FLAKY: https://github.com/elastic/kibana/issues/247632
-test.describe.skip('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, () => {
   const previewChartDataTestSubj = 'thresholdRulePreviewChart';
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
