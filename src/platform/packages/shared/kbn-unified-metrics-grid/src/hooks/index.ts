@@ -13,3 +13,4 @@ export { useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
 export { useGridNavigation } from './use_grid_navigation';
 export { useMetricFields } from './use_metric_fields';
 export { useMetricFieldsFilter } from './use_metric_fields_filter';
+export { useDiscoverFieldForBreakdown } from './use_discover_field_for_breakdown';
