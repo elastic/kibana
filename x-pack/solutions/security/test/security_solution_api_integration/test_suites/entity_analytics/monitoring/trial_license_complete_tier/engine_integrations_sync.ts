@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
   const privMonUtils = PrivMonUtils(getService);
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Integrations Sync', () => {
-    describe.only('integrations sync', async () => {
+    describe('integrations sync', async () => {
       beforeEach(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
