@@ -351,7 +351,7 @@ const styles = {
     return css({
       '.linkEditor': {
         maxInlineSize: `calc(${euiTheme.size.xs} * 125)`,
-        height: 'var(--kbn-application--content-height)',
+        height: 'var(--kbn-layout--application-height)',
         position: 'fixed',
         display: 'flex',
         inlineSize: '50vw',
