@@ -22,6 +22,7 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import { useObservedUserItems } from './hooks/use_observed_user_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
+import { ResolutionGraphPreview } from '../shared/components/resolution_graph_preview';
 
 interface UserPanelContentProps {
   userName: string;
@@ -54,6 +55,7 @@ export const UserPanelContent = ({
 
   return (
     <FlyoutBody>
+      <ResolutionGraphPreview entityType="user" entityId={userName} />
       {isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
       )}

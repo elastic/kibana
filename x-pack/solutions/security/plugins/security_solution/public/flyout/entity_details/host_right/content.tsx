@@ -21,6 +21,7 @@ import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } fro
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHostFields } from './hooks/use_observed_host_fields';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import { ResolutionGraphPreview } from '../shared/components/resolution_graph_preview';
 
 interface HostPanelContentProps {
   observedHost: ObservedEntityData<HostItem>;
@@ -53,6 +54,7 @@ export const HostPanelContent = ({
 
   return (
     <FlyoutBody>
+      <ResolutionGraphPreview entityType="host" entityId={hostName} />
       {isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
       )}

@@ -92,7 +92,7 @@ export const listGroupedEntities = (router: SecuritySolutionPluginRouter, logger
             | EVAL group_id = COALESCE(resolution_id, CONCAT("__single_", entity.id)),
                    is_resolved = resolution_id IS NOT NULL
             | KEEP entity.id, entity.name, entity.type, ${riskFieldPrefix}.risk.calculated_score_norm, ${riskFieldPrefix}.risk.calculated_level, group_id, is_resolved, is_primary
-            | SORT ${riskFieldPrefix}.risk.calculated_score_norm DESC NULLS LAST
+            | SORT is_resolved DESC, ${riskFieldPrefix}.risk.calculated_score_norm DESC NULLS LAST
             | LIMIT 10000
           `;
 
