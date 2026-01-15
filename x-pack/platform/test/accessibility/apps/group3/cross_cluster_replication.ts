@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const es = getService('es');
   const retry = getService('retry');
+  const flyout = getService('flyout');
 
   describe('cross cluster replication - a11y tests', () => {
     before(async () => {
@@ -58,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           it('follower index flyout', async () => {
             await a11y.testAppSnapshot();
-            await testSubjects.click('closeFlyoutButton');
+            await flyout.closeFlyout();
             await retry.waitFor('follower index table to be visible', async () => {
               return await (await find.byCssSelector('table')).isDisplayed();
             });
@@ -89,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           it('auto follower index flyout', async () => {
             await a11y.testAppSnapshot();
-            await testSubjects.click('closeFlyoutButton');
+            await flyout.closeFlyout();
             await retry.waitFor('auto follower index table to be visible', async () => {
               return await (await find.byCssSelector('table')).isDisplayed();
             });

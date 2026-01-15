@@ -14,6 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const flyout = getService('flyout');
   const es = getService('es');
 
   const ENRICH_INDEX_NAME = 'test-policy-1';
@@ -84,7 +85,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Assert that flyout is opened
       expect(await testSubjects.exists('policyDetailsFlyout')).to.be(true);
       // Close flyout
-      await testSubjects.click('closeFlyoutButton');
+      await flyout.closeFlyout();
     });
   });
 };
