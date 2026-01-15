@@ -16,6 +16,7 @@ import {
   BasicPrettyPrinter,
   isStringLiteral,
   esqlCommandRegistry,
+  TRANSFORMATIONAL_COMMANDS,
 } from '@kbn/esql-language';
 
 import type {
@@ -91,11 +92,10 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
  */
 export function hasTransformationalCommand(esql?: string) {
   if (!esql) return false;
-  const transformationalCommands = ['stats', 'keep'];
   const { root } = Parser.parse(esql);
 
   // Check for direct transformational commands first
-  const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
+  const hasAtLeastOneTransformationalCommand = TRANSFORMATIONAL_COMMANDS.some((command) =>
     root.commands.find(({ name }) => name === command)
   );
 

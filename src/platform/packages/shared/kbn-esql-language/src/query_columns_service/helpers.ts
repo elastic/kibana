@@ -13,6 +13,7 @@ import {
   isSource,
   mutate,
   synth,
+  TRANSFORMATIONAL_COMMANDS,
   Walker,
   type ESQLAstCommand,
 } from '../..';
@@ -96,9 +97,8 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
  * After KEEP or STATS, no new unmapped fields are added as they were erased by those destructive commands.
  */
 export function areNewUnmappedFieldsAllowed(previousCommands: ESQLAstCommand[]): boolean {
-  const allFieldsDestructiveCommands = ['KEEP', 'STATS'];
   return !previousCommands.find((cmd) =>
-    allFieldsDestructiveCommands.includes(cmd.name.toUpperCase())
+    TRANSFORMATIONAL_COMMANDS.includes(cmd.name.toLowerCase())
   );
 }
 
