@@ -9,10 +9,35 @@ import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from './visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { GROUP_ID } from './constants';
+import { DEFAULT_PALETTE } from './palette_config';
 import type { DatasourceLayers, OperationDescriptor } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { GaugeVisualizationState } from './constants';
+
+const stops = [
+  {
+    color: 'blue',
+    stop: 0,
+  },
+  {
+    color: 'red',
+    stop: 25,
+  },
+  {
+    color: 'yellow',
+    stop: 50,
+  },
+  {
+    color: 'green',
+    stop: 75,
+  },
+];
+
+jest.mock('@kbn/coloring', () => ({
+  ...jest.requireActual('@kbn/coloring'),
+  applyPaletteParams: jest.fn().mockReturnValue(stops),
+}));
 
 function exampleState(): GaugeVisualizationState {
   return {
@@ -33,6 +58,7 @@ describe('gauge', () => {
 
   beforeEach(() => {
     frame = createMockFramePublicAPI();
+    jest.restoreAllMocks();
   });
 
   describe('#intialize', () => {
@@ -42,7 +68,15 @@ describe('gauge', () => {
         layerType: LayerTypes.DATA,
         shape: 'horizontalBullet',
         labelMajorMode: 'auto',
-        ticksPosition: 'auto',
+        ticksPosition: 'bands',
+        colorMode: 'palette',
+        palette: {
+          ...DEFAULT_PALETTE,
+          params: {
+            ...DEFAULT_PALETTE.params,
+            stops,
+          },
+        },
       });
     });
 
