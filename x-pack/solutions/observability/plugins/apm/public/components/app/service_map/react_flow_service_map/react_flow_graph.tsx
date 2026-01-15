@@ -93,14 +93,6 @@ function ReactFlowGraphInner({
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('LR');
   const [selectedNodeForPopover, setSelectedNodeForPopover] =
     useState<Node<ServiceMapNodeData> | null>(null);
-  const popoverOpenTimeRef = React.useRef<number>(0);
-  const lastViewportRef = React.useRef({ x: 0, y: 0, zoom: 1 });
-  const reactFlowInstanceRef = React.useRef(reactFlowInstance);
-
-  // Update ref when reactFlowInstance changes
-  React.useEffect(() => {
-    reactFlowInstanceRef.current = reactFlowInstance;
-  }, [reactFlowInstance]);
 
   const primaryColor = euiTheme.colors.primary;
 
@@ -172,30 +164,14 @@ function ReactFlowGraphInner({
 
   // Handle node click - update node selection and edge highlighting
   const handleNodeClick: NodeMouseHandler<Node<ServiceMapNodeData>> = useCallback(
-    (event, node) => {
-      event.stopPropagation();
+    (_, node) => {
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
 
-      // Update node selection state
-      setNodes((currentNodes) =>
-        currentNodes.map((n) => ({
-          ...n,
-          selected: n.id === newSelectedId,
-        }))
-      );
-
-      // Update edge highlighting
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
       setSelectedNodeForPopover(newSelectedId ? node : null);
-
-      // Track when popover opens and store current viewport
-      if (newSelectedId) {
-        popoverOpenTimeRef.current = Date.now();
-        lastViewportRef.current = reactFlowInstanceRef.current.getViewport();
-      }
     },
-    [selectedNodeId, setNodes, setEdges, applyEdgeHighlighting]
+    [selectedNodeId, setEdges, applyEdgeHighlighting]
   );
 
   // Handle pane click to deselect
@@ -215,25 +191,8 @@ function ReactFlowGraphInner({
     setSelectedNodeForPopover(null);
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
-  // Handle viewport changes (pan/zoom) - close popover
   const handleMove = useCallback(() => {
-    if (!selectedNodeForPopover) return;
-
-    // Small delay to prevent closing from click-triggered move events
-    const timeSinceOpen = Date.now() - popoverOpenTimeRef.current;
-    if (timeSinceOpen < 100) return;
-
-    // Get current viewport
-    const currentViewport = reactFlowInstanceRef.current.getViewport();
-    const lastViewport = lastViewportRef.current;
-
-    // Check if there's actual meaningful movement (> 5px or zoom change > 0.01)
-    const deltaX = Math.abs(currentViewport.x - lastViewport.x);
-    const deltaY = Math.abs(currentViewport.y - lastViewport.y);
-    const deltaZoom = Math.abs(currentViewport.zoom - lastViewport.zoom);
-
-    if (deltaX > 5 || deltaY > 5 || deltaZoom > 0.01) {
-      lastViewportRef.current = currentViewport;
+    if (selectedNodeForPopover) {
       setSelectedNodeId(null);
       setSelectedNodeForPopover(null);
 

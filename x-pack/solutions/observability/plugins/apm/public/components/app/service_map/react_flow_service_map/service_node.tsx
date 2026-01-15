@@ -90,13 +90,14 @@ export const ServiceNode = memo(
               justify-content: center;
               box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
               cursor: pointer;
+              pointer-events: all;
             `}
           >
             {iconUrl && (
               <img
                 src={iconUrl}
                 alt={data.agentName}
-                style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+                style={{ width: '60%', height: '60%', objectFit: 'contain', pointerEvents: 'none' }}
               />
             )}
           </div>
@@ -118,6 +119,7 @@ export const ServiceNode = memo(
             max-width: 200px;
             text-align: center;
             overflow: hidden;
+            pointer-events: none;
           `}
         >
           {data.label}
