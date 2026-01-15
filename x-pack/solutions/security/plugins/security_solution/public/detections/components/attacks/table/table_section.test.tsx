@@ -9,6 +9,7 @@ import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import type { GroupingBucket, ParsedGroupingAggregation } from '@kbn/grouping/src';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { TestProviders } from '../../../../common/mock';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -20,9 +21,11 @@ import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_h
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
+import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 
+jest.mock('@kbn/expandable-flyout');
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../hooks/attacks/use_get_default_group_title_renderers');
@@ -42,6 +45,14 @@ const mockUseGetDefaultGroupTitleRenderers = useGetDefaultGroupTitleRenderers as
 const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
 const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
 const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
+const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
+
+const defaultProps: Parameters<typeof TableSection>[0] = {
+  assignees: [],
+  pageFilters: [],
+  statusFilter: [],
+  dataView,
+};
 
 describe('<TableSection />', () => {
   const openSchedulesFlyout = jest.fn();
@@ -70,6 +81,9 @@ describe('<TableSection />', () => {
         {props.emptyGroupingComponent}
       </div>
     ));
+    mockUseExpandableFlyoutApi.mockReturnValue({
+      openFlyout: jest.fn(),
+    });
     (useUserData as jest.Mock).mockReturnValue([
       {
         loading: false,
@@ -578,6 +592,105 @@ describe('<TableSection />', () => {
       });
 
       expect(getAttackMock).toHaveBeenCalledWith('some-key', groupingBucket);
+    });
+
+    describe('openAttackDetailsFlyout', () => {
+      it('should call openFlyout with correct parameters when attack exists', async () => {
+        const openFlyoutMock = jest.fn();
+        mockUseExpandableFlyoutApi.mockReturnValue({
+          openFlyout: openFlyoutMock,
+        });
+
+        const mockAttack = { id: 'attack-123' };
+        const getAttackMock = jest.fn().mockReturnValue(mockAttack);
+        mockUseAttackGroupHandler.mockReturnValue({
+          getAttack: getAttackMock,
+          isLoading: false,
+        });
+
+        render(
+          <TestProviders>
+            <TableSection {...defaultProps} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(GroupedAlertsTable).toHaveBeenCalled();
+        });
+
+        const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+        const { getAdditionalActionButtons } = props;
+
+        const groupingBucket = {
+          key: ['attack-123'],
+          doc_count: 10,
+          selectedGroup: 'some-group',
+          key_as_string: 'attack-123',
+          isNullGroup: false,
+        };
+
+        const buttons = getAdditionalActionButtons('attack-123', groupingBucket);
+        const { getByTestId } = render(<div>{buttons}</div>);
+
+        const button = getByTestId(EXPAND_ATTACK_BUTTON_TEST_ID);
+        await act(async () => {
+          button.click();
+        });
+
+        expect(openFlyoutMock).toHaveBeenCalledWith({
+          right: {
+            id: AttackDetailsRightPanelKey,
+            params: {
+              attackId: 'attack-123',
+              indexName: dataView.getIndexPattern(),
+            },
+          },
+        });
+      });
+
+      it('should not call openFlyout when attack does not exist', async () => {
+        const openFlyoutMock = jest.fn();
+        mockUseExpandableFlyoutApi.mockReturnValue({
+          openFlyout: openFlyoutMock,
+        });
+
+        const getAttackMock = jest.fn().mockReturnValue(undefined);
+        mockUseAttackGroupHandler.mockReturnValue({
+          getAttack: getAttackMock,
+          isLoading: false,
+        });
+
+        render(
+          <TestProviders>
+            <TableSection {...defaultProps} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(GroupedAlertsTable).toHaveBeenCalled();
+        });
+
+        const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+        const { getAdditionalActionButtons } = props;
+
+        const groupingBucket = {
+          key: ['unknown-key'],
+          doc_count: 10,
+          selectedGroup: 'some-group',
+          key_as_string: 'unknown-key',
+          isNullGroup: false,
+        };
+
+        const buttons = getAdditionalActionButtons('unknown-key', groupingBucket);
+        const { getByTestId } = render(<div>{buttons}</div>);
+
+        const button = getByTestId(EXPAND_ATTACK_BUTTON_TEST_ID);
+        await act(async () => {
+          button.click();
+        });
+
+        expect(openFlyoutMock).not.toHaveBeenCalled();
+      });
     });
   });
 });

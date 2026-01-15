@@ -1545,6 +1545,26 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CspClientPluginStartDeps.kql",
+            "type": "Object",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.KqlPluginStart",
+                "text": "KqlPluginStart"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
             "id": "def-public.CspClientPluginStartDeps.uiActions",
             "type": "Object",
             "tags": [],
