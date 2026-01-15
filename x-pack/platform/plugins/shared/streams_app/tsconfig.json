@@ -105,6 +105,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/react-query",
     "@kbn/timerange",
-    "@kbn/ftr-llm-proxy",
+    "@kbn/inference-common",
   ]
 }
