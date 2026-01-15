@@ -179,7 +179,6 @@ export function DescriptionGenerationControl({
           >
             {task.error}
           </EuiCallOut>
-          {triggerButton}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -207,7 +206,6 @@ export function DescriptionGenerationControl({
               }
             )}
           </EuiCallOut>
-          {triggerButton}
         </EuiFlexItem>
       </EuiFlexGroup>
     );

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useStreamDescriptionApi } from './stream_description/use_stream_description_api';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
 import type { AIFeatures } from '../../hooks/use_ai_features';
@@ -133,7 +133,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                           aria-label={CANCEL_LABEL}
                           size="s"
                           isLoading={isUpdating}
-                          isDisabled={isUpdating}
+                          isDisabled={isUpdating || task?.status === 'in_progress'}
                           onClick={onCancelEdit}
                           data-test-subj="stream_description_cancel_edit_button"
                         >
@@ -148,7 +148,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                         iconSize="s"
                         fill
                         isLoading={isUpdating}
-                        isDisabled={isUpdating}
+                        isDisabled={isUpdating || task?.status === 'in_progress'}
                         onClick={() => {
                           if (!isEditing) {
                             onStartEditing();
@@ -196,7 +196,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     isLoading={isUpdating}
-                    isDisabled={isUpdating}
+                    isDisabled={isUpdating || task?.status === 'in_progress'}
                     onClick={onStartEditing}
                     data-test-subj="stream_description_manual_entry_button"
                   >
