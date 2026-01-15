@@ -73,6 +73,12 @@ When to use:
 `,
     schema: getMetricChangePointsSchema,
     tags: ['observability', 'metrics'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async ({ start, end, index, kqlFilter, aggregation, groupBy = [] }, { esClient }) => {
       try {
         const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
