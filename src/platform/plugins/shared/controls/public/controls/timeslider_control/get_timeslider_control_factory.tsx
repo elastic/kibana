@@ -53,7 +53,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
   return {
     type: TIME_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
@@ -235,11 +235,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       function serializeState() {
         return {
-          rawState: {
-            ...timeRangePercentage.getLatestState(),
-            isAnchored: isAnchored$.value,
-          },
-          references: [],
+          ...timeRangePercentage.getLatestState(),
+          isAnchored: isAnchored$.value,
         };
       }
 
@@ -259,8 +256,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           };
         },
         onReset: (lastSaved) => {
-          timeRangePercentage.reinitializeState(lastSaved?.rawState);
-          setIsAnchored(lastSaved?.rawState?.isAnchored);
+          timeRangePercentage.reinitializeState(lastSaved);
+          setIsAnchored(lastSaved?.isAnchored);
         },
       });
 
