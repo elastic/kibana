@@ -76,7 +76,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   end,
                   esClient,
                   inferenceClient: boundInferenceClient,
-                  logger: taskContext.logger.get('feature_identification'),
+                  logger: taskContext.logger.get('features_identification'),
                   stream,
                   signal: runContext.abortController.signal,
                   systemPrompt: featurePromptOverride,
