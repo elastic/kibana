@@ -774,3 +774,31 @@ export const SNAPSHOT_ERROR_COMPARING = i18n.translate(
     defaultMessage: 'Error comparing snapshots',
   }
 );
+
+export const DRIFT_TIMELINE_SELECTOR_TITLE = i18n.translate(
+  'xpack.securitySolution.endpointAssets.drift.timelineSelector.title',
+  {
+    defaultMessage: 'Time Range',
+  }
+);
+
+export const DRIFT_TIMELINE_UPDATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.endpointAssets.drift.timelineSelector.update',
+  {
+    defaultMessage: 'Update',
+  }
+);
+
+export const DRIFT_TIMELINE_START_TIME = i18n.translate(
+  'xpack.securitySolution.endpointAssets.drift.timelineSelector.startTime',
+  {
+    defaultMessage: 'Start Time',
+  }
+);
+
+export const DRIFT_TIMELINE_END_TIME = i18n.translate(
+  'xpack.securitySolution.endpointAssets.drift.timelineSelector.endTime',
+  {
+    defaultMessage: 'End Time',
+  }
+);

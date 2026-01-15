@@ -439,6 +439,11 @@ export interface PrivilegesSummaryResponse {
   average_admin_count: number;
 }
 
+export interface DriftHistogramBucket {
+  timestamp: string;
+  count: number;
+}
+
 export interface DriftSummaryResponse {
   total_events: number;
   events_by_category: {
@@ -480,6 +485,8 @@ export interface DriftSummaryResponse {
   page_size?: number;
   /** Total number of recent changes matching filters */
   total_recent_changes?: number;
+  /** Event count histogram for timeline visualization */
+  histogram?: DriftHistogramBucket[];
 }
 
 export interface UnknownKnownsSummaryResponse {

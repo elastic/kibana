@@ -9,8 +9,9 @@ import { collectValues as collect, newestValue, oldestValue } from './field_util
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 
-// Osquery CAASM endpoint assets index pattern
+// Osquery CAASM endpoint assets index patterns
 const ENDPOINT_ASSETS_OSQUERY_INDEX = 'endpoint-assets-osquery-*';
+const ENDPOINT_DRIFT_STATS_INDEX = 'endpoint-drift-stats-*';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
 export const HOST_IDENTITY_FIELD = 'host.name';
@@ -21,7 +22,7 @@ export const hostEntityEngineDescription: EntityDescription = {
   version: HOST_DEFINITION_VERSION,
   identityField: HOST_IDENTITY_FIELD,
   identityFieldMapping: { type: 'keyword' },
-  indexPatterns: [ENDPOINT_ASSETS_OSQUERY_INDEX],
+  indexPatterns: [ENDPOINT_ASSETS_OSQUERY_INDEX, ENDPOINT_DRIFT_STATS_INDEX],
   settings: {
     timestampField: '@timestamp',
   },
@@ -141,6 +142,43 @@ export const hostEntityEngineDescription: EntityDescription = {
     newestValue({ source: 'endpoint.posture.gatekeeper_enabled_raw' }),
     newestValue({ source: 'endpoint.posture.sip_enabled', mapping: { type: 'boolean' } }),
     newestValue({ source: 'endpoint.posture.sip_enabled_raw' }),
+
+    // Drift detection statistics (from Drift Stats Transform)
+    newestValue({ source: 'endpoint.drift.events_24h.total', mapping: { type: 'integer' } }),
+    newestValue({
+      source: 'endpoint.drift.events_24h.by_severity.critical',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.drift.events_24h.by_severity.high',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.drift.events_24h.by_severity.medium',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.drift.events_24h.by_severity.low', mapping: { type: 'integer' } }),
+    newestValue({
+      source: 'endpoint.drift.events_24h.by_category.privileges',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.drift.events_24h.by_category.persistence',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.drift.events_24h.by_category.network',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.drift.events_24h.by_category.software',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({
+      source: 'endpoint.drift.events_24h.by_category.posture',
+      mapping: { type: 'integer' },
+    }),
+    newestValue({ source: 'endpoint.drift.last_event_timestamp', mapping: { type: 'date' } }),
 
     // Privileges (Unknown Knowns detection)
     newestValue({ source: 'endpoint.privileges.admin_count', mapping: { type: 'integer' } }),

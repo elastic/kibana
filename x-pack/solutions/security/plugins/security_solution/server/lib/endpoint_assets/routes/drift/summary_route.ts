@@ -45,16 +45,18 @@ export const registerDriftSummaryRoute = (
         validate: {
           request: {
             query: schema.object({
-              time_range: schema.oneOf(
-                [
+              time_range: schema.maybe(
+                schema.oneOf([
                   schema.literal('1h'),
                   schema.literal('4h'),
                   schema.literal('24h'),
                   schema.literal('7d'),
                   schema.literal('30d'),
-                ],
-                { defaultValue: '24h' }
+                ])
               ),
+              from: schema.maybe(schema.string()),
+              to: schema.maybe(schema.string()),
+              histogram_interval: schema.maybe(schema.string()),
               categories: schema.maybe(schema.string()),
               severities: schema.maybe(schema.string()),
               host_id: schema.maybe(schema.string()),
@@ -72,6 +74,9 @@ export const registerDriftSummaryRoute = (
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const {
             time_range: timeRange,
+            from,
+            to,
+            histogram_interval: histogramInterval,
             categories: categoriesParam,
             severities: severitiesParam,
             host_id: hostId,
@@ -79,8 +84,25 @@ export const registerDriftSummaryRoute = (
             page_size: pageSize = 10,
           } = request.query;
 
-          const timeRangeMs = TIME_RANGE_TO_MS[timeRange] || TIME_RANGE_TO_MS['24h'];
-          const rangeStart = Date.now() - timeRangeMs;
+          let rangeStart: number;
+          let rangeEnd: number;
+          let effectiveTimeRange: string;
+
+          if (from && to) {
+            rangeStart = new Date(from).getTime();
+            rangeEnd = new Date(to).getTime();
+            effectiveTimeRange = 'custom';
+          } else if (timeRange) {
+            const timeRangeMs = TIME_RANGE_TO_MS[timeRange] || TIME_RANGE_TO_MS['24h'];
+            rangeStart = Date.now() - timeRangeMs;
+            rangeEnd = Date.now();
+            effectiveTimeRange = timeRange;
+          } else {
+            const defaultMs = TIME_RANGE_TO_MS['24h'];
+            rangeStart = Date.now() - defaultMs;
+            rangeEnd = Date.now();
+            effectiveTimeRange = '24h';
+          }
 
           // Parse and validate categories
           const categories = categoriesParam
@@ -108,6 +130,58 @@ export const registerDriftSummaryRoute = (
             filterClauses.push({ term: { 'host.id.keyword': hostId } });
           }
 
+          const baseAggs: Record<string, unknown> = {
+            total_events: {
+              value_count: { field: '@timestamp' },
+            },
+            by_category: {
+              terms: {
+                field: 'drift.category.keyword',
+                size: 10,
+              },
+            },
+            by_severity: {
+              terms: {
+                field: 'drift.severity.keyword',
+                size: 10,
+              },
+            },
+            unique_hosts: {
+              cardinality: {
+                field: 'host.id.keyword',
+              },
+            },
+            top_changed_assets: {
+              terms: {
+                field: 'host.id.keyword',
+                size: 10,
+                order: { _count: 'desc' },
+              },
+              aggs: {
+                host_name: {
+                  terms: {
+                    field: 'host.name.keyword',
+                    size: 1,
+                  },
+                },
+              },
+            },
+          };
+
+          if (histogramInterval) {
+            baseAggs.histogram = {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: histogramInterval || '5m',
+                min_doc_count: 0,
+                extended_bounds: {
+                  min: rangeStart,
+                  max: rangeEnd,
+                },
+              },
+            };
+          }
+
           const result = await esClient.search({
             index: 'endpoint-drift-events-*',
             size: 0,
@@ -118,7 +192,7 @@ export const registerDriftSummaryRoute = (
                     range: {
                       '@timestamp': {
                         gte: rangeStart,
-                        lte: Date.now(),
+                        lte: rangeEnd,
                       },
                     },
                   },
@@ -126,43 +200,7 @@ export const registerDriftSummaryRoute = (
                 filter: filterClauses.length > 0 ? filterClauses : undefined,
               },
             },
-            aggs: {
-              total_events: {
-                value_count: { field: '@timestamp' },
-              },
-              by_category: {
-                terms: {
-                  field: 'drift.category.keyword',
-                  size: 10,
-                },
-              },
-              by_severity: {
-                terms: {
-                  field: 'drift.severity.keyword',
-                  size: 10,
-                },
-              },
-              unique_hosts: {
-                cardinality: {
-                  field: 'host.id.keyword',
-                },
-              },
-              top_changed_assets: {
-                terms: {
-                  field: 'host.id.keyword',
-                  size: 10,
-                  order: { _count: 'desc' },
-                },
-                aggs: {
-                  host_name: {
-                    terms: {
-                      field: 'host.name.keyword',
-                      size: 1,
-                    },
-                  },
-                },
-              },
-            },
+            aggs: baseAggs,
           });
 
           const aggs = result.aggregations as Record<string, unknown> | undefined;
@@ -231,11 +269,11 @@ export const registerDriftSummaryRoute = (
             })) ?? [];
 
           // Fetch recent changes with pagination
-          const from = (page - 1) * pageSize;
+          const paginationOffset = (page - 1) * pageSize;
           const recentEventsResult = await esClient.search({
             index: 'endpoint-drift-events-*',
             size: pageSize,
-            from,
+            from: paginationOffset,
             sort: [{ '@timestamp': 'desc' }],
             track_total_hits: true,
             query: {
@@ -245,7 +283,7 @@ export const registerDriftSummaryRoute = (
                     range: {
                       '@timestamp': {
                         gte: rangeStart,
-                        lte: Date.now(),
+                        lte: rangeEnd,
                       },
                     },
                   },
@@ -311,6 +349,17 @@ export const registerDriftSummaryRoute = (
           const totalHits = recentEventsResult.hits.total;
           const totalCount = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
 
+          const histogramAgg = aggs?.histogram as
+            | {
+                buckets: Array<{ key: number; key_as_string?: string; doc_count: number }>;
+              }
+            | undefined;
+
+          const histogram = histogramAgg?.buckets.map((bucket) => ({
+            timestamp: bucket.key_as_string || new Date(bucket.key).toISOString(),
+            count: bucket.doc_count,
+          }));
+
           const summaryResponse: DriftSummaryResponse = {
             total_events: totalEventsAgg?.value ?? 0,
             events_by_category: eventsByCategory,
@@ -318,10 +367,11 @@ export const registerDriftSummaryRoute = (
             assets_with_changes: uniqueHostsAgg?.value ?? 0,
             top_changed_assets: topChangedAssets,
             recent_changes: recentChanges,
-            time_range: timeRange,
+            time_range: effectiveTimeRange,
             page,
             page_size: pageSize,
             total_recent_changes: totalCount,
+            histogram,
           };
 
           return response.ok({

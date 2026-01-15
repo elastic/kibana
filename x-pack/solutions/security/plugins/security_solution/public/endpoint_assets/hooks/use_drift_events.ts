@@ -125,6 +125,8 @@ const QUERY_KEY = 'endpoint-assets-drift-events';
 
 interface UseDriftEventsOptions {
   timeRange?: string;
+  from?: Date;
+  to?: Date;
   categories?: DriftCategory[];
   severities?: DriftSeverity[];
   hostId?: string;
@@ -143,7 +145,9 @@ export const useDriftEvents = (
   options: UseDriftEventsOptions = {}
 ): UseDriftEventsResult => {
   const {
-    timeRange = '24h',
+    timeRange,
+    from,
+    to,
     categories = [],
     severities = [],
     hostId = '',
@@ -159,15 +163,25 @@ export const useDriftEvents = (
       throw new Error('HTTP service not available');
     }
 
+    const query: Record<string, string | number | undefined> = {
+      categories: categories.length > 0 ? categories.join(',') : undefined,
+      severities: severities.length > 0 ? severities.join(',') : undefined,
+      host_id: hostId || undefined,
+      page,
+      page_size: pageSize,
+    };
+
+    if (from && to) {
+      query.from = from.toISOString();
+      query.to = to.toISOString();
+    } else if (timeRange) {
+      query.time_range = timeRange;
+    } else {
+      query.time_range = '24h';
+    }
+
     const response = await http.get<DriftSummaryResponse>(ENDPOINT_ASSETS_ROUTES.DRIFT_SUMMARY, {
-      query: {
-        time_range: timeRange,
-        categories: categories.length > 0 ? categories.join(',') : undefined,
-        severities: severities.length > 0 ? severities.join(',') : undefined,
-        host_id: hostId || undefined,
-        page,
-        page_size: pageSize,
-      },
+      query,
     });
 
     // Transform DriftSummaryResponse to DriftEventsResponse
@@ -204,22 +218,21 @@ export const useDriftEvents = (
       page: response.page ?? page,
       page_size: response.page_size ?? pageSize,
     };
-  }, [services, timeRange, categories, severities, hostId, page, pageSize]);
+  }, [services, timeRange, from, to, categories, severities, hostId, page, pageSize]);
+
+  const queryKey = [QUERY_KEY, timeRange, from?.getTime(), to?.getTime(), categories, severities, hostId, page, pageSize];
 
   const { data, isFetching, error } = useQuery({
-    queryKey: [QUERY_KEY, timeRange, categories, severities, hostId, page, pageSize],
+    queryKey,
     queryFn: fetchDriftEvents,
     staleTime: 30000,
     refetchOnWindowFocus: false,
-    // Keep previous page data visible while fetching new page
     placeholderData: keepPreviousData,
   });
 
   const refresh = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: [QUERY_KEY, timeRange, categories, severities, hostId, page, pageSize],
-    });
-  }, [queryClient, timeRange, categories, severities, hostId, page, pageSize]);
+    queryClient.invalidateQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
   return {
     data: data ?? null,

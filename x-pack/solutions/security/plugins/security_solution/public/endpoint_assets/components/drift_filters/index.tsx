@@ -16,7 +16,6 @@ import {
 import type { DriftCategory, DriftSeverity } from '../../../../common/endpoint_assets';
 import { DriftCategoryFilter } from './drift_category_filter';
 import { DriftSeverityFilter } from './drift_severity_filter';
-import { DriftTimeRangeFilter } from './drift_time_range_filter';
 import { DriftHostFilter } from './drift_host_filter';
 import type { HostOption } from './drift_host_filter';
 import * as i18n from '../../pages/translations';
@@ -24,12 +23,10 @@ import * as i18n from '../../pages/translations';
 export interface DriftFiltersProps {
   selectedCategories: DriftCategory[];
   selectedSeverities: DriftSeverity[];
-  selectedTimeRange: string;
   selectedHostId: string;
   availableHosts: HostOption[];
   onCategoryChange: (categories: DriftCategory[]) => void;
   onSeverityChange: (severities: DriftSeverity[]) => void;
-  onTimeRangeChange: (timeRange: string) => void;
   onHostChange: (hostId: string) => void;
   onRefresh: () => void;
   isLoadingHosts?: boolean;
@@ -38,30 +35,16 @@ export interface DriftFiltersProps {
 const DriftFiltersComponent: React.FC<DriftFiltersProps> = ({
   selectedCategories,
   selectedSeverities,
-  selectedTimeRange,
   selectedHostId,
   availableHosts,
   onCategoryChange,
   onSeverityChange,
-  onTimeRangeChange,
   onHostChange,
   onRefresh,
   isLoadingHosts = false,
 }) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          <strong>Time range:</strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DriftTimeRangeFilter
-          selectedTimeRange={selectedTimeRange}
-          onTimeRangeChange={onTimeRangeChange}
-        />
-      </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <DriftCategoryFilter
