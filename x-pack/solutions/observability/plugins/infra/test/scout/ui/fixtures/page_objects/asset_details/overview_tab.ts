@@ -62,7 +62,7 @@ export class OverviewTab extends AssetDetailsTab {
   public readonly metricsDiskUsageChart: Locator;
   public readonly metricsDiskIOChart: Locator;
 
-  constructor(page: ScoutPage, kbnUrl: KibanaUrl) {
+  constructor(page: ScoutPage, kbnUrl: KibanaUrl, private readonly assetType: 'Host' | 'Docker') {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
 
@@ -118,10 +118,10 @@ export class OverviewTab extends AssetDetailsTab {
     this.metricsSectionGroup = this.metricsSection.getByRole('group');
 
     this.metricsCpuSection = this.metricsSection.getByTestId(
-      'infraAssetDetailsHostChartsSectioncpu'
+      `infraAssetDetails${this.assetType}ChartsSectioncpu`
     );
     this.metricsCpuSectionTitle = this.metricsCpuSection.getByTestId(
-      'infraAssetDetailsHostChartsSectioncpuTitle'
+      `infraAssetDetails${this.assetType}ChartsSectioncpuTitle`
     );
     this.metricsCpuShowAllButton = this.metricsCpuSection.getByRole('button', { name: 'Show all' });
     this.metricsCpuUsageChart = this.metricsCpuSection.getByTestId(
@@ -132,10 +132,10 @@ export class OverviewTab extends AssetDetailsTab {
     );
 
     this.metricsMemorySection = this.metricsSection.getByTestId(
-      'infraAssetDetailsHostChartsSectionmemory'
+      `infraAssetDetails${this.assetType}ChartsSectionmemory`
     );
     this.metricsMemorySectionTitle = this.metricsMemorySection.getByTestId(
-      'infraAssetDetailsHostChartsSectionmemoryTitle'
+      `infraAssetDetails${this.assetType}ChartsSectionmemoryTitle`
     );
     this.metricsMemoryShowAllButton = this.metricsMemorySection.getByRole('button', {
       name: 'Show all',
@@ -145,10 +145,10 @@ export class OverviewTab extends AssetDetailsTab {
     );
 
     this.metricsNetworkSection = this.metricsSection.getByTestId(
-      'infraAssetDetailsHostChartsSectionnetwork'
+      `infraAssetDetails${this.assetType}ChartsSectionnetwork`
     );
     this.metricsNetworkSectionTitle = this.metricsNetworkSection.getByTestId(
-      'infraAssetDetailsHostChartsSectionnetworkTitle'
+      `infraAssetDetails${this.assetType}ChartsSectionnetworkTitle`
     );
     this.metricsNetworkShowAllButton = this.metricsNetworkSection.getByRole('button', {
       name: 'Show all',
@@ -158,10 +158,10 @@ export class OverviewTab extends AssetDetailsTab {
     );
 
     this.metricsDiskSection = this.metricsSection.getByTestId(
-      'infraAssetDetailsHostChartsSectiondisk'
+      `infraAssetDetails${this.assetType}ChartsSectiondisk`
     );
     this.metricsDiskSectionTitle = this.metricsDiskSection.getByTestId(
-      'infraAssetDetailsHostChartsSectiondiskTitle'
+      `infraAssetDetails${this.assetType}ChartsSectiondiskTitle`
     );
     this.metricsDiskShowAllButton = this.metricsDiskSection.getByRole('button', {
       name: 'Show all',

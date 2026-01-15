@@ -38,133 +38,144 @@ test.describe(
 
     test('Overview Tab', async ({ pageObjects: { assetDetailsPage } }) => {
       await test.step('is selected as default tab', async () => {
-        await expect(assetDetailsPage.overviewTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.hostOverviewTab.tab).toHaveAttribute('aria-selected', 'true');
       });
 
       await test.step('renders KPI charts', async () => {
         await expect(
-          assetDetailsPage.overviewTab.kpiCpuUsageChart.getByRole('heading', { name: 'CPU Usage' })
+          assetDetailsPage.hostOverviewTab.kpiCpuUsageChart.getByRole('heading', {
+            name: 'CPU Usage',
+          })
         ).toBeVisible();
         await expect(
-          assetDetailsPage.overviewTab.kpiNormalizedLoadChart.getByRole('heading', {
+          assetDetailsPage.hostOverviewTab.kpiNormalizedLoadChart.getByRole('heading', {
             name: 'Normalized Load',
           })
         ).toBeVisible();
         await expect(
-          assetDetailsPage.overviewTab.kpiMemoryUsageChart.getByRole('heading', {
+          assetDetailsPage.hostOverviewTab.kpiMemoryUsageChart.getByRole('heading', {
             name: 'Memory Usage',
           })
         ).toBeVisible();
         await expect(
-          assetDetailsPage.overviewTab.kpiDiskUsageChart.getByRole('heading', {
+          assetDetailsPage.hostOverviewTab.kpiDiskUsageChart.getByRole('heading', {
             name: 'Disk Usage',
           })
         ).toBeVisible();
       });
 
       await test.step('renders metadata section', async () => {
-        await expect(assetDetailsPage.overviewTab.metadataSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metadataSection).toHaveAttribute(
+        await expect(assetDetailsPage.hostOverviewTab.metadataSection).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metadataSection).toHaveAttribute(
           'data-section-state',
           'open'
         );
-        await expect(assetDetailsPage.overviewTab.metadataSectionGroup).not.toHaveAttribute(
+        await expect(assetDetailsPage.hostOverviewTab.metadataSectionGroup).not.toHaveAttribute(
           'inert'
         );
-        await expect(assetDetailsPage.overviewTab.metadataShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metadataShowAllButton).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metadataSummaryItems).toHaveCount(2);
+        await expect(assetDetailsPage.hostOverviewTab.metadataSummaryItems).toHaveCount(2);
         await expect(
-          assetDetailsPage.overviewTab.metadataSummaryItems.filter({ hasText: 'Host IP' })
+          assetDetailsPage.hostOverviewTab.metadataSummaryItems.filter({ hasText: 'Host IP' })
         ).toBeVisible();
         await expect(
-          assetDetailsPage.overviewTab.metadataSummaryItems.filter({ hasText: 'Host OS version' })
+          assetDetailsPage.hostOverviewTab.metadataSummaryItems.filter({
+            hasText: 'Host OS version',
+          })
         ).toBeVisible();
 
-        await assetDetailsPage.overviewTab.metadataSectionCollapsible.click();
-        await expect(assetDetailsPage.overviewTab.metadataSection).toHaveAttribute(
+        await assetDetailsPage.hostOverviewTab.metadataSectionCollapsible.click();
+        await expect(assetDetailsPage.hostOverviewTab.metadataSection).toHaveAttribute(
           'data-section-state',
           'closed'
         );
-        await expect(assetDetailsPage.overviewTab.metadataSectionGroup).toHaveAttribute('inert');
+        await expect(assetDetailsPage.hostOverviewTab.metadataSectionGroup).toHaveAttribute(
+          'inert'
+        );
       });
 
       await test.step('renders alert section', async () => {
-        await expect(assetDetailsPage.overviewTab.alertsSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.alertsSection).toHaveAttribute(
+        await expect(assetDetailsPage.hostOverviewTab.alertsSection).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.alertsSection).toHaveAttribute(
           'data-section-state',
           'closed'
         );
-        await expect(assetDetailsPage.overviewTab.alertsSectionGroup).toHaveAttribute('inert');
-
-        await assetDetailsPage.overviewTab.alertsSectionCollapsible.click();
-        await expect(assetDetailsPage.overviewTab.alertsSection).toHaveAttribute(
+        await expect(assetDetailsPage.hostOverviewTab.alertsSectionGroup).toHaveAttribute('inert');
+        await assetDetailsPage.hostOverviewTab.alertsSectionCollapsible.click();
+        await expect(assetDetailsPage.hostOverviewTab.alertsSection).toHaveAttribute(
           'data-section-state',
           'open'
         );
-        await expect(assetDetailsPage.overviewTab.alertsSectionGroup).not.toHaveAttribute('inert');
-        await expect(assetDetailsPage.overviewTab.alertsShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.alertsSectionGroup).not.toHaveAttribute(
+          'inert'
+        );
+        await expect(assetDetailsPage.hostOverviewTab.alertsShowAllButton).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.alertsContent).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.alertsContent).toBeVisible();
       });
 
       await test.step('renders services section', async () => {
-        await expect(assetDetailsPage.overviewTab.servicesSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.servicesSection).toHaveAttribute(
+        await expect(assetDetailsPage.hostOverviewTab.servicesSection).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.servicesSection).toHaveAttribute(
           'data-section-state',
           'open'
         );
-        await expect(assetDetailsPage.overviewTab.servicesSectionGroup).not.toHaveAttribute(
+        await expect(assetDetailsPage.hostOverviewTab.servicesSectionGroup).not.toHaveAttribute(
           'inert'
         );
-        await expect(assetDetailsPage.overviewTab.servicesShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.servicesShowAllButton).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.servicesContainer).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.servicesContainer).toBeVisible();
 
-        await assetDetailsPage.overviewTab.servicesSectionCollapsible.click();
-        await expect(assetDetailsPage.overviewTab.servicesSection).toHaveAttribute(
+        await assetDetailsPage.hostOverviewTab.servicesSectionCollapsible.click();
+        await expect(assetDetailsPage.hostOverviewTab.servicesSection).toHaveAttribute(
           'data-section-state',
           'closed'
         );
-        await expect(assetDetailsPage.overviewTab.servicesSectionGroup).toHaveAttribute('inert');
+        await expect(assetDetailsPage.hostOverviewTab.servicesSectionGroup).toHaveAttribute(
+          'inert'
+        );
       });
 
       await test.step('renders metrics section', async () => {
-        await expect(assetDetailsPage.overviewTab.metricsSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsSection).toHaveAttribute(
+        await expect(assetDetailsPage.hostOverviewTab.metricsSection).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsSection).toHaveAttribute(
           'data-section-state',
           'open'
         );
-        await expect(assetDetailsPage.overviewTab.metricsSectionGroup).not.toHaveAttribute('inert');
+        await expect(assetDetailsPage.hostOverviewTab.metricsSectionGroup).not.toHaveAttribute(
+          'inert'
+        );
 
-        await expect(assetDetailsPage.overviewTab.metricsCpuSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsCpuSectionTitle).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsCpuShowAllButton).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsCpuUsageChart).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsCpuNormalizedLoadChart).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsCpuSection).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsCpuSectionTitle).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsCpuShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsCpuUsageChart).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsCpuNormalizedLoadChart).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metricsMemorySection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsMemorySectionTitle).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsMemoryShowAllButton).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsMemoryUsageChart).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsMemorySection).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsMemorySectionTitle).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsMemoryShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsMemoryUsageChart).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metricsNetworkSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsNetworkSectionTitle).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsNetworkShowAllButton).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsNetworkChart).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsNetworkSection).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsNetworkSectionTitle).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsNetworkShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsNetworkChart).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metricsDiskSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsDiskSectionTitle).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsDiskShowAllButton).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsDiskUsageChart).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsDiskIOChart).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsDiskSection).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsDiskSectionTitle).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsDiskShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsDiskUsageChart).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.metricsDiskIOChart).toBeVisible();
 
-        await assetDetailsPage.overviewTab.metricsSectionCollapsible.click();
-        await expect(assetDetailsPage.overviewTab.metricsSection).toHaveAttribute(
+        await assetDetailsPage.hostOverviewTab.metricsSectionCollapsible.click();
+        await expect(assetDetailsPage.hostOverviewTab.metricsSection).toHaveAttribute(
           'data-section-state',
           'closed'
         );
-        await expect(assetDetailsPage.overviewTab.metricsSectionGroup).toHaveAttribute('inert');
+        await expect(assetDetailsPage.hostOverviewTab.metricsSectionGroup).toHaveAttribute('inert');
       });
     });
 
@@ -210,7 +221,7 @@ test.describe(
     test('Metadata Tab - Is accessible from overview tab section show all', async ({
       pageObjects: { assetDetailsPage },
     }) => {
-      await assetDetailsPage.overviewTab.metadataShowAllButton.click();
+      await assetDetailsPage.hostOverviewTab.metadataShowAllButton.click();
       await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
     });
 
@@ -279,33 +290,33 @@ test.describe(
       pageObjects: { assetDetailsPage },
     }) => {
       const goBackToOverviewTab = async () => {
-        await assetDetailsPage.overviewTab.tab.click();
-        await expect(assetDetailsPage.overviewTab.tab).toHaveAttribute('aria-selected', 'true');
+        await assetDetailsPage.hostOverviewTab.tab.click();
+        await expect(assetDetailsPage.hostOverviewTab.tab).toHaveAttribute('aria-selected', 'true');
       };
 
       await test.step('cpu section', async () => {
-        await assetDetailsPage.overviewTab.metricsCpuShowAllButton.click();
+        await assetDetailsPage.hostOverviewTab.metricsCpuShowAllButton.click();
         await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.hostMetricsTab.cpuSectionTitle).toBeInViewport();
         await goBackToOverviewTab();
       });
 
       await test.step('memory section', async () => {
-        await assetDetailsPage.overviewTab.metricsMemoryShowAllButton.click();
+        await assetDetailsPage.hostOverviewTab.metricsMemoryShowAllButton.click();
         await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.hostMetricsTab.memorySectionTitle).toBeInViewport();
         await goBackToOverviewTab();
       });
 
       await test.step('network section', async () => {
-        await assetDetailsPage.overviewTab.metricsNetworkShowAllButton.click();
+        await assetDetailsPage.hostOverviewTab.metricsNetworkShowAllButton.click();
         await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.hostMetricsTab.networkSectionTitle).toBeInViewport();
         await goBackToOverviewTab();
       });
 
       await test.step('disk section', async () => {
-        await assetDetailsPage.overviewTab.metricsDiskShowAllButton.click();
+        await assetDetailsPage.hostOverviewTab.metricsDiskShowAllButton.click();
         await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.hostMetricsTab.diskSectionTitle).toBeInViewport();
         await goBackToOverviewTab();

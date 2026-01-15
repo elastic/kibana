@@ -44,107 +44,122 @@ test.describe(
 
     test('Overview Tab', async ({ pageObjects: { assetDetailsPage } }) => {
       await test.step('is selected as default tab', async () => {
-        await expect(assetDetailsPage.overviewTab.tab).toHaveAttribute('aria-selected', 'true');
+        await expect(assetDetailsPage.dockerOverviewTab.tab).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
       });
 
       await test.step('renders KPI charts', async () => {
         await expect(
-          assetDetailsPage.overviewTab.kpiCpuUsageChart.getByRole('heading', { name: 'CPU Usage' })
+          assetDetailsPage.dockerOverviewTab.kpiCpuUsageChart.getByRole('heading', {
+            name: 'CPU Usage',
+          })
         ).toBeVisible();
         await expect(
-          assetDetailsPage.overviewTab.kpiMemoryUsageChart.getByRole('heading', {
+          assetDetailsPage.dockerOverviewTab.kpiMemoryUsageChart.getByRole('heading', {
             name: 'Memory Usage',
           })
         ).toBeVisible();
       });
 
       await test.step('renders metadata section', async () => {
-        await expect(assetDetailsPage.overviewTab.metadataSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metadataSection).toHaveAttribute(
+        await expect(assetDetailsPage.dockerOverviewTab.metadataSection).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metadataSection).toHaveAttribute(
           'data-section-state',
           'open'
         );
-        await expect(assetDetailsPage.overviewTab.metadataSectionGroup).not.toHaveAttribute(
+        await expect(assetDetailsPage.dockerOverviewTab.metadataSectionGroup).not.toHaveAttribute(
           'inert'
         );
-        await expect(assetDetailsPage.overviewTab.metadataShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metadataShowAllButton).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metadataSummaryItems).toHaveCount(3);
+        await expect(assetDetailsPage.dockerOverviewTab.metadataSummaryItems).toHaveCount(3);
         await expect(
-          assetDetailsPage.overviewTab.metadataSummaryItems.filter({ hasText: 'Container ID' })
+          assetDetailsPage.dockerOverviewTab.metadataSummaryItems.filter({
+            hasText: 'Container ID',
+          })
         ).toBeVisible();
         await expect(
-          assetDetailsPage.overviewTab.metadataSummaryItems.filter({
+          assetDetailsPage.dockerOverviewTab.metadataSummaryItems.filter({
             hasText: 'Container image name',
           })
         ).toBeVisible();
         await expect(
-          assetDetailsPage.overviewTab.metadataSummaryItems.filter({
+          assetDetailsPage.dockerOverviewTab.metadataSummaryItems.filter({
             hasText: 'Host name',
           })
         ).toBeVisible();
 
-        await assetDetailsPage.overviewTab.metadataSectionCollapsible.click();
-        await expect(assetDetailsPage.overviewTab.metadataSection).toHaveAttribute(
+        await assetDetailsPage.dockerOverviewTab.metadataSectionCollapsible.click();
+        await expect(assetDetailsPage.dockerOverviewTab.metadataSection).toHaveAttribute(
           'data-section-state',
           'closed'
         );
-        await expect(assetDetailsPage.overviewTab.metadataSectionGroup).toHaveAttribute('inert');
+        await expect(assetDetailsPage.dockerOverviewTab.metadataSectionGroup).toHaveAttribute(
+          'inert'
+        );
       });
 
       await test.step('renders alert section', async () => {
-        await expect(assetDetailsPage.overviewTab.alertsSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.alertsSection).toHaveAttribute(
+        await expect(assetDetailsPage.dockerOverviewTab.alertsSection).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.alertsSection).toHaveAttribute(
           'data-section-state',
           'closed'
         );
-        await expect(assetDetailsPage.overviewTab.alertsSectionGroup).toHaveAttribute('inert');
-
-        await assetDetailsPage.overviewTab.alertsSectionCollapsible.click();
-        await expect(assetDetailsPage.overviewTab.alertsSection).toHaveAttribute(
+        await expect(assetDetailsPage.dockerOverviewTab.alertsSectionGroup).toHaveAttribute(
+          'inert'
+        );
+        await assetDetailsPage.dockerOverviewTab.alertsSectionCollapsible.click();
+        await expect(assetDetailsPage.dockerOverviewTab.alertsSection).toHaveAttribute(
           'data-section-state',
           'open'
         );
-        await expect(assetDetailsPage.overviewTab.alertsSectionGroup).not.toHaveAttribute('inert');
-        await expect(assetDetailsPage.overviewTab.alertsShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.alertsSectionGroup).not.toHaveAttribute(
+          'inert'
+        );
+        await expect(assetDetailsPage.dockerOverviewTab.alertsShowAllButton).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.alertsContent).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.alertsContent).toBeVisible();
       });
 
       await test.step('renders metrics section', async () => {
-        await expect(assetDetailsPage.overviewTab.metricsSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsSection).toHaveAttribute(
+        await expect(assetDetailsPage.dockerOverviewTab.metricsSection).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsSection).toHaveAttribute(
           'data-section-state',
           'open'
         );
-        await expect(assetDetailsPage.overviewTab.metricsSectionGroup).not.toHaveAttribute('inert');
+        await expect(assetDetailsPage.dockerOverviewTab.metricsSectionGroup).not.toHaveAttribute(
+          'inert'
+        );
+        await expect(assetDetailsPage.dockerOverviewTab.metricsCpuSection).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsCpuSectionTitle).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsCpuShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsCpuUsageChart).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metricsCpuSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsCpuSectionTitle).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsCpuShowAllButton).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsCpuUsageChart).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsMemorySection).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsMemorySectionTitle).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsMemoryShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsMemoryUsageChart).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metricsMemorySection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsMemorySectionTitle).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsMemoryShowAllButton).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsMemoryUsageChart).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsNetworkSection).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsNetworkSectionTitle).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsNetworkShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsNetworkChart).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metricsNetworkSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsNetworkSectionTitle).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsNetworkShowAllButton).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsNetworkChart).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsDiskSection).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsDiskSectionTitle).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsDiskShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsDiskIOChart).toBeVisible();
 
-        await expect(assetDetailsPage.overviewTab.metricsDiskSection).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsDiskSectionTitle).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsDiskShowAllButton).toBeVisible();
-        await expect(assetDetailsPage.overviewTab.metricsDiskIOChart).toBeVisible();
-
-        await assetDetailsPage.overviewTab.metricsSectionCollapsible.click();
-        await expect(assetDetailsPage.overviewTab.metricsSection).toHaveAttribute(
+        await assetDetailsPage.dockerOverviewTab.metricsSectionCollapsible.click();
+        await expect(assetDetailsPage.dockerOverviewTab.metricsSection).toHaveAttribute(
           'data-section-state',
           'closed'
         );
-        await expect(assetDetailsPage.overviewTab.metricsSectionGroup).toHaveAttribute('inert');
+        await expect(assetDetailsPage.dockerOverviewTab.metricsSectionGroup).toHaveAttribute(
+          'inert'
+        );
       });
     });
 
@@ -190,7 +205,7 @@ test.describe(
     test('Metadata Tab - Is accessible from overview tab section show all', async ({
       pageObjects: { assetDetailsPage },
     }) => {
-      await assetDetailsPage.overviewTab.metadataShowAllButton.click();
+      await assetDetailsPage.dockerOverviewTab.metadataShowAllButton.click();
       await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
     });
 
@@ -247,12 +262,15 @@ test.describe(
       pageObjects: { assetDetailsPage },
     }) => {
       const goBackToOverviewTab = async () => {
-        await assetDetailsPage.overviewTab.tab.click();
-        await expect(assetDetailsPage.overviewTab.tab).toHaveAttribute('aria-selected', 'true');
+        await assetDetailsPage.dockerOverviewTab.tab.click();
+        await expect(assetDetailsPage.dockerOverviewTab.tab).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
       };
 
       await test.step('cpu section', async () => {
-        await assetDetailsPage.overviewTab.metricsCpuShowAllButton.click();
+        await assetDetailsPage.dockerOverviewTab.metricsCpuShowAllButton.click();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
           'true'
@@ -262,7 +280,7 @@ test.describe(
       });
 
       await test.step('memory section', async () => {
-        await assetDetailsPage.overviewTab.metricsMemoryShowAllButton.click();
+        await assetDetailsPage.dockerOverviewTab.metricsMemoryShowAllButton.click();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
           'true'
@@ -272,7 +290,7 @@ test.describe(
       });
 
       await test.step('network section', async () => {
-        await assetDetailsPage.overviewTab.metricsNetworkShowAllButton.click();
+        await assetDetailsPage.dockerOverviewTab.metricsNetworkShowAllButton.click();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
           'true'
@@ -282,7 +300,7 @@ test.describe(
       });
 
       await test.step('disk section', async () => {
-        await assetDetailsPage.overviewTab.metricsDiskShowAllButton.click();
+        await assetDetailsPage.dockerOverviewTab.metricsDiskShowAllButton.click();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
           'true'
