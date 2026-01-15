@@ -270,6 +270,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/lazy-object",
     "@kbn/ai-assistant-common",
-    "@kbn/product-doc-common"
+    "@kbn/product-doc-common",
+    "@kbn/kql"
   ]
 }

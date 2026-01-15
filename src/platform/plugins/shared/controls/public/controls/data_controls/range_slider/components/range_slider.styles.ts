@@ -102,6 +102,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
 
     editMode: css`
       & input:last-child {
+        // ensures that the right up and down arrows are interactable despite drag handle
         padding-right: ${euiTheme.size.base};
       }
     `,

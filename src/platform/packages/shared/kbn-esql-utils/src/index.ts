@@ -59,7 +59,6 @@ export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
 export {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
-  mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';

@@ -6,7 +6,7 @@
  */
 
 import type { IlmPolicyDeletePhase, IlmPolicyPhase, IlmPolicyPhases } from '@kbn/streams-schema';
-import { first } from 'lodash';
+import { last } from 'lodash';
 
 export const parseDuration = (duration: string = '') => {
   const result = /^(\d+)([d|m|s|h])$/.exec(duration);
@@ -41,6 +41,15 @@ export function orderIlmPhases(phases: IlmPolicyPhases) {
   return [phases.hot, phases.warm, phases.cold, phases.frozen, phases.delete].filter(isPhase);
 }
 
+const GROW_VALUES = [2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+const DEFAULT_GROW: GrowValue = 2;
+type GrowValue = (typeof GROW_VALUES)[number];
+
+function toGrowValue(value: number): GrowValue {
+  const clamped = Math.min(10, Math.max(2, Math.round(value)));
+  return GROW_VALUES[clamped - 2];
+}
+
 export const getILMRatios = (
   value:
     | {
@@ -50,20 +59,20 @@ export const getILMRatios = (
 ) => {
   if (!value) return undefined;
 
-  const orderedPhases = orderIlmPhases(value.phases).reverse();
-  const totalDuration = parseDurationInSeconds(first(orderedPhases)!.min_age);
+  const orderedPhases = orderIlmPhases(value.phases);
+  const totalDuration = parseDurationInSeconds(last(orderedPhases)!.min_age);
 
   return orderedPhases.map((phase, index, phases) => {
-    const prevPhase = phases[index - 1];
-    if (!prevPhase) {
-      return { ...phase, grow: phase.name === 'delete' ? false : 2 };
+    const nextPhase = phases[index + 1];
+    if (!nextPhase) {
+      return { ...phase, grow: phase.name === 'delete' ? false : DEFAULT_GROW };
     }
 
     const phaseDuration =
-      parseDurationInSeconds(prevPhase!.min_age) - parseDurationInSeconds(phase!.min_age);
+      parseDurationInSeconds(nextPhase!.min_age) - parseDurationInSeconds(phase!.min_age);
     return {
       ...phase,
-      grow: totalDuration ? Math.max(2, Math.round((phaseDuration / totalDuration) * 10)) : 2,
+      grow: totalDuration ? toGrowValue((phaseDuration / totalDuration) * 10) : DEFAULT_GROW,
     };
   });
 };

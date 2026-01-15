@@ -270,6 +270,7 @@ dependsOn:
   - '@kbn/lazy-object'
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod
