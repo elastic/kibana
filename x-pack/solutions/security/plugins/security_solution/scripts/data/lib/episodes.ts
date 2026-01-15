@@ -11,6 +11,7 @@ import { pipeline } from 'stream/promises';
 import { createInterface } from 'readline';
 import { PassThrough } from 'stream';
 import crypto from 'crypto';
+import { faker } from '@faker-js/faker';
 
 export interface EpisodeFileSet {
   episodeId: string; // e.g. ep1
@@ -241,8 +242,70 @@ const setHostAndUserInPlace = ({
   setNested(doc, ['user', 'name'], userName);
 };
 
-const generatePool = (prefix: string, count: number): string[] =>
-  Array.from({ length: count }, (_, i) => `${prefix}${String(i + 1).padStart(3, '0')}`);
+const normalizeMockNameToken = (value: string): string => {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return normalized || 'unknown';
+};
+
+const deterministicIntFromHash = (input: string): number => {
+  const h = hash(input).slice(0, 8);
+  const n = Number.parseInt(h, 16);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const buildDeterministicMockName = ({
+  kind,
+  seed,
+  index,
+  existing,
+}: {
+  kind: 'host' | 'user';
+  seed: string;
+  index: number;
+  existing: Set<string>;
+}): string => {
+  // Avoid consuming faker's global RNG state in an order-dependent way by seeding per name.
+  for (let attempt = 0; attempt < 25; attempt++) {
+    const attemptSeed = `${seed}:${kind}:${index}:${attempt}`;
+    faker.seed(deterministicIntFromHash(attemptSeed));
+
+    const token =
+      kind === 'user'
+        ? normalizeMockNameToken(faker.person.fullName())
+        : normalizeMockNameToken(faker.word.noun());
+
+    // Suffix format requested: 1..99, deterministic per (seed, kind, index, attempt)
+    const suffix = (deterministicIntFromHash(`${attemptSeed}:suffix`) % 99) + 1;
+    const name = `${token}-${suffix}`;
+
+    if (!existing.has(name)) {
+      existing.add(name);
+      return name;
+    }
+  }
+
+  // Deterministic fallback in the extremely unlikely case we can't find a unique name quickly.
+  const fallback = `${kind}-${index + 1}`;
+  existing.add(fallback);
+  return fallback;
+};
+
+const generateHostPool = ({ count, seed }: { count: number; seed: string }): string[] => {
+  const existing = new Set<string>();
+  return Array.from({ length: count }, (_, i) =>
+    buildDeterministicMockName({ kind: 'host', seed, index: i, existing })
+  );
+};
+
+const generateUserPool = ({ count, seed }: { count: number; seed: string }): string[] => {
+  const existing = new Set<string>();
+  return Array.from({ length: count }, (_, i) =>
+    buildDeterministicMockName({ kind: 'user', seed, index: i, existing })
+  );
+};
 
 export async function* scaleEpisodes(
   episodes: EpisodeDocs[],
@@ -251,8 +314,9 @@ export async function* scaleEpisodes(
   const rangeMs = opts.endMs - opts.startMs;
   if (rangeMs <= 0) throw new Error('Invalid time range: end must be after start');
 
-  const hosts = generatePool('host-', opts.hostCount);
-  const users = generatePool('user-', opts.userCount);
+  const seed = opts.seed ?? 'seed';
+  const hosts = generateHostPool({ count: opts.hostCount, seed });
+  const users = generateUserPool({ count: opts.userCount, seed });
 
   const riskyHostCount = Math.min(Math.max(opts.riskyHostCount ?? 2, 0), hosts.length);
   const riskyUserCount = Math.min(Math.max(opts.riskyUserCount ?? 2, 0), users.length);
@@ -293,7 +357,6 @@ export async function* scaleEpisodes(
   let producedDataDocs = 0;
 
   for (let cloneIdx = 0; cloneIdx < cloneCount; cloneIdx++) {
-    const seed = opts.seed ?? 'seed';
     const cloneKey = `clone:${cloneIdx}:${hash(seed)}`;
 
     const riskRoll = hashToUnitFloat(`${cloneKey}:risk`);

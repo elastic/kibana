@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs';
+import { pickDefined } from './pick';
 
 /**
  * Reads the vendored `endpoint_alert.ndjson` export and returns a rule preview/create payload.
@@ -20,12 +21,7 @@ export const loadInsightsRuleCreateProps = (
   const rule = JSON.parse(firstLine) as Record<string, unknown>;
 
   // Query rule create props (subset)
-  const allowed: Record<string, unknown> = {};
-  const pick = (k: string) => {
-    if (rule[k] !== undefined) allowed[k] = rule[k];
-  };
-
-  for (const k of [
+  return pickDefined(rule, [
     'name',
     'description',
     'tags',
@@ -53,9 +49,5 @@ export const loadInsightsRuleCreateProps = (
     'exceptions_list',
     'actions',
     'meta',
-  ]) {
-    pick(k);
-  }
-
-  return allowed;
+  ]);
 };

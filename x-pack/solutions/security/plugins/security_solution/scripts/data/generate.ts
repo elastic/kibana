@@ -44,6 +44,8 @@ const NOISE_DIR = scriptsDataDir('episodes', 'noise');
 const MAPPING_PATH = path.join(ATTACKS_DIR, 'mapping.json');
 const DATA_GENERATOR_CASE_TAG = 'data-generator';
 
+const formatError = (e: unknown): string => String((e as Error).message ?? e);
+
 const parseDateMathOrThrow = (input: string, nowMs: number): number => {
   if (input === 'now') return nowMs;
 
@@ -270,11 +272,7 @@ const createCasesFromAttackDiscoveries = async ({
       });
     } catch (e) {
       // case creation/attachments should still succeed even if timestamp patching fails.
-      log.warning(
-        `--cases: failed to set case timestamps for caseId=${caseId}: ${String(
-          (e as Error).message ?? e
-        )}`
-      );
+      log.warning(`--cases: failed to set case timestamps for caseId=${caseId}: ${formatError(e)}`);
     }
   }
 };
@@ -354,9 +352,7 @@ const deleteGeneratedCases = async ({
     log.warning(`--clean: deleting ${caseIds.length} generator-created case(s).`);
     await deleteByIds(caseIds);
   } catch (e) {
-    log.warning(
-      `--clean: failed to delete generator-created cases: ${String((e as Error).message ?? e)}`
-    );
+    log.warning(`--clean: failed to delete generator-created cases: ${formatError(e)}`);
   }
 };
 
@@ -386,9 +382,7 @@ const clearPreviewAlertsDocuments = async ({
     log.info(`Cleared existing preview alert documents from ${previewInternalAlias}`);
   } catch (e) {
     log.warning(
-      `Failed to clear preview alert documents from ${previewInternalAlias}: ${String(
-        (e as Error).message ?? e
-      )}`
+      `Failed to clear preview alert documents from ${previewInternalAlias}: ${formatError(e)}`
     );
   }
 };
@@ -470,7 +464,7 @@ const cleanGeneratedData = async ({
       });
     }
   } catch (e) {
-    log.warning(`--clean: failed to delete episode indices: ${String((e as Error).message ?? e)}`);
+    log.warning(`--clean: failed to delete episode indices: ${formatError(e)}`);
   }
 
   // 2) Remove previously generated Security alerts (copied from preview).
@@ -511,9 +505,7 @@ const cleanGeneratedData = async ({
       }
     } catch (e) {
       log.warning(
-        `--clean: failed to delete Security alerts from ${alertsIndex}: ${String(
-          (e as Error).message ?? e
-        )}`
+        `--clean: failed to delete Security alerts from ${alertsIndex}: ${formatError(e)}`
       );
     }
   } else {
@@ -544,9 +536,7 @@ const cleanGeneratedData = async ({
     }
   } catch (e) {
     log.warning(
-      `--clean: failed to delete Attack Discoveries from ${adhocDiscoveryAlias}: ${String(
-        (e as Error).message ?? e
-      )}`
+      `--clean: failed to delete Attack Discoveries from ${adhocDiscoveryAlias}: ${formatError(e)}`
     );
   }
 
@@ -619,11 +609,7 @@ const ensurePreviewAlertsIndex = async ({
       },
     });
   } catch (e) {
-    log.warning(
-      `Failed to recreate preview alerts index ${previewAlias}: ${String(
-        (e as Error).message ?? e
-      )}`
-    );
+    log.warning(`Failed to recreate preview alerts index ${previewAlias}: ${formatError(e)}`);
   }
 };
 
@@ -698,8 +684,8 @@ const bulkIndexStreamed = async ({
     }
   } catch (e) {
     log.warning(
-      `Failed to refresh episode indices; rule preview may miss newly indexed docs: ${String(
-        (e as Error).message ?? e
+      `Failed to refresh episode indices; rule preview may miss newly indexed docs: ${formatError(
+        e
       )}`
     );
   }
@@ -797,11 +783,7 @@ export const cli = () => {
         // don’t block generation if the user doesn’t have Kibana privileges.
         // The script will still be able to index raw events, and may still preview rules
         // if the current user has detection privileges.
-        log.warning(
-          `Prebuilt rule install/status check failed; continuing. ${String(
-            (e as Error).message ?? e
-          )}`
-        );
+        log.warning(`Prebuilt rule install/status check failed; continuing. ${formatError(e)}`);
       }
 
       log.info(`Loading attack fixtures from: ${ATTACKS_DIR}`);
@@ -1016,8 +998,8 @@ export const cli = () => {
         }
       } catch (e) {
         log.warning(
-          `Alert generation via Kibana APIs failed; raw data was still indexed. Error: ${String(
-            (e as Error).message ?? e
+          `Alert generation via Kibana APIs failed; raw data was still indexed. Error: ${formatError(
+            e
           )}`
         );
       }

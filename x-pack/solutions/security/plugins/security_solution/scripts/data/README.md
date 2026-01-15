@@ -82,11 +82,11 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.j
 - `-n`, `--events`: Number of **source events** to generate (default: `100`)
 - `-h`, `--hosts`: Number of hosts to distribute activity across (default: `5`)
 - `-u`, `--users`: Number of users to distribute activity across (default: `5`)
-- `--clean`: Delete previously generated data for the selected time range before generating new data (default: `false`)
+- `--clean`: Delete previously generated data created by this script before generating new data (default: `false`)
   - Removes:
-    - the episode indices created by this script for the selected `--episodes` (for the current date suffix)
-    - detection alerts in `.alerts-security.alerts-<spaceId>` attributed to the ruleset rules (within the time range)
-    - ad-hoc Attack Discoveries created by this script (Synthetic (no-LLM), for the current `--username`, within the time range)
+    - the episode indices created by this script for the selected `--episodes` (across the requested date range)
+    - detection alerts in `.alerts-security.alerts-<spaceId>` attributed to the ruleset rules (generator-owned)
+    - ad-hoc Attack Discoveries created by this script (Synthetic (no-LLM), for the current `--username`)
     - Cases created by this script (tagged `data-generator`)
   - Notes:
     - **Does not delete** preview indices. Some dev setups won’t automatically recreate preview indices once deleted.
@@ -111,7 +111,7 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate.j
 Ruleset entries are resolved
 
 - If a `rule_id` is provided, it must exist (or the entry is skipped in non-strict mode)
-- Otherwise, rules are matched by `name_contains_any` tokens against installed rules’ names
+- Otherwise, rules are matched by `name_contains_any` tokens against installed rules’ names (ANY token must match)
 
 ### Reproducibility
 

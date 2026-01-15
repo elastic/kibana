@@ -9,6 +9,7 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
+import { pickDefined } from './pick';
 
 const PUBLIC_API_VERSION = '2023-10-31';
 
@@ -33,6 +34,100 @@ export const readRulesetFile = (rulesetPath: string): RulesetFile => {
     throw new Error(`Invalid ruleset file: ${rulesetPath}`);
   }
   return parsed;
+};
+
+const scoreByNameTokens = ({
+  name,
+  tokens,
+  enabled,
+  immutable,
+}: {
+  name: string;
+  tokens: string[];
+  enabled?: boolean;
+  immutable?: boolean;
+}): number => {
+  const lcName = name.toLowerCase();
+  const matched = tokens.filter((t) => lcName.includes(t.toLowerCase())).length;
+  // name_contains_any is treated as "contains ANY token" (see ruleset docs).
+  if (matched === 0) return 0;
+  return matched * 10 + (enabled ? 5 : 0) + (immutable ? 1 : 0);
+};
+
+const resolveRulesetAgainstCandidates = <TCandidate, TResolved>({
+  log,
+  rulesetPath,
+  candidates,
+  strict = true,
+  getRuleId,
+  getName,
+  getEnabled,
+  getImmutable,
+  toResolved,
+  notFoundLabel,
+  matchedLabel,
+}: {
+  log: ToolingLog;
+  rulesetPath: string;
+  candidates: TCandidate[];
+  strict?: boolean;
+  getRuleId: (candidate: TCandidate) => string;
+  getName: (candidate: TCandidate) => string;
+  getEnabled?: (candidate: TCandidate) => boolean | undefined;
+  getImmutable?: (candidate: TCandidate) => boolean | undefined;
+  toResolved: (candidate: TCandidate) => TResolved;
+  notFoundLabel: string;
+  matchedLabel: string;
+}): TResolved[] => {
+  const ruleset = readRulesetFile(rulesetPath);
+  const resolved: TResolved[] = [];
+
+  for (const spec of ruleset.rules) {
+    if (spec.rule_id) {
+      const found = candidates.find((r) => getRuleId(r) === spec.rule_id);
+      if (!found) {
+        const msg = `Ruleset rule_id not ${notFoundLabel}: ${spec.rule_id} (${spec.id})`;
+        if (strict) throw new Error(msg);
+        log.warning(`${msg}, skipping`);
+        continue;
+      }
+      resolved.push(toResolved(found));
+      continue;
+    }
+
+    const tokens = spec.match?.name_contains_any ?? [];
+    if (tokens.length === 0) {
+      throw new Error(`Ruleset entry ${spec.id} missing rule_id and match.name_contains_any`);
+    }
+
+    const ranked = candidates
+      .map((r) => ({
+        r,
+        score: scoreByNameTokens({
+          name: getName(r),
+          tokens,
+          enabled: getEnabled?.(r),
+          immutable: getImmutable?.(r),
+        }),
+      }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score || getName(a.r).localeCompare(getName(b.r)));
+
+    const best = ranked[0]?.r;
+    if (!best) {
+      const msg = `Ruleset entry ${spec.id} did not match any ${matchedLabel} rules by name tokens: ${tokens.join(
+        ', '
+      )}`;
+      if (strict) throw new Error(msg);
+      log.warning(`${msg}, skipping`);
+      continue;
+    }
+
+    log.info(`Ruleset ${spec.id} matched ${matchedLabel} rule: ${getName(best)} (${getRuleId(best)})`);
+    resolved.push(toResolved(best));
+  }
+
+  return resolved;
 };
 
 interface FindRulesResponse {
@@ -83,21 +178,6 @@ export const fetchAllInstalledRules = async ({
   return all;
 };
 
-const scoreCandidate = (rule: FindRulesResponse['data'][number], tokens: string[]): number => {
-  const name = rule.name.toLowerCase();
-  const matched = tokens.filter((t) => name.includes(t.toLowerCase())).length;
-  return matched * 10 + (rule.enabled ? 5 : 0) + (rule.immutable ? 1 : 0);
-};
-
-const scoreInstallableCandidate = (
-  rule: { name: string; immutable?: boolean },
-  tokens: string[]
-): number => {
-  const name = rule.name.toLowerCase();
-  const matched = tokens.filter((t) => name.includes(t.toLowerCase())).length;
-  return matched * 10 + (rule.immutable ? 1 : 0);
-};
-
 /**
  * Resolve ruleset entries against a list of installable prebuilt rules (from the review API),
  * returning rule_id+version so we can install only the requested set.
@@ -113,59 +193,23 @@ export const resolveRulesetForInstall = ({
   installableRules: Array<{ rule_id: string; name: string; version?: number; immutable?: boolean }>;
   strict?: boolean;
 }): InstallableRuleRef[] => {
-  const ruleset = readRulesetFile(rulesetPath);
-  const resolved: InstallableRuleRef[] = [];
-
-  for (const spec of ruleset.rules) {
-    if (spec.rule_id) {
-      const found = installableRules.find((r) => r.rule_id === spec.rule_id);
-      if (!found) {
-        if (strict) {
-          throw new Error(`Ruleset rule_id not installable: ${spec.rule_id} (${spec.id})`);
-        }
-        log.warning(`Ruleset rule_id not installable, skipping: ${spec.rule_id} (${spec.id})`);
-      } else {
-        if (typeof found.version !== 'number') {
-          throw new Error(`Installable rule missing version for rule_id: ${found.rule_id}`);
-        }
-        resolved.push({ rule_id: found.rule_id, name: found.name, version: found.version });
+  return resolveRulesetAgainstCandidates({
+    log,
+    rulesetPath,
+    candidates: installableRules,
+    strict,
+    getRuleId: (r) => r.rule_id,
+    getName: (r) => r.name,
+    getImmutable: (r) => r.immutable,
+    toResolved: (r) => {
+      if (typeof r.version !== 'number') {
+        throw new Error(`Installable rule missing version for rule_id: ${r.rule_id}`);
       }
-    } else {
-      const tokens = spec.match?.name_contains_any ?? [];
-      if (tokens.length === 0) {
-        throw new Error(`Ruleset entry ${spec.id} missing rule_id and match.name_contains_any`);
-      }
-
-      const candidates = installableRules
-        .map((r) => ({ r, score: scoreInstallableCandidate(r, tokens) }))
-        .filter(({ score }) => score > 0)
-        .sort((a, b) => b.score - a.score || a.r.name.localeCompare(b.r.name));
-
-      const best = candidates[0]?.r;
-      if (!best) {
-        if (strict) {
-          throw new Error(
-            `Ruleset entry ${
-              spec.id
-            } did not match any installable rules by name tokens: ${tokens.join(', ')}`
-          );
-        }
-        log.warning(
-          `Ruleset entry ${
-            spec.id
-          } did not match any installable rules, skipping (tokens: ${tokens.join(', ')})`
-        );
-      } else {
-        if (typeof best.version !== 'number') {
-          throw new Error(`Installable rule missing version for rule_id: ${best.rule_id}`);
-        }
-        log.info(`Ruleset ${spec.id} matched installable rule: ${best.name} (${best.rule_id})`);
-        resolved.push({ rule_id: best.rule_id, name: best.name, version: best.version });
-      }
-    }
-  }
-
-  return resolved;
+      return { rule_id: r.rule_id, name: r.name, version: r.version };
+    },
+    notFoundLabel: 'installable',
+    matchedLabel: 'installable',
+  });
 };
 
 export const enableRules = async ({
@@ -195,55 +239,20 @@ export const resolveRuleset = async ({
   rulesetPath: string;
   strict?: boolean;
 }): Promise<ResolvedRuleRef[]> => {
-  const ruleset = readRulesetFile(rulesetPath);
   const installed = await fetchAllInstalledRules({ kbnClient });
-
-  const resolved: ResolvedRuleRef[] = [];
-
-  for (const spec of ruleset.rules) {
-    if (spec.rule_id) {
-      const found = installed.find((r) => r.rule_id === spec.rule_id);
-      if (!found) {
-        if (strict) {
-          throw new Error(`Ruleset rule_id not installed: ${spec.rule_id} (${spec.id})`);
-        }
-        log.warning(`Ruleset rule_id not installed, skipping: ${spec.rule_id} (${spec.id})`);
-      } else {
-        resolved.push({ id: found.id, rule_id: found.rule_id, name: found.name });
-      }
-    } else {
-      const tokens = spec.match?.name_contains_any ?? [];
-      if (tokens.length === 0) {
-        throw new Error(`Ruleset entry ${spec.id} missing rule_id and match.name_contains_any`);
-      }
-
-      const candidates = installed
-        .map((r) => ({ r, score: scoreCandidate(r, tokens) }))
-        .filter(({ score }) => score > 0)
-        .sort((a, b) => b.score - a.score || a.r.name.localeCompare(b.r.name));
-
-      const best = candidates[0]?.r;
-      if (!best) {
-        if (strict) {
-          throw new Error(
-            `Ruleset entry ${
-              spec.id
-            } did not match any installed rules by name tokens: ${tokens.join(', ')}`
-          );
-        }
-        log.warning(
-          `Ruleset entry ${
-            spec.id
-          } did not match any installed rules, skipping (tokens: ${tokens.join(', ')})`
-        );
-      } else {
-        log.info(`Ruleset ${spec.id} matched rule: ${best.name} (${best.rule_id})`);
-        resolved.push({ id: best.id, rule_id: best.rule_id, name: best.name });
-      }
-    }
-  }
-
-  return resolved;
+  return resolveRulesetAgainstCandidates({
+    log,
+    rulesetPath,
+    candidates: installed,
+    strict,
+    getRuleId: (r) => r.rule_id,
+    getName: (r) => r.name,
+    getEnabled: (r) => r.enabled,
+    getImmutable: (r) => r.immutable,
+    toResolved: (r) => ({ id: r.id, rule_id: r.rule_id, name: r.name }),
+    notFoundLabel: 'installed',
+    matchedLabel: 'installed',
+  });
 };
 
 export const fetchRuleById = async ({
@@ -266,12 +275,7 @@ export const fetchRuleById = async ({
  * We keep a broad set of create-like properties used by the preview schema.
  */
 export const toRuleCreateProps = (rule: Record<string, unknown>): Record<string, unknown> => {
-  const allowed: Record<string, unknown> = {};
-  const pick = (k: string) => {
-    if (rule[k] !== undefined) allowed[k] = rule[k];
-  };
-
-  for (const k of [
+  return pickDefined(rule, [
     'name',
     'description',
     'tags',
@@ -312,9 +316,5 @@ export const toRuleCreateProps = (rule: Record<string, unknown>): Record<string,
     'new_terms_fields',
     'history_window_start',
     'esql_query',
-  ]) {
-    pick(k);
-  }
-
-  return allowed;
+  ]);
 };

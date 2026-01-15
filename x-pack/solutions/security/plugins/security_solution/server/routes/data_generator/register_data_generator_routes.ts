@@ -22,7 +22,7 @@ const UpdateCaseTimestampsBody = z.object({
   /**
    * ISO timestamp that will be applied to `created_at`.
    */
-  timestamp: z.string(),
+  timestamp: z.string().datetime(),
 });
 
 /**
@@ -37,7 +37,9 @@ export const registerDataGeneratorRoutes = (
     .put({
       path: '/internal/security_solution/data_generator/cases/{caseId}/timestamps',
       access: 'internal',
-      security: { authz: { enabled: false, reason: 'data generator internal route' } },
+      // We authorize explicitly in the handler by verifying the current user can access the case via Cases.
+      // (Kibana route-level authz requires at least one privilege entry when enabled.)
+      security: { authz: { enabled: false, reason: 'dev-only route; authorization enforced via Cases' } },
     })
     .addVersion(
       {
@@ -55,7 +57,15 @@ export const registerDataGeneratorRoutes = (
             return response.notFound();
           }
 
-          const [coreStart] = await getStartServices();
+          const [coreStart, pluginsStart] = await getStartServices();
+          if (!pluginsStart.cases) {
+            return response.notFound();
+          }
+
+          // Ensure the current user can access this case in this space before patching its saved object.
+          // This keeps the route dev-only but still subject to real Cases authorization.
+          const casesClient = await pluginsStart.cases.getCasesClientWithRequest(request);
+
           const internalRepo = coreStart.savedObjects.createInternalRepository([
             ...SAVED_OBJECT_TYPES,
           ]);
@@ -64,6 +74,8 @@ export const registerDataGeneratorRoutes = (
           const spaceId = (await context.securitySolution).getSpaceId();
           const { caseId } = request.params;
           const { timestamp } = request.body;
+
+          await casesClient.cases.get({ id: caseId });
 
           await soClient.update(
             'cases',
@@ -76,6 +88,13 @@ export const registerDataGeneratorRoutes = (
 
           return response.ok({ body: { success: true } });
         } catch (e) {
+          const statusCode = (e as { output?: { statusCode?: number } })?.output?.statusCode;
+          if (statusCode === 404) {
+            return response.notFound();
+          }
+          if (statusCode === 403) {
+            return response.forbidden();
+          }
           // Keep the error message explicit so the data generator can surface it in logs.
           return response.customError({
             statusCode: 500,

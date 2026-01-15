@@ -13,7 +13,7 @@
 # Matching behavior:
 # - The generator searches installed (and/or installable) rules by name.
 # - `name_contains_any` is a list of case-insensitive substrings; a rule "matches" if its name
-#   contains ALL of the provided substrings.
+#   contains ANY of the provided substrings.
 #
 # Example:
 # rules:
