@@ -33,7 +33,6 @@ import { isEqual, isFunction } from 'lodash';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../..';
 import { FetchStatus } from '../../types';
-import { changeDataView } from './utils/change_data_view';
 import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
@@ -206,11 +205,6 @@ export interface DiscoverStateContainer {
       isUpdate?: boolean
     ) => void;
     /**
-     * Triggered when the user selects a different data view in the data view picker
-     * @param id - id of the data view
-     */
-    onChangeDataView: (id: string | DataView) => Promise<void>;
-    /**
      * Updates the ES|QL query string
      */
     updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
@@ -328,7 +322,11 @@ export function getDiscoverStateContainer({
       await internalState.dispatch(internalStateActions.loadDataViewList());
     }
     if (nextDataView.id) {
-      await onChangeDataView(nextDataView);
+      await internalState.dispatch(
+        injectCurrentTab(internalStateActions.changeDataView)({
+          dataViewOrDataViewId: nextDataView,
+        })
+      );
     }
   };
 
@@ -643,7 +641,11 @@ export function getDiscoverStateContainer({
       newDataView.timeFieldName = '@timestamp';
     }
     internalState.dispatch(internalStateActions.appendAdHocDataViews(newDataView));
-    await onChangeDataView(newDataView);
+    await internalState.dispatch(
+      injectCurrentTab(internalStateActions.changeDataView)({
+        dataViewOrDataViewId: newDataView,
+      })
+    );
     return newDataView;
   };
 
@@ -673,20 +675,6 @@ export function getDiscoverStateContainer({
       addLog('[getDiscoverStateContainer] onUpdateQuery triggers data fetching');
       dataStateContainer.fetch();
     }
-  };
-
-  /**
-   * Function e.g. triggered when user changes data view in the sidebar
-   */
-  const onChangeDataView = async (dataViewId: string | DataView) => {
-    await changeDataView({
-      dataViewId,
-      services,
-      internalState,
-      runtimeStateManager,
-      injectCurrentTab,
-      getCurrentTab,
-    });
   };
 
   const fetchData = (initial: boolean = false) => {
@@ -730,7 +718,6 @@ export function getDiscoverStateContainer({
       initializeAndSync,
       stopSyncing,
       fetchData,
-      onChangeDataView,
       createAndAppendAdHocDataView,
       onDataViewCreated,
       onDataViewEdited,

@@ -1275,7 +1275,7 @@ describe('Discover state', () => {
       const { state, customizationService, getCurrentUrl } = await getState('/', {
         savedSearch: savedSearchMock,
       });
-      const { actions, dataState } = state;
+      const { dataState } = state;
 
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -1299,7 +1299,11 @@ describe('Discover state', () => {
       expect(getCurrentUrl()).toContain(dataViewMock.id);
 
       // change data view
-      await actions.onChangeDataView(dataViewComplexMock.id!);
+      await state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.changeDataView)({
+          dataViewOrDataViewId: dataViewComplexMock.id!,
+        })
+      );
       await new Promise(process.nextTick);
 
       // test changed state, fetch should be called once and URL should be updated
@@ -1531,7 +1535,11 @@ describe('Discover state', () => {
       ).toBe(dataViewMock.id);
 
       // Change the data view, this should change the URL and trigger a fetch
-      await state.actions.onChangeDataView(dataViewComplexMock.id!);
+      await state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.changeDataView)({
+          dataViewOrDataViewId: dataViewComplexMock.id!,
+        })
+      );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!(!(data,desc)))"`

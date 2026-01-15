@@ -217,6 +217,13 @@ export const DiscoverTopNav = ({
     persistedDiscoverSession,
   });
 
+  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
+  const onChangeDataView = useCallback(
+    (dataViewOrDataViewId: string | DataView) => {
+      dispatch(changeDataView({ dataViewOrDataViewId }));
+    },
+    [dispatch, changeDataView]
+  );
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
       trigger: {
@@ -228,12 +235,12 @@ export const DiscoverTopNav = ({
       onAddField: addField,
       onDataViewCreated: stateContainer.actions.onDataViewCreated,
       onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
-      onChangeDataView: stateContainer.actions.onChangeDataView,
+      onChangeDataView,
       adHocDataViews,
       savedDataViews,
       onEditDataView: stateContainer.actions.onDataViewEdited,
     };
-  }, [adHocDataViews, addField, dataView, savedDataViews, stateContainer]);
+  }, [adHocDataViews, addField, dataView, savedDataViews, stateContainer, onChangeDataView]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
     if (isOpen) {

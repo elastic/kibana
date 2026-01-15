@@ -413,6 +413,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dispatch, setLayoutUiState]
   );
 
+  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
+  const onChangeDataView = useCallback(
+    (dataViewOrDataViewId: string | DataView) => {
+      dispatch(changeDataView({ dataViewOrDataViewId }));
+    },
+    [dispatch, changeDataView]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -457,7 +465,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
-                onChangeDataView={stateContainer.actions.onChangeDataView}
+                onChangeDataView={onChangeDataView}
                 onDataViewCreated={stateContainer.actions.onDataViewCreated}
                 onFieldEdited={onFieldEdited}
                 onRemoveField={onRemoveColumnWithTracking}
