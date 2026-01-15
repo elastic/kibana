@@ -41,8 +41,7 @@ export async function generateSignificantEvents({
   inferenceClient,
   signal,
   sampleDocsSize,
-  // optional overrides for templates
-  systemPromptOverride,
+  systemPrompt,
   logger,
 }: {
   stream: Streams.all.Definition;
@@ -54,7 +53,7 @@ export async function generateSignificantEvents({
   signal: AbortSignal;
   logger: Logger;
   sampleDocsSize?: number;
-  systemPromptOverride?: string;
+  systemPrompt: string;
 }): Promise<{
   queries: Query[];
   tokensUsed: ChatCompletionTokenCount;
@@ -73,10 +72,7 @@ export async function generateSignificantEvents({
     })
   );
 
-  // create the prompt instance using provided overrides (if any)
-  const prompt = createGenerateSignificantEventsPrompt({
-    systemPromptOverride,
-  });
+  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>

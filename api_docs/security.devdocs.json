@@ -2360,380 +2360,6 @@
       },
       {
         "parentPluginId": "security",
-        "id": "def-server.APIKeys",
-        "type": "Interface",
-        "tags": [],
-        "label": "APIKeys",
-        "description": [
-          "\nInterface for managing API keys in Elasticsearch, including creation,\nvalidation, and invalidation of API keys,\nas well as checking the status of API key features."
-        ],
-        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-server.APIKeys.areAPIKeysEnabled",
-            "type": "Function",
-            "tags": [],
-            "label": "areAPIKeysEnabled",
-            "description": [
-              "\nDetermines if API Keys are enabled in Elasticsearch."
-            ],
-            "signature": [
-              "() => Promise<boolean>"
-            ],
-            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.APIKeys.areCrossClusterAPIKeysEnabled",
-            "type": "Function",
-            "tags": [],
-            "label": "areCrossClusterAPIKeysEnabled",
-            "description": [
-              "\nDetermines if Cross-Cluster API Keys are enabled in Elasticsearch."
-            ],
-            "signature": [
-              "() => Promise<boolean>"
-            ],
-            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.APIKeys.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [
-              "\nTries to create an API key for the current user.\n\nReturns newly created API key or `null` if API keys are disabled.\n\nUser needs `manage_api_key` privilege to create REST API keys and `manage_security` for Cross-Cluster API keys.\n"
-            ],
-            "signature": [
-              "(request: ",
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>, createParams: ",
-              "CreateAPIKeyParams",
-              ") => Promise<",
-              "SecurityCreateApiKeyResponse",
-              " | null>"
-            ],
-            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.create.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "request",
-                "description": [
-                  "Request instance."
-                ],
-                "signature": [
-                  "KibanaRequest",
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.create.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "createParams",
-                "description": [
-                  "The params to create an API key"
-                ],
-                "signature": [
-                  "CreateAPIKeyParams"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.APIKeys.update",
-            "type": "Function",
-            "tags": [],
-            "label": "update",
-            "description": [
-              "\nAttempts update an API key with the provided 'role_descriptors' and 'metadata'\n\nReturns `updated`, `true` if the update was successful, `false` if there was nothing to update\n\nUser needs `manage_api_key` privilege to update REST API keys and `manage_security` for cross-cluster API keys.\n"
-            ],
-            "signature": [
-              "(request: ",
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>, updateParams: ",
-              "UpdateAPIKeyParams",
-              ") => Promise<",
-              "SecurityUpdateApiKeyResponse",
-              " | null>"
-            ],
-            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.update.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "request",
-                "description": [
-                  "Request instance."
-                ],
-                "signature": [
-                  "KibanaRequest",
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.update.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "updateParams",
-                "description": [
-                  "The params to edit an API key"
-                ],
-                "signature": [
-                  "UpdateAPIKeyParams"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.APIKeys.grantAsInternalUser",
-            "type": "Function",
-            "tags": [],
-            "label": "grantAsInternalUser",
-            "description": [
-              "\nTries to grant an API key for the current user."
-            ],
-            "signature": [
-              "(request: ",
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>, createParams: ",
-              "CreateRestAPIKeyParams",
-              " | ",
-              "CreateRestAPIKeyWithKibanaPrivilegesParams",
-              ") => Promise<",
-              "GrantAPIKeyResult",
-              " | null>"
-            ],
-            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.grantAsInternalUser.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "request",
-                "description": [
-                  "Request instance."
-                ],
-                "signature": [
-                  "KibanaRequest",
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.grantAsInternalUser.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "createParams",
-                "description": [
-                  "Create operation parameters."
-                ],
-                "signature": [
-                  "CreateRestAPIKeyParams",
-                  " | ",
-                  "CreateRestAPIKeyWithKibanaPrivilegesParams"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.APIKeys.validate",
-            "type": "Function",
-            "tags": [],
-            "label": "validate",
-            "description": [
-              "\nTries to validate an API key."
-            ],
-            "signature": [
-              "(apiKeyPrams: ",
-              "ValidateAPIKeyParams",
-              ") => Promise<boolean>"
-            ],
-            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.validate.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "apiKeyPrams",
-                "description": [
-                  "ValidateAPIKeyParams."
-                ],
-                "signature": [
-                  "ValidateAPIKeyParams"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.APIKeys.invalidate",
-            "type": "Function",
-            "tags": [],
-            "label": "invalidate",
-            "description": [
-              "\nTries to invalidate an API keys."
-            ],
-            "signature": [
-              "(request: ",
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>, params: ",
-              "InvalidateAPIKeysParams",
-              ") => Promise<",
-              "InvalidateAPIKeyResult",
-              " | null>"
-            ],
-            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.invalidate.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "request",
-                "description": [
-                  "Request instance."
-                ],
-                "signature": [
-                  "KibanaRequest",
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.invalidate.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [
-                  "The params to invalidate an API keys."
-                ],
-                "signature": [
-                  "InvalidateAPIKeysParams"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.APIKeys.invalidateAsInternalUser",
-            "type": "Function",
-            "tags": [],
-            "label": "invalidateAsInternalUser",
-            "description": [
-              "\nTries to invalidate the API keys by using the internal user."
-            ],
-            "signature": [
-              "(params: ",
-              "InvalidateAPIKeysParams",
-              ") => Promise<",
-              "InvalidateAPIKeyResult",
-              " | null>"
-            ],
-            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.APIKeys.invalidateAsInternalUser.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [
-                  "The params to invalidate the API keys."
-                ],
-                "signature": [
-                  "InvalidateAPIKeysParams"
-                ],
-                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
         "id": "def-server.AppActions",
         "type": "Interface",
         "tags": [],
@@ -3428,7 +3054,7 @@
             "label": "apiKeys",
             "description": [],
             "signature": [
-              "APIKeys"
+              "NativeAPIKeysType"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/authentication_service.ts",
             "deprecated": false,
@@ -4847,6 +4473,380 @@
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.NativeAPIKeysType",
+        "type": "Interface",
+        "tags": [],
+        "label": "NativeAPIKeysType",
+        "description": [
+          "\nInterface for managing API keys in Elasticsearch, including creation,\nvalidation, and invalidation of API keys,\nas well as checking the status of API key features."
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.NativeAPIKeysType.areAPIKeysEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "areAPIKeysEnabled",
+            "description": [
+              "\nDetermines if API Keys are enabled in Elasticsearch."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.NativeAPIKeysType.areCrossClusterAPIKeysEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "areCrossClusterAPIKeysEnabled",
+            "description": [
+              "\nDetermines if Cross-Cluster API Keys are enabled in Elasticsearch."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.NativeAPIKeysType.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nTries to create an API key for the current user.\n\nReturns newly created API key or `null` if API keys are disabled.\n\nUser needs `manage_api_key` privilege to create REST API keys and `manage_security` for Cross-Cluster API keys.\n"
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, createParams: ",
+              "CreateAPIKeyParams",
+              ") => Promise<",
+              "SecurityCreateApiKeyResponse",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.create.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "createParams",
+                "description": [
+                  "The params to create an API key"
+                ],
+                "signature": [
+                  "CreateAPIKeyParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.NativeAPIKeysType.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\nAttempts update an API key with the provided 'role_descriptors' and 'metadata'\n\nReturns `updated`, `true` if the update was successful, `false` if there was nothing to update\n\nUser needs `manage_api_key` privilege to update REST API keys and `manage_security` for cross-cluster API keys.\n"
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, updateParams: ",
+              "UpdateAPIKeyParams",
+              ") => Promise<",
+              "SecurityUpdateApiKeyResponse",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.update.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "updateParams",
+                "description": [
+                  "The params to edit an API key"
+                ],
+                "signature": [
+                  "UpdateAPIKeyParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.NativeAPIKeysType.grantAsInternalUser",
+            "type": "Function",
+            "tags": [],
+            "label": "grantAsInternalUser",
+            "description": [
+              "\nTries to grant an API key for the current user."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, createParams: ",
+              "CreateRestAPIKeyParams",
+              " | ",
+              "CreateRestAPIKeyWithKibanaPrivilegesParams",
+              ") => Promise<",
+              "GrantAPIKeyResult",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.grantAsInternalUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.grantAsInternalUser.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "createParams",
+                "description": [
+                  "Create operation parameters."
+                ],
+                "signature": [
+                  "CreateRestAPIKeyParams",
+                  " | ",
+                  "CreateRestAPIKeyWithKibanaPrivilegesParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.NativeAPIKeysType.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [
+              "\nTries to validate an API key."
+            ],
+            "signature": [
+              "(apiKeyPrams: ",
+              "ValidateAPIKeyParams",
+              ") => Promise<boolean>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.validate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "apiKeyPrams",
+                "description": [
+                  "ValidateAPIKeyParams."
+                ],
+                "signature": [
+                  "ValidateAPIKeyParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.NativeAPIKeysType.invalidate",
+            "type": "Function",
+            "tags": [],
+            "label": "invalidate",
+            "description": [
+              "\nTries to invalidate an API keys."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, params: ",
+              "InvalidateAPIKeysParams",
+              ") => Promise<",
+              "InvalidateAPIKeyResult",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.invalidate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.invalidate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "The params to invalidate an API keys."
+                ],
+                "signature": [
+                  "InvalidateAPIKeysParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.NativeAPIKeysType.invalidateAsInternalUser",
+            "type": "Function",
+            "tags": [],
+            "label": "invalidateAsInternalUser",
+            "description": [
+              "\nTries to invalidate the API keys by using the internal user."
+            ],
+            "signature": [
+              "(params: ",
+              "InvalidateAPIKeysParams",
+              ") => Promise<",
+              "InvalidateAPIKeyResult",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.NativeAPIKeysType.invalidateAsInternalUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "The params to invalidate the API keys."
+                ],
+                "signature": [
+                  "InvalidateAPIKeysParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

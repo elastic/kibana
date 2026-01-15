@@ -30,6 +30,14 @@ export const RULE_LIST_TEST_SUBJECTS = {
   // Rule Actions
   RULE_SIDEBAR_EDIT_ACTION: 'ruleSidebarEditAction',
   EDIT_ACTION_HOVER_BUTTON: 'editActionHoverButton',
+
+  // Rule Status Dropdown
+  STATUS_DROPDOWN: 'statusDropdown',
+  STATUS_DROPDOWN_DISABLED_ITEM: 'statusDropdownDisabledItem',
+  STATUS_DROPDOWN_ENABLED_ITEM: 'statusDropdownEnabledItem',
+
+  // Rule Status Cell
+  RULES_TABLE_CELL_STATUS: 'rulesTableCell-status',
 } as const;
 
 /**
