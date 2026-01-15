@@ -400,10 +400,10 @@ value is 10000.
 [[observability-advanced-settings]]
 ==== Observability
 
+[horizontal]
 [[observability-log-sources]]`observability:logSources`::
 Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules. `logs-*-*, logs-*, filebeat-*` by default.
 
-[horizontal]
 [[apm-enable-service-overview]]`apm:enableServiceOverview`::
 When enabled, displays the *Overview* tab for services in *APM*.
 
