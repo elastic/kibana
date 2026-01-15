@@ -71,8 +71,8 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
+import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { TABS_ENABLED_FEATURE_FLAG_KEY } from './constants';
-import type { EmbeddableEditorService } from './plugin_imports/embeddable_services';
 
 /**
  * Location state of internal Discover history instance
@@ -169,7 +169,6 @@ export const buildServices = ({
   profilesManager,
   ebtManager,
   setHeaderActionMenu = noop,
-  embeddableEditor,
 }: {
   core: CoreStart;
   plugins: DiscoverStartPlugins;
@@ -183,7 +182,6 @@ export const buildServices = ({
   profilesManager: ProfilesManager;
   ebtManager: DiscoverEBTManager;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
-  embeddableEditor: EmbeddableEditorService;
 }): DiscoverServices => {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
@@ -254,6 +252,9 @@ export const buildServices = ({
     logsDataAccess: plugins.logsDataAccess,
     embeddableEnhanced: plugins.embeddableEnhanced,
     cps: plugins.cps,
-    embeddableEditor,
+    embeddableEditor: new EmbeddableEditorService(
+      core.application,
+      plugins.embeddable.getStateTransfer()
+    ),
   };
 };

@@ -344,7 +344,9 @@ export const useTopNavLinks = ({
           onSaveDiscoverSession({
             services,
             state,
-            onSaveCb: services.embeddableEditor.transferBackToEditor,
+            onSaveCb: services.embeddableEditor.isEmbeddedEditor()
+              ? services.embeddableEditor.transferBackToEditor
+              : undefined,
             onClose: () => {
               anchorElement?.focus();
             },

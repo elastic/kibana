@@ -89,7 +89,7 @@ export function initializeEditApi<
         path: appTarget.path,
         state: {
           embeddableId: uuid,
-          valueInput: partialApi.savedSearch$.getValue().searchSource.serialize(),
+          valueInput: undefined,
           originatingApp: parentApiContext.currentAppId,
           searchSessionId: partialApi.fetchContext$.getValue()?.searchSessionId,
           originatingPath: parentApiContext.getCurrentPath?.(),

@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { DiscoverServices } from '../build_services';
-import type { EmbeddableEditorService } from '../plugin_imports/embeddable_services';
+import type { EmbeddableEditorService } from '../plugin_imports/embeddable_editor_service';
 
 const rootPath = '#/';
 
@@ -21,7 +21,7 @@ function getRootBreadcrumbs({
   breadcrumb?: string;
   embeddable: EmbeddableEditorService;
 }): ChromeBreadcrumb[] {
-  const href = embeddable.isEmbeddedEditor() ? '#' : breadcrumb || rootPath;
+  const href = embeddable.isEmbeddedEditor() ? undefined : breadcrumb || rootPath;
 
   return [
     {
@@ -34,12 +34,7 @@ function getRootBreadcrumbs({
           }),
       deepLinkId: embeddable.isEmbeddedEditor() ? 'dashboards' : 'discover',
       href,
-      onClick: (e) => {
-        if (embeddable.isEmbeddedEditor()) {
-          e.preventDefault();
-          embeddable.transferBackToEditor();
-        }
-      },
+      onClick: embeddable.isEmbeddedEditor() ? embeddable.transferBackToEditor : undefined,
     },
   ];
 }
