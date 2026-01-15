@@ -10,7 +10,6 @@ import {
   LatencyAggregationType,
   getLatencyAggregationType,
 } from '@kbn/apm-data-access-plugin/common';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { intervalToSeconds } from '@kbn/apm-data-access-plugin/common/utils/get_preferred_bucket_size_and_data_source';
@@ -24,6 +23,7 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
+import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
 import { getPreferredDocumentSource } from '../../utils/get_preferred_document_source';
@@ -140,7 +140,13 @@ export async function getToolHandler({
     track_total_hits: false,
     query: {
       bool: {
-        filter: [...rangeQuery(startMs, endMs), ...kqlQuery(kqlFilter)],
+        filter: [
+          ...timeRangeFilter('@timestamp', {
+            start: startMs,
+            end: endMs,
+          }),
+          ...buildKqlFilter(kqlFilter),
+        ],
       },
     },
     aggs: {
