@@ -33,6 +33,35 @@ export const useAgentBuilderStream = () => {
   const [updates, setUpdates] = useState<Array<{ message: string; timestamp: Date }>>([]);
   const [rule, setRule] = useState<RuleResponse | null>(null);
 
+  const showErrorToast = useCallback(
+    (error: Error) => {
+      addError(error, { title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE });
+    },
+    [addError]
+  );
+
+  const cancelRuleCreation = useCallback(() => {
+    if (abortControllerRef.current) {
+      try {
+        abortControllerRef.current.abort();
+      } catch (error) {
+        showErrorToast(error);
+      }
+    }
+
+    if (subscriptionRef.current) {
+      try {
+        subscriptionRef.current.unsubscribe();
+      } catch (error) {
+        showErrorToast(error);
+      }
+      subscriptionRef.current = null;
+    }
+
+    setIsStreaming(false);
+    setIsCancelled(true);
+  }, [showErrorToast]);
+
   const streamRuleCreation = useCallback(
     async ({ message, connectorId }: { message: string; connectorId: string }) => {
       setIsStreaming(true);
@@ -90,64 +119,33 @@ export const useAgentBuilderStream = () => {
               event.data?.tool_id === SECURITY_CREATE_DETECTION_RULE_TOOL_ID
             ) {
               const result = event.data?.results?.[0];
-              if (result?.type === 'other' && result.data?.success && result.data?.rule) {
+              if (result.type === 'error') {
+                cancelRuleCreation();
+                showErrorToast(
+                  new Error(result.data?.message ?? 'Unknown error during rule creation.')
+                );
+              } else if (result?.type === 'other' && result.data?.success && result.data?.rule) {
                 setRule(result.data.rule as RuleResponse);
               }
             }
           },
           error: (error) => {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            addError(new Error(i18n.AI_ASSISTED_RULE_CREATION_ERROR_DURING_STREAM(errorMessage)), {
-              title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
-            });
-            setIsStreaming(false);
+            showErrorToast(error);
+            cancelRuleCreation();
           },
           complete: () => {
             setIsStreaming(false);
-            subscriptionRef.current = null;
           },
         });
 
         subscriptionRef.current = subscription;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        addError(new Error(i18n.AI_ASSISTED_RULE_CREATION_ERROR_STARTING(errorMessage)), {
-          title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
-        });
-        setIsStreaming(false);
-        subscriptionRef.current = null;
+        showErrorToast(error);
+        cancelRuleCreation();
       }
     },
-    [addError]
+    [showErrorToast, cancelRuleCreation]
   );
-
-  const cancelRuleCreation = useCallback(() => {
-    if (abortControllerRef.current) {
-      try {
-        abortControllerRef.current.abort();
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        addError(new Error(i18n.AI_ASSISTED_RULE_CREATION_ERROR_ABORTING(errorMessage)), {
-          title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
-        });
-      }
-    }
-
-    if (subscriptionRef.current) {
-      try {
-        subscriptionRef.current.unsubscribe();
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        addError(new Error(i18n.AI_ASSISTED_RULE_CREATION_ERROR_UNSUBSCRIBING(errorMessage)), {
-          title: i18n.AI_ASSISTED_RULE_CREATION_ERROR_TITLE,
-        });
-      }
-      subscriptionRef.current = null;
-    }
-
-    setIsStreaming(false);
-    setIsCancelled(true);
-  }, [addError]);
 
   useEffect(() => {
     return () => {
