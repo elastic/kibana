@@ -1235,18 +1235,12 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         actions: new Set([action]),
       });
 
-    // Enforce RBAC + Access Control
-    // Get the objects that are owned by the current user so we can check for the 'update' action
-    // instead of 'manage_access_control'. The owner is required to have access to update an object
-    // in order to change its access control settings.
+    // Derive typesRequiringRbac for the authorization check below.
+    // Objects owned by the current user require the 'update' action instead of 'manage_access_control'.
     const typesRequiringRbac = new Set(
       objectsRequiringPrivilegeCheck
         .filter((object) => object.requiresManageAccessControl === false)
         .map((object) => object.type)
-    );
-
-    const objectsRequiringAccessControl = objectsRequiringPrivilegeCheck.filter(
-      (object) => object.requiresManageAccessControl
     );
 
     /**
@@ -1273,9 +1267,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
        * list of SOs must all support access control.
        */
       this.accessControlService.enforceAccessControl({
-        typesRequiringAccessControl,
-        objectsRequiringAccessControl,
-        typesRequiringRbac,
+        objectsRequiringPrivilegeCheck,
         authorizationResult,
         currentSpace: namespaceString,
         addAuditEventFn: (types: string[]) => {

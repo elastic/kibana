@@ -134,19 +134,33 @@ export class AccessControlService {
 
   enforceAccessControl<A extends string>({
     authorizationResult,
-    typesRequiringAccessControl,
-    typesRequiringRbac,
+    objectsRequiringPrivilegeCheck,
     currentSpace,
     addAuditEventFn,
-    objectsRequiringAccessControl,
   }: {
     authorizationResult: CheckAuthorizationResult<A>;
-    typesRequiringAccessControl: Set<string>;
-    typesRequiringRbac: Set<string>;
+    objectsRequiringPrivilegeCheck: ObjectRequiringPrivilegeCheckResult[];
     currentSpace: string;
     addAuditEventFn?: (types: string[]) => void;
-    objectsRequiringAccessControl: ObjectRequiringPrivilegeCheckResult[];
   }) {
+    // Derive typesRequiringAccessControl and typesRequiringRbac from the objects array.
+    // - typesRequiringAccessControl: types where objects are NOT owned by current user (need manage_access_control)
+    // - typesRequiringRbac: types where objects ARE owned by current user (need update privilege)
+    // - objectsRequiringAccessControl: filtered list for error messaging (non-owner objects only)
+    const typesRequiringAccessControl = new Set(
+      objectsRequiringPrivilegeCheck
+        .filter((obj) => obj.requiresManageAccessControl)
+        .map((obj) => obj.type)
+    );
+    const typesRequiringRbac = new Set(
+      objectsRequiringPrivilegeCheck
+        .filter((obj) => !obj.requiresManageAccessControl)
+        .map((obj) => obj.type)
+    );
+    const objectsRequiringAccessControl = objectsRequiringPrivilegeCheck.filter(
+      (obj) => obj.requiresManageAccessControl
+    );
+
     if (authorizationResult.status === 'unauthorized') {
       const rbacTypeList = [...typesRequiringRbac].sort();
       const allTypes = [...new Set([...typesRequiringRbac, ...typesRequiringAccessControl])].sort();

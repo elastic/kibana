@@ -253,15 +253,17 @@ describe('AccessControlService', () => {
     });
 
     describe(`non-owner scenarios`, () => {
+      // Non-owner objects have requiresManageAccessControl: true
       it('throws if authorizationResult.status is "unauthorized"', () => {
         const authorizationResult = makeAuthResult('unauthorized');
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(['dashboard']),
-            typesRequiringRbac: new Set(),
+            // Non-owner object: requiresManageAccessControl = true
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: true },
+            ],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).toThrow(/Access denied/);
       });
@@ -278,10 +280,10 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(['dashboard']),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: true },
+            ],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).toThrow(/Access denied/);
       });
@@ -298,10 +300,10 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(['dashboard']),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: true },
+            ],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
@@ -318,38 +320,38 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(['dashboard']),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: true },
+            ],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
 
-      it('does not throw if typesRequiringAccessControl is empty', () => {
+      it('does not throw if objectsRequiringPrivilegeCheck is empty', () => {
         const authorizationResult = makeAuthResult('fully_authorized', {});
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
     });
 
     describe(`owner scenarios`, () => {
+      // Owner objects have requiresManageAccessControl: false (they need RBAC/update privilege instead)
       it('throws if authorizationResult.status is "unauthorized"', () => {
         const authorizationResult = makeAuthResult('unauthorized');
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(['dashboard']),
+            // Owner object: requiresManageAccessControl = false
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: false },
+            ],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).toThrow(/Access denied/);
       });
@@ -357,7 +359,7 @@ describe('AccessControlService', () => {
       it('throws if not globally authorized and not authorized in current space', () => {
         const authorizationResult = makeAuthResult('partially_authorized', {
           dashboard: {
-            manage_access_control: {
+            update: {
               isGloballyAuthorized: false,
               authorizedSpaces: ['foo'],
             },
@@ -366,10 +368,10 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(['dashboard']),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: false },
+            ],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).toThrow(/Access denied/);
       });
@@ -386,10 +388,10 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(['dashboard']),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: false },
+            ],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
@@ -406,23 +408,21 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(['dashboard']),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: false },
+            ],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
 
-      it('does not throw if typesRequiringAccessControl is empty', () => {
+      it('does not throw if objectsRequiringPrivilegeCheck is empty', () => {
         const authorizationResult = makeAuthResult('fully_authorized', {});
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [],
             currentSpace: 'default',
-            objectsRequiringAccessControl: [],
           })
         ).not.toThrow();
       });
