@@ -7,27 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface ConnectorIdItem {
+import type { PropertyValidationFn } from '@kbn/workflows';
+
+interface BaseItem {
   id: string;
-  connectorType: string;
-  type: 'connector-id';
-  key: string | null;
   startLineNumber: number;
   startColumn: number;
   endLineNumber: number;
   endColumn: number;
   yamlPath: (string | number)[];
+  key: string | null;
 }
 
-export interface VariableItem {
-  id: string;
+export interface ConnectorIdItem extends BaseItem {
+  connectorType: string;
+  type: 'connector-id';
+}
+
+export interface VariableItem extends BaseItem {
   type: 'regexp' | 'foreach';
-  key: string | null;
-  startLineNumber: number;
-  startColumn: number;
-  endLineNumber: number;
-  endColumn: number;
-  yamlPath: (string | number)[];
+}
+
+export interface CustomPropertyItem extends BaseItem {
+  type: 'custom-property';
+  scope: 'config' | 'input';
+  stepType: string;
+  propertyKey: string;
+  propertyValue: unknown;
+  validator: PropertyValidationFn;
 }
 
 export interface StepNameInfo {
@@ -70,7 +77,6 @@ interface YamlValidationResultVariableValid extends YamlValidationResultBase {
   message: null;
   owner: 'variable-validation';
 }
-
 interface YamlValidationResultMonacoYaml extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
@@ -95,14 +101,34 @@ interface YamlValidationResultConnectorIdError extends YamlValidationResultBase 
   owner: 'connector-id-validation';
 }
 
+interface YamlValidationResultCustomPropertyError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'custom-property-validation';
+}
+
+interface YamlValidationResultCustomPropertyValid extends YamlValidationResultBase {
+  severity: null;
+  message: null;
+  owner: 'custom-property-validation';
+}
+
+export type CustomPropertyValidationResult =
+  | YamlValidationResultCustomPropertyError
+  | YamlValidationResultCustomPropertyValid;
+
+export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
+  'step-name-validation',
+  'variable-validation',
+  'liquid-template-validation',
+  'connector-id-validation',
+  'custom-property-validation',
+] as const;
+
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
-  return [
-    'step-name-validation',
-    'variable-validation',
-    'liquid-template-validation',
-    'yaml',
-    'connector-id-validation',
-  ].includes(owner);
+  return [...CUSTOM_YAML_VALIDATION_MARKER_OWNERS, 'yaml'].includes(
+    owner as YamlValidationResult['owner']
+  );
 }
 
 export type YamlValidationResult =
@@ -112,4 +138,6 @@ export type YamlValidationResult =
   | YamlValidationResultMonacoYaml
   | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
-  | YamlValidationResultConnectorIdValid;
+  | YamlValidationResultConnectorIdValid
+  | YamlValidationResultCustomPropertyError
+  | YamlValidationResultCustomPropertyValid;

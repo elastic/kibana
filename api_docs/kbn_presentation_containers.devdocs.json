@@ -1878,10 +1878,42 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.HasSections.getPanelSection$",
+            "id": "def-public.HasSections.getPanelSection",
             "type": "Function",
             "tags": [],
-            "label": "getPanelSection$",
+            "label": "getPanelSection",
+            "description": [],
+            "signature": [
+              "(uuid: string) => string | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.HasSections.getPanelSection.$1",
+                "type": "string",
+                "tags": [],
+                "label": "uuid",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.HasSections.panelSection$",
+            "type": "Function",
+            "tags": [],
+            "label": "panelSection$",
             "description": [],
             "signature": [
               "(uuid: string) => ",
@@ -1894,7 +1926,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-public.HasSections.getPanelSection$.$1",
+                "id": "def-public.HasSections.panelSection$.$1",
                 "type": "string",
                 "tags": [],
                 "label": "uuid",
