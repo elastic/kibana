@@ -30,12 +30,6 @@ export function validateConverter(attributes: LensAttributes, schema: Type<any>)
   const builder = new LensConfigBuilder(undefined, true);
   const newApiConfig = builder.toAPIFormat(attributes);
 
-  try {
-    schema.validate(newApiConfig);
-  } catch (e) {
-    console.log('API config', JSON.stringify(newApiConfig, null, 2));
-  }
-
   expect(() => {
     schema.validate(newApiConfig);
   }).not.toThrow();
