@@ -114,6 +114,17 @@ const getFieldTypeLabel = (type: string): string => {
   return type;
 };
 
+const getFieldTypeIconType = (typeLabel: string): string => {
+  const typeLower = typeLabel.toLowerCase();
+  if (typeLower.includes('date') || typeLower.includes('time')) return 'date';
+  if (typeLower.includes('number')) return 'number';
+  if (typeLower.includes('ip')) return 'ip';
+  if (typeLower.includes('geo')) return 'geo_point';
+  if (typeLower.includes('keyword')) return 'keyword';
+  if (typeLower.includes('text')) return 'text';
+  return 'text';
+};
+
 interface FieldsBrowserPopoverProps {
   isOpen: boolean;
   onClose: () => void;
@@ -156,6 +167,10 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
 
   const getTypeLabel = useCallback((typeLabel: string) => {
     return typeLabel;
+  }, []);
+
+  const getTypeIcon = useCallback((typeLabel: string) => {
+    return <FieldIcon type={getFieldTypeIconType(typeLabel)} size="s" className="eui-alignMiddle" />;
   }, []);
 
   const createOptions = useCallback(
@@ -211,6 +226,7 @@ export const FieldsBrowserPopover: React.FC<FieldsBrowserPopoverProps> = ({
       fetchData={fetchData}
       getTypeKey={getTypeKey}
       getTypeLabel={getTypeLabel}
+      getTypeIcon={getTypeIcon}
       createOptions={createOptions}
       i18nKeys={i18nKeys}
     />

@@ -13,7 +13,6 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiFilterButton,
-  EuiIcon,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,6 +34,7 @@ export interface BrowserPopoverWrapperProps<TItem> {
   // Type extraction
   getTypeKey: (item: TItem) => string;
   getTypeLabel: (typeKey: string) => string;
+  getTypeIcon?: (typeKey: string) => ReactNode;
   // Option creation
   createOptions: (items: TItem[], selectedItems: string[]) => EuiSelectableOption[];
   // i18n keys
@@ -57,6 +57,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   fetchData,
   getTypeKey,
   getTypeLabel,
+  getTypeIcon,
   createOptions,
   i18nKeys,
 }: BrowserPopoverWrapperProps<TItem>) {
@@ -156,8 +157,9 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       key: typeKey,
       label: getTypeLabel(typeKey),
       checked: selectedTypes.includes(typeKey) ? ('on' as const) : undefined,
+      prepend: getTypeIcon?.(typeKey),
     }));
-  }, [availableTypes, selectedTypes, getTypeLabel]);
+  }, [availableTypes, selectedTypes, getTypeLabel, getTypeIcon]);
 
   const options: EuiSelectableOption[] = useMemo(() => {
     return createOptions(items, selectedItems);
