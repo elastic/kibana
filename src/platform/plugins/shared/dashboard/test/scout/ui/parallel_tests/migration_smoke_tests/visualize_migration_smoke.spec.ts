@@ -9,6 +9,7 @@
 
 import { spaceTest, expect, tags } from '@kbn/scout';
 import {
+  ensureIndexPatternFromExport,
   findImportedSavedObjectId,
   getDashboardPanels,
   openDashboard,
@@ -36,10 +37,11 @@ const getPanelDrilldownCounts = (
 };
 
 spaceTest.describe('Visualize migration smoke (7.12.1)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
+  spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);
     dashboardId = findImportedSavedObjectId(imported, 'dashboard', DASHBOARD_TITLE);
+    await ensureIndexPatternFromExport(kbnClient, scoutSpace.id, EXPORT_PATH);
     await scoutSpace.uiSettings.setDefaultIndex(DATA_VIEW_TITLE);
   });
 

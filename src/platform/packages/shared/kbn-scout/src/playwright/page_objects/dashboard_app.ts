@@ -36,7 +36,7 @@ export class DashboardApp {
 
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
-    await this.page.testSubj.waitForSelector('emptyDashboardWidget', { state: 'visible' });
+    await this.page.testSubj.waitForSelector('dashboardEditMode', { state: 'visible' });
   }
 
   private getSettingsFlyout() {
