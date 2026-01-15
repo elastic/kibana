@@ -72,5 +72,4 @@ export interface ClientConfigType {
   dev: {
     enableSemanticText?: boolean;
   };
-  isServerless: boolean;
 }
