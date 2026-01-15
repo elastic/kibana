@@ -38,7 +38,7 @@ import {
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
-import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import type { AutocompleteStart } from '@kbn/kql/public';
 import deepEqual from 'fast-deep-equal';
 
 import { AndOrBadge } from '../and_or_badge';

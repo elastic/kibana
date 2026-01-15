@@ -109,7 +109,8 @@ export const getTooltip = ({
 export const mapAppMenuItemToPanelItem = (
   item: AppMenuPopoverItem,
   childPanelId?: number,
-  onClose?: () => void
+  onClose?: () => void,
+  onCloseOverflowButton?: () => void
 ): EuiContextMenuPanelItemDescriptor => {
   const { content, title } = getTooltip({
     tooltipContent: item?.tooltipContent,
@@ -128,6 +129,7 @@ export const mapAppMenuItemToPanelItem = (
 
     if (shouldClosePopover) {
       onClose();
+      onCloseOverflowButton?.();
     }
   };
 
@@ -159,9 +161,11 @@ const createSeparatorItem = (key: string): EuiContextMenuPanelItemDescriptor => 
 export const getPopoverActionItems = ({
   primaryActionItem,
   secondaryActionItem,
+  onCloseOverflowButton,
 }: {
   primaryActionItem?: AppMenuPrimaryActionItem;
   secondaryActionItem?: AppMenuSecondaryActionItem;
+  onCloseOverflowButton?: () => void;
 }): EuiContextMenuPanelItemDescriptor[] => {
   if (!primaryActionItem && !secondaryActionItem) {
     return [];
@@ -194,6 +198,7 @@ export const getPopoverActionItems = ({
         <AppMenuPopoverActionButtons
           primaryActionItem={primaryActionItem}
           secondaryActionItem={secondaryActionItem}
+          onCloseOverflowButton={onCloseOverflowButton}
         />
       ),
     },
@@ -209,12 +214,14 @@ export const getPopoverPanels = ({
   secondaryActionItem,
   startPanelId = 0,
   onClose,
+  onCloseOverflowButton,
 }: {
   items: AppMenuPopoverItem[];
   primaryActionItem?: AppMenuPrimaryActionItem;
   secondaryActionItem?: AppMenuSecondaryActionItem;
   startPanelId?: number;
   onClose?: () => void;
+  onCloseOverflowButton?: () => void;
 }): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
   const hasActionItems = Boolean(primaryActionItem || secondaryActionItem);
@@ -237,9 +244,11 @@ export const getPopoverPanels = ({
         const childPanelId = currentPanelId;
 
         processItems(item.items, childPanelId, item.label);
-        panelItems.push(mapAppMenuItemToPanelItem(item, childPanelId, onClose));
+        panelItems.push(
+          mapAppMenuItemToPanelItem(item, childPanelId, onClose, onCloseOverflowButton)
+        );
       } else {
-        panelItems.push(mapAppMenuItemToPanelItem(item, undefined, onClose));
+        panelItems.push(mapAppMenuItemToPanelItem(item, undefined, onClose, onCloseOverflowButton));
       }
 
       if (item.separator === 'below') {
@@ -268,6 +277,7 @@ export const getPopoverPanels = ({
     const actionItems: EuiContextMenuPanelItemDescriptor[] = getPopoverActionItems({
       primaryActionItem,
       secondaryActionItem,
+      onCloseOverflowButton: onClose,
     });
 
     mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...actionItems];

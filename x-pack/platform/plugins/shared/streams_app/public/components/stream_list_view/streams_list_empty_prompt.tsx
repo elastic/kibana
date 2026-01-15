@@ -59,9 +59,18 @@ export const StreamsListEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
       css={{
-        maxInlineSize: '760px !important',
+        maxInlineSize: '960px !important',
+        '.euiEmptyPrompt__content': {
+          flexBasis: '35%',
+        },
+        '.euiEmptyPrompt__icon': {
+          maxInlineSize: 'unset !important',
+        },
+        '.euiEmptyPrompt__icon .euiImageWrapper': {
+          maxInlineSize: 'unset !important',
+        },
       }}
-      icon={<AssetImage type="addStreams" />}
+      icon={<AssetImage type="addStreams" size="fullWidth" />}
       title={
         <h2>
           {i18n.translate('xpack.streams.emptyState.title', {
@@ -75,7 +84,7 @@ export const StreamsListEmptyPrompt = () => {
         <p>
           {i18n.translate('xpack.streams.emptyState.body', {
             defaultMessage:
-              'Streams provides a centralized UI that streamlines common tasks like rerouting data, extracting fields, or setting data retention, so you don’t need to navigate to multiple applications or manually configure underlying Elasticsearch components.',
+              "Streams provides a centralized UI that streamlines common tasks like rerouting data, extracting fields, or setting data retention, so you don't need to navigate to multiple applications or manually configure underlying Elasticsearch components.",
           })}
         </p>
       }

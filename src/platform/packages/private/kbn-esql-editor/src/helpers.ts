@@ -119,7 +119,8 @@ export const endSuggestionsLatencyTracking = (
     return null;
   }
 
-  // Best-effort: keystroke timing is captured in the editor and may be stale if provider runs later.
+  // Best-effort: keystroke timing is captured in the editor and can be stale or
+  // negative if the provider runs before the change event; we drop outliers.
   const keystrokeToTriggerDuration = computeStart - startTime;
   const computeDuration = computeEnd - computeStart;
 

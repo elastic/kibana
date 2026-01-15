@@ -52,8 +52,6 @@ export class ESQLEditorTelemetryService {
 
   private _reportPerformanceEvent(eventData: PerformanceMetricEvent) {
     try {
-      // eslint-disable-next-line no-console
-      console.log('[esql][performance_metric]', eventData);
       reportPerformanceMetricEvent(this._analytics, eventData);
     } catch (error) {
       // eslint-disable-next-line no-console
