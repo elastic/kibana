@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { type Streams, type System } from '@kbn/streams-schema';
-import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { isCondition, type Condition } from '@kbn/streamlang';
 import { withSpan } from '@kbn/apm-utils';
 import { createIdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
@@ -147,7 +147,7 @@ export async function identifySystems({
 
   const identifiedSystems = response.toolCalls.flatMap((toolCall) =>
     toolCall.function.arguments.systems
-      .filter((args) => conditionSchema.safeParse(args.filter).success)
+      .filter((args) => isCondition(args.filter))
       .map((args) => {
         const system = {
           ...args,
