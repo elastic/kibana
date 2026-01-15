@@ -7,22 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type {
+  IUiSettingsClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
-import type {
-  ISearchClient,
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  ISearchOptions,
-  IEsSearchResponse,
-  IEsSearchRequest,
-} from '@kbn/search-types';
+import type { ISearchClient, IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 
 class CachedUiSettingsClient {
   private cache: Record<string, any> = {};
 
-  constructor(private uiSettingsClient: any) {}
+  constructor(private uiSettingsClient: IUiSettingsClient) {}
 
   async get<T = any>(key: string): Promise<T> {
     if (this.cache[key] === undefined) {
@@ -42,7 +40,7 @@ const createMinimalSearchSessionsClient = (): IScopedSearchSessionsClient => {
     find: async () => ({ saved_objects: [], total: 0 } as any),
     update: async () => ({ id: '', attributes: {} } as any),
     cancel: async () => ({ id: '', attributes: {} } as any),
-    delete: async (sessionId: string) => Promise<{}> as any,
+    delete: async (sessionId: string) => Promise<{}>,
     extend: async () => ({ id: '', attributes: {} } as any),
     status: async () => ({ status: 'complete' } as any),
     trackId: async () => {},
@@ -51,39 +49,40 @@ const createMinimalSearchSessionsClient = (): IScopedSearchSessionsClient => {
   };
 };
 
+interface SearchClientDeps {
+  savedObjectsClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
+  esClient: IScopedClusterClient;
+}
+// TODO move this into a method in abstract ExportType class
 export const createInternalSearchClient = (
-  core: CoreStart,
+  deps: SearchClientDeps,
   dataPluginStart: DataPluginStart,
   request: KibanaRequest,
   rollupsEnabled: boolean = false
 ): ISearchClient => {
-  const { elasticsearch, savedObjects, uiSettings } = core;
   const internalSearchStrategy = dataPluginStart.search.searchAsInternalUser;
-  const savedObjectsClient = savedObjects.getScopedClient(request);
+  const { savedObjectsClient, uiSettingsClient, esClient } = deps;
   const searchSessionsClient = createMinimalSearchSessionsClient();
 
-  const deps: SearchStrategyDependencies = {
+  const searchDeps: SearchStrategyDependencies = {
     searchSessionsClient,
     savedObjectsClient,
-    esClient: elasticsearch.client.asScoped(request),
-    uiSettingsClient: new CachedUiSettingsClient(uiSettings.asScopedToClient(savedObjectsClient)),
+    esClient,
+    uiSettingsClient: new CachedUiSettingsClient(uiSettingsClient),
     request,
     rollupsEnabled,
   };
 
   return {
-    search: <
-      SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-      SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-    >(
-      searchRequest: SearchStrategyRequest,
-      options: ISearchOptions = {}
-    ) => internalSearchStrategy.search(searchRequest, options, deps),
+    search: (searchRequest: IKibanaSearchRequest, options: ISearchOptions = {}) =>
+      internalSearchStrategy.search(searchRequest, options, searchDeps),
 
     cancel: (id: string, options?: ISearchOptions) =>
-      internalSearchStrategy.cancel?.(id, options || {}, deps) || Promise.resolve(),
+      internalSearchStrategy.cancel?.(id, options || {}, searchDeps) || Promise.resolve(),
 
     extend: (id: string, keepAlive: string, options?: ISearchOptions) =>
-      internalSearchStrategy.extend?.(id, keepAlive, options || {}, deps) || Promise.resolve(),
+      internalSearchStrategy.extend?.(id, keepAlive, options || {}, searchDeps) ||
+      Promise.resolve(),
   };
 };

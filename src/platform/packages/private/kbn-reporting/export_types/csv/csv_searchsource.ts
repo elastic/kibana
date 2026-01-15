@@ -28,6 +28,8 @@ import type {
 } from '@kbn/reporting-server';
 import { ExportType, getFieldFormats } from '@kbn/reporting-server';
 
+import { createInternalSearchClient } from '../internal_es_client';
+
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   data: DataPluginStart;
@@ -71,7 +73,7 @@ export class CsvSearchSourceExportType extends ExportType<
     request,
     cancellationToken,
     stream,
-    useInternalUser,
+    useInternalUser = false,
   }: RunTaskOpts<TaskPayloadCSV>) => {
     const logger = this.logger.get('execute-job');
 
@@ -84,9 +86,19 @@ export class CsvSearchSourceExportType extends ExportType<
     const es = this.startDeps.esClient.asScoped(request);
     const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
 
+    const internalSearchClientDeps = {
+      savedObjectsClient: await this.getSavedObjectsClient(request),
+      uiSettingsClient: uiSettings,
+      esClient: es,
+    };
+
+    const dataClient = useInternalUser
+      ? createInternalSearchClient(internalSearchClientDeps, dataPluginStart, request)
+      : dataPluginStart.search.asScoped(request);
+
     const clients = {
       uiSettings,
-      data: dataPluginStart.search.asScoped(request),
+      data: dataClient,
       es,
     };
     const dependencies = {

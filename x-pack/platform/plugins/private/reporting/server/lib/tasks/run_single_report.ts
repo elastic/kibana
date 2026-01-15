@@ -130,9 +130,9 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
   public async scheduleTask(
     request: KibanaRequest,
     params: ReportTaskParams,
-    options?: { useInternalESClient?: boolean }
+    options?: { useInternalUser?: boolean }
   ) {
-    const useInternalESClient = options?.useInternalESClient ?? false;
+    const useInternalUser = options?.useInternalUser ?? false;
     const reportingHealth = await this.opts.reporting.getHealthInfo();
     const shouldScheduleWithApiKey =
       reportingHealth.hasPermanentEncryptionKey && reportingHealth.isSufficientlySecure;
@@ -141,7 +141,7 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
       state: {},
       params: {
         ...params,
-        useInternalESClient,
+        useInternalUser,
       },
     };
 

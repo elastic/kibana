@@ -375,7 +375,7 @@ export class ReportingCore {
   }
 
   public async scheduleTaskWithInternalES(request: KibanaRequest, report: ReportTaskParams) {
-    return await this.runSingleReportTask.scheduleTask(request, report);
+    return await this.runSingleReportTask.scheduleTask(request, report, { useInternalUser: true });
   }
 
   public async scheduleRecurringTask(

@@ -83,7 +83,6 @@ export class SearchCursorPit extends SearchCursor {
     // maxConcurrentShardRequests=0 is not supported
     const effectiveMaxConcurrentShardRequests =
       maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
-
     const searchParamsPit = {
       params: {
         ...searchBody,

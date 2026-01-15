@@ -101,7 +101,13 @@ export const enhancedEsSearchStrategyProvider = (
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const params = {
-      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options, isServerless)),
+      ...(await getDefaultAsyncSubmitParams(
+        uiSettingsClient,
+        searchConfig,
+        options,
+        isServerless,
+        request.params?.pit != null
+      )),
       ...request.params,
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {

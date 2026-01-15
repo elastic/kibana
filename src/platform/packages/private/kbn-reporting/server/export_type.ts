@@ -107,7 +107,7 @@ export abstract class ExportType<
     }
   }
 
-  private async getSavedObjectsClient(request: KibanaRequest) {
+  protected async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = this.startDeps;
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
