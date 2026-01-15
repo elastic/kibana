@@ -9,6 +9,9 @@ import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/f
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
 
+const INVALID_PREFIX = /^[-_+]/;
+const INVALID_CHARS = /[# , :]/;
+
 export const indexNameValidator =
   () =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
@@ -18,8 +21,8 @@ export const indexNameValidator =
       return;
     }
 
-    const invalidPrefixMatch = value.match(/^[-_+]/);
-    const invalidCharMatch = value.match(/[# ,]/);
+    const invalidPrefixMatch = value.match(INVALID_PREFIX);
+    const invalidCharMatch = value.match(INVALID_CHARS);
 
     if (value !== value.toLowerCase()) {
       return {
