@@ -14,10 +14,10 @@ import { inject, injectable } from 'inversify';
 
 import type { PluginConfig } from '../../config';
 import type { RuleExecutorTaskParams } from './types';
-import { ALERT_EVENTS_INDEX } from './constants';
+import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 import { buildAlertEventsFromEsqlResponse } from './build_alert_events';
 import { getQueryPayload } from './get_query_payload';
-import { AlertingResourcesService } from '../services/alerting_resources_service';
+import { ResourceManager } from '../services/resource_service/resource_manager';
 import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { QueryService } from '../services/query_service/query_service';
 import { TaskRunScopeService } from '../services/task_run_scope_service/task_run_scope_service';
@@ -25,7 +25,7 @@ import { LoggerService } from '../services/logger_service/logger_service';
 import type { AlertingServerSetupDependencies } from '../../types';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 
-export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting:esql' as const;
+export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting_v2:rule_executor' as const;
 
 @injectable()
 export class RuleExecutorTaskDefinition {
@@ -34,7 +34,7 @@ export class RuleExecutorTaskDefinition {
     private readonly taskManager: AlertingServerSetupDependencies['taskManager'],
     @inject(LoggerService) private readonly logger: LoggerService,
     @inject(PluginInitializer('config')) private readonly pluginConfig: { get(): PluginConfig },
-    @inject(AlertingResourcesService) private readonly resourcesService: AlertingResourcesService,
+    @inject(ResourceManager) private readonly resourcesService: ResourceManager,
     @inject(TaskRunScopeService) private readonly taskRunScopeService: TaskRunScopeService
   ) {}
 
@@ -127,7 +127,7 @@ export class RuleExecutorTaskDefinition {
                     `ES|QL response values: ${JSON.stringify(esqlResponse.values, null, 2)}`,
                 });
 
-                const targetDataStream = ALERT_EVENTS_INDEX;
+                const targetDataStream = ALERT_EVENTS_DATA_STREAM;
 
                 const scheduledAt = taskInstance.scheduledAt;
                 const scheduledTimestamp =

@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { Streams } from '@kbn/streams-schema';
 import { suggestProcessingPipeline } from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
@@ -21,7 +20,6 @@ import {
   getGrokProcessor,
   getReviewFields as getGrokReviewFields,
   mergeGrokProcessors,
-  unwrapPatternDefinitions,
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
 import {
@@ -141,9 +139,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           await getScopedClients({ request });
 
         const stream = await streamsClient.getStream(params.path.name);
-        if (!Streams.ingest.all.Definition.is(stream)) {
-          throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
-        }
 
         const abortController = new AbortController();
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
@@ -328,11 +323,7 @@ async function processGrokPatterns({
         `[suggest_pipeline][grok] getGrokProcessor produced patterns=${grokProcessorResult.patterns.length}`
       );
 
-      return {
-        ...grokProcessorResult,
-        patterns: unwrapPatternDefinitions(grokProcessorResult),
-        pattern_definitions: {},
-      };
+      return grokProcessorResult;
     })
   );
 

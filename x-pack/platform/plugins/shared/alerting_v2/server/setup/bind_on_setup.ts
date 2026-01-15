@@ -7,29 +7,20 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
-import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
+import { CoreSetup } from '@kbn/core-di-server';
 import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
-import { AlertingResourcesService } from '../lib/services/alerting_resources_service';
-import type { PluginConfig } from '../config';
 import { registerSavedObjects } from '../saved_objects';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
     const logger = container.get(Logger);
-    const pluginConfig = container.get(PluginInitializer('config'));
-    const alertingConfig = pluginConfig.get<PluginConfig>();
 
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
     registerSavedObjects({
       savedObjects: container.get(CoreSetup('savedObjects')),
       logger,
-    });
-
-    const resourcesService = container.get(AlertingResourcesService);
-    resourcesService.startInitialization({
-      enabled: alertingConfig.enabled,
     });
 
     container.get(RuleExecutorTaskDefinition).register();

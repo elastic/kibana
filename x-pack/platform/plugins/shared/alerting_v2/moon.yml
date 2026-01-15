@@ -42,6 +42,9 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/logging-mocks'
+  - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/es-errors'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

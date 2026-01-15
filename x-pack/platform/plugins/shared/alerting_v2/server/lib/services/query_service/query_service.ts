@@ -10,8 +10,8 @@ import { ESQL_SEARCH_STRATEGY, isRunningResponse } from '@kbn/data-plugin/common
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { catchError, filter as rxFilter, lastValueFrom, map, throwError } from 'rxjs';
-import { injectable } from 'inversify';
-import type { LoggerService } from '../logger_service/logger_service';
+import { inject, injectable } from 'inversify';
+import { LoggerService } from '../logger_service/logger_service';
 
 interface ExecuteQueryParams {
   query: ESQLSearchParams['query'];
@@ -24,7 +24,7 @@ interface ExecuteQueryParams {
 export class QueryService {
   constructor(
     private readonly searchClient: IScopedSearchClient,
-    private readonly logger: LoggerService
+    @inject(LoggerService) private readonly logger: LoggerService
   ) {}
 
   async executeQuery({
