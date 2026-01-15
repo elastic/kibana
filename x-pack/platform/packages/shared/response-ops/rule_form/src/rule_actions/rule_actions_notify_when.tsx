@@ -22,10 +22,10 @@ import {
   EuiSpacer,
   EuiSuperSelect,
   EuiPopover,
-  EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   useEuiTheme,
+  EuiFormPrepend,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/Option';
 import { pipe } from 'fp-ts/pipeable';
@@ -294,14 +294,12 @@ export const RuleActionsNotifyWhen = ({
         { defaultMessage: 'Action frequency type select' }
       )}
       button={
-        <EuiButtonEmpty
-          size="xs"
-          iconType="arrowDown"
-          iconSide="right"
+        <EuiFormPrepend
+          element="button"
+          iconRight="arrowDown"
+          label={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
           onClick={useCallback(() => setSummaryMenuOpen(!summaryMenuOpen), [summaryMenuOpen])}
-        >
-          {frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
-        </EuiButtonEmpty>
+        />
       }
     >
       <EuiContextMenuPanel items={summaryOptions} />

@@ -21,7 +21,6 @@ import {
   EuiButtonEmpty,
   EuiIconTip,
   EuiText,
-  EuiFormLabel,
   EuiSuperSelect,
   EuiBadge,
   EuiErrorBoundary,
@@ -30,6 +29,7 @@ import {
   useEuiTheme,
   EuiCallOut,
   EuiSwitch,
+  EuiFormPrepend,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import type {
@@ -503,14 +503,15 @@ export const ActionTypeForm = ({
             {!hideNotifyWhen && <EuiSpacer size="s" />}
             <EuiSuperSelect
               prepend={
-                <EuiFormLabel
-                  htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
-                    defaultMessage="Run when"
-                  />
-                </EuiFormLabel>
+                <EuiFormPrepend
+                  inputId={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+                  label={
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
+                      defaultMessage="Run when"
+                    />
+                  }
+                />
               }
               fullWidth
               id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
