@@ -680,67 +680,6 @@ export const esqlCharts = [
     },
   },
   {
-    title: 'mosaic with multiple metrics',
-    type: 'mosaic',
-    metrics: [
-      {
-        operation: 'count',
-        empty_as_null: true,
-      },
-      {
-        operation: 'count',
-        empty_as_null: true,
-      },
-    ],
-    group_by: [
-      {
-        operation: 'terms',
-        fields: ['tags.keyword'],
-        size: 3,
-        other_bucket: {
-          include_documents_without_field: false,
-        },
-        rank_by: {
-          type: 'column',
-          metric: 0,
-          direction: 'desc',
-        },
-        collapse_by: 'sum',
-      },
-    ],
-    group_breakdown_by: [
-      {
-        operation: 'terms',
-        fields: ['geo.dest'],
-        size: 3,
-        other_bucket: {
-          include_documents_without_field: false,
-        },
-        rank_by: {
-          type: 'column',
-          metric: 0,
-          direction: 'desc',
-        },
-        collapse_by: 'sum',
-      },
-    ],
-    dataset: {
-      type: 'dataView',
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-    },
-    legend: {
-      visible: 'show',
-      nested: true,
-    },
-    value_display: {
-      mode: 'percentage',
-    },
-    query: {
-      query: '',
-      language: 'kuery',
-    },
-  },
-  {
     title: 'waffle with multiple metrics',
     type: 'waffle',
     metrics: [

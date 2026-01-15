@@ -96,8 +96,8 @@ export const mosaicStateSchemaNoESQL = schema.object(
       ),
       {
         minSize: 1,
-        maxSize: 100,
-        meta: { description: 'Array of metric configurations (minimum 1)' },
+        maxSize: 1,
+        meta: { description: 'Array of metric configurations (only 1 allowed)' },
       }
     ),
     group_by: schema.maybe(
@@ -162,8 +162,8 @@ const mosaicStateSchemaESQL = schema.object(
       ),
       {
         minSize: 1,
-        maxSize: 100,
-        meta: { description: 'Array of metric configurations (minimum 1)' },
+        maxSize: 1,
+        meta: { description: 'Array of metric configurations (only 1 allowed)' },
       }
     ),
     /**
