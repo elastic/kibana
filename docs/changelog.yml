@@ -44,8 +44,8 @@ available_areas:
   - Elastic Observability solution
   - Elastic Security solution
   - ES|QL
-  - Kibana Platform
-  - Kibana Security
+  - Kibana platform
+  - Kibana security
   - Kibana UI
   - Logstash
   - Machine learning
@@ -179,13 +179,13 @@ label_to_areas:
   "Feature:Add Data":  "Kibana platform"
   "Feature:Home":  "Kibana platform"
   "Team:Cloud":  "Kibana platform"
-  "Team:Security": "Kibana Security"
-  "Feature:Security/Spaces": "Kibana Security"
-  "Feature:users and roles": "Kibana Security"
-  "Feature:Security/Authentication": "Kibana Security"
-  "Feature:Security/Authorization": "Kibana Security"
-  "Feature:Security/Feature Controls": "Kibana Security"
-  "Team:Security-Scalability": "Kibana Security"
+  "Team:Security": "Kibana security"
+  "Feature:Security/Spaces": "Kibana security"
+  "Feature:users and roles": "Kibana security"
+  "Feature:Security/Authentication": "Kibana security"
+  "Feature:Security/Authorization": "Kibana security"
+  "Feature:Security/Feature Controls": "Kibana security"
+  "Team:Security-Scalability": "Kibana security"
   "Kibana UI": "Kibana UI"
   "Team:Core UI": "Kibana UI"
   Feature:Header": "Kibana UI"
