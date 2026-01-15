@@ -6,6 +6,7 @@
  */
 import { merge } from 'lodash';
 import deepMerge from 'deepmerge';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
 import { getAgentlessGlobalDataTags } from '../../../common/services/agentless_policy_helper';
