@@ -1353,6 +1353,16 @@
           },
           "<",
           "SecuritySubFeatureId",
+          "> | undefined; endpoint_scripts_management?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<",
+          "SecuritySubFeatureId",
           "> | undefined; endpoint_policy_protections?: ",
           {
             "pluginId": "@kbn/security-solution-features",

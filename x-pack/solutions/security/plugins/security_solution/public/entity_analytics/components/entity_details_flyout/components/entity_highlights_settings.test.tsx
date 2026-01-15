@@ -54,6 +54,7 @@ describe('EntityHighlightsSettings', () => {
     onChangeShowAnonymizedValues: mockOnChangeShowAnonymizedValues,
     setConnectorId: mockSetConnectorId,
     connectorId: 'test-connector',
+    connectorName: 'Elastic Managed LLM',
     entityType: 'user',
     entityIdentifier: 'test-user',
     assistantResult: {
@@ -208,12 +209,16 @@ describe('EntityHighlightsSettings', () => {
     expect(mockOpenAgentBuilderFlyout).toHaveBeenCalled();
   });
 
-  it('renders connector selector', () => {
+  it('renders connector selector', async () => {
     render(<EntityHighlightsSettings {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
-    expect(screen.getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('entity-highlights-settings-connector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    });
   });
 
   it('disables settings button when loading', () => {

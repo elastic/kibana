@@ -39,10 +39,8 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
     await embeddable.addPinnedPanel({
       panelType: TIME_SLIDER_CONTROL,
       serializedState: {
-        rawState: {
-          grow: true,
-          width: 'large',
-        },
+        grow: true,
+        width: 'large',
       },
     });
   },
