@@ -121,7 +121,6 @@ export const defaultConfig: ScoutServerConfig = {
       `--security.showInsecureClusterWarning=false`,
       '--telemetry.banner=false',
       '--telemetry.optIn=false',
-      '--inspect_component.enabled=true',
       // These are *very* important to have them pointing to staging
       '--telemetry.sendUsageTo=staging',
       `--server.maxPayload=1679958`,
