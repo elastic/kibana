@@ -23,7 +23,7 @@ import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiAllOperations, LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
-import type { AnyLensStateColumn } from './columns/types';
+import type { AnyLensStateColumn, APIAdHocDataView, APIDataView } from './columns/types';
 import { isLensStateBucketColumnType } from './columns/utils';
 import { LENS_LAYER_SUFFIX, LENS_DEFAULT_TIME_FIELD, INDEX_PATTERN_ID } from './constants';
 import {
@@ -365,7 +365,10 @@ export const buildDatasourceStates = (
     index: { index: string; timeFieldName: string }
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[]
-) => {
+): {
+  layers: LensAttributes['state']['datasourceStates'];
+  usedDataviews: Record<string, APIDataView | APIAdHocDataView>;
+} => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   // XY charts have dataset encoded per layer not at the root level

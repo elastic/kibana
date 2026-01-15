@@ -10,15 +10,20 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
-import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
+import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  sharedPanelInfoSchema,
+} from '../shared';
 import {
   legendTruncateAfterLinesSchema,
   legendVisibleSchema,
   legendSizeSchema,
   valueDisplaySchema,
+  validateMultipleMetricsCriteria,
 } from './partition_shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
@@ -56,40 +61,28 @@ export const waffleStateSharedSchema = {
 /**
  * Color configuration for primary metric in waffle chart
  */
-const partitionStatePrimaryMetricOptionsSchema = schema.object({
-  color: schema.maybe(staticColorSchema),
-});
+const partitionStatePrimaryMetricOptionsSchema = schema.object(
+  {
+    /**
+     * Color configuration
+     */
+    color: schema.maybe(staticColorSchema),
+  },
+  {
+    meta: {
+      description:
+        'Configuration options for primary metric values in a waffle partition, including static color settings',
+    },
+  }
+);
 
 /**
  * Breakdown configuration including color mapping and collapse behavior
  */
 const partitionStateBreakdownByOptionsSchema = schema.object({
-  color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
-      meta: {
-        description: 'Color configuration: by value (palette-based) or mapping (custom rules)',
-      },
-    })
-  ),
+  color: schema.maybe(colorMappingSchema),
   collapse_by: schema.maybe(collapseBySchema),
 });
-
-function validateGroupings({
-  metrics,
-  group_by,
-}: {
-  metrics: Array<{}>;
-  group_by?: Array<{ collapse_by?: string }>;
-}) {
-  if (metrics.length > 1) {
-    if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 0) {
-      return 'When multiple metrics are defined, only collapsed breakdown dimensions are allowed.';
-    }
-  }
-  if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
-    return 'Only a single non-collapsed breakdown dimension is allowed.';
-  }
-}
 
 /**
  * Waffle chart configuration for standard (non-ES|QL) queries
@@ -101,83 +94,10 @@ export const waffleStateSchemaNoESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetSchema,
     ...waffleStateSharedSchema,
+    ...dslOnlyPanelInfoSchema,
     metrics: schema.arrayOf(
-      schema.oneOf(
-        [
-          schema.oneOf(
-            [
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, countMetricOperationSchema], {
-                meta: { description: 'Count metric with primary options' },
-              }),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema],
-                { meta: { description: 'Unique count metric with primary options' } }
-              ),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, metricOperationSchema], {
-                meta: {
-                  description: 'Standard metric (avg, min, max, median) with primary options',
-                },
-              }),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, sumMetricOperationSchema], {
-                meta: { description: 'Sum metric with primary options' },
-              }),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, lastValueOperationSchema], {
-                meta: { description: 'Last value metric with primary options' },
-              }),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, percentileOperationSchema], {
-                meta: { description: 'Percentile metric with primary options' },
-              }),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema],
-                { meta: { description: 'Percentile rank metric with primary options' } }
-              ),
-            ],
-            {
-              meta: {
-                description:
-                  'Field-based metrics: count, unique_count, average, min, max, median, sum, standard_deviation, last_value, percentile, percentile_rank',
-              },
-            }
-          ),
-          schema.oneOf(
-            [
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, differencesOperationSchema], {
-                meta: { description: 'Differences metric with primary options' },
-              }),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, movingAverageOperationSchema],
-                { meta: { description: 'Moving average metric with primary options' } }
-              ),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema],
-                { meta: { description: 'Cumulative sum metric with primary options' } }
-              ),
-              schema.allOf([partitionStatePrimaryMetricOptionsSchema, counterRateOperationSchema], {
-                meta: { description: 'Counter rate metric with primary options' },
-              }),
-            ],
-            {
-              meta: {
-                description:
-                  'Reference-based metrics: differences, moving_average, cumulative_sum, counter_rate',
-              },
-            }
-          ),
-          schema.oneOf(
-            [
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema],
-                { meta: { description: 'Static value metric with primary options' } }
-              ),
-              schema.allOf(
-                [partitionStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema],
-                { meta: { description: 'Formula metric with primary options' } }
-              ),
-            ],
-            { meta: { description: 'Calculated metrics: static_value, formula' } }
-          ),
-        ],
-        { meta: { description: 'Metric operations for waffle chart primary value' } }
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+        partitionStatePrimaryMetricOptionsSchema
       ),
       {
         minSize: 1,
@@ -187,42 +107,18 @@ export const waffleStateSchemaNoESQL = schema.object(
     ),
     group_by: schema.maybe(
       schema.arrayOf(
-        schema.maybe(
-          schema.oneOf(
-            [
-              schema.allOf(
-                [partitionStateBreakdownByOptionsSchema, bucketDateHistogramOperationSchema],
-                { meta: { description: 'Date histogram breakdown with partition options' } }
-              ),
-              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketTermsOperationSchema], {
-                meta: { description: 'Terms breakdown with partition options' },
-              }),
-              schema.allOf(
-                [partitionStateBreakdownByOptionsSchema, bucketHistogramOperationSchema],
-                { meta: { description: 'Histogram breakdown with partition options' } }
-              ),
-              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketRangesOperationSchema], {
-                meta: { description: 'Range breakdown with partition options' },
-              }),
-              schema.allOf([partitionStateBreakdownByOptionsSchema, bucketFiltersOperationSchema], {
-                meta: { description: 'Filters breakdown with partition options' },
-              }),
-            ],
-            {
-              meta: {
-                description:
-                  'Breakdown operations: date_histogram, terms, histogram, range, filters',
-              },
-            }
-          )
-        ),
-        { minSize: 1, meta: { description: 'Array of breakdown dimensions (minimum 1)' } }
+        mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
       )
     ),
   },
   {
     meta: { description: 'Waffle chart configuration for standard queries' },
-    validate: validateGroupings,
+    validate: validateMultipleMetricsCriteria,
   }
 );
 
@@ -245,7 +141,11 @@ const waffleStateSchemaESQL = schema.object(
         ],
         { meta: { description: 'ES|QL column reference for primary metric' } }
       ),
-      { maxSize: 100 }
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
     ),
     group_by: schema.maybe(
       schema.arrayOf(
@@ -262,7 +162,7 @@ const waffleStateSchemaESQL = schema.object(
   },
   {
     meta: { description: 'Waffle chart configuration for ES|QL queries' },
-    validate: validateGroupings,
+    validate: validateMultipleMetricsCriteria,
   }
 );
 

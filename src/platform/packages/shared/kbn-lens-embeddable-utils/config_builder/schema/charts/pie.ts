@@ -10,9 +10,14 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
-import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
+import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  sharedPanelInfoSchema,
+} from '../shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
@@ -22,6 +27,7 @@ import {
   legendSizeSchema,
   legendTruncateAfterLinesSchema,
   legendVisibleSchema,
+  validateMultipleMetricsCriteria,
   valueDisplaySchema,
 } from './partition_shared';
 
@@ -64,9 +70,17 @@ const pieStateSharedSchema = {
  */
 const partitionStatePrimaryMetricOptionsSchema = schema.object(
   {
+    /**
+     * Color configuration
+     */
     color: schema.maybe(staticColorSchema),
   },
-  { meta: { description: 'Primary metric visual options including static color' } }
+  {
+    meta: {
+      description:
+        'Configuration options for primary metric values in a pie/donut partition, including static color settings',
+    },
+  }
 );
 
 /**
@@ -74,13 +88,7 @@ const partitionStatePrimaryMetricOptionsSchema = schema.object(
  */
 const partitionStateBreakdownByOptionsSchema = schema.object(
   {
-    color: schema.maybe(
-      schema.oneOf([colorByValueSchema, colorMappingSchema], {
-        meta: {
-          description: 'Color configuration: by value (palette-based) or mapping (custom rules)',
-        },
-      })
-    ),
+    color: schema.maybe(colorMappingSchema),
     collapse_by: schema.maybe(collapseBySchema),
   },
   { meta: { description: 'Breakdown dimension options with color and collapse configuration' } }
@@ -103,20 +111,32 @@ export const pieStateSchemaNoESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetSchema,
     ...pieStateSharedSchema,
+    ...dslOnlyPanelInfoSchema,
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
       ),
-      { minSize: 1, meta: { description: 'Array of metric configurations (minimum 1)' } }
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
     ),
     group_by: schema.maybe(
       schema.arrayOf(
         mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
-        { minSize: 1, meta: { description: 'Array of breakdown dimensions (minimum 1)' } }
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
       )
     ),
   },
-  { meta: { description: 'Pie/donut chart configuration for standard queries' } }
+  {
+    meta: { description: 'Pie/donut chart configuration for standard queries' },
+    validate: validateMultipleMetricsCriteria,
+  }
 );
 
 /**
@@ -129,21 +149,38 @@ const pieStateSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     ...pieStateSharedSchema,
-    metrics: schema.allOf(
-      [
-        schema.object(genericOperationOptionsSchema),
-        partitionStatePrimaryMetricOptionsSchema,
-        esqlColumnSchema,
-      ],
-      { meta: { description: 'ES|QL column reference for primary metric' } }
+    metrics: schema.arrayOf(
+      schema.allOf(
+        [
+          schema.object(genericOperationOptionsSchema),
+          partitionStatePrimaryMetricOptionsSchema,
+          esqlColumnSchema,
+        ],
+        { meta: { description: 'ES|QL column reference for primary metric' } }
+      ),
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
     ),
     group_by: schema.maybe(
-      schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
-        meta: { description: 'ES|QL column reference for breakdown dimension' },
-      })
+      schema.arrayOf(
+        schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
+          meta: { description: 'ES|QL column reference for breakdown dimension' },
+        }),
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
+      )
     ),
   },
-  { meta: { description: 'Pie/donut chart configuration for ES|QL queries' } }
+  {
+    meta: { description: 'Pie/donut chart configuration for ES|QL queries' },
+    validate: validateMultipleMetricsCriteria,
+  }
 );
 
 /**

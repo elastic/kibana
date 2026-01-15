@@ -119,6 +119,8 @@ export const collapseBySchema = schema.oneOf(
   { meta: { description: 'Collapse by function description' } }
 );
 
+export type CollapseBySchema = TypeOf<typeof collapseBySchema>;
+
 const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
 
 export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;

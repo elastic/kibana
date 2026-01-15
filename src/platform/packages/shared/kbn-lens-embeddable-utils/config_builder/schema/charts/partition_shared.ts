@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { ColorMappingType, StaticColorType } from '../color';
 
 export const legendTruncateAfterLinesSchema = schema.maybe(
   schema.number({
@@ -63,3 +64,64 @@ export const legendNestedSchema = schema.maybe(
     meta: { description: 'Show nested legend with hierarchical breakdown levels' },
   })
 );
+
+type Metric =
+  | {}
+  | {
+      color?: StaticColorType;
+    };
+interface GroupBy {
+  collapse_by?: string;
+  color?: ColorMappingType;
+}
+
+function validateColouringAssignments({
+  metrics,
+  group_by,
+}: {
+  metrics: Array<Metric>;
+  group_by?: Array<GroupBy>;
+}) {
+  if (group_by) {
+    const hasStaticColouring = metrics.some((metric) => 'color' in metric && metric.color != null);
+    if (group_by.length && hasStaticColouring) {
+      return 'Colouring cannot be assigned to metric dimensions when grouping dimensions are defined.';
+    }
+    const breakdownsWithColouring = group_by.filter((def) => def.color != null);
+    if (breakdownsWithColouring.length > 1) {
+      return 'Colouring can only be assigned to a single grouping dimension.';
+    }
+    if (breakdownsWithColouring[0]?.collapse_by) {
+      return 'Colouring cannot be assigned to a non-collapsed grouping dimension.';
+    }
+    const nonCollapsedGroupBy = group_by.filter((def) => def.collapse_by == null);
+    if (nonCollapsedGroupBy[0] !== breakdownsWithColouring[0]) {
+      return 'Colouring can only be assigned to the first non-collapsed grouping dimension.';
+    }
+  }
+}
+
+export function validateGroupings({
+  metrics,
+  group_by,
+}: {
+  metrics: Array<Metric>;
+  group_by?: Array<{ collapse_by?: string }>;
+}) {
+  if (metrics.length > 1) {
+    if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 0) {
+      return 'When multiple metrics are defined, only collapsed breakdown dimensions are allowed.';
+    }
+  }
+  if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
+    return 'Only a single non-collapsed breakdown dimension is allowed.';
+  }
+}
+
+export function validateMultipleMetricsCriteria(arg: {
+  metrics: Array<Metric>;
+  group_by?: Array<{ collapse_by?: string }>;
+}) {
+  validateGroupings(arg);
+  validateColouringAssignments(arg);
+}

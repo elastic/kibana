@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type, TypeOf } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { MetricState } from './charts/metric';
 import { metricStateSchema } from './charts/metric';
@@ -19,16 +19,8 @@ import type { HeatmapState } from './charts/heatmap';
 import { heatmapStateSchema } from './charts/heatmap';
 import type { TagcloudState } from './charts/tagcloud';
 import { tagcloudStateSchema } from './charts/tagcloud';
-import type { MosaicStateESQL, MosaicStateNoESQL } from './charts/mosaic';
 import type { XYState } from './charts/xy';
 import { xyStateSchema } from './charts/xy';
-import { mosaicStateSchema } from './charts/mosaic';
-import type { PieStateESQL, PieStateNoESQL } from './charts/pie';
-import { pieStateSchema } from './charts/pie';
-import type { TreemapStateESQL, TreemapStateNoESQL } from './charts/treemap';
-import { treemapStateSchema } from './charts/treemap';
-import type { WaffleStateESQL, WaffleStateNoESQL } from './charts/waffle';
-import { waffleStateSchema } from './charts/waffle';
 import type { RegionMapState } from './charts/region_map';
 import { regionMapStateSchema } from './charts/region_map';
 import type {
@@ -36,25 +28,8 @@ import type {
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
-
-export const partitionStateSchema = schema.oneOf([
-  mosaicStateSchema,
-  pieStateSchema,
-  treemapStateSchema,
-  waffleStateSchema,
-]);
-
-export type PartitionState = TypeOf<typeof partitionStateSchema>;
-export type PartitionStateNoESQL =
-  | MosaicStateNoESQL
-  | PieStateNoESQL
-  | TreemapStateNoESQL
-  | WaffleStateNoESQL;
-export type PartitionStateESQL =
-  | MosaicStateESQL
-  | PieStateESQL
-  | TreemapStateESQL
-  | WaffleStateESQL;
+import type { PartitionState } from './charts/partition';
+import { partitionStateSchema } from './charts/partition';
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -71,9 +46,7 @@ export const _lensApiStateSchema: any = schema.oneOf([
   gaugeStateSchema,
   heatmapStateSchema,
   tagcloudStateSchema,
-  // disable for now to avoid type issues at the config builder root level
-  // TODO: enabled once transformations are available
-  // partitionStateSchema,
+  partitionStateSchema,
   regionMapStateSchema,
 ]);
 
@@ -84,7 +57,8 @@ export type LensApiState =
   | XYState
   | HeatmapState
   | TagcloudState
-  | RegionMapState;
+  | RegionMapState
+  | PartitionState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
