@@ -7,22 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
-import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin';
+import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
 import {
-  generateGithubSearchIssuesOrPullRequestsWorkflow,
+  generateGithubSearchIssuesWorkflow,
   generateGithubGetDocsWorkflow,
   generateGithubListRepositoriesWorkflow,
-  generateGithubGetIssueWorkflow,
-  generateGithubGetPullRequestWorkflow,
-  generateGithubGetFileContentsWorkflow,
-  generateGithubListBranchesWorkflow,
-  generateGithubSearchRepoContentsWorkflow,
-  generateGithubGetDocWorkflow,
-  generateGithubGetIssueCommentsWorkflow,
-  generateGithubGetPullRequestCommentsWorkflow,
-  generateGithubGetPullRequestFilesWorkflow,
-  generateGithubGetPullRequestDiffWorkflow,
-  generateGithubGetPullRequestReviewsWorkflow,
 } from './workflows';
 
 export const githubDataSource: DataTypeDefinition = {
@@ -46,57 +35,10 @@ export const githubDataSource: DataTypeDefinition = {
 
   generateWorkflows(stackConnectorId: string) {
     return [
-      {
-        content: generateGithubSearchIssuesOrPullRequestsWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
+      { content: generateGithubSearchIssuesWorkflow(stackConnectorId), shouldGenerateABTool: true },
       { content: generateGithubGetDocsWorkflow(stackConnectorId), shouldGenerateABTool: true },
       {
         content: generateGithubListRepositoriesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetIssueWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetPullRequestWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetFileContentsWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubListBranchesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubSearchRepoContentsWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetDocWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetIssueCommentsWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetPullRequestCommentsWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetPullRequestFilesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetPullRequestDiffWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubGetPullRequestReviewsWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
     ];
