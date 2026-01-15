@@ -51,13 +51,13 @@ steps:
               message: >-
                 📋 Creating alert for monitor "{{ foreach.item.name }}" ({{ foreach.item.overallState }})
 
-          # Create alert in Kibana using the events API
+          # Create alert in Kibana using the raw events API (bypasses strict validation)
           # Status: Alert/Warn/No Data -> open, OK -> resolved
           - name: create_alert
             type: kibana.request
             with:
                 method: POST
-                path: /api/observability/events
+                path: /api/observability/events/raw
                 body:
                   title: '[Datadog] {{ foreach.item.name }}'
                   message: >-
