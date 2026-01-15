@@ -42,14 +42,14 @@ export function Bar({
         width: ${width}%;
         margin-left: ${left}%;
       `}
-      style={getCompositeBarStyle(color, duration, composite)}
+      style={getBarStyle(color, duration, composite)}
     >
       {segments?.length ? <BarSegments segments={segments} /> : null}
     </div>
   );
 }
 
-export function getCompositeBarStyle(
+export function getBarStyle(
   color: string,
   duration?: number,
   composite?: { count: number; sum: number }
