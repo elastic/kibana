@@ -132,6 +132,44 @@ const handleFlattenedOutput = (
   logFlattenedConfigs(flattenedConfigs, log);
 };
 
+// Splits 'streams_app' module by 'serverRunFlags' to have a better control over
+// test execution: streams_app-stateful, streams_app-serverless-default
+const splitStreamsTestsByServerRunFlags = (
+  modules: ModuleDiscoveryInfo[]
+): ModuleDiscoveryInfo[] => {
+  return modules.flatMap((module) => {
+    // It is a temp workaround. Only split modules that include 'streams_app' in their name
+    if (!module.name.includes('streams_app')) {
+      return [module];
+    }
+
+    const allServerRunFlags = new Set<string>();
+    module.configs.forEach((config) => {
+      config.serverRunFlags.forEach((flag) => allServerRunFlags.add(flag));
+    });
+
+    return Array.from(allServerRunFlags).map((flag) => {
+      // transform: --stateful -> stateful, --serverless=default -> serverless-default
+      const flagSuffix = flag.replace(/^--/, '').replace(/=/g, '-');
+      const newModuleName = `${module.name}-${flagSuffix}`;
+
+      const filteredConfigs = module.configs
+        .filter((config) => config.serverRunFlags.includes(flag))
+        .map((config) => ({
+          ...config,
+          // Keep only the matching 'serverRunFlag' for this split module
+          serverRunFlags: [flag],
+        }));
+
+      return {
+        ...module,
+        name: newModuleName,
+        configs: filteredConfigs,
+      };
+    });
+  });
+};
+
 const handleNonFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
@@ -139,10 +177,12 @@ const handleNonFlattenedOutput = (
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
-    saveModuleDiscoveryInfo(filteredForCiModules, log);
+    // 'streams_app' tests are quite time consuming, let's split run by 'serverRunFlags' before saving
+    const splitModules = splitStreamsTestsByServerRunFlags(filteredForCiModules);
+    saveModuleDiscoveryInfo(splitModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
-      countModulesByType(filteredForCiModules);
+      countModulesByType(splitModules);
 
     log.info(
       `Scout configs were filtered for CI. Saved ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`

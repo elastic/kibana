@@ -162,6 +162,28 @@ describe('<DocViewer />', () => {
     mockTestInitialLocalStorageValue = undefined;
   });
 
+  test('should prioritize the initialTabId prop over local storage value', () => {
+    const registry = new DocViewsRegistry();
+    registry.add({ id: 'test1', order: 10, title: 'Render function', component: jest.fn() });
+    registry.add({ id: 'test2', order: 20, title: 'Render function', component: jest.fn() });
+    registry.add({ id: 'test3', order: 30, title: 'Render function', component: jest.fn() });
+
+    mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test2';
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        initialTabId="test3"
+      />
+    );
+
+    expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('false');
+    expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('false');
+    expect(screen.getByTestId('docViewerTab-test3').getAttribute('aria-selected')).toBe('true');
+  });
+
   test('should not restore a tab from local storage if unavailable', () => {
     const registry = new DocViewsRegistry();
     registry.add({ id: 'test1', order: 10, title: 'Render function', component: jest.fn() });
@@ -199,5 +221,25 @@ describe('<DocViewer />', () => {
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('false');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('true');
     expect(screen.getByTestId('docViewerTab-test3').getAttribute('aria-selected')).toBe('false');
+  });
+
+  test('should call onUpdateSelectedTabId when tab selection changes', async () => {
+    const onUpdateSelectedTabId = jest.fn();
+    const registry = new DocViewsRegistry();
+    registry.add({ id: 'test1', order: 10, title: 'Tab 1', component: jest.fn() });
+    registry.add({ id: 'test2', order: 20, title: 'Tab 2', component: jest.fn() });
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        onUpdateSelectedTabId={onUpdateSelectedTabId}
+      />
+    );
+
+    expect(onUpdateSelectedTabId).toHaveBeenCalledWith(undefined);
+    await userEvent.click(screen.getByTestId('docViewerTab-test2'));
+    expect(onUpdateSelectedTabId).toHaveBeenCalledWith('test2');
   });
 });
