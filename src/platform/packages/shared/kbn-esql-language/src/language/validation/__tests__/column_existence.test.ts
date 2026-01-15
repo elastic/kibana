@@ -28,7 +28,7 @@ describe('column existence checks', () => {
       'SET unmapped_fields = "LOAD"; FROM index | WHERE unmapped > 0',
       [],
       [
-        `"unmapped" column isn't mapped in any searched indices. If you are not intentionally referencing an unmapped field, check that the field exists or that it is spelled correctly in your query.`,
+        `"unmapped" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`,
       ]
     );
   });
@@ -39,7 +39,7 @@ describe('column existence checks', () => {
       'SET unmapped_fields = "LOAD"; FROM index | WHERE unmapped > 0 | KEEP unmapped',
       [],
       [
-        `"unmapped" column isn't mapped in any searched indices. If you are not intentionally referencing an unmapped field, check that the field exists or that it is spelled correctly in your query.`,
+        `"unmapped" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`,
       ]
     );
   });

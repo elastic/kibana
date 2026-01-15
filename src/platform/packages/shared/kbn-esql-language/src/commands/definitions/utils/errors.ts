@@ -47,7 +47,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unmappedColumnWarning':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unmappedColumnWarning', {
-          defaultMessage: `"{name}" column isn't mapped in any searched indices. If you are not intentionally referencing an unmapped field, check that the field exists or that it is spelled correctly in your query.`,
+          defaultMessage: `"{name}" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`,
           values: { name: out.name },
         }),
         type: 'warning',
