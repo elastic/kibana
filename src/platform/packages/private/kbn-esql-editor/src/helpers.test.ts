@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filterDataErrors, filterOverlappingWarnings, parseErrors, parseWarning } from './helpers';
+import {
+  filterDataErrors,
+  filterOutWarningsOverlappingWithErrors,
+  parseErrors,
+  parseWarning,
+} from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
 describe('helpers', function () {
@@ -285,7 +290,7 @@ describe('helpers', function () {
     });
   });
 
-  describe('filterOverlappingWarnings', function () {
+  describe('filterOutWarningsOverlappingWithErrors', function () {
     it.each([
       {
         description: 'should filter out warning exactly matching error range',
@@ -353,7 +358,9 @@ describe('helpers', function () {
         },
       ];
 
-      expect(filterOverlappingWarnings(errors, warnings)).toHaveLength(expectedWarningCount);
+      expect(filterOutWarningsOverlappingWithErrors(errors, warnings)).toHaveLength(
+        expectedWarningCount
+      );
     });
   });
 });

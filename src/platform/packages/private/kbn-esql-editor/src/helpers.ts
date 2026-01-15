@@ -366,7 +366,7 @@ export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): 
 /**
  * Filters warning messages that overlap with error messages ranges.
  */
-export const filterOverlappingWarnings = (
+export const filterOutWarningsOverlappingWithErrors = (
   errors: MonacoMessage[],
   warnings: MonacoMessage[]
 ): MonacoMessage[] => {
