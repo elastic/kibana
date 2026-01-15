@@ -6,7 +6,7 @@
  */
 
 import { generateCloneName } from './clone_name_generator';
-import type { ActiveSource } from '../../types/connector';
+import type { ActiveSource } from '../types/connector';
 
 const createMockSource = (name: string): ActiveSource => ({
   id: `source-${name}`,

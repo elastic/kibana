@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActiveSource } from '../../types/connector';
+import type { ActiveSource } from '../types/connector';
 
 // Regex to match names with trailing numbers (e.g., "Github 2", "My Source 5")
 const NAME_WITH_NUMBER_PATTERN = /^(.+?)\s+(\d+)$/;

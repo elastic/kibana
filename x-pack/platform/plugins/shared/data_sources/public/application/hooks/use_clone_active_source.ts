@@ -8,7 +8,7 @@
 import { useQueryClient } from '@kbn/react-query';
 import { queryKeys } from '../query_keys';
 import type { ActiveSource } from '../../types/connector';
-import { generateCloneName } from '../utils/clone_name_generator';
+import { generateCloneName } from '../../utils/clone_name_generator';
 
 /**
  * Hook to get clone information for a source
