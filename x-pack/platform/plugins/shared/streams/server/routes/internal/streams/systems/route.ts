@@ -26,8 +26,6 @@ import {
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
-import { checkAccess } from '../../../../lib/streams/stream_crud';
-import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useStreamDescriptionApi } from './stream_description/use_stream_description_api';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
 import type { AIFeatures } from '../../hooks/use_ai_features';
