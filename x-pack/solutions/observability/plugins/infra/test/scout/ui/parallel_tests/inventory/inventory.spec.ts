@@ -144,8 +144,17 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Has no detectable a11y violations on load', async ({ page }) => {
-    const { violations } = await page.checkA11y({ include: ['main'] });
-    expect(violations).toHaveLength(0);
+  test('Has no detectable a11y violations on load', async ({
+    page,
+    pageObjects: { inventoryPage },
+  }) => {
+    await test.step('ensure waffle map is loaded', async () => {
+      await inventoryPage.waffleMap.waitFor();
+    });
+
+    await test.step('test a11y', async () => {
+      const { violations } = await page.checkA11y({ include: ['main'] });
+      expect(violations).toHaveLength(0);
+    });
   });
 });
