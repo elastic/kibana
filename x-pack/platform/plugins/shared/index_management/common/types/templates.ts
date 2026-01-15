@@ -29,13 +29,6 @@ export interface TemplateSerialized {
   _meta?: { [key: string]: any };
   data_stream?: {};
   allow_auto_create?: boolean;
-}
-
-/**
- * Extended interface for TemplateSerialized that includes date fields
- * returned by Elasticsearch GET operations but not allowed in PUT operations
- */
-export interface TemplateSerializedWithDateFields extends TemplateSerialized {
   created_date_millis?: number;
   modified_date_millis?: number;
 }
@@ -84,7 +77,7 @@ export type TemplateType = 'default' | 'managed' | 'cloudManaged' | 'system';
 
 export interface TemplateFromEs {
   name: string;
-  index_template: TemplateSerializedWithDateFields;
+  index_template: TemplateSerialized;
 }
 
 /**
