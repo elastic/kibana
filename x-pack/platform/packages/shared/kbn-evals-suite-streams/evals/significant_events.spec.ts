@@ -6,8 +6,7 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import { evaluate } from '@kbn/evals';
-import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
+
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
   SIGNIFICANT_EVENT_TYPE_ERROR,
@@ -15,7 +14,9 @@ import {
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from '@kbn/streams-ai/src/significant_events/types';
-import { from, lastValueFrom, toArray } from 'rxjs';
+import { generateSignificantEvents } from '@kbn/streams-ai';
+import kbnDatemath from '@kbn/datemath';
+import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
 
@@ -140,13 +141,16 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
       dataset.examples.forEach((example: SignificantEventsEvaluationExample) => {
         evaluate(
           example.input.stream_name,
-          async ({ phoenixClient, evaluators, connector, fetch, esClient }) => {
+          async ({ phoenixClient, evaluators, esClient, inferenceClient, logger, apiServices }) => {
             const testIndex = `logs-sig-events-test-${Date.now()}`;
+
+            // Create the data stream before we start writing to it
+            await esClient.indices.createDataStream({ name: testIndex });
 
             let bulkBody;
             if ((example.input as any).ingest_mode === 'single_doc') {
               bulkBody = [
-                { index: { _index: testIndex } },
+                { create: { _index: testIndex } },
                 {
                   '@timestamp': new Date().toISOString(),
                   'event.original': example.input.sample_logs.join('\n'),
@@ -154,8 +158,8 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
               ];
             } else {
               bulkBody = example.input.sample_logs.flatMap((doc) => [
-                { index: { _index: testIndex } },
-                { '@timestamp': new Date().toISOString(), 'event.original': doc },
+                { create: { _index: testIndex } },
+                { '@timestamp': new Date().toISOString(), 'event.original': doc, message: doc },
               ]);
             }
             await esClient.bulk({ refresh: true, body: bulkBody });
@@ -177,22 +181,19 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
                   ],
                 },
                 task: async () => {
-                  const events = await lastValueFrom(
-                    from(
-                      fetch('/api/streams/logs/significant_events/_generate', {
-                        method: 'GET',
-                        asResponse: true,
-                        rawResponse: true,
-                        query: {
-                          connectorId: connector.id,
-                          index: testIndex,
-                        },
-                      })
-                    ).pipe(httpResponseIntoObservable(), toArray())
-                  );
+                  const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
+                  const { queries } = await generateSignificantEvents({
+                    stream,
+                    start: kbnDatemath.parse('now-24h')!.valueOf(),
+                    end: kbnDatemath.parse('now')!.valueOf(),
+                    esClient,
+                    inferenceClient,
+                    logger,
+                    signal: new AbortController().signal,
+                  });
 
                   // The task should return the array of generated queries
-                  return events.map((e: any) => e.query);
+                  return queries;
                 },
               },
               [
@@ -215,60 +216,63 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
             );
 
             // Cleanup the test data stream
-            await esClient.indices.deleteDataStream({ name: testIndex });
+            // await esClient.indices.deleteDataStream({ name: testIndex });
           }
         );
       });
     });
   });
 
-  evaluate('empty datastream', async ({ phoenixClient, evaluators, connector, fetch }) => {
-    await phoenixClient.runExperiment(
-      {
-        dataset: {
-          name: 'sig_events: empty datastream',
-          description: 'Significant events query generation with empty stream data',
-          examples: [
-            {
-              input: {},
-              output: {},
-              metadata: {},
-            },
-          ],
-        },
-        task: async () => {
-          const events = await lastValueFrom(
-            from(
-              fetch('/api/streams/logs/significant_events/_generate', {
-                method: 'GET',
-                asResponse: true,
-                rawResponse: true,
-                query: {
-                  connectorId: connector.id,
-                },
-              })
-            ).pipe(httpResponseIntoObservable(), toArray())
-          );
-
-          return events.map((e: any) => e.query);
-        },
-      },
-      [
+  evaluate(
+    'empty datastream',
+    async ({ phoenixClient, evaluators, esClient, inferenceClient, logger, apiServices }) => {
+      const testIndex = `logs-sig-events-test-${Date.now()}`;
+      await esClient.indices.createDataStream({ name: testIndex });
+      await phoenixClient.runExperiment(
         {
-          name: 'evaluator',
-          kind: 'LLM',
-          evaluate: async ({ input, output, expected, metadata }) => {
-            return evaluators
-              .criteria(['Assert the KQL queries are generated following the user intent'])
-              .evaluate({
-                input,
-                expected,
-                output,
-                metadata,
-              });
+          dataset: {
+            name: 'sig_events: empty datastream',
+            description: 'Significant events query generation with empty stream data',
+            examples: [
+              {
+                input: {},
+                output: {},
+                metadata: {},
+              },
+            ],
+          },
+          task: async () => {
+            const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
+            const { queries } = await generateSignificantEvents({
+              stream,
+              start: kbnDatemath.parse('now-24h')!.valueOf(),
+              end: kbnDatemath.parse('now')!.valueOf(),
+              esClient,
+              inferenceClient,
+              logger,
+              signal: new AbortController().signal,
+            });
+
+            return queries;
           },
         },
-      ]
-    );
-  });
+        [
+          {
+            name: 'evaluator',
+            kind: 'LLM',
+            evaluate: async ({ input, output, expected, metadata }) => {
+              return evaluators
+                .criteria(['Assert the KQL queries are generated following the user intent'])
+                .evaluate({
+                  input,
+                  expected,
+                  output,
+                  metadata,
+                });
+            },
+          },
+        ]
+      );
+    }
+  );
 });
