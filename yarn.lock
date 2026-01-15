@@ -2641,12 +2641,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@111.1.0":
-  version "111.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-111.1.0.tgz#007b63c2194cead4e2a6c44b94b3abddb79ce96a"
-  integrity sha512-aKIjpGuLqfenlZsX6jnyRpziGIInFrPLvmg0H3T2RSgCYNRB5CZWh6yJGEAP5BVIOCiobnDI/VnrYyT5xZ7jZA==
+"@elastic/eui@file:./eui_time_picker2_a.tgz":
+  version "111.0.0"
+  resolved "file:./eui_time_picker2_a.tgz#a028698e5122e69b1908b58fa6ee15c50bc33e09"
   dependencies:
-    "@elastic/eui-theme-common" "7.3.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"

@@ -12,8 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, mergeMap, of } from 'rxjs';
-import { map } from 'rxjs';
+import { delay, mergeMap, of } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
 import dateMath from '@kbn/datemath';
@@ -30,16 +29,18 @@ import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@e
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperDatePicker,
+  // EuiSuperDatePicker,
+  EuiDateTimePicker,
   usePrettyDuration,
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
-  EuiIconTip,
+  // EuiIconTip,
   useEuiTheme,
-  type EuiTimeZoneDisplayProps,
+  // type EuiTimeZoneDisplayProps,
+  type EuiOnTimeChangeProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
@@ -125,9 +126,9 @@ const getWrapperWithTooltip = (
   }
 };
 
-const SuperDatePicker = React.memo(
-  EuiSuperDatePicker as any
-) as unknown as typeof EuiSuperDatePicker;
+// const SuperDatePicker = React.memo(
+//   EuiSuperDatePicker as any
+// ) as unknown as typeof EuiSuperDatePicker;
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
@@ -372,36 +373,36 @@ export const QueryBarTopRow = React.memo(
     const propsOnSubmit = props.onSubmit;
     const propsOnCancel = props.onCancel;
 
-    const toRecentlyUsedRanges = (ranges: TimeRange[]) =>
-      ranges.map(({ from, to }: { from: string; to: string }) => {
-        return {
-          start: from,
-          end: to,
-        };
-      });
+    // const toRecentlyUsedRanges = (ranges: TimeRange[]) =>
+    //   ranges.map(({ from, to }: { from: string; to: string }) => {
+    //     return {
+    //       start: from,
+    //       end: to,
+    //     };
+    //   });
     const timeHistory = props.timeHistory;
-    const timeHistory$ = useMemo(
-      () => timeHistory?.get$().pipe(map(toRecentlyUsedRanges)) ?? EMPTY,
-      [timeHistory]
-    );
+    // const timeHistory$ = useMemo(
+    //   () => timeHistory?.get$().pipe(map(toRecentlyUsedRanges)) ?? EMPTY,
+    //   [timeHistory]
+    // );
 
-    const recentlyUsedRanges = useObservable(
-      timeHistory$,
-      toRecentlyUsedRanges(timeHistory?.get() ?? [])
-    );
-    const [commonlyUsedRanges] = useState(() => {
-      return (
-        uiSettings
-          ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
-          ?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
-            return {
-              start: from,
-              end: to,
-              label: display,
-            };
-          }) ?? []
-      );
-    });
+    // const recentlyUsedRanges = useObservable(
+    //   timeHistory$,
+    //   toRecentlyUsedRanges(timeHistory?.get() ?? [])
+    // );
+    // const [commonlyUsedRanges] = useState(() => {
+    //   return (
+    //     uiSettings
+    //       ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
+    //       ?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
+    //         return {
+    //           start: from,
+    //           end: to,
+    //           label: display,
+    //         };
+    //       }) ?? []
+    //   );
+    // });
 
     const onSubmit = useCallback(
       ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
@@ -472,17 +473,7 @@ export const QueryBarTopRow = React.memo(
     }, []);
 
     const onTimeChange = useCallback(
-      ({
-        start,
-        end,
-        isInvalid,
-        isQuickSelection,
-      }: {
-        start: string;
-        end: string;
-        isInvalid: boolean;
-        isQuickSelection: boolean;
-      }) => {
+      ({ start, end, isInvalid }: EuiOnTimeChangeProps) => {
         setIsDateRangeInvalid(isInvalid);
         const retVal = {
           query: queryRef.current,
@@ -492,13 +483,9 @@ export const QueryBarTopRow = React.memo(
           },
         };
 
-        if (isQuickSelection) {
-          onSubmit(retVal);
-        } else {
-          propsOnChange(retVal);
-        }
+        onSubmit(retVal);
       },
-      [propsOnChange, onSubmit]
+      [onSubmit]
     );
 
     const propsOnRefresh = props.onRefresh;
@@ -620,46 +607,53 @@ export const QueryBarTopRow = React.memo(
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
-      const timeZoneName = uiSettings.get('dateFormat:tz');
-      const timeZoneSettingTip = i18n.translate(
-        'unifiedSearch.queryBarTopRow.datePicker.timeZoneSettingTip',
-        {
-          defaultMessage: 'Time zone is set in space settings by administrators',
-        }
-      );
-      const timeZoneCustomRender: EuiTimeZoneDisplayProps['customRender'] = ({ nameDisplay }) => (
-        <>
-          {nameDisplay}
-          <EuiIconTip content={timeZoneSettingTip} color="subdued" />
-        </>
-      );
+      // const timeZoneName = uiSettings.get('dateFormat:tz');
+      // const timeZoneSettingTip = i18n.translate(
+      //   'unifiedSearch.queryBarTopRow.datePicker.timeZoneSettingTip',
+      //   {
+      //     defaultMessage: 'Time zone is set in space settings by administrators',
+      //   }
+      // );
+      // const timeZoneCustomRender: EuiTimeZoneDisplayProps['customRender'] = ({ nameDisplay }) => (
+      //   <>
+      //     {nameDisplay}
+      //     <EuiIconTip content={timeZoneSettingTip} color="subdued" />
+      //   </>
+      // );
 
+      // const datePicker = (
+      //   <SuperDatePicker
+      //     isDisabled={isDisabled}
+      //     start={props.dateRangeFrom}
+      //     end={props.dateRangeTo}
+      //     isPaused={props.isRefreshPaused}
+      //     refreshInterval={props.refreshInterval}
+      //     refreshMinInterval={props.minRefreshInterval}
+      //     onTimeChange={onTimeChange}
+      //     onRefresh={onRefresh}
+      //     onRefreshChange={props.onRefreshChange}
+      //     showUpdateButton={false}
+      //     recentlyUsedRanges={recentlyUsedRanges}
+      //     locale={i18n.getLocale()}
+      //     commonlyUsedRanges={commonlyUsedRanges}
+      //     dateFormat={uiSettings.get('dateFormat')}
+      //     isAutoRefreshOnly={showAutoRefreshOnly}
+      //     className="kbnQueryBar__datePicker"
+      //     isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
+      //     width={isMobile ? 'full' : 'auto'}
+      //     compressed
+      //     showTimeWindowButtons
+      //     timeZoneDisplayProps={{
+      //       timeZone: timeZoneName,
+      //       customRender: timeZoneCustomRender,
+      //     }}
+      //   />
+      // );
       const datePicker = (
-        <SuperDatePicker
-          isDisabled={isDisabled}
-          start={props.dateRangeFrom}
-          end={props.dateRangeTo}
-          isPaused={props.isRefreshPaused}
-          refreshInterval={props.refreshInterval}
-          refreshMinInterval={props.minRefreshInterval}
+        <EuiDateTimePicker
+          value="last 15 minutes"
+          _showBadgeAtEnd={false}
           onTimeChange={onTimeChange}
-          onRefresh={onRefresh}
-          onRefreshChange={props.onRefreshChange}
-          showUpdateButton={false}
-          recentlyUsedRanges={recentlyUsedRanges}
-          locale={i18n.getLocale()}
-          commonlyUsedRanges={commonlyUsedRanges}
-          dateFormat={uiSettings.get('dateFormat')}
-          isAutoRefreshOnly={showAutoRefreshOnly}
-          className="kbnQueryBar__datePicker"
-          isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
-          width={isMobile ? 'full' : 'auto'}
-          compressed
-          showTimeWindowButtons
-          timeZoneDisplayProps={{
-            timeZone: timeZoneName,
-            customRender: timeZoneCustomRender,
-          }}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
