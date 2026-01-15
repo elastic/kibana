@@ -2624,29 +2624,29 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.6.0.tgz#e1d72f3969049dd07ca96736119c08e7ac24f748"
   integrity sha512-XWCgM8TkpMDcX8OX8v0ocm0zI2cuxbRrGVtMcSFqLN8VWP/7JjVuw8Dg1Jo3cvMqXK/2YbfcREgzuCqvPD28+w==
 
-"@elastic/eui-theme-borealis@5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-5.2.0.tgz#e73aabdb6f9a54fd819b1de97e692dbdb72c3864"
-  integrity sha512-1EwwqseJ3IymCVKvk04rUN7pt4YWhS9U3rKFm8+jzqH2k3gwuDaWeVdzhOAMWdTOhrIfwFov8Gu7hpCYRZ0VOQ==
+"@elastic/eui-theme-borealis@5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-5.3.0.tgz#84672790fe92c2ed559a06aca6f9c4ef64aa058f"
+  integrity sha512-LJcRer7+Qjn2mDE56yuuofNzYsAWXlCRDK/ta8Pu4AStfgCA88wOhHue4xWfH99V926WfUG4HePJZCjUIKZ+Qw==
   dependencies:
-    "@elastic/eui-theme-common" "7.2.0"
+    "@elastic/eui-theme-common" "7.3.0"
     chroma-js "^2.4.2"
 
-"@elastic/eui-theme-common@7.2.0":
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-7.2.0.tgz#caf3800d2faca3c69c0beea0afb8684007071580"
-  integrity sha512-vN8g7znFnhkjHJU1XYHuYZUwXtb9G7EdgqAGj+/jjrcnvmbJiOU1vU9lHMH8MaHkPnWVmk5aBcV3B+yRu06qrQ==
+"@elastic/eui-theme-common@7.3.0":
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-7.3.0.tgz#6116ab791624ae57b6936afb0a112792a56f1912"
+  integrity sha512-IhQ2SNcfmWJweS1w4nL76b7cHLho1EN71bIaHYPwRynuB6BAWY9Z1bQRsYH0KKHJwHr5+MIkmjA5pvQ3A2qMKQ==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@111.0.0":
-  version "111.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-111.0.0.tgz#e9f27ed57e966af9b9507f294ce6c40fb8f7c5f4"
-  integrity sha512-FqXSLqiVUYrk+yuxjEV1hUTqf0RxyKC299iFfc027+s/yUp7D39T/eBpig67HxvC3i4yYctuQiOHjry41cv3xA==
+"@elastic/eui@111.1.0":
+  version "111.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-111.1.0.tgz#007b63c2194cead4e2a6c44b94b3abddb79ce96a"
+  integrity sha512-aKIjpGuLqfenlZsX6jnyRpziGIInFrPLvmg0H3T2RSgCYNRB5CZWh6yJGEAP5BVIOCiobnDI/VnrYyT5xZ7jZA==
   dependencies:
-    "@elastic/eui-theme-common" "7.2.0"
+    "@elastic/eui-theme-common" "7.3.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -7217,6 +7217,10 @@
   uid ""
 
 "@kbn/kibana-utils-plugin@link:src/platform/plugins/shared/kibana_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kql@link:src/platform/plugins/shared/kql":
   version "0.0.0"
   uid ""
 
@@ -24538,10 +24542,10 @@ joi-to-json@5.0.0:
     combinations "^1.0.0"
     lodash "^4.17.21"
 
-joi@18.0.1:
-  version "18.0.1"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-18.0.1.tgz#1e1885d035cc6ca1624e81bf22112e7c1ee38e1b"
-  integrity sha512-IiQpRyypSnLisQf3PwuN2eIHAsAIGZIrLZkd4zdvIar2bDyhM91ubRjy8a3eYablXsh9BeI/c7dmPYHca5qtoA==
+joi@18.0.2:
+  version "18.0.2"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-18.0.2.tgz#30ced6aed00a7848cc11f92859515258301dc3a4"
+  integrity sha512-RuCOQMIt78LWnktPoeBL0GErkNaJPTBGcYuyaBvUOQSpcpcLfWrHPPihYdOGbV5pam9VTWbeoF7TsGiHugcjGA==
   dependencies:
     "@hapi/address" "^5.1.1"
     "@hapi/formula" "^3.0.2"

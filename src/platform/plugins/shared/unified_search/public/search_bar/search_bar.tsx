@@ -40,6 +40,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import type { SavedQueryMeta } from '../saved_query_form';
@@ -51,10 +52,6 @@ import type { DataViewPickerProps } from '../dataview_picker';
 import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
-import type {
-  SuggestionsAbstraction,
-  SuggestionsListSize,
-} from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
