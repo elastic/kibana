@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout-oblt';
 import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
 import { getRuleIdByName } from '../../../fixtures/helpers';
+import { BIGGER_TIMEOUT } from '../../../fixtures/constants';
 
 test.describe('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, () => {
   let ruleId: string;
@@ -175,15 +176,17 @@ test.describe('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, () => 
       // Verify dashboard selector is visible
       await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
 
-      // Get all dashboard options from the dropdown
-      const optionsText = await pageObjects.ruleDetailsPage.getDashboardsOptionsList();
+      // Open dashboards dropdown and search for the test dashboard
+      await pageObjects.ruleDetailsPage.openDashboardsDropdown();
+      await pageObjects.ruleDetailsPage.dashboardSelectorInput.fill(testDashboardTitle);
 
-      // Verify options list is not empty
-      expect(optionsText.length).toBeGreaterThan(0);
+      await expect(async () => {
+        const optionsText = await pageObjects.ruleDetailsPage.comboboxOptionsList.allTextContents();
+        expect(optionsText.join(' ')).toContain(testDashboardTitle);
+      }).toPass({ timeout: BIGGER_TIMEOUT, intervals: [500] });
 
-      // Verify our test dashboard appears in the options
-      const optionsString = optionsText.join(' ');
-      expect(optionsString).toContain(testDashboardTitle);
+      // Close the dashboards dropdown
+      await pageObjects.ruleDetailsPage.closeDashboardsDropdown();
     } finally {
       // Clean up: delete the test dashboard
       await kbnClient.savedObjects.delete({
