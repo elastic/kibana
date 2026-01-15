@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useQuery } from '@kbn/react-query';
+import { useMemo } from 'react';
+import { useSiemReadinessApi } from './use_siem_readiness_api';
 
 export const useIntegrationDisplayNames = () => {
-  const { http } = useKibana<CoreStart>().services;
+  const { getIntegrations } = useSiemReadinessApi();
 
-  return useQuery({
-    queryKey: ['integration-display-names'] as const,
-    queryFn: async () => {
-      const response = await http.get<{ items: Array<{ name: string; title: string }> }>(
-        '/api/fleet/epm/packages'
-      );
+  const nameToTitleMap = useMemo(() => {
+    if (!getIntegrations.data?.items) {
+      return new Map<string, string>();
+    }
 
-      // Create a mapping of package name to display title
-      const nameToTitleMap = new Map<string, string>();
-      response.items?.forEach((pkg) => {
-        nameToTitleMap.set(pkg.name, pkg.title || pkg.name);
-      });
+    const map = new Map<string, string>();
+    getIntegrations.data.items.forEach((pkg) => {
+      map.set(pkg.name, pkg.title || pkg.name);
+    });
 
-      return nameToTitleMap;
-    },
-  });
+    return map;
+  }, [getIntegrations.data?.items]);
+
+  return {
+    data: nameToTitleMap,
+  };
 };

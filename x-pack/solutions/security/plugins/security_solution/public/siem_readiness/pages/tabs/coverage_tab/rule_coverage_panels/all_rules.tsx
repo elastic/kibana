@@ -57,20 +57,28 @@ export const AllRuleCoveragePanel: React.FC = () => {
   );
 
   const installedIntegrationsOptions = useMemo(() => {
-    return (installedIntegrationRules.analytics?.installedIntegrations || []).map(
+    return (installedIntegrationRules.ruleIntegrationCoverage?.installedIntegrations || []).map(
       (integration) => ({
         label: getIntegrationDisplayName(integration),
         key: integration,
       })
     );
-  }, [getIntegrationDisplayName, installedIntegrationRules.analytics?.installedIntegrations]);
+  }, [
+    getIntegrationDisplayName,
+    installedIntegrationRules.ruleIntegrationCoverage?.installedIntegrations,
+  ]);
 
   const missingIntegrationsOptions = useMemo(() => {
-    return (installedIntegrationRules.analytics?.missingIntegrations || []).map((integration) => ({
-      label: getIntegrationDisplayName(integration),
-      key: integration,
-    }));
-  }, [getIntegrationDisplayName, installedIntegrationRules.analytics?.missingIntegrations]);
+    return (installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations || []).map(
+      (integration) => ({
+        label: getIntegrationDisplayName(integration),
+        key: integration,
+      })
+    );
+  }, [
+    getIntegrationDisplayName,
+    installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations,
+  ]);
 
   const onChangePopOver = (popoverOptions: EuiSelectableOption[]) => {
     // Find the selected option
@@ -174,7 +182,8 @@ export const AllRuleCoveragePanel: React.FC = () => {
     },
   ];
 
-  const installedIntegrationAssociatedRulesCount = installedIntegrationRules.data?.length || 0;
+  const installedIntegrationAssociatedRulesCount =
+    installedIntegrationRules.ruleIntegrationCoverage?.coveredRules?.length || 0;
 
   const missingIntegrationAssociatedRulesCount =
     (getDetectionRules.data?.data?.length || 0) - installedIntegrationAssociatedRulesCount;
@@ -194,8 +203,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
     ],
     [installedIntegrationAssociatedRulesCount, missingIntegrationAssociatedRulesCount]
   );
-  const isLoading =
-    getIntegrations.isLoading || getDetectionRules.isLoading || installedIntegrationRules.isLoading;
+  const isLoading = getIntegrations.isLoading || getDetectionRules.isLoading;
   const DONUT_CHART_DATA = useMemo(
     () => [
       {

@@ -73,10 +73,10 @@ export const RuleCoveragePanel: React.FC = () => {
   const caseDescription = useMemo(
     () =>
       buildMissingIntegrationDescription(
-        installedIntegrationRules.analytics?.missingIntegrations || [],
+        installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations || [],
         getIntegrationUrl
       ),
-    [installedIntegrationRules.analytics?.missingIntegrations, getIntegrationUrl]
+    [installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations, getIntegrationUrl]
   );
 
   const handleCreateCase = useCallback(() => {
@@ -111,13 +111,13 @@ export const RuleCoveragePanel: React.FC = () => {
   };
 
   const installedIntegrationAssociatedRulesCount =
-    installedIntegrationRules.analytics?.coveredRules.length || 0;
+    installedIntegrationRules.ruleIntegrationCoverage?.coveredRules.length || 0;
 
   const missingIntegrationAssociatedRulesCount =
     (getDetectionRules.data?.data?.length || 0) - installedIntegrationAssociatedRulesCount;
 
   const hasMissingIntegrations = Boolean(
-    installedIntegrationRules.analytics?.missingIntegrations?.length
+    installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations?.length
   );
 
   return (

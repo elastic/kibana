@@ -28,7 +28,7 @@ export const useSiemReadinessApi = () => {
   });
 
   const getIntegrations = useQuery({
-    queryKey: ['integrations', 'fleetPackages'] as const, // More specific query key
+    queryKey: ['siem-readiness', 'fleet', 'epm', 'packages', 'all-enabled-rules'] as const,
     queryFn: () => http.get<{ items: PackageListItem[] }>('/api/fleet/epm/packages'),
   });
 

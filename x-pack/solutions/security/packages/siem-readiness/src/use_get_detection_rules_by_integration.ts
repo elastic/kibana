@@ -6,25 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useQuery } from '@kbn/react-query';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-
-export const useEnabledDetectionRules = () => {
-  const { http } = useKibana<CoreStart>().services;
-
-  return useQuery({
-    queryKey: ['enabled-detection-rules'],
-    queryFn: () =>
-      http.get<{ data: RuleResponse[] }>('/api/detection_engine/rules/_find', {
-        query: {
-          filter: 'alert.attributes.enabled:true',
-          per_page: 10000,
-        },
-      }),
-  });
-};
+import { useSiemReadinessApi } from './use_siem_readiness_api';
 
 export interface RuleIntegrationCoverage {
   coveredRules: RuleResponse[];
@@ -87,9 +70,10 @@ export const getRuleIntegrationCoverage = (
 };
 
 export const useDetectionRulesByIntegration = (integrationPackages: string | string[]) => {
-  const enabledRulesQuery = useEnabledDetectionRules();
+  const { getDetectionRules } = useSiemReadinessApi();
+  const enabledRulesQuery = getDetectionRules;
 
-  const analytics = useMemo(() => {
+  const ruleIntegrationCoverage = useMemo(() => {
     if (!enabledRulesQuery.data?.data) {
       return null;
     }
@@ -102,9 +86,6 @@ export const useDetectionRulesByIntegration = (integrationPackages: string | str
   }, [enabledRulesQuery.data?.data, integrationPackages]);
 
   return {
-    ...enabledRulesQuery,
-    analytics,
-    // Maintain backward compatibility
-    data: analytics?.coveredRules,
+    ruleIntegrationCoverage,
   };
 };
