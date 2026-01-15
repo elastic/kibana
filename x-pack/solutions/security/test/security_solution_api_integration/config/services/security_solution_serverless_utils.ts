@@ -9,14 +9,14 @@ import supertest from 'supertest';
 import { format as formatUrl } from 'url';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type { RoleCredentials } from '@kbn/test-suites-xpack-platform/serverless/shared/services';
-import type { SendOptions } from '@kbn/ftr-common-functional-services';
+import type { SearchService, SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureSearchSendOptions } from './search_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecuritySolutionServerlessUtilsInterface, Role } from './types';
+import type { SecuritySolutionUtilsInterface, Role } from './types';
 
 export function SecuritySolutionServerlessUtils({
   getService,
-}: FtrProviderContext): SecuritySolutionServerlessUtilsInterface {
+}: FtrProviderContext): SecuritySolutionUtilsInterface {
   const svlUserManager = getService('svlUserManager');
   const lifecycle = getService('lifecycle');
   const svlCommonApi = getService('svlCommonApi');
@@ -113,7 +113,7 @@ export function SecuritySolutionServerlessUtils({
         return SecureSearch.send(serverlessSendOptions);
       };
 
-      return { ...SecureSearch, send };
+      return { ...SecureSearch, send } as SearchService;
     },
   };
 }

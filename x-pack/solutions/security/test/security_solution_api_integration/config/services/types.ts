@@ -6,31 +6,18 @@
  */
 
 import type TestAgent from 'supertest/lib/agent';
-import type { IEsSearchResponse } from '@kbn/search-types';
 
-import type { SearchService, SendOptions } from '@kbn/ftr-common-functional-services';
-import type { SearchSecureService } from './search_secure';
+import type { SearchService } from '@kbn/ftr-common-functional-services';
 
-export interface SecuritySolutionServerlessSearch extends Omit<SearchSecureService, 'send'> {
-  send: <T extends IEsSearchResponse>(options: SendOptions) => Promise<T>;
-}
-
-interface SecuritySolutionUtilsInterface {
+export interface SecuritySolutionUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
-
   createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
-
   cleanUpCustomRole: () => Promise<void>;
-
   createSuperTestWithCustomRole: (role: Role) => Promise<TestAgent<any>>;
-}
-
-export interface SecuritySolutionServerlessUtilsInterface extends SecuritySolutionUtilsInterface {
-  createSearch: (role?: string) => Promise<SecuritySolutionServerlessSearch>;
+  createSearch: (role?: string) => Promise<SearchService>;
 }
 
 export interface SecuritySolutionESSUtilsInterface extends SecuritySolutionUtilsInterface {
-  createSearch: (role?: string) => Promise<SearchService>;
   createUser: (user: User) => Promise<any>;
   deleteUsers: (userNames: string[]) => Promise<any>;
   createRole: (name: string, role: Role) => Promise<any>;
