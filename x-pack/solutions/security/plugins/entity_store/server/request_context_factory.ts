@@ -37,7 +37,7 @@ export async function createRequestHandlerContext({
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
   const taskManagerStart = await getTaskManagerStart(coreSetup);
-  
+
   return {
     core,
     logger,
