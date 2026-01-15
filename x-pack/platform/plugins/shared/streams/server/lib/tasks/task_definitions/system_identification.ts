@@ -22,10 +22,15 @@ export interface SystemIdentificationTaskParams {
   end: number;
 }
 
+export const SYSTEMS_IDENTIFICATION_TASK_TYPE = 'streams_systems_identification';
+
+export function getSystemsIdentificationTaskId(streamName: string) {
+  return `${SYSTEMS_IDENTIFICATION_TASK_TYPE}_${streamName}`;
+}
+
 export function createStreamsSystemIdentificationTask(taskContext: TaskContext) {
   return {
-    // TODO: rename to streams_system_identification
-    streams_feature_identification: {
+    [SYSTEMS_IDENTIFICATION_TASK_TYPE]: {
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(
@@ -63,7 +68,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   logger: taskContext.logger,
                 });
 
-                const { featurePromptOverride, descriptionPromptOverride } =
+                const { descriptionPromptOverride, systemsPromptOverride } =
                   await promptsConfigService.getPrompt();
 
                 const results = await identifySystemsWithDescription({
@@ -75,8 +80,8 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   stream,
                   systems,
                   signal: runContext.abortController.signal,
-                  systemsPromptOverride: featurePromptOverride,
-                  descriptionPromptOverride,
+                  descriptionPrompt: descriptionPromptOverride,
+                  systemsPrompt: systemsPromptOverride,
                   dropUnmapped: true,
                 });
 

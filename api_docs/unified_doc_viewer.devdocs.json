@@ -95,9 +95,39 @@
         "label": "UnifiedDocViewer",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<",
-          "DocViewRenderProps",
-          " & ",
+          "React.ForwardRefExoticComponent<Omit<Omit<Omit<Omit<",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-public.DocViewerProps",
+            "text": "DocViewerProps"
+          },
+          ", \"docViews\">, \"ref\"> & React.RefAttributes<",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-public.DocViewerApi",
+            "text": "DocViewerApi"
+          },
+          ">, \"ref\"> & { ref?: ((instance: ",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-public.DocViewerApi",
+            "text": "DocViewerApi"
+          },
+          " | null) => void) | React.RefObject<",
+          {
+            "pluginId": "@kbn/unified-doc-viewer",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDocViewerPluginApi",
+            "section": "def-public.DocViewerApi",
+            "text": "DocViewerApi"
+          },
+          "> | null | undefined; } & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -105,7 +135,7 @@
             "section": "def-common.WithSuspenseExtendedDeps",
             "text": "WithSuspenseExtendedDeps"
           },
-          " & React.RefAttributes<{}>>"
+          ", \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer.tsx",
         "deprecated": false,
