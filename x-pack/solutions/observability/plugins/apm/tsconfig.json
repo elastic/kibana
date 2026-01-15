@@ -146,7 +146,8 @@
     "@kbn/esql-composer",
     "@kbn/discover-shared-plugin",
     "@kbn/core-chrome-browser",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/core-chrome-layout-constants"
   ],
   "exclude": ["target/**/*"]
 }
