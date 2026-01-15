@@ -90,9 +90,6 @@ export const DiscoverTopNav = ({
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
-  const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
-  const renderAppMenuOutsideTabs =
-    stateContainer.customizationContext.displayMode !== 'embedded' && !tabsEnabled;
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -281,11 +278,7 @@ export const DiscoverTopNav = ({
 
   return (
     <span>
-      <DiscoverTopNavMenu
-        topNavMenu={topNavMenu}
-        renderAppMenuOutsideTabs={renderAppMenuOutsideTabs}
-        setAppMenu={services.chrome.setAppMenu}
-      />
+      <DiscoverTopNavMenu topNavMenu={topNavMenu} />
       <SearchBar
         useBackgroundSearchButton={
           stateContainer.customizationContext.displayMode !== 'embedded' &&
@@ -329,7 +322,7 @@ export const DiscoverTopNav = ({
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
-        onDraftChange={tabsEnabled ? onSearchDraftChange : undefined}
+        onDraftChange={onSearchDraftChange}
         esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
         esqlVariablesConfig={
@@ -357,7 +350,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
-        onOpenQueryInNewTab={tabsEnabled ? onOpenQueryInNewTab : undefined}
+        onOpenQueryInNewTab={onOpenQueryInNewTab}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

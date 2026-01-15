@@ -54,7 +54,7 @@ const buildShareOptions = async ({
     isEsqlMode
   );
 
-  const { locator, discoverFeatureFlags } = services;
+  const { locator } = services;
   const { timefilter } = services.data.query.timefilter;
   const timeRange = timefilter.getTime();
   const refreshInterval = timefilter.getRefreshInterval();
@@ -71,15 +71,6 @@ const buildShareOptions = async ({
     timeRange: timeRange ?? undefined,
     refreshInterval,
   };
-
-  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
-
-  if (tabsEnabled && currentTab) {
-    params.tab = {
-      id: currentTab.id,
-      label: currentTab.label,
-    };
-  }
 
   const relativeUrl = locator.getRedirectUrl(params);
 
@@ -129,7 +120,7 @@ const buildShareOptions = async ({
           },
         },
         link: {
-          draftModeCallOut: tabsEnabled,
+          draftModeCallOut: true,
         },
       },
     },
