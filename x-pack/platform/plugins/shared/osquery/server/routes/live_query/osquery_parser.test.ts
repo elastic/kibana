@@ -10,9 +10,9 @@ import markdown from 'remark-parse-no-trim';
 import { parser as OsqueryParser } from './osquery_parser';
 
 const parseOsqueryNodes = (value: string) =>
-  (unified()
+  unified()
     .use([[markdown, {}], OsqueryParser])
-    .parse(value).children as Array<{ type: string; configuration?: Record<string, unknown> }>);
+    .parse(value).children as Array<{ type: string; configuration?: Record<string, unknown> }>;
 
 describe('osquery parser', () => {
   it('parses osquery token without configuration', () => {
