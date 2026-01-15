@@ -42,6 +42,8 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ explicitInput, id, type, grow, width }) => {
+      const { dataViewId } = explicitInput;
+      const config = 
       return {
         uid: id,
         type,

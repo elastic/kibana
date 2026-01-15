@@ -200,10 +200,10 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             value={{
               componentApi,
               displaySettings: {
-                hideActionBar: false,
-                hideExclude: true,
-                hideExists: true,
-                hideSort: true,
+                hide_action_bar: false,
+                hide_exclude: true,
+                hide_exists: true,
+                hide_sort: true,
                 placeholder: VariableControlsStrings.emptySelectionPlaceholder,
               },
               customStrings: {

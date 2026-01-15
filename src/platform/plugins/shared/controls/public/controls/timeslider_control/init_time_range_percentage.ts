@@ -16,11 +16,11 @@ import { FROM_INDEX, TO_INDEX } from './time_utils';
 export const timeRangePercentageComparators: StateComparators<
   Pick<
     TimeSliderControlState,
-    'timesliceStartAsPercentageOfTimeRange' | 'timesliceEndAsPercentageOfTimeRange'
+    'timeslice_start_as_percentage_of_time_range' | 'timeslice_end_as_percentage_of_time_range'
   >
 > = {
-  timesliceStartAsPercentageOfTimeRange: 'referenceEquality',
-  timesliceEndAsPercentageOfTimeRange: 'referenceEquality',
+  timeslice_start_as_percentage_of_time_range: 'referenceEquality',
+  timeslice_end_as_percentage_of_time_range: 'referenceEquality',
 };
 
 export function initTimeRangePercentage(
@@ -31,10 +31,10 @@ export function initTimeRangePercentage(
   ) => void
 ) {
   const timesliceStartAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(
-    state.timesliceStartAsPercentageOfTimeRange
+    state.timeslice_start_as_percentage_of_time_range
   );
   const timesliceEndAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(
-    state.timesliceEndAsPercentageOfTimeRange
+    state.timeslice_end_as_percentage_of_time_range
   );
 
   return {
@@ -54,8 +54,8 @@ export function initTimeRangePercentage(
     },
     getLatestState: () => {
       return {
-        timesliceStartAsPercentageOfTimeRange: timesliceStartAsPercentageOfTimeRange$.value,
-        timesliceEndAsPercentageOfTimeRange: timesliceEndAsPercentageOfTimeRange$.value,
+        timeslice_start_as_percentage_of_time_range: timesliceStartAsPercentageOfTimeRange$.value,
+        timeslice_end_as_percentage_of_time_range: timesliceEndAsPercentageOfTimeRange$.value,
       };
     },
     anyStateChange$: merge(
@@ -63,11 +63,15 @@ export function initTimeRangePercentage(
       timesliceEndAsPercentageOfTimeRange$
     ).pipe(map(() => undefined)),
     reinitializeState: (lastSaved?: TimeSliderControlState) => {
-      timesliceStartAsPercentageOfTimeRange$.next(lastSaved?.timesliceStartAsPercentageOfTimeRange);
-      timesliceEndAsPercentageOfTimeRange$.next(lastSaved?.timesliceEndAsPercentageOfTimeRange);
+      timesliceStartAsPercentageOfTimeRange$.next(
+        lastSaved?.timeslice_start_as_percentage_of_time_range
+      );
+      timesliceEndAsPercentageOfTimeRange$.next(
+        lastSaved?.timeslice_end_as_percentage_of_time_range
+      );
       onReset(
-        lastSaved?.timesliceStartAsPercentageOfTimeRange,
-        lastSaved?.timesliceEndAsPercentageOfTimeRange
+        lastSaved?.timeslice_start_as_percentage_of_time_range,
+        lastSaved?.timeslice_end_as_percentage_of_time_range
       );
     },
   };

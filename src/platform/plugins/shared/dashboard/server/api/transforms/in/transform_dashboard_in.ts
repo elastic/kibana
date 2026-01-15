@@ -42,6 +42,7 @@ export const transformDashboardIn = (
       project_routing,
       ...rest
     } = dashboardState;
+    console.log({ pinned_panels });
 
     const tagReferences = transformTagsIn(tags);
 

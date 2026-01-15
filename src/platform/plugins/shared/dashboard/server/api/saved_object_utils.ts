@@ -45,6 +45,7 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references
     ) as DashboardState;
+    console.log({ dashboardState });
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   }

@@ -31,6 +31,11 @@ export async function read(
   );
 
   const response = getDashboardCRUResponseBody(savedObject, 'read');
+  console.log({
+    response,
+    pinned_panels: response.data.pinned_panels,
+    test: JSON.stringify(response.data.pinned_panels),
+  });
   return {
     ...response,
     meta: {

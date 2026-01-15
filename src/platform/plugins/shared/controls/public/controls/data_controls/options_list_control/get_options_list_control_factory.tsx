@@ -85,7 +85,13 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           state,
           parentApi,
           willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
-          getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
+          getInitialFilter: (dataView) =>
+            buildFilter(dataView, uuid, {
+              fieldName: state.field_name,
+              existsSelected: state.exists_selected,
+              exclude: state.exclude,
+              selectedOptions: state.selected_options,
+            }),
           editorStateManager,
         });
 
@@ -209,7 +215,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         });
 
       const hasSelections$ = new BehaviorSubject<boolean>(
-        Boolean(state.selectedOptions?.length || state.existsSelected)
+        Boolean(state.selected_options?.length || state.exists_selected)
       );
       const hasSelectionsSubscription = combineLatest([
         selectionsManager.api.selectedOptions$,
@@ -260,7 +266,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           ...editorStateManager.getLatestState(),
 
           // serialize state that cannot be changed to keep it consistent
-          displaySettings: state.displaySettings,
+          display_settings: state.display_settings,
         };
       }
 
@@ -279,14 +285,14 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             ...selectionComparators,
             ...editorComparators,
             // This state cannot currently be changed after the control is created
-            displaySettings: 'skip',
+            display_settings: 'skip',
           };
         },
         defaultState: {
-          searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
+          search_technique: DEFAULT_SEARCH_TECHNIQUE,
           sort: OPTIONS_LIST_DEFAULT_SORT,
           exclude: false,
-          existsSelected: false,
+          exists_selected: false,
         },
         onReset: (lastSaved) => {
           if (isOptionsListESQLControlState(lastSaved)) {
@@ -367,7 +373,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             <OptionsListControlContext.Provider
               value={{
                 componentApi,
-                displaySettings: state.displaySettings ?? {},
+                displaySettings: state.display_settings ?? {},
               }}
             >
               <OptionsListControl />

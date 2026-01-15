@@ -39,8 +39,8 @@ export function transformControlGroupOut(
     controls.map(({ config, ...rest }) => ({
       ...rest,
       config: {
-        useGlobalFilters: !ignoreFilters,
-        ignoreValidations: legacyControlGroupOptions.ignoreValidations,
+        use_global_filters: !ignoreFilters,
+        ignore_validations: legacyControlGroupOptions.ignoreValidations,
         ...config,
       },
     }));

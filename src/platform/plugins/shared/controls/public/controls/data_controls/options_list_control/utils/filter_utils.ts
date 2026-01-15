@@ -9,6 +9,7 @@
 
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SnakeToCamelCaseKeys } from '@kbn/presentation-publishing';
 import {
   type Filter,
   buildExistsFilter,
@@ -20,7 +21,7 @@ export const buildFilter = (
   dataView: DataView,
   controlId: string,
   filterState: Pick<
-    OptionsListDSLControlState,
+    SnakeToCamelCaseKeys<OptionsListDSLControlState>,
     'fieldName' | 'existsSelected' | 'exclude' | 'selectedOptions'
   > & { sectionId?: string }
 ) => {
