@@ -327,7 +327,7 @@
                 "section": "def-server.PackageInfo",
                 "text": "PackageInfo"
               },
-              ">; instanceUuid: string; configs: readonly string[]; }"
+              ">; instanceUuid: string; configs: readonly string[]; airgapped: boolean; }"
             ],
             "path": "src/core/packages/plugins/server/src/types.ts",
             "deprecated": false,
