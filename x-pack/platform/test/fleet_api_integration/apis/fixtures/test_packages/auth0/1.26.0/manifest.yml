@@ -1,0 +1,26 @@
+format_version: "3.0.2"
+name: auth0
+title: "Auth0"
+version: "1.26.0"
+description: Collect logs from Auth0 with Elastic Agent.
+type: integration
+categories:
+  - security
+  - iam
+conditions:
+  kibana:
+    version: "^8.13.0 || ^9.0.0"
+policy_templates:
+  - name: auth0_events
+    title: Auth0 log stream events
+    description: Collect Auth0 log streams events.
+    inputs:
+      - type: http_endpoint
+        title: Collect Auth0 log streams events via Webhooks
+        description: Collecting Auth0 log stream events via Webhooks.
+      - type: cel
+        title: Collect Auth0 log events via API requests
+        description: Collect Auth0 log events via API requests.
+owner:
+  github: elastic/security-service-integrations
+  type: elastic

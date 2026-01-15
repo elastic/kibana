@@ -256,7 +256,12 @@ function urlEncodeHelper(input: string) {
 }
 handlebars.registerHelper('url_encode', urlEncodeHelper);
 
-function satisfiesHelper(this: any, agentVersion: string, versionCondition: string, options: any) {
+function semverSatisfiesHelper(
+  this: any,
+  agentVersion: string,
+  versionCondition: string,
+  options: any
+) {
   if (!agentVersion) {
     return options.inverse(this);
   }
@@ -265,9 +270,9 @@ function satisfiesHelper(this: any, agentVersion: string, versionCondition: stri
     : options.inverse(this);
 }
 // cel.yml.hbs
-// {{#satisfies _meta.agent.version "^9.3.0"}}
-// {{/satisfies}}
-handlebars.registerHelper('satisfies', satisfiesHelper);
+// {{#semverSatisfies _meta.agent.version "^9.3.0"}}
+// {{/semverSatisfies}}
+handlebars.registerHelper('semverSatisfies', semverSatisfiesHelper);
 
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {

@@ -85,3 +85,28 @@ export async function getVersionSpecificPolicies(
 
   return fleetServerPolicies;
 }
+
+export function hasAgentVersionConditionInInputTemplate(
+  assetsMap: PackagePolicyAssetsMap
+): boolean {
+  let hasVersionConditionInInputTemplate = false;
+  assetsMap?.forEach((assetBuffer, assetPath) => {
+    if (assetPath.endsWith('.hbs') && assetBuffer?.toString().includes('_meta.agent.version')) {
+      hasVersionConditionInInputTemplate = true;
+    }
+  });
+  return hasVersionConditionInInputTemplate;
+}
+
+export function hasAgentVersionCondition(
+  pkgInfo: PackageInfo,
+  assetsMap: PackagePolicyAssetsMap
+): boolean {
+  if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+    return false;
+  }
+  if (pkgInfo.conditions?.agent?.version) {
+    return true;
+  }
+  return hasAgentVersionConditionInInputTemplate(assetsMap);
+}

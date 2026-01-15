@@ -602,15 +602,15 @@ describe('encode', () => {
   });
 });
 
-describe('satisfies', () => {
+describe('semverSatisfies', () => {
   it('should render the block when the agent version satisfies the condition', () => {
     const streamTemplate = `
-    {{#satisfies _meta.agent.version "^9.3.0"}}
+    {{#semverSatisfies _meta.agent.version "^9.3.0"}}
     supported: true
-    {{/satisfies}}
-    {{#satisfies _meta.agent.version "<9.3.0"}}
+    {{/semverSatisfies}}
+    {{#semverSatisfies _meta.agent.version "<9.3.0"}}
     supported: false
-    {{/satisfies}}`;
+    {{/semverSatisfies}}`;
 
     const vars = {};
 
@@ -623,9 +623,9 @@ describe('satisfies', () => {
   it('should not render the block when the agent version does not satisfy the condition', () => {
     const streamTemplate = `
     field: "value"
-    {{#satisfies _meta.agent.version ">=10.0.0"}}
+    {{#semverSatisfies _meta.agent.version ">=10.0.0"}}
     supported: true
-    {{/satisfies}}`;
+    {{/semverSatisfies}}`;
 
     const vars = {};
 
@@ -638,12 +638,12 @@ describe('satisfies', () => {
   it('should not render any blocks when the agent version variable is not set', () => {
     const streamTemplate = `
     field: "value"
-    {{#satisfies _meta.agent.version "^9.3.0"}}
+    {{#semverSatisfies _meta.agent.version "^9.3.0"}}
     supported: true
-    {{/satisfies}}
-    {{#satisfies _meta.agent.version "<9.3.0"}}
+    {{/semverSatisfies}}
+    {{#semverSatisfies _meta.agent.version "<9.3.0"}}
     supported: false
-    {{/satisfies}}`;
+    {{/semverSatisfies}}`;
 
     const vars = {};
 

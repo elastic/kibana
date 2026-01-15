@@ -1,0 +1,6 @@
+- name: input.type
+  type: keyword
+  description: Type of filebeat input.
+- name: log.offset
+  type: long
+  description: Log offset.

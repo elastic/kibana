@@ -211,6 +211,10 @@ import {
 
 import { getInputsWithIds } from './package_policies/get_input_with_ids';
 import { runWithCache } from './epm/packages/cache';
+import {
+  hasAgentVersionCondition,
+  hasAgentVersionConditionInInputTemplate,
+} from './utils/version_specific_policies';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -653,7 +657,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.policy_ids,
         {
           user: options?.user,
-          hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo, assetsMap),
+          hasAgentVersionConditions: hasAgentVersionCondition(pkgInfo, assetsMap),
         }
       );
     }
@@ -667,25 +671,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       soClient,
       esClient
     );
-  }
-
-  private hasAgentVersionCondition(
-    pkgInfo: PackageInfo,
-    assetsMap: PackagePolicyAssetsMap
-  ): boolean {
-    if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-      return false;
-    }
-    if (pkgInfo.conditions?.agent?.version) {
-      return true;
-    }
-    let hasAgentVersionCondition = false;
-    assetsMap?.forEach((assetBuffer, assetPath) => {
-      if (assetPath.endsWith('.hbs') && assetBuffer?.toString().includes('_meta.agent.version')) {
-        hasAgentVersionCondition = true;
-      }
-    });
-    return hasAgentVersionCondition;
   }
 
   private async bumpAgentPoliciesRevision(
@@ -930,7 +915,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         hasAgentVersionConditions: packageInfos
           .values()
           .some((pkgInfo) =>
-            this.hasAgentVersionCondition(
+            hasAgentVersionCondition(
               pkgInfo,
               packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
             )
@@ -1605,7 +1590,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             (!assignedInOldPolicy && assignedInNewPolicy)
           );
         },
-        hasAgentVersionConditions: this.hasAgentVersionCondition(pkgInfo, assetsMap),
+        hasAgentVersionConditions: hasAgentVersionCondition(pkgInfo, assetsMap),
       }
     );
 
@@ -2000,7 +1985,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         hasAgentVersionConditions: packageInfos
           .values()
           .some((pkgInfo) =>
-            this.hasAgentVersionCondition(
+            hasAgentVersionCondition(
               pkgInfo,
               packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
             )
@@ -2323,7 +2308,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           hasAgentVersionConditions: packageInfos
             ?.values()
             .some((pkgInfo) =>
-              this.hasAgentVersionCondition(
+              hasAgentVersionCondition(
                 pkgInfo,
                 packageInfosandAssetsMap?.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
               )
@@ -3349,6 +3334,13 @@ export function _compilePackagePolicyInputs(
   agentVersion?: string
 ): PackagePolicyInput[] {
   return inputs.map((input) => {
+    if (agentVersion) {
+      const hasVersionConditionInInputTemplate = hasAgentVersionConditionInInputTemplate(assetsMap);
+      // skip recompile input if there is no agent version condition in any of the templates
+      if (!hasVersionConditionInInputTemplate) {
+        return input;
+      }
+    }
     const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap, agentVersion);
     const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap, agentVersion);
     return {

@@ -266,7 +266,7 @@ jest.mock('./epm/packages/get', () => ({
       assetsMap.set(
         'data_stream/cel.yml.hbs',
         Buffer.from(
-          '{{#satisfies _meta.agent.version "^9.3.0"}}mock template content{{/satisfies}}'
+          '{{#semverSatisfies _meta.agent.version "^9.3.0"}}mock template content{{/semverSatisfies}}'
         )
       );
     }
