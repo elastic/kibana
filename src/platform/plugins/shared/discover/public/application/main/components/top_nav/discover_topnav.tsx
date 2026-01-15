@@ -231,6 +231,13 @@ export const DiscoverTopNav = ({
     },
     [dispatch, onDataViewCreatedAction]
   );
+  const onDataViewEditedAction = useCurrentTabAction(internalStateActions.onDataViewEdited);
+  const onDataViewEdited = useCallback(
+    (editedDataView: DataView) => {
+      dispatch(onDataViewEditedAction({ editedDataView }));
+    },
+    [dispatch, onDataViewEditedAction]
+  );
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
       trigger: {
@@ -245,7 +252,7 @@ export const DiscoverTopNav = ({
       onChangeDataView,
       adHocDataViews,
       savedDataViews,
-      onEditDataView: stateContainer.actions.onDataViewEdited,
+      onEditDataView: onDataViewEdited,
     };
   }, [
     adHocDataViews,
@@ -255,6 +262,7 @@ export const DiscoverTopNav = ({
     stateContainer,
     onChangeDataView,
     onDataViewCreated,
+    onDataViewEdited,
   ]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {

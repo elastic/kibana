@@ -18,7 +18,10 @@ import {
   type TabActionPayload,
 } from '../internal_state';
 import { selectTab } from '../selectors';
+import { selectTabRuntimeState } from '../runtime_state';
 import type { DiscoverInternalState, TabState } from '../types';
+import { addLog } from '../../../../../utils/add_log';
+import { FetchStatus } from '../../../../types';
 
 type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
 
@@ -131,6 +134,22 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
     ]);
+  };
+
+/**
+ * Triggers fetching of new data from Elasticsearch
+ * If initial is true, when SEARCH_ON_PAGE_LOAD_SETTING is set to false and it's a new saved search no fetch is triggered
+ */
+export const fetchData: InternalStateThunkActionCreator<
+  [TabActionPayload<{ initial?: boolean }>]
+> = ({ tabId, initial }) =>
+  async function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
+    addLog('fetchData', { initial });
+    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataStateContainer = stateContainer$.getValue()?.dataState;
+    if (!initial || dataStateContainer?.getInitialFetchStatus() === FetchStatus.LOADING) {
+      dataStateContainer?.fetch();
+    }
   };
 
 /**

@@ -265,4 +265,47 @@ describe('tab_state_data_view actions', () => {
       expect(currentDataView$.getValue()?.id).toBe(dataViewAdHoc.id);
     });
   });
+
+  describe('onDataViewEdited', () => {
+    test('onDataViewEdited - persisted data view', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+
+      const selectedDataView$ = selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$;
+      expect(selectedDataView$.getValue()).toEqual(dataViewMockWithTimeField);
+      await internalState.dispatch(
+        internalStateActions.onDataViewEdited({
+          tabId,
+          editedDataView: dataViewMockWithTimeField,
+        })
+      );
+      const dataViewAfter = selectedDataView$.getValue();
+      expect(dataViewAfter).not.toEqual(dataViewMockWithTimeField);
+      expect(dataViewAfter?.id).toBe(dataViewMockWithTimeField.id);
+      expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
+    });
+
+    test('onDataViewEdited - ad-hoc data view', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+
+      await internalState.dispatch(
+        internalStateActions.onDataViewCreated({
+          tabId,
+          nextDataView: dataViewAdHoc,
+        })
+      );
+      const previousId = dataViewAdHoc.id;
+      await internalState.dispatch(
+        internalStateActions.onDataViewEdited({
+          tabId,
+          editedDataView: dataViewAdHoc,
+        })
+      );
+      expect(
+        selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()?.id
+      ).not.toBe(previousId);
+      expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
+    });
+  });
 });

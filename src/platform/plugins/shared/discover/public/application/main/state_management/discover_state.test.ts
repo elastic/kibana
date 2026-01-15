@@ -1317,52 +1317,6 @@ describe('Discover state', () => {
       state.actions.stopSyncing();
     });
 
-    test('onDataViewEdited - persisted data view', async () => {
-      const { state, customizationService, runtimeStateManager } = await getState('/', {
-        savedSearch: savedSearchMock,
-      });
-      await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
-          initializeSingleTabParams: {
-            stateContainer: state,
-            customizationService,
-            dataViewSpec: undefined,
-            defaultUrlState: undefined,
-            esqlControls: undefined,
-          },
-        })
-      );
-
-      const selectedDataView$ = selectTabRuntimeState(
-        runtimeStateManager,
-        state.getCurrentTab().id
-      ).currentDataView$;
-      const selectedDataViewId = selectedDataView$.getValue()?.id;
-      expect(selectedDataViewId).toBe(dataViewMock.id);
-      await state.actions.onDataViewEdited(dataViewMock);
-      await waitFor(() => {
-        expect(selectedDataView$.getValue()?.id).toBe(selectedDataViewId);
-      });
-      state.actions.stopSyncing();
-    });
-
-    // test('onDataViewEdited - ad-hoc data view', async () => {
-    //   const { state, runtimeStateManager } = await getState('/', { savedSearch: savedSearchMock });
-    //   state.actions.initializeAndSync();
-    //   await state.actions.onDataViewCreated(dataViewAdHoc);
-    //   const previousId = dataViewAdHoc.id;
-    //   await state.actions.onDataViewEdited(dataViewAdHoc);
-    //   await waitFor(() => {
-    //     expect(
-    //       selectTabRuntimeState(
-    //         runtimeStateManager,
-    //         state.getCurrentTab().id
-    //       ).currentDataView$.getValue()?.id
-    //     ).not.toBe(previousId);
-    //   });
-    //   state.actions.stopSyncing();
-    // });
-
     test('onOpenSavedSearch - same target id', async () => {
       const { state, customizationService } = await getState('/', { savedSearch: savedSearchMock });
       await state.internalState.dispatch(

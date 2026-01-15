@@ -228,3 +228,26 @@ export const updateAdHocDataViewId: InternalStateThunkActionCreator<
 
     return nextDataView;
   };
+
+/**
+ * Triggered when a new data view is edited
+ */
+export const onDataViewEdited: InternalStateThunkActionCreator<
+  [TabActionPayload<{ editedDataView: DataView }>],
+  Promise<void>
+> =
+  ({ tabId, editedDataView }) =>
+  async (dispatch, getState, { services }) => {
+    if (editedDataView.isPersisted()) {
+      // Clear the current data view from the cache and create a new instance
+      // of it, ensuring we have a new object reference to trigger a re-render
+      services.dataViews.clearInstanceCache(editedDataView.id);
+      const newDataView = await services.dataViews.create(editedDataView.toSpec(), true);
+      dispatch(internalStateActions.assignNextDataView({ tabId, dataView: newDataView }));
+    } else {
+      await dispatch(internalStateActions.updateAdHocDataViewId({ tabId, editedDataView }));
+    }
+    void dispatch(internalStateActions.loadDataViewList());
+    addLog('onDataViewEdited triggers data fetching');
+    dispatch(internalStateActions.fetchData({ tabId }));
+  };

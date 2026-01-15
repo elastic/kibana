@@ -171,11 +171,6 @@ export interface DiscoverStateContainer {
      */
     createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
     /**
-     * Triggered when a new data view is edited
-     * @param dataView
-     */
-    onDataViewEdited: (dataView: DataView) => Promise<void>;
-    /**
      * Triggered when transitioning from ESQL to Dataview
      * Clean ups the ES|QL query and moves to the dataview mode
      */
@@ -308,25 +303,6 @@ export function getDiscoverStateContainer({
     internalState.dispatch(
       injectCurrentTab(internalStateActions.updateGlobalState)({ globalState: { filters: [] } })
     );
-  };
-
-  const onDataViewEdited = async (editedDataView: DataView) => {
-    if (editedDataView.isPersisted()) {
-      // Clear the current data view from the cache and create a new instance
-      // of it, ensuring we have a new object reference to trigger a re-render
-      services.dataViews.clearInstanceCache(editedDataView.id);
-      const newDataView = await services.dataViews.create(editedDataView.toSpec(), true);
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: newDataView })
-      );
-    } else {
-      await internalState.dispatch(
-        injectCurrentTab(internalStateActions.updateAdHocDataViewId)({ editedDataView })
-      );
-    }
-    void internalState.dispatch(internalStateActions.loadDataViewList());
-    addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
-    fetchData();
   };
 
   const getAppState = (state: DiscoverInternalState): DiscoverAppState => {
@@ -699,7 +675,6 @@ export function getDiscoverStateContainer({
       stopSyncing,
       fetchData,
       createAndAppendAdHocDataView,
-      onDataViewEdited,
       onOpenSavedSearch,
       transitionFromESQLToDataView,
       transitionFromDataViewToESQL,
