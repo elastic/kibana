@@ -278,6 +278,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      // Done
       describe('Asset Details flyout for a container', () => {
         before(async () => {
           await pageObjects.infraHome.goToContainer();
@@ -493,6 +494,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        // Done
         describe('Redirect to Container Details page', () => {
           it('should redirect to Container Details page', async () => {
             await pageObjects.infraHome.goToContainer();

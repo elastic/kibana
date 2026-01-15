@@ -111,6 +111,7 @@ test.describe(
           'inert'
         );
         await expect(assetDetailsPage.hostOverviewTab.alertsShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.alertsCreateRuleButton).toBeVisible();
 
         await expect(assetDetailsPage.hostOverviewTab.alertsContent).toBeVisible();
       });

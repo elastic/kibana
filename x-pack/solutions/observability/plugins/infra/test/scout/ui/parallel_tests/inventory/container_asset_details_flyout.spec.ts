@@ -119,6 +119,7 @@ test.describe(
           'inert'
         );
         await expect(assetDetailsPage.dockerOverviewTab.alertsShowAllButton).toBeVisible();
+        await expect(assetDetailsPage.hostOverviewTab.alertsCreateRuleButton).toBeVisible();
 
         await expect(assetDetailsPage.dockerOverviewTab.alertsContent).toBeVisible();
       });

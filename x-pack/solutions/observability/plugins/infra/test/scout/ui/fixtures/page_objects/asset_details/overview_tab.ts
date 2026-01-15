@@ -27,6 +27,7 @@ export class OverviewTab extends AssetDetailsTab {
   public readonly alertsSection: Locator;
   public readonly alertsSectionCollapsible: Locator;
   public readonly alertsSectionGroup: Locator;
+  public readonly alertsCreateRuleButton: Locator;
   public readonly alertsShowAllButton: Locator;
   public readonly alertsContent: Locator;
 
@@ -92,6 +93,9 @@ export class OverviewTab extends AssetDetailsTab {
     this.alertsSectionGroup = this.alertsSection
       .getByRole('group')
       .filter({ has: this.page.getByTestId('hostsView-alerts') });
+    this.alertsCreateRuleButton = this.alertsSection.getByTestId(
+      'infraAssetDetailsAlertsTabCreateAlertsRuleButton'
+    );
     this.alertsShowAllButton = this.alertsSection.getByTestId(
       'infraAssetDetailsAlertsTabAlertsShowAllButton'
     );
