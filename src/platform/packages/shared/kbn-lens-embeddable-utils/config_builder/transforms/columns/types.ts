@@ -83,5 +83,5 @@ export interface APIDataView {
 export interface APIAdHocDataView {
   type: 'adHocDataView';
   index: string;
-  timeFieldName: string;
+  timeFieldName: string | undefined;
 }

@@ -41,12 +41,14 @@ export const datasetTypeSchema = schema.oneOf([
      * The name of the time field in the index. Used for time-based filtering.
      * Example: '@timestamp'
      */
-    time_field: schema.string({
-      meta: {
-        description:
-          'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
-      },
-    }),
+    time_field: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
+        },
+      })
+    ),
     /**
      * Optional array of runtime fields to define on the index. Each runtime field describes a computed field available at query time.
      * If not provided, no runtime fields are used.
