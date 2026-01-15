@@ -1537,20 +1537,6 @@
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.AssistantAvailability.isAiAgentsEnabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isAiAgentsEnabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3139,20 +3125,6 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hasAgentBuilderManagePrivilege",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.UseAssistantAvailability.isAiAgentsEnabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isAiAgentsEnabled",
             "description": [],
             "signature": [
               "boolean | undefined"

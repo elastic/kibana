@@ -122,7 +122,7 @@ export const GAP_AUTO_FILL_STATUS_ERROR = i18n.translate(
 export const GAP_AUTO_FILL_STATUS_SKIPPED = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusSkipped',
   {
-    defaultMessage: 'Task skipped',
+    defaultMessage: 'Skipped',
   }
 );
 

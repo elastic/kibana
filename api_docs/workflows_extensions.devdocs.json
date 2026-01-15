@@ -2,7 +2,66 @@
   "id": "workflowsExtensions",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-public.createPublicStepDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "createPublicStepDefinition",
+        "description": [
+          "\nHelper function to create a PublicStepDefinition with automatic type inference.\nThis ensures that the editorHandlers' types are correctly inferred\nfrom the inputSchema and configSchema without needing explicit type annotations.\n"
+        ],
+        "signature": [
+          "(definition: ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "public",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-public.PublicStepDefinition",
+            "text": "PublicStepDefinition"
+          },
+          "<Input, Output, Config>) => ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "public",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-public.PublicStepDefinition",
+            "text": "PublicStepDefinition"
+          },
+          "<Input, Output, Config>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.createPublicStepDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "definition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.PublicStepDefinition",
+                "text": "PublicStepDefinition"
+              },
+              "<Input, Output, Config>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "workflowsExtensions",
@@ -21,7 +80,7 @@
             "section": "def-public.PublicStepDefinition",
             "text": "PublicStepDefinition"
           },
-          "<InputSchema, OutputSchema, ConfigSchema> extends ",
+          "<Input, Output, Config> extends ",
           {
             "pluginId": "workflowsExtensions",
             "scope": "common",
@@ -29,7 +88,7 @@
             "section": "def-common.CommonStepDefinition",
             "text": "CommonStepDefinition"
           },
-          "<InputSchema, OutputSchema, ConfigSchema>"
+          "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
         "deprecated": false,
@@ -132,9 +191,12 @@
             "type": "Object",
             "tags": [],
             "label": "editorHandlers",
-            "description": [],
+            "description": [
+              "\nProperty handlers for the step."
+            ],
             "signature": [
-              "{ dynamicSchema: { getOutputSchema?: ((params: { input: z.infer<InputSchema>; config: z.infer<ConfigSchema>; }) => z.ZodType<z.infer<OutputSchema>>) | undefined; }; } | undefined"
+              "EditorHandlers",
+              "<Input, Output, Config> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
             "deprecated": false,
@@ -251,7 +313,7 @@
             "\nRegister user-facing definition for a workflow step.\nThis should be called during the plugin's setup phase.\n"
           ],
           "signature": [
-            "(definition: ",
+            "<Input extends z.ZodType = z.ZodType, Output extends z.ZodType = z.ZodType, Config extends z.ZodObject = z.ZodObject>(definition: ",
             {
               "pluginId": "workflowsExtensions",
               "scope": "public",
@@ -259,7 +321,7 @@
               "section": "def-public.PublicStepDefinition",
               "text": "PublicStepDefinition"
             },
-            "<z.ZodType, z.ZodType, z.ZodObject>) => void"
+            "<Input, Output, Config>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
           "deprecated": false,
@@ -282,7 +344,7 @@
                   "section": "def-public.PublicStepDefinition",
                   "text": "PublicStepDefinition"
                 },
-                "<z.ZodType, z.ZodType, z.ZodObject>"
+                "<Input, Output, Config>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/public/types.ts",
               "deprecated": false,

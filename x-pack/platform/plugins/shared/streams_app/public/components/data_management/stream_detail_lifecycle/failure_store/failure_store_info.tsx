@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import type { TimeState } from '@kbn/es-query';
@@ -16,6 +16,7 @@ import { FailureStoreIngestionRate } from './ingestion_rate';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 import type { useFailureStoreConfig } from '../hooks/use_failure_store_config';
+import { FailureStoreSummary } from './failure_store_summary';
 
 export const FailureStoreInfo = ({
   openModal,
@@ -76,6 +77,11 @@ export const FailureStoreInfo = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {definition.privileges.lifecycle ? (
+        <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
+          <FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />
+        </EuiPanel>
+      ) : null}
       <FailureStoreIngestionRate
         definition={definition}
         isLoadingStats={isLoadingStats}
