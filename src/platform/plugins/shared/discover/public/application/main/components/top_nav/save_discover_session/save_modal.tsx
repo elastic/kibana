@@ -35,7 +35,7 @@ export interface DiscoverSessionSaveModalProps {
 
 export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> = ({
   isTimeBased,
-  services: { savedObjectsTagging, discoverFeatureFlags },
+  services: { savedObjectsTagging },
   title,
   description,
   tags,
@@ -48,7 +48,6 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
 }) => {
   const [timeRestore, setTimeRestore] = useState(Boolean(isTimeBased && savedTimeRestore));
   const [currentTags, setCurrentTags] = useState(tags);
-  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
   const onModalSave = async (params: OnSaveProps) => {
     await onSave({
@@ -105,16 +104,14 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
             id="discover.localMenu.saveModalTitle"
             defaultMessage="Save Discover session"
           />
-          {tabsEnabled && (
-            <EuiText size="xs" color="subdued">
-              <EuiSpacer size="xs" />
-              <p>
-                {i18n.translate('discover.localMenu.saveModalSubtitle', {
-                  defaultMessage: 'All open tabs will be saved to this session',
-                })}
-              </p>
-            </EuiText>
-          )}
+          <EuiText size="xs" color="subdued">
+            <EuiSpacer size="xs" />
+            <p>
+              {i18n.translate('discover.localMenu.saveModalSubtitle', {
+                defaultMessage: 'All open tabs will be saved to this session',
+              })}
+            </p>
+          </EuiText>
         </>
       }
       title={title}
