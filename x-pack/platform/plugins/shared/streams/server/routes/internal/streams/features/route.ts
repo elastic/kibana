@@ -5,20 +5,28 @@
  * 2.0.
  */
 
+import { conflict } from '@hapi/boom';
 import { z } from '@kbn/zod';
-import { baseFeatureSchema, featureStatusSchema, type Feature } from '@kbn/streams-schema';
-import { identifyFeatures } from '@kbn/streams-ai';
-import type { Observable } from 'rxjs';
-import { from, map, catchError } from 'rxjs';
-import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
+import {
+  baseFeatureSchema,
+  featureStatusSchema,
+  TaskStatus,
+  type Feature,
+} from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import type { IdentifiedFeaturesEvent } from './types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
+import {
+  type IdentifyFeaturesResult,
+  type FeaturesIdentificationTaskParams,
+  getFeaturesIdentificationTaskId,
+  FEATURES_IDENTIFICATION_TASK_TYPE,
+} from '../../../../lib/tasks/task_definitions/features_identification';
+import { isStale } from '../../../../lib/tasks/is_stale';
+import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
+import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -147,12 +155,30 @@ export const listFeaturesRoute = createServerRoute({
   },
 });
 
-export const identifyFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_identify',
+export type FeaturesIdentificationTaskResult =
+  | {
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
+    }
+  | {
+      status: TaskStatus.Failed;
+      error: string;
+    }
+  | ({
+      status: TaskStatus.Completed | TaskStatus.Acknowledged;
+    } & IdentifyFeaturesResult);
+
+export const featuresStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/features/_status',
   options: {
     access: 'internal',
-    summary: 'Identify features in a stream',
-    description: 'Identify features in a stream with an LLM',
+    summary: 'Check the status of feature identification',
+    description:
+      'Feature identification happens as a background task, this endpoints allows the user to check the status of this task. This endpoints combine with POST /internal/streams/{name}/features/_task which manages the task lifecycle.',
   },
   security: {
     authz: {
@@ -161,16 +187,80 @@ export const identifyFeaturesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
-      from: dateFromString,
-      to: dateFromString,
-    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<FeaturesIdentificationTaskResult> => {
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const stream = await streamsClient.getStream(params.path.name);
+    const task = await taskClient.get<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
+      getFeaturesIdentificationTaskId(stream.name)
+    );
+
+    if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
+      return {
+        status: TaskStatus.Stale,
+      };
+    } else if (task.status === TaskStatus.Failed) {
+      return {
+        status: TaskStatus.Failed,
+        error: task.task.error,
+      };
+    } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
+      return {
+        status: task.status,
+        ...task.task.payload,
+      };
+    }
+
+    return {
+      status: task.status,
+    };
+  },
+});
+
+export const featuresTaskRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/features/_task',
+  options: {
+    access: 'internal',
+    summary: 'Identify features in a stream',
+    description:
+      'Identify features in a stream with an LLM, this happens as a background task and this endpoint manages the task lifecycle.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    body: z.discriminatedUnion('action', [
+      z.object({
+        action: z.literal('schedule'),
+        from: dateFromString,
+        to: dateFromString,
+        connectorId: z
+          .string()
+          .optional()
+          .describe(
+            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+          ),
+      }),
+      z.object({
+        action: z.literal('cancel'),
+      }),
+      z.object({
+        action: z.literal('acknowledge'),
+      }),
+    ]),
   }),
   handler: async ({
     params,
@@ -178,72 +268,76 @@ export const identifyFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<Observable<IdentifiedFeaturesEvent>> => {
-    const {
-      featureClient,
-      scopedClusterClient,
-      soClient,
-      licensing,
-      uiSettingsClient,
-      streamsClient,
-      inferenceClient,
-    } = await getScopedClients({ request });
+  }): Promise<FeaturesIdentificationTaskResult> => {
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const [stream, { featurePromptOverride }] = await Promise.all([
-      streamsClient.getStream(params.path.name),
-      new PromptsConfigService({ soClient, logger }).getPrompt(),
-    ]);
+    const stream = await streamsClient.getStream(params.path.name);
+    const taskId = getFeaturesIdentificationTaskId(stream.name);
 
-    const connectorId = await resolveConnectorId({
-      connectorId: params.query.connectorId,
-      uiSettingsClient,
-      logger,
-    });
-    const boundInferenceClient = inferenceClient.bindTo({ connectorId });
-    const esClient = scopedClusterClient.asCurrentUser;
-    const signal = getRequestAbortSignal(request);
+    if (params.body.action === 'schedule') {
+      const { from: start, to: end, connectorId: connectorIdParam } = params.body;
 
-    return from(
-      identifyFeatures({
-        start: params.query.from.getTime(),
-        end: params.query.to.getTime(),
-        esClient,
-        inferenceClient: boundInferenceClient,
-        logger: logger.get('feature_identification'),
-        stream,
-        prompt: featurePromptOverride,
-        signal,
-      }).then(async ({ features: baseFeatures, tokensUsed }) => {
-        const now = new Date().toISOString();
-        const features = baseFeatures.map((feature) => ({
-          ...feature,
-          status: 'active' as const,
-          last_seen: now,
-          id: getFeatureId(stream.name, feature),
-        }));
+      const connectorId = await resolveConnectorId({
+        connectorId: connectorIdParam,
+        uiSettingsClient,
+        logger,
+      });
 
-        await featureClient.bulk(
-          stream.name,
-          features.map((feature) => ({ index: { feature } }))
-        );
+      try {
+        await taskClient.schedule<FeaturesIdentificationTaskParams>({
+          task: {
+            type: FEATURES_IDENTIFICATION_TASK_TYPE,
+            id: taskId,
+            space: '*',
+            stream: stream.name,
+          },
+          params: {
+            connectorId,
+            start: start.getTime(),
+            end: end.getTime(),
+          },
+          request,
+        });
 
-        return { features, tokensUsed };
-      })
-    ).pipe(
-      map(({ features, tokensUsed }) => {
         return {
-          type: 'identified_features' as const,
-          features,
-          tokensUsed,
+          status: TaskStatus.InProgress,
         };
-      }),
-      catchError(async (error: Error) => {
-        const connector = await inferenceClient.getConnectorById(connectorId);
-        throw createConnectorSSEError(error, connector);
-      })
-    );
+      } catch (error) {
+        if (error instanceof CancellationInProgressError) {
+          throw conflict(error.message);
+        }
+
+        throw error;
+      }
+    } else if (params.body.action === 'cancel') {
+      await taskClient.cancel(taskId);
+
+      return {
+        status: TaskStatus.BeingCanceled,
+      };
+    }
+
+    try {
+      const task = await taskClient.acknowledge<
+        FeaturesIdentificationTaskParams,
+        IdentifyFeaturesResult
+      >(taskId);
+
+      return {
+        status: TaskStatus.Acknowledged,
+        ...task.task.payload,
+      };
+    } catch (error) {
+      if (error instanceof AcknowledgingIncompleteError) {
+        throw conflict(error.message);
+      }
+
+      throw error;
+    }
   },
 });
 
@@ -251,5 +345,6 @@ export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,
-  ...identifyFeaturesRoute,
+  ...featuresStatusRoute,
+  ...featuresTaskRoute,
 };
