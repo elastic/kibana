@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-
-import { EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface DragHandleProps {
   isEditable: boolean;
@@ -19,24 +19,47 @@ interface DragHandleProps {
   [key: string]: any; // Allows passing additional props (like drag info)
 }
 
-const dragHandleStyles = css({
-  cursor: 'grab',
-  lineHeight: '0', // Vertically center the grab handle
-});
+const dragHandleStyles = {
+  dragHandle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      alignItems: 'center',
+      blockSize: '100%',
+      cursor: 'grab',
+      lineHeight: '0', // Vertically center the grab handle
+      '.euiIcon': {
+        color: euiTheme.colors.textDisabled,
+      },
+      '&:hover > .euiIcon:first-of-type': {
+        color: euiTheme.colors.textParagraph,
+      },
+      '.euiFormLabel': {
+        pointerEvents: 'none', // Prevent label from blocking drag events
+      },
+    }),
+};
 
-export const DragHandle = ({ isEditable, controlTitle = '', ...rest }: DragHandleProps) => {
-  if (!isEditable) return null;
+export const DragHandle = ({
+  isEditable,
+  controlTitle = '',
+  children,
+  ...rest
+}: DragHandleProps) => {
+  const styles = useMemoCss(dragHandleStyles);
+
+  if (!isEditable) return children;
 
   return (
-    <button
+    <div
       {...rest}
       aria-label={i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
         defaultMessage: 'Move control {controlTitle}',
         values: { controlTitle },
       })}
-      css={dragHandleStyles}
+      css={styles.dragHandle}
     >
       <EuiIcon type="grabHorizontal" />
-    </button>
+      {children}
+    </div>
   );
 };
