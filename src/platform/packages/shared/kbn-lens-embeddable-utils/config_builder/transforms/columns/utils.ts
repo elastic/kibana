@@ -24,8 +24,6 @@ import type {
 import type { LensApiAllOperations, LensApiBucketOperations } from '../../schema';
 
 export const LENS_EMPTY_AS_NULL_DEFAULT_VALUE = false;
-// Regex to match formula reference column IDs (e.g., 8bb98494-44f3-4961-a950-e3ab2ff41caaX0", "8bb98494-44f3-4961-a950-e3ab2ff41caaX1", "8bb98494-44f3-4961-a950-e3ab2ff41caaX2")
-const FORMULA_REFERENCE_ID_PATTERN = /X\d+$/;
 
 const LENS_DEFAULT_LABEL = '';
 export function getLensStateMetricSharedProps(
@@ -172,8 +170,4 @@ export function isLensStateBucketColumnType(
   column: AnyLensStateColumn
 ): column is AnyBucketLensStateColumn {
   return column.isBucketed;
-}
-
-export function isLensStateFormulaReferenceColumnType(id: string): boolean {
-  return FORMULA_REFERENCE_ID_PATTERN.test(id);
 }
