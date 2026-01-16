@@ -5,10 +5,26 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo, type ComponentProps, useEffect } from 'react';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { EuiSpacer } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { OS_TITLES } from '../../../management/common/translations';
+import { PlatformIcon } from '../../../management/components/endpoint_responder/components/header_info/platforms';
+import type { EndpointRunScriptActionRequestParams } from '../../../../common/api/endpoint';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
+
+type RunScriptUseFieldDataType = Record<SupportedHostOsType, EndpointRunScriptActionRequestParams>;
 
 export interface RunscriptConfigProps {
   basePath: string;
@@ -24,42 +40,68 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
       'responseActionsEndpointAutomatedRunScript'
     );
 
+    const fieldConfig: ComponentProps<typeof UseField<RunScriptUseFieldDataType>>['config'] =
+      useMemo(() => {
+        return {
+          defaultValue: {
+            linux: { scriptId: '', scriptInput: '', timeout: undefined },
+            macos: { scriptId: '', scriptInput: '', timeout: undefined },
+            windows: { scriptId: '', scriptInput: '', timeout: undefined },
+          },
+          label: 'Run script',
+        };
+      }, []);
+
     if (!isAutomatedRunsScriptEnabled) {
       return null;
     }
 
     return (
-      <UseField<{ foo: string }> path={`${commandPath}.config`}>
-        {(field) => {
-          const { onChange, value } = field;
-
-          return (
-            <>
-              <EuiSpacer />
-              <h2>{'runscript options per os here'}</h2>
-              <EuiSpacer />
-              <span>
-                <pre>
-                  {JSON.stringify(
-                    {
-                      commandPath,
-                      data,
-                    },
-                    null,
-                    2
-                  )}
-                </pre>
-              </span>
-              <EuiSpacer />
-              <pre>
-                {'`field`:'}
-                {JSON.stringify(field, null, 2)}
-              </pre>
-            </>
-          );
-        }}
-      </UseField>
+      <>
+        <EuiSpacer />
+        <UseField<RunScriptUseFieldDataType>
+          path={`${basePath}.config`}
+          component={AutomatedRunScriptConfiguration}
+          componentProps={{ 'data-test-subj': 'runscript-config-field' }}
+          config={fieldConfig}
+          isDisabled={disabled}
+          readDefaultValueOnForm={readDefaultValueOnForm}
+        />
+      </>
     );
+    //
+    // return (
+    //   <UseField<RunScriptUseFieldDataType> path={`${commandPath}.config`}>
+    //     {(field) => {
+    //       const { onChange, value } = field;
+    //
+    //       return (
+    //         <>
+    //           <EuiSpacer />
+    //           <h2>{'runscript options per os here'}</h2>
+    //           <EuiSpacer />
+    //           <span>
+    //             <pre>
+    //               {JSON.stringify(
+    //                 {
+    //                   commandPath,
+    //                   data,
+    //                 },
+    //                 null,
+    //                 2
+    //               )}
+    //             </pre>
+    //           </span>
+    //           <EuiSpacer />
+    //           <pre>
+    //             {'`field`:'}
+    //             {JSON.stringify(field, null, 2)}
+    //           </pre>
+    //         </>
+    //       );
+    //     }}
+    //   </UseField>
+    // );
 
     // FIXME:PT Delete
     // Form Data at `comandPath`
@@ -107,3 +149,115 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
   }
 );
 RunscriptConfig.displayName = 'RunscriptConfig';
+
+export interface AutomatedRunScriptConfigurationProps {
+  field: FieldHook<RunScriptUseFieldDataType>;
+  'data-test-subj'?: string;
+}
+
+export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProps>(
+  (props) => {
+    const { field, 'data-test-subj': dataTestSubj } = props;
+    const { onChange, value } = field;
+    const [data] = useFormData();
+    const userHasRunScriptAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
+
+    useEffect(() => {
+      if (!value.linux.scriptId) {
+        const event = new Event('change', {
+          bubbles: true,
+        }) as unknown as React.ChangeEvent<HTMLInputElement>;
+
+        Object.defineProperty(event, 'target', {
+          writable: false,
+          value: {
+            value: {
+              ...value,
+              linux: {
+                ...value.linux,
+                scriptId: 'runscript-linux-script-id-here',
+              },
+            },
+            name: field.path,
+          },
+        });
+
+        onChange(event);
+      }
+    }, [field.path, onChange, value]);
+
+    if (!userHasRunScriptAuthz) {
+      return null;
+    }
+
+    // FIXME:PT add i18n for all labels below
+    return (
+      <EuiText size="s" data-test-subj={dataTestSubj}>
+        {(['linux', 'macos', 'windows'] as Array<keyof RunScriptUseFieldDataType>).map((osType) => {
+          const currentConfig = value[osType];
+
+          return (
+            <EuiFormRow fullWidth>
+              <EuiFlexGroup
+                key={osType}
+                gutterSize="l"
+                alignItems="center"
+                justifyContent="spaceBetween"
+              >
+                <EuiFlexItem>
+                  <EuiFormRow hasEmptyLabelSpace>
+                    <EuiFlexGroup
+                      responsive={false}
+                      wrap={false}
+                      gutterSize="s"
+                      alignItems="center"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <PlatformIcon platform={osType} size="m" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>{OS_TITLES[osType] ?? osType}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow label={'Script'}>
+                    <div>{`pick script: ${currentConfig.scriptId}`}</div>
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow label={'Scripts arguments (if any)'}>
+                    <EuiFieldText name="scriptParms" fullWidth />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow label={'Script execution timeout'}>
+                    <EuiFieldText name="timeout" fullWidth />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          );
+        })}
+
+        <EuiSpacer size="xxl" />
+        <EuiHorizontalRule />
+        <EuiSpacer size="xxl" />
+        <EuiSpacer size="xxl" />
+        <div>
+          <pre>
+            {'`field`:'}
+            {JSON.stringify(props.field, null, 2)}
+          </pre>
+        </div>
+        <EuiSpacer size="xxl" />
+        <div>
+          <pre>
+            {'`data`:'}
+            {JSON.stringify(data, null, 2)}
+          </pre>
+        </div>
+      </EuiText>
+    );
+  }
+);
+AutomatedRunScriptConfiguration.displayName = 'AutomatedRunScriptConfiguration';
