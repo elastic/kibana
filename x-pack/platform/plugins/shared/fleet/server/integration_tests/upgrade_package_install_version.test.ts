@@ -154,7 +154,8 @@ describe('Uprade package install version', () => {
     await stopServers();
   });
 
-  describe('with package installed with a previous format install version', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/227351
+  describe.skip('with package installed with a previous format install version', () => {
     let soClient: SavedObjectsClientContract;
 
     const OUTDATED_PACKAGES = ['nginx', 'apache'];
