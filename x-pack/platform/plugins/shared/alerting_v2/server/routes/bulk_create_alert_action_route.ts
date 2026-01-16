@@ -12,7 +12,10 @@ import { inject, injectable } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from './constants';
-import { bulkAlertActionDataSchema, type BulkAlertActionData } from './schemas/alert_action_schema';
+import {
+  bulkCreateAlertActionDataSchema,
+  type BulkCreateAlertActionData,
+} from './schemas/alert_action_schema';
 
 @injectable()
 export class BulkCreateAlertActionRoute {
@@ -26,13 +29,13 @@ export class BulkCreateAlertActionRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: bulkAlertActionDataSchema,
+      body: bulkCreateAlertActionDataSchema,
     },
   } as const;
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, BulkAlertActionData>,
+    private readonly request: KibanaRequest<unknown, unknown, BulkCreateAlertActionData>,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
   ) {}

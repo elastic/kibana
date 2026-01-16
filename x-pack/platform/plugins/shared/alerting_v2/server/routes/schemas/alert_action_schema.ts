@@ -60,16 +60,16 @@ export const createAlertActionDataSchema = z.discriminatedUnion('action_type', [
 
 export type CreateAlertActionData = z.infer<typeof createAlertActionDataSchema>;
 
-export const alertActionParamsSchema = z.object({
+export const createAlertActionParamsSchema = z.object({
   alert_series_id: z.string(),
 });
 
-export type AlertActionParams = z.infer<typeof alertActionParamsSchema>;
+export type CreateAlertActionParams = z.infer<typeof createAlertActionParamsSchema>;
 
-export const bulkAlertActionItemDataSchema = createAlertActionDataSchema.and(
+export const bulkCreateAlertActionItemDataSchema = createAlertActionDataSchema.and(
   z.object({ alert_series_id: z.string() })
 );
-export type BulkAlertActionItemData = z.infer<typeof bulkAlertActionItemDataSchema>;
+export type BulkCreateAlertActionItemData = z.infer<typeof bulkCreateAlertActionItemDataSchema>;
 
-export const bulkAlertActionDataSchema = z.array(bulkAlertActionItemDataSchema).min(1);
-export type BulkAlertActionData = z.infer<typeof bulkAlertActionDataSchema>;
+export const bulkCreateAlertActionDataSchema = z.array(bulkCreateAlertActionItemDataSchema).min(1);
+export type BulkCreateAlertActionData = z.infer<typeof bulkCreateAlertActionDataSchema>;

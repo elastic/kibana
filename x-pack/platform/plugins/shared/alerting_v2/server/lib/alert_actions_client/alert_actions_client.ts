@@ -15,7 +15,7 @@ import { inject, injectable, optional } from 'inversify';
 import { omit, zipObject } from 'lodash';
 import pLimit from 'p-limit';
 import type {
-  BulkAlertActionItemData,
+  BulkCreateAlertActionItemData,
   CreateAlertActionData,
 } from '../../routes/schemas/alert_action_schema';
 import { QueryService } from '../services/query_service/query_service';
@@ -62,7 +62,7 @@ export class AlertActionsClient {
   }
 
   public async executeBulkActions(
-    actions: BulkAlertActionItemData[]
+    actions: BulkCreateAlertActionItemData[]
   ): Promise<{ processed: number; total: number }> {
     const username = await this.getUserName();
     const limiter = pLimit(10);
