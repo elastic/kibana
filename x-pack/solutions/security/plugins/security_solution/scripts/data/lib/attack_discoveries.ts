@@ -252,6 +252,8 @@ const createAttackDiscoveriesViaKibana = async ({
     path: '/internal/elastic_assistant/data_generator/attack_discoveries/_create',
     headers: {
       'kbn-xsrf': 'true',
+      // Required by the server route to avoid accidental invocation.
+      'x-elastic-internal-origin': 'Kibana',
       'elastic-api-version': '1',
     },
     body: params,
@@ -313,9 +315,18 @@ export const generateAndIndexAttackDiscoveries = async ({
 
   const attackDiscoveries: AttackDiscovery[] = [];
   for (const g of discoveryGroups) {
+    // Deterministic fallback: if a group timestamp is missing/invalid (shouldn't happen with real alerts),
+    // fall back to the generator's end-of-window time.
+    const fallbackIso = new Date(opts.endMs).toISOString();
+    const discoveryTimeIso = (() => {
+      const ts = g.discoveryTimeIso;
+      const d = new Date(ts);
+      return Number.isFinite(d.getTime()) ? ts : fallbackIso;
+    })();
+
     const discoveryKey = [
       spaceId,
-      g.discoveryTimeIso,
+      discoveryTimeIso,
       g.hostName ?? 'unknown-host',
       g.userName ?? 'unknown-user',
       g.alertIds.join(','),
@@ -326,7 +337,7 @@ export const generateAndIndexAttackDiscoveries = async ({
       discoveryKey,
       hostName: g.hostName,
       userName: g.userName,
-      discoveryTimeIso: g.discoveryTimeIso,
+      discoveryTimeIso,
     });
     const attack: AttackDiscovery = {
       alertIds: g.alertIds,
@@ -344,11 +355,12 @@ export const generateAndIndexAttackDiscoveries = async ({
         }${g.userName ? `- User: {{ user.name ${g.userName} }}\n` : ''}`,
       // Drives the "attack chain" visualization in the UI.
       mitreAttackTactics: pickMitreAttackTactics(generationUuid),
-      timestamp: g.discoveryTimeIso,
+      timestamp: discoveryTimeIso,
     };
 
     generatedGroups.push({
       ...g,
+      discoveryTimeIso,
       title,
     });
     attackDiscoveries.push(attack);

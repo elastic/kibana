@@ -157,12 +157,23 @@ export const createAttackDiscoveryAlertsForDataGenerator = async ({
 
   const { attackDiscoveries, ...restParams } = createAttackDiscoveryAlertsParams;
 
+  // Deterministic fallback for missing/invalid timestamps:
+  // Use the latest valid discovery timestamp as a proxy for the generator's end-of-window time.
+  const fallbackNow = (() => {
+    const times = attackDiscoveries
+      .map((d) => (typeof d.timestamp === 'string' && d.timestamp.length > 0 ? new Date(d.timestamp) : null))
+      .filter((d): d is Date => d != null && Number.isFinite(d.getTime()))
+      .map((d) => d.getTime());
+    const max = times.length > 0 ? Math.max(...times) : NaN;
+    return Number.isFinite(max) ? new Date(max) : new Date();
+  })();
+
   const alertDocuments = attackDiscoveries.flatMap((attackDiscovery) => {
     const desiredNow = (() => {
       const ts = attackDiscovery.timestamp;
-      if (typeof ts !== 'string' || ts.length === 0) return new Date();
+      if (typeof ts !== 'string' || ts.length === 0) return fallbackNow;
       const d = new Date(ts);
-      return Number.isFinite(d.getTime()) ? d : new Date();
+      return Number.isFinite(d.getTime()) ? d : fallbackNow;
     })();
 
     return transformToAlertDocuments({

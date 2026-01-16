@@ -14,6 +14,15 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { StartPlugins } from '../../plugin';
 
+const hasInternalKibanaOriginHeader = (headerValue: unknown): boolean => {
+  // `@kbn/test`'s KbnClient overwrites this header to `kbn-client` (see `buildRequest()`),
+  // while browser/internal calls commonly use `Kibana`.
+  const allowed = new Set(['Kibana', 'kbn-client']);
+  if (typeof headerValue === 'string') return allowed.has(headerValue);
+  if (Array.isArray(headerValue)) return headerValue.some((v) => allowed.has(v));
+  return false;
+};
+
 const UpdateCaseTimestampsParams = z.object({
   caseId: z.string(),
 });
@@ -52,6 +61,14 @@ export const registerDataGeneratorRoutes = (
       },
       async (context, request, response) => {
         try {
+          // Dev-only route, intended to be called only by internal tooling (the data generator script).
+          const internalOrigin = request.headers['x-elastic-internal-origin'];
+          if (!hasInternalKibanaOriginHeader(internalOrigin)) {
+            return response.forbidden({
+              body: { message: 'Missing required x-elastic-internal-origin: Kibana header' },
+            });
+          }
+
           const [coreStart, pluginsStart] = await getStartServices();
           if (!pluginsStart.cases) {
             return response.notFound();

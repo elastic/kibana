@@ -14,6 +14,15 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 
 const RESPONSE_SCHEMA = z.object({ data: z.array(z.unknown()) });
 
+const hasInternalKibanaOriginHeader = (headerValue: unknown): boolean => {
+  // `@kbn/test`'s KbnClient overwrites this header to `kbn-client` (see `buildRequest()`),
+  // while browser/internal calls commonly use `Kibana`.
+  const allowed = new Set(['Kibana', 'kbn-client']);
+  if (typeof headerValue === 'string') return allowed.has(headerValue);
+  if (Array.isArray(headerValue)) return headerValue.some((v) => allowed.has(v));
+  return false;
+};
+
 /**
  * Dev-only route used by the Security Solution data generator script.
  *
@@ -29,7 +38,8 @@ export const createAttackDiscoveryAlertsRoute = (router: ElasticAssistantPluginR
       security: {
         authz: {
           enabled: false,
-          reason: 'dev-only route for data generator',
+          reason:
+            'dev-only route for data generator; gated by route registration + internal-origin header',
         },
       },
     })
@@ -48,6 +58,15 @@ export const createAttackDiscoveryAlertsRoute = (router: ElasticAssistantPluginR
           const assistantContext = await context.elasticAssistant;
           const authenticatedUser = await assistantContext.getCurrentUser();
           if (!authenticatedUser) return response.unauthorized();
+
+          // This route is dev-only, but still requires an internal-origin request and a privileged user.
+          // The data generator script sends this header.
+          const internalOrigin = request.headers['x-elastic-internal-origin'];
+          if (!hasInternalKibanaOriginHeader(internalOrigin)) {
+            return response.forbidden({
+              body: { message: 'Missing required x-elastic-internal-origin: Kibana header' },
+            });
+          }
 
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
           if (!dataClient) {
