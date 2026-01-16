@@ -17,6 +17,7 @@ import type {
   UnifiedHistogramCustomization,
   DiscoverCustomization,
 } from '@kbn/discover-plugin/public';
+import type { internalStateActions } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { WithPreventableEvent } from './use_histogram_customizations';
 import { useHistogramCustomization } from './use_histogram_customizations';
@@ -82,6 +83,7 @@ const mockSetFunctionOnBrushEndCallback = (histogramCustomization: DiscoverCusto
 };
 
 const mockStateContainer = {} as ExtendedDiscoverStateContainer;
+const mockinternalStateActions = {} as typeof internalStateActions;
 
 describe('useHistogramCustomization', () => {
   const startServices = createStartServicesMock();
@@ -113,6 +115,7 @@ describe('useHistogramCustomization', () => {
         setHistogramCustomizationCallback({
           customizations: mockCustomization,
           stateContainer: mockStateContainer,
+          internalStateActions: mockinternalStateActions,
         });
       };
 
@@ -147,6 +150,7 @@ describe('useHistogramCustomization', () => {
         setHistogramCustomizationCallback({
           customizations: mockCustomization,
           stateContainer: mockStateContainer,
+          internalStateActions: mockinternalStateActions,
         });
       };
 
@@ -178,6 +182,7 @@ describe('useHistogramCustomization', () => {
         setHistogramCustomizationCallback({
           customizations: mockCustomization,
           stateContainer: mockStateContainer,
+          internalStateActions: mockinternalStateActions,
         });
       };
 
