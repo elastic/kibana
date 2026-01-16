@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const osqueryPublicApiVersion = '2023-10-31';
 
   const actionIndex = '.logs-osquery_manager.actions-default';
 
@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
       const detailsResponse = await supertest
         .get(`/api/osquery/live_queries/${actionId}`)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', API_VERSIONS.public.v1);
+        .set('elastic-api-version', osqueryPublicApiVersion);
 
       expect(detailsResponse.status).to.be(200);
       expect(detailsResponse.body.data.action_id).to.be(actionId);
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resultsResponse = await supertest
         .get(`/api/osquery/live_queries/${actionId}/results/${queryActionId}`)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', API_VERSIONS.public.v1);
+        .set('elastic-api-version', osqueryPublicApiVersion);
 
       expect(resultsResponse.status).to.be(200);
       expect(resultsResponse.body).to.have.property('data');

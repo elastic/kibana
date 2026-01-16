@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import type { Test } from 'supertest';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -49,12 +48,13 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const fleetAndAgents = getService('fleetAndAgents');
   const fleetApiVersion = '2023-10-31';
+  const osqueryPublicApiVersion = '2023-10-31';
 
   const withFleetHeaders = (request: Test) =>
     request.set('kbn-xsrf', 'true').set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
 
   const withOsqueryHeaders = (request: Test) =>
-    request.set('kbn-xsrf', 'true').set('elastic-api-version', API_VERSIONS.public.v1);
+    request.set('kbn-xsrf', 'true').set('elastic-api-version', osqueryPublicApiVersion);
 
   describe('Packs', () => {
     let packId: string = '';

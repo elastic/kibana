@@ -6,17 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const osqueryPublicApiVersion = '2023-10-31';
 
   const createSavedQuery = (id: string) =>
     supertest
       .post('/api/osquery/saved_queries')
       .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', API_VERSIONS.public.v1)
+      .set('elastic-api-version', osqueryPublicApiVersion)
       .send({
         id,
         query: 'select 1;',
@@ -27,19 +27,19 @@ export default function ({ getService }: FtrProviderContext) {
     supertest
       .get(`/api/osquery/saved_queries/${savedObjectId}`)
       .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', API_VERSIONS.public.v1);
+      .set('elastic-api-version', osqueryPublicApiVersion);
 
   const deleteSavedQuery = (savedObjectId: string) =>
     supertest
       .delete(`/api/osquery/saved_queries/${savedObjectId}`)
       .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', API_VERSIONS.public.v1);
+      .set('elastic-api-version', osqueryPublicApiVersion);
 
   const updateSavedQuery = (savedObjectId: string, id: string) =>
     supertest
       .put(`/api/osquery/saved_queries/${savedObjectId}`)
       .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', API_VERSIONS.public.v1)
+      .set('elastic-api-version', osqueryPublicApiVersion)
       .send({
         id,
         query: 'select 2;',
@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
     supertest
       .get('/api/osquery/saved_queries?page=1&pageSize=20')
       .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', API_VERSIONS.public.v1);
+      .set('elastic-api-version', osqueryPublicApiVersion);
 
   describe('Saved queries', () => {
     it('creates, reads, and deletes a saved query', async () => {

@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -15,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const fleetAndAgents = getService('fleetAndAgents');
   const kibanaServer = getService('kibanaServer');
   const fleetApiVersion = '2023-10-31';
+  const osqueryInternalApiVersion = '1';
 
   describe('Status', () => {
     let agentPolicyId: string;
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertest
         .get('/internal/osquery/status')
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', API_VERSIONS.internal.v1);
+        .set('elastic-api-version', osqueryInternalApiVersion);
 
       expect(response.status).to.be(200);
       expect(response.body).to.have.property('name', 'osquery_manager');
