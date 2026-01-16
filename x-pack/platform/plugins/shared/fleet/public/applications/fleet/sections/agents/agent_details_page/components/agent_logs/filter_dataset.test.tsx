@@ -29,7 +29,7 @@ jest.mock('../../../../../hooks', () => ({
         create: jest.fn().mockResolvedValue([]),
       },
     },
-    unifiedSearch: {
+    kql: {
       autocomplete: {
         getValueSuggestions: jest
           .fn()
