@@ -57,7 +57,6 @@ export function transformDashboardOut(
       : undefined;
 
   const options = transformOptionsOut(optionsJSON ?? '{}', controlGroupInput?.showApplySelections);
-  console.log({ anotherTest: pinnedControlsOut, test: JSON.stringify(pinnedControlsOut) });
 
   // try to maintain a consistent (alphabetical) order of keys
   return {

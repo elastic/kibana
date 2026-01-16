@@ -110,7 +110,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
         }
       }),
       switchMap(async (currentDataViewId) => {
-        console.log({ currentDataViewId });
         let dataView: DataView | undefined;
         try {
           dataView = await dataViewsService.get(currentDataViewId);

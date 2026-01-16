@@ -70,7 +70,6 @@ export const dashboardClient = {
         },
       })
       .catch((e) => {
-        console.log(e);
         if (e.response?.status === 404) {
           throw new SavedObjectNotFound({ type: DASHBOARD_SAVED_OBJECT_TYPE, id });
         }
@@ -85,7 +84,6 @@ export const dashboardClient = {
        */
       cache.set(id, result);
     }
-    console.log({ result });
     return result;
   },
   search: async (searchBody: DashboardSearchRequestBody) => {
