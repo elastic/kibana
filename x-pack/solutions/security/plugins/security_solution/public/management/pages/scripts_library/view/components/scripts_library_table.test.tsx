@@ -46,6 +46,7 @@ const defaultProps: ScriptsLibraryTableProps = {
     },
   ],
   onChange: jest.fn(),
+  onClickDelete: jest.fn(),
   queryParams: {
     page: 1,
     pageSize: 10,
@@ -242,6 +243,63 @@ describe('ScriptsLibraryTable', () => {
       const { getByTestId } = renderResult;
       const fileSizeCell = getByTestId('test-file-size');
       expect(fileSizeCell).toHaveTextContent('784kb');
+    });
+
+    it('shows actions menu for each script', () => {
+      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByTestId } = renderResult;
+      const actionsMenu = getByTestId('test-actions-menu');
+      expect(actionsMenu).toBeInTheDocument();
+    });
+
+    it('shows all actions menu items when actions menu is clicked and user has appropriate privileges', () => {
+      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByTestId } = renderResult;
+      const actionsMenu = getByTestId('test-actions-menu');
+      expect(actionsMenu).toBeInTheDocument();
+      userEve.click(actionsMenu).then(() => {
+        const meuPanel = getByTestId('test-actions-menu-panel');
+        expect(meuPanel).toBeInTheDocument();
+
+        const links = meuPanel.querySelectorAll('.euiContextMenuItem');
+        expect(links).toHaveLength(4);
+        expect(
+          Array.from(links)
+            .map((link) => link.textContent)
+            .join(',')
+        ).toEqual('View details,Edit script,Download script,Delete script');
+      });
+    });
+
+    it('hides edit and delete actions when user lacks write privileges', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          ...getEndpointAuthzInitialStateMock(),
+          canWriteScriptsLibrary: false,
+        },
+      });
+      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByTestId } = renderResult;
+      const actionsMenu = getByTestId('test-actions-menu');
+      expect(actionsMenu).toBeInTheDocument();
+      userEve.click(actionsMenu).then(() => {
+        const meuPanel = getByTestId('test-actions-menu-panel');
+        expect(meuPanel).toBeInTheDocument();
+
+        const links = meuPanel.querySelectorAll('.euiContextMenuItem');
+        expect(links).toHaveLength(2);
+        expect(
+          Array.from(links)
+            .map((link) => link.textContent)
+            .join(',')
+        ).toEqual('View details,Download script');
+      });
     });
   });
 });
