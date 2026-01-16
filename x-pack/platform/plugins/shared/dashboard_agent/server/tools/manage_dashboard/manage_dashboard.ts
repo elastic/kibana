@@ -112,9 +112,6 @@ Use this tool when you need to:
 
         // Extract the stored dashboard content
         const previousContent = storedResult.data.content;
-        if (!previousContent?.visualizationIds) {
-          throw new Error(`Dashboard content not found for ID "${dashboardId}".`);
-        }
 
         // Start with the previous state
         const updatedTitle = title ?? previousContent.title;
