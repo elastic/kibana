@@ -37,8 +37,12 @@ const TestWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   );
 };
 
-const renderIntegrationDetails = () => {
-  return render(<IntegrationDetails />, { wrapper: TestWrapper });
+const renderIntegrationDetails = async () => {
+  const result = render(<IntegrationDetails />, { wrapper: TestWrapper });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  return result;
 };
 
 describe('IntegrationDetails', () => {
@@ -47,25 +51,25 @@ describe('IntegrationDetails', () => {
   });
 
   describe('rendering', () => {
-    it('should render title input field', () => {
-      const { getByTestId } = renderIntegrationDetails();
+    it('should render title input field', async () => {
+      const { getByTestId } = await renderIntegrationDetails();
       expect(getByTestId('integrationTitleInput')).toBeInTheDocument();
     });
 
-    it('should render description input field', () => {
-      const { getByTestId } = renderIntegrationDetails();
+    it('should render description input field', async () => {
+      const { getByTestId } = await renderIntegrationDetails();
       expect(getByTestId('integrationDescriptionInput')).toBeInTheDocument();
     });
 
-    it('should render logo file picker', () => {
-      const { getByTestId } = renderIntegrationDetails();
+    it('should render logo file picker', async () => {
+      const { getByTestId } = await renderIntegrationDetails();
       expect(getByTestId('integrationLogoFilePicker')).toBeInTheDocument();
     });
   });
 
   describe('title field interactions', () => {
     it('should update title value when typing', async () => {
-      const { getByTestId } = renderIntegrationDetails();
+      const { getByTestId } = await renderIntegrationDetails();
       const titleInput = getByTestId('integrationTitleInput') as HTMLInputElement;
 
       await act(async () => {
@@ -76,7 +80,7 @@ describe('IntegrationDetails', () => {
     });
 
     it('should show required error when title is empty and field is touched', async () => {
-      const { getByTestId, findByText } = renderIntegrationDetails();
+      const { getByTestId, findByText } = await renderIntegrationDetails();
       const titleInput = getByTestId('integrationTitleInput');
 
       // Type something then clear it to trigger validation
@@ -95,7 +99,7 @@ describe('IntegrationDetails', () => {
     });
 
     it('should show max length error when title exceeds limit', async () => {
-      const { getByTestId, findByText } = renderIntegrationDetails();
+      const { getByTestId, findByText } = await renderIntegrationDetails();
       const titleInput = getByTestId('integrationTitleInput');
       const longTitle = 'a'.repeat(MAX_NAME_LENGTH + 1);
 
@@ -113,13 +117,7 @@ describe('IntegrationDetails', () => {
     });
 
     it('should show duplicate error when title matches existing package name', async () => {
-      const { getByTestId, findByText } = renderIntegrationDetails();
-
-      // Wait for the packageNames to be loaded from the mocked API
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      });
-
+      const { getByTestId, findByText } = await renderIntegrationDetails();
       const titleInput = getByTestId('integrationTitleInput');
 
       // Type a name that matches an existing package (exact match)
@@ -137,7 +135,7 @@ describe('IntegrationDetails', () => {
 
   describe('description field interactions', () => {
     it('should update description value when typing', async () => {
-      const { getByTestId } = renderIntegrationDetails();
+      const { getByTestId } = await renderIntegrationDetails();
       const descriptionInput = getByTestId('integrationDescriptionInput') as HTMLInputElement;
 
       await act(async () => {
@@ -148,7 +146,7 @@ describe('IntegrationDetails', () => {
     });
 
     it('should show required error when description is empty and field is touched', async () => {
-      const { getByTestId, findByText } = renderIntegrationDetails();
+      const { getByTestId, findByText } = await renderIntegrationDetails();
       const descriptionInput = getByTestId('integrationDescriptionInput');
 
       // Type something then clear it to trigger validation
@@ -167,7 +165,7 @@ describe('IntegrationDetails', () => {
     });
 
     it('should show max length error when description exceeds limit', async () => {
-      const { getByTestId, findByText } = renderIntegrationDetails();
+      const { getByTestId, findByText } = await renderIntegrationDetails();
       const descriptionInput = getByTestId('integrationDescriptionInput');
       const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
 
@@ -187,7 +185,7 @@ describe('IntegrationDetails', () => {
 
   describe('logo file picker interactions', () => {
     it('should show error for non-SVG files', async () => {
-      const { getByTestId, findByText } = renderIntegrationDetails();
+      const { getByTestId, findByText } = await renderIntegrationDetails();
       const fileInput = getByTestId('integrationLogoFilePicker') as HTMLInputElement;
 
       const pngFile = new File(['test'], 'logo.png', { type: 'image/png' });
@@ -201,7 +199,7 @@ describe('IntegrationDetails', () => {
     });
 
     it('should show error for files exceeding size limit', async () => {
-      const { getByTestId, findByText } = renderIntegrationDetails();
+      const { getByTestId, findByText } = await renderIntegrationDetails();
       const fileInput = getByTestId('integrationLogoFilePicker') as HTMLInputElement;
 
       // Create a file larger than 1MB
@@ -217,7 +215,7 @@ describe('IntegrationDetails', () => {
     });
 
     it('should accept valid SVG files', async () => {
-      const { getByTestId, queryByText } = renderIntegrationDetails();
+      const { getByTestId, queryByText } = await renderIntegrationDetails();
       const fileInput = getByTestId('integrationLogoFilePicker') as HTMLInputElement;
 
       const svgContent = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';

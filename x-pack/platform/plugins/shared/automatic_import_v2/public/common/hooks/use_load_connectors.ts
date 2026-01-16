@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useLoadConnectors as useLoadConnectorsBase } from '@kbn/elastic-assistant';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from './use_kibana';
-import * as i18n from './translations';
-
-const ALLOWED_ACTION_TYPE_IDS = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
 
 interface UseLoadConnectorsResult {
   connectors: ActionConnector[];
@@ -20,45 +17,19 @@ interface UseLoadConnectorsResult {
 }
 
 export const useLoadConnectors = (): UseLoadConnectorsResult => {
-  const { http, notifications } = useKibana().services;
-  const [connectors, setConnectors] = useState<ActionConnector[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
+  const { http, notifications, settings } = useKibana().services;
 
-  const fetchConnectors = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(undefined);
-
-      const response = await http.get<ActionConnector[]>('/api/actions/connectors');
-
-      // Filter to only AI-related connectors
-      const aiConnectors = response.filter((connector) => {
-        const typeId = connector.actionTypeId || (connector as any).connector_type_id;
-        return ALLOWED_ACTION_TYPE_IDS.includes(typeId);
-      });
-
-      setConnectors(aiConnectors);
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : i18n.LOAD_CONNECTORS_ERROR_MESSAGE;
-      setError(errorMessage);
-      notifications.toasts.addDanger({
-        title: i18n.LOAD_CONNECTORS_ERROR_TITLE,
-        text: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [http, notifications.toasts]);
-
-  useEffect(() => {
-    fetchConnectors();
-  }, [fetchConnectors]);
+  const { data, isLoading, error, refetch } = useLoadConnectorsBase({
+    http,
+    toasts: notifications.toasts,
+    inferenceEnabled: true,
+    settings,
+  });
 
   return {
-    connectors,
+    connectors: data ?? [],
     isLoading,
-    error,
-    refetch: fetchConnectors,
+    error: error?.message,
+    refetch,
   };
 };

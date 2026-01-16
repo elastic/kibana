@@ -9,9 +9,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { IntegrationManagement } from './components/integration_management/integration_management';
 import type { Services } from './services/types';
 import type { AutomaticImportPluginStartDependencies } from './types';
+
+const queryClient = new QueryClient();
 
 export const renderApp = ({
   coreStart,
@@ -30,9 +33,11 @@ export const renderApp = ({
 
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <KibanaContextProvider services={services}>
-        <IntegrationManagement />
-      </KibanaContextProvider>
+      <QueryClientProvider client={queryClient}>
+        <KibanaContextProvider services={services}>
+          <IntegrationManagement />
+        </KibanaContextProvider>
+      </QueryClientProvider>
     ),
     element
   );

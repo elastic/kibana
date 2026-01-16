@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from './constants';
+import {
+  MAX_NAME_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_DATA_STREAM_TITLE_LENGTH,
+  MAX_DATA_STREAM_DESCRIPTION_LENGTH,
+} from './constants';
 
 // Validation messages
 export const TITLE_REQUIRED = i18n.translate(
@@ -50,5 +55,51 @@ export const TITLE_ALREADY_EXISTS = i18n.translate(
   'xpack.automaticImportV2.forms.integration.titleAlreadyExists',
   {
     defaultMessage: 'An integration with this name already exists',
+  }
+);
+
+// Data stream validation messages
+export const DATA_STREAM_TITLE_REQUIRED = i18n.translate(
+  'xpack.automaticImportV2.forms.dataStream.titleRequired',
+  {
+    defaultMessage: 'Data stream title is required',
+  }
+);
+export const DATA_STREAM_TITLE_MAX_LENGTH = i18n.translate(
+  'xpack.automaticImportV2.forms.dataStream.titleMaxLength',
+  {
+    defaultMessage: 'Data stream title must be no more than {maxLength} characters',
+    values: { maxLength: MAX_DATA_STREAM_TITLE_LENGTH },
+  }
+);
+export const DATA_STREAM_DESCRIPTION_REQUIRED = i18n.translate(
+  'xpack.automaticImportV2.forms.dataStream.descriptionRequired',
+  {
+    defaultMessage: 'Data stream description is required',
+  }
+);
+export const DATA_STREAM_DESCRIPTION_MAX_LENGTH = i18n.translate(
+  'xpack.automaticImportV2.forms.dataStream.descriptionMaxLength',
+  {
+    defaultMessage: 'Data stream description must be no more than {maxLength} characters',
+    values: { maxLength: MAX_DATA_STREAM_DESCRIPTION_LENGTH },
+  }
+);
+export const DATA_COLLECTION_METHOD_REQUIRED = i18n.translate(
+  'xpack.automaticImportV2.forms.dataStream.dataCollectionMethodRequired',
+  {
+    defaultMessage: 'Please select a data collection method',
+  }
+);
+export const LOG_SAMPLE_REQUIRED = i18n.translate(
+  'xpack.automaticImportV2.forms.dataStream.logSampleRequired',
+  {
+    defaultMessage: 'A log sample is required for analysis',
+  }
+);
+export const SELECTED_INDEX_REQUIRED = i18n.translate(
+  'xpack.automaticImportV2.forms.dataStream.selectedIndexRequired',
+  {
+    defaultMessage: 'Please select an index',
   }
 );
