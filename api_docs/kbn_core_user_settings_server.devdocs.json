@@ -20,6 +20,8 @@
         "label": "UserSettingsServiceSetup",
         "description": [],
         "path": "src/core/packages/user-settings/server/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

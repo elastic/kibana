@@ -12,6 +12,8 @@
         "label": "WithKibanaProps",
         "description": [],
         "path": "x-pack/platform/plugins/private/canvas/public/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "; }; }"
             ],
             "path": "x-pack/platform/plugins/private/canvas/public/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -55,6 +59,8 @@
         "CanvasApi"
       ],
       "path": "x-pack/platform/plugins/private/canvas/public/plugin.tsx",
+      "lineNumber": 74,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -71,6 +77,8 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/private/canvas/public/plugin.tsx",
+      "lineNumber": 82,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -117,6 +125,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/private/canvas/common/locator.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -132,6 +142,8 @@
           "{ view: \"workpadPDF\"; id: string; page: number; }"
         ],
         "path": "x-pack/platform/plugins/private/canvas/common/locator.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -146,6 +158,8 @@
         "label": "UI_SETTINGS",
         "description": [],
         "path": "x-pack/platform/plugins/private/canvas/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,6 +171,8 @@
             "label": "ENABLE_LABS_UI",
             "description": [],
             "path": "x-pack/platform/plugins/private/canvas/common/index.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
