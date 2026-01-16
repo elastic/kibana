@@ -1245,6 +1245,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Gets text of the specified datatable header cell
      *
      * @param index - index of th element in datatable
+     * @param addRowNumberColumn - when true, increments the column number to ignore row number column
      */
     async getDatatableHeaderText(index = 0, addRowNumberColumn?: boolean) {
       const el = await this.getDatatableHeader(index, addRowNumberColumn);
