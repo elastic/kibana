@@ -22,7 +22,6 @@ export const RERANK_DEFAULT_MAX_INPUT_TOTAL_LENGTH = 2000;
 
 /**
  * Input schema for the rerank step
- * Validates parameters for calling the Elasticsearch rerank inference endpoint
  */
 const RerankInputSchema = z.object({
   rerank_text: z.string().describe('Text to rerank documents against'),
@@ -62,7 +61,7 @@ const RerankConfigSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Rerank inference endpoint ID. If not provided, automatically selects the first available rerank endpoint from Elasticsearch, prioritizing Elastic-hosted models over self-hosted Elasticsearch models.'
+      'Rerank inference endpoint ID. If not provided, automatically selects an available rerank endpoint from Elasticsearch, prioritizing Elastic-hosted models over self-hosted Elasticsearch models.'
     ),
 });
 

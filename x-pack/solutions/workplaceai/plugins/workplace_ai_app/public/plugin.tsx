@@ -38,7 +38,6 @@ export class WorkplaceAIAppPlugin
     core: CoreSetup<WorkplaceAIAppPluginStartDependencies, WorkplaceAIAppPluginStart>,
     { dataSourcesRegistry, workflowsExtensions }: WorkplaceAIAppPluginSetupDependencies
   ): WorkplaceAIAppPluginSetup {
-    // Register rerank step
     workflowsExtensions.registerStepDefinition(createRerankStepDefinition(core));
 
     registerApp({

@@ -50,7 +50,6 @@ export class WorkplaceAIAppPlugin
     core: CoreSetup<WorkplaceAIAppPluginStartDependencies>,
     setupDeps: WorkplaceAIAppPluginSetupDependencies
   ): WorkplaceAIAppPluginSetup {
-    // Register rerank step
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
 
     const router = core.http.createRouter();

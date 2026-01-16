@@ -22,21 +22,17 @@ let cachedEndpoints: InferenceEndpoint[] | null = null;
 let cachePromise: Promise<InferenceEndpoint[]> | null = null;
 
 async function loadInferenceEndpoints(http: HttpStart): Promise<InferenceEndpoint[]> {
-  // Return cached if available
   if (cachedEndpoints !== null) {
     return cachedEndpoints;
   }
 
-  // Return existing promise if loading
   if (cachePromise !== null) {
     return cachePromise;
   }
 
-  // Start loading
   cachePromise = http
     .get<InferenceEndpointsResponse>('/internal/inference_endpoints/endpoints')
     .then((response) => {
-      // Filter for rerank endpoints only
       const rerankEndpoints = response.inference_endpoints.filter(
         (ep) => ep.task_type === 'rerank'
       );
@@ -87,7 +83,7 @@ export function createInferenceIdValidator(http: HttpStart) {
 
       return {
         severity: null,
-        afterMessage: `✓ Connected (${endpoint.service})`,
+        afterMessage: `✓ Valid endpoint (${endpoint.service})`,
       };
     } catch (error) {
       return {
