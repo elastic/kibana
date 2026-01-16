@@ -130,8 +130,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const userMessage = llmRequest?.requestBody?.messages?.find(
           (m: { role: string }) => m.role === 'user'
         );
-        expect(userMessage.content).to.contain('<CorrelatedLogSequence>');
-        expect(userMessage.content).to.contain(logData.traceId);
+        expect(userMessage?.content).to.contain('<CorrelatedLogSequence>');
+        expect(userMessage?.content).to.contain(logData.traceId);
       });
 
       it('returns summary and context for info log with ServiceSummary', async () => {
@@ -165,8 +165,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const userMessage = llmRequest?.requestBody?.messages?.find(
           (m: { role: string }) => m.role === 'user'
         );
-        expect(userMessage.content).to.contain('<ServiceSummary>');
-        expect(userMessage.content).to.not.contain('<CorrelatedLogSequence>');
+        expect(userMessage?.content).to.contain('<ServiceSummary>');
+        expect(userMessage?.content).to.not.contain('<CorrelatedLogSequence>');
       });
     });
   });

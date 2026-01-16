@@ -17,6 +17,10 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
+import {
+  DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+  DEFAULT_LOG_SOURCE_FIELDS,
+} from '../../tools/get_correlated_logs/constants';
 import { isWarningOrAbove } from './get_log_severity';
 
 export interface GetLogAiInsightsParams {
@@ -123,6 +127,10 @@ export async function getLogAiInsights({
             start: windowStart,
             end: windowEnd,
             logId: id,
+            errorLogsOnly: true,
+            correlationFields: DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+            logSourceFields: DEFAULT_LOG_SOURCE_FIELDS,
+            maxSequences: 1,
             maxLogsPerSequence: 50,
           });
 
