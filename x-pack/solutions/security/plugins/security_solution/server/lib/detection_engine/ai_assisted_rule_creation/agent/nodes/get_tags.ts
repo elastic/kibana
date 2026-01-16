@@ -78,7 +78,6 @@ export const getTagsNode = ({
       return {
         ...state,
         rule: {
-          ...state.rule,
           tags: [...suggestedTags, AI_ASSISTED_RULE_CREATION_TAG],
         },
       };

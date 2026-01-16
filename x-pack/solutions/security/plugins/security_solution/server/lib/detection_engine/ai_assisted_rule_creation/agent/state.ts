@@ -6,6 +6,7 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
+import type { EsqlRule } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface KnowledgeBaseDocument {
   id: string;
@@ -13,17 +14,41 @@ export interface KnowledgeBaseDocument {
   name: string;
 }
 
+const defaultRuleValues: Partial<EsqlRule> = {
+  references: [],
+  severity_mapping: [],
+  risk_score_mapping: [],
+  related_integrations: [],
+  required_fields: [],
+  actions: [],
+  exceptions_list: [],
+  false_positives: [],
+  author: [],
+  setup: '',
+  max_signals: 100,
+  risk_score: 21,
+  severity: 'low',
+  interval: '5m',
+  from: 'now-6m',
+  to: 'now',
+  tags: [],
+  threat: [],
+};
+
 export const RuleCreationAnnotation = Annotation.Root({
   userQuery: Annotation<string>(),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  rule: Annotation<Record<string, any>>(),
+  rule: Annotation<Partial<EsqlRule>>({
+    default: () => defaultRuleValues,
+    reducer: (current, update) => {
+      return { ...current, ...update };
+    },
+  }),
   errors: Annotation<string[]>({
     default: () => [],
     reducer: (current, update) => {
       return [...current, ...update];
     },
   }),
-  // Warnings that are not critical. These warnings will not stop the rule creation process.
   warnings: Annotation<string[]>({
     default: () => [],
     reducer: (current, update) => {
