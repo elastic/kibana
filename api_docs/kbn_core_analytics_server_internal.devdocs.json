@@ -18,6 +18,8 @@
         "label": "AnalyticsService",
         "description": [],
         "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "any"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -46,6 +50,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -65,6 +71,8 @@
               "AnalyticsServicePreboot"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -82,6 +90,8 @@
               "AnalyticsServiceSetup"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -99,6 +109,8 @@
               "AnalyticsServiceStart"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -115,6 +127,8 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
