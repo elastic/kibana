@@ -16,6 +16,7 @@ import { queryKeys } from '../query_keys';
 export interface UseAddConnectorFlyoutOptions {
   onConnectorCreated?: (connector: ActionConnector) => void;
   dataSourceType?: string;
+  suggestedName?: string;
 }
 
 interface CreateDataConnectorPayload {
@@ -30,6 +31,7 @@ interface CreateDataConnectorPayload {
 export const useAddConnectorFlyout = ({
   onConnectorCreated,
   dataSourceType,
+  suggestedName,
 }: UseAddConnectorFlyoutOptions = {}) => {
   const {
     services: {
@@ -133,12 +135,12 @@ export const useAddConnectorFlyout = ({
 
       // Create data connector in the background using mutation
       createDataConnectorMutation.mutate({
-        name: connector.name,
+        name: suggestedName || connector.name, // Use suggested name for cloning, fallback to connector name
         stack_connector_id: connector.id,
         type: dataSourceType,
       });
     },
-    [dataSourceType, onConnectorCreated, closeFlyout, createDataConnectorMutation]
+    [dataSourceType, suggestedName, onConnectorCreated, closeFlyout, createDataConnectorMutation]
   );
 
   const flyout = useMemo(() => {
@@ -152,10 +154,18 @@ export const useAddConnectorFlyout = ({
       ...(selectedConnectorType && {
         initialConnector: {
           actionTypeId: selectedConnectorType,
+          ...(suggestedName && { name: suggestedName }),
         },
       }),
     });
-  }, [isOpen, selectedConnectorType, closeFlyout, handleConnectorCreated, triggersActionsUi]);
+  }, [
+    isOpen,
+    selectedConnectorType,
+    suggestedName,
+    closeFlyout,
+    handleConnectorCreated,
+    triggersActionsUi,
+  ]);
 
   return {
     openFlyout,

@@ -98,66 +98,6 @@ describe('UiActionsService', () => {
       ).resolves.toBe(false);
     });
 
-    test('action factory extract function gets called when calling uiactions extract', () => {
-      const service = new UiActionsServiceEnhancements(deps);
-      const actionState = {
-        events: [
-          {
-            eventId: 'test',
-            triggers: [],
-            action: { factoryId: factoryDefinition1.id, name: 'test', config: {} },
-          },
-        ],
-      };
-      const extract = jest.fn().mockImplementation((state) => ({ state, references: [] }));
-      service.registerActionFactory({
-        ...factoryDefinition1,
-        extract,
-      });
-      service.extract(actionState);
-      expect(extract).toBeCalledWith(actionState.events[0]);
-    });
-
-    test('action factory inject function gets called when calling uiactions inject', () => {
-      const service = new UiActionsServiceEnhancements(deps);
-      const actionState = {
-        events: [
-          {
-            eventId: 'test',
-            triggers: [],
-            action: { factoryId: factoryDefinition1.id, name: 'test', config: {} },
-          },
-        ],
-      };
-      const inject = jest.fn().mockImplementation((state) => state);
-      service.registerActionFactory({
-        ...factoryDefinition1,
-        inject,
-      });
-      service.inject(actionState, []);
-      expect(inject).toBeCalledWith(actionState.events[0], []);
-    });
-
-    test('action factory telemetry function gets called when calling uiactions telemetry', () => {
-      const service = new UiActionsServiceEnhancements(deps);
-      const actionState = {
-        events: [
-          {
-            eventId: 'test',
-            triggers: [],
-            action: { factoryId: factoryDefinition1.id, name: 'test', config: {} },
-          },
-        ],
-      };
-      const telemetry = jest.fn().mockImplementation((state) => ({}));
-      service.registerActionFactory({
-        ...factoryDefinition1,
-        telemetry,
-      });
-      service.telemetry(actionState);
-      expect(telemetry).toBeCalledWith(actionState.events[0], {});
-    });
-
     describe('registerFeature for licensing', () => {
       const spy = jest.spyOn(deps.featureUsageSetup!, 'register');
       beforeEach(() => {

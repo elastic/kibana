@@ -8,7 +8,7 @@
  */
 
 import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type {
   SearchEmbeddableByReferenceState,
@@ -28,7 +28,9 @@ function isByValue(
   );
 }
 
-export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
+export function getTransformOut(
+  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
+) {
   function transformOut(state: StoredSearchEmbeddableState, references?: SavedObjectReference[]) {
     const enhancementsState = state.enhancements
       ? transformEnhancementsOut(state.enhancements, references ?? [])
