@@ -77,7 +77,7 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
           color="subdued"
           content={i18n.translate('xpack.infra.metricThreshold.rule.recoverHelpText', {
             defaultMessage:
-              'Any active alerts will recover when no data is returned for the configured conditions.',
+              "Recover any active alerts when data isn't returned for the specified conditions. New alerts won't be created for the missing data.",
           })}
         />
       </>
@@ -98,11 +98,11 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
             hasGroupBy
               ? i18n.translate('xpack.infra.metricThreshold.rule.groupDisappearHelpText', {
                   defaultMessage:
-                    'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                    'Get a "no data" alert when a previously detected group stops returning data. This option is not suitable for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
                 })
               : i18n.translate('xpack.infra.metricThreshold.rule.noDataHelpText', {
                   defaultMessage:
-                    'Enable this to trigger a no data alert if the condition(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+                    'Send a "no data" alert when data isn\'t returned during the rule execution period or if the rule does not successfully query Elasticsearch.',
                 })
           }
         />
@@ -122,7 +122,7 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
           color="subdued"
           content={i18n.translate('xpack.infra.metricThreshold.rule.remainActiveHelpText', {
             defaultMessage:
-              'Active alerts will remain in their current state and no new alerts will be triggered when there is no data.',
+              'Keep active alerts in their current state, and do not create new alerts for the missing data.',
           })}
         />
       </>
