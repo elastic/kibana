@@ -7,17 +7,15 @@
 
 import { z } from '@kbn/zod';
 import type { System } from '@kbn/streams-schema';
-import { streamObjectNameSchema, systemSchema, TaskStatus } from '@kbn/streams-schema';
+import { streamObjectNameSchema, systemSchema } from '@kbn/streams-schema';
 import type {
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import { conflict } from '@hapi/boom';
 import { type IdentifySystemsResult } from '@kbn/streams-ai';
-import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
-import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
-import { isStale } from '../../../../lib/tasks/is_stale';
+import type { TaskResult } from '../../../../lib/tasks/types';
+import { handleTaskAction } from '../../../utils/task_helpers';
 import {
   SYSTEMS_IDENTIFICATION_TASK_TYPE,
   getSystemsIdentificationTaskId,
@@ -243,22 +241,7 @@ export const bulkSystemsRoute = createServerRoute({
   },
 });
 
-export type SystemIdentificationTaskResult =
-  | {
-      status:
-        | TaskStatus.NotStarted
-        | TaskStatus.InProgress
-        | TaskStatus.Stale
-        | TaskStatus.BeingCanceled
-        | TaskStatus.Canceled;
-    }
-  | {
-      status: TaskStatus.Failed;
-      error: string;
-    }
-  | ({
-      status: TaskStatus.Completed | TaskStatus.Acknowledged;
-    } & Pick<IdentifySystemsResult, 'systems'>);
+export type SystemIdentificationTaskResult = TaskResult<Pick<IdentifySystemsResult, 'systems'>>;
 
 export const systemsStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/systems/_status',
@@ -294,30 +277,10 @@ export const systemsStatusRoute = createServerRoute({
 
     await streamsClient.ensureStream(name);
 
-    const task = await taskClient.get<
+    return taskClient.getStatus<
       SystemIdentificationTaskParams,
       Pick<IdentifySystemsResult, 'systems'>
     >(getSystemsIdentificationTaskId(name));
-
-    if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
-      return {
-        status: TaskStatus.Stale,
-      };
-    } else if (task.status === TaskStatus.Failed) {
-      return {
-        status: TaskStatus.Failed,
-        error: task.task.error,
-      };
-    } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
-      return {
-        status: task.status,
-        ...task.task.payload,
-      };
-    }
-
-    return {
-      status: task.status,
-    };
   },
 });
 
@@ -376,69 +339,40 @@ export const systemsTaskRoute = createServerRoute({
 
     await streamsClient.ensureStream(name);
 
-    const { action } = body;
     const taskId = getSystemsIdentificationTaskId(name);
 
-    if (action === 'schedule') {
-      const { from: start, to: end, connectorId: connectorIdParam } = body;
+    const actionParams =
+      body.action === 'schedule'
+        ? ({
+            action: body.action,
+            scheduleConfig: {
+              taskType: SYSTEMS_IDENTIFICATION_TASK_TYPE,
+              taskId,
+              streamName: name,
+              params: await (async (): Promise<SystemIdentificationTaskParams> => {
+                const connectorId = await resolveConnectorId({
+                  connectorId: body.connectorId,
+                  uiSettingsClient,
+                  logger,
+                });
+                return {
+                  connectorId,
+                  start: body.from.getTime(),
+                  end: body.to.getTime(),
+                };
+              })(),
+              request,
+            },
+          } as const)
+        : ({ action: body.action } as const);
 
-      const connectorId = await resolveConnectorId({
-        connectorId: connectorIdParam,
-        uiSettingsClient,
-        logger,
-      });
-
-      try {
-        await taskClient.schedule<SystemIdentificationTaskParams>({
-          task: {
-            type: SYSTEMS_IDENTIFICATION_TASK_TYPE,
-            id: taskId,
-            space: '*',
-            stream: name,
-          },
-          params: {
-            connectorId,
-            start: start.getTime(),
-            end: end.getTime(),
-          },
-          request,
-        });
-
-        return {
-          status: TaskStatus.InProgress,
-        };
-      } catch (error) {
-        if (error instanceof CancellationInProgressError) {
-          throw conflict(error.message);
-        }
-
-        throw error;
+    return handleTaskAction<SystemIdentificationTaskParams, Pick<IdentifySystemsResult, 'systems'>>(
+      {
+        taskClient,
+        taskId,
+        ...actionParams,
       }
-    } else if (action === 'cancel') {
-      await taskClient.cancel(taskId);
-
-      return {
-        status: TaskStatus.BeingCanceled,
-      };
-    }
-
-    try {
-      const task = await taskClient.acknowledge<
-        SystemIdentificationTaskParams,
-        Pick<IdentifySystemsResult, 'systems'>
-      >(taskId);
-
-      return {
-        status: TaskStatus.Acknowledged,
-        ...task.task.payload,
-      };
-    } catch (error) {
-      if (error instanceof AcknowledgingIncompleteError) {
-        throw conflict(error.message);
-      }
-
-      throw error;
-    }
+    );
   },
 });
 

@@ -44,6 +44,8 @@
           ", {}, ServiceArguments>"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +57,8 @@
             "label": "propArguments",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -67,6 +71,8 @@
             "label": "serviceArguments",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,6 +84,8 @@
                 "label": "canCreateNewDataView",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "lineNumber": 32,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -89,6 +97,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 33,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -100,6 +110,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "lineNumber": 33,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -113,6 +125,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 34,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -126,6 +140,8 @@
                 "label": "dataViewsDocLink",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "lineNumber": 36,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -140,6 +156,8 @@
                       "(string | undefined)[]"
                     ],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 37,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -151,6 +169,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 38,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -162,6 +182,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "lineNumber": 38,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -175,6 +197,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 39,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -188,6 +212,8 @@
                 "label": "canTryEsql",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -199,6 +225,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 42,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -210,6 +238,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "lineNumber": 42,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -223,6 +253,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 43,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -236,6 +268,8 @@
                 "label": "esqlDocLink",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -250,6 +284,8 @@
                       "(string | undefined)[]"
                     ],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 46,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -261,6 +297,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 47,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -272,6 +310,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "lineNumber": 47,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -285,6 +325,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "lineNumber": 48,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -303,6 +345,8 @@
               "never[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -319,6 +363,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -350,6 +396,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -370,6 +418,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "lineNumber": 59,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -410,6 +460,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -432,6 +484,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -455,6 +509,8 @@
           "{ canCreateNewDataView: any; dataViewsDocLink: any; esqlDocLink: any; canTryEsql: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

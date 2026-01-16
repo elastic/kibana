@@ -7,7 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import { getStreamTypeFromDefinition, TaskStatus } from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import type { IdentifySystemsResult } from '@kbn/streams-ai';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
@@ -93,21 +93,10 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   output_tokens_used: tokensUsed.completion,
                 });
 
-                await taskClient.update<
+                await taskClient.complete<
                   SystemIdentificationTaskParams,
                   Pick<IdentifySystemsResult, 'systems'>
-                >({
-                  ..._task,
-                  status: TaskStatus.Completed,
-                  task: {
-                    params: {
-                      connectorId,
-                      start,
-                      end,
-                    },
-                    payload: { systems },
-                  },
-                });
+                >(_task, { connectorId, start, end }, { systems });
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
@@ -127,18 +116,11 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
                 );
 
-                await taskClient.update<SystemIdentificationTaskParams>({
-                  ..._task,
-                  status: TaskStatus.Failed,
-                  task: {
-                    params: {
-                      connectorId,
-                      start,
-                      end,
-                    },
-                    error: errorMessage,
-                  },
-                });
+                await taskClient.fail<SystemIdentificationTaskParams>(
+                  _task,
+                  { connectorId, start, end },
+                  errorMessage
+                );
               }
             },
             runContext,
