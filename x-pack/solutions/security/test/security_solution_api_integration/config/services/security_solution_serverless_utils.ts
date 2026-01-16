@@ -66,6 +66,8 @@ export function SecuritySolutionServerlessUtils({
   const createSuperTestWithCustomRole = async (roleDefinition: Role) => {
     await svlUserManager.setCustomRole(roleDefinition.privileges);
     const roleAuthc = await svlUserManager.createM2mApiKeyWithCustomRoleScope();
+    rolesCredentials.set(roleDefinition.name, roleAuthc);
+
     const superTest = supertest
       .agent(kbnUrl)
       .set(svlCommonApi.getInternalRequestHeader())
