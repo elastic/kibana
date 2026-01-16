@@ -28,10 +28,8 @@ test.describe(
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
       await browserAuth.loginAsViewer();
+      await inventoryPage.addDismissK8sTourInitScript();
       await inventoryPage.goToPage();
-      // Dismiss k8s tour if it's present to avoid interference with other test assertions
-      // The k8s tour specific test will take care of adding it back during its own execution
-      await inventoryPage.dismissK8sTour();
       await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
       await inventoryPage.clickWaffleNode(HOST1_NAME);
     });

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+
+const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -106,6 +108,24 @@ export class InventoryPage {
 
   public async dismissK8sTour() {
     await this.k8sTourDismissButton.click();
+  }
+
+  public async addDismissK8sTourInitScript() {
+    // Dismiss k8s tour if it's present to avoid interference with other test assertions
+    // The k8s tour specific test will take care of adding it back during its own execution
+    await this.page.addInitScript(
+      ([k8sTourStorageKey]) => {
+        window.localStorage.setItem(k8sTourStorageKey, 'true');
+      },
+      [KUBERNETES_TOUR_STORAGE_KEY]
+    );
+  }
+
+  public async resetK8sTourInLocalStorage() {
+    await this.page.evaluate(
+      ([k8sTourStorageKey]) => localStorage.setItem(k8sTourStorageKey, 'false'),
+      [KUBERNETES_TOUR_STORAGE_KEY]
+    );
   }
 
   public async goToTime(time: string) {

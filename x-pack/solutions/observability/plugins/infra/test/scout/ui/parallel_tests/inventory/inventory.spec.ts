@@ -18,8 +18,6 @@ import {
   POD_NAMES,
 } from '../../fixtures/constants';
 
-const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
-
 const POD_NAME = POD_NAMES[POD_COUNT - 1];
 
 test.use({
@@ -29,10 +27,8 @@ test.use({
 test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsViewer();
+    await inventoryPage.addDismissK8sTourInitScript();
     await inventoryPage.goToPage();
-    // Dismiss k8s tour if it's present to avoid interference with other test assertions
-    // The k8s tour specific test will take care of adding it back during its own execution
-    await inventoryPage.dismissK8sTour();
     await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
   });
 
@@ -65,12 +61,9 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Render and dismiss k8s tour', async ({ page, pageObjects: { inventoryPage } }) => {
+  test('Render and dismiss k8s tour', async ({ pageObjects: { inventoryPage } }) => {
     await test.step('reset k8s tour seen state', async () => {
-      await page.evaluate(
-        ([k8sTourStorageKey]) => localStorage.setItem(k8sTourStorageKey, 'false'),
-        [KUBERNETES_TOUR_STORAGE_KEY]
-      );
+      await inventoryPage.resetK8sTourInLocalStorage();
       await inventoryPage.reload();
     });
 
@@ -179,17 +172,8 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Has no detectable a11y violations on load', async ({
-    page,
-    pageObjects: { inventoryPage },
-  }) => {
-    await test.step('ensure waffle map is loaded', async () => {
-      await inventoryPage.waffleMap.waitFor();
-    });
-
-    await test.step('test a11y', async () => {
-      const { violations } = await page.checkA11y({ include: ['main'] });
-      expect(violations).toHaveLength(0);
-    });
+  test('Has no detectable a11y violations on load', async ({ page }) => {
+    const { violations } = await page.checkA11y({ include: ['main'] });
+    expect(violations).toHaveLength(0);
   });
 });
