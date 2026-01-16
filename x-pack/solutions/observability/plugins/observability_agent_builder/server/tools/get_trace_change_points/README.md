@@ -1,6 +1,6 @@
 # get_trace_change_points
 
-Detects statistically significant traces (latency, throughput, and failure rate) changes (e.g., "spike", "dip", "trend_change", "step_change", "distribution_change", "non_stationary", "stationary", or "indeterminable") in trace data over time. Returns the top 25 most significant change points ordered by p-value.
+Detects statistically significant changes (e.g., "spike", "dip", "trend_change", "step_change", "distribution_change", "non_stationary", "stationary", or "indeterminable") in trace metrics (latency, throughput, and failure rate). Returns the top 25 most significant change points ordered by p-value.
 
 ## Examples
 
