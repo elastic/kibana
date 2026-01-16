@@ -26,7 +26,7 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
         try {
           const response = await kbnClient.request({
             description: 'Check profiling status',
-            path: '/api/profiling/setup/es_resources',
+            path: '/internal/profiling/setup/es_resources',
             method: 'GET',
           });
           return response.data as { has_setup: boolean; has_data: boolean };
@@ -41,7 +41,7 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           log.info('Setting up profiling resources');
           await kbnClient.request({
             description: 'Setup profiling resources',
-            path: '/api/profiling/setup/es_resources',
+            path: '/internal/profiling/setup/es_resources',
             method: 'POST',
             headers: {
               'content-type': 'application/json',

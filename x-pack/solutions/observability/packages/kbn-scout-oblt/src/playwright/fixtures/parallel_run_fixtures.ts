@@ -16,9 +16,6 @@ import {
   ObltParallelWorkerFixtures,
 } from './types';
 
-/**
- * Should be used test spec files, running in parallel in isolated spaces agaist the same Kibana instance.
- */
 export const baseFixture = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
   pageObjects: async (
     {

@@ -23,6 +23,7 @@ export type ObltApiServicesFixture = ApiServicesFixture;
 
 export interface ObltWorkerFixtures extends ScoutWorkerFixtures {
   apiServices: ObltApiServicesFixture;
+  profilingSetup: ProfilingSetupFixture;
 }
 
 export interface ObltParallelTestFixtures extends ScoutParallelTestFixtures {
@@ -31,5 +32,5 @@ export interface ObltParallelTestFixtures extends ScoutParallelTestFixtures {
 
 export interface ObltParallelWorkerFixtures extends ScoutParallelWorkerFixtures {
   apiServices: ObltApiServicesFixture;
-  profiling: ProfilingSetupFixture;
+  profilingSetup: ProfilingSetupFixture;
 }
