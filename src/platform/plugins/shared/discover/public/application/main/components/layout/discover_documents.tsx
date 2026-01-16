@@ -220,11 +220,18 @@ function DiscoverDocumentsComponent({
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
 
   const setExpandedDoc = useCallback(
-    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+    (
+      doc: DataTableRecord | undefined,
+      options?: {
+        initialTabId?: string;
+        initialTabState?: object;
+      }
+    ) => {
       dispatch(
         setExpandedDocAction({
           expandedDoc: doc,
           initialDocViewerTabId: options?.initialTabId,
+          initialDocViewerTabState: options?.initialTabState,
         })
       );
       if (options?.initialTabId) {

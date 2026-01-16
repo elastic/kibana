@@ -46,7 +46,10 @@ export interface DiscoverGridFlyoutProps
   onClose: () => void;
   onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  setExpandedDoc: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  setExpandedDoc: (
+    doc?: DataTableRecord,
+    options?: { initialTabId?: string; initialTabState?: object }
+  ) => void;
 }
 
 /**
