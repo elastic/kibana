@@ -231,6 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
         'session_cleanup',
         'slo:bulk-delete-task',
         'slo:temp-summary-cleanup-task',
+        'streams_description_generation',
         'streams_significant_events_queries_generation',
         'streams_systems_identification',
         'task_manager:delete_inactive_background_task_nodes',
