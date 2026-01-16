@@ -23,6 +23,5 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       resourceManager,
       esClient,
     });
-
   });
 }
