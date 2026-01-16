@@ -38,6 +38,8 @@
           "[]) => Record<string, string | string[]>"
         ],
         "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,6 +61,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
+            "lineNumber": 28,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -78,6 +82,8 @@
           "(flattenGrouping?: Record<string, unknown>) => Record<string, string | string[]>"
         ],
         "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -92,6 +98,8 @@
               "Record<string, unknown>"
             ],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -113,6 +121,8 @@
           "({ groupBy, bucketKey, }: { groupBy: string | string[] | undefined; bucketKey: Record<string, string>; }) => { [k: string]: string; } | undefined"
         ],
         "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -124,6 +134,8 @@
             "label": "{\n  groupBy,\n  bucketKey,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+            "lineNumber": 63,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -138,6 +150,8 @@
                   "string | string[] | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+                "lineNumber": 64,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -152,6 +166,8 @@
                   "{ [x: string]: string; }"
                 ],
                 "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+                "lineNumber": 65,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -180,6 +196,8 @@
           "[] | undefined"
         ],
         "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,6 +212,8 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+            "lineNumber": 19,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -213,6 +233,8 @@
           "(grouping?: Record<string, string> | undefined) => Record<string, any> | undefined"
         ],
         "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -227,6 +249,8 @@
               "Record<string, string> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -245,6 +269,8 @@
         "label": "FieldsObject",
         "description": [],
         "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -259,6 +285,8 @@
               "[x: string]:  any"
             ],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -273,6 +301,8 @@
         "label": "Group",
         "description": [],
         "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -284,6 +314,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,6 +327,8 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -20,6 +20,8 @@
         "label": "MetricsServiceSetupDeps",
         "description": [],
         "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,6 +36,8 @@
               "InternalHttpServiceSetup"
             ],
             "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -48,6 +52,8 @@
               "InternalElasticsearchServiceSetup"
             ],
             "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -66,6 +72,8 @@
           "\nThe period of time for the average ELU calculation."
         ],
         "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -81,6 +89,8 @@
         "label": "opsConfig",
         "description": [],
         "path": "src/core/packages/metrics/server-internal/src/ops_config.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -95,6 +105,8 @@
               "\"ops\""
             ],
             "path": "src/core/packages/metrics/server-internal/src/ops_config.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -148,6 +160,8 @@
               "<string | undefined>; }>; }>"
             ],
             "path": "src/core/packages/metrics/server-internal/src/ops_config.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

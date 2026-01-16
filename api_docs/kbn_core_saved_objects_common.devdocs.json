@@ -30,6 +30,8 @@
           "\nClient interface for interacting with legacy URL aliases."
         ],
         "path": "src/core/packages/saved-objects/common/src/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "\nThe namespace that the object existed in when it was converted."
             ],
             "path": "src/core/packages/saved-objects/common/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -56,6 +60,8 @@
               "\nThe type of the object when it was converted."
             ],
             "path": "src/core/packages/saved-objects/common/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,6 +75,8 @@
               "\nThe original ID of the object, before it was converted."
             ],
             "path": "src/core/packages/saved-objects/common/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -83,6 +91,8 @@
         "label": "SavedObjectError",
         "description": [],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -94,6 +104,8 @@
             "label": "error",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,6 +117,8 @@
             "label": "message",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -116,6 +130,8 @@
             "label": "statusCode",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -130,6 +146,8 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -146,6 +164,8 @@
           "\nA warning meant to notify that a specific user action is required to finalize the import\nof some type of object.\n"
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 184,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -160,6 +180,8 @@
               "\"action_required\""
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 193,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -173,6 +195,8 @@
               "The translated message to display to the user."
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 194,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -186,6 +210,8 @@
               "The path (without the basePath) that the user should be redirect to address this warning."
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -202,6 +228,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -218,6 +246,8 @@
           "\nRepresents a failure to import due to a conflict, which can be resolved in different ways with an overwrite."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -232,6 +262,8 @@
               "\"ambiguous_conflict\""
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -246,6 +278,8 @@
               "{ id: string; title?: string | undefined; updatedAt?: string | undefined; }[]"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -262,6 +296,8 @@
           "\nRepresents a failure to import due to a conflict."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -276,6 +312,8 @@
               "\"conflict\""
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -290,6 +328,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -306,6 +346,8 @@
           "\nRepresents a failure to import."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 115,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -317,6 +359,8 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -328,6 +372,8 @@
             "label": "type",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -342,6 +388,8 @@
               "{ title?: string | undefined; icon?: string | undefined; }"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -358,6 +406,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,6 +422,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -396,6 +448,8 @@
               "SavedObjectsImportUnexpectedAccessControlMetadataError"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -412,6 +466,8 @@
           "\nRepresents a failure to import due to missing references."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -426,6 +482,8 @@
               "\"missing_references\""
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -440,6 +498,8 @@
               "{ type: string; id: string; }[]"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -456,6 +516,8 @@
           "\nThe response describing the result of an import."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 214,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,6 +529,8 @@
             "label": "success",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 219,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -478,6 +542,8 @@
             "label": "successCount",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -493,6 +559,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 221,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -508,6 +576,8 @@
               "[]"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 222,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -523,6 +593,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 223,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -539,6 +611,8 @@
           "\nDescribes a retry operation for importing a saved object."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -550,6 +624,8 @@
             "label": "type",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -561,6 +637,8 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -572,6 +650,8 @@
             "label": "overwrite",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -588,6 +668,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -602,6 +684,8 @@
               "{ type: string; from: string; to: string; }[]"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -618,6 +702,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -634,6 +720,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -650,6 +738,8 @@
           "\nA simple informative warning that will be displayed to the user.\n"
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 173,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -664,6 +754,8 @@
               "\"simple\""
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 179,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -677,6 +769,8 @@
               "The translated message to display to the user"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -693,6 +787,8 @@
           "\nRepresents a successful import."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 137,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -704,6 +800,8 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -715,6 +813,8 @@
             "label": "type",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -731,6 +831,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -747,6 +849,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -771,6 +875,8 @@
               "{ title?: string | undefined; icon?: string | undefined; }"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -787,6 +893,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -803,6 +911,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 163,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -819,6 +929,8 @@
           "\nRepresents a failure to import due to missing access control mode metadata.\nThis metadata is required only for objects that support access control when\nan Admin chooses to apply access control on import.\n\nRepresents a failure to import due to missing access control owner metadata.\nThis metadata is required only for objects that support access control when\nan Admin chooses to apply access control on import.\n\nRepresents a failure to import due to unexpected access control metadata.\nThis metadata is required only for objects that support access control."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -833,6 +945,8 @@
               "\"unexpected_access_control_metadata\""
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -849,6 +963,8 @@
           "\nRepresents a failure to import due to an unknown reason."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -863,6 +979,8 @@
               "\"unknown\""
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -874,6 +992,8 @@
             "label": "message",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -885,6 +1005,8 @@
             "label": "statusCode",
             "description": [],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -901,6 +1023,8 @@
           "\nRepresents a failure to import due to having an unsupported saved object type."
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -915,6 +1039,8 @@
               "\"unsupported_type\""
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -931,6 +1057,8 @@
           "\nInformation about the migrations that have been applied to this SavedObject.\nWhen Kibana starts up, KibanaMigrator detects outdated documents and\nmigrates them based on this value. For each migration that has been applied,\nthe plugin's name is used as a key and the latest migration version as the\nvalue.\n"
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -947,6 +1075,8 @@
               "[pluginName: string]:  string"
             ],
             "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -963,6 +1093,8 @@
           "\nAn identifier for a saved object within a space.\n"
         ],
         "path": "src/core/packages/saved-objects/common/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -976,6 +1108,8 @@
               "The id of the saved object"
             ],
             "path": "src/core/packages/saved-objects/common/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -989,6 +1123,8 @@
               "The type of the saved object"
             ],
             "path": "src/core/packages/saved-objects/common/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1012,6 +1148,8 @@
           "<T>"
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -1270,6 +1408,8 @@
         "label": "SavedObjectAccessControl",
         "description": [],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1290,6 +1430,8 @@
           "[]"
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -1350,6 +1492,8 @@
         "label": "SavedObjectAttributes",
         "description": [],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -1419,6 +1563,8 @@
           " | null | undefined"
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -1447,6 +1593,8 @@
         "label": "SavedObjectReference",
         "description": [],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -1659,26 +1807,6 @@
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/services/ui_actions_service_enhancements.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
-          },
-          {
             "plugin": "@kbn/lens-embeddable-utils",
             "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/metric.ts"
           },
@@ -1809,30 +1937,6 @@
           {
             "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -1880,6 +1984,8 @@
           "SavedObjectsImportActionRequiredWarning"
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects_imports.ts",
+        "lineNumber": 202,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1897,6 +2003,8 @@
           "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
