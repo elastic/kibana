@@ -14,6 +14,22 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { StartPlugins } from '../../plugin';
 
+const isPrivilegedDataGeneratorUser = (
+  user:
+    | { roles?: string[]; authentication_type?: string; authentication_realm?: { name?: string }; api_key?: { id?: string } }
+    | null
+    | undefined
+): boolean => {
+  if (!user) return false;
+  if (user.roles?.includes('superuser')) return true;
+  // Kibana may authenticate API-key requests as `_es_api_key` with no Kibana roles in serverless.
+  // Treat API-key auth as privileged for this dev-only route (still gated at route registration time).
+  if (user.authentication_type === 'api_key') return true;
+  if (user.authentication_realm?.name === '_es_api_key') return true;
+  if (user.api_key?.id) return true;
+  return false;
+};
+
 const hasInternalKibanaOriginHeader = (headerValue: unknown): boolean => {
   // `@kbn/test`'s KbnClient overwrites this header to `kbn-client` (see `buildRequest()`),
   // while browser/internal calls commonly use `Kibana`.
@@ -47,7 +63,9 @@ export const registerDataGeneratorRoutes = (
       access: 'internal',
       // We authorize explicitly in the handler by verifying the current user can access the case via Cases.
       // (Kibana route-level authz requires at least one privilege entry when enabled.)
-      security: { authz: { enabled: false, reason: 'dev-only route; authorization enforced via Cases' } },
+      security: {
+        authz: { enabled: false, reason: 'dev-only route; authorization enforced via Cases' },
+      },
     })
     .addVersion(
       {
@@ -72,6 +90,15 @@ export const registerDataGeneratorRoutes = (
           const [coreStart, pluginsStart] = await getStartServices();
           if (!pluginsStart.cases) {
             return response.notFound();
+          }
+
+          // Avoid relying solely on a spoofable header. This route is dev/staff-only at registration time,
+          // but also requires a superuser-equivalent principal in practice (works in serverless API key flows).
+          const currentUser = coreStart.security.authc.getCurrentUser(request);
+          if (!isPrivilegedDataGeneratorUser(currentUser)) {
+            return response.forbidden({
+              body: { message: 'Data generator route requires a privileged user' },
+            });
           }
 
           // Ensure the current user can access this case in this space before patching its saved object.

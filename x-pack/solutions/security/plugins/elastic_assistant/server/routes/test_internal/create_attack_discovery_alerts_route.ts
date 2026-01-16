@@ -14,6 +14,22 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 
 const RESPONSE_SCHEMA = z.object({ data: z.array(z.unknown()) });
 
+const isPrivilegedDataGeneratorUser = (
+  user:
+    | { roles?: string[]; authentication_type?: string; authentication_realm?: { name?: string }; api_key?: { id?: string } }
+    | null
+    | undefined
+): boolean => {
+  if (!user) return false;
+  if (user.roles?.includes('superuser')) return true;
+  // Kibana may authenticate API-key requests as `_es_api_key` with no Kibana roles in serverless.
+  // Treat API-key auth as privileged for this dev-only route (still gated at route registration time).
+  if (user.authentication_type === 'api_key') return true;
+  if (user.authentication_realm?.name === '_es_api_key') return true;
+  if (user.api_key?.id) return true;
+  return false;
+};
+
 const hasInternalKibanaOriginHeader = (headerValue: unknown): boolean => {
   // `@kbn/test`'s KbnClient overwrites this header to `kbn-client` (see `buildRequest()`),
   // while browser/internal calls commonly use `Kibana`.
@@ -65,6 +81,14 @@ export const createAttackDiscoveryAlertsRoute = (router: ElasticAssistantPluginR
           if (!hasInternalKibanaOriginHeader(internalOrigin)) {
             return response.forbidden({
               body: { message: 'Missing required x-elastic-internal-origin: Kibana header' },
+            });
+          }
+
+          // Avoid relying solely on a spoofable header. This route is dev/staff-only at registration time,
+          // but also requires a superuser-equivalent principal in practice (works in serverless API key flows).
+          if (!isPrivilegedDataGeneratorUser(authenticatedUser)) {
+            return response.forbidden({
+              body: { message: 'Data generator route requires a privileged user' },
             });
           }
 
