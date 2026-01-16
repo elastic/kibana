@@ -18,6 +18,7 @@ import {
   EuiSelect,
   EuiText,
   EuiIconTip,
+  EuiFormAppend,
 } from '@elastic/eui';
 
 import type { PhaseWithTiming } from '../../../../../../../../common/types';
@@ -115,10 +116,11 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             />
                           </>
                         );
-                        const selectAppendValue: Array<string | React.ReactElement> =
-                          isUsingRollover
-                            ? [i18nTexts.editPolicy.minAgeUnitFieldSuffix, icon]
-                            : [i18nTexts.editPolicy.minAgeUnitFieldSuffix];
+                        const selectAppendValue = (
+                          <EuiFormAppend label={i18nTexts.editPolicy.minAgeUnitFieldSuffix}>
+                            {isUsingRollover ? icon : undefined}
+                          </EuiFormAppend>
+                        );
                         const unitValue = unitField.value as string;
 
                         let unitOptions = timeUnits;

@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiSelect, EuiIconTip } from '@elastic/eui';
+import { EuiSelect, EuiIconTip, EuiFormAppend } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState, type UrlStateService } from '@kbn/ml-url-state';
 
@@ -95,14 +95,16 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
         defaultMessage: 'Interval',
       })}
       append={
-        <EuiIconTip
-          content={i18n.translate('xpack.ml.controls.selectInterval.intervalTooltip', {
-            defaultMessage:
-              'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
-          })}
-          type="question"
-          color="subdued"
-        />
+        <EuiFormAppend>
+          <EuiIconTip
+            content={i18n.translate('xpack.ml.controls.selectInterval.intervalTooltip', {
+              defaultMessage:
+                'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
+            })}
+            type="question"
+            color="subdued"
+          />
+        </EuiFormAppend>
       }
       compressed
       options={OPTIONS}
