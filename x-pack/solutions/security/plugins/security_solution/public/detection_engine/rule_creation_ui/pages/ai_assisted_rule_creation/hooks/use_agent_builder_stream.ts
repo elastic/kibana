@@ -8,21 +8,51 @@
 import { useCallback, useState, useRef, useEffect } from 'react';
 import { defer } from 'rxjs';
 import type { Observable } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isToolProgressEvent, isToolResultEvent } from '@kbn/agent-builder-common';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import {
   SecurityAgentBuilderAttachments,
   THREAT_HUNTING_AGENT_ID,
 } from '../../../../../../common/constants';
 import { KibanaServices } from '../../../../../common/lib/kibana/services';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import * as i18n from '../translations';
 
 const AGENT_BUILDER_CONVERSE_ASYNC_API_PATH = '/api/agent_builder/converse/async';
 const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
+
+const parseRuleResponse = (ruleData: unknown) => {
+  if (typeof ruleData !== 'object' || ruleData == null) {
+    return RuleResponse.safeParse(ruleData);
+  }
+
+  const now = new Date().toISOString();
+  // Values required by rule response schema
+  // AI assisted rule creation returns only fields that required for rule create API schema
+  // but we need to return a complete rule response schema to satisfy UI form type requirements
+  const requiredFields = {
+    version: 1,
+    enabled: false,
+    id: uuidv4(),
+    rule_id: uuidv4(),
+    immutable: false,
+    rule_source: {
+      type: 'internal',
+    },
+    updated_at: now,
+    updated_by: 'AI Assisted Rule Creation',
+    created_at: now,
+    created_by: 'AI Assisted Rule Creation',
+    revision: 0,
+  };
+
+  return RuleResponse.safeParse({ ...ruleData, ...requiredFields });
+};
 
 export const useAgentBuilderStream = () => {
   const { addError } = useAppToasts();
@@ -125,7 +155,14 @@ export const useAgentBuilderStream = () => {
                   new Error(result.data?.message ?? 'Unknown error during rule creation.')
                 );
               } else if (result?.type === 'other' && result.data?.success && result.data?.rule) {
-                setRule(result.data.rule as RuleResponse);
+                const parseResult = parseRuleResponse(result.data.rule);
+                if (parseResult.success) {
+                  setRule(parseResult.data);
+                } else {
+                  showErrorToast(
+                    new Error(`Invalid rule data received: ${stringifyZodError(parseResult.error)}`)
+                  );
+                }
               }
             }
           },

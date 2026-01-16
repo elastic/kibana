@@ -10,19 +10,12 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { TimeDuration } from '@kbn/securitysolution-utils/src/time_duration/time_duration';
-import type { RuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
-import type { RuleCreationState } from '../state';
+import { defaultSchedule, type RuleCreationState } from '../state';
 import { SCHEDULE_RETRIEVAL_PROMPT } from './prompts';
 export interface ComputeScheduleParams {
   model: InferenceChatModel;
   logger: Logger;
 }
-
-export const defaultSchedule: RuleSchedule = {
-  interval: '5m',
-  from: 'now-6m',
-  to: 'now',
-};
 
 interface ScheduleRetrievalChainResponse {
   interval: string | undefined;

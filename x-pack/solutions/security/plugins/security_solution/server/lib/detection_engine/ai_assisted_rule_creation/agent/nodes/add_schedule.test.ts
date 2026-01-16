@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { parseAndValidateSchedule, defaultSchedule } from './add_schedule';
+import { parseAndValidateSchedule } from './add_schedule';
 import { loggerMock } from '@kbn/logging-mocks';
+import { defaultSchedule } from '../state';
 
 const mockLogger = loggerMock.create();
 
