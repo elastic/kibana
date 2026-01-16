@@ -75,7 +75,6 @@ describe('FROM Validation', () => {
         fromExpectErrors(`fRom custom_function()`, ['Unknown index "custom_function"']);
         fromExpectErrors('from numberField', ['Unknown index "numberField"']);
         fromExpectErrors('FROM policy', ['Unknown index "policy"']);
-
         fromExpectErrors('FROM index, missingIndex', ['Unknown index "missingIndex"']);
         fromExpectErrors('FROM missingIndex, index', ['Unknown index "missingIndex"']);
         fromExpectErrors('FROM *missingIndex, missingIndex2, index', [
@@ -116,8 +115,8 @@ describe('FROM Validation', () => {
         ]);
       });
       test('no errors on unknown index if using wildcards', () => {
-        fromExpectErrors('fRoM remote-*:indexes*', []);
         fromExpectErrors('fRoM remote-*:indexes', []);
+        fromExpectErrors('from remote-*:indexes*', []);
       });
     });
 
