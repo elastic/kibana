@@ -176,11 +176,13 @@ Tool response includes:
   "tool_result_id": "abc123",
   "type": "${dashboard}",
   "data": {
-    "title": "My Dashboard",
     "content": {
       "url": "/app/dashboards#/create?...",
+      "title": "My Dashboard",
       "description": "Dashboard showing metrics",
-      "panelCount": 3
+      "markdownContent": "## Overview\\nThis dashboard shows...",
+      "panelCount": 3,
+      "visualizationIds": ["viz1", "viz2"]
     }
   }
 }
