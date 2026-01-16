@@ -6,7 +6,7 @@
  */
 import { orderBy } from 'lodash';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import type { ServiceListItem } from '../../../../../common/service_inventory';
+import type { ServiceListItem, SloStatus } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 
 type SortValueGetter = (item: ServiceListItem) => string | number;
@@ -17,6 +17,13 @@ const SERVICE_HEALTH_STATUS_ORDER = [
   ServiceHealthStatus.warning,
   ServiceHealthStatus.critical,
 ];
+
+// SLO status priority order: violated (highest) -> degrading -> noData -> stale -> healthy (lowest)
+const SLO_STATUS_ORDER: SloStatus[] = ['healthy', 'stale', 'noData', 'degrading', 'violated'];
+
+// Multiplier to ensure status priority takes precedence over count
+// e.g., 2 violated (4 * 10000 + 2 = 40002) > 100 degrading (3 * 10000 + 100 = 30100)
+const SLO_STATUS_MULTIPLIER = 10000;
 
 const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
   [ServiceInventoryFieldName.HealthStatus]: (item) =>
@@ -29,36 +36,33 @@ const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
   [ServiceInventoryFieldName.Throughput]: (item) => item.throughput ?? -1,
   [ServiceInventoryFieldName.TransactionErrorRate]: (item) => item.transactionErrorRate ?? -1,
   [ServiceInventoryFieldName.AlertsCount]: (item) => item.alertsCount ?? -1,
+  // Composite score: status priority * multiplier + count
+  // This ensures: 5 violated > 2 violated > 10 degrading > 5 degrading
+  [ServiceInventoryFieldName.SloStatus]: (item) => {
+    if (!item.sloStatus) return -1;
+    const statusPriority = SLO_STATUS_ORDER.indexOf(item.sloStatus);
+    const count = item.sloCount ?? 0;
+    return statusPriority * SLO_STATUS_MULTIPLIER + count;
+  },
 };
-
-function reverseSortDirection(sortDirection: 'asc' | 'desc') {
-  return sortDirection === 'asc' ? 'desc' : 'asc';
-}
 
 export function orderServiceItems({
   items,
-  primarySortField,
-  tiebreakerField,
   sortDirection,
 }: {
   items: ServiceListItem[];
-  primarySortField: string;
-  tiebreakerField: ServiceInventoryFieldName;
   sortDirection: 'asc' | 'desc';
 }): ServiceListItem[] {
-  // For healthStatus, sort items by healthStatus first, then by tie-breaker
-
-  const sortFn = sorts[primarySortField as ServiceInventoryFieldName];
-
-  if (primarySortField === ServiceInventoryFieldName.HealthStatus) {
-    const tiebreakerSortDirection =
-      tiebreakerField === ServiceInventoryFieldName.ServiceName
-        ? reverseSortDirection(sortDirection)
-        : sortDirection;
-
-    const tiebreakerSortFn = sorts[tiebreakerField];
-
-    return orderBy(items, [sortFn, tiebreakerSortFn], [sortDirection, tiebreakerSortDirection]);
-  }
-  return orderBy(items, [sortFn], [sortDirection]);
+  // Always apply multi-level sorting:
+  // alertsCount -> sloStatus -> healthStatus -> throughput
+  return orderBy(
+    items,
+    [
+      sorts[ServiceInventoryFieldName.AlertsCount],
+      sorts[ServiceInventoryFieldName.SloStatus],
+      sorts[ServiceInventoryFieldName.HealthStatus],
+      sorts[ServiceInventoryFieldName.Throughput],
+    ],
+    [sortDirection, sortDirection, sortDirection, sortDirection]
+  );
 }

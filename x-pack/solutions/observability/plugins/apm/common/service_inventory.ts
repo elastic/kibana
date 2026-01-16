@@ -8,6 +8,8 @@
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ServiceHealthStatus } from './service_health_status';
 
+export type SloStatus = 'violated' | 'degrading' | 'noData' | 'stale' | 'healthy';
+
 export interface ServiceListItem {
   serviceName: string;
   healthStatus?: ServiceHealthStatus;
@@ -19,6 +21,8 @@ export interface ServiceListItem {
   environments?: string[];
   alertsCount?: number;
   overflowCount?: number | null;
+  sloStatus?: SloStatus;
+  sloCount?: number;
 }
 
 export enum ServiceInventoryFieldName {
@@ -30,4 +34,5 @@ export enum ServiceInventoryFieldName {
   Latency = 'latency',
   TransactionErrorRate = 'transactionErrorRate',
   AlertsCount = 'alertsCount',
+  SloStatus = 'sloStatus',
 }

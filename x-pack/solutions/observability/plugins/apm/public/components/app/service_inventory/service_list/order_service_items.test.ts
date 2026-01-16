@@ -5,232 +5,193 @@
  * 2.0.
  */
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
+import type { SloStatus } from '../../../../../common/service_inventory';
 import { orderServiceItems } from './order_service_items';
 
 describe('orderServiceItems', () => {
-  describe('when sorting by health status', () => {
-    describe('desc', () => {
-      it('orders from critical to unknown', () => {
-        const sortedItems = orderServiceItems({
-          primarySortField: ServiceInventoryFieldName.HealthStatus,
-          sortDirection: 'desc',
-          tiebreakerField: ServiceInventoryFieldName.Throughput,
-          items: [
-            {
-              serviceName: 'critical-service',
-              healthStatus: ServiceHealthStatus.critical,
-            },
-            {
-              serviceName: 'healthy-service',
-              healthStatus: ServiceHealthStatus.healthy,
-            },
-            {
-              serviceName: 'warning-service',
-              healthStatus: ServiceHealthStatus.warning,
-            },
-            {
-              serviceName: 'unknown-service',
-              healthStatus: ServiceHealthStatus.unknown,
-            },
-          ],
-        });
-
-        expect(sortedItems.map((item) => item.serviceName)).toEqual([
-          'critical-service',
-          'warning-service',
-          'healthy-service',
-          'unknown-service',
-        ]);
-      });
-
-      it('sorts by service name ascending as a tie-breaker', () => {
-        const sortedItems = orderServiceItems({
-          primarySortField: ServiceInventoryFieldName.HealthStatus,
-          sortDirection: 'desc',
-          tiebreakerField: ServiceInventoryFieldName.ServiceName,
-          items: [
-            {
-              serviceName: 'b-critical-service',
-              healthStatus: ServiceHealthStatus.critical,
-            },
-            {
-              serviceName: 'a-critical-service',
-              healthStatus: ServiceHealthStatus.critical,
-            },
-            {
-              serviceName: 'a-unknown-service',
-              healthStatus: ServiceHealthStatus.unknown,
-            },
-            {
-              serviceName: 'b-unknown-service',
-              healthStatus: ServiceHealthStatus.unknown,
-            },
-          ],
-        });
-
-        expect(sortedItems.map((item) => item.serviceName)).toEqual([
-          'a-critical-service',
-          'b-critical-service',
-          'a-unknown-service',
-          'b-unknown-service',
-        ]);
-      });
-
-      it('sorts by metric descending as a tie-breaker', () => {
-        const sortedItems = orderServiceItems({
-          primarySortField: ServiceInventoryFieldName.HealthStatus,
-          sortDirection: 'desc',
-          tiebreakerField: ServiceInventoryFieldName.Throughput,
-          items: [
-            {
-              serviceName: 'low-throughput-service',
-              healthStatus: ServiceHealthStatus.unknown,
-              throughput: 1,
-            },
-            {
-              serviceName: 'high-throughput-service',
-              healthStatus: ServiceHealthStatus.unknown,
-              throughput: 100,
-            },
-            {
-              serviceName: 'med-throughput-service',
-              healthStatus: ServiceHealthStatus.unknown,
-              throughput: 10,
-            },
-            {
-              serviceName: 'critical-service',
-              healthStatus: ServiceHealthStatus.critical,
-              throughput: 0,
-            },
-          ],
-        });
-
-        expect(sortedItems.map((item) => item.serviceName)).toEqual([
-          'critical-service',
-          'high-throughput-service',
-          'med-throughput-service',
-          'low-throughput-service',
-        ]);
-      });
-    });
-
-    describe('asc', () => {
-      it('orders from unknown to critical', () => {
-        const sortedItems = orderServiceItems({
-          primarySortField: ServiceInventoryFieldName.HealthStatus,
-          sortDirection: 'asc',
-          tiebreakerField: ServiceInventoryFieldName.Throughput,
-          items: [
-            {
-              serviceName: 'critical-service',
-              healthStatus: ServiceHealthStatus.critical,
-            },
-            {
-              serviceName: 'healthy-service',
-              healthStatus: ServiceHealthStatus.healthy,
-            },
-            {
-              serviceName: 'warning-service',
-              healthStatus: ServiceHealthStatus.warning,
-            },
-            {
-              serviceName: 'unknown-service',
-              healthStatus: ServiceHealthStatus.unknown,
-            },
-          ],
-        });
-
-        expect(sortedItems.map((item) => item.serviceName)).toEqual([
-          'unknown-service',
-          'healthy-service',
-          'warning-service',
-          'critical-service',
-        ]);
-      });
-    });
-  });
-
-  describe('when sorting by metric fields', () => {
-    it('sorts correctly', () => {
+  describe('multi-level sorting: alerts -> SLO status -> health status -> throughput', () => {
+    it('sorts by alerts count first (desc)', () => {
       const sortedItems = orderServiceItems({
-        primarySortField: ServiceInventoryFieldName.Throughput,
         sortDirection: 'desc',
-        tiebreakerField: ServiceInventoryFieldName.Throughput,
         items: [
-          {
-            serviceName: 'low-throughput-service',
-            healthStatus: ServiceHealthStatus.unknown,
-            throughput: 1,
-          },
-          {
-            serviceName: 'high-throughput-service',
-            healthStatus: ServiceHealthStatus.unknown,
-            throughput: 100,
-          },
-          {
-            serviceName: 'med-throughput-service',
-            healthStatus: ServiceHealthStatus.unknown,
-            throughput: 10,
-          },
-          {
-            serviceName: 'critical-service',
-            healthStatus: ServiceHealthStatus.critical,
-            throughput: 0,
-          },
+          { serviceName: 'no-alerts', alertsCount: 0 },
+          { serviceName: 'many-alerts', alertsCount: 5 },
+          { serviceName: 'one-alert', alertsCount: 1 },
         ],
       });
 
       expect(sortedItems.map((item) => item.serviceName)).toEqual([
-        'high-throughput-service',
-        'med-throughput-service',
-        'low-throughput-service',
-        'critical-service',
+        'many-alerts',
+        'one-alert',
+        'no-alerts',
       ]);
     });
-  });
 
-  describe('when sorting by alphabetical fields', () => {
-    it('sorts correctly', () => {
+    it('sorts by SLO status when alerts are equal', () => {
       const sortedItems = orderServiceItems({
-        primarySortField: ServiceInventoryFieldName.ServiceName,
-        sortDirection: 'asc',
-        tiebreakerField: ServiceInventoryFieldName.ServiceName,
+        sortDirection: 'desc',
+        items: [
+          { serviceName: 'healthy-slo', alertsCount: 1, sloStatus: 'healthy' as SloStatus },
+          { serviceName: 'violated-slo', alertsCount: 1, sloStatus: 'violated' as SloStatus },
+          { serviceName: 'degrading-slo', alertsCount: 1, sloStatus: 'degrading' as SloStatus },
+        ],
+      });
+
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        'violated-slo',
+        'degrading-slo',
+        'healthy-slo',
+      ]);
+    });
+
+    it('sorts by SLO count within same status', () => {
+      const sortedItems = orderServiceItems({
+        sortDirection: 'desc',
         items: [
           {
-            serviceName: '_other',
-            healthStatus: ServiceHealthStatus.unknown,
+            serviceName: '2-violated',
+            alertsCount: 1,
+            sloStatus: 'violated' as SloStatus,
+            sloCount: 2,
           },
           {
-            serviceName: 'd-service',
-            healthStatus: ServiceHealthStatus.unknown,
+            serviceName: '5-violated',
+            alertsCount: 1,
+            sloStatus: 'violated' as SloStatus,
+            sloCount: 5,
           },
           {
-            serviceName: 'a-service',
-            healthStatus: ServiceHealthStatus.unknown,
-          },
-          {
-            serviceName: 'b-service',
-            healthStatus: ServiceHealthStatus.unknown,
-          },
-          {
-            serviceName: 'c-service',
-            healthStatus: ServiceHealthStatus.unknown,
-          },
-          {
-            serviceName: '0-service',
-            healthStatus: ServiceHealthStatus.unknown,
+            serviceName: '10-degrading',
+            alertsCount: 1,
+            sloStatus: 'degrading' as SloStatus,
+            sloCount: 10,
           },
         ],
       });
 
       expect(sortedItems.map((item) => item.serviceName)).toEqual([
-        '0-service',
-        '_other',
-        'a-service',
-        'b-service',
-        'c-service',
-        'd-service',
+        '5-violated',
+        '2-violated',
+        '10-degrading',
+      ]);
+    });
+
+    it('sorts by health status when alerts and SLO are equal', () => {
+      const sortedItems = orderServiceItems({
+        sortDirection: 'desc',
+        items: [
+          { serviceName: 'unknown', healthStatus: ServiceHealthStatus.unknown },
+          { serviceName: 'critical', healthStatus: ServiceHealthStatus.critical },
+          { serviceName: 'healthy', healthStatus: ServiceHealthStatus.healthy },
+          { serviceName: 'warning', healthStatus: ServiceHealthStatus.warning },
+        ],
+      });
+
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        'critical',
+        'warning',
+        'healthy',
+        'unknown',
+      ]);
+    });
+
+    it('sorts by throughput as final tiebreaker', () => {
+      const sortedItems = orderServiceItems({
+        sortDirection: 'desc',
+        items: [
+          { serviceName: 'low-throughput', throughput: 10 },
+          { serviceName: 'high-throughput', throughput: 100 },
+          { serviceName: 'med-throughput', throughput: 50 },
+        ],
+      });
+
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        'high-throughput',
+        'med-throughput',
+        'low-throughput',
+      ]);
+    });
+
+    it('applies full multi-level sort correctly', () => {
+      const sortedItems = orderServiceItems({
+        sortDirection: 'desc',
+        items: [
+          // No alerts, no SLO, high throughput
+          { serviceName: 'service-f', alertsCount: 0, throughput: 1000 },
+          // 1 alert, healthy SLO
+          {
+            serviceName: 'service-d',
+            alertsCount: 1,
+            sloStatus: 'healthy' as SloStatus,
+            sloCount: 1,
+          },
+          // 1 alert, 2 violated SLOs
+          {
+            serviceName: 'service-b',
+            alertsCount: 1,
+            sloStatus: 'violated' as SloStatus,
+            sloCount: 2,
+          },
+          // 3 alerts, 2 violated SLOs
+          {
+            serviceName: 'service-a',
+            alertsCount: 3,
+            sloStatus: 'violated' as SloStatus,
+            sloCount: 2,
+          },
+          // 1 alert, 1 violated SLO
+          {
+            serviceName: 'service-c',
+            alertsCount: 1,
+            sloStatus: 'violated' as SloStatus,
+            sloCount: 1,
+          },
+          // No alerts, no SLO, low throughput
+          { serviceName: 'service-e', alertsCount: 0, throughput: 100 },
+        ],
+      });
+
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        'service-a', // 3 alerts (highest)
+        'service-b', // 1 alert, 2 violated
+        'service-c', // 1 alert, 1 violated
+        'service-d', // 1 alert, healthy SLO
+        'service-f', // 0 alerts, high throughput
+        'service-e', // 0 alerts, low throughput
+      ]);
+    });
+
+    it('handles ascending sort direction', () => {
+      const sortedItems = orderServiceItems({
+        sortDirection: 'asc',
+        items: [
+          { serviceName: 'many-alerts', alertsCount: 5 },
+          { serviceName: 'no-alerts', alertsCount: 0 },
+          { serviceName: 'one-alert', alertsCount: 1 },
+        ],
+      });
+
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        'no-alerts',
+        'one-alert',
+        'many-alerts',
+      ]);
+    });
+
+    it('handles missing values gracefully', () => {
+      const sortedItems = orderServiceItems({
+        sortDirection: 'desc',
+        items: [
+          { serviceName: 'with-alerts', alertsCount: 1 },
+          { serviceName: 'no-data' }, // No alertsCount, no sloStatus, no healthStatus, no throughput
+          { serviceName: 'with-slo', sloStatus: 'violated' as SloStatus, sloCount: 1 },
+        ],
+      });
+
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        'with-alerts',
+        'with-slo',
+        'no-data',
       ]);
     });
   });

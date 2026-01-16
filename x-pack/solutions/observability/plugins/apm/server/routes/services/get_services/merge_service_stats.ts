@@ -6,8 +6,10 @@
  */
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import type { SloStatus } from '../../../../common/service_inventory';
 import type { ServiceHealthStatusesResponse } from './get_health_statuses';
 import type { ServiceAlertsResponse } from './get_service_alerts';
+import type { ServiceSlosResponse } from './get_service_slos';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import type { ServiceHealthStatus } from '../../../../common/service_health_status';
@@ -22,16 +24,20 @@ export interface MergedServiceStat {
   throughput?: number;
   healthStatus?: ServiceHealthStatus;
   alertsCount?: number;
+  sloStatus?: SloStatus;
+  sloCount?: number;
 }
 
 export function mergeServiceStats({
   serviceStats,
   healthStatuses,
   alertCounts,
+  sloCounts,
 }: {
   serviceStats: ServiceTransactionStatsResponse['serviceStats'];
   healthStatuses: ServiceHealthStatusesResponse;
   alertCounts: ServiceAlertsResponse;
+  sloCounts: ServiceSlosResponse;
 }): MergedServiceStat[] {
   const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
@@ -41,8 +47,19 @@ export function mergeServiceStats({
     allServiceNames.includes(serviceName)
   );
 
+  // make sure to exclude SLO counts from services
+  // that are not found in APM data
+  const matchedSloCounts = sloCounts.filter(({ serviceName }) =>
+    allServiceNames.includes(serviceName)
+  );
+
   return joinByKey(
-    asMutableArray([...serviceStats, ...matchedHealthStatuses, ...alertCounts] as const),
+    asMutableArray([
+      ...serviceStats,
+      ...matchedHealthStatuses,
+      ...alertCounts,
+      ...matchedSloCounts,
+    ] as const),
     'serviceName',
     function merge(a, b) {
       const aEnvs = 'environments' in a ? a.environments : [];

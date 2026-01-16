@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import type { RollupInterval } from '../../../../common/rollup';
@@ -16,6 +17,7 @@ import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesAlerts } from './get_service_alerts';
+import { getServicesSlos } from './get_service_slos';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import type { MergedServiceStat } from './merge_service_stats';
 import { mergeServiceStats } from './merge_service_stats';
@@ -34,6 +36,8 @@ export async function getServicesItems({
   mlClient,
   apmEventClient,
   apmAlertsClient,
+  esClient,
+  spaceId,
   logger,
   start,
   end,
@@ -43,12 +47,15 @@ export async function getServicesItems({
   rollupInterval,
   useDurationSummary,
   searchQuery,
+  includeSloStatus = true,
 }: {
   environment: string;
   kuery: string;
   mlClient?: MlClient;
   apmEventClient: APMEventClient;
   apmAlertsClient: ApmAlertsClient;
+  esClient?: ElasticsearchClient;
+  spaceId?: string;
   logger: Logger;
   start: number;
   end: number;
@@ -58,6 +65,7 @@ export async function getServicesItems({
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
   searchQuery?: string;
+  includeSloStatus?: boolean;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
@@ -74,6 +82,7 @@ export async function getServicesItems({
       searchQuery,
     };
 
+    // First, fetch the main service stats, health statuses, and alerts in parallel
     const [{ serviceStats, serviceOverflowCount, maxCountExceeded }, healthStatuses, alertCounts] =
       await Promise.all([
         getServiceTransactionStats({
@@ -90,12 +99,30 @@ export async function getServicesItems({
         }),
       ]);
 
+    // Then, fetch SLOs only for the services we found (optimization to avoid querying all SLOs)
+    // Skip if: includeSloStatus is false, no esClient/spaceId, or no services found
+    const serviceNames = serviceStats.map((s) => s.serviceName);
+    const shouldFetchSlos = includeSloStatus && esClient && spaceId && serviceNames.length > 0;
+
+    const sloCounts = shouldFetchSlos
+      ? await getServicesSlos({
+          esClient,
+          spaceId,
+          environment,
+          serviceNames,
+        }).catch((err) => {
+          logger.debug(err);
+          return [];
+        })
+      : [];
+
     return {
       items:
         mergeServiceStats({
           serviceStats,
           healthStatuses,
           alertCounts,
+          sloCounts,
         }) ?? [],
       maxCountExceeded,
       serviceOverflowCount,

@@ -182,8 +182,7 @@ export function ServiceInventory() {
 
   const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
 
-  // TODO: Remove this for real implementation
-  const displaySlos = mainStatisticsData.items.length > 0;
+  const displaySlos = mainStatisticsData.items.some((item) => 'sloStatus' in item);
 
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
@@ -239,15 +238,14 @@ export function ServiceInventory() {
   );
 
   const sortFn: SortFunction<ServiceListItem> = useCallback(
-    (itemsToSort, sortField, sortDirection) => {
+    (itemsToSort, _sortField, sortDirection) => {
+      // Always apply multi-level sort: alerts -> SLO -> health -> throughput
       return orderServiceItems({
         items: itemsToSort,
-        primarySortField: sortField,
         sortDirection,
-        tiebreakerField,
       });
     },
-    [tiebreakerField]
+    []
   );
 
   // TODO verify this with AI team

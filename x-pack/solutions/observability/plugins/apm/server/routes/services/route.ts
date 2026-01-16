@@ -14,6 +14,7 @@ import {
 } from '@kbn/ml-plugin/server';
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import * as t from 'io-ts';
 import { mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
@@ -98,7 +99,7 @@ const servicesRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources): Promise<ServicesItemsResponse> {
-    const { context, params, logger, request, core } = resources;
+    const { context, params, logger, request, core, plugins } = resources;
 
     const {
       searchQuery,
@@ -112,9 +113,20 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
     } = params.query;
-    const savedObjectsClient = (await context.core).savedObjects.client;
+    const coreContext = await context.core;
+    const savedObjectsClient = coreContext.savedObjects.client;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const coreStart = await core.start();
+    const spacesStart = await plugins.spaces?.start();
+    const spaceId = spacesStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+    // Check if user has SLO read capability
+    const capabilities = await coreStart.capabilities.resolveCapabilities(request, {
+      capabilityPath: 'slo.*',
+    });
+    const canReadSlos = !!(capabilities.slo?.read ?? false);
+
     const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
       await Promise.all([
         getMlClient(resources),
@@ -132,6 +144,8 @@ const servicesRoute = createApmServerRoute({
       mlClient,
       apmEventClient,
       apmAlertsClient,
+      esClient,
+      spaceId,
       logger,
       start,
       end,
@@ -141,6 +155,7 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
       searchQuery,
+      includeSloStatus: canReadSlos,
     });
   },
 });

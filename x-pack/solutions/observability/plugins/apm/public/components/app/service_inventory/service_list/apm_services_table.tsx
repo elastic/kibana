@@ -25,7 +25,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import type { ServiceListItem } from '../../../../../common/service_inventory';
+import type { ServiceListItem, SloStatus } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import { isDefaultTransactionType } from '../../../../../common/transaction_types';
 import {
@@ -66,14 +66,6 @@ import { SloOverviewFlyout } from '../slo_overview_flyout';
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
 
-export enum SloStatus {
-  Violated = 'violated',
-  Degrading = 'degrading',
-  NoData = 'noData',
-  Stale = 'stale',
-  Healthy = 'healthy',
-}
-
 interface SloStatusConfig {
   id: string;
   color: 'danger' | 'warning' | 'success' | 'default' | 'hollow';
@@ -84,7 +76,7 @@ interface SloStatusConfig {
 }
 
 const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
-  [SloStatus.Violated]: {
+  violated: {
     id: 'Violated',
     color: 'danger',
     showCount: true,
@@ -102,7 +94,7 @@ const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
         values: { count },
       }),
   },
-  [SloStatus.Degrading]: {
+  degrading: {
     id: 'Degrading',
     color: 'warning',
     showCount: true,
@@ -120,7 +112,7 @@ const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
         values: { count },
       }),
   },
-  [SloStatus.NoData]: {
+  noData: {
     id: 'NoData',
     color: 'default',
     showCount: false,
@@ -138,7 +130,7 @@ const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
         values: { count },
       }),
   },
-  [SloStatus.Stale]: {
+  stale: {
     id: 'Stale',
     color: 'default',
     showCount: false,
@@ -156,7 +148,7 @@ const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
         values: { count },
       }),
   },
-  [SloStatus.Healthy]: {
+  healthy: {
     id: 'Healthy',
     color: 'success',
     showCount: false,
@@ -174,33 +166,6 @@ const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
       }),
   },
 };
-
-interface SloStatusInfo {
-  status: SloStatus;
-  count: number;
-}
-
-// TODO: Remove this for real implementation
-const SLO_STATUS_VALUES = [
-  SloStatus.Violated,
-  SloStatus.Degrading,
-  SloStatus.NoData,
-  SloStatus.Stale,
-  SloStatus.Healthy,
-];
-
-function getSloStatusInfo(serviceName: string): SloStatusInfo {
-  let hash = 0;
-  for (let i = 0; i < serviceName.length; i++) {
-    hash = (hash * 31 + serviceName.charCodeAt(i)) % 1000000007;
-  }
-
-  const count = (hash % 5) + 1;
-  const statusIndex = hash % SLO_STATUS_VALUES.length;
-  const status = SLO_STATUS_VALUES[statusIndex];
-
-  return { status, count };
-}
 
 export function getServiceColumns({
   query,
@@ -298,8 +263,13 @@ export function getServiceColumns({
             ),
             width: `${unit * 7}px`,
             render: (item: ServiceListItem) => {
-              const { serviceName, agentName } = item;
-              const { status: sloStatus, count: sloCount } = getSloStatusInfo(serviceName);
+              const { serviceName, agentName, sloStatus, sloCount } = item;
+
+              // If no SLO data is available, don't render the badge
+              if (!sloStatus) {
+                return null;
+              }
+
               const config = SLO_STATUS_CONFIG[sloStatus];
 
               return (
