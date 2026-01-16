@@ -87,13 +87,13 @@ export const getStats = async ({
           type: NodeType.dependency as const,
         },
         value: {
-          count: bucket.doc_count ?? 0,
+          count: bucket.total_latency_count.value ?? 0,
           latency_sum: bucket.total_latency_sum.value ?? 0,
           error_count: bucket.error_count.doc_count ?? 0,
         },
         timeseries: bucket.timeseries?.buckets.map((dateBucket) => ({
           x: dateBucket.key + offsetInMs,
-          count: dateBucket.doc_count ?? 0,
+          count: dateBucket.total_latency_count.value ?? 0,
           latency_sum: dateBucket.total_latency_sum.value ?? 0,
           error_count: dateBucket.error_count.doc_count ?? 0,
         })),
