@@ -19,7 +19,10 @@ import type { PngScreenshotOptions } from '..';
 import { HeadlessChromiumDriverFactory } from '../browsers';
 import { Screenshots } from './screenshots';
 
-jest.mock('puppeteer');
+jest.mock('puppeteer'); // see __mocks__/puppeteer.ts
+
+// from __mocks__/puppeteer.ts
+const SCREENSHOT_BYTES = new Uint8Array([3, 1, 4, 1, 5]);
 
 describe('class Screenshots', () => {
   let mockConfig: ConfigType;
@@ -126,9 +129,7 @@ describe('class Screenshots', () => {
 
       const observe = screenshotsInstance.getScreenshots(options);
       await firstValueFrom(observe).then((captureResult) => {
-        expect(captureResult.results[0].screenshots[0].data).toEqual(
-          Buffer.from(`you won't believe this one weird screenshot`, 'base64')
-        );
+        expect(captureResult.results[0].screenshots[0].data).toEqual(Buffer.from(SCREENSHOT_BYTES));
         expect(captureResult.results[0].renderErrors).toBe(undefined);
         expect(captureResult.results[0].error).toBe(undefined);
       });

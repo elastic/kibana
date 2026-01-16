@@ -11,7 +11,7 @@ import UPNG from '@pdf-lib/upng';
 
 import { ZOOM } from '../../layouts/preserve_layout';
 
-const ROWS_PER_TILE = 8000;
+export const ROWS_PER_TILE = 8000;
 
 interface GetScreenshotParams {
   logger: Logger;
@@ -95,6 +95,7 @@ export function partitionScreen(rect: BoundingBox): BoundingBox[] {
   const result: BoundingBox[] = [];
 
   const { x, y, width, height } = rect;
+  if (height <= 0) return [];
 
   let currY = 0;
   while (currY < height) {

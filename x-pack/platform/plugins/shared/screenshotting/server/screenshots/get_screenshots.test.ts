@@ -12,6 +12,7 @@ import type { Layout } from '../layouts';
 import { createMockLayout } from '../layouts/mock';
 import { EventLogger } from './event_logger';
 import { getScreenshots } from './get_screenshots';
+import type { MockedLogger } from '@kbn/logging-mocks';
 
 describe('getScreenshots', () => {
   const elementsPositionAndAttributes = [
@@ -34,11 +35,13 @@ describe('getScreenshots', () => {
   let eventLogger: EventLogger;
   let config = {} as ConfigType;
   let layout: Layout;
+  let logger: MockedLogger;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
     config = { capture: { zoom: 2 } } as ConfigType;
-    eventLogger = new EventLogger(loggingSystemMock.createLogger(), config);
+    logger = loggingSystemMock.createLogger();
+    eventLogger = new EventLogger(logger, config);
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
     layout = createMockLayout();
   });
@@ -99,11 +102,13 @@ describe('getScreenshots', () => {
 
     expect(browser.screenshot).toHaveBeenCalledTimes(2);
     expect(browser.screenshot).toHaveBeenNthCalledWith(1, {
+      logger,
       elementPosition: elementsPositionAndAttributes[0].position,
       layout,
       error: undefined,
     });
     expect(browser.screenshot).toHaveBeenNthCalledWith(2, {
+      logger,
       elementPosition: elementsPositionAndAttributes[1].position,
       layout,
       error: undefined,

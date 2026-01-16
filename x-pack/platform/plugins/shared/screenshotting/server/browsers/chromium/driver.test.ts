@@ -13,6 +13,9 @@ import type { Size } from '../../../common/layout';
 import { PreserveLayout } from '../../layouts/preserve_layout';
 import { HeadlessChromiumDriver } from './driver';
 
+// from __mocks__/puppeteer.ts
+const SCREENSHOT_BYTES = new Uint8Array([3, 1, 4, 1, 5]);
+
 describe('chromium driver', () => {
   let mockConfig: ConfigType;
   let mockLogger: Logger;
@@ -47,7 +50,7 @@ describe('chromium driver', () => {
     };
 
     mockPage = {
-      screenshot: jest.fn().mockResolvedValue(`you won't believe this one weird screenshot`),
+      screenshot: jest.fn().mockResolvedValue(SCREENSHOT_BYTES),
       evaluate: jest.fn(),
     } as unknown as puppeteer.Page;
 
@@ -79,7 +82,7 @@ describe('chromium driver', () => {
       layout: new PreserveLayout({ width: 16, height: 16 }),
     });
 
-    expect(result).toEqual(Buffer.from(`you won't believe this one weird screenshot`, 'base64'));
+    expect(result).toEqual(Buffer.from(SCREENSHOT_BYTES));
   });
 
   it('add error to screenshot contents', async () => {
@@ -109,7 +112,7 @@ describe('chromium driver', () => {
         "[data-shared-items-container]",
       ]
     `);
-    expect(result).toEqual(Buffer.from(`you won't believe this one weird screenshot`, 'base64'));
+    expect(result).toEqual(Buffer.from(SCREENSHOT_BYTES));
   });
 
   it('sets the PDF image size', async () => {

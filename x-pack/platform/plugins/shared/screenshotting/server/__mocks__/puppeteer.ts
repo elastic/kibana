@@ -22,7 +22,7 @@ const stubPage = {
   isClosed: jest.fn(),
   setViewport: jest.fn(),
   evaluate: jest.fn(),
-  screenshot: jest.fn().mockResolvedValue(`you won't believe this one weird screenshot`),
+  screenshot: jest.fn().mockResolvedValue(new Uint8Array([3, 1, 4, 1, 5])),
   evaluateOnNewDocument: jest.fn(),
   setRequestInterception: jest.fn(),
   _client: jest.fn(() => ({ on: jest.fn() })),
