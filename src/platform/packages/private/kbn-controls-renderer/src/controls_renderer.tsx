@@ -34,6 +34,10 @@ import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
 import type { ControlsRendererParentApi, ControlsLayout } from './types';
 
+const isFocusedPanelId = (id: unknown): id is string => {
+  return typeof id === 'string' && id.length > 0;
+};
+
 export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
   const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
@@ -71,8 +75,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
 
   useEffect(() => {
     const focusSub = parentApi.focusedPanelId$.pipe(distinctUntilChanged()).subscribe((focusId) => {
-      // if focusId is set, the edit flyout is open
-      setIsEditFlyoutOpen(Boolean(focusId));
+      setIsEditFlyoutOpen(isFocusedPanelId(focusId));
     });
 
     return () => focusSub.unsubscribe();
