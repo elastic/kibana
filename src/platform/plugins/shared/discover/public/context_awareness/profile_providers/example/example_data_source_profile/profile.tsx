@@ -10,7 +10,7 @@
 import { EuiBadge, EuiFlyout, EuiLink } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { RowControlColumn } from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
+import { AppMenuActionId, getFieldValue } from '@kbn/discover-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
@@ -120,17 +120,18 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           // Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.
 
           // Can be a on-click action, link or a submenu with an array of actions and horizontal rules
-          registry.registerCustomAction({
+          registry.registerCustomItem({
             id: 'example-custom-action',
-            type: AppMenuActionType.custom,
-            controlProps: {
-              label: 'Custom action',
-              testId: 'example-custom-action',
-              onClick: ({ onFinishAction }) => {
-                alert('Example Custom action clicked');
-                onFinishAction(); // This allows to return focus back to the app menu DOM node
-              },
+            order: 1,
+            label: 'Custom action',
+            testId: 'example-custom-action',
+            iconType: 'logoElasticsearch',
+            run: (runParams) => {
+              alert('Example Custom action clicked');
+              const onFinishAction = runParams?.context?.onFinishAction as () => void;
+              onFinishAction(); // This allows to return focus back to the app menu DOM node
             },
+
             // In case of a submenu, you can add actions to it under `actions`
             // actions: [
             //   {
@@ -153,39 +154,36 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           });
 
           // This example shows how to add a custom action under the Alerts submenu
-          registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
+          registry.registerCustomPopoverItem(AppMenuActionId.alerts, {
             // It's also possible to override the submenu actions by using the same id
             // as `AppMenuActionId.createRule` or `AppMenuActionId.manageRulesAndConnectors`
             id: 'example-custom-action4',
-            type: AppMenuActionType.custom,
             order: 101,
-            controlProps: {
-              label: 'Create SLO (Custom action)',
-              iconType: 'visGauge',
-              testId: 'example-custom-action-under-alerts',
-              onClick: ({ onFinishAction }) => {
-                // This is an example of a custom action that opens a flyout or any other custom modal.
-                // To do so, simply return a React element and call onFinishAction when you're done.
-                return (
-                  <EuiFlyout onClose={onFinishAction}>
-                    <div>Example custom action clicked</div>
-                  </EuiFlyout>
-                );
-              },
+            label: 'Create SLO (Custom action)',
+            iconType: 'visGauge',
+            testId: 'example-custom-action-under-alerts',
+            run: (runParams) => {
+              // This is an example of a custom action that opens a flyout or any other custom modal.
+              // To do so, simply return a React element and call onFinishAction when you're done.
+              const onFinishAction = runParams?.context?.onFinishAction as () => void;
+              return (
+                <EuiFlyout onClose={onFinishAction}>
+                  <div>Example custom action clicked</div>
+                </EuiFlyout>
+              );
             },
           });
 
           // This submenu was defined in the root profile example_root_pofile/profile.tsx
           // And we can still add actions to it from the data source profile here.
-          registry.registerCustomActionUnderSubmenu('example-custom-root-submenu', {
+          registry.registerCustomPopoverItem('example-custom-root-submenu', {
             id: 'example-custom-action5',
-            type: AppMenuActionType.custom,
-            controlProps: {
-              label: 'Custom action (from Data Source profile)',
-              onClick: ({ onFinishAction }) => {
-                alert('Example Data source action under root submenu clicked');
-                onFinishAction();
-              },
+            order: 1,
+            label: 'Custom action (from Data Source profile)',
+            run: (runParams) => {
+              const onFinishAction = runParams?.context?.onFinishAction as () => void;
+              alert('Example Data source action under root submenu clicked');
+              onFinishAction();
             },
           });
 

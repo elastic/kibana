@@ -366,7 +366,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       responsive={false}
       css={tabsBarContainerCss}
     >
-      <EuiFlexItem grow={false} css={tabsBarComponentCss}>
+      <EuiFlexItem grow={!appendRight} css={tabsBarComponentCss}>
         <TabsBar
           ref={tabsBarApi}
           items={items}

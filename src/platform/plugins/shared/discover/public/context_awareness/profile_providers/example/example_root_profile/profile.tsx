@@ -68,9 +68,10 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                 order: 1,
                 label: 'Custom action 11 (from Root profile)',
                 testId: 'example-custom-root-action11',
-                run: () => {
+                run: (runParams) => {
                   alert('Example Root Custom action 11 clicked');
-                  // onFinishAction(); // This allows to close the popover and return focus back to the app menu DOM node
+                  const onFinishAction = runParams?.context?.onFinishAction as () => void;
+                  onFinishAction(); // This allows to return focus back to the app menu DOM node
                 },
               },
               {

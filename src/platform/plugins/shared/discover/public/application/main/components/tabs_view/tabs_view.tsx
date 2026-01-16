@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
+import { EuiResizeObserver, type EuiResizeObserverProps } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import useObservable from 'react-use/lib/useObservable';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { css } from '@emotion/react';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import { discoverTopNavMenuContext } from '../top_nav/discover_topnav_menu';
 import {
@@ -27,11 +29,13 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 
 const MAX_TABS_COUNT = 25;
+const APP_MENU_COLLAPSE_THRESHOLD = 800;
 
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const items = useInternalStateSelector(selectAllTabs);
+  const [shouldCollapseAppMenu, setShouldCollapseAppMenu] = useState(false);
   const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
@@ -42,6 +46,11 @@ export const TabsView = (props: SingleTabViewProps) => {
     props.runtimeStateManager,
     (state) => state.scopedEbtManager$
   );
+
+  const onResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
+    if (!dimensions) return;
+    setShouldCollapseAppMenu(dimensions.width < APP_MENU_COLLAPSE_THRESHOLD);
+  }, []);
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -74,21 +83,40 @@ export const TabsView = (props: SingleTabViewProps) => {
   const topNavMenuItems = useObservable(topNavMenu$, topNavMenu$.getValue());
 
   return (
-    <UnifiedTabs
-      services={services}
-      items={items}
-      selectedItemId={currentTabId}
-      recentlyClosedItems={recentlyClosedItems}
-      unsavedItemIds={unsavedTabIds}
-      maxItemsCount={MAX_TABS_COUNT}
-      hideTabsBar={hideTabsBar}
-      createItem={createItem}
-      getPreviewData={getPreviewData}
-      renderContent={renderContent}
-      onChanged={onChanged}
-      onEBTEvent={onEvent}
-      onClearRecentlyClosed={onClearRecentlyClosed}
-      appendRight={<AppMenuComponent config={topNavMenuItems} />}
-    />
+    /**
+     * AppMenuComponent handles responsiveness on its own, however, there are some edge cases
+     * e.g opening push flyout, where this might not be good enough.
+     * Wrapping the whole tabs view in a resize observer ensures that the tabs view is always aware of the available width and can adjust the app menu accordingly.
+     */
+    <EuiResizeObserver onResize={onResize}>
+      {(resizeRef) => (
+        <div
+          ref={resizeRef}
+          css={css`
+            height: 100%;
+            width: 100%;
+          `} // EuiResizeObserver requires the ref container to have dimensions
+        >
+          <UnifiedTabs
+            services={services}
+            items={items}
+            selectedItemId={currentTabId}
+            recentlyClosedItems={recentlyClosedItems}
+            unsavedItemIds={unsavedTabIds}
+            maxItemsCount={MAX_TABS_COUNT}
+            hideTabsBar={hideTabsBar}
+            createItem={createItem}
+            getPreviewData={getPreviewData}
+            renderContent={renderContent}
+            onChanged={onChanged}
+            onEBTEvent={onEvent}
+            onClearRecentlyClosed={onClearRecentlyClosed}
+            appendRight={
+              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
+            }
+          />
+        </div>
+      )}
+    </EuiResizeObserver>
   );
 };

@@ -32,7 +32,7 @@ describe('AppMenuRegistry', () => {
 
       const config = registry.getAppMenuConfig();
       expect(config.items).toHaveLength(1);
-      expect(config.items![0]).toEqual(item);
+      expect(config.items?.[0]).toEqual(item);
     });
 
     it('should update an existing item with the same ID', () => {
@@ -57,7 +57,7 @@ describe('AppMenuRegistry', () => {
 
       const config = registry.getAppMenuConfig();
       expect(config.items).toHaveLength(1);
-      expect(config.items![0]).toEqual(item2);
+      expect(config.items?.[0]).toEqual(item2);
     });
   });
 
@@ -172,7 +172,7 @@ describe('AppMenuRegistry', () => {
       registry.registerPopoverItem('parent', popoverItem);
 
       const config = registry.getAppMenuConfig();
-      const parent = config.items!.find((item) => item.id === 'parent');
+      const parent = config.items?.find((item) => item.id === 'parent');
 
       expect(parent?.items).toBeDefined();
       expect(parent?.items).toHaveLength(1);
@@ -215,7 +215,7 @@ describe('AppMenuRegistry', () => {
       registry.registerPopoverItem('parent', popoverItem3);
 
       const config = registry.getAppMenuConfig();
-      const parent = config.items!.find((item) => item.id === 'parent');
+      const parent = config.items?.find((item) => item.id === 'parent');
 
       expect(parent?.items).toHaveLength(3);
       expect(parent?.items?.[0].id).toBe('child-2');
@@ -251,11 +251,257 @@ describe('AppMenuRegistry', () => {
       registry.registerPopoverItem('parent', popoverItem2);
 
       const config = registry.getAppMenuConfig();
-      const parent = config.items!.find((item) => item.id === 'parent');
+      const parent = config.items?.find((item) => item.id === 'parent');
 
       expect(parent?.items).toHaveLength(2);
       expect(parent?.items?.[0].id).toBe('child-1');
       expect(parent?.items?.[1].id).toBe('child-2');
+    });
+  });
+
+  describe('registerCustomItem', () => {
+    it('should register a custom menu item', () => {
+      const customItem: AppMenuItemType = {
+        id: 'custom-item',
+        order: 1,
+        label: 'Custom Item',
+        iconType: 'beaker',
+        testId: 'customItem',
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(customItem);
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(1);
+      expect(config.items?.[0]).toEqual(customItem);
+    });
+
+    it('should update an existing custom item with the same ID', () => {
+      const customItem1: AppMenuItemType = {
+        id: 'custom-item',
+        order: 1,
+        label: 'Custom Item 1',
+        iconType: 'beaker',
+        run: jest.fn(),
+      };
+
+      const customItem2: AppMenuItemType = {
+        id: 'custom-item',
+        order: 2,
+        label: 'Custom Item 2',
+        iconType: 'bolt',
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(customItem1);
+      registry.registerCustomItem(customItem2);
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(1);
+      expect(config.items?.[0]).toEqual(customItem2);
+    });
+
+    it('should limit custom items to CUSTOM_ITEMS_LIMIT', () => {
+      const customItem1: AppMenuItemType = {
+        id: 'custom-1',
+        order: 1,
+        label: 'Custom 1',
+        iconType: 'beaker',
+        run: jest.fn(),
+      };
+
+      const customItem2: AppMenuItemType = {
+        id: 'custom-2',
+        order: 2,
+        label: 'Custom 2',
+        iconType: 'bolt',
+        run: jest.fn(),
+      };
+
+      const customItem3: AppMenuItemType = {
+        id: 'custom-3',
+        order: 3,
+        label: 'Custom 3',
+        iconType: 'brush',
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(customItem1);
+      registry.registerCustomItem(customItem2);
+      registry.registerCustomItem(customItem3);
+
+      const config = registry.getAppMenuConfig();
+      // Should only include the first 2 items due to CUSTOM_ITEMS_LIMIT
+      expect(config.items).toHaveLength(AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
+      expect(config.items?.[0].id).toBe('custom-1');
+      expect(config.items?.[1].id).toBe('custom-2');
+    });
+
+    it('should merge custom items with regular items and sort by order', () => {
+      const regularItem: AppMenuItemType = {
+        id: 'regular-item',
+        order: 2,
+        label: 'Regular Item',
+        iconType: 'search',
+        run: jest.fn(),
+      };
+
+      const customItem: AppMenuItemType = {
+        id: 'custom-item',
+        order: 1,
+        label: 'Custom Item',
+        iconType: 'beaker',
+        run: jest.fn(),
+      };
+
+      registry.registerItem(regularItem);
+      registry.registerCustomItem(customItem);
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(2);
+      // Should be sorted by order
+      expect(config.items?.[0].id).toBe('custom-item');
+      expect(config.items?.[1].id).toBe('regular-item');
+    });
+  });
+
+  describe('registerCustomPopoverItem', () => {
+    it('should register a popover item under a custom parent menu item', () => {
+      const parentItem: AppMenuItemType = {
+        id: 'custom-parent',
+        order: 1,
+        label: 'Custom Parent',
+        iconType: 'beaker',
+        items: [],
+      };
+
+      const popoverItem: AppMenuPopoverItem = {
+        id: 'custom-child-1',
+        order: 1,
+        label: 'Custom Child 1',
+        iconType: 'bell',
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(parentItem);
+      registry.registerCustomPopoverItem('custom-parent', popoverItem);
+
+      const config = registry.getAppMenuConfig();
+      const parent = config.items?.find((item) => item.id === 'custom-parent');
+
+      expect(parent?.items).toBeDefined();
+      expect(parent?.items).toHaveLength(1);
+      expect(parent?.items?.[0]).toEqual(popoverItem);
+    });
+
+    it('should sort custom popover items by order property', () => {
+      const parentItem: AppMenuItemType = {
+        id: 'custom-parent',
+        order: 1,
+        label: 'Custom Parent',
+        iconType: 'beaker',
+        items: [],
+      };
+
+      const popoverItem1: AppMenuPopoverItem = {
+        id: 'custom-child-1',
+        label: 'Custom Child 1',
+        order: 3,
+        run: jest.fn(),
+      };
+
+      const popoverItem2: AppMenuPopoverItem = {
+        id: 'custom-child-2',
+        label: 'Custom Child 2',
+        order: 1,
+        run: jest.fn(),
+      };
+
+      const popoverItem3: AppMenuPopoverItem = {
+        id: 'custom-child-3',
+        label: 'Custom Child 3',
+        order: 2,
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(parentItem);
+      registry.registerCustomPopoverItem('custom-parent', popoverItem1);
+      registry.registerCustomPopoverItem('custom-parent', popoverItem2);
+      registry.registerCustomPopoverItem('custom-parent', popoverItem3);
+
+      const config = registry.getAppMenuConfig();
+      const parent = config.items?.find((item) => item.id === 'custom-parent');
+
+      expect(parent?.items).toHaveLength(3);
+      expect(parent?.items?.[0].id).toBe('custom-child-2');
+      expect(parent?.items?.[1].id).toBe('custom-child-3');
+      expect(parent?.items?.[2].id).toBe('custom-child-1');
+    });
+
+    it('should handle registering custom popover items before parent exists', () => {
+      const popoverItem: AppMenuPopoverItem = {
+        id: 'custom-child-1',
+        order: 1,
+        label: 'Custom Child 1',
+        run: jest.fn(),
+      };
+
+      // Register popover item first
+      registry.registerCustomPopoverItem('custom-parent', popoverItem);
+
+      const parentItem: AppMenuItemType = {
+        id: 'custom-parent',
+        order: 1,
+        label: 'Custom Parent',
+        iconType: 'beaker',
+        items: [],
+      };
+
+      // Then register parent
+      registry.registerCustomItem(parentItem);
+
+      const config = registry.getAppMenuConfig();
+      const parent = config.items?.find((item) => item.id === 'custom-parent');
+
+      // The second registerCustomItem should overwrite the parent, losing the popover items
+      expect(parent?.items).toEqual([]);
+    });
+
+    it('should handle multiple custom popover items with same order', () => {
+      const parentItem: AppMenuItemType = {
+        id: 'custom-parent',
+        order: 1,
+        label: 'Custom Parent',
+        iconType: 'beaker',
+        items: [],
+      };
+
+      const popoverItem1: AppMenuPopoverItem = {
+        id: 'custom-child-1',
+        label: 'Custom Child 1',
+        order: 1,
+        run: jest.fn(),
+      };
+
+      const popoverItem2: AppMenuPopoverItem = {
+        id: 'custom-child-2',
+        label: 'Custom Child 2',
+        order: 1,
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(parentItem);
+      registry.registerCustomPopoverItem('custom-parent', popoverItem1);
+      registry.registerCustomPopoverItem('custom-parent', popoverItem2);
+
+      const config = registry.getAppMenuConfig();
+      const parent = config.items?.find((item) => item.id === 'custom-parent');
+
+      expect(parent?.items).toHaveLength(2);
+      // Both items have same order, so they should maintain insertion order
+      expect(parent?.items?.[0].id).toBe('custom-child-1');
+      expect(parent?.items?.[1].id).toBe('custom-child-2');
     });
   });
 
@@ -309,7 +555,7 @@ describe('AppMenuRegistry', () => {
       expect(config.primaryActionItem).toEqual(primaryItem);
       expect(config.secondaryActionItem).toEqual(secondaryItem);
 
-      const item2Config = config.items!.find((item) => item.id === 'item-2');
+      const item2Config = config.items?.find((item) => item.id === 'item-2');
       expect(item2Config?.items).toHaveLength(1);
     });
 
@@ -319,6 +565,33 @@ describe('AppMenuRegistry', () => {
       expect(config.items).toEqual([]);
       expect(config.primaryActionItem).toBeUndefined();
       expect(config.secondaryActionItem).toBeUndefined();
+    });
+
+    it('should include both regular and custom items in sorted order', () => {
+      const regularItem: AppMenuItemType = {
+        id: 'regular',
+        order: 2,
+        label: 'Regular',
+        iconType: 'search',
+        run: jest.fn(),
+      };
+
+      const customItem: AppMenuItemType = {
+        id: 'custom',
+        order: 1,
+        label: 'Custom',
+        iconType: 'beaker',
+        run: jest.fn(),
+      };
+
+      registry.registerItem(regularItem);
+      registry.registerCustomItem(customItem);
+
+      const config = registry.getAppMenuConfig();
+
+      expect(config.items).toHaveLength(2);
+      expect(config.items?.[0].id).toBe('custom');
+      expect(config.items?.[1].id).toBe('regular');
     });
   });
 });
