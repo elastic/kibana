@@ -5,136 +5,128 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
+import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { inject, injectable } from 'inversify';
 
-import type { Container } from 'inversify';
-import type { PluginConfig } from '../../config';
-import type { AlertingServerStartDependencies } from '../../types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { RuleSavedObjectAttributes } from '../../saved_objects';
-import { spaceIdToNamespace } from '../space_id_to_namespace';
-import type { RuleExecutorTaskParams } from './types';
-import { executeEsqlRule } from './execute_esql';
-import { writeEsqlAlerts } from './write_alerts';
-import { ResourceManager } from '../services/resource_service/resource_manager';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
+import { buildAlertEventsFromEsqlResponse } from './build_alert_events';
+import { getQueryPayload } from './get_query_payload';
+import type { ResourceManagerContract } from '../services/resource_service/resource_manager';
+import { ResourceManager } from '../services/resource_service/resource_manager';
+import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
+import type { QueryServiceContract } from '../services/query_service/query_service';
+import { QueryService } from '../services/query_service/query_service';
+import { StorageServiceInternalToken } from '../services/storage_service/tokens';
+import type { StorageServiceContract } from '../services/storage_service/storage_service';
+import type { RuleExecutorTaskParams } from './types';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
+import { LoggerServiceToken } from '../services/logger_service/logger_service';
 
-export function createRuleExecutorTaskRunner({
-  logger,
-  coreStartServices,
-  config,
-  container,
-}: {
-  logger: Logger;
-  coreStartServices: Promise<[CoreStart, AlertingServerStartDependencies, unknown]>;
-  config: PluginConfig;
-  container: Container;
-}) {
-  return ({ taskInstance, abortController, fakeRequest }: RunContext) => {
-    return {
-      async run() {
-        if (!config.enabled) {
-          return { state: taskInstance.state };
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
+
+@injectable()
+export class RuleExecutorTaskRunner {
+  constructor(
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(ResourceManager) private readonly resourcesService: ResourceManagerContract,
+    @inject(RulesSavedObjectService)
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
+    @inject(QueryService) private readonly queryService: QueryServiceContract,
+    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
+  ) {}
+
+  public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
+    // Wait for the plugin-wide resource initialization started during plugin setup.
+    await this.resourcesService.waitUntilReady();
+
+    const params = taskInstance.params as RuleExecutorTaskParams;
+
+    const ruleDoc = await this.rulesSavedObjectService
+      .get(params.ruleId, params.spaceId)
+      .catch((error) => {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          return null;
         }
+        throw error;
+      });
 
-        if (!fakeRequest) {
-          throw new Error(
-            `Cannot execute rule executor task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
-          );
-        }
+    if (!ruleDoc) {
+      // Rule was deleted.
+      return { state: taskInstance.state };
+    }
 
-        const params = taskInstance.params as RuleExecutorTaskParams;
-        const resourcesService = container.get(ResourceManager);
-        // Wait for the plugin-wide resource initialization started during plugin setup.
-        await resourcesService.waitUntilReady();
+    this.logger.debug({
+      message: () => `Rule saved object attributes: ${JSON.stringify(ruleDoc.attributes, null, 2)}`,
+    });
 
-        const [coreStart, pluginsStart] = await coreStartServices;
+    if (!ruleDoc.attributes.enabled) {
+      return { state: taskInstance.state };
+    }
 
-        const namespace: string | undefined = spaceIdToNamespace(
-          pluginsStart.spaces,
+    const { filter, params: queryParams } = getQueryPayload({
+      query: ruleDoc.attributes.query,
+      timeField: ruleDoc.attributes.timeField,
+      lookbackWindow: ruleDoc.attributes.lookbackWindow,
+    });
+
+    this.logger.debug({
+      message: () =>
+        `executing ES|QL query for rule ${params.ruleId} in space ${
           params.spaceId
-        );
+        } - ${JSON.stringify({
+          query: ruleDoc.attributes.query,
+          filter,
+          params: queryParams,
+        })}`,
+    });
 
-        let ruleAttributes: RuleSavedObjectAttributes;
-        try {
-          const soClient = coreStart.savedObjects.getScopedClient(fakeRequest, {
-            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-          });
-          const doc = await soClient.get<RuleSavedObjectAttributes>(
-            RULE_SAVED_OBJECT_TYPE,
-            params.ruleId,
-            {
-              namespace,
-            }
-          );
-          ruleAttributes = doc.attributes;
-        } catch (e) {
-          if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-            // Rule was deleted.
-            return { state: taskInstance.state };
-          }
-          throw e;
-        }
+    let esqlResponse: Awaited<ReturnType<QueryService['executeQuery']>>;
+    try {
+      esqlResponse = await this.queryService.executeQuery({
+        query: ruleDoc.attributes.query,
+        filter,
+        params: queryParams,
+        abortSignal: abortController.signal,
+      });
+    } catch (error) {
+      if (abortController.signal.aborted) {
+        throw new Error('Search has been aborted due to cancelled execution');
+      }
+      throw error;
+    }
 
-        logger.debug(
-          () => `Rule saved object attributes: ${JSON.stringify(ruleAttributes, null, 2)}`
-        );
+    this.logger.debug({
+      message: () => `ES|QL response values: ${JSON.stringify(esqlResponse.values, null, 2)}`,
+    });
 
-        if (!ruleAttributes.enabled) {
-          return { state: taskInstance.state };
-        }
+    const targetDataStream = ALERT_EVENTS_DATA_STREAM;
 
-        const searchClient = pluginsStart.data.search.asScoped(fakeRequest);
-        const esqlResponse = await executeEsqlRule({
-          logger,
-          searchClient,
-          abortController,
-          rule: {
-            id: params.ruleId,
-            spaceId: params.spaceId,
-            name: ruleAttributes.name,
-          },
-          params: {
-            query: ruleAttributes.query,
-            timeField: ruleAttributes.timeField,
-            lookbackWindow: ruleAttributes.lookbackWindow,
-          },
-        });
+    const scheduledAt = taskInstance.scheduledAt;
+    const scheduledTimestamp =
+      (typeof scheduledAt === 'string' ? scheduledAt : undefined) ??
+      (taskInstance.startedAt instanceof Date ? taskInstance.startedAt.toISOString() : undefined) ??
+      new Date().toISOString();
 
-        logger.debug(
-          () => `ES|QL response values: ${JSON.stringify(esqlResponse.values, null, 2)}`
-        );
+    const alertDocs = buildAlertEventsFromEsqlResponse({
+      ruleId: params.ruleId,
+      spaceId: params.spaceId,
+      ruleAttributes: ruleDoc.attributes,
+      esqlResponse,
+      scheduledTimestamp,
+    });
 
-        const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const targetDataStream = ALERT_EVENTS_DATA_STREAM;
+    await this.storageService.bulkIndexDocs({
+      index: targetDataStream,
+      docs: alertDocs.map(({ doc }) => doc),
+      getId: (_doc, i) => alertDocs[i].id,
+    });
 
-        const scheduledAt = taskInstance.scheduledAt;
-        const scheduledTimestamp =
-          (typeof scheduledAt === 'string' ? scheduledAt : undefined) ??
-          (taskInstance.startedAt instanceof Date
-            ? taskInstance.startedAt.toISOString()
-            : undefined) ??
-          new Date().toISOString();
+    this.logger.debug({
+      message: `alerting_v2:esql run: ruleId=${params.ruleId} spaceId=${params.spaceId} alertsDataStream=${targetDataStream}`,
+    });
 
-        await writeEsqlAlerts({
-          services: { logger, esClient, dataStreamName: targetDataStream },
-          input: {
-            ruleId: params.ruleId,
-            spaceId: params.spaceId,
-            ruleAttributes,
-            esqlResponse,
-            scheduledTimestamp,
-          },
-        });
-
-        logger.debug(
-          `alerting_v2:esql run: ruleId=${params.ruleId} spaceId=${params.spaceId} alertsDataStream=${targetDataStream}`
-        );
-
-        return { state: {} };
-      },
-    };
-  };
+    return { state: {} };
+  }
 }

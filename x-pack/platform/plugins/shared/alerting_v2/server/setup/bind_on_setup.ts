@@ -6,20 +6,17 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import type { CoreStart } from '@kbn/core/server';
 import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
-import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
-import { initializeRuleExecutorTaskDefinition } from '../lib/rule_executor';
+import { CoreSetup } from '@kbn/core-di-server';
+import { registerRuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
-import type { PluginConfig } from '../config';
-import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerSavedObjects } from '../saved_objects';
+import { TaskRunnerFactoryToken } from '../lib/services/task_run_scope_service/create_task_runner';
+import type { AlertingServerSetupDependencies } from '../types';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
     const logger = container.get(Logger);
-    const pluginConfig = container.get(PluginInitializer('config'));
-    const alertingConfig = pluginConfig.get<PluginConfig>();
 
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
@@ -28,22 +25,11 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       logger,
     });
 
-    const taskManagerSetup = container.get(
-      PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager')
-    );
-
-    const getStartServices = container.get(CoreSetup('getStartServices')) as () => Promise<
-      [CoreStart, AlertingServerStartDependencies, unknown]
-    >;
-
-    const startServices = getStartServices();
-
-    initializeRuleExecutorTaskDefinition(
-      logger,
-      taskManagerSetup,
-      startServices,
-      alertingConfig,
-      container
-    );
+    registerRuleExecutorTaskDefinition({
+      taskManager: container.get(
+        PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager')
+      ),
+      taskRunnerFactory: container.get(TaskRunnerFactoryToken),
+    });
   });
 }

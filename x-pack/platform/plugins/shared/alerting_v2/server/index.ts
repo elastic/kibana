@@ -10,9 +10,9 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
 import { bindOnSetup } from './setup/bind_on_setup';
+import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
 import { bindServices } from './setup/bind_services';
-import { bindOnStart } from './setup/bind_on_start';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,

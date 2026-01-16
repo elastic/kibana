@@ -73,14 +73,14 @@ describe('TS Validation', () => {
         tsExpectErrors(`TS index, missingIndex`, ['Unknown index "missingIndex"']);
         tsExpectErrors(`TS average()`, ['Unknown index "average"']);
         tsExpectErrors(`TS custom_function()`, ['Unknown index "custom_function"']);
-        tsExpectErrors(`TS indexes*`, ['Unknown index "indexes*"']);
+        // tsExpectErrors(`TS indexes*`, ['Unknown index "indexes*"']); // TODO: ES no longer returns error for wildcard patterns that don't match - see https://github.com/elastic/kibana/issues/217119
         tsExpectErrors('TS numberField', ['Unknown index "numberField"']);
         tsExpectErrors('TS policy', ['Unknown index "policy"']);
 
         tsExpectErrors('TS index, missingIndex', ['Unknown index "missingIndex"']);
         tsExpectErrors('TS missingIndex, index', ['Unknown index "missingIndex"']);
         tsExpectErrors('TS *missingIndex, missingIndex2, index', ['Unknown index "missingIndex2"']);
-        tsExpectErrors('TS missingIndex*', ['Unknown index "missingIndex*"']);
+        // tsExpectErrors('TS missingIndex*', ['Unknown index "missingIndex*"']); // TODO: ES no longer returns error for wildcard patterns that don't match - see https://github.com/elastic/kibana/issues/217119
         tsExpectErrors('TS *missingIndex, missing*Index2', [
           'Unknown index "*missingIndex"',
           'Unknown index "missing*Index2"',

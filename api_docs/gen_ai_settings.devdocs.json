@@ -15,6 +15,8 @@
       "label": "GenAiSettingsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/private/gen_ai_settings/public/plugin.ts",
+      "lineNumber": 29,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "GenAiSettingsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/private/gen_ai_settings/public/plugin.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -53,6 +57,8 @@
           "{ readonly showAiBreadcrumb: boolean; readonly showSpacesIntegration: boolean; readonly showAiAssistantsVisibilitySetting: boolean; readonly showChatExperienceSetting: boolean; }"
         ],
         "path": "x-pack/platform/plugins/private/gen_ai_settings/common/config.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -88,6 +94,8 @@
           ">; }"
         ],
         "path": "x-pack/platform/plugins/private/gen_ai_settings/server/routes/get_global_gen_ai_settings_route_repository.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -105,6 +113,8 @@
         "{ [x: string]: never; }"
       ],
       "path": "x-pack/platform/plugins/private/gen_ai_settings/server/plugin.ts",
+      "lineNumber": 23,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -121,6 +131,8 @@
         "{ [x: string]: never; }"
       ],
       "path": "x-pack/platform/plugins/private/gen_ai_settings/server/plugin.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

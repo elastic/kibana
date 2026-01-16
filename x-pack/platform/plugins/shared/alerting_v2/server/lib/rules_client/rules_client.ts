@@ -8,21 +8,18 @@
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core/server';
-import type {
-  KibanaRequest as CoreKibanaRequest,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
 import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { inject, injectable, optional } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 
-import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
+import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
+import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { createRuleDataSchema, updateRuleDataSchema } from './schemas';
 import type {
   CreateRuleParams,
@@ -37,9 +34,10 @@ export class RulesClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('http')) private readonly http: HttpServiceStart,
-    @inject(CoreStart('savedObjects')) private readonly savedObjects: SavedObjectsServiceStart,
+    @inject(RulesSavedObjectService)
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
+    @inject(PluginStart('security')) private readonly security: SecurityPluginStart
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
@@ -49,18 +47,11 @@ export class RulesClient {
     return { spaceId };
   }
 
-  private getSavedObjectsClient(): SavedObjectsClientContract {
-    return this.savedObjects.getScopedClient(this.request, {
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-    });
-  }
-
   private async getUserName(): Promise<string | null> {
-    return this.security?.authc.getCurrentUser(this.request)?.username ?? null;
+    return this.security.authc.getCurrentUser(this.request)?.username ?? null;
   }
 
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
-    const savedObjectsClient = this.getSavedObjectsClient();
     const { spaceId } = this.getSpaceContext();
 
     try {
@@ -69,7 +60,6 @@ export class RulesClient {
       throw Boom.badRequest(`Error validating create rule data - ${(error as Error).message}`);
     }
 
-    const id = params.options?.id ?? SavedObjectsUtils.generateId();
     const username = await this.getUserName();
     const nowIso = new Date().toISOString();
 
@@ -88,18 +78,16 @@ export class RulesClient {
       updatedAt: nowIso,
     };
 
+    let id: string;
     try {
-      await savedObjectsClient.create<RuleSavedObjectAttributes>(
-        RULE_SAVED_OBJECT_TYPE,
-        ruleAttributes,
-        {
-          id,
-          overwrite: false,
-        }
-      );
+      id = await this.rulesSavedObjectService.create({
+        attrs: ruleAttributes,
+        id: params.options?.id,
+      });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(`Rule with id "${id}" already exists`);
+        const conflictId = params.options?.id ?? 'unknown';
+        throw Boom.conflict(`Rule with id "${conflictId}" already exists`);
       }
       throw e;
     }
@@ -116,7 +104,7 @@ export class RulesClient {
           },
         });
       } catch (e) {
-        await savedObjectsClient.delete(RULE_SAVED_OBJECT_TYPE, id).catch(() => {});
+        await this.rulesSavedObjectService.delete({ id }).catch(() => {});
         throw e;
       }
     }
@@ -132,7 +120,6 @@ export class RulesClient {
     id: string;
     data: UpdateRuleData;
   }): Promise<RuleResponse> {
-    const savedObjectsClient = this.getSavedObjectsClient();
     const { spaceId } = this.getSpaceContext();
 
     try {
@@ -147,10 +134,7 @@ export class RulesClient {
     let existingAttrs: RuleSavedObjectAttributes;
     let existingVersion: string | undefined;
     try {
-      const doc = await savedObjectsClient.get<RuleSavedObjectAttributes>(
-        RULE_SAVED_OBJECT_TYPE,
-        id
-      );
+      const doc = await this.rulesSavedObjectService.get(id);
       existingAttrs = doc.attributes;
       existingVersion = doc.version;
     } catch (e) {
@@ -190,14 +174,11 @@ export class RulesClient {
     }
 
     try {
-      await savedObjectsClient.update<RuleSavedObjectAttributes>(
-        RULE_SAVED_OBJECT_TYPE,
+      await this.rulesSavedObjectService.update({
         id,
-        nextAttrs,
-        {
-          ...(existingVersion ? { version: existingVersion } : {}),
-        }
-      );
+        attrs: nextAttrs,
+        version: existingVersion,
+      });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`);
@@ -209,13 +190,8 @@ export class RulesClient {
   }
 
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
-    const savedObjectsClient = this.getSavedObjectsClient();
-
     try {
-      const doc = await savedObjectsClient.get<RuleSavedObjectAttributes>(
-        RULE_SAVED_OBJECT_TYPE,
-        id
-      );
+      const doc = await this.rulesSavedObjectService.get(id);
       const attrs = doc.attributes;
       return { id, ...attrs };
     } catch (e) {
@@ -227,11 +203,10 @@ export class RulesClient {
   }
 
   public async deleteRule({ id }: { id: string }): Promise<void> {
-    const savedObjectsClient = this.getSavedObjectsClient();
     const { spaceId } = this.getSpaceContext();
 
     try {
-      await savedObjectsClient.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id);
+      await this.rulesSavedObjectService.get(id);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Rule with id "${id}" not found`);
@@ -242,22 +217,14 @@ export class RulesClient {
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
-    await savedObjectsClient.delete(RULE_SAVED_OBJECT_TYPE, id);
+    await this.rulesSavedObjectService.delete({ id });
   }
 
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
-    const savedObjectsClient = this.getSavedObjectsClient();
-
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 20;
 
-    const res = await savedObjectsClient.find<RuleSavedObjectAttributes>({
-      type: RULE_SAVED_OBJECT_TYPE,
-      page,
-      perPage,
-      sortField: 'updatedAt',
-      sortOrder: 'desc',
-    });
+    const res = await this.rulesSavedObjectService.find({ page, perPage });
 
     return {
       items: res.saved_objects.map((so) => ({

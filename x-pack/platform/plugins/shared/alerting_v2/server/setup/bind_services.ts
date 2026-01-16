@@ -11,9 +11,14 @@ import { CoreStart, Request } from '@kbn/core-di-server';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { RulesClient } from '../lib/rules_client';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
-import { LoggerService } from '../lib/services/logger_service/logger_service';
+import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import { AlertingRetryService } from '../lib/services/retry_service';
+import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
+import {
+  createTaskRunnerFactory,
+  TaskRunnerFactoryToken,
+} from '../lib/services/task_run_scope_service/create_task_runner';
 import { StorageService } from '../lib/services/storage_service/storage_service';
 import {
   StorageServiceInternalToken,
@@ -30,6 +35,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RetryServiceToken).toService(AlertingRetryService);
 
   bind(LoggerService).toSelf().inSingletonScope();
+  bind(LoggerServiceToken).toService(LoggerService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -46,12 +52,18 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return elasticsearch.client.asScoped(request).asCurrentUser;
     })
     .inRequestScope();
+  bind(TaskRunnerFactoryToken).toFactory((context) =>
+    createTaskRunnerFactory({
+      getInjection: () => context.get(CoreStart('injection')),
+    })
+  );
+  bind(RulesSavedObjectService).toSelf().inRequestScope();
 
   bind(QueryService)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
       const data = get(PluginStart<AlertingServerStartDependencies['data']>('data'));
-      const loggerService = get(LoggerService);
+      const loggerService = get(LoggerServiceToken);
       const searchClient = data.search.asScoped(request);
       return new QueryService(searchClient, loggerService);
     })
@@ -59,7 +71,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(StorageServiceScopedToken)
     .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerService);
+      const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
       return new StorageService(esClient, loggerService);
     })
@@ -67,7 +79,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(StorageServiceInternalToken)
     .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerService);
+      const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
       return new StorageService(esClient, loggerService);
     })

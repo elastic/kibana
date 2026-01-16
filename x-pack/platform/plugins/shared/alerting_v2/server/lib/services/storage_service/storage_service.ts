@@ -8,30 +8,42 @@
 import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import { LoggerService } from '../logger_service/logger_service';
+import type { LoggerServiceContract } from '../logger_service/logger_service';
+import { LoggerServiceToken } from '../logger_service/logger_service';
 
-interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
+export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
   index: string;
   docs: TDocument[];
+  /**
+   * Optional deterministic id factory.
+   */
+  getId?: (doc: TDocument, index: number) => string;
+}
+
+export interface StorageServiceContract {
+  bulkIndexDocs<TDocument extends Record<string, unknown>>(
+    params: BulkIndexDocsParams<TDocument>
+  ): Promise<void>;
 }
 
 @injectable()
-export class StorageService {
+export class StorageService implements StorageServiceContract {
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerService) private readonly logger: LoggerService
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
   public async bulkIndexDocs<TDocument extends Record<string, unknown>>({
     index,
     docs,
+    getId,
   }: BulkIndexDocsParams<TDocument>): Promise<void> {
     if (docs.length === 0) {
       return;
     }
 
-    const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc) => [
-      { create: { _index: index } },
+    const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc, i) => [
+      { create: { _index: index, ...(getId ? { _id: getId(doc, i) } : {}) } },
       doc,
     ]);
 

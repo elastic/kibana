@@ -5,24 +5,26 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { schema } from '@kbn/config-schema';
 
-import type { Container } from 'inversify';
-import type { PluginConfig } from '../../config';
-import type { AlertingServerStartDependencies } from '../../types';
-import { createRuleExecutorTaskRunner } from './task_runner';
+import type { AlertingServerSetupDependencies } from '../../types';
+import type { TaskRunnerFactory } from '../services/task_run_scope_service/create_task_runner';
+import { RuleExecutorTaskRunner } from './task_runner';
 
 export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting_v2:rule_executor' as const;
 
-export function initializeRuleExecutorTaskDefinition(
-  logger: Logger,
-  taskManager: TaskManagerSetupContract,
-  coreStartServices: Promise<[CoreStart, AlertingServerStartDependencies, unknown]>,
-  config: PluginConfig,
-  container: Container
-) {
+export function registerRuleExecutorTaskDefinition({
+  taskManager,
+  taskRunnerFactory,
+}: {
+  taskManager: AlertingServerSetupDependencies['taskManager'];
+  taskRunnerFactory: TaskRunnerFactory;
+}) {
+  const createTaskRunner = taskRunnerFactory({
+    taskRunnerClass: RuleExecutorTaskRunner,
+    taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
+  });
+
   taskManager.registerTaskDefinitions({
     [ALERTING_RULE_EXECUTOR_TASK_TYPE]: {
       title: 'Alerting v2 rule executor (ES|QL)',
@@ -31,12 +33,7 @@ export function initializeRuleExecutorTaskDefinition(
         ruleId: schema.string(),
         spaceId: schema.string(),
       }),
-      createTaskRunner: createRuleExecutorTaskRunner({
-        logger,
-        coreStartServices,
-        config,
-        container,
-      }),
+      createTaskRunner,
     },
   });
 }

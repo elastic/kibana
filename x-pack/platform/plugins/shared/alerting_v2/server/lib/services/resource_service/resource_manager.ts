@@ -9,7 +9,8 @@ import { inject, injectable } from 'inversify';
 
 import type { IRetryService } from '../retry_service/alerting_retry_service';
 import type { IResourceInitializer } from './resource_initializer';
-import { LoggerService } from '../logger_service/logger_service';
+import type { LoggerServiceContract } from '../logger_service/logger_service';
+import { LoggerServiceToken } from '../logger_service/logger_service';
 import { RetryServiceToken } from '../retry_service/tokens';
 
 interface ResourceState {
@@ -19,13 +20,21 @@ interface ResourceState {
   status: 'not_started' | 'pending' | 'ready' | 'failed';
 }
 
+export interface ResourceManagerContract {
+  registerResource(key: string, initializer: IResourceInitializer): void;
+  startInitialization(options?: { resourceKeys?: string[] }): void;
+  waitUntilReady(): Promise<void>;
+  isReady(key: string): boolean;
+  ensureResourceReady(key: string): Promise<void>;
+}
+
 @injectable()
-export class ResourceManager {
+export class ResourceManager implements ResourceManagerContract {
   private readonly resources = new Map<string, ResourceState>();
   private readonly startupResourceKeys = new Set<string>();
 
   constructor(
-    @inject(LoggerService) private readonly logger: LoggerService,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(RetryServiceToken) private readonly retryService: IRetryService
   ) {}
 
