@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { threatAnalysisSkill } from './threat_analysis_skill';
+export { alertAnalysisSkill } from './alert_analysis_skill';
 export { registerSkills } from './register_skills';
