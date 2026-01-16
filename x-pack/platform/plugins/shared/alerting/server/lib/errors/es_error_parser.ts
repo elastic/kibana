@@ -13,6 +13,12 @@ const getEsCause = (
 ): string[] => {
   const updated = [...causes];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const auc = (obj as any)?.additional_unsuccessful_credentials;
+  if (auc) {
+    updated.push(auc);
+  }
+
   if (obj.caused_by) {
     if (obj.caused_by?.reason) {
       updated.push(obj.caused_by?.reason);

@@ -68,6 +68,11 @@ export function getErrorSource(error: Error | DecoratedError): TaskErrorSource |
   if (isTaskRunError(error) && error[source]) {
     return error[source];
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((error as any)?.meta?.statusCode === 401) {
+    return TaskErrorSource.USER;
+  }
 }
 
 export function isUserError(error: Error | DecoratedError) {
