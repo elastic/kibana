@@ -23,6 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -59,6 +60,19 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
 const DEFAULT_TO = 'now';
+
+const COLD_FROZEN_TIER_CALLOUT_TITLE = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.left.insights.prevalence.excludeColdAndFrozenTiers.calloutTitle"
+    defaultMessage="Cold and frozen tiers"
+  />
+);
+const COLD_FROZEN_TIER_CALLOUT_DESCRIPTION = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.left.insights.prevalence.excludeColdAndFrozenTiers.calloutDescription"
+    defaultMessage="Cold and frozen tiers are currently excluded. To include them, go to Advanced Settings."
+  />
+);
 
 /**
  * Component that renders a grey box to indicate the user doesn't have proper license to view the actual data
@@ -345,7 +359,10 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { storage } = useKibana().services;
+  const { storage, uiSettings } = useKibana().services;
+  const excludeColdAndFrozenTiers = uiSettings.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
+  );
 
   const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
     useDocumentDetailsContext();
@@ -437,6 +454,15 @@ export const PrevalenceDetails: React.FC = () => {
     </>
   );
 
+  const coldFrozenTierCallout = (
+    <>
+      <EuiCallOut title={COLD_FROZEN_TIER_CALLOUT_TITLE} iconType="snowflake">
+        <p>{COLD_FROZEN_TIER_CALLOUT_DESCRIPTION}</p>
+      </EuiCallOut>
+      <EuiSpacer size="s" />
+    </>
+  );
+
   return (
     <>
       {!error && !isPlatinumPlus && upsell}
@@ -449,6 +475,7 @@ export const PrevalenceDetails: React.FC = () => {
           width="full"
         />
         <EuiSpacer size="m" />
+        {excludeColdAndFrozenTiers && coldFrozenTierCallout}
         <EuiInMemoryTable
           items={error ? [] : items}
           columns={columns}

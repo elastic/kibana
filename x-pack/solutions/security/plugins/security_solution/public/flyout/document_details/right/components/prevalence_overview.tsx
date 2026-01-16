@@ -7,8 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
@@ -28,26 +29,38 @@ const UNCOMMON = (
 );
 const DEFAULT_TIME_RANGE_LABEL = (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeApplied.badgeLabel"
+    id="xpack.securitySolution.flyout.right.insights.prevalence.defaultTimeRangeApplied.badgeLabel"
     defaultMessage="Time range applied"
   />
 );
 const CUSTOM_TIME_RANGE_LABEL = (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeApplied.badgeLabel"
+    id="xpack.securitySolution.flyout.right.insights.prevalence.customTimeRangeApplied.badgeLabel"
     defaultMessage="Custom time range applied"
   />
 );
 const DEFAULT_TIME_RANGE_TOOLTIP = (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeApplied.tooltipLabel"
+    id="xpack.securitySolution.flyout.right.insights.prevalence.defaultTimeRangeApplied.tooltipLabel"
     defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the last 30 days. To choose a custom time range, click the section title, then use the date time picker in the left panel."
   />
 );
 const CUSTOM_TIME_RANGE_TOOLTIP = (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeApplied.tooltipLabel"
+    id="xpack.securitySolution.flyout.right.insights.prevalence.customTimeRangeApplied.tooltipLabel"
     defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the time range that you chose. To choose a different custom time range, click the section title, then use the date time picker in the left panel."
+  />
+);
+const COLD_FROZEN_TIER_LABEL = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.prevalence.excludeColdAndFrozenTiers.badgeLabel"
+    defaultMessage="Cold/Frozen tiers excluded"
+  />
+);
+const COLD_FROZEN_TIER_TOOLTIP = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.prevalence.excludeColdAndFrozenTiers.tooltipLabel"
+    defaultMessage="Cold and frozen tiers are currently excluded. To include them, go to Advanced Settings."
   />
 );
 
@@ -60,7 +73,10 @@ const DEFAULT_TO = 'now';
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
 export const PrevalenceOverview: FC = () => {
-  const { storage } = useKibana().services;
+  const { storage, uiSettings } = useKibana().services;
+  const excludeColdAndFrozenTiers = uiSettings.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
+  );
   const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE);
 
   const { dataFormattedForFieldBrowser, investigationFields, isPreviewMode } =
@@ -117,15 +133,28 @@ export const PrevalenceOverview: FC = () => {
         link,
         iconType: !isPreviewMode ? 'arrowStart' : undefined,
         headerContent: (
-          <EuiToolTip
-            content={
-              timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_TOOLTIP : DEFAULT_TIME_RANGE_TOOLTIP
-            }
-          >
-            <EuiBadge color="hollow" iconSide="left" iconType="clock" tabIndex={0}>
-              {timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_LABEL : DEFAULT_TIME_RANGE_LABEL}
-            </EuiBadge>
-          </EuiToolTip>
+          <EuiFlexGroup alignItems="center">
+            {excludeColdAndFrozenTiers && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={COLD_FROZEN_TIER_TOOLTIP}>
+                  <EuiBadge color="hollow" iconSide="left" iconType="snowflake" tabIndex={0}>
+                    {COLD_FROZEN_TIER_LABEL}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_TOOLTIP : DEFAULT_TIME_RANGE_TOOLTIP
+                }
+              >
+                <EuiBadge color="hollow" iconSide="left" iconType="clock">
+                  {timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_LABEL : DEFAULT_TIME_RANGE_LABEL}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       }}
       content={{ loading, error }}
