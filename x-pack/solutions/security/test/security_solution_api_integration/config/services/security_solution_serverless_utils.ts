@@ -88,7 +88,7 @@ export function SecuritySolutionServerlessUtils({
 
     createSuperTestWithCustomRole,
 
-    cleanUpCustomRole: async () => {
+    cleanUpCustomRoles: async () => {
       await svlUserManager.deleteCustomRole();
     },
 

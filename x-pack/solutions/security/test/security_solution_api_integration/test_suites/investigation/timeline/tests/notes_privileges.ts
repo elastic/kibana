@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     after(async () => {
-      await utils.cleanUpCustomRole();
+      await utils.cleanUpCustomRoles();
     });
 
     describe('read notes', () => {

@@ -12,7 +12,7 @@ import type { SearchService } from '@kbn/ftr-common-functional-services';
 export interface SecuritySolutionUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
   createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
-  cleanUpCustomRole: () => Promise<void>;
+  cleanUpCustomRoles: () => Promise<void>;
   createSuperTestWithCustomRole: (role: Role) => Promise<TestAgent<any>>;
   createSearch: (role?: string) => Promise<SearchService>;
 }

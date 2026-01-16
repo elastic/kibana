@@ -17,6 +17,7 @@ export function SecuritySolutionESSUtils({
   const search = getService('search');
   const supertestWithoutAuth = getService('supertest');
   const security = getService('security');
+  const createdCustomRolesAndUsers = new Set<string>();
 
   const createSuperTest = async (role?: string, password: string = 'changeme') => {
     if (!role) {
@@ -46,7 +47,20 @@ export function SecuritySolutionESSUtils({
       password: 'changeme',
       roles: [roleDefinition.name],
     });
+    createdCustomRolesAndUsers.add(roleDefinition.name);
     return createSuperTest(roleDefinition.name);
+  };
+
+  const deleteUsers = async (names: string[]): Promise<void> => {
+    for (const name of names) {
+      await security.user.delete(name);
+    }
+  };
+
+  const deleteRoles = async (roles: string[]): Promise<void> => {
+    for (const role of roles) {
+      await security.role.delete(role);
+    }
   };
 
   return {
@@ -58,9 +72,12 @@ export function SecuritySolutionESSUtils({
 
     createSuperTestWithCustomRole,
 
-    cleanUpCustomRole: () => {
-      // In ESS this is a no-op
-      return Promise.resolve();
+    cleanUpCustomRoles: async () => {
+      const rolesAndUsersList = Array.from(createdCustomRolesAndUsers);
+      await deleteUsers(rolesAndUsersList);
+      await deleteRoles(rolesAndUsersList);
+
+      createdCustomRolesAndUsers.clear();
     },
   };
 }
