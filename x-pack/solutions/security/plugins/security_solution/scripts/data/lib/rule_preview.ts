@@ -119,7 +119,10 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
 
       // Fallback: choose the lexicographically last index, which generally corresponds to the latest
       // rollover suffix (-00000N) for these alert indices.
-      return entries.map(([indexName]) => indexName).sort().slice(-1)[0];
+      return entries
+        .map(([indexName]) => indexName)
+        .sort()
+        .slice(-1)[0];
     } catch (e) {
       if (getStatusCode(e) === 404) return undefined;
       throw e;
@@ -136,7 +139,9 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
     }
 
     const destIsDataStream = await isDataStream(destIndex);
-    const destWriteIndex = destIsDataStream ? destIndex : await resolveWriteIndexFromAlias(destIndex);
+    const destWriteIndex = destIsDataStream
+      ? destIndex
+      : await resolveWriteIndexFromAlias(destIndex);
     const destExists =
       destIsDataStream ||
       Boolean(destWriteIndex) ||

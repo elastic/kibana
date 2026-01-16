@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { ElasticAssistantPluginRouter } from '../../types';
 import { API_VERSIONS, CreateAttackDiscoveryAlertsParams } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
+import type { ElasticAssistantPluginRouter } from '../../types';
 
 const RESPONSE_SCHEMA = z.object({ data: z.array(z.unknown()) });
 

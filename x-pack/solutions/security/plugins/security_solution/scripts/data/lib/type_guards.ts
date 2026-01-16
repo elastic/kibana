@@ -35,4 +35,3 @@ export const getStatusCode = (e: unknown): number | undefined => {
 
   return undefined;
 };
-

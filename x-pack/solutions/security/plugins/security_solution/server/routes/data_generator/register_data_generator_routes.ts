@@ -47,7 +47,9 @@ export const registerDataGeneratorRoutes = (
       access: 'internal',
       // We authorize explicitly in the handler by verifying the current user can access the case via Cases.
       // (Kibana route-level authz requires at least one privilege entry when enabled.)
-      security: { authz: { enabled: false, reason: 'dev-only route; authorization enforced via Cases' } },
+      security: {
+        authz: { enabled: false, reason: 'dev-only route; authorization enforced via Cases' },
+      },
     })
     .addVersion(
       {

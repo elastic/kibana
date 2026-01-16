@@ -25,4 +25,3 @@ export const assertNoBulkErrors = (index: string, resp: BulkResponseLike, log: T
   log.error(`Bulk indexing into ${index} had errors. First error: ${JSON.stringify(firstError)}`);
   throw new Error(`Bulk indexing errors for ${index}`);
 };
-

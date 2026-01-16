@@ -42,4 +42,3 @@ describe('episodeIndexNames', () => {
     expect(names.endpointEvents).toEqual('logs-endpoint.events.insights.ep1.2026.01.14');
   });
 });
-

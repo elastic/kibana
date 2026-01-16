@@ -89,4 +89,3 @@ describe('resolveRulesetForInstall', () => {
     expect(resolved).toEqual([]);
   });
 });
-
