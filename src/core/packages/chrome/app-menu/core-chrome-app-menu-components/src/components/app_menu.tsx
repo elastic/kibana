@@ -21,6 +21,7 @@ export interface AppMenuItemsProps {
   /**
    * Whether to render the app menu in a collapsed state (showing only the overflow button).
    * Only available for the standalone app menu component.
+   * TODO: Remove this in favour of container queries once EUI supports them https://github.com/elastic/eui/issues/8822
    */
   isCollapsed?: boolean;
 }
