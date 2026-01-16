@@ -16,7 +16,7 @@ import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { i18n } from '@kbn/i18n';
-import { useProfileAccessor } from '../../../../context_awareness';
+import { type UpdateESQLQueryFn, useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
@@ -145,16 +145,23 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
   const dispatch = useInternalStateDispatch();
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
 
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
+    (queryOrUpdater) => {
+      dispatch(updateESQLQuery({ queryOrUpdater }));
+    },
+    [dispatch, updateESQLQuery]
+  );
   const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
     useMemo(() => {
       return {
         actions: {
           openInNewTab: (params) =>
             dispatch(internalStateActions.openInNewTabExtPointAction(params)),
-          updateESQLQuery: stateContainer.actions.updateESQLQuery,
+          updateESQLQuery: onUpdateESQLQuery,
         },
       };
-    }, [dispatch, stateContainer.actions.updateESQLQuery]);
+    }, [dispatch, onUpdateESQLQuery]);
 
   const isEsqlMode = useIsEsqlMode();
   const chartSectionConfig = useMemo<ChartSectionConfiguration>(() => {
