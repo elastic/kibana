@@ -60,7 +60,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
-      ...(isFinite(timeout) ? { timeout } : {}),
+      ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
     };
 
     return defer(async () => {
