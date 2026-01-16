@@ -13,10 +13,7 @@ import { from, limit, sort, SortOrder, where } from '@kbn/esql-composer';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable, optional } from 'inversify';
 import pLimit from 'p-limit';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction as AlertActionDocument,
-} from '../../resources/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM, type AlertEvent } from '../../resources/alert_events';
 import {
   ALERT_TRANSITIONS_DATA_STREAM,
@@ -89,8 +86,7 @@ export class AlertActionsClient {
 
     const docs = results
       .filter(
-        (result): result is PromiseFulfilledResult<AlertActionDocument> =>
-          result.status === 'fulfilled'
+        (result): result is PromiseFulfilledResult<AlertAction> => result.status === 'fulfilled'
       )
       .map((result) => result.value);
 
@@ -123,7 +119,7 @@ export class AlertActionsClient {
     alertEvent: AlertEvent;
     alertTransition: AlertTransition;
     username: string | null;
-  }): AlertActionDocument {
+  }): AlertAction {
     const {
       action: { episode_id, action_type, ...actionData },
       alertEvent,

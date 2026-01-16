@@ -84,7 +84,7 @@ export class StorageService implements StorageServiceContract {
       return;
     }
 
-    const firstErrorItem = response.items.find((item) => item.index?.error);
+    const firstErrorItem = response.items.find((item) => item.create?.error);
     if (!firstErrorItem) {
       return;
     }
