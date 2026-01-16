@@ -57,7 +57,7 @@ describe('Observability AI Assistant Management plugin', () => {
     let plugin: any;
     let management: ManagementSetup;
     let coreSetup: CoreSetup<any, any>;
-    beforeAll(async () => {
+    beforeEach(async () => {
       plugin = new AiAssistantManagementObservabilityPlugin({
         config: {
           get: jest.fn(() => ({
@@ -74,6 +74,9 @@ describe('Observability AI Assistant Management plugin', () => {
         observabilityAIAssistant: {} as any,
         ml: {} as any,
       });
+    });
+    afterEach(async () => {
+      plugin.stop();
     });
 
     it('is disabled by default, enabled for enterprise if the AI Assistant is enabled, and disabled for platinum', async () => {
