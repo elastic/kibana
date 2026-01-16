@@ -70,7 +70,10 @@ const normalizeHeaders = (headers: unknown): Record<string, string> | undefined 
   if (headers == null) return undefined;
 
   // WHATWG Headers (e.g. from fetch/undici in Node) are not assignable to Kibana's expected plain record.
-  if (typeof headers === 'object' && typeof (headers as { entries?: unknown }).entries === 'function') {
+  if (
+    typeof headers === 'object' &&
+    typeof (headers as { entries?: unknown }).entries === 'function'
+  ) {
     return Object.fromEntries(
       Array.from((headers as { entries: () => IterableIterator<[string, string]> }).entries()).map(
         ([k, v]) => [k, String(v)]

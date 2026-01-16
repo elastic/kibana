@@ -101,4 +101,3 @@ describe('createAttackDiscoveryAlertsRoute', () => {
     expect(res.status).toEqual(200);
   });
 });
-

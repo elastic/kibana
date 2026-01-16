@@ -33,7 +33,7 @@ describe('registerDataGeneratorRoutes', () => {
       securitySolution: Promise.resolve({
         getSpaceId: jest.fn().mockReturnValue('default'),
       }),
-    }) as any;
+    } as any);
 
   const createRequest = ({
     headers,
@@ -58,7 +58,9 @@ describe('registerDataGeneratorRoutes', () => {
 
     coreStart = coreMock.createStart();
     internalRepo = { update: jest.fn().mockResolvedValue({}) };
-    (coreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue(internalRepo as any);
+    (coreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue(
+      internalRepo as any
+    );
     (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
       username: 'elastic',
       roles: ['superuser'],
@@ -142,4 +144,3 @@ describe('registerDataGeneratorRoutes', () => {
     expect(mockResponse.ok).toHaveBeenCalled();
   });
 });
-

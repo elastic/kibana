@@ -15,9 +15,7 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { StartPlugins } from '../../plugin';
 
-const isPrivilegedDataGeneratorUser = (
-  user: AuthenticatedUser | null | undefined
-): boolean => {
+const isPrivilegedDataGeneratorUser = (user: AuthenticatedUser | null | undefined): boolean => {
   if (!user) return false;
   if (user.roles?.includes('superuser')) return true;
   // Kibana may authenticate API-key requests as `_es_api_key` with no Kibana roles in serverless.
