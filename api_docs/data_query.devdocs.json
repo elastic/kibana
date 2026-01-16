@@ -36,6 +36,8 @@
           "[]>"
         ],
         "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +52,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -64,6 +68,8 @@
                   "IUiSettingsClient"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 47,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -90,6 +96,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -114,6 +122,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -138,6 +148,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -154,6 +166,8 @@
               "() => PartitionedFilters"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -172,6 +186,8 @@
               "<void>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -190,6 +206,8 @@
               "<void>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -222,6 +240,8 @@
               "[], pinFilterStatus?: boolean) => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -251,6 +271,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 133,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -266,6 +288,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 134,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -292,6 +316,8 @@
               "[], pinFilterStatus?: boolean) => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -313,6 +339,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 161,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -328,6 +356,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 162,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -356,6 +386,8 @@
               "[]) => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -377,6 +409,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 179,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -405,6 +439,8 @@
               "[]) => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 191,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -426,6 +462,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 196,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -452,6 +490,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -472,6 +512,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 207,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -490,6 +532,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 219,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -522,6 +566,8 @@
               ", shouldOverrideStore?: boolean) => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 223,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -543,6 +589,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 224,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -564,6 +612,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 225,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -579,6 +629,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+                "lineNumber": 226,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -615,6 +667,8 @@
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 237,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -637,6 +691,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts",
+                "lineNumber": 16,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -671,6 +727,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -693,6 +751,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts",
+                "lineNumber": 40,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -708,6 +768,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts",
+                "lineNumber": 40,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -732,6 +794,8 @@
               "[], collector: unknown) => {}"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 241,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -754,6 +818,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts",
+                "lineNumber": 57,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -768,6 +834,8 @@
                   "unknown"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts",
+                "lineNumber": 57,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -791,6 +859,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/filter_manager.ts",
+            "lineNumber": 243,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -817,6 +887,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -828,6 +900,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -842,6 +916,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -856,6 +932,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -870,6 +948,8 @@
               "(oldItem: T, newItem: T) => boolean"
             ],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -885,6 +965,8 @@
                   "T"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+                "lineNumber": 30,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -899,6 +981,8 @@
                   "T"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+                "lineNumber": 30,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -922,6 +1006,8 @@
               "<any, void>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -936,6 +1022,8 @@
               "T[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -950,6 +1038,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -964,6 +1054,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+                "lineNumber": 39,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -979,6 +1071,8 @@
                   "PersistedLogOptions<T>"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+                "lineNumber": 39,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1001,6 +1095,8 @@
                   "<any, void>"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+                "lineNumber": 39,
+                "columnNumber": 67,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1019,6 +1115,8 @@
               "(val: any) => T[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1033,6 +1131,8 @@
                   "any"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+                "lineNumber": 85,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1051,6 +1151,8 @@
               "() => T[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1069,6 +1171,8 @@
               "<T[]>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/persisted_log/persisted_log.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1085,6 +1189,8 @@
         "label": "TimeHistory",
         "description": [],
         "path": "src/platform/plugins/shared/data/public/query/timefilter/time_history.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1099,6 +1205,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/time_history.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1120,6 +1228,8 @@
                   "<any, void>"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/timefilter/time_history.ts",
+                "lineNumber": 19,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1146,6 +1256,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/time_history.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1166,6 +1278,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/timefilter/time_history.ts",
+                "lineNumber": 31,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1192,6 +1306,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/time_history.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1218,6 +1334,8 @@
               "[]>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/time_history.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1281,6 +1399,8 @@
           " | undefined; query?: boolean | undefined; }) => () => void"
         ],
         "path": "src/platform/plugins/shared/data/public/query/state_sync/connect_to_query_state.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1311,6 +1431,8 @@
               ", \"state$\" | \"timefilter\" | \"filterManager\" | \"queryString\">"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/connect_to_query_state.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1335,6 +1457,8 @@
               "<S>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/connect_to_query_state.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1347,6 +1471,8 @@
             "label": "syncConfig",
             "description": [],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/connect_to_query_state.ts",
+            "lineNumber": 33,
+            "columnNumber": 15,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1361,6 +1487,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/state_sync/connect_to_query_state.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1375,6 +1503,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/state_sync/connect_to_query_state.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1397,6 +1527,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/state_sync/connect_to_query_state.ts",
+                "lineNumber": 36,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1411,6 +1543,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/state_sync/connect_to_query_state.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1481,6 +1615,8 @@
           ">; deleteSavedQuery: (id: string) => Promise<{}>; getSavedQueryCount: () => Promise<number>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/saved_query/saved_query_service.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1495,6 +1631,8 @@
               "HttpSetup"
             ],
             "path": "src/platform/plugins/shared/data/public/query/saved_query/saved_query_service.ts",
+            "lineNumber": 17,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1548,6 +1686,8 @@
           "[]"
         ],
         "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/generate_filters.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1570,6 +1710,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/generate_filters.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1594,6 +1736,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/generate_filters.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1611,6 +1755,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/generate_filters.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1628,6 +1774,8 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/generate_filters.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1651,6 +1799,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/generate_filters.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1672,6 +1822,8 @@
           "(language: QueryLanguage) => { query: string; language: QueryLanguage; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/lib/get_default_query.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1686,6 +1838,8 @@
               "QueryLanguage"
             ],
             "path": "src/platform/plugins/shared/data/public/query/lib/get_default_query.ts",
+            "lineNumber": 12,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1721,6 +1875,8 @@
           "[]) => string"
         ],
         "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1741,6 +1897,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.ts",
+            "lineNumber": 60,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1763,6 +1921,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.ts",
+            "lineNumber": 60,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1806,6 +1966,8 @@
           "[]) => string"
         ],
         "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1826,6 +1988,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1856,6 +2020,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_display_value.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1883,6 +2049,8 @@
           ", indexPatterns: T[]) => T | undefined"
         ],
         "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1903,6 +2071,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1918,6 +2088,8 @@
               "T[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1953,6 +2125,8 @@
           "[]"
         ],
         "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/map_and_flatten_filters.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1974,6 +2148,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/data/public/query/filter_manager/lib/map_and_flatten_filters.ts",
+            "lineNumber": 15,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2019,6 +2195,8 @@
           ") => { stop: () => void; hasInheritedQueryFromUrl: boolean; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/state_sync/sync_state_with_url.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2049,6 +2227,8 @@
               ", \"state$\" | \"timefilter\" | \"filterManager\" | \"queryString\">"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/sync_state_with_url.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2072,6 +2252,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/sync_state_with_url.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2117,6 +2299,8 @@
           ") => { stop: () => void; hasInheritedQueryFromUrl: boolean; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/state_sync/sync_state_with_url.ts",
+        "lineNumber": 98,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -2174,6 +2358,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/sync_state_with_url.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2194,6 +2380,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/sync_state_with_url.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2212,6 +2400,8 @@
           "\nPart of {@link QueryState} serialized in the `_g` portion of Url"
         ],
         "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2233,6 +2423,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2247,6 +2439,8 @@
               "Readonly<{} & { value: number; pause: boolean; }> | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2268,6 +2462,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2308,6 +2504,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2328,6 +2526,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2348,6 +2548,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2444,6 +2646,8 @@
               ") => void; clearQuery: () => void; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2475,6 +2679,8 @@
               "; }>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2496,6 +2702,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2538,6 +2746,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2558,6 +2768,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2578,6 +2790,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2674,6 +2888,8 @@
               ") => void; clearQuery: () => void; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2705,6 +2921,8 @@
               "; }>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2726,6 +2944,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2750,6 +2970,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2762,6 +2984,8 @@
                 "label": "appName",
                 "description": [],
                 "path": "src/platform/plugins/shared/data/public/query/lib/add_to_query_log.ts",
+                "lineNumber": 30,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2776,6 +3000,8 @@
                   "{ query: string | { [key: string]: any; }; language: string; }"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/lib/add_to_query_log.ts",
+                "lineNumber": 30,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2840,6 +3066,8 @@
               ">; deleteSavedQuery: (id: string) => Promise<{}>; getSavedQueryCount: () => Promise<number>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2878,6 +3106,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2898,6 +3128,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+                "lineNumber": 72,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2920,6 +3152,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/query_service.ts",
+                "lineNumber": 72,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2948,6 +3182,8 @@
           " extends QueryStateChangePartial"
         ],
         "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2962,6 +3198,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2976,6 +3214,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2990,6 +3230,8 @@
         "label": "SavedQueryService",
         "description": [],
         "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3004,6 +3246,8 @@
               "(title: string, id?: string | undefined) => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3018,6 +3262,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 21,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3033,6 +3279,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 21,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3067,6 +3315,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3087,6 +3337,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 22,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3121,6 +3373,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3135,6 +3389,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 23,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3156,6 +3412,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 23,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3182,6 +3440,8 @@
               "[]; }>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3196,6 +3456,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 25,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3211,6 +3473,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 26,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3226,6 +3490,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 27,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3252,6 +3518,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3266,6 +3534,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 29,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3284,6 +3554,8 @@
               "(id: string) => Promise<{}>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3298,6 +3570,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+                "lineNumber": 30,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3316,6 +3590,8 @@
               "() => Promise<number>"
             ],
             "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3332,6 +3608,8 @@
         "label": "TimefilterHook",
         "description": [],
         "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3352,6 +3630,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3366,6 +3646,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3385,6 +3667,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3399,6 +3683,8 @@
         "label": "TimefilterSetup",
         "description": [],
         "path": "src/platform/plugins/shared/data/public/query/timefilter/timefilter_service.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3565,6 +3851,8 @@
               "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/timefilter_service.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3605,6 +3893,8 @@
               "[]>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/query/timefilter/timefilter_service.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3625,6 +3915,8 @@
           "() => void"
         ],
         "path": "src/platform/plugins/shared/data/public/query/timefilter/lib/auto_refresh_loop.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3659,6 +3951,8 @@
           "; }>"
         ],
         "path": "src/platform/plugins/shared/data/public/query/state_sync/create_query_state_observable.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3756,6 +4050,8 @@
           ") => void; clearQuery: () => void; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/query_string/query_string_manager.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3778,6 +4074,8 @@
           " & { refreshInterval: Readonly<{} & { value: number; pause: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/saved_query/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3945,6 +4243,8 @@
           "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/timefilter/timefilter.ts",
+        "lineNumber": 311,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3986,6 +4286,8 @@
           "[]>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/query/timefilter/time_history.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4032,6 +4334,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4052,6 +4356,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4067,6 +4373,8 @@
               "CalculateBoundsOptions"
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4101,6 +4409,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4121,6 +4431,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4133,6 +4445,8 @@
             "label": "{ forceNow }",
             "description": [],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 45,
+            "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4147,6 +4461,8 @@
                   "Date | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+                "lineNumber": 45,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4201,6 +4517,8 @@
           " | undefined"
         ],
         "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4222,6 +4540,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -4243,6 +4563,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4255,6 +4577,8 @@
             "label": "options",
             "description": [],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 71,
+            "columnNumber": 13,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4269,6 +4593,8 @@
                   "Date | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+                "lineNumber": 71,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -4283,6 +4609,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+                "lineNumber": 71,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4337,6 +4665,8 @@
           " | undefined"
         ],
         "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4358,6 +4688,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -4379,6 +4711,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4391,6 +4725,8 @@
             "label": "options",
             "description": [],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+            "lineNumber": 57,
+            "columnNumber": 13,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4405,6 +4741,8 @@
                   "Date | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+                "lineNumber": 57,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -4419,6 +4757,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/data/common/query/timefilter/get_time.ts",
+                "lineNumber": 57,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4446,6 +4786,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/data/common/query/is_query.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4460,6 +4802,8 @@
               "unknown"
             ],
             "path": "src/platform/plugins/shared/data/common/query/is_query.ts",
+            "lineNumber": 12,
+            "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4486,6 +4830,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/data/common/query/timefilter/is_time_range.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4500,6 +4846,8 @@
               "unknown"
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/is_time_range.ts",
+            "lineNumber": 12,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4529,6 +4877,8 @@
           " | undefined>"
         ],
         "path": "src/platform/plugins/shared/data/common/query/text_based_query_state_to_ast_with_validation.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4543,6 +4893,8 @@
               "Args"
             ],
             "path": "src/platform/plugins/shared/data/common/query/text_based_query_state_to_ast_with_validation.ts",
+            "lineNumber": 32,
+            "columnNumber": 62,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4571,6 +4923,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/data/common/query/text_based_query_state_to_ast.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4585,6 +4939,8 @@
               "Args"
             ],
             "path": "src/platform/plugins/shared/data/common/query/text_based_query_state_to_ast.ts",
+            "lineNumber": 33,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4603,6 +4959,8 @@
         "label": "SavedQuery",
         "description": [],
         "path": "src/platform/plugins/shared/data/common/query/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4614,6 +4972,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/data/common/query/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4634,6 +4994,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/common/query/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4648,6 +5010,8 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/data/common/query/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4662,6 +5026,8 @@
         "label": "SavedQueryAttributes",
         "description": [],
         "path": "src/platform/plugins/shared/data/common/query/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4673,6 +5039,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/data/common/query/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4684,6 +5052,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/data/common/query/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4698,6 +5068,8 @@
               "{ query: string | { [key: string]: any; }; language: string; }"
             ],
             "path": "src/platform/plugins/shared/data/common/query/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4719,6 +5091,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/query/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4740,6 +5114,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/query/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4754,6 +5130,8 @@
         "label": "TimeRangeBounds",
         "description": [],
         "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4768,6 +5146,8 @@
               "moment.Moment | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4782,6 +5162,8 @@
               "moment.Moment | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4836,6 +5218,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data/common/query/query_state.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4858,6 +5242,8 @@
           " & { refreshInterval: Readonly<{} & { value: number; pause: boolean; }>; }"
         ],
         "path": "src/platform/plugins/shared/data/common/query/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4873,6 +5259,8 @@
           "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
