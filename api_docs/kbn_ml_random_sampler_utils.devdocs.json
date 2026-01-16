@@ -28,6 +28,8 @@
           "\nClass that helps manage random sampling settings\nAutomatically calculates the probability if only total doc count is provided\nElse, use the probability that was explicitly set"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -67,6 +71,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "lineNumber": 73,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -92,6 +98,8 @@
                   ") => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "lineNumber": 74,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -116,6 +124,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "lineNumber": 75,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -141,6 +151,8 @@
                   ") => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "lineNumber": 76,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -161,6 +173,8 @@
               "(docCount: number) => void"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -177,6 +191,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "lineNumber": 91,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -197,6 +213,8 @@
               "() => number"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -223,6 +241,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -245,6 +265,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "lineNumber": 105,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -275,6 +297,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -300,6 +324,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -326,6 +352,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -348,6 +376,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "lineNumber": 130,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -378,6 +408,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -403,6 +435,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -427,6 +461,8 @@
               ">>(responseAggs: T) => T | T[string]; probability: number; }"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -456,6 +492,8 @@
           ">>(responseAggs: T) => T | T[string]; probability: number; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -472,6 +510,8 @@
               "RandomSamplerOptions"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
+            "lineNumber": 56,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -495,6 +535,8 @@
           "(totalDocCount: number) => number"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/get_sample_probability.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -511,6 +553,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/get_sample_probability.ts",
+            "lineNumber": 20,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -538,6 +582,8 @@
           "0.001"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -555,6 +601,8 @@
           "0.00001"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -572,6 +620,8 @@
           "number[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -586,6 +636,8 @@
           "\nDefault step minimum probability for default sampling"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -603,6 +655,8 @@
           "\"off\" | \"on_automatic\" | \"on_manual\""
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -620,6 +674,8 @@
           "number | null"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -643,6 +699,8 @@
           ">>(responseAggs: T) => T | T[string]; probability: number; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -662,6 +720,8 @@
           "{ readonly ON_AUTOMATIC: \"on_automatic\"; readonly ON_MANUAL: \"on_manual\"; readonly OFF: \"off\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
