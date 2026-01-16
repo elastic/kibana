@@ -176,6 +176,7 @@ export const addMitreMappingsNode = ({ model, events }: AddMitreMappingsNodePara
           ...state.rule,
           threat: [],
         },
+        warnings: [`Failed to add MITRE mappings: ${error.message}`],
       };
     }
   };

@@ -83,7 +83,7 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         events?.reportProgress(`Failed to generate ES|QL query: ${esqlResponse.error}`);
         return {
           ...state,
-          errors: [...state.errors, `Failed to generate ES|QL query: ${esqlResponse.error}`],
+          errors: [`Failed to generate ES|QL query: ${esqlResponse.error}`],
         };
       }
 
@@ -91,11 +91,11 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         events?.reportProgress('Generated ES|QL query is empty');
         return {
           ...state,
-          errors: [...state.errors, 'Generated ES|QL query is empty'],
+          errors: ['Generated ES|QL query is empty'],
         };
       }
 
-      events?.reportProgress('ES|QL query generated successfully');
+      events?.reportProgress(`ES|QL query generated successfully: "${esqlResponse.query}"`);
 
       return {
         ...state,
@@ -110,7 +110,7 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
       events?.reportProgress(`Failed to generate ES|QL query: ${err.message}`);
       return {
         ...state,
-        errors: [...state.errors, `Failed to generate ES|QL query: ${err.message}`],
+        errors: [`Failed to generate ES|QL query: ${err.message}`],
       };
     }
   };

@@ -106,7 +106,7 @@ export const addScheduleNode = ({
           ...state.rule,
           ...defaultSchedule,
         },
-        errors: [...state.errors, `Failed to fetch and process tags: ${error.message}`],
+        warnings: [`Failed to fetch and process tags: ${error.message}`],
       };
     }
   };
