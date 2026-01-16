@@ -86,7 +86,7 @@ export const getTagsNode = ({
       events?.reportProgress(`Failed to fetch and process tags: ${error.message}`);
       return {
         ...state,
-        errors: [`Failed to fetch and process tags: ${error.message}`],
+        warnings: [`Failed to fetch and process tags: ${error.message}`],
       };
     }
   };

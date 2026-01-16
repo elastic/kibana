@@ -42,7 +42,7 @@ export const createRuleNameAndDescriptionNode = ({
       events?.reportProgress(`Failed to create rule name and description: ${e.message}`);
       return {
         ...state,
-        errors: [...state.errors, `Failed to create rule name and description: ${e.message}`],
+        criticalErrors: [`Failed to create rule name and description: ${e.message}`],
       };
     }
   };

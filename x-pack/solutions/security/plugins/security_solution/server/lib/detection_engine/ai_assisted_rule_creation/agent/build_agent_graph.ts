@@ -26,8 +26,6 @@ import { addScheduleNode } from './nodes/add_schedule';
 import { addMitreMappingsNode } from './nodes/add_mitre_mappings';
 
 export const BUILD_AGENT_NODE_NAMES = {
-  PROCESS_KNOWLEDGE_BASE: 'processKnowledgeBase',
-  GET_INDEX_PATTERN: 'getIndexPattern',
   ESQL_QUERY_CREATION: 'esqlQueryCreation',
   GET_TAGS: 'getTags',
   CREATE_RULE_NAME_AND_DESCRIPTION: 'createRuleNameAndDescription',
@@ -87,14 +85,17 @@ export const getBuildAgent = async ({
     .addNode(ADD_DEFAULT_FIELDS_TO_RULES, addDefaultFieldsToRulesNode({ model, events }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
     .addEdge(START, ESQL_QUERY_CREATION)
-    .addEdge(ESQL_QUERY_CREATION, GET_TAGS)
-    .addEdge(GET_TAGS, CREATE_RULE_NAME_AND_DESCRIPTION)
-    .addEdge(CREATE_RULE_NAME_AND_DESCRIPTION, ADD_MITRE_MAPPINGS)
-    .addEdge(ADD_MITRE_MAPPINGS, ADD_SCHEDULE)
-    .addConditionalEdges(ADD_SCHEDULE, shouldAddDefaultFieldsToRule, {
-      [ADD_DEFAULT_FIELDS_TO_RULES]: ADD_DEFAULT_FIELDS_TO_RULES,
+    .addConditionalEdges(ESQL_QUERY_CREATION, shouldContinue, {
+      continue: CREATE_RULE_NAME_AND_DESCRIPTION,
       end: END,
     })
+    .addConditionalEdges(CREATE_RULE_NAME_AND_DESCRIPTION, shouldContinue, {
+      continue: GET_TAGS,
+      end: END,
+    })
+    .addEdge(GET_TAGS, ADD_MITRE_MAPPINGS)
+    .addEdge(ADD_MITRE_MAPPINGS, ADD_SCHEDULE)
+    .addEdge(ADD_SCHEDULE, ADD_DEFAULT_FIELDS_TO_RULES)
     .addEdge(ADD_DEFAULT_FIELDS_TO_RULES, END);
 
   const graph = buildAgentGraph.compile({ checkpointer: undefined });
@@ -102,9 +103,13 @@ export const getBuildAgent = async ({
   return graph;
 };
 
-const shouldAddDefaultFieldsToRule = (state: RuleCreationState) => {
-  if (state.rule) {
-    return ADD_DEFAULT_FIELDS_TO_RULES;
+/**
+ * Stop further execution if there are critical errors in the state for mandatory rule fields: query, name, description.
+ * Rest fields are optional or can be fillled with default values.
+ */
+const shouldContinue = (state: RuleCreationState): 'continue' | 'end' => {
+  if (state.errors.length > 0) {
+    return 'end';
   }
-  return END;
+  return 'continue';
 };

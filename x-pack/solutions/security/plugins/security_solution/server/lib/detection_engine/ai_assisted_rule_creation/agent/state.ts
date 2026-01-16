@@ -15,7 +15,6 @@ export interface KnowledgeBaseDocument {
 
 export const RuleCreationAnnotation = Annotation.Root({
   userQuery: Annotation<string>(),
-  answer: Annotation<string>(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rule: Annotation<Record<string, any>>(),
   errors: Annotation<string[]>({
@@ -24,16 +23,13 @@ export const RuleCreationAnnotation = Annotation.Root({
       return [...current, ...update];
     },
   }),
-  indices: Annotation<{
-    shortlistedIndexPatterns: string[];
-    indexPatternAnalysis: Record<
-      string,
-      { indexPattern: string; containsRequiredData: boolean; context: string }
-    >;
-  }>(),
-  validationErrors: Annotation<{ esqlErrors: string }>(),
-  queryFixRetries: Annotation<number>(),
-  knowledgeBase: Annotation<{ documents: KnowledgeBaseDocument[]; insights: string }>(),
+  // Warnings that are not critical. These warnings will not stop the rule creation process.
+  warnings: Annotation<string[]>({
+    default: () => [],
+    reducer: (current, update) => {
+      return [...current, ...update];
+    },
+  }),
 });
 
 export type RuleCreationState = typeof RuleCreationAnnotation.State;

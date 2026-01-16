@@ -17,8 +17,6 @@ export const addDefaultFieldsToRulesNode = ({
   events?: ToolEventEmitter;
 }) => {
   return async (state: RuleCreationState) => {
-    events?.reportProgress('Adding default fields to rule...');
-
     const updatedState = {
       ...state,
       rule: {
