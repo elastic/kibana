@@ -49,7 +49,7 @@ export class CreateAlertActionRoute {
 
   async handle() {
     try {
-      await this.alertActionsClient.executeAction({
+      await this.alertActionsClient.createAction({
         alertSeriesId: this.request.params.alert_series_id,
         action: this.request.body,
       });

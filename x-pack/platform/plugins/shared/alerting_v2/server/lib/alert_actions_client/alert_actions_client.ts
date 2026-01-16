@@ -38,7 +38,7 @@ export class AlertActionsClient {
     @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
   ) {}
 
-  public async executeAction(params: {
+  public async createAction(params: {
     alertSeriesId: string;
     action: CreateAlertActionData;
   }): Promise<void> {
@@ -61,7 +61,7 @@ export class AlertActionsClient {
     });
   }
 
-  public async executeBulkActions(
+  public async createBulkActions(
     actions: BulkCreateAlertActionItemData[]
   ): Promise<{ processed: number; total: number }> {
     const username = await this.getUserName();

@@ -42,7 +42,7 @@ export class BulkCreateAlertActionRoute {
 
   async handle() {
     try {
-      const { processed, total } = await this.alertActionsClient.executeBulkActions(
+      const { processed, total } = await this.alertActionsClient.createBulkActions(
         this.request.body
       );
 
