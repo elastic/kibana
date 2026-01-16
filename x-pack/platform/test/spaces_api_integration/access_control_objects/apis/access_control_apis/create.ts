@@ -88,6 +88,43 @@ export default function ({ getService }: FtrProviderContext) {
       expect(getResponse.body).not.to.have.property('accessControl');
     });
 
+    it('allows creating an object supporting access control with no access control metadata when there is no active user profile and no access mode is provided', async () => {
+      const response = await supertestWithoutAuth
+        .post('/access_control_objects/create')
+        .set('kbn-xsrf', 'xxxxx')
+        .set(
+          'Authorization',
+          `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+            'base64'
+          )}`
+        )
+
+        .send({ type: ACCESS_CONTROL_TYPE })
+        .expect(200);
+
+      // Verify the response does not contain accessControl metadata
+      expect(response.body).not.to.have.property('accessControl');
+      expect(response.body).to.have.property('type', ACCESS_CONTROL_TYPE);
+
+      const { id: createdId } = response.body;
+
+      // Verify via GET that the persisted object also has no accessControl metadata
+      const getResponse = await supertestWithoutAuth
+        .get(`/access_control_objects/${createdId}`)
+        .set('kbn-xsrf', 'true')
+        .set(
+          'Authorization',
+          `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+            'base64'
+          )}`
+        )
+        .expect(200);
+
+      expect(getResponse.body).not.to.have.property('accessControl');
+      expect(getResponse.body).to.have.property('id', createdId);
+      expect(getResponse.body).to.have.property('type', ACCESS_CONTROL_TYPE);
+    });
+
     it('should throw when trying to create an access control object with no user', async () => {
       const response = await supertest
         .post('/access_control_objects/create')
