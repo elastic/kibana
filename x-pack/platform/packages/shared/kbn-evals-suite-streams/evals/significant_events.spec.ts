@@ -15,6 +15,8 @@ import {
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from '@kbn/streams-ai/src/significant_events/types';
 import { generateSignificantEvents } from '@kbn/streams-ai';
+import { systemsPrompt } from '@kbn/streams-ai/src/systems/prompt';
+
 import kbnDatemath from '@kbn/datemath';
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
@@ -192,6 +194,7 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
                     inferenceClient,
                     logger,
                     signal: new AbortController().signal,
+                    systemPrompt: systemsPrompt,
                   });
 
                   // The task should return the array of generated queries
@@ -257,6 +260,7 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
               inferenceClient,
               logger,
               signal: new AbortController().signal,
+              systemPrompt: systemsPrompt,
             });
 
             return queries;
