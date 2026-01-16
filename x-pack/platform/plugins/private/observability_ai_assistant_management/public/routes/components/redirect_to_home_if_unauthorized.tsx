@@ -20,7 +20,7 @@ export function RedirectToHomeIfUnauthorized({
   children,
 }: {
   coreStart: CoreStart;
-  cloud: CloudStart | undefined;
+  cloud?: CloudStart;
   children: ReactNode;
 }) {
   const {
