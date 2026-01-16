@@ -24,6 +24,7 @@ import { EsqlQuery } from '@kbn/esql-language';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
 import { useCurrentTabSelector, useAppStateSelector } from '../../../state_management/redux';
@@ -41,7 +42,6 @@ import {
   useGroupedCascadeData,
   useScopedESQLQueryFetchClient,
 } from './hooks';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 
 export { getESQLStatsQueryMeta };
 
@@ -164,7 +164,7 @@ const ESQLDataCascade = React.memo(
 
 export interface CascadedDocumentsLayoutProps
   extends Omit<ESQLDataCascadeProps, 'togglePopover' | 'queryMeta'> {
-  onUpdateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
+  onUpdateESQLQuery: UpdateESQLQueryFn;
 }
 
 export const CascadedDocumentsLayout = React.memo(

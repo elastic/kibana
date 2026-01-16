@@ -73,7 +73,6 @@ import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
-  TABS_ENABLED_FEATURE_FLAG_KEY,
 } from './constants';
 
 /**
@@ -90,7 +89,6 @@ export interface UrlTracker {
 }
 
 export interface DiscoverFeatureFlags {
-  getTabsEnabled: () => boolean;
   getCascadeLayoutEnabled: () => boolean;
 }
 
@@ -201,7 +199,6 @@ export const buildServices = ({
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
     discoverFeatureFlags: {
-      getTabsEnabled: () => core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, true),
       getCascadeLayoutEnabled: () =>
         core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, false),
     },

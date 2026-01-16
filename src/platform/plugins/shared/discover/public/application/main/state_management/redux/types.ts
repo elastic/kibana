@@ -168,6 +168,8 @@ export interface TabState extends TabItem {
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
     cascadedDocuments?: CascadedDocumentsRestorableState;
   };
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId?: string;
 }
 
 export interface RecentlyClosedTabState extends TabState {
@@ -187,8 +189,6 @@ export interface DiscoverInternalState {
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
-  expandedDoc: DataTableRecord | undefined;
-  initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
@@ -207,4 +207,9 @@ export interface DiscoverInternalState {
      */
     unsafeCurrentId: string;
   };
+}
+
+export interface UpdateESQLQueryActionPayload {
+  tabId: string;
+  queryOrUpdater: string | ((prevQuery: string) => string);
 }

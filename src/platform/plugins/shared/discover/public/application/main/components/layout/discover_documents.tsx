@@ -73,6 +73,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
   DocViewerExtensionParams,
+  UpdateESQLQueryFn,
 } from '../../../../context_awareness';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
@@ -154,8 +155,8 @@ function DiscoverDocumentsComponent({
       state.density,
     ];
   });
-  const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
-  const initialDocViewerTabId = useInternalStateSelector((state) => state.initialDocViewerTabId);
+  const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
+  const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -234,11 +235,12 @@ function DiscoverDocumentsComponent({
   const docViewerRef = useRef<DocViewerApi>(null);
 
   const documentViewRenderer = useGetDocumentViewRenderer(docViewerRef);
+  const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
 
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
       dispatch(
-        internalStateActions.setExpandedDoc({
+        setExpandedDocAction({
           expandedDoc: doc,
           initialDocViewerTabId: options?.initialTabId,
         })
@@ -247,7 +249,7 @@ function DiscoverDocumentsComponent({
         docViewerRef.current?.setSelectedTabId(options.initialTabId);
       }
     },
-    [dispatch]
+    [dispatch, setExpandedDocAction]
   );
 
   const latestGrid = useLatest(grid);
@@ -325,12 +327,30 @@ function DiscoverDocumentsComponent({
     timeRange: requestParams.timeRangeAbsolute,
   });
 
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
+    (queryOrUpdater) => {
+      dispatch(updateESQLQuery({ queryOrUpdater }));
+    },
+    [dispatch, updateESQLQuery]
+  );
   const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
     () => ({
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
-      updateESQLQuery: stateContainer.actions.updateESQLQuery,
+      updateESQLQuery: onUpdateESQLQuery,
     }),
-    [dispatch, stateContainer.actions.updateESQLQuery]
+    [dispatch, onUpdateESQLQuery]
+  );
+
+  const setInitialDocViewerTabIdAction = useCurrentTabAction(
+    internalStateActions.setInitialDocViewerTabId
+  );
+
+  const onUpdateSelectedTabId = useCallback(
+    (tabId: string | undefined) => {
+      dispatch(setInitialDocViewerTabIdAction({ initialDocViewerTabId: tabId }));
+    },
+    [dispatch, setInitialDocViewerTabIdAction]
   );
 
   const renderDocumentView = useCallback(
@@ -357,6 +377,7 @@ function DiscoverDocumentsComponent({
         setExpandedDoc: expandedDocSetter,
         onClose: expandedDocSetter.bind(null, undefined),
         docViewerExtensionActions,
+        onUpdateSelectedTabId,
       }),
     [
       documentViewRenderer,
@@ -368,6 +389,7 @@ function DiscoverDocumentsComponent({
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
       docViewerExtensionActions,
+      onUpdateSelectedTabId,
     ]
   );
 
@@ -531,7 +553,7 @@ function DiscoverDocumentsComponent({
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
-            onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
+            onUpdateESQLQuery={onUpdateESQLQuery}
             query={query}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}

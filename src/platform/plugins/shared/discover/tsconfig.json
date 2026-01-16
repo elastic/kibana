@@ -123,7 +123,9 @@
     "@kbn/shared-ux-document-data-cascade",
     "@kbn/controls-schemas",
     "@kbn/zod",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/controls-renderer",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

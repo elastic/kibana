@@ -38,6 +38,8 @@
           "<G, L> & IDataCascadeProviderProps & { children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,6 +61,8 @@
               "<G, L> & IDataCascadeProviderProps & { children?: React.ReactNode; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 93,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,6 +100,8 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,6 +123,8 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,6 +162,8 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +185,8 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -196,6 +208,8 @@
           "(nodePath: string[], nodePathMap: Record<string, string>, leafId: string) => string"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,6 +224,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -225,6 +241,8 @@
               "Record<string, string>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -240,6 +258,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -263,6 +283,8 @@
           "<G>) => string[]"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,6 +299,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -293,6 +317,8 @@
               "<G>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -316,6 +342,8 @@
           "<G>) => { [x: string]: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -330,6 +358,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -346,6 +376,8 @@
               "<G>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -367,6 +399,8 @@
           "(cacheKey: string) => string"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -381,6 +415,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 75,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -402,6 +438,8 @@
           "({ value, shortenAtExpSize, align = 'end' }: NumberBadgeProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/helpers/number_badge/number_badge.tsx",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -416,6 +454,8 @@
               "NumberBadgeProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/helpers/number_badge/number_badge.tsx",
+            "lineNumber": 73,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -448,6 +488,8 @@
           "<G>, \"getScrollElement\">"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -462,6 +504,8 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -478,6 +522,8 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -500,6 +546,8 @@
           "DataCascadeImplBaseProps<G, L> & ({ customTableHeader: (props: { availableColumns: string[]; currentSelectedColumns: string[]; onGroupSelection: (groupByColumn: string[]) => void; selectedRows: string[]; }) => React.ReactNode; tableTitleSlot?: undefined; } | { customTableHeader?: undefined; tableTitleSlot: React.FC<{}>; })"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+        "lineNumber": 226,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -523,6 +571,8 @@
           "<G>) => React.ReactNode; onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+        "lineNumber": 162,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -548,6 +598,8 @@
           "<G, L>, string | React.JSXElementConstructor<any>>; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+        "lineNumber": 167,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -573,6 +625,8 @@
           "[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/store_provider/reducers.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -588,6 +642,8 @@
           "Record<string, any> & { id: string; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/store_provider/reducers.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -17,7 +17,7 @@ import {
 import type { AggregateQuery } from '@kbn/es-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { useProfileAccessor } from '../../context_awareness';
+import { useProfileAccessor, type UpdateESQLQueryFn } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import {
@@ -28,11 +28,11 @@ import { type CascadedDocumentsRestorableState } from '../../application/main/co
 
 export type DiscoverGridProps = UnifiedDataTableProps & {
   query?: DiscoverAppState['query'];
+  onUpdateESQLQuery?: UpdateESQLQueryFn;
 } & (
     | {
         cascadeConfig?: never;
         onCascadeGroupingChange?: undefined;
-        onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
         viewModeToggle?: never;
         registerCascadeRequestsInspectorAdapter?: never;
       }
@@ -40,7 +40,7 @@ export type DiscoverGridProps = UnifiedDataTableProps & {
         cascadeConfig: CascadedDocumentsRestorableState | undefined;
         // when cascade on grouping change handler config is passed to the discover grid component, we expect that all it's supporting props are passed along
         onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
-        onUpdateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
+        onUpdateESQLQuery: UpdateESQLQueryFn;
         viewModeToggle: React.ReactElement | undefined;
         registerCascadeRequestsInspectorAdapter: (requestAdapter: RequestAdapter) => void;
       }
