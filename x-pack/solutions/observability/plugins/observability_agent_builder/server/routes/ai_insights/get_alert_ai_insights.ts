@@ -9,7 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import dedent from 'dedent';
-import { isEmpty } from 'lodash';
+import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type {
@@ -149,24 +149,9 @@ async function fetchAlertContext({
   const [coreStart] = await core.getStartServices();
   const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-  // Define all fetchers with a common interface
-  interface FetchResult {
-    key: string;
-    start: string;
-    data: unknown;
-  }
-
-  // Helper to format context parts consistently
-  const formatContextPart = ({ key, start, data }: FetchResult) =>
-    `<${key}>\nTime window: ${start} to ${alertStart}\n\`\`\`json\n${JSON.stringify(
-      data,
-      null,
-      2
-    )}\n\`\`\`\n</${key}>`;
-
-  const allFetchers: Array<Promise<FetchResult | null>> = [
+  const allFetchers = [
     // Registry-based fetches
-    ...fetchConfigs.map(async (config): Promise<FetchResult | null> => {
+    ...fetchConfigs.map(async (config) => {
       try {
         const start = getStart(config.window);
         const data = await dataRegistry.getData(config.key, {
@@ -182,7 +167,7 @@ async function fetchAlertContext({
       }
     }),
     // log categories
-    (async (): Promise<FetchResult | null> => {
+    (async () => {
       try {
         const start = getStart(START_TIME_OFFSETS.logs);
         const result = await getLogCategories({
@@ -197,7 +182,7 @@ async function fetchAlertContext({
         const hasCategories =
           (result.highSeverityCategories?.categories?.length ?? 0) > 0 ||
           (result.lowSeverityCategories?.categories?.length ?? 0) > 0;
-        return hasCategories ? { key: 'logCategories', start, data: result } : null;
+        return hasCategories ? { key: 'logCategories' as const, start, data: result } : null;
       } catch (err) {
         logger.debug(`AI insight: logCategories failed: ${err}`);
         return null;
@@ -206,7 +191,14 @@ async function fetchAlertContext({
   ];
 
   const results = await Promise.all(allFetchers);
-  const contextParts = results.filter((r): r is FetchResult => r !== null).map(formatContextPart);
+  const contextParts = compact(results).map(
+    ({ key, start, data }) =>
+      `<${key}>\nTime window: ${start} to ${alertStart}\n\`\`\`json\n${JSON.stringify(
+        data,
+        null,
+        2
+      )}\n\`\`\`\n</${key}>`
+  );
 
   return contextParts.length > 0 ? contextParts.join('\n\n') : 'No related signals available.';
 }
