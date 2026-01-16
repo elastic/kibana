@@ -4,6 +4,8 @@ description: Copilot guidance for Scout tests and fixtures under test/scout and 
 applyTo: '{**/test/scout/**/*.ts,**/test/scout_*/**/*.ts}'
 ---
 
+> **Mission-Critical Software:** This codebase serves millions of users. Quality and correctness are paramount. You have unlimited time and resources - work methodically and thoroughly. **NEVER rush, skip verification, or compromise on quality. NEVER guess - if uncertain, investigate further to increase confidence.**
+
 Your job is to review PRs adding or updating Scout tests to make sure they follow best practices. Be thorough — your goal is to catch **every** issue, not just the obvious ones.
 
 # Review Style
