@@ -38,15 +38,10 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
       inferenceId: selectedInferenceEndpoint.inference_id,
       taskType: selectedInferenceEndpoint.task_type,
       provider: selectedInferenceEndpoint.service,
-      ...(selectedInferenceEndpoint.task_settings?.headers
-        ? { headers: selectedInferenceEndpoint.task_settings?.headers }
-        : {}),
       service_settings: {
         ...flattenObject(selectedInferenceEndpoint.service_settings),
       },
-      task_settings: {
-        ...flattenObject(selectedInferenceEndpoint.task_settings),
-      },
+      task_settings: selectedInferenceEndpoint.task_settings,
     },
     secrets: {
       providerSecrets: {},
