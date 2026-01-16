@@ -46,6 +46,8 @@ import {
   SPAN_ID,
 } from '../../../common/es_fields/apm';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
+import { hasTracesApmData } from './has_traces_apm_data';
+import { hasTracesUnprocessedOtelData } from './has_traces_unprocessed_otel_data';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -537,6 +539,26 @@ const unifiedTraceSpanRoute = createApmServerRoute({
   },
 });
 
+const hasTracesApmDataRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/has_traces_apm_data',
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ hasTracesApmData: boolean }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const hasTracesApmDataResult = await hasTracesApmData(apmEventClient);
+    return { hasTracesApmData: hasTracesApmDataResult };
+  },
+});
+
+const hasTracesUnprocessedOtelDataRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/has_traces_unprocessed_otel_data',
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ hasTracesUnprocessedOtelData: boolean }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const hasTracesUnprocessedOtelDataResult = await hasTracesUnprocessedOtelData(apmEventClient);
+    return { hasTracesUnprocessedOtelData: hasTracesUnprocessedOtelDataResult };
+  },
+});
+
 export const traceRouteRepository = {
   ...tracesByIdRoute,
   ...unifiedTracesByIdRoute,
@@ -551,4 +573,6 @@ export const traceRouteRepository = {
   ...unifiedTracesByIdSummaryRoute,
   ...unifiedTracesByIdErrorsRoute,
   ...unifiedTraceSpanRoute,
+  ...hasTracesApmDataRoute,
+  ...hasTracesUnprocessedOtelDataRoute,
 };
