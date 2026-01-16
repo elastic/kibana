@@ -48,6 +48,8 @@
           "<TPrompt, TPromptOptions & { toolChoice: TFinalToolChoice; }, TToolCallbacks>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/execute_as_reasoning_agent.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,6 +82,8 @@
               " & { prompt: TPrompt; } & { toolCallbacks: TToolCallbacks; finalToolChoice?: TFinalToolChoice | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/execute_as_reasoning_agent.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -185,6 +189,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/execute_as_reasoning_agent.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -275,6 +281,8 @@
               "<string> | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/execute_as_reasoning_agent.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -314,6 +322,8 @@
           "<TPrompt, TPromptOptions & { toolChoice: TFinalToolChoice; }, TToolCallbacks>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/until_valid/execute_until_valid.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -346,6 +356,8 @@
               " & { prompt: TPrompt; } & { toolCallbacks: TToolCallbacks; finalToolChoice: TFinalToolChoice; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/until_valid/execute_until_valid.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -445,6 +457,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/until_valid/execute_until_valid.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -535,6 +549,8 @@
               "<string>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/until_valid/execute_until_valid.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -599,6 +615,8 @@
           "[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -637,6 +655,8 @@
           "<TPrompt>, { [key in keyof TToolCallbacks]: Awaited<ReturnType<TToolCallbacks[key]>>[\"response\"]; }>[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
