@@ -111,6 +111,9 @@ export class InventoryPage {
   public async goToTime(time: string) {
     await this.datePickerInput.fill(time);
     await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
+    // Focusing the date picker input will cause the calendar popover to open, which covers parts of the UI and can interfere with test assertions.
+    // Closing it by pressing Escape on the date input itself was leading to flaky behaviour where the input value wouldn't be properly set sometimes.
+    // So instead, we click and escape the query input to get rid of all popovers while not interfering with input values as the query input is not being filled.
     await this.queryInput.click();
     await this.queryInput.press('Escape');
   }
