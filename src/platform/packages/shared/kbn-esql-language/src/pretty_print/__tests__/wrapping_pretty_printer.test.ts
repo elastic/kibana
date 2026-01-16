@@ -1020,10 +1020,23 @@ FROM index
         const text = reprint(src, { wrap: 60 }).text;
 
         expect(text).toBe(`PROMQL
-  
     index = my_very_long_index_name_that_should_wrap
     time = ?param
   bytes[5m]`);
+      });
+
+      test('long query', () => {
+        const src = `PROMQL index = kibana_sample_data_logstsdb step = 5m start = "2026-01-08T19:30:00.000Z" end = ?_end rate(byres_counter[5m])`;
+        const text = reprint(src, { wrap: 60 }).text;
+
+        expect(text).toBe(
+          `PROMQL
+    index = kibana_sample_data_logstsdb
+    step = 5m
+    start = "2026-01-08T19:30:00.000Z"
+    end = ?_end
+  rate(byres_counter[5m])`
+        );
       });
     });
   });

@@ -325,12 +325,17 @@ export class WrappingPrettyPrinter {
 
     if (!oneArgumentPerLine) {
       let argIndex = 0;
+      const opts: BasicPrettyPrinterOptions = {
+        ...this.opts,
+        mapRepresentation: ctx.node.type === 'map' ? ctx.node.representation : undefined,
+      };
+
       ARGS: for (const arg of singleItems(ctx.arguments())) {
         if (arg.type === 'option') {
           continue;
         }
 
-        const formattedArg = BasicPrettyPrinter.expression(arg, this.opts);
+        const formattedArg = BasicPrettyPrinter.expression(arg, opts);
         const formattedArgLength = formattedArg.length;
         const needsWrap = remainingCurrentLine < formattedArgLength;
         if (formattedArgLength > largestArg) {
@@ -376,6 +381,12 @@ export class WrappingPrettyPrinter {
       }
     }
 
+    const isAssignmentMap = ctx.node.type === 'map' && ctx.node.representation === 'assignment';
+
+    if (isAssignmentMap && lines > 1) {
+      oneArgumentPerLine = true;
+    }
+
     let indent = inp.indent + this.opts.tab;
 
     if (ctx instanceof CommandVisitorContext) {
@@ -388,7 +399,7 @@ export class WrappingPrettyPrinter {
 
     if (oneArgumentPerLine) {
       lines = 1;
-      txt = ctx instanceof CommandVisitorContext ? '' : '\n';
+      txt = ctx instanceof CommandVisitorContext || isAssignmentMap ? '' : '\n';
       const args = [...ctx.arguments()].filter((arg) => {
         if (!arg) return false;
         if (arg.type === 'option') return arg.name === 'as';
@@ -409,7 +420,19 @@ export class WrappingPrettyPrinter {
         const indentation = arg.indented ? '' : indent;
         const formattedArg = arg.txt;
         const separator = isFirstArg ? '' : '\n';
-        txt += separator + indentation + formattedArg;
+
+        // Remove extra indentation for PROMQL command first map argument
+        let adjustedIndentation = indentation;
+        if (
+          i === 0 &&
+          ctx instanceof CommandVisitorContext &&
+          ctx.name() === 'PROMQL' &&
+          [...children(ctx.node)][0].type === 'map'
+        ) {
+          adjustedIndentation = adjustedIndentation.slice(0, -2);
+        }
+
+        txt += separator + adjustedIndentation + formattedArg;
         lines++;
       }
     }

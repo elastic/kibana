@@ -37,6 +37,7 @@ import type {
   ESQLAstItem,
   ESQLAstQueryExpression,
   ESQLMap,
+  ESQLMapEntry,
   ESQLProperNode,
 } from '../types';
 
@@ -84,6 +85,11 @@ export interface BasicPrettyPrinterOptions {
    * Whether to lowercase keywords. Defaults to `false`.
    */
   lowercaseKeywords?: boolean;
+
+  /**
+   * Map representation to use if cannot be determined from parent context.
+   */
+  mapRepresentation?: ESQLMap['representation'];
 }
 
 export type BasicPrettyPrinterMultilineOptions = Omit<BasicPrettyPrinterOptions, 'multiline'>;
@@ -167,6 +173,7 @@ export class BasicPrettyPrinter {
       lowercaseOptions: opts.lowercaseOptions ?? opts.lowercase ?? false,
       lowercaseFunctions: opts.lowercaseFunctions ?? opts.lowercase ?? false,
       lowercaseKeywords: opts.lowercaseKeywords ?? opts.lowercase ?? false,
+      mapRepresentation: opts.mapRepresentation ?? 'map',
     };
   }
 
@@ -338,7 +345,7 @@ export class BasicPrettyPrinter {
       const key = ctx.visitKey();
       const value = ctx.visitValue();
       const parentNode = ctx.parent?.node as ESQLMap | undefined;
-      const representation = parentNode?.representation ?? 'map';
+      const representation = parentNode?.representation ?? this.opts.mapRepresentation ?? 'map';
       const separator =
         representation === 'map' ? ': ' : representation === 'assignment' ? ' = ' : ' ';
       const formatted = key + separator + value;
