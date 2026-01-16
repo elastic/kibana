@@ -27,20 +27,6 @@ export const DataConnectorsLayout: React.FC<DataConnectorsLayoutProps> = ({ chil
     {
       label: (
         <>
-          {i18n.translate('xpack.dataConnectors.tabs.catalog', {
-            defaultMessage: 'Catalog',
-          })}{' '}
-          <EuiBadge color="hollow">{connectors.length}</EuiBadge>
-        </>
-      ),
-      onClick: navigateToConnectors,
-      isSelected: isConnectorsTab,
-      key: 'connectors',
-      'data-test-subj': 'connectorsTab',
-    },
-    {
-      label: (
-        <>
           {i18n.translate('xpack.dataConnectors.tabs.activeSources', {
             defaultMessage: 'Active sources',
           })}{' '}
@@ -51,6 +37,20 @@ export const DataConnectorsLayout: React.FC<DataConnectorsLayoutProps> = ({ chil
       isSelected: isActiveSourcesTab,
       key: 'active-sources',
       'data-test-subj': 'activeSourcesTab',
+    },
+    {
+      label: (
+        <>
+          {i18n.translate('xpack.dataConnectors.tabs.catalog', {
+            defaultMessage: 'Catalog',
+          })}{' '}
+          <EuiBadge color="hollow">{connectors.length}</EuiBadge>
+        </>
+      ),
+      onClick: navigateToConnectors,
+      isSelected: isConnectorsTab,
+      key: 'connectors',
+      'data-test-subj': 'connectorsTab',
     },
   ];
 
