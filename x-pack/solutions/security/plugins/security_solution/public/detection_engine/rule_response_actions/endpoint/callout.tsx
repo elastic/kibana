@@ -21,6 +21,8 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
   const [data] = useFormData();
   const currentCommand = get(data, `${basePath}.command`);
 
+  // FIXME:PT FIX BUG below.... When `editDisabled` is true, the message displayed assumes the user selected `isolate` when in reality it could have been one of the other response actions
+
   if (editDisabled) {
     return (
       <>
