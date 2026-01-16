@@ -64,7 +64,7 @@ export const EmbeddableRenderer = <
        */
       return (async () => {
         const parentApi = getParentApi();
-
+        console.log({ type });
         const buildEmbeddable = async () => {
           const factory = await getReactEmbeddableFactory<SerializedState, Api>(type);
 
@@ -95,6 +95,7 @@ export const EmbeddableRenderer = <
 
           const initialState =
             parentApi.getSerializedStateForChild(uuid) ?? ({} as SerializedState);
+          console.log({ initialState });
           const { api, Component } = await factory.buildEmbeddable({
             initialState,
             finalizeApi,

@@ -45,6 +45,6 @@ export function transformControlGroupOut(
       },
     }));
   }
-
+  console.log({ controls });
   return controls;
 }

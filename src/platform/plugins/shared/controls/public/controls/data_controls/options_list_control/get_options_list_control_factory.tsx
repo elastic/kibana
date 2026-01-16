@@ -69,6 +69,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
+      console.log({ initialState });
 
       if (isOptionsListESQLControlState(state)) {
         throw new Error('ES|QL control state handling not yet implemented');
@@ -98,7 +99,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
       );
-
+      debugger;
       /** Handle loading state; since suggestion fetching and validation are tied, only need one loading subject */
       const loadingSuggestions$ = new BehaviorSubject<boolean>(false);
       const dataLoadingSubscription = combineLatest([

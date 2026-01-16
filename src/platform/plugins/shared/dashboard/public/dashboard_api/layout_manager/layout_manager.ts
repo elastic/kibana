@@ -79,6 +79,7 @@ export function initializeLayoutManager(
   initialPinnedPanels: DashboardState['pinned_panels'] | undefined,
   trackPanel: ReturnType<typeof initializeTrackPanel>
 ) {
+  console.log({ initialPinnedPanels });
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
   // --------------------------------------------------------------------------------------

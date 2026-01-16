@@ -60,6 +60,7 @@ export function getDashboardApi({
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
 }) {
+  console.log({ initialState });
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
