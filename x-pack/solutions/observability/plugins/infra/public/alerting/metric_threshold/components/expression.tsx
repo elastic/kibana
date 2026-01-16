@@ -102,7 +102,7 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
                 })
               : i18n.translate('xpack.infra.metricThreshold.rule.noDataHelpText', {
                   defaultMessage:
-                    'Send a "no data" alert when data isn\'t returned during the rule execution period or if the rule does not successfully query Elasticsearch.',
+                    'Get a "no data" alert when data isn\'t returned during the rule execution period or if the rule does not successfully query Elasticsearch.',
                 })
           }
         />
