@@ -75,7 +75,11 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
           stepType,
           kibanaNode.configuration.with || {}
         );
-        consoleFormat = generateConsoleFormat({ ...requestInfo, path: `kbn:/${requestInfo.path}` });
+        consoleFormat = generateConsoleFormat({
+          ...requestInfo,
+          // request builder returns path prefixed with one slash, but for kibana apis we need two slashes and a kbn prefix
+          path: `kbn:/${requestInfo.path}`,
+        });
       }
 
       if (!consoleFormat) {
