@@ -11,7 +11,7 @@ import type { UseExpandSectionParams } from './use_expand_section';
 import { useExpandSection } from './use_expand_section';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
 describe('useExpandSection', () => {
   let hookResult: RenderHookResult<boolean, UseExpandSectionParams>;
