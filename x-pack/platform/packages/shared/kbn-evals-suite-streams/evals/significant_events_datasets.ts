@@ -115,6 +115,134 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
             'Scenario C (Java Error): Inject multiline Java stack traces (NullPointerException).',
         },
       },
+      {
+        input: {
+          stream_name: 'synthtrace.http_5xx_errors',
+          feature_description: 'A stream with a high number of HTTP 5xx errors.',
+          sample_logs: Array(50).fill(
+            '192.168.1.1 - - [15/Jan/2024:10:30:00 +0000] "GET /api/user HTTP/1.1" 503 1234 "-" "Mozilla/5.0"'
+          ),
+        },
+        output: {
+          expected_query: {
+            categories: ['error', 'web'],
+            kql_substrings: [
+              'http.response.status_code >= 500 and http.response.status_code < 600',
+            ],
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes:
+            'Scenario D (HTTP Errors): Inject logs with 5xx status codes to test range queries.',
+        },
+      },
+      {
+        input: {
+          stream_name: 'synthtrace.python_error',
+          feature_description: 'A stream with Python IndexError stack traces.',
+          sample_logs: [
+            'Traceback (most recent call last):',
+            '  File "main.py", line 10, in <module>',
+            '    print(my_list[5])',
+            'IndexError: list index out of range',
+          ],
+          ingest_mode: 'single_doc',
+        },
+        output: {
+          expected_query: {
+            categories: ['error'],
+            kql_substrings: ['error', 'IndexError'],
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'Scenario E (Python Error): Inject multiline Python stack traces (IndexError).',
+        },
+      },
+      {
+        input: {
+          stream_name: 'synthtrace.docker_error',
+          feature_description: 'A stream with Docker image not found errors.',
+          sample_logs: [
+            "Unable to find image 'nonexistent-image:latest' locally",
+            "docker: Error response from daemon: pull access denied for nonexistent-image, repository does not exist or may require 'docker login'.",
+          ],
+        },
+        output: {
+          expected_query: {
+            categories: ['error', 'devops'],
+            kql_substrings: ['error', 'image', 'not found'],
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'Scenario F (Docker Error): Inject Docker image not found errors.',
+        },
+      },
+      {
+        input: {
+          stream_name: 'synthtrace.k8s_error',
+          feature_description: 'A stream with Kubernetes pod CrashLoopBackOff errors.',
+          sample_logs: [
+            'State:          Waiting',
+            '  Reason:       CrashLoopBackOff',
+            'Last State:     Terminated',
+            '  Reason:       Error',
+            '  Exit Code:    1',
+          ],
+        },
+        output: {
+          expected_query: {
+            categories: ['error', 'devops'],
+            kql_substrings: ['error', 'CrashLoopBackOff'],
+          },
+        },
+        metadata: {
+          difficulty: 'hard',
+          notes: 'Scenario G (Kubernetes Error): Inject Kubernetes CrashLoopBackOff events.',
+        },
+      },
+      {
+        input: {
+          stream_name: 'synthtrace.db_connection_error',
+          feature_description: 'A stream with database connection errors.',
+          sample_logs: [
+            'ERROR: could not connect to database "postgres": Connection refused',
+            'Is the server running on host "db.example.com" (192.168.1.10) and accepting TCP/IP connections on port 5432?',
+          ],
+        },
+        output: {
+          expected_query: {
+            categories: ['error', 'database'],
+            kql_substrings: ['error', 'connect', 'database'],
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'Scenario H (Database Error): Inject database connection refused errors.',
+        },
+      },
+      {
+        input: {
+          stream_name: 'synthtrace.disk_space_warning',
+          feature_description: 'A stream with disk space warnings.',
+          sample_logs: [
+            'WARN: /var/log is 95% full',
+            'CRITICAL: /var/log is 99% full. Please free up space immediately.',
+          ],
+        },
+        output: {
+          expected_query: {
+            categories: ['operational', 'system'],
+            kql_substrings: ['warn or critical', 'full'],
+          },
+        },
+        metadata: {
+          difficulty: 'easy',
+          notes: 'Scenario I (Disk Space): Inject disk space warnings and critical alerts.',
+        },
+      },
     ],
   },
   {
