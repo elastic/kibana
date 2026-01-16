@@ -110,9 +110,9 @@ export class InventoryPage {
 
   public async goToTime(time: string) {
     await this.datePickerInput.fill(time);
+    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
     await this.queryInput.click();
     await this.queryInput.press('Escape');
-    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
 
   public async getWaffleNode(nodeName: string) {
