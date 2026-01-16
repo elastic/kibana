@@ -44,42 +44,48 @@ export async function getTiledScreenshotWrapped(
     return Buffer.from(screenshot);
   }
 
+  const messagePrefix = 'getTiledScreenshot: ';
+  const messageMeta = { tags: ['tiled-report'] };
+  const debug = (message: string) => logger.debug(`${messagePrefix}${message}`, messageMeta);
+
   // 4 bytes for each pixel (RGBA), multiply by zoom (both dimensions)
   const bufferSize = 4 * ZOOM * ZOOM * rect.width * rect.height;
   const result = new Uint8Array(new ArrayBuffer(bufferSize));
-  log(`width: ${rect.width}; height: ${rect.height}; bufferSize: ${bufferSize}`);
+  debug(
+    `allocated buffer: width: ${rect.width}; height: ${rect.height}; bufferSize: ${bufferSize}`
+  );
 
   let offset = 0;
   for (const tile of tiles) {
+    debug(`getting tile: ${JSON.stringify(tile)}`);
     const screenshot = await getSingleScreenshot({ logger, page, rect: tile });
-    log(`- tile ${JSON.stringify(tile)}; offset: ${offset}`);
-    const bytes = new Uint8Array(screenshot);
-    const image = UPNG.decode(bytes.buffer);
+    const image = UPNG.decode(screenshot);
     const rgbaBytes = UPNG.toRGBA8(image)[0];
-    log(`  - image: width: ${image.width}; height: ${image.height}; depth: ${image.depth}`);
+    debug(`got tile: width: ${image.width}; height: ${image.height}; depth: ${image.depth}`);
     const imageData = new Uint8Array(rgbaBytes);
 
+    debug(`copying tile to buffer offset: ${offset}`);
     result.set(imageData, offset);
 
     offset += rgbaBytes.byteLength;
   }
 
-  log(`new image; height: ${rect.height * ZOOM}; width: ${rect.width * ZOOM}`);
-  const resultImage = UPNG.encode([result.buffer], rect.width * ZOOM, rect.height * ZOOM, 0);
-  return Buffer.from(resultImage);
+  const finalWidth = rect.width * ZOOM;
+  const finalHeight = rect.height * ZOOM;
+  debug(`result image: width: ${finalWidth}; height: ${finalHeight}`);
 
-  function log(message: string) {
-    logger.debug(`getTiledScreenshot: ${message}`);
-  }
+  const resultImage = UPNG.encode([result.buffer], finalWidth, finalHeight, 0);
+  return Buffer.from(resultImage);
 }
 
-async function getSingleScreenshot(params: GetScreenshotParams): Promise<Uint8Array> {
+async function getSingleScreenshot(params: GetScreenshotParams): Promise<ArrayBuffer> {
   const { page } = params;
 
-  return await page.screenshot({
+  const image = await page.screenshot({
     clip: params.rect,
     captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
   });
+  return image.buffer as ArrayBuffer;
 }
 
 // Split a page into tiles but only length-wise, as it's easy to
