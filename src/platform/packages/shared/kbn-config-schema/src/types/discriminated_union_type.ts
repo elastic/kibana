@@ -79,6 +79,9 @@ export class DiscriminatedUnionType<
       return acc;
     }, []);
 
+    // This is a workaround to add the discriminator to the first case because our parser
+    // strips it off the alternatives.match container.
+    // https://github.com/kenspirit/joi-to-json/pull/58
     if (switchCases.length > 0) {
       switchCases[0].then = (switchCases[0]!.then! as Schema).meta({
         [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator,
