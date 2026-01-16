@@ -21,14 +21,8 @@ export function useDiscoverFieldForBreakdown(
   const syncBreakdownFieldToDimensions = useCallback(() => {
     const matchingDimension = getMatchingDimension(breakdownField, dimensions, selectedDimensions);
 
-    if (!matchingDimension) {
-      return;
-    }
-
     // Update selection
-    if (selectedDimensions.length === 0 && MAX_DIMENSIONS_SELECTIONS === 1) {
-      onDimensionsChange([matchingDimension]);
-    } else {
+    if (matchingDimension) {
       onDimensionsChange(
         [matchingDimension, ...selectedDimensions].slice(0, MAX_DIMENSIONS_SELECTIONS)
       );
