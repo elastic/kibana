@@ -14,6 +14,12 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable, optional } from 'inversify';
 import { omit, zipObject } from 'lodash';
 import pLimit from 'p-limit';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction as AlertActionDocument,
+} from '../../resources/alert_actions';
+import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
+import { ALERT_TRANSITIONS_DATA_STREAM } from '../../resources/alert_transitions';
 import type {
   BulkCreateAlertActionItemData,
   CreateAlertActionData,
@@ -21,7 +27,6 @@ import type {
 import { QueryService } from '../services/query_service/query_service';
 import type { StorageService } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
-import type { AlertAction as AlertActionDocument } from '../../resources/alert_actions';
 import {
   alertEventSchema,
   alertTransitionSchema,
@@ -48,7 +53,7 @@ export class AlertActionsClient {
     ]);
 
     await this.storageService.bulkIndexDocs({
-      index: '.alerts-actions',
+      index: ALERT_ACTIONS_DATA_STREAM,
       docs: [
         this.buildAlertActionDocument({
           alertSeriesId: params.alertSeriesId,
@@ -94,7 +99,7 @@ export class AlertActionsClient {
       .map((result) => result.value);
 
     if (docs.length > 0) {
-      await this.storageService.bulkIndexDocs({ index: '.alerts-actions', docs });
+      await this.storageService.bulkIndexDocs({ index: ALERT_ACTIONS_DATA_STREAM, docs });
     }
 
     return { processed: docs.length, total: actions.length };
@@ -138,7 +143,7 @@ export class AlertActionsClient {
   }
 
   private async findLastAlertEventBySeriesIdOrThrow(alertSeriesId: string): Promise<AlertEvent> {
-    const query = from('.alerts-events').pipe(
+    const query = from(ALERT_EVENTS_DATA_STREAM).pipe(
       where(`alert_series_id == ?alertSeriesId`, { alertSeriesId }),
       sort({ '@timestamp': SortOrder.Desc }),
       keep(['@timestamp', 'rule.id']),
@@ -167,7 +172,7 @@ export class AlertActionsClient {
       whereCriteria += ' AND episode_id == ?episodeId';
     }
 
-    const query = from('.alerts-transitions').pipe(
+    const query = from(ALERT_TRANSITIONS_DATA_STREAM).pipe(
       where(whereCriteria, { alertSeriesId, episodeId }),
       sort({ '@timestamp': SortOrder.Desc }),
       keep(['episode_id']),
