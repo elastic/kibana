@@ -35,6 +35,8 @@
           "\"complete\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52,6 +54,8 @@
           "\"logs_essentials\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -69,6 +73,8 @@
           "\"oblt\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -86,6 +92,8 @@
           "\"observability\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,6 +111,8 @@
           "\"platform\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -120,6 +130,8 @@
           "\"es\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -137,6 +149,8 @@
           "\"search\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -154,6 +168,8 @@
           "\"complete\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -171,6 +187,8 @@
           "\"essentials\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 57,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -188,6 +206,8 @@
           "\"security\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -205,6 +225,8 @@
           "\"search_ai_lake\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -222,6 +244,8 @@
           "\"security\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -239,6 +263,8 @@
           "\"workplaceai\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -256,6 +282,8 @@
           "\"workplaceai\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -273,6 +301,8 @@
           "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -290,6 +320,8 @@
           "\"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -307,6 +339,8 @@
           "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -324,6 +358,8 @@
           "\"search\" | \"security\" | \"observability\" | \"workplaceai\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -341,6 +377,8 @@
           "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | \"common\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -358,6 +396,8 @@
           "\"shared\" | \"private\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -377,6 +417,8 @@
           "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -394,6 +436,8 @@
           "{ readonly observability: readonly [\"complete\", \"logs_essentials\"]; readonly security: readonly [\"complete\", \"essentials\", \"search_ai_lake\"]; readonly search: readonly []; readonly workplaceai: readonly []; }"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -411,6 +455,8 @@
           "readonly [\"oblt\", \"security\", \"es\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -428,6 +474,8 @@
           "readonly [\"observability\", \"security\", \"search\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

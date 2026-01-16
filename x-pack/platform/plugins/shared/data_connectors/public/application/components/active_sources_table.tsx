@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { capitalize } from 'lodash';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -18,10 +19,13 @@ import {
   EuiButton,
   EuiSpacer,
   EuiTablePagination,
+  EuiLink,
   EuiIcon,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type { ActiveSource } from '../../types/connector';
 import {
   DEFAULT_ITEMS_PER_PAGE,
@@ -29,12 +33,14 @@ import {
 } from '../../../common/constants';
 import { AgentAvatarGroup } from './agent_avatar_group';
 import { getConnectorIcon, toStackConnectorType } from '../../utils';
+import { useKibana } from '../hooks/use_kibana';
 
 interface ActiveSourcesTableProps {
   sources: ActiveSource[];
   isLoading?: boolean;
   onReconnect?: (source: ActiveSource) => void;
   onEdit?: (source: ActiveSource) => void;
+  onClone?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
 }
 
@@ -56,11 +62,13 @@ const ActionsCell: React.FC<{
   source: ActiveSource;
   onReconnect?: (source: ActiveSource) => void;
   onEdit?: (source: ActiveSource) => void;
+  onClone?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
   disabled?: boolean;
-}> = ({ source, onReconnect, onEdit, onDelete, disabled = false }) => {
+}> = ({ source, onReconnect, onEdit, onClone, onDelete, disabled = false }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  // Menu items (ALL actions)
   const items = [
     onEdit && (
       <EuiContextMenuItem
@@ -74,6 +82,21 @@ const ActionsCell: React.FC<{
       >
         {i18n.translate('xpack.dataConnectors.activeSources.editAction', {
           defaultMessage: 'Edit',
+        })}
+      </EuiContextMenuItem>
+    ),
+    onClone && (
+      <EuiContextMenuItem
+        key="clone"
+        icon="copy"
+        onClick={() => {
+          setIsPopoverOpen(false);
+          onClone(source);
+        }}
+        data-test-subj={`cloneActiveSource-${source.id}`}
+      >
+        {i18n.translate('xpack.dataConnectors.activeSources.cloneAction', {
+          defaultMessage: 'Clone',
         })}
       </EuiContextMenuItem>
     ),
@@ -112,11 +135,6 @@ const ActionsCell: React.FC<{
     ),
   ].filter((item): item is React.ReactElement => Boolean(item));
 
-  // Don't render actions button if no actions are available
-  if (items.length === 0) {
-    return null;
-  }
-
   const button = (
     <EuiButtonIcon
       iconType="boxesHorizontal"
@@ -130,15 +148,48 @@ const ActionsCell: React.FC<{
   );
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel items={items} />
-    </EuiPopover>
+    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center" responsive={false}>
+      {onEdit && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="pencil"
+            aria-label={i18n.translate('xpack.dataConnectors.activeSources.editAction', {
+              defaultMessage: 'Edit',
+            })}
+            onClick={() => onEdit(source)}
+            disabled={disabled}
+            data-test-subj={`editActiveSource-${source.id}`}
+          />
+        </EuiFlexItem>
+      )}
+      {onDelete && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={i18n.translate('xpack.dataConnectors.activeSources.deleteAction', {
+              defaultMessage: 'Delete',
+            })}
+            onClick={() => onDelete(source)}
+            disabled={disabled}
+            data-test-subj={`deleteActiveSource-${source.id}`}
+          />
+        </EuiFlexItem>
+      )}
+      {items.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={() => setIsPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 
@@ -147,8 +198,12 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   isLoading = false,
   onReconnect,
   onEdit,
+  onClone,
   onDelete,
 }) => {
+  const {
+    services: { chrome },
+  } = useKibana();
   const [selectedItems, setSelectedItems] = useState<ActiveSource[]>([]);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
@@ -157,6 +212,21 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     setItemsPerPage(newItemsPerPage);
     setActivePage(0); // Reset to first page when changing page size
   };
+
+  // Get workflow URL for linking
+  const workflowsUrl = useMemo(() => {
+    return chrome?.navLinks.get(WORKFLOWS_APP_ID)?.url;
+  }, [chrome]);
+
+  // Generate tools URL with search param
+  const getToolsUrl = useCallback(
+    (sourceType: string) => {
+      const baseUrl = chrome?.navLinks.get(AGENT_BUILDER_APP_ID)?.url;
+      if (!baseUrl) return undefined;
+      return `${baseUrl}/tools?search=${encodeURIComponent(sourceType)}`;
+    },
+    [chrome]
+  );
 
   const paginatedSources = useMemo(() => {
     const start = activePage * itemsPerPage;
@@ -177,7 +247,16 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
             <SourceIcon source={source} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s">{name}</EuiText>
+            {onEdit ? (
+              <EuiLink
+                onClick={() => onEdit(source)}
+                data-test-subj={`activeSourceNameLink-${source.id}`}
+              >
+                <EuiText size="s">{name}</EuiText>
+              </EuiLink>
+            ) : (
+              <EuiText size="s">{name}</EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -187,21 +266,37 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.typeColumn', {
         defaultMessage: 'Type',
       }),
-      render: (type: string) => <EuiText size="s">{type}</EuiText>,
+      render: (type: string) => <EuiText size="s">{capitalize(type)}</EuiText>,
     },
     {
       field: 'workflows',
       name: i18n.translate('xpack.dataConnectors.activeSources.workflowsColumn', {
         defaultMessage: 'Workflows',
       }),
-      render: (workflows: string[]) => <EuiText size="s">{workflows.length}</EuiText>,
+      align: 'center',
+      render: (workflows: string[]) =>
+        workflows.length > 0 ? (
+          <EuiLink href={workflowsUrl} data-test-subj="workflowsLink">
+            <EuiText size="s">{workflows.length}</EuiText>
+          </EuiLink>
+        ) : (
+          <EuiText size="s">0</EuiText>
+        ),
     },
     {
       field: 'agentTools',
       name: i18n.translate('xpack.dataConnectors.activeSources.toolsColumn', {
         defaultMessage: 'Tools',
       }),
-      render: (agentTools: string[]) => <EuiText size="s">{agentTools.length}</EuiText>,
+      align: 'center',
+      render: (agentTools: string[], source: ActiveSource) =>
+        agentTools.length > 0 ? (
+          <EuiLink href={getToolsUrl(source.type)} data-test-subj="toolsLink">
+            <EuiText size="s">{agentTools.length}</EuiText>
+          </EuiLink>
+        ) : (
+          <EuiText size="s">0</EuiText>
+        ),
     },
     {
       field: 'usedBy',
@@ -219,14 +314,15 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.actionsColumn', {
         defaultMessage: 'Actions',
       }),
-      width: '80px',
+      width: '120px',
+      align: 'center',
       render: (source: ActiveSource) => (
         <ActionsCell
           source={source}
           onReconnect={onReconnect}
           onEdit={onEdit}
+          onClone={onClone}
           onDelete={onDelete}
-          disabled={selectedItems.length > 0}
         />
       ),
     },
@@ -250,19 +346,6 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
                   values: { count: selectedItems.length },
                 })}
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="copy"
-                onClick={() => {}}
-                disabled
-                data-test-subj="bulkCloneButton"
-              >
-                {i18n.translate('xpack.dataConnectors.activeSources.cloneSelected', {
-                  defaultMessage: 'Clone selected',
-                })}
-              </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
