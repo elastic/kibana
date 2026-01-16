@@ -213,7 +213,7 @@ export function JobSelector({
               data-test-subj="mlButtonEditJobSelection"
             >
               {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
-                defaultMessage: 'Edit job selection',
+                defaultMessage: 'Job selection',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
