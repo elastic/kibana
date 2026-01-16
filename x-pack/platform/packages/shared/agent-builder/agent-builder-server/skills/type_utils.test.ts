@@ -76,7 +76,13 @@ describe('FilePathsFromStructure type', () => {
       const _t4: _Test4 = true;
       const _t5: _Test5 = true;
       const _t6: _Test6 = true;
-      void _t1, _t2, _t3, _t4, _t5, _t6; // Type-level tests - variables exist only for type checking
+      // Type-level tests - variables exist only for type checking
+      expect(_t1).toBe(true);
+      expect(_t2).toBe(true);
+      expect(_t3).toBe(true);
+      expect(_t4).toBe(true);
+      expect(_t5).toBe(true);
+      expect(_t6).toBe(true);
 
       expect(validPath1).toBe('test/level1');
       expect(validPath2).toBe('test/level1/subdir1');
@@ -100,7 +106,8 @@ describe('FilePathsFromStructure type', () => {
       // This will fail at compile time if paths don't match
       type _PathsMatch = Expect<Equal<AllPaths, ExpectedPaths>>;
       const __: _PathsMatch = true;
-      void __; // Type-level test - variable exists only for type checking
+      // Type-level test - variable exists only for type checking
+      expect(__).toBe(true);
     });
   });
 
@@ -114,7 +121,10 @@ describe('FilePathsFromStructure type', () => {
       const _1: _Test1 = true;
       const _2: _Test2 = true;
       const _3: _Test3 = true;
-      void _1, _2, _3; // Type-level tests - variables exist only for type checking
+      // Type-level tests - variables exist only for type checking
+      expect(_1).toBe(true);
+      expect(_2).toBe(true);
+      expect(_3).toBe(true);
     });
 
     it('should reject non-existent paths', () => {
@@ -128,14 +138,19 @@ describe('FilePathsFromStructure type', () => {
       const _2: _Test2 = true;
       const _3: _Test3 = true;
       const _4: _Test4 = true;
-      void _1, _2, _3, _4; // Type-level tests - variables exist only for type checking
+      // Type-level tests - variables exist only for type checking
+      expect(_1).toBe(true);
+      expect(_2).toBe(true);
+      expect(_3).toBe(true);
+      expect(_4).toBe(true);
     });
 
     it('should reject empty path', () => {
       // Empty path should not be valid (root level is skipped)
       type _Test1 = Expect<IsInvalidPath<''>>;
       const _1: _Test1 = true;
-      void _1; // Type-level test - variable exists only for type checking
+      // Type-level test - variable exists only for type checking
+      expect(_1).toBe(true);
     });
   });
 
@@ -147,7 +162,9 @@ describe('FilePathsFromStructure type', () => {
 
       const _1: _ValidEnding = true;
       const _2: _InvalidEnding = true;
-      void _1, _2; // Type-level tests - variables exist only for type checking
+      // Type-level tests - variables exist only for type checking
+      expect(_1).toBe(true);
+      expect(_2).toBe(true);
     });
 
     it('should handle nested FileDirectory structures correctly', () => {
@@ -159,7 +176,10 @@ describe('FilePathsFromStructure type', () => {
       const _1: _Nested1 = true;
       const _2: _Nested2 = true;
       const _3: _Nested3 = true;
-      void _1, _2, _3; // Type-level tests - variables exist only for type checking
+      // Type-level tests - variables exist only for type checking
+      expect(_1).toBe(true);
+      expect(_2).toBe(true);
+      expect(_3).toBe(true);
     });
   });
 });
