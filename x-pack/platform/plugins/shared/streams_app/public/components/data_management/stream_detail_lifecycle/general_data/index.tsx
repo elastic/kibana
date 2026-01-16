@@ -9,8 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
-import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
-import { isIlmLifecycle } from '@kbn/streams-schema';
+import { type IngestStreamLifecycle, type Streams } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { omit } from 'lodash';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -21,7 +20,7 @@ import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
 import { IngestionCard } from './cards/ingestion_card';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
-import { IlmSummary } from './ilm_summary';
+import { LifecycleSummary } from './lifecycle_summary';
 import { IngestionRate } from './ingestion_rate';
 import { EditLifecycleModal } from './modal';
 
@@ -137,9 +136,9 @@ export const StreamDetailGeneralData = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
+      {definition.privileges.lifecycle ? (
         <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
-          <IlmSummary definition={definition} stats={data.stats?.ds.stats} />
+          <LifecycleSummary definition={definition} stats={data.stats?.ds.stats} />
         </EuiPanel>
       ) : null}
       <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>

@@ -10,6 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { ReactElement } from 'react';
 import type { DocViewsRegistry } from './doc_views_registry';
 
 export interface FieldMapping {
@@ -44,7 +45,6 @@ export interface DocViewRenderProps {
   onRemoveColumn?: (columnName: string) => void;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
-  initialTabId?: string;
 }
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
@@ -53,8 +53,6 @@ export interface DocView {
   id: string;
   order: number;
   title: string;
-  component: DocViewerComponent;
   enabled?: boolean;
+  render: (props: DocViewRenderProps) => ReactElement;
 }
-
-export type DocViewFactory = () => DocView;

@@ -11,7 +11,7 @@ import { threatAnalysisSkill } from './threat_analysis_skill';
 /**
  * Registers all security agent builder skills with the agentBuilder plugin
  */
-export const registerSkills = (agentBuilder: AgentBuilderPluginSetup): void => {
+export const registerSkills = async (agentBuilder: AgentBuilderPluginSetup): Promise<void> => {
   agentBuilder.skill.registerSkill(threatAnalysisSkill);
 };
 

@@ -18,11 +18,11 @@ import type {
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
+import type { ConfigSchema } from '@kbn/kql/server/config';
 import type { Observable } from 'rxjs';
-import { dataPluginMock } from '@kbn/unified-search-plugin/server/mocks';
-import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
-import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
+import { dataPluginMock } from '@kbn/kql/server/mocks';
+import { termsEnumSuggestions } from '@kbn/kql/server/autocomplete/terms_enum';
+import { termsAggSuggestions } from '@kbn/kql/server/autocomplete/terms_agg';
 import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
@@ -46,13 +46,13 @@ import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
-jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
+jest.mock('@kbn/kql/server/autocomplete/terms_enum', () => {
   return {
     termsEnumSuggestions: jest.fn(),
   };
 });
 
-jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_agg', () => {
+jest.mock('@kbn/kql/server/autocomplete/terms_agg', () => {
   return {
     termsAggSuggestions: jest.fn(),
   };
