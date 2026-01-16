@@ -45,6 +45,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,6 +61,8 @@
               "\"authentication_expired_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -70,6 +74,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -101,6 +107,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,6 +123,8 @@
               "\"browser_could_not_launch_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -126,6 +136,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -140,6 +152,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -173,6 +187,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -187,6 +203,8 @@
               "\"browser_screenshot_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -198,6 +216,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -229,6 +249,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 125,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,6 +265,8 @@
               "\"browser_unexpectedly_closed_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -254,6 +278,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -268,6 +294,8 @@
         "label": "CancellationToken",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/common/cancellation_token.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -282,6 +310,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/cancellation_token.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -298,6 +328,8 @@
               "(callback: Function) => void"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/cancellation_token.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -312,6 +344,8 @@
                   "Function"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/common/cancellation_token.ts",
+                "lineNumber": 21,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -330,6 +364,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/cancellation_token.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -346,6 +382,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/cancellation_token.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -381,6 +419,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -395,6 +435,8 @@
               "\"disallowed_outgoing_url_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -409,6 +451,8 @@
               "\"disallowed_outgoing_url_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -442,6 +486,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -456,6 +502,8 @@
               "\"invalid_layout_parameters_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -470,6 +518,8 @@
               "\"invalid_layout_parameters_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -501,6 +551,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 139,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -515,6 +567,8 @@
               "\"kibana_shutting_down_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -526,6 +580,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -557,6 +613,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -571,6 +629,8 @@
               "\"missing_authentication_header_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -582,6 +642,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -613,6 +675,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -627,6 +691,8 @@
               "\"pdf_worker_out_of_memory_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -638,6 +704,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -652,6 +720,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -685,6 +755,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -699,6 +771,8 @@
               "\"queue_timeout_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -710,6 +784,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -734,6 +810,8 @@
           " extends Error"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -749,6 +827,8 @@
               "\nA string that uniquely brands an error type. This is used to power telemetry\nabout reporting failures.\n"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -763,6 +843,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -777,6 +859,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+                "lineNumber": 28,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -792,6 +876,8 @@
             "label": "message",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -806,6 +892,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -839,6 +927,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 163,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -853,6 +943,8 @@
               "\"reporting_saved_object_not_found_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -864,6 +956,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -897,6 +991,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -911,6 +1007,8 @@
               "\"unknown_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -922,6 +1020,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -955,6 +1055,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 146,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -969,6 +1071,8 @@
               "\"visual_reporting_soft_disabled_error\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -980,6 +1084,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -994,6 +1100,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1015,6 +1123,8 @@
           "({ basePath, appPath, spaceId }: Args) => string"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/build_kibana_path.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1029,6 +1139,8 @@
               "Args"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/build_kibana_path.ts",
+            "lineNumber": 16,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1056,6 +1168,8 @@
           ") => number"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/schema_utils.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1077,6 +1191,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/schema_utils.ts",
+            "lineNumber": 32,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1096,6 +1212,8 @@
           "(value: number | moment.Duration) => number"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/schema_utils.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1110,6 +1228,8 @@
               "number | moment.Duration"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/schema_utils.ts",
+            "lineNumber": 18,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1129,6 +1249,8 @@
           "(value: number | moment.Duration) => moment.Duration"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/schema_utils.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1143,6 +1265,8 @@
               "number | moment.Duration"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/schema_utils.ts",
+            "lineNumber": 25,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1161,6 +1285,8 @@
         "label": "ReportingError",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1177,6 +1303,8 @@
               "(() => string) | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1195,6 +1323,8 @@
         "label": "JOB_STATUS",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 104,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1212,6 +1342,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1227,6 +1359,8 @@
           "\"scheduled\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 57,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1242,6 +1376,8 @@
           "\"single\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1257,6 +1393,8 @@
           "\"kibana-reporting\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 95,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1272,6 +1410,8 @@
           "\"xpack.reporting.jobCompletionNotifications\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1287,6 +1427,8 @@
           "\"basic\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1302,6 +1444,8 @@
           "\"standard\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1317,6 +1461,8 @@
           "\"enterprise\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1332,6 +1478,8 @@
           "\"gold\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1347,6 +1495,8 @@
           "\"platinum\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1362,6 +1512,8 @@
           "\"trial\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1377,6 +1529,8 @@
           "\"reportJobListing\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 117,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1392,6 +1546,8 @@
           "\"reportJobRow\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 118,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1407,6 +1563,8 @@
           "(\"scheduled\" | \"single\")[]"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1422,6 +1580,8 @@
           "\"Reporting\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1437,6 +1597,8 @@
           "\"/app/management/insightsAndAlerting/reporting\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 86,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1452,6 +1614,8 @@
           "\"/app/management/insightsAndAlerting/reporting/schedules\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 87,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1467,6 +1631,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 72,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1482,6 +1648,8 @@
           "\"/app/reportingRedirect\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 82,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1497,6 +1665,8 @@
           "\"__REPORTING_REDIRECT_LOCATOR_STORE_KEY__\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 83,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1512,6 +1682,8 @@
           "(\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1527,6 +1699,8 @@
           "\"xpackReporting:customPdfLogo\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1542,6 +1716,8 @@
           "\"dateFormat:tz\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1557,6 +1733,8 @@
           "\"search:includeFrozen\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1571,6 +1749,8 @@
         "label": "INTERNAL_ROUTES",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1582,6 +1762,8 @@
             "label": "MIGRATE",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1593,6 +1775,8 @@
                 "label": "MIGRATE_ILM_POLICY",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 13,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1604,6 +1788,8 @@
                 "label": "GET_ILM_POLICY_STATUS",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 14,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1617,6 +1803,8 @@
             "label": "DIAGNOSE",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1628,6 +1816,8 @@
                 "label": "BROWSER",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 17,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1639,6 +1829,8 @@
                 "label": "SCREENSHOT",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 18,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1652,6 +1844,8 @@
             "label": "JOBS",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1663,6 +1857,8 @@
                 "label": "COUNT",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 21,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1674,6 +1870,8 @@
                 "label": "LIST",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 22,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1685,6 +1883,8 @@
                 "label": "INFO_PREFIX",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 23,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1696,6 +1896,8 @@
                 "label": "DELETE_PREFIX",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 24,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1707,6 +1909,8 @@
                 "label": "DOWNLOAD_PREFIX",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 25,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1720,6 +1924,8 @@
             "label": "SCHEDULED",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1731,6 +1937,8 @@
                 "label": "LIST",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 28,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1742,6 +1950,8 @@
                 "label": "BULK_DISABLE",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 29,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1753,6 +1963,8 @@
                 "label": "BULK_DELETE",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 30,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1764,6 +1976,8 @@
                 "label": "BULK_ENABLE",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 31,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1777,6 +1991,8 @@
             "label": "HEALTH",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1788,6 +2004,8 @@
             "label": "GENERATE_PREFIX",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1799,6 +2017,8 @@
             "label": "SCHEDULE_PREFIX",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1813,6 +2033,8 @@
         "label": "PUBLIC_ROUTES",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1826,6 +2048,8 @@
               "/**\n   * Public endpoint for POST URL strings and automated report generation\n   * exportTypeId is added to the final path\n   */"
             ],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1837,6 +2061,8 @@
             "label": "JOBS",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1850,6 +2076,8 @@
                   "/**\n     * Public endpoint used by Watcher and automated report downloads\n     * jobId is added to the final path\n     */"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1863,6 +2091,8 @@
                   "/**\n     * Public endpoint potentially used to delete a report after download in automation\n     * jobId is added to the final path\n     */"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
