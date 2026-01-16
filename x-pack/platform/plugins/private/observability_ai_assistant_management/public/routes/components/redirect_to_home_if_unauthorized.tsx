@@ -50,5 +50,7 @@ export function RedirectToHomeIfUnauthorized({
     }
   }, [allowed, navigateToApp, isServerlessSearchSolution]);
 
+  if (!allowed) return null;
+
   return <>{children}</>;
 }
