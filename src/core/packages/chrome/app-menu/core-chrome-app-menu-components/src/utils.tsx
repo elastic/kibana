@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type MouseEvent } from 'react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
   type EuiButtonColor,
@@ -117,15 +117,14 @@ export const mapAppMenuItemToPanelItem = (
     tooltipTitle: item?.tooltipTitle,
   });
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent) => {
     if (isDisabled(item?.disableButton)) {
       return;
     }
 
-    const shouldClosePopover =
-      !item?.href && childPanelId === undefined && item.run?.length === 0 && onClose;
+    const shouldClosePopover = !item?.href && childPanelId === undefined && onClose;
 
-    item.run?.();
+    item.run?.({ triggerElement: event?.currentTarget as HTMLElement });
 
     if (shouldClosePopover) {
       onClose();
@@ -222,17 +221,23 @@ export const getPopoverPanels = ({
   startPanelId?: number;
   onClose?: () => void;
   onCloseOverflowButton?: () => void;
-}): EuiContextMenuPanelDescriptor[] => {
+}): { panels: EuiContextMenuPanelDescriptor[]; panelIdToTestId: Record<string, string> } => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
+  const panelIdToTestId: Record<string, string> = {};
   const hasActionItems = Boolean(primaryActionItem || secondaryActionItem);
   let currentPanelId = startPanelId;
 
   const processItems = (
     itemsToProcess: AppMenuPopoverItem[],
     panelId: number,
-    parentTitle?: string
+    parentTitle?: string,
+    parentPopoverTestId?: string
   ) => {
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
+
+    if (parentPopoverTestId) {
+      panelIdToTestId[String(panelId)] = parentPopoverTestId;
+    }
 
     itemsToProcess.forEach((item) => {
       if (item.separator === 'above') {
@@ -243,7 +248,7 @@ export const getPopoverPanels = ({
         currentPanelId++;
         const childPanelId = currentPanelId;
 
-        processItems(item.items, childPanelId, item.label);
+        processItems(item.items, childPanelId, item.label, item.popoverTestId);
         panelItems.push(
           mapAppMenuItemToPanelItem(item, childPanelId, onClose, onCloseOverflowButton)
         );
@@ -272,7 +277,7 @@ export const getPopoverPanels = ({
   if (hasActionItems) {
     const mainPanel = panels.find((panel) => panel.id === startPanelId);
 
-    if (!mainPanel) return panels;
+    if (!mainPanel) return { panels, panelIdToTestId };
 
     const actionItems: EuiContextMenuPanelItemDescriptor[] = getPopoverActionItems({
       primaryActionItem,
@@ -282,10 +287,10 @@ export const getPopoverPanels = ({
 
     mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...actionItems];
 
-    return panels;
+    return { panels, panelIdToTestId };
   }
 
-  return panels;
+  return { panels, panelIdToTestId };
 };
 
 /**

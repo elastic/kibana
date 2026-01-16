@@ -25,6 +25,8 @@
           "{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/src/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -73,6 +75,8 @@
           "<string | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/src/titles_schema.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
