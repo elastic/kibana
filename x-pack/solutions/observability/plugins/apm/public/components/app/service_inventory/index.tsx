@@ -182,6 +182,9 @@ export function ServiceInventory() {
 
   const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
 
+  // TODO: Remove this for real implementation
+  const displaySlos = mainStatisticsData.items.length > 0;
+
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
   const displayAlerts = mainStatisticsData.items.some(
@@ -301,6 +304,7 @@ export function ServiceInventory() {
             comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
             displayHealthStatus={displayHealthStatus}
             displayAlerts={displayAlerts}
+            displaySlos={displaySlos}
             initialSortField={initialSortField}
             initialSortDirection={initialSortDirection}
             sortFn={sortFn}
