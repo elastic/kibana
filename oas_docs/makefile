@@ -21,7 +21,7 @@ api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles
 
 .PHONY: lens-docs
 lens-docs:
-	echo "Making Lens docs..."
+	@echo "Making Lens docs..."
 
 	$(MAKE) merge-api-docs-stateful
 
@@ -30,7 +30,7 @@ lens-docs:
 	npx @redocly/cli bundle output/kibana.tmp.yaml --ext yaml -o output/kibana.yaml
 	rm output/kibana.tmp*.yaml
 
-	$(MAKE) space-aware-api-docs
+#	$(MAKE) space-aware-api-docs
 
 	echo "Rendering stateful docs preview..."
 	npx bump-cli preview "output/kibana.yaml"
