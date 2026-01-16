@@ -29,6 +29,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.observability}.get_log_change_points`,
   `${internalNamespaces.observability}.get_metric_change_points`,
   `${internalNamespaces.observability}.get_index_info`,
+  `${internalNamespaces.observability}.get_correlations`,
 
   // Dashboards
   'platform.dashboard.create_dashboard',
