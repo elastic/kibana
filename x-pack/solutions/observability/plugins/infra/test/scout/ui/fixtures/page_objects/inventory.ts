@@ -6,13 +6,11 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
   public readonly k8sFeedbackLink: Locator;
 
-  public readonly queryInput: Locator;
   public readonly datePickerInput: Locator;
 
   public readonly inventorySwitcherButton: Locator;
@@ -41,7 +39,6 @@ export class InventoryPage {
     this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
     this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
 
-    this.queryInput = this.page.getByTestId('queryInput');
     this.datePickerInput = this.page.getByTestId('waffleDatePicker').getByRole('textbox');
 
     this.inventorySwitcherButton = this.page.getByTestId('openInventorySwitcher');
@@ -67,20 +64,14 @@ export class InventoryPage {
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
   }
 
-  private async waitForNodesToLoad(opts: { waitForSnapshotRequest?: boolean } = {}) {
-    if (opts.waitForSnapshotRequest) {
-      // Wait for successful API completion
-      await this.page.waitForResponse(
-        (resp) => resp.url().includes('/api/metrics/snapshot') && resp.status() === 200
-      );
-    }
-
+  private async waitForNodesToLoad() {
     await this.page.getByTestId('infraNodesOverviewLoadingPanel').waitFor({ state: 'hidden' });
   }
 
   private async waitForPageToLoad() {
     await this.page.getByTestId('infraMetricsPage').waitFor();
     await this.waitForNodesToLoad();
+    await this.page.getByTestId('savedViews-openPopover-loaded').waitFor();
   }
 
   public async goToPage() {
@@ -110,15 +101,9 @@ export class InventoryPage {
   }
 
   public async goToTime(time: string) {
-    let inputValue = '';
-    do {
-      // eslint-disable-next-line playwright/no-force-option
-      await this.datePickerInput.fill(time, { force: true });
-      inputValue = await this.datePickerInput.inputValue();
-    } while (inputValue !== time);
-    await expect(this.datePickerInput).toHaveValue(time);
+    await this.datePickerInput.fill(time);
     await this.datePickerInput.press('Escape');
-    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
+    await this.waitForNodesToLoad();
   }
 
   public async getWaffleNode(nodeName: string) {
@@ -134,19 +119,19 @@ export class InventoryPage {
   public async showHosts() {
     await this.inventorySwitcherButton.click();
     await this.inventorySwitcherHostsButton.click();
-    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
+    await this.waitForNodesToLoad();
   }
 
   public async showPods() {
     await this.inventorySwitcherButton.click();
     await this.inventorySwitcherPodsButton.click();
-    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
+    await this.waitForNodesToLoad();
   }
 
   public async showContainers() {
     await this.inventorySwitcherButton.click();
     await this.inventorySwitcherContainersButton.click();
-    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
+    await this.waitForNodesToLoad();
   }
 
   public async clickNoDataPageAddDataButton() {
