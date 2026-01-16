@@ -80,7 +80,7 @@ The dashboard is created in edit mode so the user can review and save it.`,
 
         const spaceId = spaces?.spacesService?.getSpaceId(request);
 
-        // Generate in-memory dashboard URL - no dashboardId means unsaved/create mode
+        // Generate dashboard URL
         const dashboardUrl = await dashboardLocator.getRedirectUrl(
           {
             // No dashboardId means it will be an unsaved "create" dashboard
