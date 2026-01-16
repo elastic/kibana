@@ -33,10 +33,15 @@ jest.mock('../../../stream_detail_features/stream_description/use_stream_descrip
     onCancelEdit: jest.fn(),
     onStartEditing: jest.fn(),
     onSaveDescription: jest.fn(),
+    isTaskLoading: false,
+    task: undefined,
+    taskError: null,
+    refreshTask: jest.fn(),
     getDescriptionGenerationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
     scheduleDescriptionGenerationTask: jest.fn(),
     cancelDescriptionGenerationTask: jest.fn(),
     acknowledgeDescriptionGenerationTask: jest.fn(),
+    areButtonsDisabled: false,
   }),
 }));
 
