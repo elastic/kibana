@@ -62,6 +62,8 @@ export interface DocViewRenderProps {
   decreaseAvailableHeightBy?: number;
 }
 
+export type DocViewerComponent = React.FC<DocViewRenderProps>;
+
 export type DocViewRenderFunction<TState extends object = object> = (
   props: DocViewRenderProps & RestorableStateProviderProps<TState>
 ) => ReactElement;
