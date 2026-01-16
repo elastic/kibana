@@ -467,21 +467,19 @@ export class SignatureAnalyzer {
    * Input:  "{name='boost', values=[2.5], description='Boost value', type=[float]}, {name='analyzer', values=[standard], description='analyzer used', type=[keyword]}"
    * Output: { boost: { type: 'number', ... }, analyzer: { type: 'string', ... } }
    */
-  public static parseMapParams(mapParamsStr: string): MapParameters<boolean> {
-    const result: MapParameters<boolean> = {};
+  public static parseMapParams(mapParamsStr: string): MapParameters {
+    const result: MapParameters = {};
 
     for (const match of mapParamsStr.matchAll(MAP_PARAMS_REGEX)) {
       const paramName = match[1];
       const rawValues = match[2] ?? '';
-      const description = match[3] ?? '';
-      const rawType = match[4] ?? 'string';
 
       const values = rawValues
         .split(',')
         .map((val) => val.trim().replace(STRIP_SINGLE_QUOTES_REGEX, ''))
         .filter(Boolean);
 
-      result[paramName] = parseMapValues(values, description, rawType);
+      result[paramName] = parseMapValues(values);
     }
 
     return result;
