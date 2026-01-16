@@ -120,9 +120,14 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
   const { query, cursorPosition } = params;
   const innerText = query.slice(0, cursorPosition);
   const isCursorFollowedByComma = query.slice(cursorPosition).trimStart().startsWith(',');
+  const isCursorFollowedByParens = query.slice(cursorPosition).trimStart().startsWith('(');
 
   const baseOptions: ExpressionContextOptions = params.options ?? ({} as ExpressionContextOptions);
-  const options: ExpressionContextOptions = { ...baseOptions, isCursorFollowedByComma };
+  const options: ExpressionContextOptions = {
+    ...baseOptions,
+    isCursorFollowedByComma,
+    isCursorFollowedByParens,
+  };
 
   return {
     query,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { ProjectTagsResponse } from '@kbn/cps-utils';
 
@@ -17,7 +18,11 @@ export const registerGetProjectTagsRoute = (
   router.get(
     {
       path: '/internal/cps/projects_tags',
-      validate: false,
+      validate: {
+        query: schema.object({
+          project_routing: schema.maybe(schema.string()),
+        }),
+      },
       security: {
         authz: {
           enabled: false,
@@ -28,10 +33,13 @@ export const registerGetProjectTagsRoute = (
     async (requestHandlerContext, request, response) => {
       try {
         const core = await requestHandlerContext.core;
+        const { project_routing } = request.query;
+
         const result: ProjectTagsResponse =
           await core.elasticsearch.client.asCurrentUser.transport.request({
             method: 'GET',
             path: `/_project/tags`,
+            querystring: project_routing ? { project_routing } : undefined,
           });
 
         return response.ok({

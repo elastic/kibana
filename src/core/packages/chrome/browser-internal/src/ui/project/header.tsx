@@ -35,9 +35,10 @@ import { i18n } from '@kbn/i18n';
 import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { debounceTime } from 'rxjs';
+import { debounceTime, EMPTY } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
@@ -107,6 +108,7 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
   actionMenu$?: Observable<MountPoint | undefined> | null;
+  appMenu$?: Observable<AppMenuConfig | undefined> | null;
   docLinks: DocLinksStart;
   children: React.ReactNode;
   customBranding$: Observable<CustomBranding>;
@@ -309,8 +311,12 @@ export const ProjectHeader = ({
         </div>
       </header>
 
-      {observables.actionMenu$ && (
-        <AppMenuBar appMenuActions$={observables.actionMenu$} isFixed={true} />
+      {(observables.actionMenu$ || observables.appMenu$) && (
+        <AppMenuBar
+          appMenuActions$={observables.actionMenu$}
+          appMenu$={observables.appMenu$ ?? EMPTY}
+          isFixed={true}
+        />
       )}
     </>
   );

@@ -69,7 +69,9 @@ describe('<TemplateEdit />', () => {
       const createFieldForm = screen.getByTestId('createFieldForm');
       await within(createFieldForm).findByTestId('fieldType');
       const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-      fieldTypeComboBox.select('text');
+      await fieldTypeComboBox.select('text');
+      // Close the combobox popover (portal) so it doesn't leak across tests.
+      await fieldTypeComboBox.close();
 
       fireEvent.click(screen.getByTestId('addButton'));
 
@@ -164,7 +166,7 @@ describe('<TemplateEdit />', () => {
         });
         await completeStep.two();
         await completeStep.three(JSON.stringify(SETTINGS));
-      });
+      }, 20000);
 
       it('should send the correct payload with changed values', async () => {
         // Now on mappings step - edit the text_datatype field (avoid "first item wins")

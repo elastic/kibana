@@ -93,15 +93,15 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
     const onStartMigrationWithSettings = useCallback(
       (settings: MigrationSettingsBase) => {
-        if (migrationStats?.id) {
+        if (migrationStats) {
           startMigration(
-            migrationStats.id,
+            migrationStats,
             isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
             settings
           );
         }
       },
-      [isRetry, migrationStats?.id, startMigration]
+      [isRetry, migrationStats, startMigration]
     );
     const { modal: startMigrationModal, showModal: showStartMigrationModal } =
       useStartDashboardsMigrationModal({

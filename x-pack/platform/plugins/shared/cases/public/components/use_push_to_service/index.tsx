@@ -20,6 +20,7 @@ import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_pa
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CaseConnectors } from '../../containers/types';
+import { useKibana } from '../../common/lib/kibana';
 
 export interface UsePushToService {
   caseConnectors: CaseConnectors;
@@ -47,6 +48,7 @@ export const usePushToService = ({
   isValidConnector,
 }: UsePushToService): ReturnUsePushToService => {
   const { permissions } = useCasesContext();
+  const { docLinks } = useKibana().services;
   const { isLoading, mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
@@ -90,11 +92,11 @@ export const usePushToService = ({
      */
 
     if (hasLicenseError) {
-      return [getLicenseError()];
+      return [getLicenseError(docLinks)];
     }
 
     if (actionLicense != null && !actionLicense.enabledInConfig) {
-      return [getKibanaConfigError()];
+      return [getKibanaConfigError(docLinks)];
     }
 
     if (connector.id === 'none' && !isLoadingLicense && !hasLicenseError) {
@@ -102,13 +104,14 @@ export const usePushToService = ({
     }
 
     if (!isValidConnector && !isLoadingLicense && !hasLicenseError) {
-      return [getDeletedConnectorError()];
+      return [getDeletedConnectorError(docLinks)];
     }
 
     return errors;
   }, [
     actionLicense,
     connector.id,
+    docLinks,
     hasLicenseError,
     isValidConnector,
     isLoadingLicense,
