@@ -10,7 +10,7 @@
 import { renderHook } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMetricFieldsFilter } from './use_metric_fields_filter';
-import type { MetricField, Dimension } from '../types';
+import type { MetricField, Dimension } from '../../../../types';
 
 describe('useMetricFieldsFilter', () => {
   const baseDimensions: Dimension[] = [

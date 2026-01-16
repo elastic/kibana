@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import type { MetricField, Dimension } from '../types';
+import type { MetricField, Dimension } from '../../../../types';
 
 export const useMetricFieldsFilter = ({
   fields,

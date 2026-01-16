@@ -10,7 +10,7 @@
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
-import * as hooks from '../hooks';
+import * as hooks from './hooks';
 import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
@@ -18,22 +18,21 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { MetricField, Dimension } from '../types';
+import type { MetricField, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
-import type { UnifiedMetricsGridProps } from '../types';
-import * as metricsExperienceFieldsCapsProvider from '../context/metrics_experience_fields_provider';
+import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
+import * as metricsExperienceFieldsCapsProvider from './context/metrics_experience_fields_provider';
 
-jest.mock('../context/metrics_experience_state_provider');
-jest.mock('../context/metrics_experience_fields_provider');
+jest.mock('./context/metrics_experience_state_provider');
+jest.mock('./context/metrics_experience_fields_provider');
 jest.mock('@kbn/ebt-tools', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
   }),
 }));
-jest.mock('../hooks');
+jest.mock('./hooks');
 jest.mock('./metrics_experience_grid_content', () => ({
   MetricsExperienceGridContent: jest.fn(() => (
     <div data-test-subj="metricsExperienceGridContent" />

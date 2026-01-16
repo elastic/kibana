@@ -11,19 +11,19 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { MetricsExperienceGridContentProps } from './metrics_experience_grid_content';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
-import * as hooks from '../hooks';
+import * as hooks from './hooks';
 import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { MetricField, Dimension } from '../types';
+import type { MetricField, Dimension } from '../../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
+import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
 jest.mock('../context/metrics_experience_state_provider');
-jest.mock('../hooks');
+jest.mock('.hooks');
 jest.mock('./chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
 }));

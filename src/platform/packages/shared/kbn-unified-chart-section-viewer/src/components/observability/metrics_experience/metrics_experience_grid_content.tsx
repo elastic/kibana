@@ -19,14 +19,13 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import type { MetricField } from '../types';
-import { PAGE_SIZE } from '../common/constants';
-import { MetricsGrid } from './metrics_grid';
-import { Pagination } from './pagination';
-import { usePagination } from '../hooks';
-import { MetricsGridLoadingProgress } from './empty_state/empty_state';
-import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
-import type { UnifiedMetricsGridProps } from '../types';
+import type { MetricField, UnifiedMetricsGridProps } from '../../../types';
+import { PAGE_SIZE } from '../../../common/constants';
+import { MetricsGrid } from '../../metrics_grid';
+import { Pagination } from '../../pagination';
+import { usePagination } from './hooks';
+import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
+import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<

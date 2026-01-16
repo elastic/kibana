@@ -8,4 +8,7 @@
  */
 
 export { useEsqlQueryInfo } from './use_esql_query_info';
-export { useGridNavigation } from './use_grid_navigation';
+export { usePagination } from './use_pagination';
+export { useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
+export { useMetricFields } from './use_metric_fields';
+export { useMetricFieldsFilter } from './use_metric_fields_filter';

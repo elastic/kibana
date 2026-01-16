@@ -12,7 +12,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMetricFields } from './use_metric_fields';
 import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
 import * as metricsExperienceFieldsProvider from '../context/metrics_experience_fields_provider';
-import type { MetricField, Dimension } from '../types';
+import type { MetricField, Dimension } from '../../../../types';
 
 jest.mock('../context/metrics_experience_state_provider');
 jest.mock('../context/metrics_experience_fields_provider');

@@ -14,11 +14,11 @@ import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../common/constants';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { EmptyState } from './empty_state/empty_state';
-import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
-import { SearchButton } from './toolbar/right_side_actions/search_button';
-import { useMetricFields } from '../hooks';
+import { useToolbarActions } from '../toolbar/hooks/use_toolbar_actions';
+import { SearchButton } from '../toolbar/right_side_actions/search_button';
+import { useMetricFields } from './hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
-import type { UnifiedMetricsGridProps } from '../types';
+import type { UnifiedMetricsGridProps } from '../../../types';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,

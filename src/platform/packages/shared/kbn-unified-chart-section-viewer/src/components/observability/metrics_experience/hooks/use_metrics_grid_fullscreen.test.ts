@@ -16,7 +16,7 @@ import {
 import {
   METRICS_GRID_FULL_SCREEN_CLASS,
   METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
-} from '../common/constants';
+} from '../../../../common/constants';
 
 // Mock only what's needed for the hook test
 jest.mock('@elastic/eui', () => ({

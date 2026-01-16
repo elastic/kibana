@@ -14,7 +14,7 @@ import {
   METRICS_GRID_FULL_SCREEN_CLASS,
   METRICS_GRID_RESTRICT_BODY_CLASS,
   METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
-} from '../common/constants';
+} from '../../../../common/constants';
 
 const fullScreenBodyStyles = css`
   *:not(
