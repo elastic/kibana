@@ -122,8 +122,7 @@ export const mapAppMenuItemToPanelItem = (
       return;
     }
 
-    const shouldClosePopover =
-      !item?.href && childPanelId === undefined && item.run?.length === 0 && onClose;
+    const shouldClosePopover = !item?.href && childPanelId === undefined && onClose;
 
     item.run?.(event?.currentTarget as HTMLElement);
 
