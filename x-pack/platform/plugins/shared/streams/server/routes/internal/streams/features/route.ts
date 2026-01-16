@@ -50,16 +50,16 @@ export const upsertFeatureRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
 
-    const stream = await streamsClient.getStream(params.path.name);
-    await featureClient.bulk(stream.name, [
+    await featureClient.bulk(params.path.name, [
       {
         index: {
           feature: {
             ...params.body,
             status: 'active' as const,
             last_seen: new Date().toISOString(),
-            id: getFeatureId(stream.name, params.body),
+            id: getFeatureId(params.path.name, params.body),
           },
         },
       },
@@ -95,9 +95,9 @@ export const deleteFeatureRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
 
-    const stream = await streamsClient.getStream(params.path.name);
-    await featureClient.deleteFeature(stream.name, params.path.id);
+    await featureClient.deleteFeature(params.path.name, params.path.id);
 
     return { acknowledged: true };
   },
@@ -135,9 +135,9 @@ export const listFeaturesRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
 
-    const stream = await streamsClient.getStream(params.path.name);
-    const { hits: features } = await featureClient.getFeatures(stream.name, {
+    const { hits: features } = await featureClient.getFeatures(params.path.name, {
       type: params.query?.type ? [params.query.type] : [],
       status: params.query?.status ? [params.query.status] : [],
     });
