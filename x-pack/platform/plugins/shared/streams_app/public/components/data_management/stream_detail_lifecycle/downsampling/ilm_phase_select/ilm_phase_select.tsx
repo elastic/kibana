@@ -57,27 +57,6 @@ const PHASE_LABELS: Record<IlmPhaseSelectOption, string> = {
   }),
 };
 
-const PHASE_DESCRIPTIONS: Record<IlmPhaseSelectOption, string> = {
-  hot: i18n.translate('xpack.streams.ilmPhaseSelect.hotPhaseDescription', {
-    defaultMessage:
-      'Use for data that is searched frequently and actively updated, optimized for indexing and search performance.',
-  }),
-  warm: i18n.translate('xpack.streams.ilmPhaseSelect.warmPhaseDescription', {
-    defaultMessage:
-      'Use for data that is searched occasionally but rarely updated, optimized for search over indexing.',
-  }),
-  cold: i18n.translate('xpack.streams.ilmPhaseSelect.coldPhaseDescription', {
-    defaultMessage:
-      'Use for infrequently searched, read-only data where cost savings are prioritized over performance.',
-  }),
-  frozen: i18n.translate('xpack.streams.ilmPhaseSelect.frozenPhaseDescription', {
-    defaultMessage: 'Use for long-term retention of searchable data at the lowest possible cost.',
-  }),
-  delete: i18n.translate('xpack.streams.ilmPhaseSelect.deletePhaseDescription', {
-    defaultMessage: 'Use to delete your data once it has reached a specified age.',
-  }),
-};
-
 export const IlmPhaseSelect = ({
   button,
   selectedPhases,
@@ -124,7 +103,7 @@ export const IlmPhaseSelect = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
-                  {PHASE_DESCRIPTIONS[option]}
+                  {ilmPhases[option].description}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

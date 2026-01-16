@@ -13,11 +13,11 @@ import { IlmPhaseSelect } from './ilm_phase_select';
 jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
   useIlmPhasesColorAndDescription: () => ({
     ilmPhases: {
-      hot: { color: '#FF0000' },
-      warm: { color: '#FFA500' },
-      cold: { color: '#0000FF' },
-      frozen: { color: '#00FFFF' },
-      delete: { color: '#808080' },
+      hot: { color: '#FF0000', description: 'Hot desc' },
+      warm: { color: '#FFA500', description: 'Warm desc' },
+      cold: { color: '#0000FF', description: 'Cold desc' },
+      frozen: { color: '#00FFFF', description: 'Frozen desc' },
+      delete: { color: '#808080', description: 'Delete desc' },
     },
   }),
 }));
@@ -50,6 +50,7 @@ describe('IlmPhaseSelect', () => {
 
     expect(screen.getByRole('dialog', { name: 'Add ILM phase popover' })).toBeInTheDocument();
     expect(screen.getByTestId('ilmPhaseSelectOption-cold')).toBeInTheDocument();
+    expect(screen.getByTestId('ilmPhaseSelectOption-cold')).toHaveTextContent('Cold desc');
     fireEvent.click(screen.getByTestId('ilmPhaseSelectOption-cold'));
 
     expect(onSelect).toHaveBeenCalledWith('cold');
