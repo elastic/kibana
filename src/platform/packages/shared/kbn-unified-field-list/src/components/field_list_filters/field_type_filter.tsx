@@ -64,16 +64,6 @@ const filterPopoverStyle = ({ euiTheme }: UseEuiTheme) => css`
   }
 `;
 
-const filterButtonStyle = ({ euiTheme }: UseEuiTheme) => css`
-  padding: 0;
-
-  &,
-  & .euiFilterButton__text {
-    min-width: 0;
-    line-height: 1;
-  }
-`;
-
 /**
  * Props for FieldTypeFilter component
  */

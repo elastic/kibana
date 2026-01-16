@@ -114,7 +114,6 @@ export default function Filters() {
           }
           refreshInterval={timeRange.refresh.value}
           isRefreshPaused={timeRange.refresh.pause}
-          compressed={false}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
