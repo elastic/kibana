@@ -31,7 +31,7 @@ async function loadInferenceEndpoints(http: HttpStart): Promise<InferenceEndpoin
   }
 
   cachePromise = http
-    .get<InferenceEndpointsResponse>('/internal/inference_endpoints/endpoints')
+    .get<InferenceEndpointsResponse>('/internal/workplace_ai/inference_endpoints')
     .then((response) => {
       const rerankEndpoints = response.inference_endpoints.filter(
         (ep) => ep.task_type === 'rerank'

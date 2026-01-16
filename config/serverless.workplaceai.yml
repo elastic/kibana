@@ -1,7 +1,7 @@
 # Workplace AI Project Config
 
 # Make sure the plugins belonging to this project type are loaded
-plugins.allowlistPluginGroups: ['platform', 'workplaceai', 'search']
+plugins.allowlistPluginGroups: ['platform', 'workplaceai']
 
 ## Enable the Serverless Workplace AI plugin
 xpack.serverless.workplaceAI.enabled: true

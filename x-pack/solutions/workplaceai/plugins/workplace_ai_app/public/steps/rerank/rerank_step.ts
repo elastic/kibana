@@ -27,11 +27,7 @@ export const createRerankStepDefinition = (core: CoreSetup) => {
 
   return createPublicStepDefinition({
     ...rerankStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/sortable').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
+    icon: 'sortable',
     label: i18n.translate('searchWorkflows.rerankStep.label', {
       defaultMessage: 'Rerank Results',
     }),

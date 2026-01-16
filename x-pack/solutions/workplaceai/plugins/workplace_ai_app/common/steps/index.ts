@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { RerankStepTypeId, rerankStepCommonDefinition } from './rerank_step';
-export type { RerankInput, RerankConfig, RerankOutput } from './rerank_step';
+export { RerankStepTypeId, rerankStepCommonDefinition } from './rerank/rerank_step';
+export type { RerankInput, RerankConfig, RerankOutput } from './rerank/rerank_step';
