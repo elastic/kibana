@@ -12,6 +12,15 @@ import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-pub
 import type { DashboardNavigationOptions } from '../../server';
 import type { DashboardLocatorParams } from '../types';
 
+/**
+ * Extracts dashboard locator parameters from an embeddable API based on drilldown options.
+ * This function collects query, time range, and filters from the embeddable and its parent
+ * based on the provided drilldown options.
+ *
+ * @param api - The embeddable API that may publish unified search state and have a parent API.
+ * @param options - The drilldown options that control which parameters to include.
+ * @returns A partial {@link DashboardLocatorParams} object containing the extracted parameters.
+ */
 export const getDashboardLocatorParamsFromEmbeddable = (
   api: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>,
   options: DashboardNavigationOptions

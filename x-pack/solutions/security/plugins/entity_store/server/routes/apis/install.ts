@@ -7,11 +7,11 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from './constants';
-import type { EntityStorePluginRouter } from '../types';
-import { ALL_ENTITY_TYPES, EntityType } from '../domain/definitions/entity_type';
-import { scheduleExtractEntityTasks } from '../tasks/extract_entity_task';
-import { wrapMiddlewares } from './middleware';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import type { EntityStorePluginRouter } from '../../types';
+import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_type';
+import { wrapMiddlewares } from '../middleware';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
@@ -40,22 +40,14 @@ export function registerInstall(router: EntityStorePluginRouter) {
           },
         },
       },
-      wrapMiddlewares(async (ctx, req, res) => {
+      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, resourcesService, taskManagerStart } = entityStoreCtx;
+        const { logger, assetManager } = entityStoreCtx;
         const { entityTypes, logExtractionFrequency } = req.body;
         logger.debug('Install api called');
-        resourcesService.install(entityTypes);
 
-        await scheduleExtractEntityTasks({
-          taskManager: taskManagerStart,
-          entityTypes,
-          resourcesService,
-          logger,
-          frequency: logExtractionFrequency,
-        });
+        await assetManager.install(entityTypes, logExtractionFrequency);
 
-        resourcesService.install(entityTypes);
         return res.ok({
           body: {
             ok: true,
