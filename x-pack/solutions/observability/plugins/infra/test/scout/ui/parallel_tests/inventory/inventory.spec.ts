@@ -33,7 +33,7 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
   });
 
-  test('Render expected content', async ({ page, pageObjects: { inventoryPage } }) => {
+  test.only('Render expected content', async ({ page, pageObjects: { inventoryPage } }) => {
     await test.step('set the correct browser page title', async () => {
       const title = await page.title();
       expect(title).toBe('Infrastructure inventory - Infrastructure - Observability - Elastic');
