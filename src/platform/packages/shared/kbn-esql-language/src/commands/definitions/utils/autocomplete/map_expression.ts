@@ -142,13 +142,34 @@ export function isInsideMapExpression(text: string): boolean {
   return getMapNestingLevel(text) > 0;
 }
 
+// can be enhanced later to support more types
+const ESTypesMap: Record<string, MapValueType> = {
+  integer: 'number',
+  double: 'number',
+  float: 'number',
+  boolean: 'boolean',
+  keyword: 'string',
+  text: 'string',
+};
+
 /**
  * Parses a comma-separated values string and infers the type.
  * Returns suggestions for each value.
  */
-export function parseMapValues(values: string[], description: string): MapParameterValues {
+export function parseMapValues(
+  values: string[],
+  description: string,
+  types: string
+): MapParameterValues {
+  // infer types from definition when no values are provided
+  const mappedTypesFromDefinition = types
+    .split(',')
+    .map((type) => ESTypesMap[type.trim()] ?? 'string');
+  const uniqueMappedTypes = Array.from(new Set(mappedTypesFromDefinition));
   if (values.length === 0) {
-    return { type: 'string', suggestions: [], description };
+    // arbitrarily selecting the first type if multiple types are provided in the definition
+    // can be enhanced later to return one or multiple types
+    return { type: uniqueMappedTypes[0], suggestions: [], description };
   }
 
   const type = inferMapValueType(values);
