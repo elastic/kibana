@@ -8,8 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import type { CategoriesResponse, RelatedIntegrationRuleResponse } from './types';
+import type {
+  CategoriesResponse,
+  RelatedIntegrationRuleResponse,
+  SiemReadinessPackageInfo,
+} from './types';
 import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from './constants';
 
 // Fix: Use 'as const' to make these readonly tuples for proper React Query typing
@@ -28,7 +31,7 @@ export const useSiemReadinessApi = () => {
 
   const getIntegrations = useQuery({
     queryKey: ['siem-readiness', 'fleet', 'epm', 'packages', 'all-enabled-rules'] as const,
-    queryFn: () => http.get<{ items: PackageListItem[] }>('/api/fleet/epm/packages'),
+    queryFn: () => http.get<{ items: SiemReadinessPackageInfo[] }>('/api/fleet/epm/packages'),
   });
 
   const getDetectionRules = useQuery({

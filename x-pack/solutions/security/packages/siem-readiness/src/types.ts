@@ -28,3 +28,12 @@ export interface RelatedIntegrationRuleResponse {
     integration?: string;
   }>;
 }
+
+export interface SiemReadinessPackageInfo {
+  id: string;
+  name: string;
+  title: string;
+  version: string;
+  description: string;
+  status: string;
+}

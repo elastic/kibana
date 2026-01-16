@@ -24,7 +24,7 @@ import {
   useIntegrationDisplayNames,
   useSiemReadinessApi,
 } from '@kbn/siem-readiness';
-import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { useBasePath } from '../../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 
@@ -40,8 +40,9 @@ export const AllRuleCoveragePanel: React.FC = () => {
   const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
 
   const getInstalledIntegrations =
-    getIntegrations?.data?.items?.filter((pkg: PackageListItem) => pkg.status === 'installed') ||
-    [];
+    getIntegrations?.data?.items?.filter(
+      (pkg: SiemReadinessPackageInfo) => pkg.status === 'installed'
+    ) || [];
 
   const integrationNames = getInstalledIntegrations?.map((item) => item.name) || [];
 
