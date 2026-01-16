@@ -31,7 +31,7 @@ import type {
   TransformEnhancementsOut,
 } from '../common';
 import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
-import { Drilldown } from './drilldowns/types';
+import type { Drilldown } from './drilldowns/types';
 import { DrilldownRegistry } from './drilldowns/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {

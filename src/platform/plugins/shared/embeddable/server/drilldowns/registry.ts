@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Drilldown } from "./types";
+import type { Drilldown } from './types';
 
 export class DrilldownRegistry {
   private registry: { [key: string]: Drilldown } = {};
@@ -27,7 +27,9 @@ export class DrilldownRegistry {
   getSchemas(embeddableSupportedTriggers: string[]) {
     return Object.values(this.registry)
       .filter(({ supportedTriggers: drilldownSupportedTriggers }) => {
-        return embeddableSupportedTriggers.some(trigger => drilldownSupportedTriggers.includes(trigger));
+        return embeddableSupportedTriggers.some((trigger) =>
+          drilldownSupportedTriggers.includes(trigger)
+        );
       })
       .map(({ schema }) => schema);
   }

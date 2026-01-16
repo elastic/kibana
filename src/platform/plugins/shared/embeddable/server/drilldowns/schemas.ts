@@ -7,16 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ObjectType, schema, Type } from '@kbn/config-schema';
-import { DrilldownRegistry } from './registry';
+import type { ObjectType, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { DrilldownRegistry } from './registry';
 
-export function getDrilldownSchema(registry: DrilldownRegistry, embeddableSupportedTriggers: string[]) {
+export function getDrilldownsSchema(
+  registry: DrilldownRegistry,
+  embeddableSupportedTriggers: string[]
+) {
   return schema.object({
-    config: schema.discriminatedUnion('type', registry.getSchemas(embeddableSupportedTriggers) as [ObjectType<{ type: Type<string> }>]),
+    drilldowns: schema.maybe(
+      schema.arrayOf(getDrilldownSchema(registry, embeddableSupportedTriggers))
+    ),
+  });
+}
+
+function getDrilldownSchema(registry: DrilldownRegistry, embeddableSupportedTriggers: string[]) {
+  return schema.object({
+    config: schema.discriminatedUnion(
+      'type',
+      registry.getSchemas(embeddableSupportedTriggers) as [ObjectType<{ type: Type<string> }>]
+    ),
     label: schema.maybe(schema.string()),
-    triggers: schema.arrayOf(schema.string({
-      minLength: 1, // at least one trigger is required
-      maxLength: 100 // arbitrary value
-    }))
+    triggers: schema.arrayOf(
+      schema.string({
+        minLength: 1, // at least one trigger is required
+        maxLength: 100, // arbitrary value
+      })
+    ),
   });
 }

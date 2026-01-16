@@ -19,10 +19,7 @@ export type Drilldown<
   /**
    * Called on REST read routes to inject references and convert Stored State into API State
    */
-  transformOut?: (
-    storedState: StoredState,
-    references?: Reference[],
-  ) => State;
+  transformOut?: (storedState: StoredState, references?: Reference[]) => State;
   /**
    * Called on REST write routes to convert API State into Stored State and extracts references
    */
