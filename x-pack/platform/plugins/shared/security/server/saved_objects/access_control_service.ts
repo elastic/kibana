@@ -202,9 +202,6 @@ export class AccessControlService {
 
     // Check manage_access_control privilege for non-owner types
     for (const type of typesRequiringAccessControl) {
-      if (!this.typeRegistry?.supportsAccessControl(type)) {
-        continue;
-      }
       addUnauthorizedType(type, MANAGE_ACCESS_CONTROL_ACTION as A, unauthorizedAccessControlTypes);
     }
 
