@@ -65,7 +65,7 @@ describe('generateYamlSchemaFromConnectors / kibana connectors', () => {
       });
       expect(result.error).toBeDefined();
       expect(result.success).toBe(false);
-      expect(result.error?.message).toContain(zodErrorMessage);
+      expect(result.error?.message).toEqual(expect.stringMatching(zodErrorMessage));
     });
   });
 });

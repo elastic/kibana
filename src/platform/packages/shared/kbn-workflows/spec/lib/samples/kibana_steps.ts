@@ -215,7 +215,7 @@ export const KIBANA_INVALID_SAMPLE_STEPS = [
         owner: 'securitySolution',
       },
     },
-    zodErrorMessage: 'Invalid input: expected "alert" | "user"',
+    zodErrorMessage: /expected \\"alert\\"[\s\S]*expected \\"user\\"/,
     diagnosticErrorMessage: /type/,
   },
 ];
