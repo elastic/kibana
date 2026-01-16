@@ -11,14 +11,11 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  ears: schema.object(
-    {
-      url: schema.maybe(schema.string()),
-      ui_enabled: schema.boolean({ defaultValue: false }),
-      allow_insecure: schema.boolean({ defaultValue: true }),
-    },
-    { defaultValue: {} }
-  ),
+  ears: schema.object({
+    url: schema.maybe(schema.string()),
+    ui_enabled: schema.boolean({ defaultValue: false }),
+    allow_insecure: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type WorkplaceAIAppConfig = TypeOf<typeof configSchema>;
