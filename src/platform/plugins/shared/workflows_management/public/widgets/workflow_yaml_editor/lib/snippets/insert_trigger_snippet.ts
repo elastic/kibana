@@ -9,13 +9,9 @@
 
 import { type Document, parseDocument } from 'yaml';
 import { isSeq } from 'yaml';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { TriggerType } from '@kbn/workflows';
 import { generateTriggerSnippet } from './generate_trigger_snippet';
-import { getTriggerNodes, getTriggersPair } from '../../../../../common/lib/yaml';
-import { getIndentLevelFromLineNumber } from '../get_indent_level';
-import { prependIndentToLines } from '../prepend_indent_to_lines';
-import { getMonacoRangeFromYamlNode } from '../utils';
 import {
   createReplacementRange,
   findFirstEmptyItem,
@@ -23,6 +19,10 @@ import {
   getInsertRangeAndTextForTriggers,
   getSectionKeyInfo,
 } from './snippet_insertion_utils';
+import { getTriggerNodes, getTriggersPair } from '../../../../../common/lib/yaml';
+import { getIndentLevelFromLineNumber } from '../get_indent_level';
+import { prependIndentToLines } from '../prepend_indent_to_lines';
+import { getMonacoRangeFromYamlNode } from '../utils';
 
 // Algorithm:
 // 1. Check if triggers section exists (even if empty or has empty items)
@@ -60,10 +60,7 @@ export function insertTriggerSnippet(
 
   if (triggersPair) {
     insertTriggersSection = false;
-    const { range: keyRange, indentLevel: expectedIndent } = getSectionKeyInfo(
-      model,
-      triggersPair
-    );
+    const { range: keyRange, indentLevel: expectedIndent } = getSectionKeyInfo(model, triggersPair);
     triggersKeyRange = keyRange;
 
     // Check if triggers is a flow-style empty array (triggers: [])
