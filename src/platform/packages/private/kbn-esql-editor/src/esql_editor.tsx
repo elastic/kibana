@@ -79,10 +79,12 @@ import {
   parseWarning,
   useDebounceWithOptions,
 } from './helpers';
-import { useSuggestionsLatencyTracking } from './use_suggestions_latency_tracking';
-import { useInputLatencyTracking } from './use_input_latency_tracking';
-import { useValidationLatencyTracking } from './use_validation_latency_tracking';
-import { useInitLatencyTracking } from './use_init_latency_tracking';
+import {
+  useInitLatencyTracking,
+  useInputLatencyTracking,
+  useSuggestionsLatencyTracking,
+  useValidationLatencyTracking,
+} from './use_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import { useRestorableState, withRestorableState } from './restorable_state';
@@ -235,13 +237,11 @@ const ESQLEditorInternal = function ESQLEditor({
     [onTextLangQueryChange]
   );
 
-  const { onSuggestionsReady, recordSuggestionsVersionTiming, resetSuggestionsTracking } =
-    useSuggestionsLatencyTracking({
-      editorModelRef: editorModel,
-      telemetryService,
-      sessionIdRef,
-      interactionIdRef,
-    });
+  const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
+    telemetryService,
+    sessionIdRef,
+    interactionIdRef,
+  });
 
   const { trackInputLatencyOnKeystroke, reportInputLatency } = useInputLatencyTracking({
     telemetryService,
@@ -802,7 +802,6 @@ const ESQLEditorInternal = function ESQLEditor({
       invalidateColumnsCache?: boolean;
     }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
-
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const { warnings: parserWarnings, errors: parserErrors } = await parseMessages({
         invalidateColumnsCache,
@@ -894,7 +893,6 @@ const ESQLEditorInternal = function ESQLEditor({
   useDebounceWithOptions(
     async () => {
       if (!editorModel.current) return;
-
       const subscription = { active: true };
       trackValidationLatencyStart(code);
 
@@ -1243,9 +1241,6 @@ const ESQLEditorInternal = function ESQLEditor({
 
                     editor.onDidChangeModelContent(async () => {
                       trackInputLatencyOnKeystroke(editor.getValue() ?? '');
-                      if (editorModel.current) {
-                        recordSuggestionsVersionTiming(editorModel.current);
-                      }
                       await addLookupIndicesDecorator();
                       maybeTriggerSuggestions();
                     });

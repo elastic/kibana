@@ -164,7 +164,12 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
         }
 
-        deps?.telemetry?.onSuggestionsReady?.(computeStart, computeEnd);
+        deps?.telemetry?.onSuggestionsReady?.(
+          computeStart,
+          computeEnd,
+          model.getValueLength(),
+          model.getLineCount()
+        );
 
         return wrapAsMonacoSuggestions(suggestions, fullText);
       },

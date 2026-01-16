@@ -10,7 +10,12 @@
 export interface ESQLTelemetryCallbacks {
   onDecorationHoverShown?: (hoverMessage: string) => void;
   onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
-  onSuggestionsReady?: (computeStart: number, computeEnd: number) => void;
+  onSuggestionsReady?: (
+    computeStart: number,
+    computeEnd: number,
+    queryLength: number,
+    queryLines: number
+  ) => void;
 }
 
 export enum QuerySource {
@@ -38,7 +43,7 @@ export enum TelemetryControlCancelledReason {
   CLOSE_BUTTON = 'close_button',
 }
 
-export interface BaseLatencyPayload {
+export interface TelemetryLatencyProps {
   duration: number;
   queryLength: number;
   queryLines: number;
@@ -46,12 +51,3 @@ export interface BaseLatencyPayload {
   interactionId?: number;
   isInitialLoad?: boolean;
 }
-
-export type InputLatencyPayload = BaseLatencyPayload;
-
-export interface SuggestionsLatencyPayload extends BaseLatencyPayload {
-  keystrokeToTriggerDuration: number;
-  computeDuration: number;
-}
-
-export type ValidationLatencyPayload = BaseLatencyPayload;

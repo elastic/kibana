@@ -13,10 +13,7 @@ import type {
   TelemetryQuerySubmittedProps,
   ESQLVariableType,
   ControlTriggerSource,
-  BaseLatencyPayload,
-  InputLatencyPayload,
-  SuggestionsLatencyPayload,
-  ValidationLatencyPayload,
+  TelemetryLatencyProps,
 } from '@kbn/esql-types';
 import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
 import {
@@ -59,7 +56,7 @@ export class ESQLEditorTelemetryService {
     }
   }
 
-  private _buildBaseLatencyEvent(eventName: string, payload: BaseLatencyPayload) {
+  private _buildBaseLatencyEvent(eventName: string, payload: TelemetryLatencyProps) {
     return {
       eventName,
       duration: Math.round(payload.duration),
@@ -223,22 +220,16 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  public trackInputLatency(payload: InputLatencyPayload) {
+  public trackInputLatency(payload: TelemetryLatencyProps) {
     this._reportPerformanceEvent(this._buildBaseLatencyEvent('esql_editor_input_latency', payload));
   }
 
-  public trackSuggestionsLatency(payload: SuggestionsLatencyPayload) {
-    const baseEvent = this._buildBaseLatencyEvent('esql_editor_suggestions_latency', payload);
-    this._reportPerformanceEvent({
-      ...baseEvent,
-      meta: {
-        ...baseEvent.meta,
-        keystroke_to_trigger_ms: Math.round(payload.keystrokeToTriggerDuration),
-        compute_ms: Math.round(payload.computeDuration),
-      },
-    });
+  public trackSuggestionsLatency(payload: TelemetryLatencyProps) {
+    this._reportPerformanceEvent(
+      this._buildBaseLatencyEvent('esql_editor_suggestions_latency', payload)
+    );
   }
-  public trackValidationLatency(payload: ValidationLatencyPayload) {
+  public trackValidationLatency(payload: TelemetryLatencyProps) {
     this._reportPerformanceEvent(
       this._buildBaseLatencyEvent('esql_editor_validation_latency', payload)
     );

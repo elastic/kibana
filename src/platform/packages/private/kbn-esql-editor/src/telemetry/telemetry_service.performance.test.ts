@@ -91,8 +91,6 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
       sessionId: 'session-1',
       interactionId: 5,
       isInitialLoad: false,
-      keystrokeToTriggerDuration: 7,
-      computeDuration: 2,
     });
 
     expect(mockMetricEvent).toHaveBeenCalledWith(
@@ -107,8 +105,6 @@ describe('ESQLEditorTelemetryService performance metrics', () => {
           session_id: 'session-1',
           interaction_id: 5,
           is_initial_load: false,
-          keystroke_to_trigger_ms: 7,
-          compute_ms: 2,
         }),
       })
     );
