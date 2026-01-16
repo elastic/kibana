@@ -39,7 +39,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-m-flexStart-stretch-row-OverviewWrapper"
   >
     <button
       aria-label="Inspect"
@@ -467,7 +467,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-l-flexStart-stretch-column-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-m-flexStart-stretch-column-OverviewWrapper"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1"
