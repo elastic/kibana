@@ -8,7 +8,6 @@
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
-import { RULES_PATH } from '../../common/locators/paths';
 
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
   public readonly id = rulesLocatorID;
@@ -21,7 +20,7 @@ export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorPar
     type = [],
   }: RulesLocatorParams) => {
     return {
-      app: 'observability',
+      app: 'rules',
       path: setStateToKbnUrl(
         '_a',
         {
@@ -32,7 +31,7 @@ export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorPar
           type,
         },
         { useHash: false, storeInHashQuery: false },
-        RULES_PATH
+        '/'
       ),
       state: {},
     };

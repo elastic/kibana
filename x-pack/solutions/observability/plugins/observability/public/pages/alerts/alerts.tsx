@@ -20,6 +20,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
 import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { createUseRulesLink } from '../../hooks/create_use_rules_link';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
@@ -63,6 +64,7 @@ const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 const DEFAULT_EMPTY_FILTERS: Filter[] = [];
 
 const tableColumns = getColumns({ showRuleName: true });
+const useRulesLink = createUseRulesLink();
 
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
@@ -263,7 +265,7 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
+  const manageRulesHref = useRulesLink().href;
 
   return (
     <Provider value={alertSearchBarStateContainer}>
@@ -275,7 +277,7 @@ function InternalAlertsPage() {
           ),
           rightSideItems: renderRuleStats(
             ruleStats,
-            manageRulesHref,
+            manageRulesHref as string,
             ruleStatsLoading,
             locators.get<RulesLocatorParams>(rulesLocatorID)
           ),
