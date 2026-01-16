@@ -119,13 +119,20 @@ const DraggableConcatTextInput = ({ index }: DraggableConcatInputProps) => {
 };
 
 interface FromBuilderItemProps {
+  shouldShowDragHandle: boolean;
   type: ConcatFormState['from'][number]['type'];
   id: string;
   index: number;
   onRemove: (index: number) => void;
 }
 
-const FromBuilderItem = ({ type, id, index, onRemove }: FromBuilderItemProps) => {
+const FromBuilderItem = ({
+  shouldShowDragHandle,
+  type,
+  id,
+  index,
+  onRemove,
+}: FromBuilderItemProps) => {
   return (
     <EuiDraggable
       draggableId={id}
@@ -135,18 +142,20 @@ const FromBuilderItem = ({ type, id, index, onRemove }: FromBuilderItemProps) =>
     >
       {(provided) => (
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiPanel
-              color="transparent"
-              paddingSize="s"
-              {...provided.dragHandleProps}
-              aria-label={i18n.translate('xpack.streams.fromBuilderItem.dragHandleLabel', {
-                defaultMessage: 'Drag Handle',
-              })}
-            >
-              <EuiIcon type="grab" />
-            </EuiPanel>
-          </EuiFlexItem>
+          {shouldShowDragHandle && (
+            <EuiFlexItem grow={false}>
+              <EuiPanel
+                color="transparent"
+                paddingSize="s"
+                {...provided.dragHandleProps}
+                aria-label={i18n.translate('xpack.streams.fromBuilderItem.dragHandleLabel', {
+                  defaultMessage: 'Drag Handle',
+                })}
+              >
+                <EuiIcon type="grab" />
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             {type === 'field' ? (
               <DraggableConcatFieldInput index={index} />
@@ -207,6 +216,7 @@ export const ConcatFromBuilder = () => {
             {fields.map((field, index) => (
               <EuiFlexItem key={field.id}>
                 <FromBuilderItem
+                  shouldShowDragHandle={fields.length > 1}
                   type={field.type}
                   id={field.id}
                   index={index}
