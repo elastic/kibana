@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { type Streams, type System } from '@kbn/streams-schema';
-import type { Condition } from '@kbn/streamlang';
+import { isCondition, type Condition } from '@kbn/streamlang';
 import { withSpan } from '@kbn/apm-utils';
 import { createIdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
@@ -26,8 +26,8 @@ export interface IdentifySystemsOptions {
   inferenceClient: BoundInferenceClient;
   logger: Logger;
   signal: AbortSignal;
-  systemsPromptOverride?: string;
-  descriptionPromptOverride?: string;
+  descriptionPrompt: string;
+  systemsPrompt: string;
   dropUnmapped?: boolean;
   maxSteps?: number;
 }
@@ -53,9 +53,9 @@ export async function identifySystems({
   inferenceClient,
   logger,
   signal,
-  systemsPromptOverride,
   maxSteps: initialMaxSteps,
   dropUnmapped,
+  systemsPrompt,
 }: IdentifySystemsOptions): Promise<IdentifySystemsResult> {
   logger.debug(`Identifying systems for stream ${stream.name}`);
 
@@ -102,7 +102,7 @@ export async function identifySystems({
         initial_clustering: JSON.stringify(initialClustering),
         condition_schema: conditionSchemaText,
       },
-      prompt: createIdentifySystemsPrompt({ systemPromptOverride: systemsPromptOverride }),
+      prompt: createIdentifySystemsPrompt({ systemPrompt: systemsPrompt }),
       inferenceClient,
       finalToolChoice: {
         function: 'finalize_systems',
@@ -146,14 +146,16 @@ export async function identifySystems({
   );
 
   const identifiedSystems = response.toolCalls.flatMap((toolCall) =>
-    toolCall.function.arguments.systems.map((args) => {
-      const system = {
-        ...args,
-        filter: args.filter as Condition,
-        type: 'system' as const,
-      };
-      return { ...system, description: '' };
-    })
+    toolCall.function.arguments.systems
+      .filter((args) => isCondition(args.filter))
+      .map((args) => {
+        const system = {
+          ...args,
+          filter: args.filter as Condition,
+          type: 'system' as const,
+        };
+        return { ...system, description: '' };
+      })
   );
 
   logger.debug(`Identified ${identifiedSystems.length} system features for stream ${stream.name}`);
