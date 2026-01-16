@@ -70,7 +70,7 @@ export const login = async (
 };
 
 /**
- * Logs in as the Kibana admin user (elastic_serverless or elastic depending on environment).
+ * Logs in as the Kibana admin user.
  *
  * @param supertestWithoutAuth - Supertest instance without authentication
  * @returns Object containing the session cookie and admin user profile UID
@@ -78,41 +78,18 @@ export const login = async (
 export const loginAsKibanaAdmin = (supertestWithoutAuth: SuperTest.Agent): Promise<LoginResult> =>
   login(supertestWithoutAuth, adminTestUser.username, adminTestUser.password);
 
-/**
- * Logs in as an object owner. This is a semantic wrapper around login() for test clarity.
- *
- * @param supertestWithoutAuth - Supertest instance without authentication
- * @param username - Username of the object owner
- * @param password - Password for the user
- * @returns Object containing the session cookie and user profile UID
- */
 export const loginAsObjectOwner = (
   supertestWithoutAuth: SuperTest.Agent,
   username: string,
   password: string
 ): Promise<LoginResult> => login(supertestWithoutAuth, username, password);
 
-/**
- * Logs in as a user who is not the object owner. This is a semantic wrapper around login() for test clarity.
- *
- * @param supertestWithoutAuth - Supertest instance without authentication
- * @param username - Username of the non-owner user
- * @param password - Password for the user
- * @returns Object containing the session cookie and user profile UID
- */
 export const loginAsNotObjectOwner = (
   supertestWithoutAuth: SuperTest.Agent,
   username: string,
   password: string
 ): Promise<LoginResult> => login(supertestWithoutAuth, username, password);
 
-/**
- * Activates the user profile for 'simple_user'.
- * This is required before the user can be used in access control operations.
- *
- * @param es - Elasticsearch client instance
- * @returns Object containing the activated profile UID
- */
 export const activateSimpleUserProfile = async (es: Client): Promise<{ profileUid: string }> => {
   const response = await es.security.activateUserProfile({
     username: 'simple_user',
