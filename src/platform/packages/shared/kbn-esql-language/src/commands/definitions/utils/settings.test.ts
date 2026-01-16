@@ -47,7 +47,7 @@ describe('getUnmappedFieldsStrategy', () => {
     expect(strategy).toBe(UnmappedFieldsStrategy.NULLIFY);
   });
 
-  it('should ignore cases', () => {
+  it('should be case insensitive', () => {
     const headers = [synth.header`SET unmapped_fields = "nullify"`];
     const strategy = getUnmappedFieldsStrategy(headers);
     expect(strategy).toBe(UnmappedFieldsStrategy.NULLIFY);
