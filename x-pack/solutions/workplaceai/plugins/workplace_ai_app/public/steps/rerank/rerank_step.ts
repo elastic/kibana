@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreSetup, HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
@@ -26,7 +27,11 @@ export const createRerankStepDefinition = (core: CoreSetup) => {
 
   return createPublicStepDefinition({
     ...rerankStepCommonDefinition,
-    icon: 'sortable',
+    icon: React.lazy(() =>
+      import('@elastic/eui/es/components/icon/assets/sortable').then(({ icon }) => ({
+        default: icon,
+      }))
+    ),
     label: i18n.translate('searchWorkflows.rerankStep.label', {
       defaultMessage: 'Rerank Results',
     }),

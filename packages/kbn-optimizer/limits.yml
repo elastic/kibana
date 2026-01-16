@@ -25,7 +25,7 @@ pageLoadAssetSize:
   console: 31192
   contentConnectors: 33014
   contentManagement: 8350
-  controls: 12234
+  controls: 10786
   core: 559233
   cps: 5918
   crossClusterReplication: 12662
@@ -117,7 +117,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 15639
+  navigation: 12376
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
@@ -184,7 +184,7 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 111000
   uiActions: 24670
-  uiActionsEnhanced: 20189
+  uiActionsEnhanced: 19272
   unifiedDocViewer: 14513
   unifiedSearch: 19500
   upgradeAssistant: 6898
@@ -208,6 +208,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 77926
+  workflowsExtensions: 76765
   workflowsManagement: 8497
-  workplaceAIApp: 6135
+  workplaceAIApp: 65756
