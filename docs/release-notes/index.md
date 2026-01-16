@@ -61,7 +61,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Dashboards and Visualizations**:
 * Adds support for chaining variable controls. You can now set up variable controls to depend on the values selected for another variable control [#242909]({{kib-pull}}242909).
 * Removes the **Supporting visualization** section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under **Appearance** [#245979]({{kib-pull}}245979).
-* Reorganizes and renames color settings in the Primary Metric dimension editor. For numeric metrics, the "Color by value" and "Color mapping"/"Color" settings are now located under the "Background chart" field. The settings have been renamed as follows: "Color by value" is now "Color mode," and "Color mapping" is now "Dynamic color mapping" [#243608]({{kib-pull}}243608).
+* Reorganizes and renames color settings in the Primary Metric dimension editor. For numeric metrics, the "Color by value" and "Color mapping"/"Color" settings are now located under the "Background chart" field. The settings have been renamed as follows: "Color by value" is now "Color mode", and "Color mapping" is now "Dynamic color mapping" [#243608]({{kib-pull}}243608).
 * In **dashboard visualization in-line editing** and **Lens workspace**, the 'Appearance', 'Titles and text', 'Axis', and 'Legend' settings have been moved from a popover into a dedicated flyout panel [#240804]({{kib-pull}}240804).
 * Moves the Lens visualization toolbar from the workspace section to the configuration panel. [#239879]({{kib-pull}}239879)
 * Moves the **Save as** and **Reset** options under the top nav **Save** button when the dashboard is in edit mode. [#237211]({{kib-pull}}237211).
@@ -86,13 +86,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fleet agent list table now persists state of filters while navigating within a session [#228875]({{kib-pull}}228875).
 
 **Discover**:
-* Adds an option to the document viewer to add or remove a field in the main documents table [#246024]({{kib-pull}}246024).
 * Adds a “Copy as Markdown” option for selected results [#245545]({{kib-pull}}245545).
 * Optimizes performance by avoiding redundant requests when breakdown or chart interval changes [#245523]({{kib-pull}}245523).
 * Shows multi-fields in the document viewer by default in {{esql}} mode [#245890]({{kib-pull}}245890).
 * Adds support for filtering multivalue fields by interacting with the results table in {{esql}} mode [#245554]({{kib-pull}}245554).
 * Improves the lookup index editor interface available from the {{esql}} mode [#244480]({{kib-pull}}244480).
 * Saving an {{esql}} query's visualization to a dashboard now brings any related controls along with it [#237070]({{kib-pull}}237070).
+* Updates the icon in the document viewer to add or remove a field in the main documents table [#246024]({{kib-pull}}246024).
 
 
 **{{esql}} editor**:
