@@ -47,7 +47,7 @@ const setup = async () => {
 
   const dataView = dataViewMockWithTimeField;
 
-  // Create a persisted tab with ES|QL query
+  // Create a persisted tab
   const persistedTab = fromTabStateToSavedObjectTab({
     tab: getTabStateMock({
       id: 'test-tab',
