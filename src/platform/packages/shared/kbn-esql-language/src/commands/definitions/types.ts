@@ -382,6 +382,14 @@ export interface ValidationErrors {
     message: string;
     type: { value: string; setting: string };
   };
+  unknownMapParameterName: {
+    message: string;
+    type: { paramName: string; map: string };
+  };
+  invalidMapParameterValueType: {
+    message: string;
+    type: { paramName: string; expectedTypes: string; actualType: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

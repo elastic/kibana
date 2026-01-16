@@ -403,6 +403,30 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'unknownMapParameterName':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownMapParameterName', {
+          defaultMessage: 'Unknown map parameter "{paramName}". Available parameters are: {map}.',
+          values: {
+            paramName: out.paramName,
+            map: out.map,
+          },
+        }),
+        type: 'error',
+      };
+    case 'invalidMapParameterValueType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValueType', {
+          defaultMessage:
+            'Invalid value type for map parameter "{paramName}". Expected types: {expectedTypes}. Actual type: {actualType}.',
+          values: {
+            paramName: out.paramName,
+            expectedTypes: out.expectedTypes,
+            actualType: out.actualType,
+          },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
