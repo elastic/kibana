@@ -19,6 +19,7 @@ import { getHealthStatuses } from './get_health_statuses';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServicesSlos } from './get_service_slos';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import type { MergedServiceStat } from './merge_service_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
@@ -28,6 +29,9 @@ export interface ServicesItemsResponse {
   items: MergedServiceStat[];
   maxCountExceeded: boolean;
   serviceOverflowCount: number;
+  // The highest priority sort field based on available data
+  // Priority: alertsCount -> sloStatus -> healthStatus -> throughput
+  sortField: ServiceInventoryFieldName;
 }
 
 export async function getServicesItems({
@@ -99,8 +103,6 @@ export async function getServicesItems({
         }),
       ]);
 
-    // Then, fetch SLOs only for the services we found (optimization to avoid querying all SLOs)
-    // Skip if: includeSloStatus is false, no esClient/spaceId, or no services found
     const serviceNames = serviceStats.map((s) => s.serviceName);
     const shouldFetchSlos = includeSloStatus && esClient && spaceId && serviceNames.length > 0;
 
@@ -116,16 +118,36 @@ export async function getServicesItems({
         })
       : [];
 
+    const items =
+      mergeServiceStats({
+        serviceStats,
+        healthStatuses,
+        alertCounts,
+        sloCounts,
+      }) ?? [];
+
+    // Determine the highest priority sort field based on available data
+    // Priority: alertsCount -> sloStatus -> healthStatus -> throughput
+    const hasAlerts = alertCounts.length > 0;
+    const hasSlos = sloCounts.length > 0;
+    const hasHealthStatuses = healthStatuses.length > 0;
+
+    let sortField: ServiceInventoryFieldName;
+    if (hasAlerts) {
+      sortField = ServiceInventoryFieldName.AlertsCount;
+    } else if (hasSlos) {
+      sortField = ServiceInventoryFieldName.SloStatus;
+    } else if (hasHealthStatuses) {
+      sortField = ServiceInventoryFieldName.HealthStatus;
+    } else {
+      sortField = ServiceInventoryFieldName.Throughput;
+    }
+
     return {
-      items:
-        mergeServiceStats({
-          serviceStats,
-          healthStatuses,
-          alertCounts,
-          sloCounts,
-        }) ?? [],
+      items,
       maxCountExceeded,
       serviceOverflowCount,
+      sortField,
     };
   });
 }

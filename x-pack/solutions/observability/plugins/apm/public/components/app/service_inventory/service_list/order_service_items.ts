@@ -48,21 +48,34 @@ const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
 
 export function orderServiceItems({
   items,
+  sortField,
   sortDirection,
+  isDefaultSort = false,
 }: {
   items: ServiceListItem[];
+  sortField: ServiceInventoryFieldName;
   sortDirection: 'asc' | 'desc';
+  isDefaultSort?: boolean;
 }): ServiceListItem[] {
-  // Always apply multi-level sorting:
-  // alertsCount -> sloStatus -> healthStatus -> throughput
-  return orderBy(
-    items,
-    [
-      sorts[ServiceInventoryFieldName.AlertsCount],
-      sorts[ServiceInventoryFieldName.SloStatus],
-      sorts[ServiceInventoryFieldName.HealthStatus],
-      sorts[ServiceInventoryFieldName.Throughput],
-    ],
-    [sortDirection, sortDirection, sortDirection, sortDirection]
-  );
+  // Default sort: multi-level sorting (alerts -> SLO -> health -> throughput)
+  // User-selected sort: sort by the selected column only
+  if (isDefaultSort) {
+    return orderBy(
+      items,
+      [
+        sorts[ServiceInventoryFieldName.AlertsCount],
+        sorts[ServiceInventoryFieldName.SloStatus],
+        sorts[ServiceInventoryFieldName.HealthStatus],
+        sorts[ServiceInventoryFieldName.Throughput],
+      ],
+      [sortDirection, sortDirection, sortDirection, sortDirection]
+    );
+  }
+
+  // Single column sort when user explicitly selects a column
+  const sortFn = sorts[sortField];
+  if (!sortFn) {
+    return items;
+  }
+  return orderBy(items, [sortFn], [sortDirection]);
 }

@@ -6,13 +6,16 @@
  */
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { SloStatus } from '../../../../../common/service_inventory';
+import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import { orderServiceItems } from './order_service_items';
 
 describe('orderServiceItems', () => {
-  describe('multi-level sorting: alerts -> SLO status -> health status -> throughput', () => {
+  describe('default multi-level sorting (isDefaultSort=true)', () => {
     it('sorts by alerts count first (desc)', () => {
       const sortedItems = orderServiceItems({
+        sortField: ServiceInventoryFieldName.AlertsCount,
         sortDirection: 'desc',
+        isDefaultSort: true,
         items: [
           { serviceName: 'no-alerts', alertsCount: 0 },
           { serviceName: 'many-alerts', alertsCount: 5 },
@@ -29,7 +32,9 @@ describe('orderServiceItems', () => {
 
     it('sorts by SLO status when alerts are equal', () => {
       const sortedItems = orderServiceItems({
+        sortField: ServiceInventoryFieldName.SloStatus,
         sortDirection: 'desc',
+        isDefaultSort: true,
         items: [
           { serviceName: 'healthy-slo', alertsCount: 1, sloStatus: 'healthy' as SloStatus },
           { serviceName: 'violated-slo', alertsCount: 1, sloStatus: 'violated' as SloStatus },
@@ -46,7 +51,9 @@ describe('orderServiceItems', () => {
 
     it('sorts by SLO count within same status', () => {
       const sortedItems = orderServiceItems({
+        sortField: ServiceInventoryFieldName.SloStatus,
         sortDirection: 'desc',
+        isDefaultSort: true,
         items: [
           {
             serviceName: '2-violated',
@@ -76,77 +83,37 @@ describe('orderServiceItems', () => {
       ]);
     });
 
-    it('sorts by health status when alerts and SLO are equal', () => {
-      const sortedItems = orderServiceItems({
-        sortDirection: 'desc',
-        items: [
-          { serviceName: 'unknown', healthStatus: ServiceHealthStatus.unknown },
-          { serviceName: 'critical', healthStatus: ServiceHealthStatus.critical },
-          { serviceName: 'healthy', healthStatus: ServiceHealthStatus.healthy },
-          { serviceName: 'warning', healthStatus: ServiceHealthStatus.warning },
-        ],
-      });
-
-      expect(sortedItems.map((item) => item.serviceName)).toEqual([
-        'critical',
-        'warning',
-        'healthy',
-        'unknown',
-      ]);
-    });
-
-    it('sorts by throughput as final tiebreaker', () => {
-      const sortedItems = orderServiceItems({
-        sortDirection: 'desc',
-        items: [
-          { serviceName: 'low-throughput', throughput: 10 },
-          { serviceName: 'high-throughput', throughput: 100 },
-          { serviceName: 'med-throughput', throughput: 50 },
-        ],
-      });
-
-      expect(sortedItems.map((item) => item.serviceName)).toEqual([
-        'high-throughput',
-        'med-throughput',
-        'low-throughput',
-      ]);
-    });
-
     it('applies full multi-level sort correctly', () => {
       const sortedItems = orderServiceItems({
+        sortField: ServiceInventoryFieldName.AlertsCount,
         sortDirection: 'desc',
+        isDefaultSort: true,
         items: [
-          // No alerts, no SLO, high throughput
           { serviceName: 'service-f', alertsCount: 0, throughput: 1000 },
-          // 1 alert, healthy SLO
           {
             serviceName: 'service-d',
             alertsCount: 1,
             sloStatus: 'healthy' as SloStatus,
             sloCount: 1,
           },
-          // 1 alert, 2 violated SLOs
           {
             serviceName: 'service-b',
             alertsCount: 1,
             sloStatus: 'violated' as SloStatus,
             sloCount: 2,
           },
-          // 3 alerts, 2 violated SLOs
           {
             serviceName: 'service-a',
             alertsCount: 3,
             sloStatus: 'violated' as SloStatus,
             sloCount: 2,
           },
-          // 1 alert, 1 violated SLO
           {
             serviceName: 'service-c',
             alertsCount: 1,
             sloStatus: 'violated' as SloStatus,
             sloCount: 1,
           },
-          // No alerts, no SLO, low throughput
           { serviceName: 'service-e', alertsCount: 0, throughput: 100 },
         ],
       });
@@ -160,38 +127,119 @@ describe('orderServiceItems', () => {
         'service-e', // 0 alerts, low throughput
       ]);
     });
+  });
 
-    it('handles ascending sort direction', () => {
+  describe('single column sorting (isDefaultSort=false)', () => {
+    it('sorts only by alerts count when user clicks alerts column', () => {
       const sortedItems = orderServiceItems({
-        sortDirection: 'asc',
+        sortField: ServiceInventoryFieldName.AlertsCount,
+        sortDirection: 'desc',
+        isDefaultSort: false,
         items: [
-          { serviceName: 'many-alerts', alertsCount: 5 },
-          { serviceName: 'no-alerts', alertsCount: 0 },
-          { serviceName: 'one-alert', alertsCount: 1 },
+          { serviceName: 'no-alerts', alertsCount: 0, throughput: 1000 },
+          { serviceName: 'many-alerts', alertsCount: 5, throughput: 10 },
+          { serviceName: 'one-alert', alertsCount: 1, throughput: 500 },
         ],
       });
 
       expect(sortedItems.map((item) => item.serviceName)).toEqual([
-        'no-alerts',
-        'one-alert',
         'many-alerts',
+        'one-alert',
+        'no-alerts',
       ]);
     });
 
-    it('handles missing values gracefully', () => {
+    it('sorts only by SLO status when user clicks SLO column', () => {
       const sortedItems = orderServiceItems({
+        sortField: ServiceInventoryFieldName.SloStatus,
         sortDirection: 'desc',
+        isDefaultSort: false,
         items: [
-          { serviceName: 'with-alerts', alertsCount: 1 },
-          { serviceName: 'no-data' }, // No alertsCount, no sloStatus, no healthStatus, no throughput
-          { serviceName: 'with-slo', sloStatus: 'violated' as SloStatus, sloCount: 1 },
+          {
+            serviceName: 'healthy-slo',
+            alertsCount: 10,
+            sloStatus: 'healthy' as SloStatus,
+            sloCount: 1,
+          },
+          {
+            serviceName: 'violated-slo',
+            alertsCount: 0,
+            sloStatus: 'violated' as SloStatus,
+            sloCount: 1,
+          },
+          {
+            serviceName: 'degrading-slo',
+            alertsCount: 5,
+            sloStatus: 'degrading' as SloStatus,
+            sloCount: 1,
+          },
+        ],
+      });
+
+      // Should sort by SLO status only, ignoring alerts count
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        'violated-slo',
+        'degrading-slo',
+        'healthy-slo',
+      ]);
+    });
+
+    it('sorts only by throughput when user clicks throughput column', () => {
+      const sortedItems = orderServiceItems({
+        sortField: ServiceInventoryFieldName.Throughput,
+        sortDirection: 'desc',
+        isDefaultSort: false,
+        items: [
+          { serviceName: 'low-throughput', alertsCount: 10, throughput: 10 },
+          { serviceName: 'high-throughput', alertsCount: 0, throughput: 100 },
+          { serviceName: 'med-throughput', alertsCount: 5, throughput: 50 },
+        ],
+      });
+
+      // Should sort by throughput only, ignoring alerts count
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        'high-throughput',
+        'med-throughput',
+        'low-throughput',
+      ]);
+    });
+
+    it('sorts only by health status when user clicks health column', () => {
+      const sortedItems = orderServiceItems({
+        sortField: ServiceInventoryFieldName.HealthStatus,
+        sortDirection: 'desc',
+        isDefaultSort: false,
+        items: [
+          { serviceName: 'unknown', healthStatus: ServiceHealthStatus.unknown, alertsCount: 10 },
+          { serviceName: 'critical', healthStatus: ServiceHealthStatus.critical, alertsCount: 0 },
+          { serviceName: 'healthy', healthStatus: ServiceHealthStatus.healthy, alertsCount: 5 },
+        ],
+      });
+
+      // Should sort by health status only, ignoring alerts count
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        'critical',
+        'healthy',
+        'unknown',
+      ]);
+    });
+
+    it('sorts by service name ascending', () => {
+      const sortedItems = orderServiceItems({
+        sortField: ServiceInventoryFieldName.ServiceName,
+        sortDirection: 'asc',
+        isDefaultSort: false,
+        items: [
+          { serviceName: 'zebra-service' },
+          { serviceName: 'alpha-service' },
+          { serviceName: 'beta-service' },
         ],
       });
 
       expect(sortedItems.map((item) => item.serviceName)).toEqual([
-        'with-alerts',
-        'with-slo',
-        'no-data',
+        'alpha-service',
+        'beta-service',
+        'zebra-service',
       ]);
     });
   });

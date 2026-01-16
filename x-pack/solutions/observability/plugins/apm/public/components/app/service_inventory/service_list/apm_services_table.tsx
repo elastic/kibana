@@ -251,6 +251,7 @@ export function getServiceColumns({
     ...(showSlosColumn
       ? [
           {
+            field: ServiceInventoryFieldName.SloStatus,
             name: (
               <ColumnHeaderWithTooltip
                 tooltipContent={i18n.translate('xpack.apm.servicesTable.tooltip.slosStatus', {
@@ -262,9 +263,8 @@ export function getServiceColumns({
               />
             ),
             width: `${unit * 7}px`,
-            render: (item: ServiceListItem) => {
-              const { serviceName, agentName, sloStatus, sloCount } = item;
-
+            sortable: true,
+            render: (_, { serviceName, agentName, sloStatus, sloCount }) => {
               // If no SLO data is available, don't render the badge
               if (!sloStatus) {
                 return null;

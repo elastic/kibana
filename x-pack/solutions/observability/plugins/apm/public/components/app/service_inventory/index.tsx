@@ -177,7 +177,7 @@ export function ServiceInventory() {
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, sortField },
   } = useApmParams('/services');
 
   const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
@@ -190,11 +190,9 @@ export function ServiceInventory() {
     (item) => ServiceInventoryFieldName.AlertsCount in item
   );
 
-  const tiebreakerField = ServiceInventoryFieldName.Throughput;
-
-  const initialSortField = displayHealthStatus
-    ? ServiceInventoryFieldName.HealthStatus
-    : tiebreakerField;
+  // Use the sort field from the API response, which is based on available data
+  // Priority: alertsCount -> sloStatus -> healthStatus -> throughput
+  const initialSortField = mainStatisticsData.sortField ?? ServiceInventoryFieldName.Throughput;
 
   const initialSortDirection = 'desc';
 
@@ -237,15 +235,20 @@ export function ServiceInventory() {
     </EuiFlexItem>
   );
 
+  // Track if user has explicitly selected a sort column via URL params
+  const isDefaultSort = !sortField;
+
   const sortFn: SortFunction<ServiceListItem> = useCallback(
-    (itemsToSort, _sortField, sortDirection) => {
-      // Always apply multi-level sort: alerts -> SLO -> health -> throughput
+    (itemsToSort, currentSortField, currentSortDirection) => {
       return orderServiceItems({
         items: itemsToSort,
-        sortDirection,
+        sortField: currentSortField as ServiceInventoryFieldName,
+        sortDirection: currentSortDirection,
+        // Use multi-level sort only when no explicit sort field is in URL
+        isDefaultSort,
       });
     },
-    []
+    [isDefaultSort]
   );
 
   // TODO verify this with AI team
