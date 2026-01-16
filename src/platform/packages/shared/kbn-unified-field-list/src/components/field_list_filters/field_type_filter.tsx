@@ -15,8 +15,6 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFilterButton,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
   EuiPanel,
@@ -32,6 +30,7 @@ import {
   useGeneratedHtmlId,
   logicalCSS,
   mathWithUnits,
+  EuiFormAppend,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -186,21 +185,20 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
       closePopover={() => setIsOpen(false)}
       css={filterPopoverStyle}
       button={
-        <EuiFilterButton
+        <EuiFormAppend
+          element="button"
+          iconLeft="filter"
+          onClick={() => setIsOpen((value) => !value)}
           aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.filterByTypeAriaLabel', {
             defaultMessage: 'Filter by type',
           })}
-          color="text"
-          isSelected={isOpen}
-          numFilters={selectedFieldTypes.length}
-          hasActiveFilters={!!selectedFieldTypes.length}
-          numActiveFilters={selectedFieldTypes.length}
+          aria-expanded={isOpen}
           data-test-subj={`${testSubj}Toggle`}
-          css={filterButtonStyle}
-          onClick={() => setIsOpen((value) => !value)}
         >
-          <EuiIcon type="filter" />
-        </EuiFilterButton>
+          <EuiNotificationBadge color={!!selectedFieldTypes.length ? 'accent' : 'subdued'}>
+            {selectedFieldTypes.length}
+          </EuiNotificationBadge>
+        </EuiFormAppend>
       }
     >
       <>

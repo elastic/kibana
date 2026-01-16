@@ -11,8 +11,8 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiForm,
+  EuiFormAppend,
   EuiFormRow,
-  EuiText,
 } from '@elastic/eui';
 import React, { Controller, useForm } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -85,14 +85,14 @@ export const CreateApiKeyForm = () => {
             <EuiFieldText
               fullWidth
               append={
-                <EuiText size="xs">
-                  <strong>
+                <EuiFormAppend
+                  label={
                     <FormattedMessage
                       id="xpack.searchPlayground.viewCode.apiForm.expire.days"
                       defaultMessage="Days"
                     />
-                  </strong>
-                </EuiText>
+                  }
+                />
               }
               type="number"
               placeholder={i18n.translate(
