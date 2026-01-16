@@ -157,12 +157,14 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
 
         const computeStart = performance.now();
         const suggestions = await suggest(fullText, offset, deps);
-        const computeEnd = performance.now();
 
         const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
         if (suggestionsWithCustomCommands.length) {
           deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
         }
+
+        const result = wrapAsMonacoSuggestions(suggestions, fullText);
+        const computeEnd = performance.now();
 
         deps?.telemetry?.onSuggestionsReady?.(
           computeStart,
@@ -171,7 +173,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           model.getLineCount()
         );
 
-        return wrapAsMonacoSuggestions(suggestions, fullText);
+        return result;
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
         if (!deps?.getFieldsMetadata) return item;
