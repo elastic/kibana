@@ -13,7 +13,7 @@ exports[`LinkToAlertsPage component renders correctly with default props 1`] = `
       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
     >
       <span
-        class="eui-textTruncate euiButtonEmpty__text"
+        class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
       >
         Show all
       </span>
@@ -39,7 +39,7 @@ exports[`LinkToAlertsPage component renders correctly with optional props 1`] = 
       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
     >
       <span
-        class="eui-textTruncate euiButtonEmpty__text"
+        class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
       >
         Show all
       </span>
