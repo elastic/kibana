@@ -11,12 +11,7 @@ import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
-import {
-  ruleActivityFilterDefaultOptions,
-  ruleActivityFilterLabelMap,
-  ruleSourceFilterDefaultOptions,
-  ruleSourceFilterLabelMap,
-} from './constants';
+import { ruleSourceFilterDefaultOptions, ruleSourceFilterLabelMap } from './constants';
 import {
   initialState,
   useCoverageOverviewDashboardContext,
@@ -25,7 +20,6 @@ import {
 jest.mock('./coverage_overview_dashboard_context');
 
 const setShowExpandedCells = jest.fn();
-const setRuleActivityFilter = jest.fn();
 const setRuleSourceFilter = jest.fn();
 const setRuleSearchFilter = jest.fn();
 
@@ -33,7 +27,6 @@ const mockCoverageOverviewContextReturn = {
   state: initialState,
   actions: {
     setShowExpandedCells,
-    setRuleActivityFilter,
     setRuleSourceFilter,
     setRuleSearchFilter,
   },
@@ -52,19 +45,6 @@ const renderFiltersPanel = () => {
 };
 
 describe('CoverageOverviewFiltersPanel', () => {
-  test('it correctly populates rule activity filter state', async () => {
-    const wrapper = renderFiltersPanel();
-
-    await userEvent.click(wrapper.getByTestId('coverageOverviewRuleActivityFilterButton'));
-
-    await userEvent.click(
-      within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
-        ruleActivityFilterLabelMap[ruleActivityFilterDefaultOptions[0].label]
-      )
-    );
-    expect(setRuleActivityFilter).toHaveBeenCalledWith([ruleActivityFilterDefaultOptions[0].label]);
-  });
-
   test('it correctly populates rule source filter state', async () => {
     const wrapper = renderFiltersPanel();
 

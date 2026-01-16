@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React, { memo, useCallback, useMemo } from 'react';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
-import { getTotalRuleCount } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewPanelWidth } from './constants';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { CoverageOverviewPanelRuleStats } from './shared_components/panel_rule_stats';
@@ -37,8 +36,7 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
 
   const { getColorsForValue } = useCoverageColors();
 
-  const totalRuleCount = getTotalRuleCount(technique, filter.activity);
-  const techniqueColors = getColorsForValue(totalRuleCount);
+  const techniqueColors = getColorsForValue(technique.enabledRules.length);
 
   const handlePanelOnClick = useCallback(
     () => setIsPopoverOpen(!isPopoverOpen),
@@ -90,6 +88,7 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
             <CoverageOverviewPanelRuleStats
               enabledRules={technique.enabledRules.length}
               disabledRules={technique.disabledRules.length}
+              availableRules={technique.availableRules.length}
             />
           </EuiFlexItem>
         )}

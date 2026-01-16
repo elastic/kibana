@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoverageOverviewRuleActivity,
-  CoverageOverviewRuleSource,
-} from '../../../../../common/api/detection_engine';
+import { CoverageOverviewRuleSource } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
 export const coverageOverviewPanelWidth = 160;
@@ -16,20 +13,6 @@ export const coverageOverviewPanelWidth = 160;
 export const coverageOverviewLegendWidth = 380;
 
 export const coverageOverviewFilterWidth = 300;
-
-export const ruleActivityFilterDefaultOptions = [
-  {
-    label: CoverageOverviewRuleActivity.Enabled,
-  },
-  {
-    label: CoverageOverviewRuleActivity.Disabled,
-  },
-];
-
-export const ruleActivityFilterLabelMap: Record<string, string> = {
-  [CoverageOverviewRuleActivity.Enabled]: i18n.CoverageOverviewEnabledRuleActivity,
-  [CoverageOverviewRuleActivity.Disabled]: i18n.CoverageOverviewDisabledRuleActivity,
-};
 
 export const ruleSourceFilterDefaultOptions = [
   {

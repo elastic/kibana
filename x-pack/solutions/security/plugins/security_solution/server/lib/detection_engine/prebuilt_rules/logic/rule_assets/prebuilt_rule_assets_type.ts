@@ -19,6 +19,7 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
     version: {
       type: 'long',
     },
+    // here
   },
 };
 

@@ -10,4 +10,5 @@ import type { RuleObjectId } from '../../../../../common/api/detection_engine';
 export interface CoverageOverviewRule {
   id: RuleObjectId; // rule SO's ids (not ruleId)
   name: string;
+  version?: number;
 }

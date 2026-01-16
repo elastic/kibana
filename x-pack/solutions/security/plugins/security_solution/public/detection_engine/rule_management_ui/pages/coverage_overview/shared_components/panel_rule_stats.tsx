@@ -24,6 +24,7 @@ const metadataLabelClass = css`
 export const CoverageOverviewPanelRuleStats = ({
   disabledRules,
   enabledRules,
+  availableRules,
 }: CoverageOverviewPanelRuleStatsProps) => {
   return (
     <EuiFlexGroup
@@ -31,6 +32,19 @@ export const CoverageOverviewPanelRuleStats = ({
       direction="column"
       gutterSize="xs"
     >
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiText className={cx(metadataLabelClass)} size="xs">
+            {i18n.ENABLED_RULES_METADATA_LABEL}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiNotificationBadge data-test-subj="ruleStatsEnabledRulesCount" color="subdued">
+            {enabledRules}
+          </EuiNotificationBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiText className={cx(metadataLabelClass)} size="xs">
@@ -47,12 +61,12 @@ export const CoverageOverviewPanelRuleStats = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiText className={cx(metadataLabelClass)} size="xs">
-            {i18n.ENABLED_RULES_METADATA_LABEL}
+            {i18n.AVAILABLE_RULES_METADATA_LABEL}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge data-test-subj="ruleStatsEnabledRulesCount" color="subdued">
-            {enabledRules}
+          <EuiNotificationBadge data-test-subj="ruleStatsAvailableRulesCount" color="subdued">
+            {availableRules}
           </EuiNotificationBadge>
         </EuiFlexItem>
       </EuiFlexGroup>

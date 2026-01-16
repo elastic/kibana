@@ -21,6 +21,10 @@ export enum CoverageOverviewRuleActivity {
    * Disabled rules (prebuilt and custom)
    */
   Disabled = 'disabled',
+  /**
+   * Available rules (prebuilt rules that are not yet installed)
+   */
+  Available = 'available',
 }
 export const CoverageOverviewRuleActivitySchema = enumeration(
   'CoverageOverviewRuleActivity',
@@ -53,10 +57,6 @@ export const CoverageOverviewFilter = t.partial({
    * @example "Defense Evasion" or "TA0005"
    */
   search_term: NonEmptyString,
-  /**
-   * An activity filter representing an array combined of CoverageOverviewRuleActivity values to include only specified rules in the response
-   */
-  activity: NonEmptyArray(CoverageOverviewRuleActivitySchema),
   /**
    * A source filter representing an array combined of CoverageOverviewRuleSource values to include only specified rules in the response
    */

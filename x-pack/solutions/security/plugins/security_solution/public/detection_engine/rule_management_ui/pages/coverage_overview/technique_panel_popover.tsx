@@ -45,15 +45,17 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
     () => !canEditRules || technique.disabledRules.length === 0,
     [canEditRules, technique.disabledRules.length]
   );
-
-  const isEnableButtonLoading = isLoading;
+  const isInstallButtonDisabled = useMemo(
+    () => !canEditRules || technique.availableRules.length === 0,
+    [canEditRules, technique.availableRules.length]
+  );
 
   const {
     state: {
       showExpandedCells,
       filter: { activity },
     },
-    actions: { enableAllDisabled },
+    actions: { enableAllDisabled, installAvailableRules },
   } = useCoverageOverviewDashboardContext();
 
   const coveredSubtechniques = useMemo(
@@ -68,6 +70,14 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
     setIsLoading(false);
     closePopover();
   }, [closePopover, enableAllDisabled, technique.disabledRules]);
+
+  const handleInstallRules = useCallback(async () => {
+    setIsLoading(true);
+    const rules = technique.availableRules.map((r) => ({ rule_id: r.id, version: r.version }));
+    await installAvailableRules(rules);
+    setIsLoading(false);
+    closePopover();
+  }, [closePopover, installAvailableRules, technique.availableRules]);
 
   const TechniquePanel = (
     <CoverageOverviewMitreTechniquePanel
@@ -107,6 +117,15 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
     [technique.disabledRules]
   );
 
+  const availableRuleListItems: EuiListGroupItemProps[] = useMemo(
+    () =>
+      technique.availableRules.map((rule) => ({
+        label: <RuleLink name={rule.name} id={rule.id} />,
+        color: 'primary',
+      })),
+    [technique.availableRules]
+  );
+
   const EnabledRulesAccordionButton = useMemo(
     () => (
       <CoverageOverviewRuleListHeader
@@ -125,6 +144,16 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       />
     ),
     [technique.disabledRules.length]
+  );
+
+  const AvailableRulesAccordionButton = useMemo(
+    () => (
+      <CoverageOverviewRuleListHeader
+        listTitle={i18n.AVAILABLE_RULES_LIST_LABEL}
+        listLength={technique.availableRules.length}
+      />
+    ),
+    [technique.availableRules.length]
   );
 
   return (
@@ -161,7 +190,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       <div className={cx(css({ maxHeight: '40em', padding: '5px 0px' }), 'eui-yScrollWithShadows')}>
         <EuiAccordion
           id="enabledRulesListAccordion"
-          initialIsOpen={technique.enabledRules.length > 0}
+          initialIsOpen={true}
           buttonContent={EnabledRulesAccordionButton}
         >
           <EuiListGroup
@@ -172,11 +201,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
           />
         </EuiAccordion>
         <EuiSpacer size="s" />
-        <EuiAccordion
-          id="disabledRulesListAccordion"
-          initialIsOpen={technique.disabledRules.length > 0}
-          buttonContent={DisabledRulesAccordionButton}
-        >
+        <EuiAccordion id="disabledRulesListAccordion" buttonContent={DisabledRulesAccordionButton}>
           <EuiListGroup
             data-test-subj="coverageOverviewDisabledRulesList"
             flush
@@ -185,19 +210,42 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
           />
         </EuiAccordion>
         <EuiSpacer size="s" />
+        <EuiAccordion
+          id="availableRulesListAccordion"
+          buttonContent={AvailableRulesAccordionButton}
+        >
+          <EuiListGroup
+            data-test-subj="coverageOverviewAvailableRulesList"
+            flush
+            listItems={availableRuleListItems}
+            size="s"
+          />
+        </EuiAccordion>
       </div>
       <EuiPopoverFooter>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButton
               data-test-subj="enableAllDisabledButton"
-              isLoading={isEnableButtonLoading}
+              isLoading={isLoading}
               disabled={isEnableButtonDisabled}
               onClick={handleEnableAllDisabled}
               size="s"
               iconType="checkInCircleFilled"
             >
               {i18n.ENABLE_ALL_DISABLED}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton
+              data-test-subj="installAvailableRulesButton"
+              isLoading={isLoading}
+              disabled={isInstallButtonDisabled}
+              onClick={handleInstallRules}
+              size="s"
+              iconType="plusInCircle"
+            >
+              {i18n.INSTALL_AVAILABLE_RULES}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

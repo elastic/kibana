@@ -69,11 +69,17 @@ function calcMetrics(
   const metrics: CoverageOverviewDashboard['metrics'] = {
     totalRulesCount: ruleIds.length,
     totalEnabledRulesCount: 0,
+    totalDisabledRulesCount: 0,
+    totalAvailableRulesCount: 0,
   };
 
   for (const ruleId of Object.keys(rulesData)) {
     if (rulesData[ruleId].activity === CoverageOverviewRuleActivity.Enabled) {
       metrics.totalEnabledRulesCount++;
+    } else if (rulesData[ruleId].activity === CoverageOverviewRuleActivity.Disabled) {
+      metrics.totalDisabledRulesCount++;
+    } else if (rulesData[ruleId].activity === CoverageOverviewRuleActivity.Available) {
+      metrics.totalAvailableRulesCount++;
     }
   }
 
@@ -119,13 +125,11 @@ function addRule(
       id: ruleId,
       name: ruleData.name,
     });
+  } else if (ruleData.activity === CoverageOverviewRuleActivity.Available) {
+    container.availableRules.push({
+      id: ruleId,
+      name: ruleData.name,
+      version: ruleData.version,
+    });
   }
-
-  // When we add support for available (not installed) rules to this feature, add the following here:
-  // else if (ruleData.activity === CoverageOverviewRuleActivity.Available) {
-  //   container.availableRules.push({
-  //     id: ruleId,
-  //     name: ruleData.name,
-  //   });
-  // }
 }

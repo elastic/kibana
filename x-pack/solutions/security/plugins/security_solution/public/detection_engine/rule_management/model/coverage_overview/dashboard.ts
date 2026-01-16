@@ -30,5 +30,7 @@ export interface CoverageOverviewDashboard {
   metrics: {
     totalRulesCount: number;
     totalEnabledRulesCount: number;
+    totalDisabledRulesCount: number;
+    totalAvailableRulesCount: number;
   };
 }

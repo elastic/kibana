@@ -16,6 +16,7 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
+import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { handleCoverageOverviewRequest } from './handle_coverage_overview_request';
 
 export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) => {
@@ -42,11 +43,14 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const ctx = await context.resolve(['alerting']);
+          const ctx = await context.resolve(['alerting', 'core']);
 
           const responseData = await handleCoverageOverviewRequest({
             params: request.body,
-            deps: { rulesClient: await ctx.alerting.getRulesClient() },
+            deps: {
+              rulesClient: await ctx.alerting.getRulesClient(),
+              ruleAssetsClient: createPrebuiltRuleAssetsClient(ctx.core.savedObjects.client),
+            },
           });
 
           return response.ok({

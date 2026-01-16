@@ -42,6 +42,13 @@ export const ENABLED_RULES_METADATA_LABEL = i18n.translate(
   }
 );
 
+export const AVAILABLE_RULES_METADATA_LABEL = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.availableRulesMetadataLabel',
+  {
+    defaultMessage: 'To install:',
+  }
+);
+
 export const SUBTECHNIQUES = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.subtechniques',
   {
@@ -53,6 +60,13 @@ export const ENABLE_ALL_DISABLED = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.enableAllDisabledButtonLabel',
   {
     defaultMessage: 'Enable all disabled',
+  }
+);
+
+export const INSTALL_AVAILABLE_RULES = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.enableAllDisabledButtonLabel',
+  {
+    defaultMessage: 'Install available rules',
   }
 );
 
@@ -82,6 +96,13 @@ export const ENABLED_RULES_LIST_LABEL = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.enabledRulesListLabel',
   {
     defaultMessage: 'Enabled rules',
+  }
+);
+
+export const AVAILABLE_RULES_LIST_LABEL = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.availableRulesListLabel',
+  {
+    defaultMessage: 'Available to install',
   }
 );
 
@@ -134,17 +155,10 @@ export const CoverageOverviewCustomRuleSource = i18n.translate(
   }
 );
 
-export const CoverageOverviewRuleActivityFilterLabel = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.ruleActivityFilterLabel',
-  {
-    defaultMessage: 'Installed rule status',
-  }
-);
-
 export const CoverageOverviewRuleSourceFilterLabel = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.ruleSourceFilterLabel',
   {
-    defaultMessage: 'Installed rule type',
+    defaultMessage: 'Rule type',
   }
 );
 

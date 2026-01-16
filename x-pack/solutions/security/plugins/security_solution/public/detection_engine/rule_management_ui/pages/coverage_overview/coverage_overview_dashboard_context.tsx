@@ -16,27 +16,27 @@ import React, {
 import { invariant } from '../../../../../common/utils/invariant';
 import {
   BulkActionTypeEnum,
-  CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewDashboardState } from './coverage_overview_dashboard_reducer';
 import {
   SET_SHOW_EXPANDED_CELLS,
-  SET_RULE_ACTIVITY_FILTER,
   SET_RULE_SOURCE_FILTER,
   SET_RULE_SEARCH_FILTER,
   createCoverageOverviewDashboardReducer,
 } from './coverage_overview_dashboard_reducer';
+import type { InstallSpecificRulesRequest } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import { usePerformInstallSpecificRules } from '../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 
 export interface CoverageOverviewDashboardActions {
   refetch: () => void;
   setShowExpandedCells: (value: boolean) => void;
-  setRuleActivityFilter: (value: CoverageOverviewRuleActivity[]) => void;
   setRuleSourceFilter: (value: CoverageOverviewRuleSource[]) => void;
   setRuleSearchFilter: (value: string) => void;
   enableAllDisabled: (ruleIds: string[]) => Promise<void>;
+  installAvailableRules: (ruleIds: string[]) => Promise<void>;
 }
 
 export interface CoverageOverviewDashboardContextType {
@@ -52,9 +52,8 @@ interface CoverageOverviewDashboardContextProviderProps {
 }
 
 export const initialState: CoverageOverviewDashboardState = {
-  showExpandedCells: false,
+  showExpandedCells: true,
   filter: {
-    activity: [CoverageOverviewRuleActivity.Enabled],
     source: [CoverageOverviewRuleSource.Prebuilt, CoverageOverviewRuleSource.Custom],
   },
   data: undefined,
@@ -67,6 +66,7 @@ export const CoverageOverviewDashboardContextProvider = ({
   const [state, dispatch] = useReducer(createCoverageOverviewDashboardReducer(), initialState);
   const { data, isLoading, refetch } = useFetchCoverageOverviewQuery(state.filter);
   const { executeBulkAction } = useExecuteBulkAction();
+  const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
 
   useEffect(() => {
     refetch();
@@ -76,16 +76,6 @@ export const CoverageOverviewDashboardContextProvider = ({
     (value: boolean): void => {
       dispatch({
         type: SET_SHOW_EXPANDED_CELLS,
-        value,
-      });
-    },
-    [dispatch]
-  );
-
-  const setRuleActivityFilter = useCallback(
-    (value: CoverageOverviewRuleActivity[]): void => {
-      dispatch({
-        type: SET_RULE_ACTIVITY_FILTER,
         value,
       });
     },
@@ -119,22 +109,29 @@ export const CoverageOverviewDashboardContextProvider = ({
     [executeBulkAction]
   );
 
+  const installAvailableRules = useCallback(
+    async (rules: InstallSpecificRulesRequest['rules']) => {
+      await installSpecificRulesRequest({ rules });
+    },
+    [installSpecificRulesRequest]
+  );
+
   const actions = useMemo(
     () => ({
       refetch,
       setShowExpandedCells,
-      setRuleActivityFilter,
       setRuleSourceFilter,
       setRuleSearchFilter,
       enableAllDisabled,
+      installAvailableRules,
     }),
     [
       refetch,
-      setRuleActivityFilter,
       setRuleSearchFilter,
       setRuleSourceFilter,
       setShowExpandedCells,
       enableAllDisabled,
+      installAvailableRules,
     ]
   );
 

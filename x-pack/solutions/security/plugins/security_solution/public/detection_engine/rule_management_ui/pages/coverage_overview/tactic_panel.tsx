@@ -73,6 +73,7 @@ const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTactic
       <CoverageOverviewPanelRuleStats
         enabledRules={tactic.enabledRules.length}
         disabledRules={tactic.disabledRules.length}
+        availableRules={tactic.availableRules.length}
       />
     </EuiPanel>
   );

@@ -37,6 +37,7 @@ export const createPrebuiltRuleAssetsClient = (
   savedObjectsClient: SavedObjectsClientContract
 ): IPrebuiltRuleAssetsClient => {
   return {
+    // her
     fetchLatestAssets: () => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestAssets', async () => {
         const findResult = await savedObjectsClient.find<

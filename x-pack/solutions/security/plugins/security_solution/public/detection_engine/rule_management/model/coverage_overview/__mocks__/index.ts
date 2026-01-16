@@ -55,6 +55,8 @@ export const getMockCoverageOverviewDashboard = (): CoverageOverviewDashboard =>
   metrics: {
     totalRulesCount: 3,
     totalEnabledRulesCount: 1,
+    totalDisabledRulesCount: 1,
+    totalAvailableRulesCount: 1,
   },
 });
 

@@ -17,18 +17,12 @@ import React, { memo, useCallback } from 'react';
 import { CoverageOverviewLegend } from './shared_components/dashboard_legend';
 import * as i18n from './translations';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
-import { RuleActivityFilter } from './rule_activity_filter';
 import { RuleSourceFilter } from './rule_source_filter';
 
 const CoverageOverviewFiltersPanelComponent = () => {
   const {
     state: { filter, isLoading, showExpandedCells },
-    actions: {
-      setShowExpandedCells,
-      setRuleActivityFilter,
-      setRuleSourceFilter,
-      setRuleSearchFilter,
-    },
+    actions: { setShowExpandedCells, setRuleSourceFilter, setRuleSearchFilter },
   } = useCoverageOverviewDashboardContext();
 
   const handleExpandCellsFilterClick = () => setShowExpandedCells(true);
@@ -46,13 +40,6 @@ const CoverageOverviewFiltersPanelComponent = () => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFlexGroup>
-            <EuiFlexItem grow={0}>
-              <RuleActivityFilter
-                onChange={setRuleActivityFilter}
-                isLoading={isLoading}
-                selected={filter.activity ?? []}
-              />
-            </EuiFlexItem>
             <EuiFlexItem grow={0}>
               <RuleSourceFilter
                 onChange={setRuleSourceFilter}
