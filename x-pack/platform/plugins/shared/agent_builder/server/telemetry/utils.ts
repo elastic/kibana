@@ -13,7 +13,7 @@ import {
 import { createHash } from 'crypto';
 
 const BUILTIN_AGENT_IDS = new Set([agentBuilderDefaultAgentId, ...AGENT_BUILDER_BUILTIN_AGENTS]);
-const BUILTIN_TOOL_IDS = new Set<string>(AGENT_BUILDER_BUILTIN_TOOLS);
+const BUILTIN_TOOL_IDS = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 
 const CUSTOM = 'custom';
 const CUSTOM_HASH_PREFIX = `${CUSTOM}-`;
@@ -45,5 +45,5 @@ export function normalizeAgentIdForTelemetry(agentId?: string): string | undefin
  * custom/user-created tools are reported as a stable hashed label (CUSTOM-<sha256_prefix>).
  */
 export function normalizeToolIdForTelemetry(toolId: string): string {
-  return BUILTIN_TOOL_IDS.has(toolId) ? toolId : toCustomHashedId(toolId);
+  return (BUILTIN_TOOL_IDS as Set<string>).has(toolId) ? toolId : toCustomHashedId(toolId);
 }
