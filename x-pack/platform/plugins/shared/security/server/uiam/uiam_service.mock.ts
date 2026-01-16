@@ -15,9 +15,18 @@ export const uiamServiceMock = {
       [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
     })),
     getUserProfileGrant: jest.fn(),
+    getEsClientAuthenticationHeader: jest.fn().mockReturnValue({
+      [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+    }),
     refreshSessionTokens: jest
       .fn()
       .mockResolvedValue({ accessToken: 'new-access', refreshToken: 'new-refresh' }),
     invalidateSessionTokens: jest.fn().mockResolvedValue(undefined),
+    grantApiKey: jest.fn().mockResolvedValue({
+      id: 'mock-api-key-id',
+      key: 'mock-api-key-value',
+      description: 'mock-api-key-name',
+    }),
+    revokeApiKey: jest.fn().mockResolvedValue(undefined),
   }),
 };
