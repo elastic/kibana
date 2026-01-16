@@ -181,6 +181,5 @@
     "@kbn/dashboard-plugin",
     "@kbn/automatic-import-v2-plugin",
     "@kbn/connector-specs",
-    "@kbn/osquery-plugin"
   ]
 }
