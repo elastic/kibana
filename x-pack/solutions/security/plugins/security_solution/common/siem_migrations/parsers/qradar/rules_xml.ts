@@ -6,9 +6,15 @@
  */
 
 import xml2js from 'xml2js';
+import DOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
 import type { XmlElement } from '../xml/xml';
 import { XmlParser } from '../xml/xml';
 import type { QradarRule, ResourceDetailType, ResourceTypeMap } from './types';
+
+// Create DOMPurify instance for server-side use
+const window = new JSDOM('').window;
+const purify = DOMPurify(window);
 
 export class QradarRulesXmlParser extends XmlParser {
   private async processRuleXml(qradarRule: XmlElement): Promise<QradarRule | undefined> {
@@ -112,27 +118,29 @@ export class QradarRulesXmlParser extends XmlParser {
    * This method converts it to plain text:
    * `when any of Reference Set Name`
    *
+   * Uses DOMPurify, a well-tested sanitization library, to prevent security vulnerabilities
+   * such as incomplete multi-character sanitization and double-escaping issues.
+   *
    * @param text - The text content that may contain HTML entities and tags
    * @returns Sanitized plain text
    */
   private sanitizeHtmlText(text: string): string {
-    // First, decode common HTML entities
-    let decoded = text
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&apos;/g, "'");
-
-    // Remove all HTML tags and keep only the text content
-    // This regex matches opening tags, closing tags, and self-closing tags
-    decoded = decoded.replace(/<[^>]*>/g, '');
+    // Use DOMPurify to sanitize HTML content
+    // Configuration:
+    // - ALLOWED_TAGS: [] - Remove all HTML tags
+    // - ALLOWED_ATTR: [] - Remove all attributes
+    // - KEEP_CONTENT: true - Keep text content but remove tags
+    // - SAFE_FOR_TEMPLATES: true - Additional safety for template contexts
+    const sanitized = purify.sanitize(text, {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: [],
+      KEEP_CONTENT: true,
+      SAFE_FOR_TEMPLATES: true,
+      RETURN_TRUSTED_TYPE: false,
+    });
 
     // Clean up any extra whitespace that might result from tag removal
-    decoded = decoded.replace(/\s+/g, ' ').trim();
-
-    return decoded;
+    return sanitized.replace(/\s+/g, ' ').trim();
   }
 
   /**
