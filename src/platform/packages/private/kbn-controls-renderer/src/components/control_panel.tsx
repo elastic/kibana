@@ -96,8 +96,6 @@ export const ControlPanel = ({
   useEffect(() => {
     if (!api) return;
 
-    console.log({ api });
-
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
     if (apiPublishesTitle(api)) {

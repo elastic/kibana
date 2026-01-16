@@ -38,8 +38,8 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
   const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
     controlPanelRefs.current = { ...controlPanelRefs.current, [id]: ref };
   }, []);
+
   const [controlState, setControlState] = useState(parentApi.layout$.getValue().controls);
-  console.log({ controlState });
 
   const controlsInOrder: Array<ControlsLayout['controls'][string] & { id: string }> =
     useMemo(() => {

@@ -112,7 +112,6 @@ export class Fetch {
           resolve(interceptedResponse.body as TResponseBody);
         }
       } catch (error) {
-        debugger;
         if (!(error instanceof HttpInterceptHaltError)) {
           reject(error);
         }
