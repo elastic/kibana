@@ -21,9 +21,9 @@
         }
       ],
       "scopedQuery": {
-        "kql": "kibana.alert.rule.name :  \"Elasticsearch query rule\"",
+        "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
         "filters": [],
-        "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert. rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
+        "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
       },
       "createdAt": "2023-02-26T00:00:00.000Z",
       "updatedAt": "2023-02-26T00:00:00.000Z",
@@ -54,9 +54,9 @@
         }
       ],
       "scopedQuery": {
-        "kql": "kibana. alert.rule.name : \"Elasticsearch query rule\"",
+        "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
         "filters": [],
-        "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\": 1}}],\"should\":[],\"must_not\":[]}}"
+        "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
       },
       "createdAt": "2023-02-26T00:00:00.000Z",
       "updatedAt": "2023-02-26T00:00:00.000Z",
@@ -66,7 +66,7 @@
       "schedule": {
         "custom": {
           "start": "2023-02-26T00:00:00.000Z",
-          "duration": "1h",
+          "duration": "60m",
           "timezone": "UTC",
           "recurring": {
             "every": "1w",
