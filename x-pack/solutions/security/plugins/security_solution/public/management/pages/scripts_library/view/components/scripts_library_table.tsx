@@ -34,6 +34,7 @@ import type {
   EndpointScriptListApiResponse,
 } from '../../../../../../common/endpoint/types';
 import { scriptsLibraryLabels as i18n } from '../../translations';
+import { ScriptRowActions } from './script_row_actions';
 import { ScriptNameNavLink } from './script_name_nav_link';
 import { getScriptsDetailPath } from '../../../../common/routing';
 import { ScriptTablePlatformBadges } from './platform_badges';
@@ -52,6 +53,7 @@ interface GetScriptsLibraryTableColumnsProps {
   formatBytes: (bytes: number) => string;
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
   getTestId: (suffix?: string | undefined) => string | undefined;
+  onClickDelete: ScriptsLibraryTableProps['onClickDelete'];
   queryParams: ScriptsLibraryTableProps['queryParams'];
 }
 
@@ -59,6 +61,7 @@ const getScriptsLibraryTableColumns = ({
   formatBytes,
   getAppUrl,
   getTestId,
+  onClickDelete,
   queryParams,
 }: GetScriptsLibraryTableColumnsProps) => {
   const columns = [
@@ -180,7 +183,18 @@ const getScriptsLibraryTableColumns = ({
       field: '',
       name: i18n.table.columns.actions,
       width: columnWidths.actions,
-      actions: [],
+      actions: [
+        {
+          render: (item: EndpointScript) => (
+            <ScriptRowActions
+              scriptItem={item}
+              queryParams={queryParams}
+              onClickDelete={onClickDelete}
+              data-test-subj={getTestId('actions-menu')}
+            />
+          ),
+        },
+      ],
     },
   ];
 
@@ -198,6 +212,7 @@ export interface ScriptsLibraryTableProps {
   onChange: OnChangeTable;
   queryParams: ListScriptsRequestQuery;
   totalItemCount: number;
+  onClickDelete: (script: EndpointScript) => void;
 }
 export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
   ({
@@ -208,6 +223,7 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
     onChange,
     queryParams,
     totalItemCount,
+    onClickDelete,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { getAppUrl } = useAppUrl();
@@ -273,8 +289,9 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
           getTestId,
           getAppUrl,
           queryParams,
+          onClickDelete,
         }),
-      [formatBytes, getTestId, getAppUrl, queryParams]
+      [formatBytes, getTestId, getAppUrl, queryParams, onClickDelete]
     );
 
     const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {

@@ -6,7 +6,10 @@
  */
 
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
-import type { SortableScriptLibraryFields } from '../../../../../common/endpoint/types';
+import type {
+  EndpointScript,
+  SortableScriptLibraryFields,
+} from '../../../../../common/endpoint/types';
 import type { ListScriptsRequestQuery } from '../../../../../common/api/endpoint';
 import { useToasts } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -19,6 +22,7 @@ import {
 } from './components/scripts_library_table';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import { useScriptsLibraryUrlParams } from './components/scripts_library_url_params';
+import { ScriptDeleteModal } from './components/script_delete_modal';
 
 export const ScriptsLibrary = () => {
   const { addDanger } = useToasts();
@@ -30,6 +34,9 @@ export const ScriptsLibrary = () => {
     sortField: sortFieldFromUrl,
     setScriptsLibraryUrlParams,
   } = useScriptsLibraryUrlParams();
+  const [selectedItemForDelete, setSelectedItemForDelete] = useState<undefined | EndpointScript>(
+    undefined
+  );
 
   const { canReadScriptsLibrary } = useUserPrivileges().endpointPrivileges;
 
@@ -70,6 +77,21 @@ export const ScriptsLibrary = () => {
     },
     [reFetchEndpointScriptsLibrary, setQueryParams, setScriptsLibraryUrlParams]
   );
+  const onClickDelete = useCallback(
+    (script: EndpointScript) => {
+      setSelectedItemForDelete(script);
+    },
+    [setSelectedItemForDelete]
+  );
+
+  const onDeleteModalSuccess = useCallback(() => {
+    setSelectedItemForDelete(undefined);
+    reFetchEndpointScriptsLibrary();
+  }, [reFetchEndpointScriptsLibrary]);
+
+  const onDeleteModalCancel = useCallback(() => {
+    setSelectedItemForDelete(undefined);
+  }, []);
 
   useEffect(() => {
     if (!isFetching && scriptsLibraryFetchError) {
@@ -84,13 +106,22 @@ export const ScriptsLibrary = () => {
       subtitle={i18n.pageAboutInfo}
       hideHeader={false}
     >
+      {selectedItemForDelete && (
+        <ScriptDeleteModal
+          scriptName={selectedItemForDelete.name}
+          scriptId={selectedItemForDelete.id}
+          onSuccess={onDeleteModalSuccess}
+          onCancel={onDeleteModalCancel}
+          data-test-subj={'scriptDeleteModal'}
+        />
+      )}
       {isFetched && (
         <ScriptsLibraryTable
           data-test-subj="scriptsLibraryTable"
           items={tableItems}
           isLoading={isFetching}
           onChange={onChangeScriptsTable}
-          // onClickDelete={onClickDelete}
+          onClickDelete={onClickDelete}
           queryParams={queryParams}
           totalItemCount={totalItemCount}
         />

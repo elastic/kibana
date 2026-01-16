@@ -79,4 +79,42 @@ export const scriptsLibraryLabels = Object.freeze({
         },
       }),
   },
+  deleteModal: {
+    title: (scriptName: string) =>
+      i18n.translate('xpack.securitySolution.scriptsLibrary.table.actions.deleteLabel', {
+        defaultMessage: 'Delete "{scriptName}"?',
+        values: { scriptName },
+      }),
+    confirmationText: i18n.translate(
+      'xpack.securitySolution.scriptsLibrary.table.actions.deleteConfirmationText',
+      {
+        defaultMessage:
+          'This action cannot be undone. The script and all its metadata will be permanently removed from the library.',
+      }
+    ),
+    deleteButtonLabel: i18n.translate(
+      'xpack.securitySolution.scriptsLibrary.table.actions.deleteConfirmButtonLabel',
+      {
+        defaultMessage: 'Delete',
+      }
+    ),
+    cancelButtonLabel: i18n.translate(
+      'xpack.securitySolution.scriptsLibrary.table.actions.deleteCancelButtonLabel',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+    successToastTitle: i18n.translate(
+      'xpack.securitySolution.scriptsLibrary.table.actions.deleteSuccessTitle',
+      {
+        defaultMessage: 'Script deleted successfully',
+      }
+    ),
+    errorToastTitle: i18n.translate(
+      'xpack.securitySolution.scriptsLibrary.table.actions.deleteErrorTitle',
+      {
+        defaultMessage: 'Failed to delete script',
+      }
+    ),
+  },
 });
