@@ -100,9 +100,9 @@ When the user wants to modify an existing in-memory dashboard:
         } first
 
 3. **Call ${dashboardTools.manageDashboard}** with:
-   - \`toolResultId\`: The \`tool_result_id\` from the previous dashboard operation
-   - \`panelsToAdd\`: (optional) Array of \`tool_result_id\` values for new visualizations to add
-   - \`panelsToRemove\`: (optional) Array of panel UIDs to remove
+   - \`dashboardId\`: The \`tool_result_id\` from the previous dashboard operation
+   - \`visualizationsToAdd\`: (optional) Array of \`tool_result_id\` values for new visualizations to add
+   - \`visualizationsToRemove\`: (optional) Array of \`tool_result_id\` values to remove from the dashboard
    - \`title\`: (optional) Updated dashboard title
    - \`description\`: (optional) Updated dashboard description
    - \`markdownContent\`: (optional) Updated markdown summary
@@ -120,7 +120,7 @@ The tool returns a new \`tool_result_id\` that can be used for subsequent modifi
    -> ${
      dashboardTools.createVisualizations
    } (for memory viz) -> Returns \`tool_result_id: "viz456"\`
-   -> ${dashboardTools.manageDashboard}({ toolResultId: "abc123", panelsToAdd: ["viz456"] })
+   -> ${dashboardTools.manageDashboard}({ dashboardId: "abc123", visualizationsToAdd: ["viz456"] })
    -> Returns updated dashboard with new \`tool_result_id: "def789"\`
 `,
       },
