@@ -161,10 +161,9 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
 };
 
 const controlsGroupStyles = {
-  controlsGroup: () =>
-    css({
-      '&.controlsGroup--editing .controlFrameFloatingActions': {
-        visibility: 'hidden !important' as 'hidden',
-      },
-    }),
+  controlsGroup: css({
+    '&.controlsGroup--editing .controlFrameFloatingActions': {
+      visibility: 'hidden !important' as 'hidden',
+    },
+  }),
 };
