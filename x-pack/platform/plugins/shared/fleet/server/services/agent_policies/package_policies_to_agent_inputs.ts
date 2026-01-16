@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import apm from 'elastic-apm-node';
 import { merge } from 'lodash';
 import deepMerge from 'deepmerge';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -230,6 +231,13 @@ export const storedPackagePoliciesToAgentInputs = async (
     let packagePolicyWithUpdatedInputs = packagePolicy;
     // recompile inputs to apply agent version conditions
     if (agentVersion && appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+      const span = apm.startSpan(
+        `recompileInputsWithAgentVersion ${packageInfo!.name}-${
+          packageInfo!.version
+        } ${agentVersion}`,
+        'full-agent-policy'
+      );
+      // span?.addLabels({ pkg: `${packageInfo!.name}-${packageInfo!.version}`, agentVersion });
       const inputs = await recompileInputsWithAgentVersion(
         packageInfo!,
         packagePolicy,
@@ -237,6 +245,7 @@ export const storedPackagePoliciesToAgentInputs = async (
         soClient!
       );
       packagePolicyWithUpdatedInputs = { ...packagePolicy, inputs };
+      span?.end();
     }
 
     fullInputs.push(

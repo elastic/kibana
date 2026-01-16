@@ -35,6 +35,8 @@ import pMap from 'p-map';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
+import apm from 'elastic-apm-node';
+
 import { catchAndSetErrorStackTrace, rethrowIfInstanceOrWrap } from '../errors/utils';
 
 import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
@@ -3341,8 +3343,14 @@ export function _compilePackagePolicyInputs(
         return input;
       }
     }
+    const span = apm.startSpan(
+      `_compilePackagePolicyInputs ${pkgInfo.name}-${pkgInfo.version} ${agentVersion}`,
+      'full-agent-policy'
+    );
+    // span?.addLabels({ pkg: `${pkgInfo.name}-${pkgInfo.version}`, agentVersion, input_type: input.type, policy_template: input.policy_template });
     const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap, agentVersion);
     const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap, agentVersion);
+    span?.end();
     return {
       ...input,
       compiled_input: compiledInput,

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import apm from 'elastic-apm-node';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
@@ -1643,6 +1643,8 @@ class AgentPolicyService {
     agentPolicies?: AgentPolicy[],
     options?: { throwOnAgentlessError?: boolean; agentVersions?: string[] }
   ) {
+    const t = apm.startTransaction('deploy-policies', 'fleet');
+    // t.addLabels({ agentPolicyIds: agentPolicyIds.join(','), agentVersions: options?.agentVersions?.join(',') });
     const logger = this.getLogger('deployPolicies');
     logger.debug(
       () =>
@@ -1835,6 +1837,7 @@ class AgentPolicyService {
         concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
       }
     );
+    t.end();
   }
 
   public async deleteFleetServerPoliciesForPolicyId(
@@ -1937,7 +1940,14 @@ class AgentPolicyService {
     id: string,
     options?: { standalone?: boolean; agentPolicy?: AgentPolicy; agentVersion?: string }
   ): Promise<FullAgentPolicy | null> {
-    return getFullAgentPolicy(soClient, id, options);
+    const span = apm.startSpan(
+      `getFullAgentPolicy ${id} ${options?.agentVersion ?? ''}`,
+      'full-agent-policy'
+    );
+    // span?.addLabels({ agentPolicyId: id, agentVersion: options?.agentVersion ?? '' });
+    const result = await getFullAgentPolicy(soClient, id, options);
+    span?.end();
+    return result;
   }
 
   /**
