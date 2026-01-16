@@ -149,8 +149,29 @@ async function fetchAlertContext({
   const [coreStart] = await core.getStartServices();
   const esClient = coreStart.elasticsearch.client.asScoped(request);
 
+  async function fetchLogCategories() {
+    try {
+      const start = getStart(START_TIME_OFFSETS.logs);
+      const result = await getLogCategories({
+        core,
+        logger,
+        esClient,
+        start,
+        end: alertStart,
+        kqlFilter: `service.name: "${serviceName}"`,
+        fields: ['service.name'],
+      });
+      const hasCategories =
+        (result.highSeverityCategories?.categories?.length ?? 0) > 0 ||
+        (result.lowSeverityCategories?.categories?.length ?? 0) > 0;
+      return hasCategories ? { key: 'logCategories' as const, start, data: result } : null;
+    } catch (err) {
+      logger.debug(`AI insight: logCategories failed: ${err}`);
+      return null;
+    }
+  }
+
   const allFetchers = [
-    // Registry-based fetches
     ...fetchConfigs.map(async (config) => {
       try {
         const start = getStart(config.window);
@@ -166,28 +187,7 @@ async function fetchAlertContext({
         return null;
       }
     }),
-    // log categories
-    (async () => {
-      try {
-        const start = getStart(START_TIME_OFFSETS.logs);
-        const result = await getLogCategories({
-          core,
-          logger,
-          esClient,
-          start,
-          end: alertStart,
-          kqlFilter: `service.name: "${serviceName}"`,
-          fields: ['service.name'],
-        });
-        const hasCategories =
-          (result.highSeverityCategories?.categories?.length ?? 0) > 0 ||
-          (result.lowSeverityCategories?.categories?.length ?? 0) > 0;
-        return hasCategories ? { key: 'logCategories' as const, start, data: result } : null;
-      } catch (err) {
-        logger.debug(`AI insight: logCategories failed: ${err}`);
-        return null;
-      }
-    })(),
+    fetchLogCategories(),
   ];
 
   const results = await Promise.all(allFetchers);
