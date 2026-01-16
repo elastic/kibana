@@ -47,6 +47,9 @@ dependsOn:
   - '@kbn/elastic-assistant'
   - '@kbn/ai-assistant-connector-selector-action'
   - '@kbn/core-application-browser'
+  - '@kbn/workflows-extensions'
+  - '@kbn/zod'
+  - '@kbn/workflows'
 tags:
   - plugin
   - prod
