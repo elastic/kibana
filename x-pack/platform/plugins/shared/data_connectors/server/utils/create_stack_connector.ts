@@ -119,6 +119,7 @@ async function importMcpTools(
     request,
     connectorId,
     toolNames,
+    logger,
   });
 
   if (mcpTools === undefined) {
