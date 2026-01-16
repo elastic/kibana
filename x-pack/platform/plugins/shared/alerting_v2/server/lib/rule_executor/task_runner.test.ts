@@ -206,7 +206,7 @@ describe('RuleExecutorTaskRunner', () => {
         getId: expect.any(Function),
       })
     );
-    const [{ docs }] = (storageService.bulkIndexDocs as jest.Mock).mock.calls[0];
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
     expect(docs).toHaveLength(1);
   });
 });
