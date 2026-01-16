@@ -20,7 +20,7 @@ export const createRuleNameAndDescriptionNode = ({
   model,
   events,
 }: CreateRuleNameAndDescriptionNodeParams) => {
-  const jsonParser = new JsonOutputParser();
+  const jsonParser = new JsonOutputParser<{ name: string; description: string }>();
   const ruleCreationChain =
     CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT.pipe(model).pipe(jsonParser);
   return async (state: typeof RuleCreationAnnotation.State) => {
@@ -36,7 +36,7 @@ export const createRuleNameAndDescriptionNode = ({
 
       return {
         ...state,
-        rule: { ...state.rule, ...baseRuleParams },
+        rule: baseRuleParams,
       };
     } catch (e) {
       events?.reportProgress(`Failed to create rule name and description: ${e.message}`);

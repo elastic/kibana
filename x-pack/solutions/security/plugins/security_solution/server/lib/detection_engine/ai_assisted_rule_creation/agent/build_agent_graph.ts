@@ -18,7 +18,6 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { RuleCreationState } from './state';
 import { RuleCreationAnnotation } from './state';
-import { addDefaultFieldsToRulesNode } from './nodes/add_default_fields_to_rule';
 import { createRuleNameAndDescriptionNode } from './nodes/create_rule_name_and_description';
 import { getTagsNode } from './nodes/get_tags';
 import { getEsqlQueryGraphWithTool } from './sub_graphs/esql_with_tool/esql_query_graph';
@@ -31,7 +30,6 @@ export const BUILD_AGENT_NODE_NAMES = {
   CREATE_RULE_NAME_AND_DESCRIPTION: 'createRuleNameAndDescription',
   ADD_MITRE_MAPPINGS: 'addMitreMappings',
   ADD_SCHEDULE: 'addSchedule',
-  ADD_DEFAULT_FIELDS_TO_RULES: 'addDefaultFieldsToRules',
 } as const;
 
 const {
@@ -40,7 +38,6 @@ const {
   CREATE_RULE_NAME_AND_DESCRIPTION,
   ADD_MITRE_MAPPINGS,
   ADD_SCHEDULE,
-  ADD_DEFAULT_FIELDS_TO_RULES,
 } = BUILD_AGENT_NODE_NAMES;
 
 export interface GetBuildAgentParams {
@@ -82,7 +79,6 @@ export const getBuildAgent = async ({
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model, events }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
     .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
-    .addNode(ADD_DEFAULT_FIELDS_TO_RULES, addDefaultFieldsToRulesNode({ model, events }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
     .addEdge(START, ESQL_QUERY_CREATION)
     .addConditionalEdges(ESQL_QUERY_CREATION, shouldContinue, {
@@ -95,8 +91,7 @@ export const getBuildAgent = async ({
     })
     .addEdge(GET_TAGS, ADD_MITRE_MAPPINGS)
     .addEdge(ADD_MITRE_MAPPINGS, ADD_SCHEDULE)
-    .addEdge(ADD_SCHEDULE, ADD_DEFAULT_FIELDS_TO_RULES)
-    .addEdge(ADD_DEFAULT_FIELDS_TO_RULES, END);
+    .addEdge(ADD_SCHEDULE, END);
 
   const graph = buildAgentGraph.compile({ checkpointer: undefined });
   graph.name = 'Detection Engine AI Assisted Rule Creation Graph';

@@ -92,20 +92,13 @@ export const addScheduleNode = ({
 
       return {
         ...state,
-        rule: {
-          ...state.rule,
-          ...schedule,
-        },
+        rule: schedule,
       };
     } catch (error) {
       logger.debug('Error computing schedule:', error);
       events?.reportProgress(`Failed to compute schedule, using defaults: ${error.message}`);
       return {
         ...state,
-        rule: {
-          ...state.rule,
-          ...defaultSchedule,
-        },
         warnings: [`Failed to fetch and process tags: ${error.message}`],
       };
     }

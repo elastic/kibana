@@ -163,7 +163,6 @@ export const addMitreMappingsNode = ({ model, events }: AddMitreMappingsNodePara
       return {
         ...state,
         rule: {
-          ...state.rule,
           threat: threatMappings,
         },
       };
@@ -172,10 +171,6 @@ export const addMitreMappingsNode = ({ model, events }: AddMitreMappingsNodePara
       // Don't fail the entire rule creation if MITRE mapping fails
       return {
         ...state,
-        rule: {
-          ...state.rule,
-          threat: [],
-        },
         warnings: [`Failed to add MITRE mappings: ${error.message}`],
       };
     }
