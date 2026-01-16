@@ -102,8 +102,7 @@ export async function getLogAiInsights({
   const resourceAttributes = logEntry.resource?.attributes;
   const serviceName =
     logEntry.service?.name ?? (resourceAttributes?.['service.name'] as string) ?? '';
-  const serviceEnvironment =
-    logEntry.service?.environment ?? (resourceAttributes?.['service.environment'] as string) ?? '';
+  const serviceEnvironment = logEntry.service?.environment ?? '';
 
   interface ContextPart {
     name: string;
@@ -121,24 +120,11 @@ export async function getLogAiInsights({
             '@timestamp',
             'message',
             'log.level',
-            'level',
-            'severity',
             'service.name',
             'service.environment',
-            'trace.id',
-            'trace_id',
-            'request.id',
-            'request_id',
             'error.*',
-            'exception.*',
-            'event.name',
-            'event_name',
-            'event.message',
-            'event.type',
-            'event.action',
-            'event.dataset',
             'event.*',
-            'attributes.*', // OpenTelemetry attributes (contains nested fields like attributes.message, attributes.service.name, etc.)
+            'exception.*',
             'host.name',
             'container.id',
           ];
@@ -150,10 +136,8 @@ export async function getLogAiInsights({
             start: windowStart,
             end: windowEnd,
             logId: id,
-            errorLogsOnly: false,
-            maxSequences: 1,
-            maxLogsPerSequence: 50,
             logSourceFields,
+            maxLogsPerSequence: 50,
           });
 
           return sequences[0] || null;

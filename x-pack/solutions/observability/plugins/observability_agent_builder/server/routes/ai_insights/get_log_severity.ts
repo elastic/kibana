@@ -12,7 +12,7 @@
  * - Warning or above (warn, error, critical, fatal) - using isWarningOrAbove()
  *
  * Supports multiple log formats:
- * - ECS standard fields (log.level, level, severity)
+ * - ECS standard field (log.level) - aliases handle mapping from other fields
  * - OpenTelemetry fields (severity_number, SeverityText, attributes.*)
  * - HTTP status codes
  * - Error/exception indicators in field names
@@ -31,54 +31,32 @@ const WARNING_AND_ABOVE_LEVELS = new Set([
   'warning',
 ]);
 
-const LOG_LEVEL_FIELDS = ['log.level', 'level', 'severity_text', 'SeverityText', 'severity'];
-
-function isErrorField(fieldName: string): boolean {
-  const lower = fieldName.toLowerCase();
-  return lower.includes('exception') || lower.includes('error');
-}
-
 /**
  * Check if a log entry is warning or above (warn, error, critical, fatal) or has error indicators.
  */
 export function isWarningOrAbove(logEntry: Record<string, unknown>): boolean {
-  // 1. Check log level text fields
-  for (const field of LOG_LEVEL_FIELDS) {
-    const level = logEntry[field];
-    if (typeof level === 'string' && WARNING_AND_ABOVE_LEVELS.has(level.toLowerCase())) {
+  // 1. Check log.level (aliases handle mapping from other fields)
+  const level = logEntry['log.level'];
+  if (typeof level === 'string' && WARNING_AND_ABOVE_LEVELS.has(level.toLowerCase())) {
+    return true;
+  }
+
+  // 2. Check HTTP error status codes
+  const httpStatus = logEntry['http.response.status_code'];
+  if (typeof httpStatus === 'number' && httpStatus >= 400) return true;
+
+  // 3. Check error.* fields
+  for (const key of Object.keys(logEntry)) {
+    if (key.startsWith('error.') && logEntry[key] != null) {
       return true;
     }
   }
 
-  // 2. Check OTel severity_number (13-24 = Warn/Error/Fatal)
-  const severityNumber = logEntry.severity_number ?? logEntry.SeverityNumber;
-  if (typeof severityNumber === 'number' && severityNumber >= 13) return true;
-
-  // 3. Check HTTP error status codes
-  const httpStatus = logEntry['http.response.status_code'] ?? logEntry['http.request.status_code'];
-  if (typeof httpStatus === 'number' && httpStatus >= 400) return true;
-
-  // 4. Check attributes object (OpenTelemetry)
-  const attributes = logEntry.attributes as Record<string, unknown> | undefined;
-  if (attributes) {
-    for (const key of Object.keys(attributes)) {
-      if (isErrorField(key) && attributes[key] != null) return true;
-    }
-  }
-
-  // 5. Check message and body.text fields for error/exception keywords
+  // 4. Check message and body.text fields for error/exception keywords
   const message = logEntry.message;
   if (typeof message === 'string') {
     const lowerMessage = message.toLowerCase();
     if (lowerMessage.includes('error') || lowerMessage.includes('exception')) {
-      return true;
-    }
-  }
-
-  const bodyText = (logEntry.body as { text?: string } | undefined)?.text;
-  if (typeof bodyText === 'string') {
-    const lowerBodyText = bodyText.toLowerCase();
-    if (lowerBodyText.includes('error') || lowerBodyText.includes('exception')) {
       return true;
     }
   }
