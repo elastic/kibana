@@ -9,10 +9,9 @@
 
 import type {
   ObservabilityLogsAIAssistantFeature,
-  ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
-import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { i18n } from '@kbn/i18n';
 import {
   UnifiedDocViewerLogsOverview,
@@ -77,7 +76,7 @@ interface LogOverviewTabProps extends DocViewRenderProps {
   logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;
   logsAIAssistantFeature: ObservabilityLogsAIAssistantFeature | undefined;
   streamsFeature: ObservabilityStreamsFeature | undefined;
-  indexes: ObservabilityIndexes;
+  indexes: TraceIndexes;
 }
 
 const LogOverviewTab = ({
