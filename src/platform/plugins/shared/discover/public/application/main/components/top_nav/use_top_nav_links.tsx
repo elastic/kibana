@@ -40,6 +40,7 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
@@ -219,6 +220,13 @@ export const useTopNavLinks = ({
     intl,
   ]);
 
+  const transitionFromESQLToDataView = useCurrentTabAction(
+    internalStateActions.transitionFromESQLToDataView
+  );
+  const transitionFromDataViewToESQL = useCurrentTabAction(
+    internalStateActions.transitionFromDataViewToESQL
+  );
+
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
@@ -253,10 +261,10 @@ export const useTopNavLinks = ({
               ) {
                 dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
               } else {
-                state.actions.transitionFromESQLToDataView(dataView.id ?? '');
+                dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
               }
             } else {
-              state.actions.transitionFromDataViewToESQL(dataView);
+              dispatch(transitionFromDataViewToESQL({ dataView }));
               services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
             }
           }
@@ -354,6 +362,8 @@ export const useTopNavLinks = ({
     state,
     defaultMenu?.saveItem?.disabled,
     hasUnsavedChanges,
+    transitionFromESQLToDataView,
+    transitionFromDataViewToESQL,
   ]);
 
   return useMemo((): AppMenuConfig => {
