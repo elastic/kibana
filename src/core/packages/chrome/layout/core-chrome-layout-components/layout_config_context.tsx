@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { LayoutDimensions } from './layout.types';
 
 /**
@@ -24,7 +25,11 @@ export type LayoutConfig = Pick<
   | 'sidebarWidth'
   | 'applicationTopBarHeight'
   | 'applicationBottomBarHeight'
->;
+  | 'applicationMarginBottom'
+  | 'applicationMarginRight'
+> & {
+  chromeStyle?: ChromeStyle;
+};
 
 /**
  * Context interface including both the config and an update function

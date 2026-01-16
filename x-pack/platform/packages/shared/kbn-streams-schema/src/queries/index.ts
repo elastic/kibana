@@ -12,7 +12,6 @@ import type { Condition } from '@kbn/streamlang';
 import { conditionSchema } from '@kbn/streamlang';
 import { primitive } from '../shared/record_types';
 import { createIsNarrowSchema } from '../shared/type_guards';
-import { featureTypeSchema, type FeatureType } from '../feature';
 
 interface StreamQueryBase {
   id: string;
@@ -23,7 +22,7 @@ export interface StreamQueryKql extends StreamQueryBase {
   feature?: {
     name: string;
     filter: Condition;
-    type: FeatureType;
+    type: 'system';
   };
   kql: {
     query: string;
@@ -47,7 +46,7 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
       .object({
         name: NonEmptyString,
         filter: conditionSchema,
-        type: featureTypeSchema,
+        type: z.literal('system'),
       })
       .optional(),
     kql: z.object({
@@ -70,7 +69,7 @@ export const upsertStreamQueryRequestSchema = z.object({
     .object({
       name: NonEmptyString,
       filter: conditionSchema,
-      type: featureTypeSchema,
+      type: z.literal('system'),
     })
     .optional(),
   kql: z.object({

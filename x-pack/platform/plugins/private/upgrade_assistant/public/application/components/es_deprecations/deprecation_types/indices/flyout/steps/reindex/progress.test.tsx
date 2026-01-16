@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ReindexStep } from '@kbn/reindex-service-plugin/common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
@@ -16,7 +18,7 @@ import { ReindexProgress } from './progress';
 
 describe('ReindexProgress', () => {
   it('renders', () => {
-    const wrapper = shallow(
+    renderWithI18n(
       <ReindexProgress
         reindexState={
           {
@@ -41,137 +43,23 @@ describe('ReindexProgress', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <Fragment>
-        <EuiTitle
-          data-test-subj="reindexChecklistTitle"
-          size="xs"
-        >
-          <h3>
-            <MemoizedFormattedMessage
-              defaultMessage="Reindexing in progress… {percents}"
-              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingInProgressTitle"
-              values={
-                Object {
-                  "percents": "0%",
-                }
-              }
-            />
-          </h3>
-        </EuiTitle>
-        <StepProgress
-          steps={
-            Array [
-              Object {
-                "status": "inProgress",
-                "title": <Memo(MemoizedFormattedMessage)
-                  defaultMessage="Setting {indexName} index to read-only."
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.readonlyStepTitle"
-                  values={
-                    Object {
-                      "indexName": <EuiCode>
-                        foo
-                      </EuiCode>,
-                    }
-                  }
-                />,
-              },
-              Object {
-                "status": "incomplete",
-                "title": <Memo(MemoizedFormattedMessage)
-                  defaultMessage="Create {reindexName} index."
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.createIndexStepTitle"
-                  values={
-                    Object {
-                      "reindexName": <EuiCode>
-                        reindexed-foo
-                      </EuiCode>,
-                    }
-                  }
-                />,
-              },
-              Object {
-                "status": "incomplete",
-                "title": <ReindexingDocumentsStepTitle
-                  cancelReindex={[MockFunction]}
-                  reindexState={
-                    Object {
-                      "errorMessage": null,
-                      "lastCompletedStep": 0,
-                      "loadingState": 1,
-                      "meta": Object {
-                        "aliases": Array [],
-                        "indexName": "foo",
-                        "isClosedIndex": false,
-                        "isFollowerIndex": false,
-                        "isFrozen": false,
-                        "isInDataStream": false,
-                        "isReadonly": false,
-                        "reindexName": "reindexed-foo",
-                      },
-                      "reindexTaskPercComplete": null,
-                      "status": 0,
-                    }
-                  }
-                />,
-              },
-              Object {
-                "status": "incomplete",
-                "title": <Memo(MemoizedFormattedMessage)
-                  defaultMessage="Copy original index settings from {indexName} to {reindexName}."
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.indexSettingsRestoredStepTitle"
-                  values={
-                    Object {
-                      "indexName": <EuiCode>
-                        foo
-                      </EuiCode>,
-                      "reindexName": <EuiCode>
-                        reindexed-foo
-                      </EuiCode>,
-                    }
-                  }
-                />,
-              },
-              Object {
-                "status": "incomplete",
-                "title": <Memo(MemoizedFormattedMessage)
-                  defaultMessage="Create {indexName} alias for {reindexName} index."
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.aliasCreatedStepTitle"
-                  values={
-                    Object {
-                      "indexName": <EuiCode>
-                        foo
-                      </EuiCode>,
-                      "reindexName": <EuiCode>
-                        reindexed-foo
-                      </EuiCode>,
-                    }
-                  }
-                />,
-              },
-              Object {
-                "status": "incomplete",
-                "title": <Memo(MemoizedFormattedMessage)
-                  defaultMessage="Delete original {indexName} index."
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.originalIndexDeletedStepTitle"
-                  values={
-                    Object {
-                      "indexName": <EuiCode>
-                        foo
-                      </EuiCode>,
-                    }
-                  }
-                />,
-              },
-            ]
-          }
-        />
-      </Fragment>
-    `);
+    expect(screen.getByTestId('reindexChecklistTitle')).toHaveTextContent(
+      'Reindexing in progress… 0%'
+    );
+
+    const stepHeaders = screen.getAllByTestId('stepProgressStep');
+    expect(stepHeaders).toHaveLength(6);
+
+    expect(
+      stepHeaders.some((step) => step.textContent?.includes('Setting foo index to read-only.'))
+    ).toBe(true);
+    expect(
+      stepHeaders.some((step) => step.textContent?.includes('Create reindexed-foo index.'))
+    ).toBe(true);
   });
 
   it('displays errors in the step that failed', () => {
-    const wrapper = shallow(
+    renderWithI18n(
       <ReindexProgress
         reindexState={
           {
@@ -195,9 +83,18 @@ describe('ReindexProgress', () => {
         cancelReindex={jest.fn()}
       />
     );
-    const aliasStep = (wrapper.find('StepProgress').props() as any).steps[3];
-    expect(aliasStep.children.props.errorMessage).toEqual(
-      `This is an error that happened on alias switch`
+
+    const stepHeaders = screen.getAllByTestId('stepProgressStep');
+    const stepHeader = stepHeaders.find(
+      (step) =>
+        step.textContent?.includes('Copy original index settings from') === true &&
+        step.textContent?.includes('reindexed-foo') === true
     );
+
+    expect(stepHeader).toBeDefined();
+    const stepContent = stepHeader!.nextElementSibling;
+    expect(stepContent).not.toBeNull();
+    expect(stepContent!).toHaveTextContent('There was an error');
+    expect(stepContent!).toHaveTextContent('This is an error that happened on alias switch');
   });
 });

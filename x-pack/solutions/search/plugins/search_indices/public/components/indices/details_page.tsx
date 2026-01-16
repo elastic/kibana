@@ -121,7 +121,7 @@ export const SearchIndexDetailsPage = () => {
         name: i18n.translate('xpack.searchIndices.mappingsTabLabel', {
           defaultMessage: 'Mappings',
         }),
-        content: <SearchIndexDetailsMappings index={index} userPrivileges={userPrivileges} />,
+        content: <SearchIndexDetailsMappings index={index} />,
         'data-test-subj': `${SearchIndexDetailsTabs.MAPPINGS}Tab`,
       },
       {

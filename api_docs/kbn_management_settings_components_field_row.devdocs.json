@@ -24,6 +24,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+        "lineNumber": 80,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 80,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -75,6 +79,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -97,6 +103,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+            "lineNumber": 46,
+            "columnNumber": 91,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -126,6 +134,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,6 +156,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+            "lineNumber": 31,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -166,6 +178,8 @@
           "\nProps for a {@link FieldRow} component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -186,6 +200,8 @@
               " | undefined; isCustom: boolean; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: string | number | boolean | (string | number)[] | null | undefined; defaultValueDisplay: string; isDefaultValue: boolean; unsavedFieldId: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -199,6 +215,8 @@
               "True if saving settings is enabled, false otherwise."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -225,6 +243,8 @@
               "> | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -237,6 +257,8 @@
                 "label": "id",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+                "lineNumber": 95,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -258,6 +280,8 @@
                   "<T> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+                "lineNumber": 96,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -276,6 +300,8 @@
               "((id: string) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -292,6 +318,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+                "lineNumber": 71,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -321,6 +349,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -354,6 +384,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -368,6 +400,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -384,6 +418,8 @@
           "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link FieldRow} component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -398,6 +434,8 @@
               "{ links: { management: Record<string, string>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -414,6 +452,8 @@
           "\nContextual services used by a {@link FieldRow} component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -428,6 +468,8 @@
               "{ [key: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -464,6 +506,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -495,6 +539,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

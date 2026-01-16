@@ -14,8 +14,8 @@
 // * Apply tags (operationId: SetAlertTags)
 // * Read tags (operationId: ReadTags)
 // Case Management:
-// * Create case (operationId: createCaseDefaultSpace)
-// * Update case (operationId: updateCaseDefaultSpace)
+// * Create case (operationId: createCaseDefaultSpace -> type: kibana.createCase)
+// * Update case (operationId: updateCaseDefaultSpace -> type: kibana.updateCase)
 export const KIBANA_SAMPLE_STEPS = [
   {
     name: 'set_alerts_status_by_ids',
@@ -68,7 +68,7 @@ export const KIBANA_SAMPLE_STEPS = [
   // },
   {
     name: 'create_case',
-    type: 'kibana.createCaseDefaultSpace',
+    type: 'kibana.createCase',
     with: {
       owner: 'securitySolution',
       title: '[Attack Discovery] {{foreach.item.attack_discovery.title_with_replacements}}',
@@ -89,7 +89,7 @@ export const KIBANA_SAMPLE_STEPS = [
   },
   {
     name: 'update_case',
-    type: 'kibana.updateCaseDefaultSpace',
+    type: 'kibana.updateCase',
     with: {
       cases: [
         {
