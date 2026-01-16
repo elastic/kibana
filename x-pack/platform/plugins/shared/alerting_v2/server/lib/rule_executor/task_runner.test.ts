@@ -43,19 +43,16 @@ describe('RuleExecutorTaskRunner', () => {
   } as unknown as RunContext['taskInstance'];
 
   const createRunner = ({
-    enabled = true,
     ruleAttributes = baseRuleAttributes,
     esqlResponse = {
       columns: [{ name: 'host.name' }],
       values: [['host-a']],
     } as ESQLSearchResponse,
   }: {
-    enabled?: boolean;
     ruleAttributes?: RuleSavedObjectAttributes;
     esqlResponse?: ESQLSearchResponse;
   } = {}) => {
     const { loggerService } = createMockLoggerService();
-    const pluginConfig = { get: () => ({ enabled }) };
     const resourcesService = createMockResourceManager();
     const rulesSavedObjectService = createMockRulesSavedObjectService();
     const queryService = createMockQueryService();
@@ -66,7 +63,6 @@ describe('RuleExecutorTaskRunner', () => {
 
     const runner = new RuleExecutorTaskRunner(
       loggerService,
-      pluginConfig as unknown as { get: () => { enabled: boolean } },
       resourcesService,
       rulesSavedObjectService,
       queryService,
@@ -82,22 +78,6 @@ describe('RuleExecutorTaskRunner', () => {
       storageService,
     };
   };
-
-  it('returns early when alerting v2 is disabled', async () => {
-    const { runner, resourcesService, rulesSavedObjectService, queryService, storageService } =
-      createRunner({ enabled: false });
-
-    const res = await runner.run({
-      taskInstance,
-      abortController: new AbortController(),
-    });
-
-    expect(res).toEqual({ state: taskInstance.state });
-    expect(resourcesService.waitUntilReady).not.toHaveBeenCalled();
-    expect(rulesSavedObjectService.getRuleAttributes).not.toHaveBeenCalled();
-    expect(queryService.executeQuery).not.toHaveBeenCalled();
-    expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
-  });
 
   it('returns early when rule is disabled', async () => {
     const { runner, resourcesService, rulesSavedObjectService, queryService, storageService } =

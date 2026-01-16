@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core-di-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
 
-import type { PluginConfig } from '../../config';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 import { buildAlertEventsFromEsqlResponse } from './build_alert_events';
 import { getQueryPayload } from './get_query_payload';
@@ -32,7 +30,6 @@ type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 export class RuleExecutorTaskRunner {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(PluginInitializer('config')) private readonly pluginConfig: { get(): PluginConfig },
     @inject(ResourceManager) private readonly resourcesService: ResourceManagerContract,
     @inject(RulesSavedObjectService)
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
@@ -41,10 +38,6 @@ export class RuleExecutorTaskRunner {
   ) {}
 
   public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
-    if (!this.pluginConfig.get().enabled) {
-      return { state: taskInstance.state };
-    }
-
     // Wait for the plugin-wide resource initialization started during plugin setup.
     await this.resourcesService.waitUntilReady();
 
