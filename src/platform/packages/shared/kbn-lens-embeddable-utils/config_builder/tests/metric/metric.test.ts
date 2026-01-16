@@ -13,6 +13,7 @@ import {
   simpleMetricAttributes,
   breakdownMetricAttributes,
   complexMetricAttributes,
+  breakdownMetricWithFormulaRefColumnsAttributes,
 } from './lens_state_config.mock';
 import {
   simpleMetricAPIAttributes,
@@ -56,5 +57,10 @@ describe('Metric', () => {
     it('should convert a metric with a terms agg ranked by secondary metric', () => {
       validateAPIConverter(metricAPIWithTermsRankedBySecondary, metricStateSchema);
     });
+  });
+
+  // TODO: This test should succeed once this https://github.com/elastic/kibana/pull/247119 is merged
+  it.skip('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
+    validateConverter(breakdownMetricWithFormulaRefColumnsAttributes, metricStateSchema);
   });
 });
