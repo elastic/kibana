@@ -284,7 +284,7 @@ export function createEvaluateExternalDataset({
         dataset: {
           name: datasetName,
           description: 'External dataset resolved from Phoenix by name',
-          examples: [],
+          examples: [], // Examples will be loaded from Phoenix, not provided in code
         },
         task,
         trustUpstreamDataset: true,
