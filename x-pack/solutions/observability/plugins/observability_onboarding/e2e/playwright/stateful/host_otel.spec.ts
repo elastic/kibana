@@ -25,7 +25,7 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
   await onboardingHomePage.selectHostUseCase();
   await onboardingHomePage.selectOtelHostQuickstart();
 
-  const osName = process.env.OS_NAME || 'linux';
+  const osName = process.env.OS_NAME || os.platform();
   await otelHostFlowPage.selectPlatform(osName);
 
   await otelHostFlowPage.copyCollectorDownloadSnippetToClipboard();

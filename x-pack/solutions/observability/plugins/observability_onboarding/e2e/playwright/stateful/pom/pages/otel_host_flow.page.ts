@@ -30,6 +30,7 @@ export class OtelHostFlowPage {
       case 'darwin':
         return 'Mac';
       case 'windows':
+      case 'win32':
         return 'Windows';
       case 'linux':
       default:
