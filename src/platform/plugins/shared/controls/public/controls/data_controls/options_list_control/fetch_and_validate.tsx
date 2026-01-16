@@ -119,6 +119,8 @@ export function fetchAndValidate$({
           allowExpensiveQueries,
         };
 
+        console.log({ request });
+
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {
