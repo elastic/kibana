@@ -9,6 +9,11 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { StartPlugins } from '../../plugin';
+import type {
+  SecuritySolutionApiRequestHandlerContext,
+  SecuritySolutionPluginRouter,
+  SecuritySolutionRequestHandlerContext,
+} from '../../types';
 import { registerDataGeneratorRoutes } from './register_data_generator_routes';
 
 describe('registerDataGeneratorRoutes', () => {
@@ -28,12 +33,17 @@ describe('registerDataGeneratorRoutes', () => {
     return route.versions['1'].handler;
   };
 
-  const createContext = () =>
-    ({
-      securitySolution: Promise.resolve({
-        getSpaceId: jest.fn().mockReturnValue('default'),
-      }),
-    }) as any;
+  const createContext = (): SecuritySolutionRequestHandlerContext => {
+    const securitySolutionContext = {
+      getSpaceId: jest.fn().mockReturnValue('default'),
+    } as Pick<SecuritySolutionApiRequestHandlerContext, 'getSpaceId'>;
+
+    return {
+      securitySolution: Promise.resolve(
+        securitySolutionContext as unknown as SecuritySolutionApiRequestHandlerContext
+      ),
+    } as unknown as SecuritySolutionRequestHandlerContext;
+  };
 
   const createRequest = ({
     headers,
@@ -58,7 +68,9 @@ describe('registerDataGeneratorRoutes', () => {
 
     coreStart = coreMock.createStart();
     internalRepo = { update: jest.fn().mockResolvedValue({}) };
-    (coreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue(internalRepo as any);
+    (coreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue(
+      internalRepo as unknown as ReturnType<typeof coreStart.savedObjects.createInternalRepository>
+    );
     (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
       username: 'elastic',
       roles: ['superuser'],
@@ -72,13 +84,20 @@ describe('registerDataGeneratorRoutes', () => {
     pluginsStart = {
       cases: {
         getCasesClientWithRequest: jest.fn().mockResolvedValue({ cases: { get: casesGet } }),
-      } as any,
+      } as unknown as StartPlugins['cases'],
     };
 
     getStartServices = jest
       .fn()
-      .mockResolvedValue([coreStart as any, pluginsStart as any, undefined] as any);
-    registerDataGeneratorRoutes(router as any, getStartServices);
+      .mockResolvedValue([
+        coreStart as unknown as (typeof coreStart),
+        pluginsStart as unknown as StartPlugins,
+        undefined,
+      ]);
+    registerDataGeneratorRoutes(
+      router as unknown as SecuritySolutionPluginRouter,
+      getStartServices as unknown as StartServicesAccessor<StartPlugins>
+    );
   });
 
   it('returns forbidden when the internal-origin header is missing', async () => {
