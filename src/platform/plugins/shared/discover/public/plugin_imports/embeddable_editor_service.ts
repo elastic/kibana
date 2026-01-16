@@ -16,12 +16,13 @@ export class EmbeddableEditorService {
     private application: ApplicationStart,
     private embeddableStateTransfer: EmbeddableStateTransfer
   ) {
-    this.embeddableState = embeddableStateTransfer.getIncomingEditorState('discover');
+    this.embeddableState = embeddableStateTransfer.getIncomingEditorState('discover', true);
   }
 
   public isByValueEditor = (): boolean => Boolean(this.embeddableState?.valueInput);
 
   // TODO: Enable this for By Value editing
+  // NOTE: The state's `searchSessionId` is actually a `savedObjectId` in relation to Discover
   public isEmbeddedEditor = (): boolean => Boolean(this.embeddableState?.searchSessionId);
 
   public transferBackToEditor = () => {

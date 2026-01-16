@@ -91,7 +91,7 @@ export function initializeEditApi<
           embeddableId: uuid,
           valueInput: undefined,
           originatingApp: parentApiContext.currentAppId,
-          searchSessionId: partialApi.fetchContext$.getValue()?.searchSessionId,
+          searchSessionId: partialApi.savedObjectId$.getValue(),
           originatingPath: parentApiContext.getCurrentPath?.(),
         },
       });
