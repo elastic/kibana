@@ -818,7 +818,7 @@ export const RuleDetailsPage = connector(
                           />
                           <EuiSpacer />
                         </Display>
-                        {ruleId != null && rule != null && (
+                        {ruleId != null && (
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
