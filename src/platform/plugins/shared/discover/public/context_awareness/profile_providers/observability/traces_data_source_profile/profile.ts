@@ -38,26 +38,31 @@ export const createTracesDataSourceProfileProvider = ({
     hasUnprocessedOtel: boolean;
   }> => {
     try {
-      const [hasData, hasUnprocessedOtel] = await Promise.allSettled([
-        http.get<{ hasData: boolean }>('/internal/apm/has_data'),
+      const [hasTracesApmData, hasTracesUnprocessedOtelData] = await Promise.allSettled([
+        http.get<{ hasTracesApmData: boolean }>('/internal/apm/has_traces_apm_data'),
         /*
          * POC comment:
          * Using an endpoint from apm, which we might want to review, as we might have unprocessed OTEL data in the cluster not related to APM.
          * Should we cover that case? How do we know which index the data is in?
          */
-        http.get<{ hasUnprocessedOtelData: boolean }>('/internal/apm/has_unprocessed_otel_data'),
+        http.get<{ hasTracesUnprocessedOtelData: boolean }>(
+          '/internal/apm/has_traces_unprocessed_otel_data'
+        ),
       ]);
 
       // eslint-disable-next-line no-console
-      console.log('hasData', hasData);
+      console.log('hasTracesApmData', hasTracesApmData);
       // eslint-disable-next-line no-console
-      console.log('hasUnprocessedOtel', hasUnprocessedOtel);
+      console.log('hasTracesUnprocessedOtelData', hasTracesUnprocessedOtelData);
 
       return {
-        hasApm: hasData.status === 'fulfilled' ? Boolean(hasData.value.hasData) : false,
+        hasApm:
+          hasTracesApmData.status === 'fulfilled'
+            ? Boolean(hasTracesApmData.value.hasTracesApmData)
+            : false,
         hasUnprocessedOtel:
-          hasUnprocessedOtel.status === 'fulfilled'
-            ? Boolean(hasUnprocessedOtel.value.hasUnprocessedOtelData)
+          hasTracesUnprocessedOtelData.status === 'fulfilled'
+            ? Boolean(hasTracesUnprocessedOtelData.value.hasTracesUnprocessedOtelData)
             : false,
       };
     } catch {
