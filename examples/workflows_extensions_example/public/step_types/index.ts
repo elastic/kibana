@@ -9,9 +9,17 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { setVarStepDefinition } from './setvar_step';
+import { getExternalStepDefinition } from './external_step';
+import type { IExampleExternalService } from '../../common/external_service/types';
+
+export interface RegisterStepDefinitionsDependencies {
+  externalService: IExampleExternalService;
+}
 
 export const registerStepDefinitions = (
-  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
+  deps: RegisterStepDefinitionsDependencies
 ) => {
   workflowsExtensions.registerStepDefinition(setVarStepDefinition);
+  workflowsExtensions.registerStepDefinition(getExternalStepDefinition(deps));
 };
