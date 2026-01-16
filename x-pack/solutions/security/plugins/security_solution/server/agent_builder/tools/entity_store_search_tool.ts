@@ -1,0 +1,408 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { z } from '@kbn/zod';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import { getEntitiesIndexName } from '../../lib/entity_analytics/entity_store/utils';
+import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
+import { getSpaceIdFromRequest } from './helpers';
+import { securityTool } from './constants';
+
+const RISK_LEVELS = ['Critical', 'High', 'Moderate', 'Low', 'Unknown'] as const;
+const ASSET_CRITICALITY_LEVELS = [
+  'extreme_impact',
+  'high_impact',
+  'medium_impact',
+  'low_impact',
+] as const;
+
+const entityStoreSearchSchema = z.object({
+  entityTypes: z
+    .array(z.enum(['host', 'user', 'service', 'generic']))
+    .min(1)
+    .describe('The types of entities to search for. At least one type is required.'),
+  riskLevels: z
+    .array(z.enum(RISK_LEVELS))
+    .optional()
+    .describe(
+      'Filter by risk levels. Use "Critical" or "High" to find high-risk entities. If not specified, all risk levels are included.'
+    ),
+  assetCriticality: z
+    .array(z.enum(ASSET_CRITICALITY_LEVELS))
+    .optional()
+    .describe(
+      'Filter by asset criticality levels. Use "extreme_impact" or "high_impact" to find high-impact assets.'
+    ),
+  attributes: z
+    .object({
+      privileged: z.boolean().optional().describe('Filter for privileged entities'),
+      managed: z.boolean().optional().describe('Filter for managed entities'),
+      mfa_enabled: z.boolean().optional().describe('Filter for entities with MFA enabled'),
+      asset: z.boolean().optional().describe('Filter for entities marked as assets'),
+    })
+    .optional()
+    .describe('Filter by entity attributes'),
+  behaviors: z
+    .object({
+      brute_force_victim: z
+        .boolean()
+        .optional()
+        .describe('Filter for entities that have been brute force victims'),
+      new_country_login: z
+        .boolean()
+        .optional()
+        .describe('Filter for entities with new country logins'),
+      used_usb_device: z
+        .boolean()
+        .optional()
+        .describe('Filter for entities that have used USB devices'),
+    })
+    .optional()
+    .describe('Filter by entity behaviors'),
+  sortBy: z
+    .enum(['risk_score', 'last_activity', 'first_seen', 'name'])
+    .optional()
+    .describe('Field to sort results by. Defaults to risk_score.'),
+  sortOrder: z
+    .enum(['asc', 'desc'])
+    .optional()
+    .describe('Sort order. Defaults to desc (highest first).'),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe('Maximum number of entities to return. Defaults to 10.'),
+});
+
+export const SECURITY_ENTITY_STORE_SEARCH_TOOL_ID = securityTool('entity_store_search');
+
+/**
+ * Builds an Elasticsearch query from the search parameters
+ */
+const buildEntityQuery = (
+  params: z.infer<typeof entityStoreSearchSchema>
+): Record<string, unknown> => {
+  const mustClauses: Array<Record<string, unknown>> = [];
+
+  // Filter by risk levels
+  if (params.riskLevels && params.riskLevels.length > 0) {
+    mustClauses.push({
+      terms: {
+        'entity.risk.calculated_level': params.riskLevels,
+      },
+    });
+  }
+
+  // Filter by asset criticality
+  if (params.assetCriticality && params.assetCriticality.length > 0) {
+    mustClauses.push({
+      terms: {
+        'asset.criticality': params.assetCriticality,
+      },
+    });
+  }
+
+  // Filter by attributes
+  if (params.attributes) {
+    if (params.attributes.privileged !== undefined) {
+      mustClauses.push({
+        term: { 'entity.attributes.Privileged': params.attributes.privileged },
+      });
+    }
+    if (params.attributes.managed !== undefined) {
+      mustClauses.push({
+        term: { 'entity.attributes.Managed': params.attributes.managed },
+      });
+    }
+    if (params.attributes.mfa_enabled !== undefined) {
+      mustClauses.push({
+        term: { 'entity.attributes.Mfa_enabled': params.attributes.mfa_enabled },
+      });
+    }
+    if (params.attributes.asset !== undefined) {
+      mustClauses.push({
+        term: { 'entity.attributes.Asset': params.attributes.asset },
+      });
+    }
+  }
+
+  // Filter by behaviors
+  if (params.behaviors) {
+    if (params.behaviors.brute_force_victim !== undefined) {
+      mustClauses.push({
+        term: { 'entity.behaviors.Brute_force_victim': params.behaviors.brute_force_victim },
+      });
+    }
+    if (params.behaviors.new_country_login !== undefined) {
+      mustClauses.push({
+        term: { 'entity.behaviors.New_country_login': params.behaviors.new_country_login },
+      });
+    }
+    if (params.behaviors.used_usb_device !== undefined) {
+      mustClauses.push({
+        term: { 'entity.behaviors.Used_usb_device': params.behaviors.used_usb_device },
+      });
+    }
+  }
+
+  if (mustClauses.length === 0) {
+    return { match_all: {} };
+  }
+
+  return {
+    bool: {
+      must: mustClauses,
+    },
+  };
+};
+
+/**
+ * Maps sortBy parameter to actual Elasticsearch field
+ */
+const getSortField = (sortBy?: string): string => {
+  switch (sortBy) {
+    case 'risk_score':
+      return 'entity.risk.calculated_score_norm';
+    case 'last_activity':
+      return 'entity.lifecycle.Last_activity';
+    case 'first_seen':
+      return 'entity.lifecycle.First_seen';
+    case 'name':
+      return 'entity.name';
+    default:
+      return 'entity.risk.calculated_score_norm';
+  }
+};
+
+/**
+ * Queries the entity store indices for entities matching the search criteria
+ */
+const searchEntityStore = async ({
+  esClient,
+  spaceId,
+  entityTypes,
+  query,
+  sortField,
+  sortOrder,
+  limit,
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  entityTypes: Array<'host' | 'user' | 'service' | 'generic'>;
+  query: Record<string, unknown>;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
+  limit: number;
+}): Promise<Array<Record<string, unknown>>> => {
+  // Build index patterns for all requested entity types
+  const indices = entityTypes.map((type) =>
+    getEntitiesIndexName(EntityTypeEnum.enum[type], spaceId)
+  );
+
+  const response = await esClient.search({
+    index: indices,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: limit,
+    query,
+    sort: [
+      {
+        [sortField]: {
+          order: sortOrder,
+          unmapped_type: 'float',
+        },
+      },
+    ],
+  });
+
+  return response.hits.hits
+    .map((hit) => hit._source as Record<string, unknown>)
+    .filter((source): source is Record<string, unknown> => source !== undefined);
+};
+
+export const entityStoreSearchTool = (
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
+): BuiltinToolDefinition<typeof entityStoreSearchSchema> => {
+  return {
+    id: SECURITY_ENTITY_STORE_SEARCH_TOOL_ID,
+    type: ToolType.builtin,
+    description: `Search the Entity Store for entities (hosts, users, services) matching specific criteria. Use this tool to find entities based on risk levels, asset criticality, attributes (privileged, managed), and behaviors. For example: "What are the riskiest hosts that are high impact?" or "Show me privileged users with high risk scores."
+
+Key fields:
+- entity.risk.calculated_level: Critical, High, Moderate, Low, Unknown
+- asset.criticality: extreme_impact, high_impact, medium_impact, low_impact
+- entity.attributes: Privileged, Managed, Mfa_enabled, Asset
+- entity.behaviors: Brute_force_victim, New_country_login, Used_usb_device
+
+Always use 'calculated_score_norm' (0-100) when comparing risk scores between entities.`,
+    schema: entityStoreSearchSchema,
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
+        try {
+          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
+          if (availability.status === 'available') {
+            const [coreStart] = await core.getStartServices();
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
+
+            // Check if at least one entity store index exists
+            const entityTypes = ['host', 'user', 'service', 'generic'] as const;
+            const indices = entityTypes.map((type) =>
+              getEntitiesIndexName(EntityTypeEnum.enum[type], spaceId)
+            );
+
+            const indexExists = await esClient.indices.exists({
+              index: indices,
+              allow_no_indices: true,
+            });
+
+            if (indexExists) {
+              return { status: 'available' };
+            }
+
+            return {
+              status: 'unavailable',
+              reason: 'Entity Store indices do not exist for this space',
+            };
+          }
+          return availability;
+        } catch (error) {
+          return {
+            status: 'unavailable',
+            reason: `Failed to check Entity Store availability: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`,
+          };
+        }
+      },
+    },
+    handler: async (params, { request, esClient }) => {
+      const spaceId = getSpaceIdFromRequest(request);
+      const {
+        entityTypes,
+        riskLevels,
+        assetCriticality,
+        attributes,
+        behaviors,
+        sortBy = 'risk_score',
+        sortOrder = 'desc',
+        limit = 10,
+      } = params;
+
+      logger.debug(
+        `${SECURITY_ENTITY_STORE_SEARCH_TOOL_ID} tool called with entityTypes: ${entityTypes.join(', ')}, riskLevels: ${riskLevels?.join(', ') ?? 'all'}`
+      );
+
+      try {
+        const query = buildEntityQuery({
+          entityTypes,
+          riskLevels,
+          assetCriticality,
+          attributes,
+          behaviors,
+        });
+        const sortField = getSortField(sortBy);
+
+        const entities = await searchEntityStore({
+          esClient: esClient.asCurrentUser,
+          spaceId,
+          entityTypes,
+          query,
+          sortField,
+          sortOrder,
+          limit,
+        });
+
+        if (entities.length === 0) {
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.error,
+                data: {
+                  message: `No entities found matching the specified criteria`,
+                },
+              },
+            ],
+          };
+        }
+
+        // Format entities for response, prioritizing key fields
+        const formattedEntities = entities.map((entity) => {
+          const entityData = entity.entity as Record<string, unknown> | undefined;
+          const riskData = entityData?.risk as Record<string, unknown> | undefined;
+          const lifecycleData = entityData?.lifecycle as Record<string, unknown> | undefined;
+          const attributesData = entityData?.attributes as Record<string, unknown> | undefined;
+          const behaviorsData = entityData?.behaviors as Record<string, unknown> | undefined;
+          const assetData = entity.asset as Record<string, unknown> | undefined;
+
+          return {
+            // Identity
+            entity_id: entityData?.id,
+            entity_name: entityData?.name,
+            entity_type: entityData?.type,
+            // Risk (prioritized)
+            risk_score_norm: riskData?.calculated_score_norm,
+            risk_level: riskData?.calculated_level,
+            // Asset criticality
+            asset_criticality: assetData?.criticality,
+            // Lifecycle
+            first_seen: lifecycleData?.First_seen,
+            last_activity: lifecycleData?.Last_activity,
+            // Attributes (if present)
+            ...(attributesData && Object.keys(attributesData).length > 0
+              ? { attributes: attributesData }
+              : {}),
+            // Behaviors (if present)
+            ...(behaviorsData && Object.keys(behaviorsData).length > 0
+              ? { behaviors: behaviorsData }
+              : {}),
+            // Include host/user/service specific identity fields
+            ...(entity.host ? { host: entity.host } : {}),
+            ...(entity.user ? { user: entity.user } : {}),
+            ...(entity.service ? { service: entity.service } : {}),
+          };
+        });
+
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.other,
+              data: {
+                total_found: entities.length,
+                entities: formattedEntities,
+              },
+            },
+          ],
+        };
+      } catch (error) {
+        logger.error(`Error in ${SECURITY_ENTITY_STORE_SEARCH_TOOL_ID} tool: ${error.message}`);
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.error,
+              data: {
+                message: `Error searching Entity Store: ${error.message}`,
+              },
+            },
+          ],
+        };
+      }
+    },
+    tags: ['security', 'entity-store', 'entities', 'search'],
+  };
+};

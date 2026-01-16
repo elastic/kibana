@@ -8,7 +8,13 @@ import { z } from '@kbn/zod';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
+import {
+  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  SECURITY_ENTITY_STORE_SEARCH_TOOL_ID,
+  SECURITY_ENTITY_STORE_GET_TOOL_ID,
+  SECURITY_ENTITY_STORE_TIMELINE_TOOL_ID,
+  SECURITY_ENTITY_STORE_SNAPSHOT_TOOL_ID,
+} from '../tools';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 const riskEntityAttachmentDataSchema = securityAttachmentDataSchema.extend({
@@ -59,7 +65,13 @@ export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
         },
       };
     },
-    getTools: () => [SECURITY_ENTITY_RISK_SCORE_TOOL_ID],
+    getTools: () => [
+      SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+      SECURITY_ENTITY_STORE_SEARCH_TOOL_ID,
+      SECURITY_ENTITY_STORE_GET_TOOL_ID,
+      SECURITY_ENTITY_STORE_TIMELINE_TOOL_ID,
+      SECURITY_ENTITY_STORE_SNAPSHOT_TOOL_ID,
+    ],
     getAgentDescription: () => {
       const description = `You have access to a risk entity that needs to be evaluated. The entity has an identifierType and identifier that you should use to query the risk score.
 

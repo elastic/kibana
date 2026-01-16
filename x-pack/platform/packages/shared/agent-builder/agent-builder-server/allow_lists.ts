@@ -35,6 +35,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'platform.dashboard.update_dashboard',
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
+  `${internalNamespaces.security}.entity_store_get`,
+  `${internalNamespaces.security}.entity_store_snapshot`,
+  `${internalNamespaces.security}.entity_store_timeline`,
+  `${internalNamespaces.security}.entity_store_search`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,

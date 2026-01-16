@@ -11,6 +11,10 @@ import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
 import { alertsTool } from './alerts_tool';
+import { entityStoreSearchTool } from './entity_store_search_tool';
+import { entityStoreGetTool } from './entity_store_get_tool';
+import { entityStoreTimelineTool } from './entity_store_timeline_tool';
+import { entityStoreSnapshotTool } from './entity_store_snapshot_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -25,4 +29,10 @@ export const registerTools = async (
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(alertsTool(core, logger));
+
+  // Entity Store tools
+  agentBuilder.tools.register(entityStoreSearchTool(core, logger));
+  agentBuilder.tools.register(entityStoreGetTool(core, logger));
+  agentBuilder.tools.register(entityStoreTimelineTool(core, logger));
+  agentBuilder.tools.register(entityStoreSnapshotTool(core, logger));
 };
