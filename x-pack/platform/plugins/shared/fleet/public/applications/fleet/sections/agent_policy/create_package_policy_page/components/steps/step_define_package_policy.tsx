@@ -40,6 +40,7 @@ import {
   VarGroupSelector,
   shouldShowVar,
   useVarGroupSelections,
+  isVarRequiredByVarGroup,
 } from './components';
 import { useOutputs } from './components/hooks';
 
@@ -281,6 +282,10 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               const { name: varName, type: varType } = varDef;
               if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
               const value = packagePolicy.vars[varName].value;
+              const requiredByVarGroup =
+                packageInfo.var_groups && packageInfo.var_groups.length > 0
+                  ? isVarRequiredByVarGroup(varName, packageInfo.var_groups, varGroupSelections)
+                  : false;
 
               return (
                 <EuiFlexItem key={varName}>
@@ -301,6 +306,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     errors={validationResults?.vars?.[varName] ?? []}
                     forceShowErrors={submitAttempted}
                     isEditPage={isEditPage}
+                    isRequiredByVarGroup={requiredByVarGroup}
                   />
                 </EuiFlexItem>
               );
@@ -493,6 +499,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     const { name: varName, type: varType } = varDef;
                     if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
                     const value = packagePolicy.vars![varName].value;
+                    const requiredByVarGroup =
+                      packageInfo.var_groups && packageInfo.var_groups.length > 0
+                        ? isVarRequiredByVarGroup(
+                            varName,
+                            packageInfo.var_groups,
+                            varGroupSelections
+                          )
+                        : false;
                     return (
                       <EuiFlexItem key={varName}>
                         <PackagePolicyInputVarField
@@ -512,6 +526,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           errors={validationResults?.vars?.[varName] ?? []}
                           forceShowErrors={submitAttempted}
                           isEditPage={isEditPage}
+                          isRequiredByVarGroup={requiredByVarGroup}
                         />
                       </EuiFlexItem>
                     );

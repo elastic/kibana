@@ -139,6 +139,30 @@ export function shouldShowVar(
 }
 
 /**
+ * Determines if a variable is required due to being in a required var_group's selected option.
+ * When var_group.required is true, all vars in the selected option are treated as required.
+ */
+export function isVarRequiredByVarGroup(
+  varName: string,
+  varGroups: RegistryVarGroup[],
+  varGroupSelections: VarGroupSelection
+): boolean {
+  for (const group of varGroups) {
+    // Skip if var_group is not marked as required
+    if (!group.required) continue;
+
+    const selectedOptionName = varGroupSelections[group.name];
+    if (!selectedOptionName) continue;
+
+    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
+    if (selectedOption?.vars.includes(varName)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * VarGroupSelector component renders a dropdown for selecting between
  * mutually exclusive variable groups (e.g., authentication methods).
  */

@@ -14,6 +14,7 @@ export {
   getVarsControlledByVarGroups,
   shouldShowVar,
   computeDefaultVarGroupSelections,
+  isVarRequiredByVarGroup,
 } from './var_group_selector';
 export type { VarGroupSelection } from './var_group_selector';
 export { useVarGroupSelections } from './hooks';

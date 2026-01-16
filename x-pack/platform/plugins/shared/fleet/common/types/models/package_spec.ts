@@ -23,6 +23,7 @@ export interface RegistryVarGroup {
   title: string;
   selector_title: string;
   description?: string;
+  required?: boolean; // When true, all vars in the selected option are treated as required
   options: RegistryVarGroupOption[];
 }
 

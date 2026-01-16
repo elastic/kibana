@@ -59,7 +59,7 @@ import { useIndexTemplateExists } from '../../datastream_hooks';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
-import { VarGroupSelector, shouldShowVar } from './var_group_selector';
+import { VarGroupSelector, shouldShowVar, isVarRequiredByVarGroup } from './var_group_selector';
 import { useVarGroupSelections } from './hooks';
 
 const ScrollAnchor = styled.div`
@@ -320,6 +320,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                 const varConfigEntry = packagePolicyInputStream.vars?.[varName];
                 const value = varConfigEntry?.value;
                 const frozen = varConfigEntry?.frozen ?? false;
+                const requiredByVarGroup =
+                  effectiveVarGroups && effectiveVarGroups.length > 0
+                    ? isVarRequiredByVarGroup(
+                        varName,
+                        effectiveVarGroups,
+                        effectiveVarGroupSelections
+                      )
+                    : false;
                 return (
                   <EuiFlexItem key={varName}>
                     <PackagePolicyInputVarField
@@ -343,6 +351,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       packageName={packageInfo.name}
                       datastreams={datastreams}
                       isEditPage={isEditPage}
+                      isRequiredByVarGroup={requiredByVarGroup}
                     />
                   </EuiFlexItem>
                 );
@@ -457,6 +466,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         if (!packagePolicyInputStream.vars) return null;
                         const { name: varName, type: varType } = varDef;
                         const value = packagePolicyInputStream.vars?.[varName]?.value;
+                        const requiredByVarGroup =
+                          effectiveVarGroups && effectiveVarGroups.length > 0
+                            ? isVarRequiredByVarGroup(
+                                varName,
+                                effectiveVarGroups,
+                                effectiveVarGroupSelections
+                              )
+                            : false;
 
                         return (
                           <EuiFlexItem key={varName}>
@@ -480,6 +497,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               packageName={packageInfo.name}
                               datastreams={datastreams}
                               isEditPage={isEditPage}
+                              isRequiredByVarGroup={requiredByVarGroup}
                             />
                           </EuiFlexItem>
                         );
