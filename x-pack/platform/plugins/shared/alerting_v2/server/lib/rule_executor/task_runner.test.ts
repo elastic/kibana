@@ -59,6 +59,7 @@ describe('RuleExecutorTaskRunner', () => {
     const storageService = createMockStorageService();
 
     rulesSavedObjectService.get.mockResolvedValue({
+      id: 'rule-1',
       attributes: ruleAttributes,
     });
     queryService.executeQuery.mockResolvedValue(esqlResponse);

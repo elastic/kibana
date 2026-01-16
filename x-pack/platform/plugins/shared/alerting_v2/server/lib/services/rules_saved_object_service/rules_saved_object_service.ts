@@ -22,7 +22,7 @@ export interface RulesSavedObjectServiceContract {
   get(
     id: string,
     spaceId?: string
-  ): Promise<{ attributes: RuleSavedObjectAttributes; version?: string }>;
+  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
   update(params: { id: string; attrs: RuleSavedObjectAttributes; version?: string }): Promise<void>;
   delete(params: { id: string }): Promise<void>;
   find(params: { page: number; perPage: number }): Promise<{
@@ -62,14 +62,14 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   public async get(
     id: string,
     spaceId?: string
-  ): Promise<{ attributes: RuleSavedObjectAttributes; version?: string }> {
+  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }> {
     const namespace = spaceIdToNamespace(this.spaces, spaceId);
     const doc = await this.client.get<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
       id,
       namespace ? { namespace } : undefined
     );
-    return { attributes: doc.attributes, version: doc.version };
+    return { id: doc.id, attributes: doc.attributes, version: doc.version };
   }
 
   public async update({
