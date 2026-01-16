@@ -21,9 +21,7 @@ export class EmbeddableEditorService {
 
   public isByValueEditor = (): boolean => Boolean(this.embeddableState?.valueInput);
 
-  // TODO: Enable this for By Value editing
-  // NOTE: The state's `searchSessionId` is actually a `savedObjectId` in relation to Discover
-  public isEmbeddedEditor = (): boolean => Boolean(this.embeddableState?.searchSessionId);
+  public isEmbeddedEditor = (): boolean => Boolean(this.embeddableState);
 
   public transferBackToEditor = () => {
     if (this.embeddableState) {
