@@ -58,7 +58,7 @@ describe('<Benchmarks />', () => {
         fleet: {
           authz: {
             integrations: {
-              all: true,
+              installPackages: true,
             },
           },
         },
@@ -117,7 +117,7 @@ describe('<Benchmarks />', () => {
         fleet: {
           authz: {
             integrations: {
-              canInstallPackages: false,
+              installPackages: false,
             },
           },
         },
