@@ -9,7 +9,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function hasTracesApmData(apmEventClient: APMEventClient) {
+export async function hasTracesEcsData(apmEventClient: APMEventClient) {
   const hasDataInWarmOrHotDataTiers = await hasDataRequest(apmEventClient, [
     'data_hot',
     'data_warm',
@@ -39,6 +39,6 @@ async function hasDataRequest(apmEventClient: APMEventClient, dataTiers?: DataTi
     query,
   };
 
-  const resp = await apmEventClient.search('has_traces_apm_data', params);
+  const resp = await apmEventClient.search('has_traces_ecs_data', params);
   return resp.hits.total.value > 0;
 }

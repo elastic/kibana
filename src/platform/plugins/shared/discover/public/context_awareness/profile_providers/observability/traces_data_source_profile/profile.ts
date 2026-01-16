@@ -21,8 +21,10 @@ const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-s
 
 export interface TracesDataContext {
   category: DataSourceCategory.Traces;
-  hasApm: boolean;
-  hasUnprocessedOtel: boolean;
+  tracesDataSourcesSummary: {
+    hasEcs: boolean;
+    hasUnprocessedOtel: boolean;
+  };
 }
 
 export const createTracesDataSourceProfileProvider = ({
@@ -33,40 +35,18 @@ export const createTracesDataSourceProfileProvider = ({
    * POC comment:
    * This could be stored in a more centralized place, but for now it's here.
    */
-  const getClusterTracesFlags = async (): Promise<{
-    hasApm: boolean;
+  const getTracesDataSourcesSummary = async (): Promise<{
+    hasEcs: boolean;
     hasUnprocessedOtel: boolean;
   }> => {
     try {
-      const [hasTracesApmData, hasTracesUnprocessedOtelData] = await Promise.allSettled([
-        http.get<{ hasTracesApmData: boolean }>('/internal/apm/has_traces_apm_data'),
-        /*
-         * POC comment:
-         * Using an endpoint from apm, which we might want to review, as we might have unprocessed OTEL data in the cluster not related to APM.
-         * Should we cover that case? How do we know which index the data is in?
-         */
-        http.get<{ hasTracesUnprocessedOtelData: boolean }>(
-          '/internal/apm/has_traces_unprocessed_otel_data'
-        ),
-      ]);
-
-      // eslint-disable-next-line no-console
-      console.log('hasTracesApmData', hasTracesApmData);
-      // eslint-disable-next-line no-console
-      console.log('hasTracesUnprocessedOtelData', hasTracesUnprocessedOtelData);
-
-      return {
-        hasApm:
-          hasTracesApmData.status === 'fulfilled'
-            ? Boolean(hasTracesApmData.value.hasTracesApmData)
-            : false,
-        hasUnprocessedOtel:
-          hasTracesUnprocessedOtelData.status === 'fulfilled'
-            ? Boolean(hasTracesUnprocessedOtelData.value.hasTracesUnprocessedOtelData)
-            : false,
-      };
+      const { hasECS, hasUnprocessedOtel } = await http.get<{
+        hasECS: boolean;
+        hasUnprocessedOtel: boolean;
+      }>('/internal/apm/traces_data_sources_summary');
+      return { hasEcs: hasECS, hasUnprocessedOtel };
     } catch {
-      return { hasApm: false, hasUnprocessedOtel: false };
+      return { hasEcs: false, hasUnprocessedOtel: false };
     }
   };
 
@@ -87,14 +67,13 @@ export const createTracesDataSourceProfileProvider = ({
         params.rootContext.solutionType === SolutionType.Observability &&
         apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params))
       ) {
-        const { hasApm, hasUnprocessedOtel } = await getClusterTracesFlags();
+        const { hasEcs, hasUnprocessedOtel } = await getTracesDataSourcesSummary();
 
         return {
           isMatch: true,
           context: {
             category: DataSourceCategory.Traces,
-            hasApm,
-            hasUnprocessedOtel,
+            tracesDataSourcesSummary: { hasEcs, hasUnprocessedOtel },
           } as TracesDataContext,
         };
       }

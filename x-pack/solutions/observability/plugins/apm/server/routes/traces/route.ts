@@ -46,7 +46,7 @@ import {
   SPAN_ID,
 } from '../../../common/es_fields/apm';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
-import { hasTracesApmData } from './has_traces_apm_data';
+import { hasTracesEcsData } from './has_traces_ecs_data';
 import { hasTracesUnprocessedOtelData } from './has_traces_unprocessed_otel_data';
 
 const tracesRoute = createApmServerRoute({
@@ -539,23 +539,17 @@ const unifiedTraceSpanRoute = createApmServerRoute({
   },
 });
 
-const hasTracesApmDataRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/has_traces_apm_data',
+const tracesDataSourcesSummaryRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces_data_sources_summary',
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ hasTracesApmData: boolean }> => {
+  handler: async (resources): Promise<{ hasEcs: boolean; hasUnprocessedOtel: boolean }> => {
     const apmEventClient = await getApmEventClient(resources);
-    const hasTracesApmDataResult = await hasTracesApmData(apmEventClient);
-    return { hasTracesApmData: hasTracesApmDataResult };
-  },
-});
+    const [hasEcs, hasUnprocessedOtel] = await Promise.all([
+      hasTracesEcsData(apmEventClient),
+      hasTracesUnprocessedOtelData(apmEventClient),
+    ]);
 
-const hasTracesUnprocessedOtelDataRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/has_traces_unprocessed_otel_data',
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ hasTracesUnprocessedOtelData: boolean }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const hasTracesUnprocessedOtelDataResult = await hasTracesUnprocessedOtelData(apmEventClient);
-    return { hasTracesUnprocessedOtelData: hasTracesUnprocessedOtelDataResult };
+    return { hasEcs, hasUnprocessedOtel };
   },
 });
 
@@ -573,6 +567,5 @@ export const traceRouteRepository = {
   ...unifiedTracesByIdSummaryRoute,
   ...unifiedTracesByIdErrorsRoute,
   ...unifiedTraceSpanRoute,
-  ...hasTracesApmDataRoute,
-  ...hasTracesUnprocessedOtelDataRoute,
+  ...tracesDataSourcesSummaryRoute,
 };
