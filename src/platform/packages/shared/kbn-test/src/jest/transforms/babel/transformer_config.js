@@ -27,8 +27,11 @@ module.exports = () => ({
         [
           require.resolve('@emotion/babel-preset-css-prop'),
           {
-            autoLabel: 'always',
-            labelFormat: '[local]',
+            // Runtime labeling is enabled via custom Jest resolver which loads the development builds of Emotion
+            // Babel labeling is disabled here to avoid conflicting with Emotion
+            // This is required because Emotion will skip labeling if Babel already added a label with '-' in it
+            // See: Custom resolver forcing @emotion/react/dist/emotion-react.development.cjs.js
+            autoLabel: 'never',
             sourceMap: false,
           },
         ],

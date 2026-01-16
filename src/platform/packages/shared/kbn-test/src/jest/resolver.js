@@ -48,6 +48,15 @@ function parseRequestOrExtSuffix(str) {
  * @returns
  */
 module.exports = (request, options) => {
+  // Force Emotion to load development builds for runtime labeling in tests
+  // This allows EMOTION_RUNTIME_AUTO_LABEL support
+  if (request === '@emotion/react') {
+    return resolve.sync('@emotion/react/dist/emotion-react.development.cjs.js', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === `@elastic/eui`) {
     return module.exports(`@elastic/eui/test-env`, options);
   }
