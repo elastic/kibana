@@ -269,6 +269,7 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod
