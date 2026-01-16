@@ -6,3 +6,4 @@
  */
 
 export type { SkillTypeDefinition } from './type_definition';
+export { validateSkillTypeDefinition } from './type_definition';

@@ -6,6 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
+import { z } from '@kbn/zod';
 import type { SkillBoundedTool } from './tools';
 import type {
   Directory,
@@ -15,6 +16,8 @@ import type {
   StringWithoutSpace,
 } from './type_utils';
 import type { AgentBuilderBuiltinTool } from '../allow_lists';
+
+
 
 /**
  * Skill directory structure - explicit about how skills are organized.
@@ -96,6 +99,41 @@ export interface SkillTypeDefinition<
    * Can be used to expose tools which are specific to the skill.
    */
   getInlineTools?: () => MaybePromise<SkillBoundedTool[]>;
+}
+
+/**
+ * Zod schema for validating SkillTypeDefinition name and description fields.
+ * Validates:
+ * - name: max 64 characters, lowercase letters, numbers, and hyphens only
+ * - description: max 1024 characters, non-empty
+ */
+export const skillTypeDefinitionSchema = z.object({
+  name: z
+    .string()
+    .max(64, 'Name must be at most 64 characters')
+    .regex(/^[a-z0-9-]+$/, 'Name must contain only lowercase letters, numbers, and hyphens'),
+  description: z
+    .string()
+    .min(1, 'Description must be non-empty')
+    .max(1024, 'Description must be at most 1024 characters'),
+});
+
+/**
+ * Validates a SkillTypeDefinition against the schema constraints.
+ * Throws a ZodError if validation fails.
+ *
+ * @param definition - The SkillTypeDefinition to validate
+ * @returns The validated definition
+ * @throws {z.ZodError} If validation fails
+ */
+export function validateSkillTypeDefinition<TName extends string, TPath extends DirectoryPath>(
+  definition: SkillTypeDefinition<TName, TPath>
+): SkillTypeDefinition<TName, TPath> {
+  skillTypeDefinitionSchema.parse({
+    name: definition.name,
+    description: definition.description,
+  });
+  return definition;
 }
 
 /**

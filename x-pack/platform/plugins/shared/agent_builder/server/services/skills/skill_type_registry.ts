@@ -6,7 +6,7 @@
  */
 
 import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
-
+import { validateSkillTypeDefinition } from '@kbn/agent-builder-server/skills';
 export interface SkillTypeRegistry {
   register(skill: SkillTypeDefinition): void;
   has(skillId: string): boolean;
@@ -25,6 +25,8 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
   constructor() {}
 
   register(skill: SkillTypeDefinition) {
+    validateSkillTypeDefinition(skill);
+    
     if (this.skills.has(skill.id)) {
       throw new Error(`Skill type with id ${skill.id} already registered`);
     }
