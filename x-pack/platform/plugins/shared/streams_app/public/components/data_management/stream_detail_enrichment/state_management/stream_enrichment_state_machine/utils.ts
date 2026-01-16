@@ -268,6 +268,10 @@ export function reorderSteps(
 /**
  * Reorders steps for drag-and-drop operations by moving a step block directly before, after, or inside a target step.
  * Supports cross-level moves and nesting items inside condition blocks.
+ * ============================
+ * NOTE: The parentId update is handled separately in the state machines via a step.parentChanged event.
+ * This is because the inner context of the step machine needs to be updated properly via xstate.
+ * This function only handles the reordering of the stepRefs array (the array order always mimics the hierarchy).
  * @param stepRefs The flat array of StepActorRef
  * @param sourceStepId The customIdentifier of the step to move
  * @param targetStepId The customIdentifier of the target step
@@ -290,17 +294,11 @@ export function reorderStepsByDragDrop(
     return stepRefs;
   }
 
-  const sourceStep = steps[sourceIndex];
-  const targetStep = steps[targetIndex];
-
   // Prevent dropping a step onto itself or its descendants
   const sourceDescendants = collectDescendantStepIds(steps, sourceStepId);
   if (sourceDescendants.has(targetStepId)) {
     return stepRefs;
   }
-
-  // Collect all descendant IDs for the source block
-  const allSourceBlockIds = new Set([sourceStepId, ...sourceDescendants]);
 
   // Find the boundaries of the source block
   const sourceBlockStart = sourceIndex;
@@ -313,19 +311,6 @@ export function reorderStepsByDragDrop(
   // Remove source block from array
   const withoutSource = [...stepRefs.slice(0, sourceBlockStart), ...stepRefs.slice(sourceBlockEnd)];
 
-  // Determine new parentId for the source step based on operation
-  let newParentId: string | null;
-  if (operation === 'inside') {
-    // Moving inside the target - target becomes the parent
-    newParentId = targetStepId;
-  } else {
-    // Moving before/after the target - adopt target's parent
-    newParentId = targetStep.parentId ?? null;
-  }
-
-  // We need to update the parentId of the moved step
-  // Note: The step machine will handle the actual update when it processes the change
-  // For now, we just reorder the refs; the parentId update happens via step.change event
   const updatedSourceBlock = sourceBlock;
 
   // Find target position in the filtered array
