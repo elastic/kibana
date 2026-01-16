@@ -18,6 +18,7 @@ import { CoreStart, Request } from '@kbn/core-di-server';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
+import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { createRuleDataSchema, updateRuleDataSchema } from './schemas';
 import type {
@@ -34,7 +35,7 @@ export class RulesClient {
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('http')) private readonly http: HttpServiceStart,
     @inject(RulesSavedObjectService)
-    private readonly rulesSavedObjectService: RulesSavedObjectService,
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
     @inject(PluginStart('security')) private readonly security: SecurityPluginStart
   ) {}

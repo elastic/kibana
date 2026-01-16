@@ -10,14 +10,14 @@ import { OnStart } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
-import { LoggerService } from '../lib/services/logger_service/logger_service';
+import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { TaskRunnerFactory } from '../lib/services/task_run_scope_service/create_task_runner';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue((container) => {
     const resourceManager = container.get(ResourceManager);
-    const logger = container.get(LoggerService);
+    const logger = container.get(LoggerServiceToken);
     const esClient = container.get(EsServiceInternalToken);
 
     initializeResources({

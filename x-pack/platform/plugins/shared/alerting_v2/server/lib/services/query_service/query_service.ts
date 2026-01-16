@@ -11,7 +11,8 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { catchError, filter as rxFilter, lastValueFrom, map, throwError } from 'rxjs';
 import { inject, injectable } from 'inversify';
-import { LoggerService } from '../logger_service/logger_service';
+import type { LoggerServiceContract } from '../logger_service/logger_service';
+import { LoggerServiceToken } from '../logger_service/logger_service';
 
 interface ExecuteQueryParams {
   query: ESQLSearchParams['query'];
@@ -20,11 +21,16 @@ interface ExecuteQueryParams {
   abortSignal?: AbortSignal;
 }
 
+export interface QueryServiceContract {
+  executeQuery(params: ExecuteQueryParams): Promise<ESQLSearchResponse>;
+  queryResponseToRecords<T extends Record<string, any>>(response: ESQLSearchResponse): T[];
+}
+
 @injectable()
-export class QueryService {
+export class QueryService implements QueryServiceContract {
   constructor(
     private readonly searchClient: IScopedSearchClient,
-    @inject(LoggerService) private readonly logger: LoggerService
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
   async executeQuery({

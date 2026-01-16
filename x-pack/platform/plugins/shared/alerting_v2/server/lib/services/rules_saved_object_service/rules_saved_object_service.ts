@@ -17,8 +17,20 @@ import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 
+export interface RulesSavedObjectServiceContract {
+  create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<string>;
+  get(id: string): Promise<{ attributes: RuleSavedObjectAttributes; version?: string }>;
+  update(params: { id: string; attrs: RuleSavedObjectAttributes; version?: string }): Promise<void>;
+  delete(params: { id: string }): Promise<void>;
+  find(params: { page: number; perPage: number }): Promise<{
+    saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes }>;
+    total: number;
+  }>;
+  getRuleAttributes(params: { id: string; spaceId?: string }): Promise<RuleSavedObjectAttributes>;
+}
+
 @injectable()
-export class RulesSavedObjectService {
+export class RulesSavedObjectService implements RulesSavedObjectServiceContract {
   private readonly client: SavedObjectsClientContract;
 
   constructor(

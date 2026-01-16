@@ -62,7 +62,7 @@ export class TaskRunnerFactory {
           const runner = scope.get(taskRunnerClass);
           return await runner.run({ taskInstance, abortController });
         } finally {
-          scope.unbindAll();
+          await scope.unbindAll();
         }
       },
     });

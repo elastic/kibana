@@ -10,7 +10,7 @@ import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import { RulesClient } from '../lib/rules_client';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
-import { LoggerService } from '../lib/services/logger_service/logger_service';
+import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import { AlertingRetryService } from '../lib/services/retry_service';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
@@ -30,6 +30,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RetryServiceToken).toService(AlertingRetryService);
 
   bind(LoggerService).toSelf().inSingletonScope();
+  bind(LoggerServiceToken).toService(LoggerService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -53,7 +54,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const request = get(Request);
       const data = get(PluginStart<AlertingServerStartDependencies['data']>('data'));
-      const loggerService = get(LoggerService);
+      const loggerService = get(LoggerServiceToken);
       const searchClient = data.search.asScoped(request);
       return new QueryService(searchClient, loggerService);
     })
@@ -61,7 +62,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(StorageServiceScopedToken)
     .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerService);
+      const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
       return new StorageService(esClient, loggerService);
     })
@@ -69,7 +70,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(StorageServiceInternalToken)
     .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerService);
+      const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
       return new StorageService(esClient, loggerService);
     })

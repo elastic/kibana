@@ -6,30 +6,42 @@
  */
 
 import { inject, injectable } from 'inversify';
+import type { ServiceIdentifier } from 'inversify';
 import type { Logger, LogMessageSource } from '@kbn/logging';
 import { Logger as BaseLogger } from '@kbn/core-di';
 import type { EcsError } from '@elastic/ecs';
 
-interface DebugParams {
+export interface DebugParams {
   message: LogMessageSource;
 }
 
-interface InfoParams {
+export interface InfoParams {
   message: LogMessageSource;
 }
 
-interface WarnParams {
+export interface WarnParams {
   message: LogMessageSource;
 }
 
-interface ErrorParams {
+export interface ErrorParams {
   error: Error;
   code?: string;
   type?: string;
 }
 
+export interface LoggerServiceContract {
+  debug(params: DebugParams): void;
+  info(params: InfoParams): void;
+  warn(params: WarnParams): void;
+  error(params: ErrorParams): void;
+}
+
+export const LoggerServiceToken = Symbol.for(
+  'alerting_v2.LoggerService'
+) as ServiceIdentifier<LoggerServiceContract>;
+
 @injectable()
-export class LoggerService {
+export class LoggerService implements LoggerServiceContract {
   constructor(@inject(BaseLogger) private readonly logger: Logger) {}
 
   public debug({ message }: DebugParams): void {
