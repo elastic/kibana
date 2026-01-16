@@ -217,7 +217,7 @@ describe('datatable appearance settings', () => {
 
   it('should toggle show row numbers', async () => {
     const { rerender } = await renderComponent();
-    const showRowNumbersSwitch = screen.getByTestId('lens-table-show-row-numbers-switch');
+    const showRowNumbersSwitch = screen.getByTestId('lens-table-row-numbers-switch');
 
     expect(showRowNumbersSwitch).not.toBeChecked();
 
