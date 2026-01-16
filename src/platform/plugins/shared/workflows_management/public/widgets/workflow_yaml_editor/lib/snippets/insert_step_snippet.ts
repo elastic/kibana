@@ -329,12 +329,9 @@ export function insertStepSnippet(
   
   const stepNode = findStepNodeToInsertAfter(document, model, cursorPosition, stepNodes, stepsKeyRange);
 
-  let { replaceRange, indentLevel, isReplacingFlowArray } = handleFlowArrayReplacement(
-    model,
-    stepsPair,
-    stepsKeyRange,
-    expectedIndent
-  );
+  const replacement = handleFlowArrayReplacement(model, stepsPair, stepsKeyRange, expectedIndent);
+  const { isReplacingFlowArray } = replacement;
+  let { replaceRange, indentLevel } = replacement;
 
   if (!replaceRange) {
     const firstEmptyItem = findFirstEmptyItem(model, stepsPair);
