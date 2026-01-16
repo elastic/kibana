@@ -105,7 +105,9 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
         responsive={false}
       >
         <EuiFlexItem grow={true}>
-          <EuiText textAlign="center">{jobId}</EuiText>
+          <EuiText textAlign="center" size="s">
+            {jobId}
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIcon type="boxesVertical" />
