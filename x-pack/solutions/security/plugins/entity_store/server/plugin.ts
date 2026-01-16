@@ -5,11 +5,23 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '@kbn/core/server';
 import { registerRoutes } from './routes';
-import type { EntityStoreRequestHandlerContext } from './types';
+import type {
+  EntityStoreRequestHandlerContext,
+  EntityStoreSetupPlugins,
+  EntityStoreStartPlugins,
+} from './types';
 import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
+import { registerTasks } from './tasks/register_tasks';
+import { registerUiSettings } from './infra/feature_flags/register';
 
 export class EntityStorePlugin implements Plugin {
   private readonly logger: Logger;
@@ -18,17 +30,23 @@ export class EntityStorePlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<EntityStoreStartPlugins, void>, plugins: EntityStoreSetupPlugins) {
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
-      (context, request) => createRequestHandlerContext({ context, core, logger: this.logger })
+      (context, request) =>
+        createRequestHandlerContext({ context, coreSetup: core, logger: this.logger })
     );
 
+    registerTasks(plugins.taskManager, this.logger);
+    this.logger.debug('Registering routes');
     registerRoutes(router);
+
+    this.logger.debug('Registering ui settings');
+    registerUiSettings(core.uiSettings);
   }
 
-  public start() {
+  public start(core: CoreStart, plugins: EntityStoreStartPlugins) {
     this.logger.info('Initializing plugin');
   }
 

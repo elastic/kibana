@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudConnectApiConfig } from '../types';
 import type { CloudConnectTelemetryService } from '../telemetry/client';
 import type { CloudConnectApiService } from '../lib/api';
@@ -15,6 +16,7 @@ export interface CloudConnectedAppContextValue {
   chrome: CoreStart['chrome'];
   application: CoreStart['application'];
   http: CoreStart['http'];
+  licensing: LicensingPluginStart;
   docLinks: CoreStart['docLinks'];
   notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];

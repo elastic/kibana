@@ -12,6 +12,14 @@ import type {
   DataSourcesRegistryPluginSetup,
   DataSourcesRegistryPluginStart,
 } from '@kbn/data-sources-registry-plugin/server';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server';
+import type {
+  WorkflowsServerPluginSetup,
+  WorkflowsServerPluginStart,
+} from '@kbn/workflows-management-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
@@ -22,9 +30,13 @@ export interface DataConnectorsServerStart {}
 export interface DataConnectorsServerSetupDependencies {
   actions: ActionsPluginSetup;
   dataSourcesRegistry: DataSourcesRegistryPluginSetup;
+  agentBuilder: AgentBuilderPluginSetup;
+  workflowsManagement: WorkflowsServerPluginSetup;
 }
 
 export interface DataConnectorsServerStartDependencies {
   actions: ActionsPluginStart;
   dataSourcesRegistry: DataSourcesRegistryPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
+  workflowsManagement: WorkflowsServerPluginStart;
 }

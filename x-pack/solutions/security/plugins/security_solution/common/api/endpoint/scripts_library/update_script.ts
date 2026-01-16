@@ -15,6 +15,7 @@ import {
   ScriptPathToExecutableSchema,
   ScriptPlatformSchema,
   ScriptRequiresInputSchema,
+  ScriptTagsSchema,
 } from './common';
 import type { DeepMutable } from '../../../endpoint/types';
 import { validateNonEmptyString } from '../schema_utils';
@@ -30,6 +31,7 @@ export const PatchUpdateScriptRequestSchema = {
       instructions: schema.maybe(ScriptInstructionsSchema),
       example: schema.maybe(ScriptExampleSchema),
       pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
+      tags: schema.maybe(ScriptTagsSchema),
       version: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
     },
     {

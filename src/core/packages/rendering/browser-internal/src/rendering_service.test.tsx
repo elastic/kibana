@@ -83,6 +83,7 @@ describe('RenderingService', () => {
         theme,
         userProfile,
         coreEnv,
+        chrome,
       });
     };
 
@@ -155,7 +156,7 @@ describe('RenderingService', () => {
     });
 
     it('renders the React element when dependencies are provided', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv };
+      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, chrome };
       rendering.start(deps);
 
       const TestComponent = rendering.addContext(<div>Test Element</div>);
@@ -167,7 +168,7 @@ describe('RenderingService', () => {
     });
 
     it('maintains component identity across multiple calls to prevent remounting', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv };
+      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, chrome };
       rendering.start(deps);
 
       // Create a stateful component to test remounting behavior
@@ -210,7 +211,7 @@ describe('RenderingService', () => {
     });
 
     it('preserves component state and focus during re-renders', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv };
+      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, chrome };
       rendering.start(deps);
 
       // Create a component with an input to test focus preservation

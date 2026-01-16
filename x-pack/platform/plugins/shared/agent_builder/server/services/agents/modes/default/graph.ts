@@ -89,6 +89,7 @@ export const createAgentGraph = ({
           initialMessages: state.initialMessages,
           actions: state.mainActions,
           attachmentTypes: processedConversation.attachmentTypes,
+          outputSchema,
         })
       );
 

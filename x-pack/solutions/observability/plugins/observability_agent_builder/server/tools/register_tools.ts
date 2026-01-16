@@ -15,10 +15,6 @@ import type {
 } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import {
-  OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
-  createGetDataSourcesTool,
-} from './get_data_sources/tool';
-import {
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   createRunLogRateAnalysisTool,
 } from './run_log_rate_analysis/tool';
@@ -42,6 +38,10 @@ import {
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 } from './get_downstream_dependencies/tool';
 import {
+  createGetTraceMetricsTool,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+} from './get_trace_metrics/tool';
+import {
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   createGetLogChangePointsTool,
 } from './get_log_change_points/tool';
@@ -49,6 +49,11 @@ import {
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   createGetMetricChangePointsTool,
 } from './get_metric_change_points/tool';
+import {
+  OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
+  createGetTraceChangePointsTool,
+} from './get_trace_change_points/tool';
+import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -59,7 +64,6 @@ const PLATFORM_TOOL_IDS = [
 ];
 
 const OBSERVABILITY_TOOL_IDS = [
-  OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
@@ -68,8 +72,11 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -89,17 +96,19 @@ export async function registerTools({
   logger: Logger;
 }) {
   const observabilityTools: StaticToolRegistration<any>[] = [
-    createGetDataSourcesTool({ core, plugins, logger }),
     createRunLogRateAnalysisTool({ core, logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
     createGetLogCategoriesTool({ core, logger }),
-    createGetServicesTool({ core, dataRegistry, logger }),
+    createGetServicesTool({ core, plugins, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
+    createGetTraceMetricsTool({ core, plugins, logger }),
     createGetLogChangePointsTool({ core, plugins, logger }),
     createGetMetricChangePointsTool({ core, plugins, logger }),
+    createGetTraceChangePointsTool({ core, plugins, logger }),
+    createGetIndexInfoTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {

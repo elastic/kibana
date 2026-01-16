@@ -72,8 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/245943
-    describe.skip('page transitions', () => {
+    describe('page transitions', () => {
       it('transitions from one tab to another and back again will cause the intercept to be displayed if the intercept interval has elapsed on transitioning', async () => {
         // navigate the home journey to set a record for new intercept journey
         await PageObjects.common.navigateToUrl('home');

@@ -8,7 +8,6 @@
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptionsReference,
-  SavedObject,
 } from '@kbn/core/server';
 import type { Tag, TagAttributes, TagWithRelations } from '../../../common/types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
@@ -18,6 +17,11 @@ export const addConnectionCount = async (
   targetTypes: string[],
   client: SavedObjectsClientContract
 ): Promise<TagWithRelations[]> => {
+  // Early return if no tags - avoid expensive PIT query that would scan all saved objects
+  if (tags.length === 0) {
+    return [];
+  }
+
   const ids = new Set(tags.map((tag) => tag.id));
   const counts: Map<string, number> = new Map(tags.map((tag) => [tag.id, 0]));
 
@@ -31,20 +35,19 @@ export const addConnectionCount = async (
     perPage: 1000,
     hasReference: references,
     hasReferenceOperator: 'OR',
+    fields: ['title'], // No need to retrieve all fields, so we scope it down to just one
   });
 
-  const results: SavedObject[] = [];
   for await (const response of pitFinder.find()) {
-    results.push(...response.saved_objects);
-  }
-
-  results.forEach((obj) => {
-    obj.references.forEach((ref) => {
-      if (ref.type === tagSavedObjectTypeName && ids.has(ref.id)) {
-        counts.set(ref.id, counts.get(ref.id)! + 1);
-      }
+    const results = response.saved_objects;
+    results.forEach((so) => {
+      so.references.forEach((ref) => {
+        if (ref.type === tagSavedObjectTypeName && ids.has(ref.id)) {
+          counts.set(ref.id, counts.get(ref.id)! + 1);
+        }
+      });
     });
-  });
+  }
 
   return tags.map((tag) => ({
     ...tag,
