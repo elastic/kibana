@@ -1,5 +1,7 @@
 ---
-applyTo: '{**/test/scout/**/*.ts,**/test/scout_*/**/*.ts}'
+name: Scout best practices
+description: Copilot guidance for Scout tests and fixtures under test/scout and test/scout_*.
+applyTo: '**/test/scout/**/*.ts,**/test/scout_*/**/*.ts'
 ---
 
 You are reviewing Scout tests. Your goal is to catch **every** best-practice violation.
