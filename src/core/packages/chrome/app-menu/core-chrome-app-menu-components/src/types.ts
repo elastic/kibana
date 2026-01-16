@@ -14,7 +14,7 @@ import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
  * Type for the function that runs when an app menu item is clicked
  * @param triggerElement - The HTML element that triggered the action. Do not use this to open popovers. Use `items` property to define popover items instead.
  */
-export type AppMenuRunAction = (triggerElement: HTMLElement) => void;
+export type AppMenuRunAction = (triggerElement?: HTMLElement) => void;
 
 /**
  * Subset of SplitButtonWithNotificationProps.
