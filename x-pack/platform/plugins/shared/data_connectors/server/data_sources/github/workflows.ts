@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export function generateGithubSearchIssuesWorkflow(
-  stackConnectorId: string,
-  dataSourceName: string
-): string {
+export function generateGithubSearchIssuesWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'sources.github.${dataSourceName}.search_issues'
+name: 'search_issues'
 description: 'Search for issues in a GitHub repository'
 enabled: true
 triggers:
@@ -53,13 +50,9 @@ steps:
         sort: "\${{inputs.sort}}"
 `;
 }
-
-export function generateGithubSearchCodeWorkflow(
-  stackConnectorId: string,
-  dataSourceName: string
-): string {
+export function generateGithubSearchCodeWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'sources.github.${dataSourceName}.search_code'
+name: 'search_code'
 description: 'Search for code in GitHub repositories'
 enabled: true
 triggers:
@@ -92,12 +85,9 @@ steps:
 `;
 }
 
-export function generateGithubSearchPullRequestsWorkflow(
-  stackConnectorId: string,
-  dataSourceName: string
-): string {
+export function generateGithubSearchPullRequestsWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'sources.github.${dataSourceName}.search_pull_requests'
+name: 'search_pull_requests'
 description: 'Search for pull requests in a GitHub repository'
 enabled: true
 triggers:
@@ -142,12 +132,9 @@ steps:
 `;
 }
 
-export function generateGithubSearchRepositoriesWorkflow(
-  stackConnectorId: string,
-  dataSourceName: string
-): string {
+export function generateGithubSearchRepositoriesWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'sources.github.${dataSourceName}.search_repositories'
+name: 'search_repositories'
 description: 'Search for GitHub repositories'
 enabled: true
 triggers:
@@ -188,12 +175,9 @@ steps:
 `;
 }
 
-export function generateGithubSearchUsersWorkflow(
-  stackConnectorId: string,
-  dataSourceName: string
-): string {
+export function generateGithubSearchUsersWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'sources.github.${dataSourceName}.search_users'
+name: 'search_users'
 description: 'Search for GitHub users'
 enabled: true
 triggers:

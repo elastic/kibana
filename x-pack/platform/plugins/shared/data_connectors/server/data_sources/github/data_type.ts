@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
-import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin';
+import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/common';
 import {
   generateGithubSearchIssuesWorkflow,
   generateGithubSearchCodeWorkflow,
@@ -58,26 +58,26 @@ export const githubDataSource: DataTypeDefinition = {
     ],
   },
 
-  generateWorkflows(stackConnectorId: string, stackConnectorName: string) {
+  generateWorkflows(stackConnectorId: string) {
     return [
       {
-        content: generateGithubSearchIssuesWorkflow(stackConnectorId, stackConnectorName),
+        content: generateGithubSearchIssuesWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {
-        content: generateGithubSearchCodeWorkflow(stackConnectorId, stackConnectorName),
+        content: generateGithubSearchCodeWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {
-        content: generateGithubSearchPullRequestsWorkflow(stackConnectorId, stackConnectorName),
+        content: generateGithubSearchPullRequestsWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {
-        content: generateGithubSearchRepositoriesWorkflow(stackConnectorId, stackConnectorName),
+        content: generateGithubSearchRepositoriesWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {
-        content: generateGithubSearchUsersWorkflow(stackConnectorId, stackConnectorName),
+        content: generateGithubSearchUsersWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
     ];

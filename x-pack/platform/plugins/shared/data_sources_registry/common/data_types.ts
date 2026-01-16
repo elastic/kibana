@@ -83,7 +83,7 @@ export interface DataTypeDefinition {
    * Generates workflows for interacting with the third-party data source.
    * Workflows are the only model for "taking action" against the third party.
    */
-  generateWorkflows(stackConnectorId?: string, dataSourceName?: string): WorkflowInfo[];
+  generateWorkflows(stackConnectorId?: string): WorkflowInfo[];
 
   /**
    * Stack connector configuration.

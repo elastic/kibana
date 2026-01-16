@@ -13,6 +13,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
 import type {
   DataConnectorsServerSetupDependencies,
   DataConnectorsServerStartDependencies,
@@ -97,14 +98,20 @@ export async function createConnectorAndRelatedResources(
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
-  const workflowInfos = dataConnectorTypeDef.generateWorkflows(finalStackConnectorId, name);
+  const workflowInfos = dataConnectorTypeDef.generateWorkflows(finalStackConnectorId);
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data connector '${name}'`);
 
   for (const workflowInfo of workflowInfos) {
+    // Extract original workflow name from YAML and prefix it with the data source name
+    const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
+    const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
+    const prefixedName = `${slugify(name)}.${originalName}`;
+    const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
+
     const workflow = await workflowManagement.management.createWorkflow(
-      { yaml: workflowInfo.content },
+      { yaml: prefixedContent },
       spaceId,
       request
     );

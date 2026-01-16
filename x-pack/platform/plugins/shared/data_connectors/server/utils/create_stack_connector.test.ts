@@ -300,6 +300,7 @@ describe('createStackConnector', () => {
         request: mockRequest,
         connectorId: 'mcp-connector-3',
         toolNames: ['get_file_contents', 'list_issues', 'get_commit'],
+        logger: mockLogger,
       });
       expect(bulkCreateMcpToolsModule.bulkCreateMcpTools).toHaveBeenCalledWith({
         registry: mockRegistry,
@@ -557,6 +558,7 @@ describe('createStackConnector', () => {
         request: mockRequest,
         connectorId: 'mcp-connector-10',
         toolNames: ['get_file_contents'],
+        logger: mockLogger,
       });
       expect(bulkCreateMcpToolsModule.bulkCreateMcpTools).not.toHaveBeenCalled();
       expect(mockToolIds).toEqual([]);
