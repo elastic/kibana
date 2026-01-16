@@ -213,17 +213,16 @@ export class AccessControlService {
       addUnauthorizedType(type, UPDATE_ACTION as A, unauthorizedRbacTypes);
     }
 
-    // Throw a unified error if any authorization checks failed.
-    // The error message includes context-specific details for each type of failure:
-    // - RBAC failures: owners who lost space access or RBAC privileges
-    // - Access control failures: non-owner users lacking manage_access_control privilege
     if (unauthorizedRbacTypes.size > 0 || unauthorizedAccessControlTypes.size > 0) {
       const rbacTypeList = [...unauthorizedRbacTypes].sort();
       const accessControlTypeList = [...unauthorizedAccessControlTypes].sort();
       const allUnauthorizedTypes = [...new Set([...rbacTypeList, ...accessControlTypeList])].sort();
+      const unauthorizedObjects = objectsRequiringAccessControl.filter((obj) =>
+        unauthorizedAccessControlTypes.has(obj.type)
+      );
       addAuditEventFn?.(allUnauthorizedTypes);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
-        new Error(buildAccessDeniedMessage(rbacTypeList, objectsRequiringAccessControl))
+        new Error(buildAccessDeniedMessage(rbacTypeList, unauthorizedObjects))
       );
     }
   }
