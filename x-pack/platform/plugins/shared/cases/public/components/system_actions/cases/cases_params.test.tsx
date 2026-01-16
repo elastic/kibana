@@ -113,7 +113,7 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
     expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
-    expect(await screen.findByTestId('auto-push-case')).toBeInTheDocument();
+    expect(screen.queryByTestId('auto-push-case')).not.toBeInTheDocument();
   });
 
   it('renders loading state of grouping by fields correctly', async () => {
@@ -182,7 +182,29 @@ describe('CasesParamsFields renders', () => {
     });
 
     it('renders the auto push case option correctly', async () => {
-      render(<CasesParamsFields {...defaultProps} />);
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      }));
+
+      const props = {
+        ...defaultProps,
+        producerId: 'siem',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[3].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...props} />);
 
       const autoPushCase = await screen.findByTestId('auto-push-case');
       expect(autoPushCase).not.toBeChecked();
