@@ -10,13 +10,11 @@
 import type { FC } from 'react';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type {
   ActionFactoryDefinition,
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedAction,
-  SerializedEvent,
 } from '../dynamic_actions';
 
 /**
@@ -37,7 +35,7 @@ export interface DrilldownDefinition<
   Config extends BaseActionConfig = BaseActionConfig,
   ExecutionContext extends object = object,
   FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
-> extends PersistableStateDefinition<SerializedEvent> {
+> {
   /**
    * Globally unique identifier for this drilldown.
    */

@@ -32,6 +32,8 @@
           ") => void) => void"
         ],
         "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
+        "lineNumber": 85,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,6 +77,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -90,6 +96,8 @@
               ") => void"
             ],
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -111,6 +119,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/data-table/components/data_table/index.tsx",
+        "lineNumber": 139,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -126,6 +136,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -160,6 +172,8 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/reducer.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -175,6 +189,8 @@
               "PassedS"
             ],
             "path": "node_modules/typescript-fsa-reducers/dist/index.d.ts",
+            "lineNumber": 17,
+            "columnNumber": 15,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,6 +205,8 @@
               "{ type: any; }"
             ],
             "path": "node_modules/typescript-fsa-reducers/dist/index.d.ts",
+            "lineNumber": 17,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -224,6 +242,8 @@
           "[]>"
         ],
         "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -245,6 +265,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,6 +282,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -275,6 +299,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -290,6 +316,8 @@
               "boolean"
             ],
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -311,6 +339,8 @@
           "(rowIndex: number, itemsPerPage: number) => number"
         ],
         "path": "x-pack/solutions/security/packages/data-table/components/data_table/pagination.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -325,6 +355,8 @@
               "number"
             ],
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/pagination.ts",
+            "lineNumber": 21,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -340,6 +372,8 @@
               "number"
             ],
             "path": "x-pack/solutions/security/packages/data-table/components/data_table/pagination.ts",
+            "lineNumber": 21,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -393,6 +427,8 @@
           ", { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/selectors.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -420,6 +456,8 @@
           "DataTableModelSettings"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -466,6 +504,8 @@
               " | undefined; type?: string | undefined; })[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -482,6 +522,8 @@
               "string | null"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -498,6 +540,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -519,6 +563,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -532,6 +578,8 @@
               "Uniquely identifies the data table"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -546,6 +594,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -557,6 +607,8 @@
             "label": "isLoading",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -570,6 +622,8 @@
               "If selectAll checkbox in header is checked"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -583,6 +637,8 @@
               "The number of items to show in a single page of results"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -599,6 +655,8 @@
               "number[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -615,6 +673,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -639,6 +699,8 @@
               "[]; }"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -653,6 +715,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -669,6 +733,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -682,6 +748,8 @@
               "Total number of fetched events/alerts"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -696,6 +764,8 @@
               "\"gridView\" | \"eventRenderedView\""
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -710,6 +780,8 @@
               "{ showOnlyThreatIndicatorAlerts: boolean; showBuildingBlockAlerts: boolean; }"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -726,6 +798,8 @@
           "The state of all timelines is stored here"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -746,6 +820,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -760,6 +836,8 @@
         "label": "SortColumnTable",
         "description": [],
         "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -771,6 +849,8 @@
             "label": "columnId",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -782,6 +862,8 @@
             "label": "columnType",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -796,6 +878,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -817,6 +901,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -833,6 +919,8 @@
           "A map of id to data table"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -854,6 +942,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -870,6 +960,8 @@
           "The state of all data tables is stored here"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -890,6 +982,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -906,6 +1000,8 @@
         "label": "Direction",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -918,6 +1014,8 @@
         "label": "TableEntityType",
         "description": [],
         "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -930,6 +1028,8 @@
         "label": "TableId",
         "description": [],
         "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -947,6 +1047,8 @@
           "\"not-filtered\" | \"text-filter\""
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -963,6 +1065,8 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -978,6 +1082,8 @@
           "\"open\""
         ],
         "path": "x-pack/solutions/security/packages/data-table/common/types/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1075,6 +1181,8 @@
           "[]>; readonly totalCount: number; }"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1115,6 +1223,8 @@
           ".alertsRiskInputs"
         ],
         "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1130,6 +1240,8 @@
           "\"gridView\" | \"eventRenderedView\""
         ],
         "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1144,6 +1256,8 @@
         "label": "tableDefaults",
         "description": [],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1159,6 +1273,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1173,6 +1289,8 @@
               "null"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1187,6 +1305,8 @@
               "never[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1201,6 +1321,8 @@
               "never[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1215,6 +1337,8 @@
               "never[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1229,6 +1353,8 @@
               "false"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1243,6 +1369,8 @@
               "false"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1254,6 +1382,8 @@
             "label": "itemsPerPage",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1268,6 +1398,8 @@
               "number[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1282,6 +1414,8 @@
               "never[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1293,6 +1427,8 @@
             "label": "selectedEventIds",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -1308,6 +1444,8 @@
               "false"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1322,6 +1460,8 @@
               "{ columnId: string; columnType: string; esTypes: string[]; sortDirection: \"desc\"; }[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1336,6 +1476,8 @@
               "false"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1351,6 +1493,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1365,6 +1509,8 @@
               "never[]"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1376,6 +1522,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1387,6 +1535,8 @@
             "label": "totalCount",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1401,6 +1551,8 @@
               "\"gridView\""
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1412,6 +1564,8 @@
             "label": "additionalFilters",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1426,6 +1580,8 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+                "lineNumber": 92,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1440,6 +1596,8 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
+                "lineNumber": 93,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1489,6 +1647,8 @@
           "; }"
         ],
         "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
