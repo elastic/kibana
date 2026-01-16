@@ -68,17 +68,17 @@ export const arePinnedPanelLayoutsEqual = (
   newLayout?: DashboardLayout
 ) => {
   /**
-   * check for control ID equality
+   * check for pinned panel ID equality
    */
-  const controlIdDiff = xor(
-    Object.keys(originalLayout?.controls ?? {}),
-    Object.keys(newLayout?.controls ?? {})
+  const pinnedPanelIdDiff = xor(
+    Object.keys(originalLayout?.pinnedPanels ?? {}),
+    Object.keys(newLayout?.pinnedPanels ?? {})
   );
-  if (controlIdDiff.length > 0) return false;
+  if (pinnedPanelIdDiff.length > 0) return false;
 
   // then compare control state that layout manages (i.e. order, grow, width, etc.)
-  for (const controlId of Object.keys(newLayout?.controls ?? {})) {
-    if (!deepEqual(originalLayout?.controls[controlId], newLayout?.controls[controlId])) {
+  for (const panelId of Object.keys(newLayout?.pinnedPanels ?? {})) {
+    if (!deepEqual(originalLayout?.pinnedPanels[panelId], newLayout?.pinnedPanels[panelId])) {
       return false;
     }
   }
