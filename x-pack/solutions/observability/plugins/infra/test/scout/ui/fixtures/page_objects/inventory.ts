@@ -64,30 +64,12 @@ export class InventoryPage {
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
   }
 
-  private async waitForNodesToLoad(opts: { waitForSnapshotRequest?: boolean } = {}) {
-    if (opts.waitForSnapshotRequest) {
-      // Wait for successful API completion
-      await this.page.waitForResponse(
-        (resp) => resp.url().includes('/api/metrics/snapshot') && resp.status() === 200
-      );
-    }
-
-    await this.page.getByTestId('infraNodesOverviewLoadingPanel').waitFor({ state: 'hidden' });
-  }
-
-  private async waitForPageToLoad() {
-    await this.page.getByTestId('infraMetricsPage').waitFor();
-    await this.waitForNodesToLoad();
-  }
-
   public async goToPage() {
     await this.page.goto(`${this.kbnUrl.app('metrics')}/inventory`);
-    await this.waitForPageToLoad();
   }
 
   public async reload() {
     await this.page.reload();
-    await this.waitForPageToLoad();
   }
 
   public async toggleTimeline() {
@@ -108,7 +90,7 @@ export class InventoryPage {
 
   public async goToTime(time: string) {
     await this.datePickerInput.fill(time);
-    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
+    await this.datePickerInput.press('Escape');
   }
 
   public async getWaffleNode(nodeName: string) {
@@ -124,19 +106,16 @@ export class InventoryPage {
   public async showHosts() {
     await this.inventorySwitcherButton.click();
     await this.inventorySwitcherHostsButton.click();
-    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
 
   public async showPods() {
     await this.inventorySwitcherButton.click();
     await this.inventorySwitcherPodsButton.click();
-    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
 
   public async showContainers() {
     await this.inventorySwitcherButton.click();
     await this.inventorySwitcherContainersButton.click();
-    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
 
   public async clickNoDataPageAddDataButton() {
