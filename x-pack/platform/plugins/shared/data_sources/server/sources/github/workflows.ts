@@ -26,6 +26,7 @@ steps:
     with:
       owner: "\${{inputs.owner}}"
       repo: "\${{inputs.repo}}"
+      type: "issue"
       query: "\${{inputs.query}}"
 `;
 }
