@@ -41,6 +41,7 @@ export const DashboardMigrationDataInputWrapper = React.memo<
     <MigrationDataInputContextProvider
       openFlyout={openFlyoutHandler}
       closeFlyout={closeFlyoutHandler}
+      isFlyoutOpen={isFlyoutOpen}
     >
       {children}
       {isFlyoutOpen && (

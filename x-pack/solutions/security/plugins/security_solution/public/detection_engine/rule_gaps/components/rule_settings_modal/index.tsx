@@ -71,6 +71,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
         title: i18n.AUTO_GAP_FILL_TOAST_TITLE,
         text: i18n.AUTO_GAP_FILL_TOAST_TEXT,
       });
+      onClose();
     } catch (err) {
       addError(err, { title: i18n.AUTO_GAP_FILL_TOAST_TITLE });
     }
@@ -118,7 +119,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillSchedulerDescriptionDetail"
-                  defaultMessage="The gap fill scheduler controls how often auto gap filling runs to detect and recover missed rule executions. View the gap fill scheduler {logsLink} to monitor its status and errors."
+                  defaultMessage="The Auto gap fill setting lets you specify whether you want to automatically fill execution gaps that are detected for rules. You can track the status and history of gap fill jobs from the {logsLink}."
                   values={{
                     logsLink: (
                       <EuiLink
@@ -130,7 +131,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
                       >
                         <FormattedMessage
                           id="xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillSchedulerLogsLinkText"
-                          defaultMessage="logs"
+                          defaultMessage="Gap fill scheduler"
                         />
                       </EuiLink>
                     ),

@@ -18,6 +18,8 @@
         "void"
       ],
       "path": "x-pack/solutions/observability/plugins/ux/public/plugin.ts",
+      "lineNumber": 51,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

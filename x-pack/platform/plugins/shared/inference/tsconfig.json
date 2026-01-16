@@ -42,6 +42,7 @@
     "@kbn/zod",
     "@kbn/inference-tracing",
     "@kbn/core-ui-settings-common",
-    "@kbn/setup-node-env"
+    "@kbn/setup-node-env",
+    "@kbn/es-errors"
   ]
 }

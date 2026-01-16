@@ -12,6 +12,7 @@ import {
   RULE_TYPE_MODAL_TEST_SUBJECTS,
   RULE_LIST_TEST_SUBJECTS,
   LOGS_TAB_TEST_SUBJECTS,
+  CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS,
   BIGGER_TIMEOUT,
   SHORTER_TIMEOUT,
 } from '../constants';
@@ -332,5 +333,233 @@ export class RulesPage {
   async closeEditRuleFlyout() {
     await this.editRuleFlyoutCancelButton.click();
     await expect(this.editRuleFlyout).toBeHidden({ timeout: SHORTER_TIMEOUT });
+  }
+
+  // Custom Threshold Rule Creation methods
+
+  /**
+   * Gets the custom threshold rule type card
+   */
+  public get customThresholdRuleTypeCard() {
+    return this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_THRESHOLD_RULE_TYPE_CARD
+    );
+  }
+
+  /**
+   * Gets the rule form locator
+   */
+  public get ruleForm() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_FORM);
+  }
+
+  /**
+   * Gets the rule name input field
+   */
+  public get ruleNameInput() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_NAME_INPUT);
+  }
+
+  /**
+   * Gets the data view expression button
+   */
+  public get dataViewExpression() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.DATA_VIEW_EXPRESSION);
+  }
+
+  /**
+   * Gets the index pattern switcher input
+   */
+  public get indexPatternInput() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.INDEX_PATTERN_INPUT);
+  }
+
+  /**
+   * Gets the explore matching indices button
+   */
+  public get exploreMatchingIndicesButton() {
+    return this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.EXPLORE_MATCHING_INDICES_BUTTON
+    );
+  }
+
+  /**
+   * Gets the rule save button
+   */
+  public get ruleSaveButton() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_SAVE_BUTTON);
+  }
+
+  /**
+   * Gets the confirm modal confirm button
+   */
+  public get confirmModalButton() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CONFIRM_MODAL_BUTTON);
+  }
+
+  /**
+   * Clicks the custom threshold rule type card
+   */
+  async clickCustomThresholdRuleType() {
+    await expect(this.customThresholdRuleTypeCard).toBeVisible({ timeout: BIGGER_TIMEOUT });
+    await this.customThresholdRuleTypeCard.click();
+    await expect(this.ruleForm).toBeVisible({ timeout: BIGGER_TIMEOUT });
+  }
+
+  /**
+   * Sets the rule name
+   */
+  async setRuleName(name: string) {
+    await expect(this.ruleNameInput).toBeVisible();
+    // Clear existing value
+    await this.ruleNameInput.fill('');
+    await this.ruleNameInput.fill(name);
+  }
+
+  /**
+   * Sets the index pattern and waits for the explore matching indices button
+   */
+  async setIndexPatternAndWaitForButton(pattern: string) {
+    await this.dataViewExpression.click();
+    await expect(this.indexPatternInput).toBeVisible();
+    await this.indexPatternInput.fill(pattern);
+    // Wait for debounce and button to appear
+    await expect(this.exploreMatchingIndicesButton).toBeVisible({ timeout: BIGGER_TIMEOUT });
+  }
+
+  /**
+   * Clicks the explore matching indices button to create ad-hoc data view
+   */
+  async clickExploreMatchingIndices() {
+    await this.exploreMatchingIndicesButton.click();
+    // Wait for data view to be selected
+    await expect(this.dataViewExpression).toContainText('.alerts-*', { timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Waits for the form to be ready after data view changes
+   */
+  async waitForFormReady() {
+    // Ensure save button is enabled (form is valid)
+    await expect(this.ruleSaveButton).toBeEnabled({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Saves the rule by clicking save and confirming
+   */
+  async saveRule() {
+    // Scroll the save button into view to ensure it's accessible
+    await this.ruleSaveButton.scrollIntoViewIfNeeded();
+
+    // Click the save button
+    await this.ruleSaveButton.click();
+
+    await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.confirmModalButton.click();
+    // Wait for navigation to rule details page
+    await expect(this.ruleDetails).toBeVisible({ timeout: BIGGER_TIMEOUT });
+  }
+
+  public get observabilityCategory() {
+    return this.ruleTypeModal.locator('.euiFacetButton[title="Observability"]');
+  }
+
+  // Rule Status Dropdown methods
+
+  /**
+   * Gets the rule status dropdown button for a specific rule row
+   */
+  public getRuleStatusDropdown(ruleRow: Locator) {
+    return ruleRow.locator(`[data-test-subj="${RULE_LIST_TEST_SUBJECTS.STATUS_DROPDOWN}"]`);
+  }
+
+  /**
+   * Gets the disable option in the status dropdown menu
+   */
+  public get disableDropdownItem() {
+    return this.page.testSubj.locator(RULE_LIST_TEST_SUBJECTS.STATUS_DROPDOWN_DISABLED_ITEM);
+  }
+
+  /**
+   * Gets the enable option in the status dropdown menu
+   */
+  public get enableDropdownItem() {
+    return this.page.testSubj.locator(RULE_LIST_TEST_SUBJECTS.STATUS_DROPDOWN_ENABLED_ITEM);
+  }
+
+  /**
+   * Clicks the rule status dropdown menu for a rule by name
+   */
+  async clickRuleStatusDropDownMenu(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    const statusDropdown = this.getRuleStatusDropdown(ruleRow);
+    await expect(statusDropdown).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await statusDropdown.click();
+  }
+
+  /**
+   * Clicks the disable option from the dropdown menu
+   */
+  async clickDisableFromDropDownMenu() {
+    await expect(this.disableDropdownItem).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.disableDropdownItem.click();
+  }
+
+  /**
+   * Clicks the enable option from the dropdown menu
+   */
+  async clickEnableFromDropDownMenu() {
+    await expect(this.enableDropdownItem).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.enableDropdownItem.click();
+  }
+
+  /**
+   * Gets a rule row by name
+   */
+  public getRuleRowByName(ruleName: string) {
+    return this.getEditableRules().filter({ hasText: ruleName });
+  }
+
+  /**
+   * Gets the status button for a specific rule by name
+   */
+  public getRuleStatusButton(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    return ruleRow.locator(`[data-test-subj="${RULE_LIST_TEST_SUBJECTS.RULES_TABLE_CELL_STATUS}"]`);
+  }
+
+  /**
+   * Disables a rule by its name
+   */
+  async disableRule(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    await expect(ruleRow).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    const statusDropdown = this.getRuleStatusDropdown(ruleRow);
+    await expect(statusDropdown).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await statusDropdown.click();
+    await this.clickDisableFromDropDownMenu();
+
+    await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.confirmModalButton.click();
+
+    await expect(statusDropdown).toHaveAttribute('title', 'Disabled', { timeout: BIGGER_TIMEOUT });
+  }
+
+  /**
+   * Verifies that a rule's status is "Disabled"
+   */
+  async expectRuleToBeDisabled(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    const statusDropdown = this.getRuleStatusDropdown(ruleRow);
+    await expect(statusDropdown).toHaveAttribute('title', 'Disabled', { timeout: BIGGER_TIMEOUT });
+  }
+
+  /**
+   * Verifies that a rule's status is "Enabled"
+   */
+  async expectRuleToBeEnabled(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    const statusDropdown = this.getRuleStatusDropdown(ruleRow);
+    await expect(statusDropdown).toHaveAttribute('title', 'Enabled', { timeout: BIGGER_TIMEOUT });
   }
 }

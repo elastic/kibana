@@ -74,7 +74,7 @@ export function initializeProjectRoutingManager(
       setProjectRouting,
     },
     internalApi: {
-      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return projectRouting$.pipe(
           debounceTime(COMPARE_DEBOUNCE),
           map(() => getState()),

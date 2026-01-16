@@ -6,13 +6,13 @@
   "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*", "public/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/onechat-common",
-    "@kbn/onechat-plugin",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-plugin",
     "@kbn/apm-data-access-plugin",
     "@kbn/apm-sources-access-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/zod",
-    "@kbn/onechat-server",
+    "@kbn/agent-builder-server",
     "@kbn/security-plugin",
     "@kbn/es-query",
     "@kbn/core-elasticsearch-server",
@@ -43,7 +43,7 @@
     "@kbn/licensing-plugin",
     "@kbn/observability-nav-icons",
     "@kbn/server-route-repository-client",
-    "@kbn/onechat-browser"
+    "@kbn/agent-builder-browser"
   ],
   "exclude": ["target/**/*"]
 }

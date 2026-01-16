@@ -47,7 +47,13 @@ export interface FlyoutTitleProps {
  * Title component with optional icon to indicate the type of document, can be used for text or a link
  */
 export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
-  ({ title, iconType, iconColor, isLink = false, 'data-test-subj': dataTestSubj }) => {
+  ({
+    title,
+    iconType,
+    iconColor,
+    isLink = false,
+    'data-test-subj': dataTestSubj = 'flyoutTitle',
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     const titleIcon = useMemo(() => {

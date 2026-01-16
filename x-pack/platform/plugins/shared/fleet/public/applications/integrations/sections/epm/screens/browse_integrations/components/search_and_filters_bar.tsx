@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiFieldSearch,
@@ -12,11 +12,19 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
+  EuiSelectable,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
+import useDebounce from 'react-use/lib/useDebounce';
+
+import { useUrlFilters, useAddUrlFilters } from '../hooks/url_filters';
+import type { BrowseIntegrationSortType } from '../types';
+
+const SEARCH_DEBOUNCE_MS = 150;
 
 export const StickyFlexItem = styled(EuiFlexItem)`
   position: sticky;
@@ -26,28 +34,149 @@ export const StickyFlexItem = styled(EuiFlexItem)`
   padding-top: ${(props) => props.theme.euiTheme.size.m};
 `;
 
-interface Props {
-  searchTerm?: string;
-  setSearchTerm: (searchTerm: string) => void;
-}
+const SortFilter: React.FC = () => {
+  const urlFilters = useUrlFilters();
+  const addUrlFilters = useAddUrlFilters();
 
-export const SearchAndFiltersBar: React.FC<Props> = ({ searchTerm, setSearchTerm }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+  const options = useMemo(
+    () => [
+      // TODO enabled when supported
+      // {
+      //   label: i18n.translate(
+      //     'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortByRecentOldOption',
+      //     {
+      //       defaultMessage: 'Recent-Old',
+      //     }
+      //   ),
+      //   key: 'recent-old',
+      // },
+      // {
+      //   label: i18n.translate(
+      //     'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortByOldRecentOption',
+      //     {
+      //       defaultMessage: 'Old-Recent',
+      //     }
+      //   ),
+      //   key: 'old-recent',
+      // },
+      {
+        label: i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortByAZOption',
+          {
+            defaultMessage: 'A-Z',
+          }
+        ),
+        key: 'a-z',
+        'data-test-subj': 'browseIntegrations.searchBar.sortByAZOption',
+      },
+      {
+        label: i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortByZAOption',
+          {
+            defaultMessage: 'Z-A',
+          }
+        ),
+        key: 'z-a',
+        'data-test-subj': 'browseIntegrations.searchBar.sortByZAOption',
+      },
+    ],
+    []
+  );
+
+  const selectedOption = useMemo(() => {
+    if (!urlFilters.sort) {
+      return options[0];
+    }
+
+    return options.find((option) => option.key === urlFilters.sort) ?? options[0];
+  }, [urlFilters.sort, options]);
+
+  return (
+    <EuiFilterGroup compressed>
+      <EuiPopover
+        id="browseIntegrationsSortPopover"
+        isOpen={isOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        button={
+          <EuiFilterButton
+            data-test-subj="browseIntegrations.searchBar.sortBtn"
+            iconType="arrowDown"
+            onClick={togglePopover}
+            isSelected={isOpen}
+          >
+            {selectedOption.label}
+          </EuiFilterButton>
+        }
+      >
+        <EuiSelectable
+          searchable={false}
+          singleSelection={true}
+          options={options}
+          onChange={(newOptions) => {
+            const selected = newOptions.find((option) => option.checked);
+            if (selected) {
+              addUrlFilters({ sort: selected.key as BrowseIntegrationSortType });
+              closePopover();
+            }
+          }}
+          listProps={{
+            paddingSize: 's',
+            showIcons: false,
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </EuiPopover>
+    </EuiFilterGroup>
+  );
+};
+
+const SearchBar: React.FC = () => {
+  const urlFilters = useUrlFilters();
+  const addUrlFilters = useAddUrlFilters();
+
+  const [searchTerms, setSearchTerms] = useState(urlFilters.q);
+
+  useDebounce(
+    () => {
+      addUrlFilters(
+        {
+          q: searchTerms,
+        },
+        { replace: true }
+      );
+    },
+    SEARCH_DEBOUNCE_MS,
+    [searchTerms]
+  );
+
+  return (
+    <EuiFieldSearch
+      compressed
+      placeholder={i18n.translate(
+        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.searchPlaceholder',
+        {
+          defaultMessage: 'Search integrations',
+        }
+      )}
+      value={searchTerms}
+      data-test-subj="browseIntegrations.searchBar.input"
+      onChange={(e) => setSearchTerms(e.target.value)}
+      fullWidth
+    />
+  );
+};
+
+export const SearchAndFiltersBar: React.FC = ({}) => {
   return (
     <StickyFlexItem>
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
         <EuiFlexItem grow={true}>
-          <EuiFieldSearch
-            compressed
-            placeholder={i18n.translate(
-              'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.searchPlaceholder',
-              {
-                defaultMessage: 'Search integrations, providers, tools, tags...',
-              }
-            )}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            fullWidth
-          />
+          <SearchBar />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup compressed>
@@ -72,14 +201,7 @@ export const SearchAndFiltersBar: React.FC<Props> = ({ searchTerm, setSearchTerm
           </EuiFilterGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFilterGroup compressed>
-            <EuiFilterButton>
-              <FormattedMessage
-                id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.sortLabel"
-                defaultMessage="Sort"
-              />
-            </EuiFilterButton>
-          </EuiFilterGroup>
+          <SortFilter />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

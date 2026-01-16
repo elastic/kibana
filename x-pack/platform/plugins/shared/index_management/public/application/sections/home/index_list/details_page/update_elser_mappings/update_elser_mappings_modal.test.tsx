@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as mappingsContext from '../../../../../components/mappings_editor/mappings_state_context';
@@ -15,13 +14,16 @@ import {
   prepareFieldsForEisUpdate,
   isElserOnMlNodeSemanticField,
 } from '../../../../../components/mappings_editor/lib/utils';
-import {
-  UpdateElserMappingsModal,
-  type UpdateElserMappingsModalProps,
-} from './update_elser_mappings_modal';
 import * as apiService from '../../../../../services/api';
 import { notificationService } from '../../../../../services/notification';
-import type { NormalizedFields } from '../../../../../components/mappings_editor/types';
+import type { NormalizedFields, State } from '../../../../../components/mappings_editor/types';
+import { UpdateElserMappingsModal } from './update_elser_mappings_modal';
+import {
+  createMappingViewFieldsFixture,
+  defaultDenormalizedMappings,
+  refetchMapping,
+  setIsModalOpen,
+} from './update_elser_mappings_modal.test_helpers';
 
 jest.mock('../../../../../components/mappings_editor/lib/utils', () => ({
   deNormalize: jest.fn(),
@@ -58,67 +60,32 @@ const prepareFieldsForEisUpdateMock = jest.mocked(prepareFieldsForEisUpdate);
 const isElserOnMlNodeSemanticFieldMock = jest.mocked(isElserOnMlNodeSemanticField);
 const mappingsContextMock = jest.mocked(mappingsContext);
 const notificationServiceMock = jest.mocked(notificationService);
-const updateIndexMappingsMock = apiService.updateIndexMappings as jest.MockedFunction<
-  typeof apiService.updateIndexMappings
->;
+const updateIndexMappingsMock = jest.mocked(apiService.updateIndexMappings);
 
-const setIsModalOpen = jest.fn();
-const refetchMapping = jest.fn();
-
-const renderEisUpdateCallout = (props?: Partial<UpdateElserMappingsModalProps>) => {
+const renderEisUpdateCallout = ({
+  hasUpdatePrivileges = true,
+}: {
+  hasUpdatePrivileges?: boolean;
+} = {}) => {
   return render(
-    <IntlProvider>
-      <UpdateElserMappingsModal
-        indexName="test-index"
-        setIsModalOpen={setIsModalOpen}
-        refetchMapping={refetchMapping}
-        hasUpdatePrivileges={props?.hasUpdatePrivileges ?? true}
-        modalId="testModal"
-      />
-    </IntlProvider>
+    <UpdateElserMappingsModal
+      indexName="test-index"
+      refetchMapping={refetchMapping}
+      setIsModalOpen={setIsModalOpen}
+      hasUpdatePrivileges={hasUpdatePrivileges}
+      modalId="test-modal-id"
+    />
   );
 };
 
 describe('UpdateElserMappingsModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    const fieldsById: NormalizedFields = {
-      byId: {
-        first: {
-          id: 'first',
-          nestedDepth: 0,
-          isMultiField: false,
-          path: ['name'],
-          source: { name: 'name', type: 'semantic_text', inference_id: '.elser-2-elasticsearch' },
-          childFieldsName: 'fields',
-          canHaveChildFields: false,
-          hasChildFields: false,
-          canHaveMultiFields: true,
-          hasMultiFields: false,
-          isExpanded: false,
-        },
-        second: {
-          id: 'second',
-          nestedDepth: 0,
-          isMultiField: false,
-          path: ['text'],
-          source: { name: 'text', type: 'semantic_text', inference_id: '.elser-2-elasticsearch' },
-          childFieldsName: 'fields',
-          canHaveChildFields: false,
-          hasChildFields: false,
-          canHaveMultiFields: true,
-          hasMultiFields: false,
-          isExpanded: false,
-        },
-      },
-      aliases: {},
-      rootLevelFields: ['first', 'second'],
-      maxNestedDepth: 0,
-    };
+    const fieldsById: NormalizedFields = createMappingViewFieldsFixture();
 
     mappingsContextMock.useMappingsState.mockReturnValue({
       mappingViewFields: fieldsById,
-    } as any);
+    } as unknown as State);
 
     isElserOnMlNodeSemanticFieldMock.mockImplementation((field) => {
       return field.source.inference_id === '.elser-2-elasticsearch';
@@ -126,16 +93,7 @@ describe('UpdateElserMappingsModal', () => {
 
     prepareFieldsForEisUpdateMock.mockReturnValue(fieldsById);
 
-    deNormalizeMock.mockReturnValue({
-      name: {
-        type: 'semantic_text',
-        inference_id: '.elser-2-elastic',
-      },
-      text: {
-        type: 'semantic_text',
-        inference_id: '.elser-2-elastic',
-      },
-    });
+    deNormalizeMock.mockReturnValue(defaultDenormalizedMappings);
   });
 
   it('should render modal and load options', () => {

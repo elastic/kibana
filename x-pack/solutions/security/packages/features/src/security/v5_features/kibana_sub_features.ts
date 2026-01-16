@@ -26,6 +26,7 @@ import {
   workflowInsightsSubFeature,
   trustedDevicesSubFeature,
   socManagementSubFeature,
+  scriptsManagementSubFeature,
 } from '../kibana_sub_features';
 
 /**
@@ -58,6 +59,7 @@ export const getSecurityV5SubFeaturesMap = ({
     [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature()],
     [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [SecuritySubFeatureId.policyManagement, policyManagementSubFeature()],
+    [SecuritySubFeatureId.scriptsManagement, scriptsManagementSubFeature()],
     [SecuritySubFeatureId.responseActionsHistory, responseActionsHistorySubFeature()],
     [SecuritySubFeatureId.hostIsolation, hostIsolationSubFeature()],
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature()],
@@ -73,6 +75,10 @@ export const getSecurityV5SubFeaturesMap = ({
   // Remove disabled experimental features
   if (!experimentalFeatures.trustedDevices) {
     securitySubFeaturesMap.delete(SecuritySubFeatureId.trustedDevices);
+  }
+
+  if (!experimentalFeatures.responseActionsScriptLibraryManagement) {
+    securitySubFeaturesMap.delete(SecuritySubFeatureId.scriptsManagement);
   }
 
   return Object.freeze(securitySubFeaturesMap);

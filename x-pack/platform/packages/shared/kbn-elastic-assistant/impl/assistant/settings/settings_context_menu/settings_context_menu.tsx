@@ -22,7 +22,7 @@ import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { TryAIAgentContextMenuItem } from './try_ai_agent_context_menu_item';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { useAssistantContext } from '../../../..';
@@ -196,17 +196,11 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-        ...(assistantAvailability.isAiAgentsEnabled
-          ? [
-              <TryAIAgentContextMenuItem
-                analytics={analytics}
-                handleOpenAIAgentModal={handleOpenAIAgentModal}
-                hasAgentBuilderManagePrivilege={
-                  assistantAvailability.hasAgentBuilderManagePrivilege
-                }
-              />,
-            ]
-          : []),
+        <TryAIAgentContextMenuItem
+          analytics={analytics}
+          handleOpenAIAgentModal={handleOpenAIAgentModal}
+          hasAgentBuilderManagePrivilege={assistantAvailability.hasAgentBuilderManagePrivilege}
+        />,
       ],
       [
         handleNavigateToSettings,
@@ -214,18 +208,13 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         handleNavigateToAnonymization,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
-        assistantAvailability.isAiAgentsEnabled,
         assistantAvailability.hasAgentBuilderManagePrivilege,
         analytics,
         handleOpenAIAgentModal,
       ]
     );
     const isAgentUpgradeDisabled = useMemo(() => {
-      return (
-        isDisabled ||
-        !assistantAvailability.hasAgentBuilderManagePrivilege ||
-        !assistantAvailability.isAiAgentsEnabled
-      );
+      return isDisabled || !assistantAvailability.hasAgentBuilderManagePrivilege;
     }, [assistantAvailability, isDisabled]);
 
     const onContinueTour = useCallback(() => {

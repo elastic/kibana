@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AttachmentServiceStartContract } from '@kbn/onechat-browser';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,

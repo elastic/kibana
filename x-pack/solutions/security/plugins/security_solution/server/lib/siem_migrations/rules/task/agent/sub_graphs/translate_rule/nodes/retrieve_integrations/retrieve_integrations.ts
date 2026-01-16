@@ -53,9 +53,11 @@ export const getRetrieveIntegrationsNode = ({
       title: integration.title,
       description: integration.description,
     }));
-    const splunkRule = {
+    const ruleToMatch = {
       title: state.original_rule.title,
-      description: state.original_rule.description,
+      description: `state.original_rule.description \n ${
+        state.nl_query ? `\n Additional context: ${state.nl_query}` : ''
+      }`,
     };
 
     /*
@@ -64,7 +66,7 @@ export const getRetrieveIntegrationsNode = ({
     const integrationsJson = JSON.stringify(integrationsInfo, null, 2);
     const response = (await mostRelevantIntegration.invoke({
       integrations: integrationsJson,
-      splunk_rule: JSON.stringify(splunkRule, null, 2),
+      rule: JSON.stringify(ruleToMatch, null, 2),
     })) as GetMatchedIntegrationResponse;
     const comments = response.summary
       ? [generateAssistantComment(cleanMarkdown(response.summary))]

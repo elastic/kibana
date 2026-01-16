@@ -111,7 +111,6 @@ export class Plugin implements PluginType {
 
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
     plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
-      transformOutInjectsReferences: true,
       transformIn: getTransformIn(plugins.embeddable.transformEnhancementsIn),
       transformOut: getTransformOut(plugins.embeddable.transformEnhancementsOut),
     });

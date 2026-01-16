@@ -545,7 +545,7 @@ export function RuleConditionChart({
     );
   }
   return (
-    <div>
+    <div data-test-subj="thresholdRulePreviewChart">
       <lens.EmbeddableComponent
         onLoad={setChartLoading}
         id="ruleConditionChart"

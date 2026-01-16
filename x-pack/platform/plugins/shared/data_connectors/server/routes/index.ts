@@ -7,83 +7,70 @@
 
 import type {
   IRouter,
+  KibanaResponseFactory,
   Logger,
   SavedObject,
   SavedObjectsFindResponse,
   StartServicesAccessor,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { connectorsSpecs } from '@kbn/connector-specs';
+import {
+  createConnectorAndRelatedResources,
+  deleteConnectorAndRelatedResources,
+} from './connectors_helpers';
 import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
-import type { DataConnectorsServerStartDependencies } from '../types';
+import type {
+  DataConnectorsServerSetupDependencies,
+  DataConnectorsServerStartDependencies,
+} from '../types';
 import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
+import { API_BASE_PATH } from '../../common/constants';
 
-/**
- * Builds the secrets object for a connector based on its spec
- * @param connectorType - The connector type ID (e.g., '.notion')
- * @param token - The authentication token
- * @returns The secrets object to pass to the actions client
- * @throws Error if the connector spec is not found
- * @internal exported for testing
- */
-export function buildSecretsFromConnectorSpec(
-  connectorType: string,
-  token: string
-): Record<string, string> {
-  const connectorSpec = Object.values(connectorsSpecs).find(
-    (spec) => spec.metadata.id === connectorType
-  );
-  if (!connectorSpec) {
-    throw new Error(`Stack connector spec not found for type "${connectorType}"`);
-  }
+// Constants
+const DEFAULT_PAGE_SIZE = 100;
+const MAX_PAGE_SIZE = 1000;
 
-  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'bearer';
+function createErrorResponse(
+  response: KibanaResponseFactory,
+  message: string,
+  error: Error,
+  statusCode: number = 500
+) {
+  return response.customError({
+    statusCode,
+    body: {
+      message: `${message}: ${error.message}`,
+    },
   });
-
-  const secrets: Record<string, string> = {};
-  if (hasBearerAuth) {
-    secrets.authType = 'bearer';
-    secrets.token = token;
-  } else {
-    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
-      const typeId = typeof authType === 'string' ? authType : authType.type;
-      return typeId === 'api_key_header';
-    });
-
-    const headerField =
-      typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
-        ? String(apiKeyHeaderAuth.defaults.headerField)
-        : 'ApiKey'; // default fallback
-
-    secrets.authType = 'api_key_header';
-    secrets.apiKey = token;
-    secrets.headerField = headerField;
-  }
-
-  return secrets;
 }
 
-export function registerRoutes(
-  router: IRouter,
-  logger: Logger,
-  getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>
-) {
+export interface RouteDependencies {
+  router: IRouter;
+  logger: Logger;
+  getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>;
+  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
+}
+
+/**
+ * Registers all data connector routes
+ */
+export function registerRoutes(dependencies: RouteDependencies) {
+  const { router, logger, getStartServices, workflowManagement } = dependencies;
+
   // List all data connectors
   router.get(
     {
-      path: '/api/data_connectors',
+      path: API_BASE_PATH,
       validate: false,
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
-    async (context, request, response) => {
+    async (context, _request, response) => {
       const coreContext = await context.core;
 
       try {
@@ -91,7 +78,7 @@ export function registerRoutes(
         const findResult: SavedObjectsFindResponse<DataConnectorAttributes> =
           await savedObjectsClient.find({
             type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
-            perPage: 100,
+            perPage: DEFAULT_PAGE_SIZE,
           });
 
         const connectors = findResult.saved_objects.map((savedObject) => {
@@ -106,12 +93,7 @@ export function registerRoutes(
         });
       } catch (error) {
         logger.error(`Failed to list all data connectors: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to list connectors: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to list connectors', error as Error);
       }
     }
   );
@@ -119,12 +101,12 @@ export function registerRoutes(
   // Get one data connector by ID
   router.get(
     {
-      path: '/api/data_connectors/{id}',
+      path: `${API_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -143,12 +125,7 @@ export function registerRoutes(
         });
       } catch (error) {
         logger.error(`Error fetching data connector: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to fetch data connector: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to fetch data connector', error as Error);
       }
     }
   );
@@ -156,14 +133,14 @@ export function registerRoutes(
   // Create data connector
   router.post(
     {
-      path: '/api/data_connectors',
+      path: API_BASE_PATH,
       validate: {
         body: createDataConnectorRequestSchema,
       },
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -171,60 +148,120 @@ export function registerRoutes(
       const coreContext = await context.core;
 
       try {
-        const { name, type, token } = request.body;
-        const [, { actions, dataSourcesRegistry }] = await getStartServices();
+        const { name, type, token, stack_connector_id } = request.body;
+        const [, { actions, dataSourcesRegistry, agentBuilder }] = await getStartServices();
+        const savedObjectsClient = coreContext.savedObjects.client;
 
+        // Validate data connector type exists
         const dataCatalog = dataSourcesRegistry.getCatalog();
         const dataConnectorTypeDef = dataCatalog.get(type);
         if (!dataConnectorTypeDef) {
           return response.customError({
             statusCode: 400,
             body: {
-              message: `Data connector type "${request.body.type}" not found`,
+              message: `Data connector type "${type}" not found`,
             },
           });
         }
 
-        const connectorType = dataConnectorTypeDef.stackConnector.type;
-        const secrets = buildSecretsFromConnectorSpec(connectorType, token);
+        // Validate required fields based on pattern
+        if (!stack_connector_id && (!name || !token)) {
+          return response.badRequest({
+            body: {
+              message: 'name and token are required when stack_connector_id is not provided',
+            },
+          });
+        }
 
-        const actionsClient = await actions.getActionsClientWithRequest(request);
-        const stackConnector = await actionsClient.create({
-          action: {
-            name: `${type} stack connector for data connector '${name}'`,
-            actionTypeId: connectorType,
-            config: {},
-            secrets,
-          },
-        });
-
-        const savedObjectsClient = coreContext.savedObjects.client;
-        const now = new Date().toISOString();
-        const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
-          name,
+        const dataConnectorId = await createConnectorAndRelatedResources({
+          name: name || `Data connector for ${type}`,
           type,
-          config: {},
-          features: [],
-          createdAt: now,
-          updatedAt: now,
-          workflowIds: [],
-          toolIds: [],
-          kscIds: [stackConnector.id],
+          token: token || '',
+          stackConnectorId: stack_connector_id,
+          savedObjectsClient,
+          request,
+          logger,
+          workflowManagement,
+          actions,
+          dataConnectorTypeDef,
+          agentBuilder,
         });
 
         return response.ok({
           body: {
             message: 'Data connector created successfully!',
-            dataConnectorId: savedObject.id,
-            stackConnectorId: stackConnector.id,
+            dataConnectorId,
           },
         });
       } catch (error) {
         logger.error(`Error creating data connector: ${(error as Error).message}`);
+        return createErrorResponse(response, 'Failed to create data connector', error as Error);
+      }
+    }
+  );
+
+  // Update data connector by ID
+  router.put(
+    {
+      path: `${API_BASE_PATH}/{id}`,
+      validate: {
+        params: schema.object({ id: schema.string() }),
+        body: schema.object({
+          name: schema.maybe(schema.string()),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization is delegated to underlying service plugins',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+
+      try {
+        const { name } = request.body;
+        const savedObjectsClient = coreContext.savedObjects.client;
+
+        // Get existing data connector
+        const savedObject: SavedObject<DataConnectorAttributes> = await savedObjectsClient.get(
+          DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          request.params.id
+        );
+
+        // Update only if name is provided
+        if (name !== undefined) {
+          await savedObjectsClient.update<DataConnectorAttributes>(
+            DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+            request.params.id,
+            {
+              ...savedObject.attributes,
+              name,
+              updatedAt: new Date().toISOString(),
+            }
+          );
+
+          // Fetch the updated saved object
+          const updatedSavedObject: SavedObject<DataConnectorAttributes> =
+            await savedObjectsClient.get(DATA_CONNECTOR_SAVED_OBJECT_TYPE, request.params.id);
+
+          logger.info(`Successfully updated data connector ${request.params.id}`);
+          return response.ok({
+            body: convertSOtoAPIResponse(updatedSavedObject),
+          });
+        }
+
+        // If no updates provided, return current state
+        return response.ok({
+          body: convertSOtoAPIResponse(savedObject),
+        });
+      } catch (error) {
+        logger.error(`Failed to update data connector: ${(error as Error).message}`);
         return response.customError({
           statusCode: 500,
           body: {
-            message: `Failed to create data connector: ${(error as Error).message}`,
+            message: `Failed to update data connector: ${(error as Error).message}`,
           },
         });
       }
@@ -234,12 +271,12 @@ export function registerRoutes(
   // Delete all data connectors
   router.delete(
     {
-      path: '/api/data_connectors',
+      path: API_BASE_PATH,
       validate: false,
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -251,39 +288,61 @@ export function registerRoutes(
         const findResponse: SavedObjectsFindResponse<DataConnectorAttributes> =
           await savedObjectsClient.find({
             type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
-            perPage: 1000,
+            perPage: MAX_PAGE_SIZE,
           });
         const connectors = findResponse.saved_objects;
 
-        const kscIds: string[] = connectors.flatMap((connector) => connector.attributes.kscIds);
-        logger.info(
-          `Found ${connectors.length} data connectors and ${kscIds.length} stack connectors to delete.`
-        );
+        logger.debug(`Found ${connectors.length} data connector(s) to delete`);
 
-        const [, { actions }] = await getStartServices();
+        if (connectors.length === 0) {
+          return response.ok({
+            body: {
+              success: true,
+              deletedCount: 0,
+              fullyDeletedCount: 0,
+              partiallyDeletedCount: 0,
+            },
+          });
+        }
+
+        // Delete all related resources and saved objects for each connector
+        const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        const deleteKscPromises = kscIds.map((kscId) => actionsClient.delete({ id: kscId }));
-        await Promise.all(deleteKscPromises);
+        const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
-        const deletePromises = connectors.map((connector) =>
-          savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id)
-        );
-        await Promise.all(deletePromises);
+        let fullyDeletedCount = 0;
+        let partiallyDeletedCount = 0;
+
+        // Process each connector individually to handle partial failures
+        for (const connector of connectors) {
+          const result = await deleteConnectorAndRelatedResources({
+            connector,
+            savedObjectsClient,
+            actionsClient,
+            toolRegistry,
+            workflowManagement,
+            request,
+            logger,
+          });
+
+          if (result.fullyDeleted) {
+            fullyDeletedCount++;
+          } else {
+            partiallyDeletedCount++;
+          }
+        }
 
         return response.ok({
           body: {
             success: true,
             deletedCount: connectors.length,
+            fullyDeletedCount,
+            partiallyDeletedCount,
           },
         });
       } catch (error) {
         logger.error(`Failed to delete all connectors: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to delete all connectors: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to delete all connectors', error as Error);
       }
     }
   );
@@ -291,12 +350,12 @@ export function registerRoutes(
   // Delete data connector by ID
   router.delete(
     {
-      path: '/api/data_connectors/{id}',
+      path: `${API_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization is delegated to underlying service plugins',
         },
       },
     },
@@ -309,28 +368,28 @@ export function registerRoutes(
           DATA_CONNECTOR_SAVED_OBJECT_TYPE,
           request.params.id
         );
-        const kscIds: string[] = savedObject.attributes.kscIds;
 
-        const [, { actions }] = await getStartServices();
+        // Delete the connector and all related resources
+        const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        kscIds.forEach((kscId) => actionsClient.delete({ id: kscId }));
-        logger.info(`Successfully deleted Kibana stack connectors: ${kscIds.join(', ')}`);
+        const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
-        await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id);
-        logger.info(`Successfully deleted data connector ${savedObject.id}`);
+        const result = await deleteConnectorAndRelatedResources({
+          connector: savedObject,
+          savedObjectsClient,
+          actionsClient,
+          toolRegistry,
+          workflowManagement,
+          request,
+          logger,
+        });
+
         return response.ok({
-          body: {
-            success: true,
-          },
+          body: result,
         });
       } catch (error) {
         logger.error(`Failed to delete connector: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to delete connector: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(response, 'Failed to delete connector', error as Error);
       }
     }
   );
