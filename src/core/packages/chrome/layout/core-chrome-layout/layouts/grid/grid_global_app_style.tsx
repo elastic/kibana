@@ -133,6 +133,10 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
     left: ${layoutVar('application.left', '0px')} !important; /* override EUI inline style */
     right: ${layoutVar('application.right', '0px')} !important; /* override EUI inline style */
     bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
+    border-bottom-left-radius: ${_euiTheme.border.radius.medium} !important;
+    border-bottom-right-radius: ${_euiTheme.border.radius.medium} !important;
+    box-shadow: ${_euiTheme.shadows.xs.down} !important;
+    clip-path: inset(0 -10px -10px -10px) !important;
   }
 `;
 
