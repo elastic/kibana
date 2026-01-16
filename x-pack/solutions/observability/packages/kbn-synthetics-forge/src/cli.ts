@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { writeFileSync } from '@kbn/fs';
+// eslint-disable-next-line @kbn/eslint/require_kbn_fs
+import { writeFileSync } from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { run, cleanup } from './run';
 import type { ForgeConfig, ForgeOutput } from './types';

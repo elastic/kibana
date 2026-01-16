@@ -194,6 +194,11 @@ steps:
           echo "Forge output:"
           cat $OUTPUT_FILE
 
+  - name: Wait for enrollment token to be active
+    type: builtin.wait
+    with:
+      time: 10
+
   - name: Deploy Elastic Agent
     id: deploy_agent
     type: providers.shell.run
