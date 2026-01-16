@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import fs from 'fs';
 import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { assertNoBulkErrors } from './bulk';
+import { readJsonFromFile } from './fs_utils';
 import { formatError, getStatusCode, isRecord, isString } from './type_guards';
 
 const INDEX_FIELDS_LIMIT = 6000;
@@ -136,7 +137,7 @@ const isMappingTypeMapping = (value: unknown): value is MappingTypeMapping => {
 const readMappingJsonCached = (mappingPath: string): MappingTypeMapping => {
   const cached = mappingCache.get(mappingPath);
   if (cached) return cached;
-  const parsed: unknown = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
+  const parsed: unknown = readJsonFromFile(mappingPath);
   if (!isMappingTypeMapping(parsed)) {
     throw new Error(`Invalid index mapping JSON (expected object): ${mappingPath}`);
   }
@@ -196,16 +197,7 @@ export const bulkIndex = async ({
     const slice = docs.slice(i, i + batchSize);
     const body = slice.flatMap((doc) => [{ index: { _index: index } }, doc]);
     const resp = await esClient.bulk({ refresh: false, body });
-    if (resp.errors) {
-      const firstError = resp.items?.find((it) => {
-        const action = it.index ?? it.create ?? it.update ?? it.delete;
-        return action && 'error' in action;
-      });
-      log.error(
-        `Bulk indexing into ${index} had errors. First error: ${JSON.stringify(firstError)}`
-      );
-      throw new Error(`Bulk indexing errors for ${index}`);
-    }
+    assertNoBulkErrors(index, resp, log);
   }
 };
 

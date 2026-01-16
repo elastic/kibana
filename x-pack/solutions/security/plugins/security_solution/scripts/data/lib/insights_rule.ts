@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import fs from 'fs';
 import { pickDefined } from './pick';
+import { readFirstNonEmptyLineUtf8 } from './fs_utils';
 import { isRecord } from './type_guards';
 
 export interface InsightsRuleCreateProps extends Record<string, unknown> {
@@ -24,7 +24,7 @@ export interface InsightsRuleCreateProps extends Record<string, unknown> {
 export const loadInsightsRuleCreateProps = (
   ruleExportNdjsonPath: string
 ): InsightsRuleCreateProps => {
-  const firstLine = fs.readFileSync(ruleExportNdjsonPath, 'utf8').split('\n').find(Boolean);
+  const firstLine = readFirstNonEmptyLineUtf8(ruleExportNdjsonPath);
   if (!firstLine) throw new Error(`Invalid rule export file (empty): ${ruleExportNdjsonPath}`);
   const parsed: unknown = JSON.parse(firstLine);
   if (!isRecord(parsed)) {

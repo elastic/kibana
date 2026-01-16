@@ -27,6 +27,7 @@ import {
   episodeIndexNames,
   scriptsDataDir,
 } from './lib/indexing';
+import { assertNoBulkErrors } from './lib/bulk';
 import { ensurePrebuiltRulesInstalled } from './lib/prebuilt_rules';
 import { loadInsightsRuleCreateProps } from './lib/insights_rule';
 import { copyPreviewAlertsToRealAlertsIndex, previewRule } from './lib/rule_preview';
@@ -697,16 +698,7 @@ const bulkIndexStreamed = async ({
     buffers.set(index, []);
     const body = batch.flatMap((doc) => [{ index: { _index: index } }, doc]);
     const resp = await esClient.bulk({ refresh: false, body });
-    if (resp.errors) {
-      const firstError = resp.items?.find((it) => {
-        const action = it.index ?? it.create ?? it.update ?? it.delete;
-        return action && 'error' in action;
-      });
-      log.error(
-        `Bulk indexing into ${index} had errors. First error: ${JSON.stringify(firstError)}`
-      );
-      throw new Error(`Bulk indexing errors for ${index}`);
-    }
+    assertNoBulkErrors(index, resp, log);
     indexedCounts.set(index, (indexedCounts.get(index) ?? 0) + batch.length);
   };
 
