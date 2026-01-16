@@ -33,6 +33,7 @@ import {
   getShareAppMenuItem,
   getInspectAppMenuItem,
   getBackgroundSearchFlyout,
+  enhanceAppMenuItemWithRunAction,
 } from './app_menu_actions';
 import type { TopNavCustomization } from '../../../../customizations';
 import { useProfileAccessor } from '../../../../context_awareness';
@@ -357,6 +358,18 @@ export const useTopNavLinks = ({
   ]);
 
   return useMemo((): AppMenuConfig => {
-    return appMenuRegistry.getAppMenuConfig();
-  }, [appMenuRegistry]);
+    const config = appMenuRegistry.getAppMenuConfig();
+
+    return {
+      items: config.items?.map((item) =>
+        enhanceAppMenuItemWithRunAction({ appMenuItem: item, services })
+      ),
+      primaryActionItem: config.primaryActionItem
+        ? enhanceAppMenuItemWithRunAction({ appMenuItem: config.primaryActionItem, services })
+        : undefined,
+      secondaryActionItem: config.secondaryActionItem
+        ? enhanceAppMenuItemWithRunAction({ appMenuItem: config.secondaryActionItem, services })
+        : undefined,
+    };
+  }, [appMenuRegistry, services]);
 };

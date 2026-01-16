@@ -14,13 +14,11 @@ import { AppMenuActionId } from '@kbn/discover-utils';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
-import { RuleFormFlyoutContent } from '@kbn/response-ops-rule-form/flyout';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
-import type { AppMenuDiscoverParams } from './types';
+import type { AppMenuDiscoverParams, DiscoverAppMenuRunAction } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
@@ -35,14 +33,14 @@ interface EsQueryAlertMetaData extends RuleTypeMetaData {
   adHocDataViewList: DataView[];
 }
 
-const RuleFormFlyoutWithType = RuleFormFlyoutContent<EsQueryAlertMetaData>;
+const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  onFinishAction: () => void;
+  onFinishAction?: () => void;
   stateContainer: DiscoverStateContainer;
-}> = ({ stateContainer, discoverParams, services, onFinishAction }) => {
+}> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
   const {
     dataView,
     isEsqlMode,
@@ -157,21 +155,16 @@ export const getAlertsAppMenuItem = ({
           : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
               defaultMessage: 'Data view does not have a time field.',
             }),
-        run: () => {
-          const overlay = services.core.overlays.openFlyout(
-            toMountPoint(
-              <KibanaContextProvider services={services}>
-                <CreateAlertFlyout
-                  discoverParams={discoverParams}
-                  services={services}
-                  onFinishAction={() => overlay.close()}
-                  stateContainer={stateContainer}
-                />
-              </KibanaContextProvider>,
-              services.core
-            )
+        run: (async (_triggerElement, onFinishAction) => {
+          return (
+            <CreateAlertFlyout
+              onFinishAction={onFinishAction}
+              discoverParams={discoverParams}
+              services={services}
+              stateContainer={stateContainer}
+            />
           );
-        },
+        }) as DiscoverAppMenuRunAction,
       });
     }
   }
@@ -185,7 +178,8 @@ export const getAlertsAppMenuItem = ({
     order: 4,
     iconType: 'alert',
     popoverWidth: 250,
-    items,
+    // Cast needed because Discover extends AppMenuRunAction with onFinishAction callback
+    items: items as AppMenuPopoverItem[],
   };
 };
 

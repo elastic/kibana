@@ -21,9 +21,36 @@ import type {
  * primary/secondary actions, and popover items for specific parent items.
  */
 export class AppMenuRegistry {
+  static CUSTOM_ITEMS_LIMIT = 2;
   private items: Map<string, AppMenuItemType> = new Map();
+  private customItems: Map<string, AppMenuItemType> = new Map();
   private primaryActionItem?: AppMenuPrimaryActionItem;
   private secondaryActionItem?: AppMenuSecondaryActionItem;
+
+  private getCustomItems(): AppMenuItemType[] {
+    return Array.from(this.customItems.values()).slice(0, AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
+  }
+
+  /**
+   * Register a custom menu item.
+   * @param item The menu item to register
+   */
+  public registerCustomItem(item: AppMenuItemType) {
+    this.customItems.set(item.id, item as AppMenuItemType);
+  }
+
+  /**
+   * Register a custom menu item.
+   * @param item The menu item to register
+   */
+  public registerCustomPopoverItem(parentId: string, popoverItem: AppMenuPopoverItem) {
+    this.customItems.set(parentId, {
+      ...this.customItems.get(parentId),
+      items: [...(this.customItems.get(parentId)?.items || []), popoverItem].sort(
+        (a: AppMenuPopoverItem, b: AppMenuPopoverItem) => (a.order || 0) - (b.order || 0)
+      ),
+    } as AppMenuItemType);
+  }
 
   /**
    * Register a menu item.
@@ -77,9 +104,9 @@ export class AppMenuRegistry {
    */
   public getAppMenuConfig(): AppMenuConfig {
     return {
-      items: Array.from(this.items.values()).sort(
-        (a: AppMenuItemType, b: AppMenuItemType) => (a.order || 0) - (b.order || 0)
-      ),
+      items: Array.from(this.items.values())
+        .concat(this.getCustomItems())
+        .sort((a: AppMenuItemType, b: AppMenuItemType) => (a.order || 0) - (b.order || 0)),
       primaryActionItem: this.primaryActionItem,
       secondaryActionItem: this.secondaryActionItem,
     };
