@@ -176,30 +176,32 @@ export class DeployPrivateLocationMonitors {
     encryptedSavedObjects,
     soClient,
     spaceIdToSync,
+    filterByGlobalParams,
   }: {
     spaceIdToSync?: string;
     soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+    filterByGlobalParams?: boolean;
   }) {
     if (allPrivateLocations.length === 0) {
       this.debugLog('No private locations found, skipping sync of private location monitors');
       return;
     }
 
-    // Filter to only include monitors that use global parameters
-    // This avoids unnecessary updates for monitors that don't depend on global params
     const { configsBySpaces, paramsBySpace, monitorSpaceIds, maintenanceWindows } =
       await this.getAllMonitorConfigs({
         encryptedSavedObjects,
         soClient,
         spaceId: spaceIdToSync,
-        filterByGlobalParams: true,
+        filterByGlobalParams,
       });
 
     if (monitorSpaceIds.size === 0) {
       this.debugLog(
-        'No monitors found that use global parameters, skipping sync of private location monitors'
+        filterByGlobalParams
+          ? 'No monitors found that use global parameters, skipping sync of private location monitors'
+          : 'No monitors found, skipping sync of private location monitors'
       );
       return;
     }
