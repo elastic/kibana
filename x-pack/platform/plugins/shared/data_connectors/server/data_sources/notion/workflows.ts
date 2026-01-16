@@ -21,7 +21,7 @@ inputs:
       - "data_source"
 steps:
   - name: search-page-by-title
-    type: notion.searchPageByTitle
+    type: notion.searchPageOrDSByTitle
     connector-id: ${stackConnectorId}
     with:
       query: "\${{inputs.query_string}}"

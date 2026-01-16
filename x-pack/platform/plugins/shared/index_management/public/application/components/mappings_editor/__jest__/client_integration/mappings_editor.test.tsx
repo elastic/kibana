@@ -99,7 +99,9 @@ describe('Mappings editor: core', () => {
 
     // Select type using EuiComboBox harness - use label, not value
     const typeComboBox = new EuiComboBoxTestHarness('fieldType');
-    typeComboBox.select(getTypeLabel(type));
+    await typeComboBox.select(getTypeLabel(type));
+    // Close the combobox popover (portal) so it can't intercept later clicks/keystrokes.
+    await typeComboBox.close();
 
     if (subType !== undefined && type === 'other') {
       const subTypeInput = await screen.findByTestId('fieldSubType');
@@ -703,7 +705,8 @@ describe('Mappings editor: core', () => {
 
         // Select semantic_text type using EuiComboBox harness
         const typeComboBox = new EuiComboBoxTestHarness('fieldType');
-        typeComboBox.select(getTypeLabel(newField.type));
+        await typeComboBox.select(getTypeLabel(newField.type));
+        await typeComboBox.close();
 
         // Wait for reference field selector to appear with the address.city option
         await screen.findByTestId('referenceFieldSelect');
