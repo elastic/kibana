@@ -155,6 +155,7 @@ function buildEuiGridColumn({
     dataView,
     fieldName: columnName,
     columnMeta: columnsMeta?.[columnName],
+    isComputedColumn: columnsMeta?.[columnName]?.isComputedColumn,
   });
   const editFieldButton =
     editField &&
