@@ -552,6 +552,16 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   is_connector_type_deprecated: false,
                 },
                 {
+                  id: 'system-connector-.http-system',
+                  name: 'HTTP',
+                  connector_type_id: '.http-system',
+                  is_preconfigured: false,
+                  is_deprecated: false,
+                  referenced_by_count: 0,
+                  is_system_action: true,
+                  is_connector_type_deprecated: false,
+                },
+                {
                   connector_type_id: '.email',
                   id: 'notification-email',
                   is_deprecated: false,
