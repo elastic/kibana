@@ -109,6 +109,7 @@ export class InventoryPage {
   }
 
   public async goToTime(time: string) {
+    // eslint-disable-next-line playwright/no-force-option
     await this.datePickerInput.fill(time, { force: true });
     await this.datePickerInput.press('Escape');
     await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
