@@ -13,6 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { DataSource } from '@kbn/data-catalog-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { connectorsSpecs } from '@kbn/connector-specs';
+import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
 import type {
   DataSourcesServerSetupDependencies,
   DataSourcesServerStartDependencies,
@@ -146,8 +147,14 @@ export async function createDataSourceAndRelatedResources(
   const toolIds: string[] = [];
 
   for (const workflowInfo of workflowInfos) {
+    // Extract original workflow name from YAML and prefix it with the data source name
+    const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
+    const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
+    const prefixedName = `${slugify(name)}.${originalName}`;
+    const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
+
     const workflow = await workflowManagement.management.createWorkflow(
-      { yaml: workflowInfo.content },
+      { yaml: prefixedContent },
       spaceId,
       request
     );
