@@ -102,8 +102,9 @@ export function createInferenceIdCompletion(http: HttpStart) {
       const currentValueString = typeof currentValue === 'string' ? currentValue.trim() : '';
 
       return endpoints
-        .filter((endpoint) =>
-          currentValueString === '' || endpoint.inference_id.includes(currentValueString)
+        .filter(
+          (endpoint) =>
+            currentValueString === '' || endpoint.inference_id.includes(currentValueString)
         )
         .map((endpoint) => ({
           label: endpoint.inference_id,

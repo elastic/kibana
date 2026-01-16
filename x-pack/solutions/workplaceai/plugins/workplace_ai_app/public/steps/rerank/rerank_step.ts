@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { CoreSetup, HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { rerankStepCommonDefinition, RerankStepTypeId } from '../../../common/steps/rerank/rerank_step';
 import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
-  createInferenceIdCompletion,
-  createInferenceIdValidator,
-} from './inference_id_validation';
+  rerankStepCommonDefinition,
+  RerankStepTypeId,
+} from '../../../common/steps/rerank/rerank_step';
+import { createInferenceIdCompletion, createInferenceIdValidator } from './inference_id_validation';
 
 export const createRerankStepDefinition = (core: CoreSetup) => {
   let httpPromise: Promise<HttpStart> | null = null;
-  
+
   const getHttp = async (): Promise<HttpStart> => {
     if (!httpPromise) {
       httpPromise = core.getStartServices().then(([coreStart]) => coreStart.http);
@@ -61,8 +60,8 @@ export const createRerankStepDefinition = (core: CoreSetup) => {
 
 This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
       }),
-    examples: [
-      `## Basic usage with rank window
+      examples: [
+        `## Basic usage with rank window
 \`\`\`yaml
 # Rerank only top 50 results to save on inference costs
 - name: rerank_search_results
@@ -73,7 +72,7 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
     data: \${{ steps.search.output }}
     rank_window_size: 50
 \`\`\``,
-      `## Reranking with field extraction
+        `## Reranking with field extraction
 \`\`\`yaml
 # Extract only title and content fields for reranking
 # Rerank top 20 from 100 search results
@@ -87,7 +86,7 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
       - ["content"]
     rank_window_size: 20
 \`\`\``,
-      `## Rerank with default window
+        `## Rerank with default window
 \`\`\`yaml
 # Omit rank_window_size to use default of 100 documents
 - name: rerank_messages
@@ -100,7 +99,7 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
       - ["user", "name"]
       - ["text"]
 \`\`\``,
-      `## Rerank with custom truncation limits
+        `## Rerank with custom truncation limits
 \`\`\`yaml
 # Limit each field to 500 chars, total concatenated text to 1500 chars
 - name: rerank_large_docs
@@ -116,26 +115,26 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
     max_input_field_length: 500
     max_input_total_length: 1500
 \`\`\``,
-    ],
-  },
-  actionsMenuGroup: ActionsMenuGroup.elasticsearch,
-  editorHandlers: {
-    config: {
-      inference_id: {
-        completion: {
-          getOptions: async (value) => {
-            const http = await getHttp();
-            return createInferenceIdCompletion(http)(value);
+      ],
+    },
+    actionsMenuGroup: ActionsMenuGroup.elasticsearch,
+    editorHandlers: {
+      config: {
+        inference_id: {
+          completion: {
+            getOptions: async (value) => {
+              const http = await getHttp();
+              return createInferenceIdCompletion(http)(value);
+            },
           },
-        },
-        validation: {
-          validate: async (value, context) => {
-            const http = await getHttp();
-            return createInferenceIdValidator(http)(value);
+          validation: {
+            validate: async (value, context) => {
+              const http = await getHttp();
+              return createInferenceIdValidator(http)(value);
+            },
           },
         },
       },
     },
-  },
   });
 };
