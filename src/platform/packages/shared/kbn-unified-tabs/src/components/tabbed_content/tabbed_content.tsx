@@ -366,7 +366,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       responsive={false}
       css={tabsBarContainerCss}
     >
-      <EuiFlexItem grow={!appendRight} css={tabsBarComponentCss}>
+      <EuiFlexItem grow={true} css={tabsBarComponentCss}>
         <TabsBar
           ref={tabsBarApi}
           items={items}
@@ -394,14 +394,22 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         />
       </EuiFlexItem>
       {appendRight ? (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <VerticalRule />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={appendRightContainerCss}>
-            {appendRight}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            justifyContent="flexEnd"
+            wrap={false}
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <VerticalRule />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} css={appendRightContainerCss}>
+              {appendRight}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
   );
