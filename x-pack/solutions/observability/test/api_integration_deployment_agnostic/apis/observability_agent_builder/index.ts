@@ -26,5 +26,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     // ai insights
     loadTestFile(require.resolve('./ai_insights/error.spec.ts'));
     loadTestFile(require.resolve('./ai_insights/alert.spec.ts'));
+    loadTestFile(require.resolve('./ai_insights/log.spec.ts'));
   });
 }

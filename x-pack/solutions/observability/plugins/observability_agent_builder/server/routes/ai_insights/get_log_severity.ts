@@ -36,7 +36,10 @@ const WARNING_AND_ABOVE_LEVELS = new Set([
  */
 export function isWarningOrAbove(logEntry: Record<string, unknown>): boolean {
   // 1. Check log.level (aliases handle mapping from other fields)
-  const level = logEntry['log.level'];
+  // Handle both flattened {log.level: level} and nested {log: {level: level}} formats
+  const level =
+    (logEntry['log.level'] as string | undefined) ??
+    ((logEntry.log as Record<string, unknown> | undefined)?.level as string | undefined);
   if (typeof level === 'string' && WARNING_AND_ABOVE_LEVELS.has(level.toLowerCase())) {
     return true;
   }
