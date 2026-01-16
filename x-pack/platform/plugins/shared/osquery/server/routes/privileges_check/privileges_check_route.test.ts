@@ -87,6 +87,8 @@ describe('privilegesCheckRoute', () => {
     await routeHandler({} as any, mockRequest, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledWith({ body: 'true' });
-    expect(mockOsqueryContext.security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
+    expect(
+      mockOsqueryContext.security.authz.checkPrivilegesDynamicallyWithRequest
+    ).not.toHaveBeenCalled();
   });
 });
