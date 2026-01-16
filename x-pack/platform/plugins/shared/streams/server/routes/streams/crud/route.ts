@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod';
 import { badData } from '@hapi/boom';
 import { Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -119,15 +118,6 @@ export const editStreamRoute = createServerRoute({
       !(await streamsClient.isStreamsEnabled())
     ) {
       throw badData('Streams are not enabled for Wired streams.');
-    }
-
-    const core = await context.core;
-    const groupStreamsEnabled = await core.uiSettings.client.get(
-      OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS
-    );
-
-    if (Streams.GroupStream.UpsertRequest.is(params.body) && !groupStreamsEnabled) {
-      throw badData('Streams are not enabled for Group streams.');
     }
 
     return await streamsClient.upsertStream({

@@ -12,6 +12,8 @@
         "label": "FetchResult",
         "description": [],
         "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -34,6 +38,8 @@
             "label": "hasNew",
             "description": [],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -55,6 +61,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,6 +77,8 @@
               "Error | null"
             ],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -83,6 +93,8 @@
         "label": "NewsfeedItem",
         "description": [],
         "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -94,6 +106,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,6 +119,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -119,6 +135,8 @@
               "string | null"
             ],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -130,6 +148,8 @@
             "label": "linkUrl",
             "description": [],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -144,6 +164,8 @@
               "string | null"
             ],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -158,6 +180,8 @@
               "moment.Moment"
             ],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -172,6 +196,8 @@
               "moment.Moment"
             ],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -183,6 +209,8 @@
             "label": "hash",
             "description": [],
             "path": "src/platform/plugins/shared/newsfeed/public/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -199,6 +227,8 @@
         "label": "NewsfeedApiEndpoint",
         "description": [],
         "path": "src/platform/plugins/shared/newsfeed/public/lib/api.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -217,6 +247,8 @@
         "{}"
       ],
       "path": "src/platform/plugins/shared/newsfeed/public/plugin.tsx",
+      "lineNumber": 22,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -251,6 +283,8 @@
         " | null>; }"
       ],
       "path": "src/platform/plugins/shared/newsfeed/public/plugin.tsx",
+      "lineNumber": 23,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
