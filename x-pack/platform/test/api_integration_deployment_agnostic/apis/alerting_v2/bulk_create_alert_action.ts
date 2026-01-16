@@ -20,7 +20,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
 
-  describe('Bulk Alert Action API', function () {
+  describe('Bulk Create Alert Action API', function () {
     let roleAuthc: RoleCredentials;
 
     before(async () => {

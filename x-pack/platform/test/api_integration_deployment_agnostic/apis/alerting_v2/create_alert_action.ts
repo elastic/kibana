@@ -20,7 +20,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
 
-  describe('Alert Action API', function () {
+  describe('Create Alert Action API', function () {
     let roleAuthc: RoleCredentials;
     let alertEvent: ReturnType<typeof createAlertEvent>;
     let alertTransitions: ReturnType<typeof createAlertTransition>[];

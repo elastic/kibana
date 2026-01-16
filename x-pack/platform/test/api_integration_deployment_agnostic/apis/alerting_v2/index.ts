@@ -9,7 +9,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('alerting_v2', () => {
-    loadTestFile(require.resolve('./alert_action'));
-    loadTestFile(require.resolve('./bulk_alert_action'));
+    loadTestFile(require.resolve('./create_alert_action'));
+    loadTestFile(require.resolve('./bulk_create_alert_action'));
   });
 }
