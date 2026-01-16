@@ -23,8 +23,8 @@ export const DashboardNavigationOptionsEditor = ({ options, onOptionChange }: Pr
       <div>
         <EuiSwitch
           compressed
-          name="useCurrentFilters"
-          label={i18n.translate('dashboard.navigationOptions.useCurrentFiltersLabel', {
+          name="useFilters"
+          label={i18n.translate('dashboard.navigationOptions.useFiltersLabel', {
             defaultMessage: 'Use filters and query from origin dashboard',
           })}
           checked={options.use_filters}
@@ -34,8 +34,8 @@ export const DashboardNavigationOptionsEditor = ({ options, onOptionChange }: Pr
         <EuiSpacer size="s" />
         <EuiSwitch
           compressed
-          name="useCurrentDateRange"
-          label={i18n.translate('dashboard.navigationOptions.useCurrentDateRange', {
+          name="useTimeRange"
+          label={i18n.translate('dashboard.navigationOptions.useTimeRange', {
             defaultMessage: 'Use date range from origin dashboard',
           })}
           checked={options.use_time_range}
