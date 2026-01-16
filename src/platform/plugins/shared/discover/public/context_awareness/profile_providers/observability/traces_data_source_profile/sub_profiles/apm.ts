@@ -31,12 +31,12 @@ export const createTracesAPMDataSourceProfileProvider = (
     }
     const baseContext = baseResult.context as TracesDataContext;
     const {
-      tracesDataSourcesSummary: { hasEcs, hasUnprocessedOtel },
+      tracesDataSourcesSummary: { ecs, unprocessedOtel },
     } = baseContext;
 
     // Avoid mixing APM and OTEL columns in the same profile
     // (activate only when the source is uniquely APM)
-    if (hasEcs && !hasUnprocessedOtel) {
+    if (ecs && !unprocessedOtel) {
       // eslint-disable-next-line no-console
       console.log('[traces profile] APM sub-profile matched');
       return {

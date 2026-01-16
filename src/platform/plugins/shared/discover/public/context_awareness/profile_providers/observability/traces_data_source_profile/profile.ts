@@ -22,8 +22,8 @@ const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-s
 export interface TracesDataContext {
   category: DataSourceCategory.Traces;
   tracesDataSourcesSummary: {
-    hasEcs: boolean;
-    hasUnprocessedOtel: boolean;
+    ecs: boolean;
+    unprocessedOtel: boolean;
   };
 }
 
@@ -36,17 +36,17 @@ export const createTracesDataSourceProfileProvider = ({
    * This could be stored in a more centralized place, but for now it's here.
    */
   const getTracesDataSourcesSummary = async (): Promise<{
-    hasEcs: boolean;
-    hasUnprocessedOtel: boolean;
+    ecs: boolean;
+    unprocessedOtel: boolean;
   }> => {
     try {
-      const { hasEcs, hasUnprocessedOtel } = await http.get<{
-        hasEcs: boolean;
-        hasUnprocessedOtel: boolean;
+      const { ecs, unprocessedOtel } = await http.get<{
+        ecs: boolean;
+        unprocessedOtel: boolean;
       }>('/internal/apm/traces_data_sources_summary');
-      return { hasEcs, hasUnprocessedOtel };
+      return { ecs, unprocessedOtel };
     } catch {
-      return { hasEcs: false, hasUnprocessedOtel: false };
+      return { ecs: false, unprocessedOtel: false };
     }
   };
 
@@ -67,13 +67,13 @@ export const createTracesDataSourceProfileProvider = ({
         params.rootContext.solutionType === SolutionType.Observability &&
         apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params))
       ) {
-        const { hasEcs, hasUnprocessedOtel } = await getTracesDataSourcesSummary();
+        const { ecs, unprocessedOtel } = await getTracesDataSourcesSummary();
 
         return {
           isMatch: true,
           context: {
             category: DataSourceCategory.Traces,
-            tracesDataSourcesSummary: { hasEcs, hasUnprocessedOtel },
+            tracesDataSourcesSummary: { ecs, unprocessedOtel },
           } as TracesDataContext,
         };
       }
