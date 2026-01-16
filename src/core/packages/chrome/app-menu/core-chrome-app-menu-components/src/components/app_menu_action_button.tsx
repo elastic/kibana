@@ -86,7 +86,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       return;
     }
 
-    run?.(event.currentTarget);
+    run?.({ triggerElement: event.currentTarget });
   };
 
   const handleSecondaryButtonClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
@@ -97,7 +97,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       return;
     }
 
-    splitButtonRun?.(event.currentTarget);
+    splitButtonRun?.({ triggerElement: event.currentTarget });
   };
 
   const commonProps = {

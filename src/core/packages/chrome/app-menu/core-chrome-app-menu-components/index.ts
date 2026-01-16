@@ -16,6 +16,7 @@ export { AppMenuPopoverActionButtons } from './src';
 
 export type {
   AppMenuRunAction,
+  AppMenuRunActionParams,
   AppMenuConfig,
   AppMenuItemType,
   AppMenuSecondaryActionItem,
