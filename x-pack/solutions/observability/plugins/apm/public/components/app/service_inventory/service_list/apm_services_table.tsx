@@ -61,6 +61,7 @@ import type {
 import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
+import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -73,7 +74,6 @@ export function getServiceColumns({
   breakpoints,
   showHealthStatusColumn,
   showAlertsColumn,
-  showSlosColumn,
   link,
   serviceOverflowCount,
 }: {
@@ -81,7 +81,6 @@ export function getServiceColumns({
   showTransactionTypeColumn: boolean;
   showHealthStatusColumn: boolean;
   showAlertsColumn: boolean;
-  showSlosColumn: boolean;
   comparisonDataLoading: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
@@ -312,6 +311,7 @@ interface Props {
   onChangeRenderedItems?: (renderedItems: ServiceListItem[]) => void;
   onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
 }
+
 export function ApmServicesTable({
   status,
   items,
@@ -359,10 +359,9 @@ export function ApmServicesTable({
     serviceName: undefined,
   });
 
-  type SloIndicatorType = 'sli.apm.transactionDuration' | 'sli.apm.transactionErrorRate';
   const [sloFlyoutState, setSloFlyoutState] = useState<{
     isOpen: boolean;
-    indicatorType: SloIndicatorType | null;
+    indicatorType: ApmIndicatorType | null;
     serviceName: string | undefined;
   }>({
     isOpen: false,
@@ -386,7 +385,7 @@ export function ApmServicesTable({
     });
   }, []);
 
-  const openSloFlyout = useCallback((indicatorType: SloIndicatorType, serviceName: string) => {
+  const openSloFlyout = useCallback((indicatorType: ApmIndicatorType, serviceName: string) => {
     setSloFlyoutState({
       isOpen: true,
       indicatorType,
@@ -466,7 +465,6 @@ export function ApmServicesTable({
   const serviceActions: TableActions<ServiceListItem> = useMemo(() => {
     const actions: TableActions<ServiceListItem> = [];
 
-    // Add alerts group if user has alerting write permissions
     if (canSaveApmAlerts) {
       actions.push({
         groupLabel: i18n.translate('xpack.apm.servicesTable.actions.alertsGroupLabel', {
@@ -540,7 +538,6 @@ export function ApmServicesTable({
       });
     }
 
-    // Add SLOs group if user has SLO write permissions
     if (canWriteSlos) {
       actions.push({
         groupLabel: i18n.translate('xpack.apm.servicesTable.actions.slosGroupLabel', {

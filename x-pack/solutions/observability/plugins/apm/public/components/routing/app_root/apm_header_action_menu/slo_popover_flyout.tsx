@@ -15,6 +15,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 
 const sloLabel = i18n.translate('xpack.apm.home.sloMenu.slos', {
   defaultMessage: 'SLOs',
@@ -32,8 +33,6 @@ const manageSlosLabel = i18n.translate('xpack.apm.home.sloMenu.manageSlos', {
   defaultMessage: 'Manage SLOs',
 });
 
-type SloIndicatorType = 'sli.apm.transactionDuration' | 'sli.apm.transactionErrorRate';
-
 interface Props {
   canReadSlos: boolean;
   canWriteSlos: boolean;
@@ -45,7 +44,7 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutState, setFlyoutState] = useState<{
     isOpen: boolean;
-    indicatorType: SloIndicatorType | null;
+    indicatorType: ApmIndicatorType | null;
   }>({
     isOpen: false,
     indicatorType: null,
@@ -54,7 +53,7 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
   const apmEnvironment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
   const sloEnvironment = apmEnvironment === ENVIRONMENT_ALL.value ? ALL_VALUE : apmEnvironment;
 
-  const openFlyout = (indicatorType: SloIndicatorType) => {
+  const openFlyout = (indicatorType: ApmIndicatorType) => {
     setFlyoutState({ isOpen: true, indicatorType });
     setPopoverOpen(false);
   };

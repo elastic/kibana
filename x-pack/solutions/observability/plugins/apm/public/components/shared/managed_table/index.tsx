@@ -528,4 +528,4 @@ function UnoptimizedManagedTable<T extends object>(props: {
 const ManagedTable = React.memo(UnoptimizedManagedTable) as typeof UnoptimizedManagedTable;
 
 export { ManagedTable, UnoptimizedManagedTable };
-export type { TableAction, TableActionGroup, TableActions };
+export type { TableActions };
