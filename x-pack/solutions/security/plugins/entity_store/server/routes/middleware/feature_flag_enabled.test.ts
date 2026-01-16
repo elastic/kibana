@@ -21,7 +21,7 @@ describe('featureFlagEnabledMiddleware', () => {
     };
     mockEntityStoreCtx = {
       logger: loggerMock.create(),
-      getFeatureFlags: jest.fn(() => mockFeatureFlags),
+      featureFlags: mockFeatureFlags,
     };
     mockCtx = {
       entityStore: Promise.resolve(mockEntityStoreCtx),
@@ -41,7 +41,7 @@ describe('featureFlagEnabledMiddleware', () => {
     expect(result).toBeUndefined();
   });
 
-  it('should return 501 if Entity Store V2 is not enabled', async () => {
+  it('should return 403 if Entity Store V2 is not enabled', async () => {
     mockFeatureFlags.isEntityStoreV2Enabled.mockResolvedValue(false);
     const result = await featureFlagEnabledMiddleware(mockCtx, mockReq, mockRes);
 

@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "dataConnectors"],
-    "requiredPlugins": ["actions", "dataSourcesRegistry", "agentBuilder", "workflowsManagement"],
+    "requiredPlugins": ["actions", "dataSourcesRegistry", "agentBuilder", "workflowsManagement", "triggersActionsUi"],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": [

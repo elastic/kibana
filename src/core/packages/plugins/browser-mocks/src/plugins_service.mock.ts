@@ -56,6 +56,7 @@ const createPluginInitializerContextMock = (
         buildDate: new Date('2023-05-15T23:12:09.000Z'),
         buildFlavor,
       },
+      airgapped: false,
     },
     logger: loggerMock.create(),
     config: {
