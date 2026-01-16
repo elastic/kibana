@@ -76,22 +76,19 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * The Lens configuration panel has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines [#235372]({{kib-pull}}235372).
 
 **Data ingestion and Fleet**:
-* Adds integration knowledge opt out UI setting and enable feature flag [#245080]({{kib-pull}}245080).
-* Support integrations rollback to previous versions [#240761]({{kib-pull}}240761).
-* Adds a functionality for removing root privilege from Fleet managed agents if applicable [#237790]({{kib-pull}}237790).
-* Adds agent internal yaml settings [#245819]({{kib-pull}}245819).
-* Agent actions menu redesign [#245174]({{kib-pull}}245174).
-% !!TODO!! The above PR had a lengthy release note description:
-% Redesigned single and bulk agent actions menus in Fleet. Commonly used actions are organized at the top level of the menus, while other actions are now organized into nested menus by use-case.
-* Auto migrate component template ilms in setup task [#243333]({{kib-pull}}243333).
-* Adds fleet policy revisions cleanup task [#242612]({{kib-pull}}242612).
-% !!TODO!! The above PR had a lengthy release note description:
-% * Adds the background task `FleetPolicyRevisionsCleanupTask` which removes excess policy revisions from the `.fleet-policies` index
-* Use type@lifecycle ILMs for new package installs [#241992]({{kib-pull}}241992).
-* Adds `xpack.fleet.experimentalFeatures` config setting [#238840]({{kib-pull}}238840).
-* "Show agentless resources" toggle added to Fleet > Settings for troubleshooting and diagnostics purposes [#237528]({{kib-pull}}237528).
-* Adds missing settings to set up Elastic Agent > Fleet Server SSL support [#236959]({{kib-pull}}236959).
-* Fleet agent list table now persists state of filters while navigating within a session [#228875]({{kib-pull}}228875).
+* Enables integration knowledge generation by default and adds a UI setting that allows you to opt out of the integration knowledge indexing [#245080]({{kib-pull}}245080).
+* Enables rolling back integrations to the previously installed version [#240761]({{kib-pull}}240761).
+* Adds capability for rolling back a recent upgrade of a Fleet-managed Elastic Agent using Fleet UI or API [#247398]({{kib-pull}}247398).
+* Adds functionality for removing root privilege from Fleet-managed agents if applicable [#237790]({{kib-pull}}237790).
+* Adds **Advanced Internal YAML Settings** field to the agent policy settings UI [#245819]({{kib-pull}}245819).
+* Redesigns the Actions menu in Fleet, placing commonly used actions at the top level and organizing other actions into nested menus by use case [#245174]({{kib-pull}}245174).
+* Auto-migrates component templates to use `type@lifecycle` ILM policies during Fleet setup [#243333]({{kib-pull}}243333).
+* Adds a cleanup task that removes excess policy revisions from the `.fleet-policies` index [#242612]({{kib-pull}}242612).
+* Uses `type@lifecycle` ILM policies for new package installations [#241992]({{kib-pull}}241992).
+* Adds the `xpack.fleet.experimentalFeatures` config setting [#238840]({{kib-pull}}238840).
+* Adds a **Show agentless resources** toggle on the Fleet > Settings page for debugging and diagnostics [#237528]({{kib-pull}}237528).
+* Adds Fleet Server host authentication settings for Elastic Agent > Fleet Server SSL support [#236959]({{kib-pull}}236959).
+* Persists the state of filters in the agent list table while navigating within a session [#228875]({{kib-pull}}228875).
 
 **Discover**:
 * Discover now shows partial results after a search gets canceled [#242346]({{kib-pull}}242346).
@@ -227,23 +224,23 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 
 
 **Data ingestion and Fleet**:
-* Use long expiration for upgrade agents [#243443]({{kib-pull}}243443).
-* Fixes retrying stuck agents in auto upgrade logic [#243326]({{kib-pull}}243326).
-* * Adds retry behavior for `/api/fleet/agents` when transient issues with ES are encountered [#243105]({{kib-pull}}243105).
-* Fixes docker image in Add agent k8s manifest [#242691]({{kib-pull}}242691).
-* Fixes package icons loading [#242406]({{kib-pull}}242406).
-* Show warnings on sync integrations UI when referencing other entities [#241623]({{kib-pull}}241623).
-* Adds proxy ssl options to download sources [#241115]({{kib-pull}}241115).
-* Omit system properties when syncing ingest pipelines [#241096]({{kib-pull}}241096).
-* Fixes `template_path` asset selection for some cases of integration packages [#240750]({{kib-pull}}240750).
-* * Allows fleet setup retries on start in all environments [#240342]({{kib-pull}}240342).
-* Fixes fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
+* Uses long expiration for agent auto-upgrade actions and scheduled upgrades [#243443]({{kib-pull}}243443).
+* Fixes auto-upgrade logic to retry upgrade action if agents are stuck in **Updating** state [#243326]({{kib-pull}}243326).
+* Adds retry behavior for `/api/fleet/agents` when transient issues with {{es}} are encountered [#243105]({{kib-pull}}243105).
+* Fixes Docker image in the Kubernetes manifest in the Add agent instructions [#242691]({{kib-pull}}242691).
+* Fixes an issue where some package icons were not loaded correctly [#242406]({{kib-pull}}242406).
+* Shows warnings on sync integrations UI when referencing other entities [#241623]({{kib-pull}}241623).
+* Adds the proxy SSL options to download sources if a proxy is selected [#241115]({{kib-pull}}241115).
+* Omits system properties when synchronizing ingest pipelines [#241096]({{kib-pull}}241096).
+* Fixes `template_path` asset selection for some integration packages [#240750]({{kib-pull}}240750).
+* Allows Fleet setup retries on start in all environments [#240342]({{kib-pull}}240342).
+* Fixes an issue where the uniqueness of agent policy names was not consistently enforced across spaces when name or space changes occurred [#239631]({{kib-pull}}239631).
 * Fixes `ignore_above` mapping for `flattened` fields [#238890]({{kib-pull}}238890).
-* Fixes "package not found" error when skipping cloud onboarding for a prerelease package [#238629]({{kib-pull}}238629).
-* * Fixes on integration policy upgrade [#238542]({{kib-pull}}238542).
-* Fixes error when deleting orphaned integration policies [#237875]({{kib-pull}}237875).
-* Enable storing secrets in Fleet Server Host config if fleet-server is running at a minimum supported version [#237464]({{kib-pull}}237464).
-* 233750 msi commands [#236994]({{kib-pull}}236994).
+* Fixes a "package not found" error when skipping cloud onboarding for a prerelease package [#238629]({{kib-pull}}238629).
+* Fixes an issue where new package global variables were not included and stale variable references were not removed on integration policy upgrade [#238542]({{kib-pull}}238542).
+* Fixes an error that occurred when deleting orphaned integration policies [#237875]({{kib-pull}}237875).
+* Enables storing secrets in Fleet Server host config if Fleet Server is running at a minimum supported version [#237464]({{kib-pull}}237464).
+* Fixes MSI commands for installing Elastic Agent and Fleet Server [#236994]({{kib-pull}}236994).
 
 **Discover**:
 * Fixes an issue in Discover where default app state could trigger unsaved changes in saved Discover sessions, such as default columns applied through the `defaultColumns` advanced setting. [#246664]({{kib-pull}}246664).
