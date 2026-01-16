@@ -1070,10 +1070,13 @@ describe('TabsStorageManager', () => {
 
     // Should have migrated the data
     const newStorageKey = getTabsStorageKey(mockSpaceId, mockUserId);
-    expect(storage.set).toHaveBeenCalledWith(newStorageKey, expect.objectContaining({
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-    }));
+    expect(storage.set).toHaveBeenCalledWith(
+      newStorageKey,
+      expect.objectContaining({
+        userId: mockUserId,
+        spaceId: mockSpaceId,
+      })
+    );
     expect(storage.remove).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
 
     // Should have loaded the tabs from the migrated data
