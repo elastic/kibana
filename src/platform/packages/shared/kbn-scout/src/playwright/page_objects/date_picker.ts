@@ -20,41 +20,43 @@ export class DatePicker {
   constructor(private readonly page: ScoutPage) {}
 
   private async showStartEndTimes() {
-    // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
-    await this.page.testSubj.waitForSelector('superDatePickerToggleQuickMenuButton', {
-      timeout: 10000,
-    });
-    const isShowDateBtnVisible = await this.page.testSubj.isVisible(
-      'superDatePickerShowDatesButton',
-      {
-        timeout: 5000,
-      }
-    );
+    await this.page.testSubj.waitForSelector('superDatePickerToggleQuickMenuButton');
 
-    if (isShowDateBtnVisible) {
-      await this.page.testSubj.click('superDatePickerShowDatesButton');
+    // Initial check if show/end buttons are visible
+    const showBtn = this.page.testSubj.locator('superDatePickerShowDatesButton');
+    const endBtn = this.page.testSubj.locator('superDatePickerendDatePopoverButton');
+
+    if (
+      !((await showBtn.isVisible({ timeout: 2000 })) || (await endBtn.isVisible({ timeout: 2000 })))
+    ) {
+      // Reload loop only if initial fails
+      await expect
+        .poll(
+          async () => {
+            await this.page.reload();
+            await this.page.testSubj.waitForSelector('superDatePickerToggleQuickMenuButton');
+            return (await showBtn.isVisible()) || (await endBtn.isVisible());
+          },
+          {
+            timeout: 20000,
+            intervals: [500], // Retry every 0.5s
+          }
+        )
+        .toBe(true);
     }
 
-    const isStartDatePopoverBtnVisible = await this.page.testSubj.isVisible(
-      'superDatePickerstartDatePopoverButton',
-      {
-        timeout: 5000,
-      }
-    );
-
-    if (isStartDatePopoverBtnVisible) {
-      await this.page.testSubj.click('superDatePickerstartDatePopoverButton');
+    if (await showBtn.isVisible()) {
+      await showBtn.click();
+    } else {
+      await endBtn.click();
     }
+
+    await this.page.testSubj.waitForSelector('superDatePickerAbsoluteTab');
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
     await this.showStartEndTimes();
     // we start with end date
-    // Note: Playwright fails to click 'superDatePickerendDatePopoverButton' because <span class="...">Now</span>
-    // element inside <div data-euiportal="true"> subtree repeatedly intercepts pointer events, preventing
-    // the click despite the target element is visible, enabled, and stable. Using { force: true } to bypass these checks.
-    // eslint-disable-next-line playwright/no-force-option
-    await this.page.testSubj.locator('superDatePickerendDatePopoverButton').click({ force: true });
     await this.page.testSubj.click('superDatePickerAbsoluteTab');
     const inputFrom = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputFrom.clear();
