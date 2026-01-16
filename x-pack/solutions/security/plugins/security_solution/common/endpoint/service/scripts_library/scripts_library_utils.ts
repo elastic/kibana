@@ -19,6 +19,7 @@ export const KUERY_FIELD_TO_SO_FIELD_MAP = Object.freeze({
   instructions: 'instructions',
   example: 'example',
   pathToExecutable: 'path_to_executable',
+  tags: 'tags',
   createdBy: 'created_by',
   createdAt: 'created_at',
   updatedBy: 'updated_by',

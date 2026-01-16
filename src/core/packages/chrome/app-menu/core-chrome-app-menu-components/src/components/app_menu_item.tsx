@@ -38,6 +38,7 @@ export const AppMenuItem = ({
   isPopoverOpen,
   hidden,
   popoverWidth,
+  popoverTestId,
   onPopoverToggle,
   onPopoverClose,
 }: AppMenuItemProps) => {
@@ -74,7 +75,7 @@ export const AppMenuItem = ({
       <EuiHeaderLink
         onClick={href ? undefined : handleClick}
         id={htmlId}
-        data-test-subj={testId || `top-nav-menu-item-${id}`}
+        data-test-subj={testId || `app-menu-item-${id}`}
         iconType={iconType}
         isDisabled={isDisabled(disableButton)}
         href={href}
@@ -116,6 +117,7 @@ export const AppMenuItem = ({
         tooltipTitle={title}
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
+        popoverTestId={popoverTestId}
         onClose={onPopoverClose}
       />
     );

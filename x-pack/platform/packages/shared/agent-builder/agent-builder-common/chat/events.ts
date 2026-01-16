@@ -7,7 +7,7 @@
 
 import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
-import type { ConversationRound } from './conversation';
+import type { ConversationInternalState, ConversationRound } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 
 export enum ChatEventType {
@@ -214,6 +214,8 @@ export interface RoundCompleteEventData {
   round: ConversationRound;
   /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
   resumed?: boolean;
+  /** if the prompt state was updated during the round, contains the up-to-date version */
+  conversation_state?: ConversationInternalState;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;

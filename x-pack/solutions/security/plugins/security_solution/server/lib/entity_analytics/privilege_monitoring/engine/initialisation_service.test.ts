@@ -54,6 +54,7 @@ jest.mock('../saved_objects', () => {
     })),
   };
 });
+
 describe('Privileged User Monitoring: Index Sync Service', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
