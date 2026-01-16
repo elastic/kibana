@@ -22,7 +22,7 @@ export function registerRuleExecutorTaskDefinition({
 }) {
   const createTaskRunner = taskRunnerFactory({
     taskRunnerClass: RuleExecutorTaskRunner,
-    taskType: 'rule executor',
+    taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
   });
 
   taskManager.registerTaskDefinitions({

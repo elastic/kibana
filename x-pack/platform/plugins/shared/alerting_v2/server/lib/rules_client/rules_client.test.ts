@@ -73,7 +73,7 @@ describe('RulesClient', () => {
     rulesSavedObjectService.find.mockResolvedValue({
       saved_objects: [],
       total: 0,
-    } as any);
+    });
 
     ensureRuleExecutorTaskScheduledMock.mockResolvedValue({ id: 'task-123' });
     getRuleExecutorTaskIdMock.mockReturnValue('task:fallback');
@@ -220,6 +220,7 @@ describe('RulesClient', () => {
       rulesSavedObjectService.get.mockResolvedValueOnce({
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        id: 'rule-id-1',
       });
 
       await client.updateRule({
@@ -253,6 +254,7 @@ describe('RulesClient', () => {
       rulesSavedObjectService.get.mockResolvedValueOnce({
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        id: 'rule-id-2',
       });
 
       await client.updateRule({
@@ -280,6 +282,7 @@ describe('RulesClient', () => {
         updatedAt: '2025-01-01T00:00:00.000Z',
       };
       rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-4',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
       });
@@ -311,6 +314,7 @@ describe('RulesClient', () => {
       rulesSavedObjectService.get.mockResolvedValueOnce({
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        id: 'rule-id-get-1',
       });
 
       const res = await client.getRule({ id: 'rule-id-get-1' });
@@ -352,6 +356,7 @@ describe('RulesClient', () => {
       rulesSavedObjectService.get.mockResolvedValueOnce({
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        id: 'rule-id-del-1',
       });
       getRuleExecutorTaskIdMock.mockReturnValueOnce('task:delete');
 
@@ -412,7 +417,7 @@ describe('RulesClient', () => {
       rulesSavedObjectService.find.mockResolvedValueOnce({
         saved_objects: [so1, so2],
         total: 2,
-      } as any);
+      });
 
       const res = await client.findRules({ page: 2, perPage: 50 });
 
