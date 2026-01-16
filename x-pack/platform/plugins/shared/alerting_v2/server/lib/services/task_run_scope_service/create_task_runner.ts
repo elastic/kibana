@@ -13,7 +13,7 @@ import type {
   RunResult,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server/task';
-import { injectable } from 'inversify';
+import type { ServiceIdentifier } from 'inversify';
 
 type TaskRunnerConstructor<T> = new (...args: never[]) => T;
 
@@ -24,36 +24,32 @@ export interface AlertingTaskRunner {
   }): Promise<RunResult>;
 }
 
+export type TaskRunnerFactory = <TRunner extends AlertingTaskRunner>(params: {
+  taskRunnerClass: TaskRunnerConstructor<TRunner>;
+  taskType: string;
+}) => TaskRunCreatorFunction;
+
+export const TaskRunnerFactoryToken = Symbol.for(
+  'alerting_v2.TaskRunnerFactory'
+) as ServiceIdentifier<TaskRunnerFactory>;
+
 // Factory for task runners that depend on Task Manager fakeRequest.
 // It forks the DI container and overrides Request scope with the fake request.
-@injectable()
-export class TaskRunnerFactory {
-  private di?: CoreDiServiceStart;
-
-  public initialize(di: CoreDiServiceStart) {
-    this.di = di;
-  }
-
-  public create<TRunner extends AlertingTaskRunner>({
-    taskRunnerClass,
-    taskType,
-  }: {
-    taskRunnerClass: TaskRunnerConstructor<TRunner>;
-    taskType: string;
-  }): TaskRunCreatorFunction {
+export function createTaskRunnerFactory({
+  getInjection,
+}: {
+  getInjection: () => CoreDiServiceStart;
+}): TaskRunnerFactory {
+  return ({ taskRunnerClass, taskType }) => {
     return ({ taskInstance, abortController, fakeRequest }: RunContext) => ({
       run: async () => {
-        if (!this.di) {
-          throw new Error('TaskRunnerFactory is not initialized. Was OnStart executed?');
-        }
-
         if (!fakeRequest) {
           throw new Error(
             `Cannot execute ${taskType} task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
           );
         }
 
-        const scope = this.di.fork();
+        const scope = getInjection().fork();
         scope.bind(Request).toConstantValue(fakeRequest);
         scope.bind(Global).toConstantValue(Request);
         scope.bind(taskRunnerClass).toSelf().inRequestScope();
@@ -66,5 +62,5 @@ export class TaskRunnerFactory {
         }
       },
     });
-  }
+  };
 }

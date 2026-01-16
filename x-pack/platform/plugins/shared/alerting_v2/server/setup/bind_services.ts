@@ -14,7 +14,10 @@ import { LoggerService, LoggerServiceToken } from '../lib/services/logger_servic
 import { QueryService } from '../lib/services/query_service/query_service';
 import { AlertingRetryService } from '../lib/services/retry_service';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
-import { TaskRunnerFactory } from '../lib/services/task_run_scope_service/create_task_runner';
+import {
+  createTaskRunnerFactory,
+  TaskRunnerFactoryToken,
+} from '../lib/services/task_run_scope_service/create_task_runner';
 import { StorageService } from '../lib/services/storage_service/storage_service';
 import {
   StorageServiceInternalToken,
@@ -47,7 +50,11 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return elasticsearch.client.asScoped(request).asCurrentUser;
     })
     .inRequestScope();
-  bind(TaskRunnerFactory).toSelf().inSingletonScope();
+  bind(TaskRunnerFactoryToken).toFactory((context) =>
+    createTaskRunnerFactory({
+      getInjection: () => context.get(CoreStart('injection')),
+    })
+  );
   bind(RulesSavedObjectService).toSelf().inRequestScope();
 
   bind(QueryService)

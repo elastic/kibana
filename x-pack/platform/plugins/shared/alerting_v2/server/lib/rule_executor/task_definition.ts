@@ -20,7 +20,7 @@ export function registerRuleExecutorTaskDefinition({
   taskManager: AlertingServerSetupDependencies['taskManager'];
   taskRunnerFactory: TaskRunnerFactory;
 }) {
-  const createTaskRunner = taskRunnerFactory.create({
+  const createTaskRunner = taskRunnerFactory({
     taskRunnerClass: RuleExecutorTaskRunner,
     taskType: 'rule executor',
   });

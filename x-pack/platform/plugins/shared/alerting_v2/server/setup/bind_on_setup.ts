@@ -11,7 +11,7 @@ import { CoreSetup } from '@kbn/core-di-server';
 import { registerRuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
-import { TaskRunnerFactory } from '../lib/services/task_run_scope_service/create_task_runner';
+import { TaskRunnerFactoryToken } from '../lib/services/task_run_scope_service/create_task_runner';
 import type { AlertingServerSetupDependencies } from '../types';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
@@ -29,7 +29,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       taskManager: container.get(
         PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager')
       ),
-      taskRunnerFactory: container.get(TaskRunnerFactory),
+      taskRunnerFactory: container.get(TaskRunnerFactoryToken),
     });
   });
 }

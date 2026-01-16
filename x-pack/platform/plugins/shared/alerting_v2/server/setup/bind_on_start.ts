@@ -7,12 +7,10 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { OnStart } from '@kbn/core-di';
-import { CoreStart } from '@kbn/core-di-server';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
-import { TaskRunnerFactory } from '../lib/services/task_run_scope_service/create_task_runner';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue((container) => {
@@ -26,8 +24,5 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       esClient,
     });
 
-    const taskRunnerFactory = container.get(TaskRunnerFactory);
-    const injection = container.get(CoreStart('injection'));
-    taskRunnerFactory.initialize(injection);
   });
 }
