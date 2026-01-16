@@ -16,13 +16,14 @@ import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_d
 interface Props {
   onSelected: (slo: SearchSLODefinitionResponse | undefined) => void;
   hasError?: boolean;
+  remoteName?: string;
 }
 
 const SLO_REQUIRED = i18n.translate('xpack.slo.sloEmbeddable.config.errors.sloRequired', {
   defaultMessage: 'SLO is required.',
 });
 
-export function SloDefinitionSelector({ onSelected, hasError }: Props) {
+export function SloDefinitionSelector({ onSelected, hasError, remoteName }: Props) {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
   );
@@ -32,6 +33,7 @@ export function SloDefinitionSelector({ onSelected, hasError }: Props) {
   const { isLoading, data: definitionsData } = useFetchSloDefinitionsWithRemote({
     search,
     size: 100,
+    remoteName,
   });
 
   // const { isLoading, data: definitionsData } = useFetchSloDefinitions({

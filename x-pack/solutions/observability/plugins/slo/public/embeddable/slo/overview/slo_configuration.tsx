@@ -123,6 +123,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
               {hasGroupBy && selectedSloDefinition && (
                 <EuiFlexItem data-test-subj="singleSloInstanceSelector" grow>
                   <SloInstanceSelector
+                    remoteName={selectedSloDefinition?.remote?.remoteName}
                     sloId={selectedSloDefinition.id}
                     onSelected={(instanceId) => {
                       setSelectedInstanceId(instanceId);

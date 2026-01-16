@@ -15,6 +15,7 @@ import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
 
 interface Props {
   sloId: string;
+  remoteName?: string;
   onSelected: (instanceId: string | undefined) => void;
   hasError?: boolean;
 }
@@ -26,7 +27,7 @@ const ALL_OPTION: EuiComboBoxOptionOption<string> = {
   value: ALL_VALUE,
 };
 
-export function SloInstanceSelector({ sloId, onSelected, hasError }: Props) {
+export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }: Props) {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
   );
@@ -46,6 +47,7 @@ export function SloInstanceSelector({ sloId, onSelected, hasError }: Props) {
 
   const { isLoading, data: instancesData } = useFetchSloInstances({
     sloId,
+    remoteName,
     search: searchValue.trim() || undefined,
     size: 100,
     searchAfter,
