@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
 import { SCRIPT_TAGS } from '../../../../../../common/endpoint/service/scripts_library/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useAppUrl } from '../../../../../common/lib/kibana';
@@ -32,8 +33,10 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type {
   EndpointScript,
   EndpointScriptListApiResponse,
+  SortableScriptLibraryFields,
+  SortDirection,
 } from '../../../../../../common/endpoint/types';
-import { scriptsLibraryLabels as i18n } from '../../translations';
+import { scriptsLibraryLabels as tableLabels } from '../../translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
 import { getScriptsDetailPath } from '../../../../common/routing';
 import { ScriptTablePlatformBadges } from './platform_badges';
@@ -64,7 +67,7 @@ const getScriptsLibraryTableColumns = ({
   const columns = [
     {
       field: 'name',
-      name: i18n.table.columns.name,
+      name: tableLabels.table.columns.name,
       sortable: true,
       width: columnWidths.name,
       truncateText: true,
@@ -86,9 +89,9 @@ const getScriptsLibraryTableColumns = ({
     },
     {
       field: 'platform',
-      name: i18n.table.columns.platform,
+      name: tableLabels.table.columns.platform,
       width: columnWidths.platform,
-      render: (platforms: string[]) => (
+      render: (platforms: SupportedHostOsType[]) => (
         <ScriptTablePlatformBadges
           platforms={platforms}
           data-test-subj={getTestId('platform-badges')}
@@ -97,7 +100,7 @@ const getScriptsLibraryTableColumns = ({
     },
     {
       field: 'tags',
-      name: i18n.table.columns.tags,
+      name: tableLabels.table.columns.tags,
       width: columnWidths.tags,
       render: (tags: string[]) => {
         const renderItem = (sortedTag: string, i: number) => (
@@ -112,7 +115,7 @@ const getScriptsLibraryTableColumns = ({
         return (
           <PopoverItems
             items={tags.sort()}
-            popoverTitle={i18n.table.columns.tags}
+            popoverTitle={tableLabels.table.columns.tags}
             popoverButtonIcon="tag"
             popoverButtonTitle={tags.length.toString()}
             renderItem={renderItem}
@@ -123,7 +126,7 @@ const getScriptsLibraryTableColumns = ({
     },
     {
       field: 'updatedBy',
-      name: i18n.table.columns.updatedBy,
+      name: tableLabels.table.columns.updatedBy,
       sortable: true,
       width: columnWidths.updatedBy,
       render: (updatedBy: string) => (
@@ -152,14 +155,14 @@ const getScriptsLibraryTableColumns = ({
     },
     {
       field: 'updatedAt',
-      name: i18n.table.columns.updatedAt,
+      name: tableLabels.table.columns.updatedAt,
       width: columnWidths.updatedAt,
       truncateText: true,
       sortable: true,
       render: (updatedAt: string) => {
         return (
           <FormattedDate
-            fieldName={i18n.table.columns.updatedAt}
+            fieldName={tableLabels.table.columns.updatedAt}
             value={updatedAt}
             className="eui-textTruncate"
           />
@@ -168,7 +171,7 @@ const getScriptsLibraryTableColumns = ({
     },
     {
       field: 'fileSize',
-      name: i18n.table.columns.size,
+      name: tableLabels.table.columns.size,
       width: columnWidths.size,
       render: (fileSize: number) => (
         <EuiText size="s" data-test-subj={getTestId('file-size')}>
@@ -178,7 +181,7 @@ const getScriptsLibraryTableColumns = ({
     },
     {
       field: '',
-      name: i18n.table.columns.actions,
+      name: tableLabels.table.columns.actions,
       width: columnWidths.actions,
       actions: [],
     },
@@ -197,6 +200,10 @@ export interface ScriptsLibraryTableProps {
   items: ScriptItems;
   onChange: OnChangeTable;
   queryParams: ListScriptsRequestQuery;
+  sort: {
+    field?: SortableScriptLibraryFields;
+    direction?: SortDirection;
+  };
   totalItemCount: number;
 }
 export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
@@ -207,6 +214,7 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
     items,
     onChange,
     queryParams,
+    sort,
     totalItemCount,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -216,11 +224,11 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
     const sorting = useMemo(
       () => ({
         sort: {
-          field: queryParams?.sortField,
-          direction: queryParams?.sortDirection,
+          field: sort.field ?? queryParams?.sortField,
+          direction: sort.direction ?? queryParams?.sortDirection,
         },
       }),
-      [queryParams?.sortField, queryParams?.sortDirection]
+      [queryParams?.sortField, queryParams?.sortDirection, sort.field, sort.direction]
     );
 
     const tablePagination = useMemo(() => {
@@ -258,7 +266,7 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
                 </strong>
               ),
               total: <EuiI18nNumber value={totalItemCount} />,
-              recordsLabel: <strong>{i18n.table.recordsPerPage(totalItemCount)}</strong>,
+              recordsLabel: <strong>{tableLabels.table.recordsPerPage(totalItemCount)}</strong>,
             }}
           />
         </EuiText>
@@ -291,13 +299,13 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
           columns={columns}
           error={error}
           items={items}
-          noItemsMessage={i18n.table.noItemsMessage}
+          noItemsMessage={tableLabels.table.noItemsMessage}
           loading={isLoading}
           pagination={tablePagination}
           onChange={onChange}
           rowProps={setTableRowProps}
           sorting={sorting as EuiTableSortingType<EndpointScript>}
-          tableCaption={i18n.pageTitle}
+          tableCaption={tableLabels.pageTitle}
           data-test-subj={dataTestSubj}
         />
       </>

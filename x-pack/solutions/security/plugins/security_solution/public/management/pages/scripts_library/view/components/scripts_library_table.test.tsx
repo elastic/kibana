@@ -54,6 +54,10 @@ const defaultProps: ScriptsLibraryTableProps = {
   },
   totalItemCount: 1,
   isLoading: false,
+  sort: {
+    field: 'name',
+    direction: 'asc',
+  },
   'data-test-subj': 'test',
 };
 describe('ScriptsLibraryTable', () => {
@@ -194,7 +198,7 @@ describe('ScriptsLibraryTable', () => {
       const badges = platformBadges.querySelectorAll('.euiBadge');
       expect(badges).toHaveLength(2);
       badges.forEach((badge) => {
-        expect(['windows', 'linux']).toContain(badge.textContent);
+        expect(['Windows', 'Linux']).toContain(badge.textContent);
       });
     });
 

@@ -4,28 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type {
   SortableScriptLibraryFields,
   SortDirection,
 } from '../../../../../../common/endpoint/types';
-import { SCRIPT_LIBRARY_SORTABLE_FIELDS } from '../../../../../../common/endpoint/service/scripts_library';
+import { SCRIPT_LIBRARY_SORTABLE_FIELDS } from '../../../../common/constants';
 import { useUrlParams } from '../../../../hooks/use_url_params';
 
 export interface ScriptsLibraryUrlParams {
   kuery?: string;
   page?: number;
   pageSize?: number;
-  sortField?: string;
+  sortField?: SortableScriptLibraryFields;
   sortDirection?: SortDirection;
   selectedScriptId?: string;
   show?: 'details' | 'edit';
 }
 
-interface ScriptLibraryFiltersFromUrlParams {
-  setUrlKuery: (kuery: string) => void;
-  setScriptsLibraryUrlParams: (params: ScriptsLibraryUrlParams) => void;
+interface ScriptLibraryUrlParamSetters {
+  setUrlKueryParam: (kuery: string) => void;
+  setPagingAndSortingParams: (params: {
+    page: number;
+    pageSize: number;
+    sortField: SortableScriptLibraryFields;
+    sortDirection: SortDirection;
+  }) => void;
 }
 
 export const scriptsLibraryFiltersFromUrlParams = (
@@ -46,8 +51,7 @@ export const scriptsLibraryFiltersFromUrlParams = (
   scriptLibraryFilters.kuery = urlKuery;
 
   const urlSortField =
-    urlParams.sortField &&
-    SCRIPT_LIBRARY_SORTABLE_FIELDS.includes(urlParams.sortField as SortableScriptLibraryFields)
+    urlParams.sortField && SCRIPT_LIBRARY_SORTABLE_FIELDS.includes(urlParams.sortField)
       ? urlParams.sortField
       : undefined;
   scriptLibraryFilters.sortField = urlSortField;
@@ -62,18 +66,18 @@ export const scriptsLibraryFiltersFromUrlParams = (
 };
 
 export const useScriptsLibraryUrlParams = (): ScriptsLibraryUrlParams &
-  ScriptLibraryFiltersFromUrlParams => {
+  ScriptLibraryUrlParamSetters => {
   const location = useLocation();
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
 
-  const getUrlScriptsLibraryFilters = useMemo(
+  const getUrlScriptsLibraryFilters = useCallback(
     () => scriptsLibraryFiltersFromUrlParams(urlParams),
     [urlParams]
   );
   const [scriptLibraryFilters, setScriptsLibraryFilters] = useState(getUrlScriptsLibraryFilters);
 
-  const setUrlKuery = useCallback(
+  const setUrlKueryParam = useCallback(
     (kuery: string) => {
       history.push({
         ...location,
@@ -86,15 +90,21 @@ export const useScriptsLibraryUrlParams = (): ScriptsLibraryUrlParams &
     [history, location, toUrlParams, urlParams]
   );
 
-  const setScriptsLibraryUrlParams = useCallback(
-    (params: ScriptsLibraryUrlParams) => {
+  const setPagingAndSortingParams = useCallback(
+    (pagingParams: {
+      page: number;
+      pageSize: number;
+      sortField: SortableScriptLibraryFields;
+      sortDirection: SortDirection;
+    }) => {
       const search = toUrlParams({
         ...urlParams,
-        page: params.page ? params.page : 1,
-        pageSize: params.pageSize ? params.pageSize : 10,
-        sortField: params.sortField?.length ? params.sortField : undefined,
-        sortDirection: params.sortDirection?.length ? params.sortDirection : undefined,
+        page: pagingParams.page,
+        pageSize: pagingParams.pageSize,
+        sortField: pagingParams.sortField?.length ? pagingParams.sortField : undefined,
+        sortDirection: pagingParams.sortDirection?.length ? pagingParams.sortDirection : undefined,
       });
+
       history.push({
         ...location,
         search,
@@ -116,7 +126,7 @@ export const useScriptsLibraryUrlParams = (): ScriptsLibraryUrlParams &
     ...scriptLibraryFilters,
     selectedScriptId: urlParams?.selectedScriptId as ScriptsLibraryUrlParams['selectedScriptId'],
     show: urlParams?.show as ScriptsLibraryUrlParams['show'],
-    setUrlKuery,
-    setScriptsLibraryUrlParams,
+    setUrlKueryParam,
+    setPagingAndSortingParams,
   };
 };
