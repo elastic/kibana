@@ -22,6 +22,12 @@ const INTERNAL_INFERENCE_CONNECTORS = [
   'Anthropic-Claude-Sonnet-3-7',
   'Anthropic-Claude-Sonnet-4-5',
   'OpenAI-GPT-OSS-120B',
+  'OpenAI-GPT-4-1',
+  'OpenAI-GPT-4-1-Mini',
+  'OpenAI-GPT-5-2',
+  'OpenAI-GPT-OSS-20B',
+  'Google-Gemini-3-0-Pro',
+  'Google-Gemini-3-0-Flash',
 ];
 const INTERNAL_CONNECTORS = [...INTERNAL_CLOUD_CONNECTORS, ...INTERNAL_INFERENCE_CONNECTORS];
 
