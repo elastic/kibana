@@ -22,7 +22,6 @@ import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
 } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
