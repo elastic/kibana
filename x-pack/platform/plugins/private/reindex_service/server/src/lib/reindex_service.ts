@@ -224,18 +224,18 @@ export const reindexServiceFactory = (
     // https://github.com/elastic/kibana/issues/201605
     // In serverless mode, index.number_of_replicas setting is not available
     // Filter out undefined values to prevent them from overriding null in settingsToApply
-    const rawBackupSettings = isServerless
-      ? {
-          'index.refresh_interval': settings['index.refresh_interval'],
-        }
-      : {
-          'index.number_of_replicas': settings['index.number_of_replicas'],
-          'index.refresh_interval': settings['index.refresh_interval'],
-        };
+    const indexRefreshInterval = settings['index.refresh_interval'];
+    const indexNumberOfReplicas = settings['index.number_of_replicas'];
 
-    const backupSettings = Object.fromEntries(
-      Object.entries(rawBackupSettings).filter(([key, value]) => value !== undefined)
-    );
+    const backupSettings = {
+      ...(indexRefreshInterval !== undefined && {
+        'index.refresh_interval': indexRefreshInterval,
+      }),
+      ...(!isServerless &&
+        indexNumberOfReplicas !== undefined && {
+          'index.number_of_replicas': indexNumberOfReplicas,
+        }),
+    };
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const settings_override = isServerless
