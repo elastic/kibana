@@ -118,7 +118,7 @@ function setupAlertingMock({
 function renderHeaderMenu(mockContext?: Partial<ApmPluginContextValue>) {
   return render(
     <IntlProvider locale="en">
-      <MockApmPluginContextWrapper value={mockContext}>
+      <MockApmPluginContextWrapper value={mockContext as ApmPluginContextValue}>
         <ApmHeaderActionMenu />
       </MockApmPluginContextWrapper>
     </IntlProvider>

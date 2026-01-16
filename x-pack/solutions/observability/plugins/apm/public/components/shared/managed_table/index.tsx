@@ -119,7 +119,6 @@ function ActionsCell<T extends object>({
       // Add group header
       mainPanelItems.push({
         name: group.groupLabel,
-        isSeparator: false,
         disabled: true,
         css: {
           fontWeight: 700,
@@ -527,4 +526,3 @@ function UnoptimizedManagedTable<T extends object>(props: {
 const ManagedTable = React.memo(UnoptimizedManagedTable) as typeof UnoptimizedManagedTable;
 
 export { ManagedTable, UnoptimizedManagedTable };
-export type { TableActions };

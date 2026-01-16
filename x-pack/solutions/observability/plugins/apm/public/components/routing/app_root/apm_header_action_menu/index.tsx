@@ -31,8 +31,8 @@ export function ApmHeaderActionMenu() {
     capabilities
   );
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
-  const canReadSlos = capabilities.slo?.read;
-  const canWriteSlos = capabilities.slo?.write;
+  const canReadSlos = !!capabilities.slo?.read;
+  const canWriteSlos = !!capabilities.slo?.write;
   const isSloAvailable = canReadSlos || canWriteSlos;
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
