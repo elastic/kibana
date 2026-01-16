@@ -12,10 +12,12 @@ import type { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { PluginSetup as KqlSetup } from '@kbn/kql/server';
 
-import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
-import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
+import { registerESQLControlTransforms } from '../common/transforms/esql_control_transforms';
 import { registerOptionsListControlTransforms } from '../common/transforms/options_list_control_transforms';
 import { registerRangeSliderControlTransforms } from '../common/transforms/range_slider_control_transforms';
+import { registerTimeSliderControlTransforms } from '../common/transforms/time_slider_control_transforms';
+import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
+import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -25,8 +27,10 @@ interface SetupDeps {
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
   public setup(core: CoreSetup, { embeddable, kql }: SetupDeps) {
+    registerESQLControlTransforms(embeddable);
     registerOptionsListControlTransforms(embeddable);
     registerRangeSliderControlTransforms(embeddable);
+    registerTimeSliderControlTransforms(embeddable);
 
     setupOptionsListClusterSettingsRoute(core);
     setupOptionsListSuggestionsRoute(core, kql.autocomplete.getAutocompleteSettings);
