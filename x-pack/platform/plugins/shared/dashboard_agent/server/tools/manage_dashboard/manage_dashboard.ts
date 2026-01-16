@@ -12,25 +12,22 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, isToolResultId } from '@kbn/agent-builder-server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 
 import { dashboardTools } from '../../../common';
-import type { StoredDashboardState } from '../create_dashboard/create_dashboard';
 import {
   checkDashboardToolsAvailability,
   normalizePanels,
   buildMarkdownPanel,
   getMarkdownPanelHeight,
-  assignPanelUids,
-  removePanelsByUids,
-  filterOutMarkdownPanels,
+  filterVisualizationIds,
 } from '../utils';
+import type { DashboardContent } from '../types';
 
 const manageDashboardSchema = z.object({
-  toolResultId: z
+  dashboardId: z
     .string()
     .describe(
-      'The tool_result_id from a previous create_dashboard or manage_dashboard call. This references the dashboard state to modify.'
+      'The ID of the dashboard to modify, returned by a previous create_dashboard or manage_dashboard call.'
     ),
   title: z.string().optional().describe('(optional) Updated title for the dashboard.'),
   description: z.string().optional().describe('(optional) Updated description for the dashboard.'),
@@ -40,16 +37,18 @@ const manageDashboardSchema = z.object({
     .describe(
       '(optional) Updated markdown content for the summary panel. If not provided, the existing markdown is preserved.'
     ),
-  panelsToAdd: z
-    .array(z.unknown())
-    .optional()
-    .describe(
-      '(optional) Array of panel configurations or tool_result_ids to add to the dashboard.'
-    ),
-  panelsToRemove: z
+  visualizationsToAdd: z
     .array(z.string())
     .optional()
-    .describe('(optional) Array of panel UIDs to remove from the dashboard.'),
+    .describe(
+      '(optional) Array of tool_result_ids from create_visualizations calls to add to the dashboard.'
+    ),
+  visualizationsToRemove: z
+    .array(z.string())
+    .optional()
+    .describe(
+      '(optional) Array of tool_result_ids to remove from the dashboard. These are the same IDs returned by create_visualizations.'
+    ),
 });
 
 export const manageDashboardTool = ({
@@ -66,105 +65,91 @@ export const manageDashboardTool = ({
       cacheMode: 'space',
       handler: checkDashboardToolsAvailability,
     },
-    description: `Incrementally update an in-memory dashboard by adding or removing panels, or updating metadata.
+    description: `Incrementally update an in-memory dashboard by adding or removing visualizations, or updating metadata.
 
 This tool will:
-1. Read the previous dashboard state from the provided tool_result_id
-2. Apply incremental changes (add/remove panels, update title/description/markdown)
+1. Read the previous dashboard state from the provided dashboardId
+2. Apply incremental changes (add/remove visualizations, update title/description/markdown)
 3. Generate a new in-memory dashboard URL with the updated state
-4. Return a new tool_result_id for subsequent modifications
+4. Return a new dashboard ID for subsequent modifications
 
 Use this tool when you need to:
 - Add new visualizations to an existing dashboard
-- Remove panels from a dashboard
+- Remove visualizations from a dashboard
 - Update dashboard title, description, or markdown summary`,
     schema: manageDashboardSchema,
     tags: [],
     handler: async (
-      { toolResultId, title, description, markdownContent, panelsToAdd, panelsToRemove },
+      {
+        dashboardId,
+        title,
+        description,
+        markdownContent,
+        visualizationsToAdd,
+        visualizationsToRemove,
+      },
       { logger, request, resultStore }
     ) => {
       try {
-        if (!isToolResultId(toolResultId)) {
+        if (!isToolResultId(dashboardId)) {
           throw new Error(
-            `Invalid toolResultId "${toolResultId}". Expected a tool_result_id from a previous create_dashboard or manage_dashboard call.`
+            `Invalid dashboardId "${dashboardId}". Expected an ID from a previous create_dashboard or manage_dashboard call.`
           );
         }
 
-        if (!resultStore.has(toolResultId)) {
+        if (!resultStore.has(dashboardId)) {
           throw new Error(
-            `Dashboard state not found for toolResultId "${toolResultId}". Make sure you're using a tool_result_id from a previous dashboard operation.`
+            `Dashboard not found for ID "${dashboardId}". Make sure you're using an ID from a previous dashboard operation.`
           );
         }
 
-        const storedResult = resultStore.get(toolResultId);
+        const storedResult = resultStore.get(dashboardId);
         if (storedResult.type !== ToolResultType.dashboard) {
           throw new Error(
-            `The provided toolResultId "${toolResultId}" is not a dashboard result (got "${storedResult.type}").`
+            `The provided dashboardId "${dashboardId}" is not a dashboard (got "${storedResult.type}").`
           );
         }
 
-        // Extract the stored dashboard state from content.state
-        // DashboardResult.data has type: { id, title, content: Record<string, unknown> }
-        const content = storedResult.data.content as { state?: StoredDashboardState };
-        if (!content?.state) {
-          throw new Error(
-            `Dashboard state not found in content for toolResultId "${toolResultId}". The dashboard may have been created with an older version.`
-          );
+        // Extract the stored dashboard content
+        const previousContent = storedResult.data.content;
+        if (!previousContent?.visualizationIds) {
+          throw new Error(`Dashboard content not found for ID "${dashboardId}".`);
         }
-        const previousState = content.state;
 
         // Start with the previous state
-        const updatedTitle = title ?? previousState.title;
-        const updatedDescription = description ?? previousState.description;
-        const updatedMarkdownContent = markdownContent ?? previousState.markdownContent;
+        const updatedTitle = title ?? previousContent.title;
+        const updatedDescription = description ?? previousContent.description;
+        const updatedMarkdownContent = markdownContent ?? previousContent.markdownContent;
 
-        // Get current panels, filtering out the markdown panel (we'll rebuild it)
-        let currentPanels = filterOutMarkdownPanels(previousState.panels) as DashboardPanel[];
+        // Work with visualization IDs directly
+        let visualizationIds = [...previousContent.visualizationIds];
 
-        // Remove panels if specified
-        if (panelsToRemove && panelsToRemove.length > 0) {
-          currentPanels = removePanelsByUids(currentPanels, panelsToRemove);
-          logger.debug(`Removed ${panelsToRemove.length} panels from dashboard`);
+        // Remove visualizations if specified
+        if (visualizationsToRemove && visualizationsToRemove.length > 0) {
+          visualizationIds = filterVisualizationIds(visualizationIds, visualizationsToRemove);
+          logger.debug(`Removed ${visualizationsToRemove.length} visualizations from dashboard`);
         }
 
-        // Add new panels if specified
-        if (panelsToAdd && panelsToAdd.length > 0) {
-          // Calculate the Y offset for new panels (below existing panels)
-          const maxY = currentPanels.reduce((max, panel) => {
-            const panelBottom = panel.grid.y + panel.grid.h;
-            return Math.max(max, panelBottom);
-          }, 0);
-
-          const newPanels = normalizePanels(panelsToAdd, maxY, resultStore);
-          currentPanels = [...currentPanels, ...newPanels];
-          logger.debug(`Added ${panelsToAdd.length} new panels to dashboard`);
+        // Add new visualizations if specified
+        if (visualizationsToAdd && visualizationsToAdd.length > 0) {
+          visualizationIds = [...visualizationIds, ...visualizationsToAdd];
+          logger.debug(`Added ${visualizationsToAdd.length} visualizations to dashboard`);
         }
 
-        // Build the new markdown panel and offset all visualization panels accordingly
+        // Build markdown panel and visualization panels
         const markdownPanel = buildMarkdownPanel(updatedMarkdownContent);
         const yOffset = getMarkdownPanelHeight(updatedMarkdownContent);
-
-        // Shift all non-markdown panels down to accommodate the markdown panel
-        const shiftedPanels = currentPanels.map((panel) => ({
-          ...panel,
-          grid: {
-            ...panel.grid,
-            y: panel.grid.y + yOffset,
-          },
-        }));
-
-        const finalPanels = [markdownPanel, ...shiftedPanels];
-
-        // Assign unique UIDs to any panels that don't have them
-        const panelsWithUids = assignPanelUids(finalPanels);
+        const dashboardPanels = [
+          markdownPanel,
+          ...normalizePanels(visualizationIds, yOffset, resultStore),
+        ];
 
         const spaceId = spaces?.spacesService?.getSpaceId(request);
 
         // Generate new in-memory dashboard URL
         const dashboardUrl = await dashboardLocator.getRedirectUrl(
           {
-            panels: panelsWithUids as unknown as DashboardPanel[],
+            panels: dashboardPanels,
             title: updatedTitle,
             description: updatedDescription,
             viewMode: 'edit',
@@ -173,16 +158,17 @@ Use this tool when you need to:
           { spaceId }
         );
 
-        logger.info(`Dashboard updated with ${panelsWithUids.length} panels`);
+        logger.info(`Dashboard updated with ${dashboardPanels.length} panels`);
 
         const newToolResultId = getToolResultId();
 
-        // Store the updated dashboard state for future manage_dashboard calls
-        const storedState: StoredDashboardState = {
+        const content: DashboardContent = {
+          url: dashboardUrl,
           title: updatedTitle,
           description: updatedDescription,
           markdownContent: updatedMarkdownContent,
-          panels: panelsWithUids,
+          panelCount: dashboardPanels.length,
+          visualizationIds,
         };
 
         return {
@@ -190,16 +176,7 @@ Use this tool when you need to:
             {
               type: ToolResultType.dashboard,
               tool_result_id: newToolResultId,
-              data: {
-                id: newToolResultId,
-                title: updatedTitle,
-                content: {
-                  url: dashboardUrl,
-                  description: updatedDescription,
-                  panelCount: panelsWithUids.length,
-                  state: storedState,
-                },
-              },
+              data: { content },
             },
           ],
         };
@@ -211,7 +188,7 @@ Use this tool when you need to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to manage dashboard: ${error.message}`,
-                metadata: { toolResultId, title, description },
+                metadata: { dashboardId, title, description },
               },
             },
           ],

@@ -12,7 +12,6 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 
 import { dashboardTools } from '../../../common';
 import {
@@ -20,32 +19,24 @@ import {
   normalizePanels,
   buildMarkdownPanel,
   getMarkdownPanelHeight,
-  assignPanelUids,
 } from '../utils';
+import type { DashboardContent } from '../types';
 
 const createDashboardSchema = z.object({
   title: z.string().describe('The title of the dashboard to create.'),
   description: z.string().describe('A description of the dashboard.'),
-  panels: z
-    .array(z.unknown())
+  visualizations: z
+    .array(z.string())
     .optional()
-    .describe('An array of panel configurations (PanelJSON or lens_tool_artifact).'),
+    .describe(
+      'An array of tool_result_ids from previous create_visualizations calls. These reference the visualizations to include in the dashboard.'
+    ),
   markdownContent: z
     .string()
     .describe(
       'Markdown content for a summary panel displayed at the top of the dashboard. Should describe what the dashboard shows and provide helpful context.'
     ),
 });
-
-/**
- * Dashboard state stored in the tool result for later retrieval by manage_dashboard
- */
-export interface StoredDashboardState {
-  title: string;
-  description: string;
-  markdownContent: string;
-  panels: DashboardPanel[];
-}
 
 export const createDashboardTool = ({
   dashboardLocator,
@@ -61,29 +52,31 @@ export const createDashboardTool = ({
       cacheMode: 'space',
       handler: checkDashboardToolsAvailability,
     },
-    description: `Create an in-memory dashboard with the specified title, description, panels, and a markdown summary.
+    description: `Create an in-memory dashboard with the specified title, description, visualizations, and a markdown summary.
 
 This tool will:
 1. Accept a title and description for the dashboard
 2. Accept markdown content for a summary panel at the top
-3. Accept an array of panel configurations
+3. Accept an array of visualization tool_result_ids from previous create_visualizations calls
 4. Generate an in-memory dashboard URL (not saved until user explicitly saves it)
 
 The dashboard is created in edit mode so the user can review and save it.`,
     schema: createDashboardSchema,
     tags: [],
     handler: async (
-      { title, description, panels, markdownContent },
+      { title, description, visualizations, markdownContent },
       { logger, request, resultStore }
     ) => {
       try {
-        // Build markdown panel and offset other panels accordingly
+        const visualizationIds = visualizations ?? [];
+
+        // Build markdown panel and visualization panels
         const markdownPanel = buildMarkdownPanel(markdownContent);
         const yOffset = getMarkdownPanelHeight(markdownContent);
-        const normalizedPanels = [markdownPanel, ...normalizePanels(panels, yOffset, resultStore)];
-
-        // Assign unique UIDs to all panels for later reference
-        const panelsWithUids = assignPanelUids(normalizedPanels);
+        const dashboardPanels = [
+          markdownPanel,
+          ...normalizePanels(visualizationIds, yOffset, resultStore),
+        ];
 
         const spaceId = spaces?.spacesService?.getSpaceId(request);
 
@@ -91,7 +84,7 @@ The dashboard is created in edit mode so the user can review and save it.`,
         const dashboardUrl = await dashboardLocator.getRedirectUrl(
           {
             // No dashboardId means it will be an unsaved "create" dashboard
-            panels: panelsWithUids as unknown as DashboardPanel[],
+            panels: dashboardPanels,
             title,
             description,
             viewMode: 'edit', // Allow user to edit and save
@@ -101,16 +94,17 @@ The dashboard is created in edit mode so the user can review and save it.`,
           { spaceId }
         );
 
-        logger.info(`In-memory dashboard created with ${panelsWithUids.length} panels`);
+        logger.info(`In-memory dashboard created with ${dashboardPanels.length} panels`);
 
         const toolResultId = getToolResultId();
 
-        // Store dashboard state inside content for manage_dashboard to retrieve
-        const storedState: StoredDashboardState = {
+        const content: DashboardContent = {
+          url: dashboardUrl,
           title,
           description,
           markdownContent,
-          panels: panelsWithUids,
+          panelCount: dashboardPanels.length,
+          visualizationIds,
         };
 
         return {
@@ -118,16 +112,7 @@ The dashboard is created in edit mode so the user can review and save it.`,
             {
               type: ToolResultType.dashboard,
               tool_result_id: toolResultId,
-              data: {
-                id: toolResultId,
-                title,
-                content: {
-                  url: dashboardUrl,
-                  description,
-                  panelCount: panelsWithUids.length,
-                  state: storedState,
-                },
-              },
+              data: { content },
             },
           ],
         };

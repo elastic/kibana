@@ -125,12 +125,13 @@ export function createDashboardRenderer({
       return <EuiText>Unable to find dashboard for {ToolResultAttribute}.</EuiText>;
     }
 
-    const { title, content } = toolResult.data;
-    const dashboardUrl = content?.url as string | undefined;
+    const {
+      content: { url, title },
+    } = toolResult.data;
 
     return (
       <>
-        <DashboardCard title={title || 'Dashboard'} url={dashboardUrl} />
+        <DashboardCard title={title || 'Dashboard'} url={url} />
         <EuiSpacer size="m" />
       </>
     );
