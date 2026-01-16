@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { conflict } from '@hapi/boom';
 import { z } from '@kbn/zod';
-import {
-  baseFeatureSchema,
-  featureStatusSchema,
-  TaskStatus,
-  type Feature,
-} from '@kbn/streams-schema';
+import { baseFeatureSchema, featureStatusSchema, type Feature } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -24,9 +18,8 @@ import {
   getFeaturesIdentificationTaskId,
   FEATURES_IDENTIFICATION_TASK_TYPE,
 } from '../../../../lib/tasks/task_definitions/features_identification';
-import { isStale } from '../../../../lib/tasks/is_stale';
-import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
-import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
+import type { TaskResult } from '../../../../lib/tasks/types';
+import { handleTaskAction } from '../../../utils/task_helpers';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -155,22 +148,7 @@ export const listFeaturesRoute = createServerRoute({
   },
 });
 
-export type FeaturesIdentificationTaskResult =
-  | {
-      status:
-        | TaskStatus.NotStarted
-        | TaskStatus.InProgress
-        | TaskStatus.Stale
-        | TaskStatus.BeingCanceled
-        | TaskStatus.Canceled;
-    }
-  | {
-      status: TaskStatus.Failed;
-      error: string;
-    }
-  | ({
-      status: TaskStatus.Completed | TaskStatus.Acknowledged;
-    } & IdentifyFeaturesResult);
+export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
 
 export const featuresStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/features/_status',
@@ -203,29 +181,9 @@ export const featuresStatusRoute = createServerRoute({
     const { name } = params.path;
     await streamsClient.ensureStream(name);
 
-    const task = await taskClient.get<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
+    return await taskClient.getStatus<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
       getFeaturesIdentificationTaskId(name)
     );
-
-    if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
-      return {
-        status: TaskStatus.Stale,
-      };
-    } else if (task.status === TaskStatus.Failed) {
-      return {
-        status: TaskStatus.Failed,
-        error: task.task.error,
-      };
-    } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
-      return {
-        status: task.status,
-        ...task.task.payload,
-      };
-    }
-
-    return {
-      status: task.status,
-    };
   },
 });
 
@@ -277,71 +235,44 @@ export const featuresTaskRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { name } = params.path;
+    const {
+      path: { name },
+      body,
+    } = params;
     await streamsClient.ensureStream(name);
 
     const taskId = getFeaturesIdentificationTaskId(name);
 
-    if (params.body.action === 'schedule') {
-      const { from: start, to: end, connector_id: connectorIdParam } = params.body;
+    const actionParams =
+      body.action === 'schedule'
+        ? ({
+            action: body.action,
+            scheduleConfig: {
+              taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
+              taskId,
+              streamName: name,
+              params: await (async (): Promise<FeaturesIdentificationTaskParams> => {
+                const connectorId = await resolveConnectorId({
+                  connectorId: body.connector_id,
+                  uiSettingsClient,
+                  logger,
+                });
+                return {
+                  connectorId,
+                  start: body.from.getTime(),
+                  end: body.to.getTime(),
+                };
+              })(),
+              request,
+            },
+          } as const)
+        : ({ action: body.action } as const);
 
-      const connectorId = await resolveConnectorId({
-        connectorId: connectorIdParam,
-        uiSettingsClient,
-        logger,
-      });
-
-      try {
-        await taskClient.schedule<FeaturesIdentificationTaskParams>({
-          task: {
-            type: FEATURES_IDENTIFICATION_TASK_TYPE,
-            id: taskId,
-            space: '*',
-            stream: name,
-          },
-          params: {
-            connectorId,
-            start: start.getTime(),
-            end: end.getTime(),
-          },
-          request,
-        });
-
-        return {
-          status: TaskStatus.InProgress,
-        };
-      } catch (error) {
-        if (error instanceof CancellationInProgressError) {
-          throw conflict(error.message);
-        }
-
-        throw error;
-      }
-    } else if (params.body.action === 'cancel') {
-      await taskClient.cancel(taskId);
-
-      return {
-        status: TaskStatus.BeingCanceled,
-      };
-    }
-
-    try {
-      const task = await taskClient.acknowledge<
-        FeaturesIdentificationTaskParams,
-        IdentifyFeaturesResult
-      >(taskId);
-
-      return {
-        status: TaskStatus.Acknowledged,
-        ...task.task.payload,
-      };
-    } catch (error) {
-      if (error instanceof AcknowledgingIncompleteError) {
-        throw conflict(error.message);
-      }
-
-      throw error;
-    }
+    return handleTaskAction<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>({
+      taskClient,
+      taskId,
+      ...actionParams,
+    });
   },
 });
 
