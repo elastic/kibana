@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { EndpointRunscriptScriptSelector } from '../../../management/components/endpoint_runscript_script_selector';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { OS_TITLES } from '../../../management/common/translations';
 import { PlatformIcon } from '../../../management/components/endpoint_responder/components/header_info/platforms';
@@ -193,51 +194,53 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
     // FIXME:PT add i18n for all labels below
     return (
       <EuiText size="s" data-test-subj={dataTestSubj}>
-        {(['linux', 'macos', 'windows'] as Array<keyof RunScriptUseFieldDataType>).map((osType) => {
-          const currentConfig = value[osType];
+        {(['linux', 'macos', 'windows'] as Array<keyof RunScriptUseFieldDataType>).map(
+          (osType, index) => {
+            const currentConfig = value[osType];
 
-          return (
-            <EuiFormRow fullWidth>
-              <EuiFlexGroup
-                key={osType}
-                gutterSize="l"
-                alignItems="center"
-                justifyContent="spaceBetween"
-              >
-                <EuiFlexItem>
-                  <EuiFormRow hasEmptyLabelSpace>
-                    <EuiFlexGroup
-                      responsive={false}
-                      wrap={false}
-                      gutterSize="s"
-                      alignItems="center"
-                    >
-                      <EuiFlexItem grow={false}>
-                        <PlatformIcon platform={osType} size="m" />
-                      </EuiFlexItem>
-                      <EuiFlexItem>{OS_TITLES[osType] ?? osType}</EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow label={'Script'}>
-                    <div>{`pick script: ${currentConfig.scriptId}`}</div>
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow label={'Scripts arguments (if any)'}>
-                    <EuiFieldText name="scriptParms" fullWidth />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label={'Script execution timeout'}>
-                    <EuiFieldText name="timeout" fullWidth />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
-          );
-        })}
+            return (
+              <EuiFormRow fullWidth>
+                <EuiFlexGroup
+                  key={osType}
+                  gutterSize="l"
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                >
+                  <EuiFlexItem>
+                    <EuiFormRow hasEmptyLabelSpace>
+                      <EuiFlexGroup
+                        responsive={false}
+                        wrap={false}
+                        gutterSize="s"
+                        alignItems="center"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <PlatformIcon platform={osType} size="m" />
+                        </EuiFlexItem>
+                        <EuiFlexItem>{OS_TITLES[osType] ?? osType}</EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow label={index === 0 ? 'Script' : undefined}>
+                      <EndpointRunscriptScriptSelector />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow label={index === 0 ? 'Script arguments (if any)' : undefined}>
+                      <EuiFieldText name="scriptParms" fullWidth />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFormRow label={index === 0 ? 'Script execution timeout' : undefined}>
+                      <EuiFieldText name="timeout" fullWidth />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            );
+          }
+        )}
 
         <EuiSpacer size="xxl" />
         <EuiHorizontalRule />
