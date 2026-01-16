@@ -30,7 +30,8 @@ export class RuleExecutorTaskRunner {
     @inject(LoggerService) private readonly logger: LoggerService,
     @inject(PluginInitializer('config')) private readonly pluginConfig: { get(): PluginConfig },
     @inject(ResourceManager) private readonly resourcesService: ResourceManager,
-    @inject(RulesSavedObjectService) private readonly rulesSavedObjectService: RulesSavedObjectService,
+    @inject(RulesSavedObjectService)
+    private readonly rulesSavedObjectService: RulesSavedObjectService,
     @inject(QueryService) private readonly queryService: QueryService,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageService
   ) {}
@@ -100,7 +101,9 @@ export class RuleExecutorTaskRunner {
       const scheduledAt = taskInstance.scheduledAt;
       const scheduledTimestamp =
         (typeof scheduledAt === 'string' ? scheduledAt : undefined) ??
-        (taskInstance.startedAt instanceof Date ? taskInstance.startedAt.toISOString() : undefined) ??
+        (taskInstance.startedAt instanceof Date
+          ? taskInstance.startedAt.toISOString()
+          : undefined) ??
         new Date().toISOString();
 
       const alertDocs = buildAlertEventsFromEsqlResponse({

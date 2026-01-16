@@ -26,7 +26,9 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     });
 
     registerRuleExecutorTaskDefinition({
-      taskManager: container.get(PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager')),
+      taskManager: container.get(
+        PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager')
+      ),
       taskRunnerFactory: container.get(TaskRunnerFactory),
     });
   });
