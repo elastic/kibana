@@ -59,13 +59,13 @@ function prepareFilters(
 
   if (filterOptions.name) {
     filter.fields.name = {
-      include: [filterOptions.name],
+      include: { values: [filterOptions.name] },
     };
   }
 
   if (filterOptions.tags.length) {
     filter.fields.tags = {
-      include: filterOptions.tags,
+      include: { values: filterOptions.tags },
     };
   }
 

@@ -217,6 +217,26 @@ describe(
         expectLastRuleInTable(ADD_ELASTIC_RULES_TABLE, 'My rule 1');
       });
 
+      it('Setting a filter resets pagination to the first page', () => {
+        const rules = Array.from({ length: 6 }, (_, i) =>
+          createRuleAssetSavedObject({
+            name: `Rule ${i + 1}`,
+            rule_id: `rule_${i + 1}`,
+            tags: ['tag-a'],
+          })
+        );
+
+        installPrebuiltRuleAssets(rules);
+        visitAddRulesPage();
+        setRowsPerPageTo(5);
+
+        goToTablePage(2);
+        expectTablePage(2);
+
+        filterByTags(['tag-a']);
+        expectTablePage(1);
+      });
+
       it('Empty state is shown when filters match no rules', () => {
         installPrebuiltRuleAssets([
           createRuleAssetSavedObject({

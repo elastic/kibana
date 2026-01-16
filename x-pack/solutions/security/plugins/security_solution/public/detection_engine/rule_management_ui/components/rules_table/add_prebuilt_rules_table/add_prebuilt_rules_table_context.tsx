@@ -140,10 +140,21 @@ export const AddPrebuiltRulesTableContextProvider = ({
     perPage: RULES_TABLE_INITIAL_PAGE_SIZE,
   });
 
-  const [filterOptions, setFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
+  const [filterOptions, setInternalFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
     name: '',
     tags: [],
   });
+
+  const setFilterOptions = useCallback<
+    Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>
+  >((action) => {
+    setInternalFilterOptions(action);
+    setPagination((prev) => ({
+      // Reset pagination to the first page when filters are changed to avoid displaying the wrong page of rules
+      ...prev,
+      page: 1,
+    }));
+  }, []);
 
   const [sortingOptions, setSortingOptions] = useState<PrebuiltRuleAssetsSortItem | undefined>();
 
@@ -317,6 +328,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
       installSelectedRules,
       refetch,
       openRulePreview,
+      setFilterOptions,
     ]
   );
 
