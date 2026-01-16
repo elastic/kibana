@@ -206,102 +206,52 @@ describe('InferenceFlyout', () => {
     expect(screen.getByTestId('num_allocations-number')).toBeEnabled();
   });
 
+  // Note: UI visibility tests for serverless adaptive allocations are in inference_service_form_fields.test.tsx
+  // This file focuses on integration tests: form submission, deserialization, and cross-provider behavior
   describe('Serverless adaptive allocations', () => {
-    describe('when enforceAdaptiveAllocations is true (serverless)', () => {
-      it('shows max_number_of_allocations field instead of num_allocations for Elasticsearch provider', async () => {
-        renderComponent({ enforceAdaptiveAllocations: true });
+    it('does not affect other providers like Hugging Face', async () => {
+      renderComponent({ enforceAdaptiveAllocations: true });
 
-        await userEvent.click(screen.getByTestId('provider-select'));
-        await userEvent.click(screen.getByText('Elasticsearch'));
+      await userEvent.click(screen.getByTestId('provider-select'));
+      await userEvent.click(screen.getByText('Hugging Face'));
 
-        expect(screen.getByTestId('provider-select')).toHaveValue('Elasticsearch');
-        // max_number_of_allocations should be visible in serverless
-        expect(screen.getByTestId('max_number_of_allocations-number')).toBeInTheDocument();
-        // num_allocations should be hidden in serverless
-        expect(screen.queryByTestId('num_allocations-number')).not.toBeInTheDocument();
-        // num_threads should be hidden in serverless
-        expect(screen.queryByTestId('num_threads-number')).not.toBeInTheDocument();
-      });
-
-      it('shows adaptive resources title section for Elasticsearch provider', async () => {
-        renderComponent({ enforceAdaptiveAllocations: true });
-
-        await userEvent.click(screen.getByTestId('provider-select'));
-        await userEvent.click(screen.getByText('Elasticsearch'));
-
-        expect(screen.getByTestId('maxNumberOfAllocationsDetailsLabel')).toBeInTheDocument();
-      });
-
-      it('does not affect other providers like Hugging Face', async () => {
-        renderComponent({ enforceAdaptiveAllocations: true });
-
-        await userEvent.click(screen.getByTestId('provider-select'));
-        await userEvent.click(screen.getByText('Hugging Face'));
-
-        expect(screen.getByTestId('provider-select')).toHaveValue('Hugging Face');
-        // Hugging Face fields should be visible as normal
-        expect(screen.getByTestId('api_key-password')).toBeInTheDocument();
-        expect(screen.getByTestId('url-input')).toBeInTheDocument();
-        // max_number_of_allocations should not be visible for non-elasticsearch providers
-        expect(screen.queryByTestId('max_number_of_allocations-number')).not.toBeInTheDocument();
-      });
-
-      it('submits form with adaptive_allocations config when max_number_of_allocations is set', async () => {
-        renderComponent({ enforceAdaptiveAllocations: true });
-
-        await userEvent.click(screen.getByTestId('provider-select'));
-        await userEvent.click(screen.getByText('Elasticsearch'));
-
-        // Set max allocations
-        const maxAllocationsInput = screen.getByTestId('max_number_of_allocations-number');
-        await userEvent.clear(maxAllocationsInput);
-        await userEvent.type(maxAllocationsInput, '10');
-
-        await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
-
-        expect(mockMutationFn).toHaveBeenCalledWith(
-          expect.objectContaining({
-            config: expect.objectContaining({
-              provider: 'elasticsearch',
-              providerConfig: expect.objectContaining({
-                adaptive_allocations: expect.objectContaining({
-                  enabled: true,
-                  min_number_of_allocations: 0,
-                  max_number_of_allocations: 10,
-                }),
-                num_threads: 1,
-              }),
-            }),
-          }),
-          false
-        );
-      });
+      expect(screen.getByTestId('provider-select')).toHaveValue('Hugging Face');
+      // Hugging Face fields should be visible as normal
+      expect(screen.getByTestId('api_key-password')).toBeInTheDocument();
+      expect(screen.getByTestId('url-input')).toBeInTheDocument();
+      // max_number_of_allocations should not be visible for non-elasticsearch providers
+      expect(screen.queryByTestId('max_number_of_allocations-number')).not.toBeInTheDocument();
     });
 
-    describe('when enforceAdaptiveAllocations is false (non-serverless)', () => {
-      it('shows num_allocations and num_threads fields for Elasticsearch provider', async () => {
-        renderComponent({ enforceAdaptiveAllocations: false });
+    it('submits form with adaptive_allocations config when max_number_of_allocations is set', async () => {
+      renderComponent({ enforceAdaptiveAllocations: true });
 
-        await userEvent.click(screen.getByTestId('provider-select'));
-        await userEvent.click(screen.getByText('Elasticsearch'));
+      await userEvent.click(screen.getByTestId('provider-select'));
+      await userEvent.click(screen.getByText('Elasticsearch'));
 
-        expect(screen.getByTestId('provider-select')).toHaveValue('Elasticsearch');
-        // num_allocations should be visible in non-serverless
-        expect(screen.getByTestId('num_allocations-number')).toBeInTheDocument();
-        // num_threads should be visible in non-serverless
-        expect(screen.getByTestId('num_threads-number')).toBeInTheDocument();
-        // max_number_of_allocations should NOT be visible in non-serverless
-        expect(screen.queryByTestId('max_number_of_allocations-number')).not.toBeInTheDocument();
-      });
+      // Set max allocations
+      const maxAllocationsInput = screen.getByTestId('max_number_of_allocations-number');
+      await userEvent.clear(maxAllocationsInput);
+      await userEvent.type(maxAllocationsInput, '10');
 
-      it('does not show adaptive resources title for Elasticsearch provider', async () => {
-        renderComponent({ enforceAdaptiveAllocations: false });
+      await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
 
-        await userEvent.click(screen.getByTestId('provider-select'));
-        await userEvent.click(screen.getByText('Elasticsearch'));
-
-        expect(screen.queryByTestId('maxNumberOfAllocationsDetailsLabel')).not.toBeInTheDocument();
-      });
+      expect(mockMutationFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            provider: 'elasticsearch',
+            providerConfig: expect.objectContaining({
+              adaptive_allocations: expect.objectContaining({
+                enabled: true,
+                min_number_of_allocations: 0,
+                max_number_of_allocations: 10,
+              }),
+              num_threads: 1,
+            }),
+          }),
+        }),
+        false
+      );
     });
 
     describe('edit mode with adaptive allocations', () => {
