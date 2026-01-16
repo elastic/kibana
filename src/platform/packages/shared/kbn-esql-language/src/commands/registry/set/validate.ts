@@ -17,12 +17,7 @@ import type {
   ESQLSingleAstItem,
 } from '../../../types';
 import type { SupportedDataType } from '../..';
-
-// the setting 'approximate' uses 'map_param' as a type,
-// whereas the expression type in the AST is 'function_named_parameters'.
-const TypeMap: Record<SupportedDataType, string> = {
-  function_named_parameters: 'map_param',
-};
+import { MAP_PARAMS_REGEX } from '../../definitions/utils/autocomplete/expressions/signature_analyzer';
 
 export const validate = (command: ESQLAstAllCommands, commands: ESQLCommand[]): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
@@ -48,23 +43,11 @@ export const validate = (command: ESQLAstAllCommands, commands: ESQLCommand[]): 
     return messages;
   }
 
-  // If the setting name is complete, validate the value type
+  // If the setting definition is complete, validate the values and the types
   if (!settingNameIdentifier.incomplete) {
-    const settingValue = getSettingValue(command);
-    if (settingValue) {
-      const expectedTypes = setting.type;
-      const settingValueType = getExpressionType(settingValue);
-      const valueType = TypeMap[settingValueType] || settingValueType;
-
-      if (!expectedTypes.includes(valueType)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'invalidSettingValueType',
-            values: { value: settingValue.text, setting: settingNameIdentifier.text },
-            locations: settingValue.location,
-          })
-        );
-      }
+    const validationError = validateSettingValues(command, setting);
+    if (validationError) {
+      messages.push(validationError);
     }
   }
 
@@ -91,6 +74,81 @@ function getSettingValue(command: ESQLAstAllCommands): ESQLSingleAstItem | null 
   const settingValue = settingArg.args[1];
   if (isLiteral(settingValue) || isMap(settingValue)) {
     return settingValue;
+  }
+  return null;
+}
+
+function getValuesTypeFromMapParamDefinition(mapParamsStr: string): Record<string, string[]> {
+  const result: Record<string, string[]> = {};
+
+  for (const match of mapParamsStr.matchAll(MAP_PARAMS_REGEX)) {
+    const paramName = match[1];
+    const rawType = match[4] ?? 'keyword';
+    const typesFromDefinition = rawType.split(',').map((type) => type.trim() ?? 'keyword');
+    result[paramName] = typesFromDefinition;
+  }
+
+  return result;
+}
+
+// the setting 'approximate' uses 'map_param' as a type,
+// whereas the expression type in the AST is 'function_named_parameters'.
+const TypeMap: Record<SupportedDataType, string> = {
+  function_named_parameters: 'map_param',
+};
+
+function validateSettingValues(
+  command: ESQLAstAllCommands,
+  setting: { name: string; type: SupportedDataType[]; mapParams?: string }
+): ESQLMessage | null {
+  const settingValue = getSettingValue(command);
+  if (settingValue) {
+    const expectedTypes = setting.type;
+    const settingValueType = getExpressionType(settingValue);
+    const valueType = TypeMap[settingValueType] || settingValueType;
+
+    // validate literal values types
+    if (!expectedTypes.includes(valueType)) {
+      return getMessageFromId({
+        messageId: 'invalidSettingValueType',
+        values: { value: settingValue.text, setting: setting.name },
+        locations: settingValue.location,
+      });
+    }
+
+    // If the setting value is a map, validate its parameters
+    if (valueType === 'map_param' && isMap(settingValue) && setting.mapParams) {
+      const mapParamsDefinition = getValuesTypeFromMapParamDefinition(setting.mapParams);
+      const mapParamsEntries = settingValue.entries;
+
+      for (const param of mapParamsEntries) {
+        const paramKey = 'valueUnquoted' in param.key ? param.key.valueUnquoted : param.key.text;
+        if (!mapParamsDefinition[paramKey]) {
+          return getMessageFromId({
+            messageId: 'unknownMapParameterName',
+            values: { paramName: paramKey, map: JSON.stringify(mapParamsDefinition) },
+            locations: param.key.location,
+          });
+        }
+
+        const paramValueType = getExpressionType(param.value);
+        if (
+          mapParamsDefinition[paramKey] &&
+          param.incomplete === false &&
+          !mapParamsDefinition[paramKey].includes(paramValueType)
+        ) {
+          return getMessageFromId({
+            messageId: 'invalidMapParameterValueType',
+            values: {
+              paramName: paramKey,
+              expectedTypes: mapParamsDefinition[paramKey].join(', '),
+              actualType: paramValueType,
+            },
+            locations: param.value.location,
+          });
+        }
+      }
+    }
   }
   return null;
 }
