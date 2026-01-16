@@ -5,80 +5,60 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const GEO_GRID_TYPE = 'geo_grid';
 
 describe('Processor: GeoGrid', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
 
-    const { component, actions } = testBed;
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: GEO_GRID_TYPE },
+    });
 
-    component.update();
-
-    // Open flyout to add new processor
-    actions.addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await actions.addProcessorType(GEO_GRID_TYPE);
+    await screen.findByTestId('addProcessorForm');
+    await screen.findByTestId('fieldNameField');
   });
 
   test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
-
     // Expect form error as "field" is a required parameter
-    expect(form.getErrorsMessages()).toEqual([
-      'A field value is required.', // "Field" input
-      'A tile type value is required.', // "Tile type" input
-    ]);
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+
+    expect(await screen.findByText('A field value is required.')).toBeInTheDocument();
+    expect(screen.getByText('A tile type value is required.')).toBeInTheDocument();
   });
 
   test('saves with default parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value
-    form.setInputValue('fieldNameField.input', 'test_geo_grid_processor');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'test_geo_grid_processor' },
+    });
 
     // Add "tile tyle" field
-    form.setSelectValue('tileTypeField', 'geohex');
+    fireEvent.change(screen.getByTestId('tileTypeField'), { target: { value: 'geohex' } });
 
     // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, GEO_GRID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][GEO_GRID_TYPE]).toEqual(
       expect.objectContaining({
@@ -89,27 +69,35 @@ describe('Processor: GeoGrid', () => {
   });
 
   test('saves with optional parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add required fields
-    form.setInputValue('fieldNameField.input', 'test_geo_grid_processor');
-    form.setSelectValue('tileTypeField', 'geohex');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'test_geo_grid_processor' },
+    });
+    fireEvent.change(screen.getByTestId('tileTypeField'), { target: { value: 'geohex' } });
 
     // Add optional fields
-    form.setInputValue('targetField.input', 'test_target');
-    form.setSelectValue('targetFormatField', 'WKT');
-    form.setInputValue('parentField.input', 'parent_field');
-    form.setInputValue('childrenField.input', 'children_field');
-    form.setInputValue('nonChildrenField.input', 'nonchildren_field');
-    form.setInputValue('precisionField.input', 'precision_field');
+    fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
+      target: { value: 'test_target' },
+    });
+    fireEvent.change(screen.getByTestId('targetFormatField'), { target: { value: 'WKT' } });
+    fireEvent.change(within(screen.getByTestId('parentField')).getByTestId('input'), {
+      target: { value: 'parent_field' },
+    });
+    fireEvent.change(within(screen.getByTestId('childrenField')).getByTestId('input'), {
+      target: { value: 'children_field' },
+    });
+    fireEvent.change(within(screen.getByTestId('nonChildrenField')).getByTestId('input'), {
+      target: { value: 'nonchildren_field' },
+    });
+    fireEvent.change(within(screen.getByTestId('precisionField')).getByTestId('input'), {
+      target: { value: 'precision_field' },
+    });
 
     // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, GEO_GRID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][GEO_GRID_TYPE]).toEqual({
       field: 'test_geo_grid_processor',

@@ -24,7 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const logger = getService('log');
   const findingsIndexProvider = new EsIndexDataProvider(es, FINDINGS_INDEX);
 
-  describe('Verify cloud_security_posture telemetry payloads', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/247313
+  describe.skip('Verify cloud_security_posture telemetry payloads', async () => {
     before(async () => {
       await waitForPluginInitialized({ retry, logger, supertest });
     });

@@ -120,4 +120,54 @@ describe('useCloudConnectorUsage', () => {
 
     expect(result.current.error).toEqual(new Error('HTTP service is not available'));
   });
+
+  it('should accept custom staleTime option', async () => {
+    const mockUsageData = {
+      items: [],
+      total: 0,
+      page: 1,
+      perPage: 10,
+    };
+
+    mockHttp.get.mockResolvedValue(mockUsageData);
+
+    const { result } = renderHook(
+      () => useCloudConnectorUsage('connector-id-123', 1, 10, { staleTime: 0 }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(mockHttp.get).toHaveBeenCalledWith(
+      CLOUD_CONNECTOR_API_ROUTES.USAGE_PATTERN.replace('{cloudConnectorId}', 'connector-id-123'),
+      { query: { page: 1, perPage: 10 } }
+    );
+    expect(result.current.data).toEqual(mockUsageData);
+  });
+
+  it('should use custom pagination parameters', async () => {
+    const mockUsageData = {
+      items: [],
+      total: 25,
+      page: 2,
+      perPage: 5,
+    };
+
+    mockHttp.get.mockResolvedValue(mockUsageData);
+
+    const { result } = renderHook(() => useCloudConnectorUsage('connector-id-123', 2, 5), {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(mockHttp.get).toHaveBeenCalledWith(
+      CLOUD_CONNECTOR_API_ROUTES.USAGE_PATTERN.replace('{cloudConnectorId}', 'connector-id-123'),
+      { query: { page: 2, perPage: 5 } }
+    );
+  });
 });

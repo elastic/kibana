@@ -37,6 +37,7 @@ import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
 import moment from 'moment';
+import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import type { AlertDetailsSource, TabId } from './types';
@@ -77,9 +78,6 @@ const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertD
   defaultMessage: 'Alert details',
 });
 
-// avoiding circular dependency by having the attachment id here
-const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
-
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
@@ -94,7 +92,7 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
-    onechat,
+    agentBuilder,
     uiSettings,
     serverless,
     observabilityAgentBuilder,
@@ -117,6 +115,10 @@ export function AlertDetails() {
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
 
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
+  const alertTitle = alertDetail
+    ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+    : undefined;
+
   const { rule, refetch } = useFetchRule({
     ruleId: ruleId || '',
   });
@@ -176,14 +178,14 @@ export function AlertDetails() {
 
   // Configure agent builder global flyout with the current alert attachment
   useEffect(() => {
-    if (!onechat) return;
+    if (!agentBuilder) return;
     const alertUuid = alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined;
 
     if (!alertUuid) {
       return;
     }
 
-    onechat.setConversationFlyoutActiveConfig({
+    agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
       attachments: [
         {
@@ -191,15 +193,24 @@ export function AlertDetails() {
           type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
           data: {
             alertId: alertUuid,
+            ...(alertTitle && {
+              attachmentLabel: i18n.translate(
+                'xpack.observability.alertDetails.alertAttachmentLabel',
+                {
+                  defaultMessage: '{alertTitle} alert',
+                  values: { alertTitle },
+                }
+              ),
+            }),
           },
         },
       ],
     });
 
     return () => {
-      onechat.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig();
     };
-  }, [onechat, alertDetail]);
+  }, [agentBuilder, alertDetail, alertTitle]);
 
   useBreadcrumbs(
     [
@@ -211,9 +222,7 @@ export function AlertDetails() {
         deepLinkId: 'observability-overview:alerts',
       },
       {
-        text: alertDetail
-          ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
-          : defaultBreadcrumb,
+        text: alertTitle ?? defaultBreadcrumb,
       },
     ],
     { serverless }
@@ -303,7 +312,10 @@ export function AlertDetails() {
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
           {AlertAiInsight && (
-            <AlertAiInsight alertId={alertDetail.formatted.fields['kibana.alert.uuid']} />
+            <AlertAiInsight
+              alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
+              alertTitle={alertTitle}
+            />
           )}
           {rule && alertDetail.formatted && (
             <>
@@ -331,7 +343,10 @@ export function AlertDetails() {
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         {AlertAiInsight && (
-          <AlertAiInsight alertId={alertDetail.formatted.fields['kibana.alert.uuid']} />
+          <AlertAiInsight
+            alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
+            alertTitle={alertTitle}
+          />
         )}
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
@@ -442,15 +457,16 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: alertDetail?.formatted ? (
-          <>
-            {getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])}
-            <EuiSpacer size="xs" />
-            <AlertSubtitle alert={alertDetail.formatted} />
-          </>
-        ) : (
-          <EuiLoadingSpinner />
-        ),
+        pageTitle:
+          alertDetail?.formatted && alertTitle ? (
+            <>
+              {alertTitle}
+              <EuiSpacer size="xs" />
+              <AlertSubtitle alert={alertDetail.formatted} />
+            </>
+          ) : (
+            <EuiLoadingSpinner />
+          ),
         rightSideItems: [
           <HeaderActions
             alert={alertDetail?.formatted ?? null}

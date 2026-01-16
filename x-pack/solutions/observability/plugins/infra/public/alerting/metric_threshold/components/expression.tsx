@@ -307,6 +307,7 @@ export const Expressions: React.FC<Props> = (props) => {
               <RuleConditionChart
                 metricExpression={{
                   metrics: metricExpression,
+                  equation: e.equation,
                   threshold: e.threshold,
                   comparator: e.comparator,
                   timeSize,

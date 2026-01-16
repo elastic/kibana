@@ -22,6 +22,18 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).not.toThrow();
   });
 
+  it('accepts valid csv job params', () => {
+    const validParams = {
+      browserTimezone: 'America/Los_Angeles',
+      isEsqlMode: true,
+      objectType: 'search',
+      title: 'Discover session',
+      version: '9.4.0',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).not.toThrow();
+  });
+
   it('sanitizes title', () => {
     const validParams = {
       title: 'Monthly Report<script>alert("xss")</script>',

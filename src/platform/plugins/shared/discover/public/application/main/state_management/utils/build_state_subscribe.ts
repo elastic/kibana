@@ -55,11 +55,9 @@ export const buildStateSubscribe =
   }) =>
   async (nextState: DiscoverAppState) => {
     const prevState = getCurrentTab().previousAppState;
-    const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
-    const prevQuery = savedSearch.searchSource.getField('query');
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
-    const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
+    const queryChanged = !isEqual(nextState.query, prevState.query);
 
     if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
       savedSearchState.update({ nextState });
@@ -147,7 +145,7 @@ export const buildStateSubscribe =
       const logData = {
         docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
         dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),
-        queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
+        queryChanged: logEntry(queryChanged, prevState.query, nextState.query),
       };
 
       if (dataState.disableNextFetchOnStateChange$.getValue()) {

@@ -44,6 +44,7 @@ export interface UpdateElserMappingsModalProps {
   refetchMapping: () => void;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   hasUpdatePrivileges: boolean | undefined;
+  modalId: string;
 }
 
 export function UpdateElserMappingsModal({
@@ -51,6 +52,7 @@ export function UpdateElserMappingsModal({
   refetchMapping,
   setIsModalOpen,
   hasUpdatePrivileges,
+  modalId,
 }: UpdateElserMappingsModalProps) {
   const state = useMappingsState();
   const [options, setOptions] = useState<EuiSelectableOption<MappingsOptionData>[]>([]);
@@ -171,6 +173,7 @@ export function UpdateElserMappingsModal({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiLink
+          data-telemetry-id={`${modalId}-updateElserMappingsModal-learnMore-link`}
           href={documentationService.docLinks.enterpriseSearch.elasticInferenceServicePricing}
           target="_blank"
           external
@@ -204,6 +207,7 @@ export function UpdateElserMappingsModal({
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
           <EuiButtonEmpty
             data-test-subj="UpdateElserMappingsModalCancelBtn"
+            data-telemetry-id={`${modalId}-updateElserMappingsModal-cancel-btn`}
             onClick={() => setIsModalOpen(false)}
             aria-label={i18n.translate(
               'xpack.idxMgmt.indexDetails.updateElserMappingsModal.cancelButtonAriaLabel',
@@ -224,6 +228,7 @@ export function UpdateElserMappingsModal({
             onClick={handleApply}
             isLoading={isUpdating}
             data-test-subj="UpdateElserMappingsModalApplyBtn"
+            data-telemetry-id={`${modalId}-updateElserMappingsModal-apply-btn`}
             isDisabled={isApplyDisabled}
           >
             {i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.applyButton', {

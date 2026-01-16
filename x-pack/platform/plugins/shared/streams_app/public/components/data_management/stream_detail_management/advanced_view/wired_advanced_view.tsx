@@ -18,6 +18,7 @@ import { IndexConfiguration } from './index_configuration';
 import { DeleteStreamPanel } from './delete_stream';
 import { ImportExportPanel } from './import_export';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { useAIFeatures } from '../../../../hooks/use_ai_features';
 
 export function WiredAdvancedView({
   definition,
@@ -29,6 +30,7 @@ export function WiredAdvancedView({
   const {
     features: { contentPacks, significantEvents },
   } = useStreamsPrivileges();
+  const aiFeatures = useAIFeatures();
 
   const { onPageReady } = usePerformanceContext();
 
@@ -38,7 +40,7 @@ export function WiredAdvancedView({
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_advanced] streamType: ${streamType}`,
         },
       });
     }
@@ -54,9 +56,13 @@ export function WiredAdvancedView({
       )}
       {significantEvents?.enabled && (
         <>
-          <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
+          <StreamDescription
+            definition={definition}
+            refreshDefinition={refreshDefinition}
+            aiFeatures={aiFeatures}
+          />
           <EuiSpacer />
-          <StreamFeatureConfiguration definition={definition.stream} />
+          <StreamFeatureConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
           <EuiSpacer />
         </>
       )}

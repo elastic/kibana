@@ -6,9 +6,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const TIMESTAMP_TRANSFORM_SCRIPT = `
+  // Reset the _id field to null to avoid conflicts with subsequent reindex operations
+  ctx._id = null;
   if (ctx.containsKey('@timestamp') && ctx['@timestamp'] != null) {
     Instant maxTime = Instant.parse(params.max_timestamp);
     Instant originalTime = Instant.parse(ctx['@timestamp'].toString());
@@ -20,16 +22,16 @@ const TIMESTAMP_TRANSFORM_SCRIPT = `
 
 export async function createTimestampPipeline({
   esClient,
-  logger,
+  log,
   pipelineName,
   maxTimestamp,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   pipelineName: string;
   maxTimestamp: string;
 }): Promise<string> {
-  logger.debug(`Creating timestamp transformation pipeline (max: ${maxTimestamp})`);
+  log.debug(`Creating timestamp transformation pipeline (max: ${maxTimestamp})`);
 
   try {
     await esClient.ingest.putPipeline({
@@ -47,26 +49,26 @@ export async function createTimestampPipeline({
       ],
     });
 
-    logger.debug('Timestamp pipeline created');
+    log.debug('Timestamp pipeline created');
     return pipelineName;
   } catch (error) {
-    logger.error(`Failed to create timestamp transformation pipeline`);
+    log.error(`Failed to create timestamp transformation pipeline`);
     throw error;
   }
 }
 
 export async function deletePipeline({
   esClient,
-  logger,
+  log,
   pipelineName,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   pipelineName: string;
 }): Promise<void> {
   try {
     await esClient.ingest.deletePipeline({ id: pipelineName });
   } catch (error) {
-    logger.debug(`Failed to delete pipeline: ${error}`);
+    log.debug(`Failed to delete pipeline: ${error}`);
   }
 }

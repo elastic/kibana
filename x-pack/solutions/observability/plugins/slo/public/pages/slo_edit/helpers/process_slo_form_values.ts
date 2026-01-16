@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
+import type {
+  CreateSLOInput,
+  GetSLOResponse,
+  Indicator,
+  SLOTemplateResponse,
+  UpdateSLOInput,
+} from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import type { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
@@ -24,7 +30,7 @@ import {
 } from '../constants';
 import type { CreateSLOForm } from '../types';
 
-export function transformSloResponseToCreateSloForm(
+export function transformSloResponseToFormState(
   values?: GetSLOResponse
 ): CreateSLOForm | undefined {
   if (!values) return undefined;
@@ -188,9 +194,12 @@ function transformPartialIndicatorState(
   }
 }
 
-export function transformPartialSLOStateToFormState(
-  values: RecursivePartial<CreateSLOInput>
-): CreateSLOForm {
+export function transformPartialSLODataToFormState(
+  values?: RecursivePartial<CreateSLOInput> | SLOTemplateResponse
+): CreateSLOForm | undefined {
+  if (!values) {
+    return undefined;
+  }
   let state: CreateSLOForm;
   const indicator = transformPartialIndicatorState(values.indicator);
 

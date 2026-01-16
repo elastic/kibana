@@ -71,6 +71,8 @@ export function TraceWaterfallEmbeddable({
       serviceName={serviceName}
       onErrorClick={onErrorClick}
       isFiltered={isFiltered}
+      agentMarks={data.agentMarks}
+      showCriticalPathControl
     />
   );
 }

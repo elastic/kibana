@@ -115,47 +115,4 @@ describe('catchRetryableSearchPhaseExecutionException', () => {
       }
     `);
   });
-  it('retries search phase execution exception for "all shards failed"', async () => {
-    const error = new esErrors.ResponseError(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          error: {
-            type: 'search_phase_execution_exception',
-            caused_by: {
-              type: 'search_phase_execution_exception',
-              reason: 'all shards failed',
-            },
-          },
-        },
-      })
-    );
-    expect(
-      ((await Promise.reject(error).catch(catchRetryableSearchPhaseExecutionException)) as any).left
-    ).toMatchInlineSnapshot(`
-      Object {
-        "error": [ResponseError: search_phase_execution_exception
-      	Caused by:
-      		search_phase_execution_exception: all shards failed],
-        "message": "search_phase_execution_exception
-      	Caused by:
-      		search_phase_execution_exception: all shards failed",
-        "type": "retryable_es_client_error",
-      }
-    `);
-  });
-  it('does not retry other errors', async () => {
-    const error = new esErrors.ResponseError(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          error: {
-            type: 'search_phase_execution_exception',
-            reason: 'Malformed search query.',
-          },
-        },
-      })
-    );
-    await expect(
-      Promise.reject(error).catch(catchRetryableSearchPhaseExecutionException)
-    ).rejects.toBe(error);
-  });
 });

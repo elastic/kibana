@@ -82,6 +82,10 @@ describe('WorkflowContextManager', () => {
       delete: jest.fn(),
     } as any;
 
+    workflowExecutionState.getLatestStepExecution = jest
+      .fn()
+      .mockReturnValue({} as EsWorkflowStepExecution);
+
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,
@@ -271,6 +275,7 @@ describe('WorkflowContextManager', () => {
 
       const context = testContainer.underTest.getContext();
       expect(context.inputs).toEqual({
+        name: '', // Default value from workflow definition is applied
         remainingKey: 'some string',
         overridenKey: false,
         newKey: 123,

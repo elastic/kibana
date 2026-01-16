@@ -24,6 +24,7 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
+import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 
@@ -53,7 +54,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
   const [context, setContext] = useState('');
 
   const {
-    services: { onechat, application },
+    services: { agentBuilder, application },
   } = useKibana();
 
   const { getLicense } = useLicense();
@@ -61,6 +62,8 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
 
   const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
+
+  const { hasConnectors } = useGenAIConnectors();
 
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
@@ -80,16 +83,17 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
   }, [fetchInsight]);
 
   const handleStartConversation = useCallback(() => {
-    if (!onechat?.openConversationFlyout) return;
+    if (!agentBuilder?.openConversationFlyout) return;
 
-    onechat.openConversationFlyout({
+    agentBuilder.openConversationFlyout({
       newConversation: true,
       attachments: buildAttachments(summary, context),
     });
-  }, [onechat, buildAttachments, summary, context]);
+  }, [agentBuilder, buildAttachments, summary, context]);
 
   if (
-    !onechat ||
+    !hasConnectors ||
+    !agentBuilder ||
     !isAgentChatExperienceEnabled ||
     !hasAgentBuilderAccess ||
     !hasEnterpriseLicense

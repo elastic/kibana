@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type {
+  ChromeSetup,
   ChromeStart,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
@@ -21,6 +22,10 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InternalChromeSetup extends ChromeSetup {}
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {

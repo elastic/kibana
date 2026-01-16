@@ -7,3 +7,4 @@
 
 export const PLUGIN_ID = 'dataSourcesRegistry';
 export const PLUGIN_NAME = 'dataSourcesRegistry';
+export const API_BASE_PATH = '/api/data_sources_registry';

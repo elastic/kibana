@@ -16,6 +16,8 @@ export type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './
 export type {
   DashboardState,
   DashboardPanel,
+  DashboardPinnedPanelsState,
+  DashboardPinnedPanel,
   DashboardSection,
   DashboardFilter,
   DashboardOptions,

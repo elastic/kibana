@@ -7,16 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
-import { useTimefilter } from '../../hooks/use_timefilter';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useKibana } from '../../hooks/use_kibana';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
 import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 export const EditSignificantEventFlyout = ({
-  refreshDefinition,
   queryToEdit,
   definition,
   isEditFlyoutOpen,
@@ -27,44 +26,46 @@ export const EditSignificantEventFlyout = ({
   setQueryToEdit,
   features,
   refresh,
-  onFeatureIdentificationClick,
+  refreshFeatures,
   generateOnMount,
+  aiFeatures,
 }: {
-  refreshDefinition: () => void;
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
-  selectedFeatures: Feature[];
-  setSelectedFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
-  features: Feature[];
+  selectedFeatures: System[];
+  setSelectedFeatures: React.Dispatch<React.SetStateAction<System[]>>;
+  features: System[];
   queryToEdit?: StreamQueryKql;
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onFeatureIdentificationClick: () => void;
+  refreshFeatures: () => void;
   generateOnMount: boolean;
+  aiFeatures: AIFeatures | null;
 }) => {
   const {
     core: { notifications },
     services: { telemetryClient },
   } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
 
-  const { upsertQuery, bulk } = useSignificantEventsApi({
+  const { upsertQuery, bulk, acknowledgeGenerationTask } = useSignificantEventsApi({
     name: definition.stream.name,
-    start,
-    end,
   });
+
+  const onCloseFlyout = () => {
+    setIsEditFlyoutOpen(false);
+    setQueryToEdit(undefined);
+    setSelectedFeatures([]);
+  };
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
       generateOnMount={generateOnMount}
-      refreshDefinition={refreshDefinition}
-      onFeatureIdentificationClick={onFeatureIdentificationClick}
+      refreshFeatures={refreshFeatures}
       definition={definition}
       query={queryToEdit}
+      aiFeatures={aiFeatures}
       onSave={async (data: SaveData) => {
         const streamType = getStreamTypeFromDefinition(definition.stream);
 
@@ -79,18 +80,11 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
-                setIsEditFlyoutOpen(false);
+                onCloseFlyout();
                 refresh();
 
                 telemetryClient.trackSignificantEventsCreated({
                   count: 1,
-                  count_by_feature_type: !data.query.feature
-                    ? {
-                        system: 0,
-                      }
-                    : {
-                        [data.query.feature.type]: 1,
-                      },
                   stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
@@ -112,7 +106,12 @@ export const EditSignificantEventFlyout = ({
                 index: query,
               }))
             ).then(
-              () => {
+              async () => {
+                // Acknowledge the task after successful save
+                await acknowledgeGenerationTask().catch(() => {
+                  // Ignore errors - task acknowledgment is not critical
+                });
+
                 notifications.toasts.addSuccess({
                   title: i18n.translate(
                     'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
@@ -120,25 +119,14 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
+                onCloseFlyout();
+                refresh();
+
                 telemetryClient.trackSignificantEventsCreated({
                   count: data.queries.length,
-                  count_by_feature_type: data.queries.reduce(
-                    (acc, query) => {
-                      if (query.feature) {
-                        const type = query.feature.type;
-                        acc[type] = acc[type] + 1;
-                      }
-                      return acc;
-                    },
-                    {
-                      system: 0,
-                    } satisfies Record<FeatureType, number>
-                  ),
                   stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
-                setIsEditFlyoutOpen(false);
-                refresh();
               },
               (error) => {
                 notifications.showErrorDialog({
@@ -153,11 +141,7 @@ export const EditSignificantEventFlyout = ({
             break;
         }
       }}
-      onClose={() => {
-        setIsEditFlyoutOpen(false);
-        setQueryToEdit(undefined);
-        setSelectedFeatures([]);
-      }}
+      onClose={onCloseFlyout}
       initialFlow={initialFlow}
       initialSelectedFeatures={selectedFeatures}
       features={features}
