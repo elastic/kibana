@@ -40,7 +40,7 @@ export function buildParamsSchema({
   const pathShape = getShapeAt(requestSchema, 'path');
   const queryShape = getShapeAt(requestSchema, 'query');
 
-  if (bodySchema.schema instanceof z.ZodUnion) {
+  if (bodySchema.schema instanceof z.ZodUnion && bodySchema.schema.options.length > 1) {
     // For union bodies, create a union of objects where each option
     // is merged with path, query, and additional schemas
     const unionOptions = bodySchema.schema.options.map((option) => {
