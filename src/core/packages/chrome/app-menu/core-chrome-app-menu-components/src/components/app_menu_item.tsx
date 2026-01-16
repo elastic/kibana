@@ -57,7 +57,7 @@ export const AppMenuItem = ({
       return;
     }
 
-    run?.(event.currentTarget);
+    run?.({ triggerElement: event.currentTarget });
   };
 
   const buttonCss = css`
