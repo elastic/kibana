@@ -68,6 +68,47 @@ describe('UserActionsService: Finder', () => {
 
       expect(commentId).toBe(null);
     });
+
+    describe('types filter', () => {
+      beforeEach(() => {
+        const userAction = createUserActionSO();
+        const soFindRes = createSOFindResponse([createUserActionFindSO(userAction)]);
+        mockFind(soFindRes);
+      });
+
+      it('filters by type=comment and action=create when types includes "user"', async () => {
+        await finder.find({ caseId: '1', types: ['user'] });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: expect.objectContaining({
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  arguments: expect.arrayContaining([
+                    expect.objectContaining({
+                      value: 'cases-user-actions.attributes.type',
+                    }),
+                    expect.objectContaining({
+                      value: 'comment',
+                    }),
+                  ]),
+                }),
+                expect.objectContaining({
+                  arguments: expect.arrayContaining([
+                    expect.objectContaining({
+                      value: 'cases-user-actions.attributes.action',
+                    }),
+                    expect.objectContaining({
+                      value: 'create',
+                    }),
+                  ]),
+                }),
+              ]),
+            }),
+          })
+        );
+      });
+    });
   });
 
   describe('findStatusChanges', () => {

@@ -8,6 +8,8 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useDeleteMigration } from './use_delete_migrations';
 import { TestProviders } from '../../../common/mock';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
+import { MigrationSource } from '../types';
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
@@ -34,6 +36,16 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => ({
 }));
 
 describe('useDeleteMigration', () => {
+  const defaultMigrationStats = {
+    id: 'test-id',
+    status: SiemMigrationTaskStatus.READY,
+    vendor: MigrationSource.SPLUNK,
+    name: 'Test Migration',
+    items: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
+    created_at: '2025-01-01T00:00:00Z',
+    last_updated_at: '2025-01-01T01:00:00Z',
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -41,11 +53,14 @@ describe('useDeleteMigration', () => {
   it('calls deleteMigration for rules', async () => {
     const { result } = renderHook(() => useDeleteMigration('rule'), { wrapper: TestProviders });
     act(() => {
-      result.current.mutate('test-id');
+      result.current.mutate(defaultMigrationStats);
     });
 
     await waitFor(() => {
-      expect(mockDeleteRuleMigration).toHaveBeenCalledWith('test-id');
+      expect(mockDeleteRuleMigration).toHaveBeenCalledWith({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockDeleteDashboardMigration).not.toHaveBeenCalled();
     });
   });
@@ -55,11 +70,14 @@ describe('useDeleteMigration', () => {
       wrapper: TestProviders,
     });
     act(() => {
-      result.current.mutate('test-id');
+      result.current.mutate(defaultMigrationStats);
     });
 
     await waitFor(() => {
-      expect(mockDeleteDashboardMigration).toHaveBeenCalledWith('test-id');
+      expect(mockDeleteDashboardMigration).toHaveBeenCalledWith({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockDeleteRuleMigration).not.toHaveBeenCalled();
     });
   });
@@ -67,7 +85,7 @@ describe('useDeleteMigration', () => {
   it('calls addSuccess on success', async () => {
     const { result } = renderHook(() => useDeleteMigration('rule'), { wrapper: TestProviders });
     act(() => {
-      result.current.mutate('test-id');
+      result.current.mutate(defaultMigrationStats);
     });
 
     await waitFor(() => {
@@ -81,7 +99,7 @@ describe('useDeleteMigration', () => {
 
     const { result } = renderHook(() => useDeleteMigration('rule'), { wrapper: TestProviders });
 
-    result.current.mutate('test-id');
+    result.current.mutate(defaultMigrationStats);
     await waitFor(() => result.current.isError);
 
     expect(mockAddError).toHaveBeenCalledWith(error, { title: 'Failed to delete migration' });

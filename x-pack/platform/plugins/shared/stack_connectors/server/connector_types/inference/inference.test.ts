@@ -13,7 +13,7 @@ import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
-
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 
@@ -107,6 +107,24 @@ describe('InferenceConnector', () => {
           body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
         })
       ).rejects.toThrow('API Error');
+    });
+
+    it('marks 429 errors as user errors', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `{\"error\":{\"code\":\"insufficient_quota\",\"message\":\"Received a rate limit status code for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Error message: [You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.]\",\"type\":\"insufficient_quota\"}}`,
+        ]),
+        statusCode: 400,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletion({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
   });
 
@@ -341,6 +359,24 @@ describe('InferenceConnector', () => {
           body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
         })
       ).rejects.toThrow('API Error');
+    });
+
+    it('marks 429 errors as user errors', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `{\"error\":{\"code\":\"insufficient_quota\",\"message\":\"Received a rate limit status code for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Error message: [You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.]\",\"type\":\"insufficient_quota\"}}`,
+        ]),
+        statusCode: 400,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletionStream({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
 
     it('responds with a readable stream', async () => {

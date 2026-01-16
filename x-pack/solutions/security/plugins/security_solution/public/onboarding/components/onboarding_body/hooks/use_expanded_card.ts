@@ -40,8 +40,6 @@ export const useExpandedCard = () => {
       _setExpandedCardId(cardIdFromHash);
       scrollToCard(cardIdFromHash);
     }
-    // cardIdFromHash is only defined once on page load
-    // it does not change with subsequent url hash changes since history.replaceState is used
   }, [cardIdFromHash]);
 
   const setExpandedCardId = useCallback<SetExpandedCardId>(

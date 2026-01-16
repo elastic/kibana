@@ -12,6 +12,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
+import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import type {
   ScopedRunner,
@@ -29,17 +30,15 @@ import type {
   ConversationStateManager,
   PromptManager,
 } from '@kbn/agent-builder-server/runner';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { TrackingService } from '../../telemetry';
-import {
-  createEmptyRunContext,
-  createConversationStateManager,
-  createPromptManager,
-  initPromptManager,
-} from './utils';
+import { createEmptyRunContext, createConversationStateManager } from './utils';
+import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
 import { createResultStore } from './tool_result_store';
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
@@ -65,6 +64,7 @@ export interface CreateScopedRunnerDeps {
   defaultConnectorId?: string;
   // context-aware deps
   resultStore: WritableToolResultStore;
+  attachmentStateManager: AttachmentStateManager;
 }
 
 export type CreateRunnerDeps = Omit<
@@ -72,6 +72,7 @@ export type CreateRunnerDeps = Omit<
   | 'request'
   | 'defaultConnectorId'
   | 'resultStore'
+  | 'attachmentStateManager'
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
@@ -149,19 +150,18 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     defaultConnectorId,
     conversation,
     nextInput,
+    promptState,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
     conversation?: Conversation;
     nextInput?: ConverseInput;
+    promptState?: PromptStorageState;
   }): ScopedRunner => {
     const resultStore = createResultStore(conversation?.rounds);
+    const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? []);
     const stateManager = createConversationStateManager(conversation);
-    const promptManager = createPromptManager();
-
-    if (nextInput !== undefined) {
-      initPromptManager({ promptManager, conversation, input: nextInput });
-    }
+    const promptManager = createPromptManager({ state: promptState });
 
     const modelProvider = modelProviderFactory({ request, defaultConnectorId });
     const allDeps = {
@@ -170,6 +170,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       request,
       defaultConnectorId,
       resultStore,
+      attachmentStateManager,
       stateManager,
       promptManager,
     };
@@ -178,22 +179,27 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
   return {
     runTool: (runToolParams) => {
-      const { request, defaultConnectorId, ...otherParams } = runToolParams;
-      const runner = createScopedRunnerWithDeps({ request, defaultConnectorId });
+      const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
+      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
       return runner.runTool(otherParams);
     },
     runInternalTool: (runToolParams) => {
-      const { request, defaultConnectorId, ...otherParams } = runToolParams;
-      const runner = createScopedRunnerWithDeps({ request, defaultConnectorId });
+      const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
+      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
       return runner.runInternalTool(otherParams);
     },
     runAgent: (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;
+      const { nextInput, conversation } = params.agentParams;
       const runner = createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
-        conversation: params.agentParams.conversation,
-        nextInput: params.agentParams.nextInput,
+        conversation,
+        nextInput,
+        promptState: getAgentPromptStorageState({
+          input: nextInput,
+          conversation,
+        }),
       });
       return runner.runAgent(otherParams);
     },

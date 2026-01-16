@@ -317,7 +317,7 @@ describe('DocumentMigrator', () => {
           typeMigrationVersion: '10.2.0',
         })
       ).toThrow(
-        /Document "smelly" belongs to a more recent version of Kibana \[10\.2\.0\] when the last known version is \[undefined\]/i
+        /Document "smelly" of type 'dog' belongs to a more recent version of Kibana \[10\.2\.0\] when the last known version is \[0\.0\.0\]/i
       );
     });
 

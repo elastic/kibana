@@ -28,10 +28,8 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import { FilterStateStore, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
-import { isEqual, isFunction } from 'lodash';
+import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
+import { isEqual } from 'lodash';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../..';
 import { FetchStatus } from '../../types';
@@ -186,29 +184,10 @@ export interface DiscoverStateContainer {
      */
     onDataViewEdited: (dataView: DataView) => Promise<void>;
     /**
-     * Triggered when transitioning from ESQL to Dataview
-     * Clean ups the ES|QL query and moves to the dataview mode
-     */
-    transitionFromESQLToDataView: (dataViewId: string) => void;
-    /**
-     * Triggered when transitioning from ESQL to Dataview
-     * Clean ups the ES|QL query and moves to the dataview mode
-     */
-    transitionFromDataViewToESQL: (dataView: DataView) => void;
-    /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
      */
     onOpenSavedSearch: (savedSearchId: string) => Promise<void>;
-    /**
-     * Triggered when the unified search bar query is updated
-     * @param payload
-     * @param isUpdate
-     */
-    onUpdateQuery: (
-      payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-      isUpdate?: boolean
-    ) => void;
     /**
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
@@ -224,10 +203,6 @@ export interface DiscoverStateContainer {
      * This is to prevent duplicate ids messing with our system
      */
     updateAdHocDataViewId: (editedDataView: DataView) => Promise<DataView | undefined>;
-    /**
-     * Updates the ES|QL query string
-     */
-    updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
   };
 }
 
@@ -355,62 +330,6 @@ export function getDiscoverStateContainer({
         savedSearchId: newSavedSearchId,
       });
     }
-  };
-
-  const transitionFromESQLToDataView = (dataViewId: string) => {
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.updateAppState)({
-        appState: {
-          query: {
-            language: 'kuery',
-            query: '',
-          },
-          columns: [],
-          dataSource: {
-            type: DataSourceType.DataView,
-            dataViewId,
-          },
-        },
-      })
-    );
-  };
-
-  const clearTimeFieldFromSort = (
-    sort: DiscoverAppState['sort'],
-    timeFieldName: string | undefined
-  ) => {
-    if (!Array.isArray(sort) || !timeFieldName) return sort;
-
-    const filteredSort = sort.filter(([field]) => field !== timeFieldName);
-
-    return filteredSort;
-  };
-
-  const transitionFromDataViewToESQL = (dataView: DataView) => {
-    const appState = getCurrentTab().appState;
-    const { query, sort } = appState;
-    const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
-    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
-
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.updateAppState)({
-        appState: {
-          query: { esql: queryString },
-          filters: [],
-          dataSource: {
-            type: DataSourceType.Esql,
-          },
-          columns: [],
-          sort: clearedSort,
-        },
-      })
-    );
-
-    // clears pinned filters
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.updateGlobalState)({ globalState: { filters: [] } })
-    );
   };
 
   const onDataViewCreated = async (nextDataView: DataView) => {
@@ -735,34 +654,6 @@ export function getDiscoverStateContainer({
     return newDataView;
   };
 
-  const trackQueryFields = (query: Query | AggregateQuery | undefined) => {
-    const { scopedEbtManager$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const scopedEbtManager = scopedEbtManager$.getValue();
-    const { fieldsMetadata } = services;
-
-    scopedEbtManager.trackSubmittingQuery({
-      query,
-      fieldsMetadata,
-    });
-  };
-
-  /**
-   * Triggered when a user submits a query in the search bar
-   */
-  const onUpdateQuery = (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-    isUpdate?: boolean
-  ) => {
-    trackQueryFields(payload.query);
-
-    if (isUpdate === false) {
-      // remove the search session if the given query is not just updated
-      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-      addLog('[getDiscoverStateContainer] onUpdateQuery triggers data fetching');
-      dataStateContainer.fetch();
-    }
-  };
-
   /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
@@ -782,24 +673,6 @@ export function getDiscoverStateContainer({
     if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {
       dataStateContainer.fetch();
     }
-  };
-
-  const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
-    addLog('updateESQLQuery');
-    const { query: currentQuery } = getCurrentTab().appState;
-
-    if (!isOfAggregateQueryType(currentQuery)) {
-      throw new Error(
-        'Cannot update a non-ES|QL query. Make sure this function is only called once in ES|QL mode.'
-      );
-    }
-
-    const queryUpdater = isFunction(queryOrUpdater) ? queryOrUpdater : () => queryOrUpdater;
-    const query = { esql: queryUpdater(currentQuery.esql) };
-
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.updateAppState)({ appState: { query } })
-    );
   };
 
   return {
@@ -823,12 +696,8 @@ export function getDiscoverStateContainer({
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
-      transitionFromESQLToDataView,
-      transitionFromDataViewToESQL,
-      onUpdateQuery,
       setDataView,
       updateAdHocDataViewId,
-      updateESQLQuery,
     },
   };
 }

@@ -13,6 +13,7 @@ import type {
   FunctionParameter,
   Signature,
 } from '../../../types';
+import { parseMapValues, type MapParameters } from '../map_expression';
 import { argMatchesParamType } from '../../expressions';
 import type { FunctionParameterContext } from './types';
 import { getValidSignaturesAndTypesToSuggestNext } from '../helpers';
@@ -21,8 +22,12 @@ import type { ICommandContext } from '../../../../registry/types';
 import { acceptsArbitraryExpressions } from './utils';
 import type { FunctionDefinition } from '../../../types';
 
-/** Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API. */
+// Parses mapParams format: {name='paramName', values=[val1, val2]}
+// Captures: [1] = param name, [2] = comma-separated values
+const MAP_PARAMS_REGEX = /\{name='([^']+)'(?:,\s*values=\[([^\]]*)\])?[^}]*\}/g;
+const STRIP_SINGLE_QUOTES_REGEX = /^'|'$/g;
 
+/** Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API. */
 export class SignatureAnalyzer {
   private readonly signatures: Signature[];
 
@@ -442,5 +447,40 @@ export class SignatureAnalyzer {
     }
 
     return types;
+  }
+
+  // ============================================================================
+  // Static Utilities
+  // ============================================================================
+
+  /** Extracts mapParams string from function signatures (first found) */
+  public static extractMapParams(
+    signatures: Array<{ params: Array<{ mapParams?: string }> }>
+  ): string | undefined {
+    return signatures.flatMap(({ params }) => params).find(({ mapParams }) => mapParams)?.mapParams;
+  }
+
+  /**
+   * Parses a mapParams definition string into MapParameters.
+   *
+   * Input:  "{name='boost', values=[2.5]}, {name='analyzer', values=[standard]}"
+   * Output: { boost: { type: 'number', ... }, analyzer: { type: 'string', ... } }
+   */
+  public static parseMapParams(mapParamsStr: string): MapParameters {
+    const result: MapParameters = {};
+
+    for (const match of mapParamsStr.matchAll(MAP_PARAMS_REGEX)) {
+      const paramName = match[1];
+      const rawValues = match[2] ?? '';
+
+      const values = rawValues
+        .split(',')
+        .map((val) => val.trim().replace(STRIP_SINGLE_QUOTES_REGEX, ''))
+        .filter(Boolean);
+
+      result[paramName] = parseMapValues(values);
+    }
+
+    return result;
   }
 }

@@ -13,8 +13,3 @@ export type IdentifiedFeaturesEvent = ServerSentEventBase<
   'identified_features',
   { features: Feature[]; tokensUsed: ChatCompletionTokenCount }
 >;
-
-export type StreamDescriptionEvent = ServerSentEventBase<
-  'stream_description',
-  { description: string; tokensUsed: ChatCompletionTokenCount }
->;

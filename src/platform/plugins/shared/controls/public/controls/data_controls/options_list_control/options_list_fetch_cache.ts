@@ -83,8 +83,7 @@ export class OptionsListFetchCache {
     abortSignal: AbortSignal
   ): Promise<OptionsListResponse> {
     const requestHash = this.getRequestHash(request);
-
-    if (this.cache.has(requestHash)) {
+    if (!request.isReload && this.cache.has(requestHash)) {
       return Promise.resolve(this.cache.get(requestHash)!);
     } else {
       const index = request.dataView.getIndexPattern();

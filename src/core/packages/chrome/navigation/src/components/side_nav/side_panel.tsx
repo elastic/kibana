@@ -10,6 +10,7 @@
 import React, { type ReactNode, useMemo } from 'react';
 import {
   EuiScreenReaderOnly,
+  euiShadow,
   EuiSplitPanel,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -17,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { layoutVar, SIDE_PANEL_CONTENT_GAP } from '@kbn/core-chrome-layout-constants';
 
 import type { MenuItem } from '../../../types';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
@@ -25,19 +27,19 @@ import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { getHighContrastBorder } from '../../hooks/use_high_contrast_mode_styles';
 
-/**
- * **Border and shadow**
- *
- * For instance, only plain or transparent panels can have a border and/or shadow.
- * Source: {@link https://eui.elastic.co/docs/components/containers/panel/}
- */
-const getWrapperStyles = (theme: UseEuiTheme['euiTheme']) => css`
+const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   box-sizing: border-box;
-  border-right: ${theme.border.width.thin} ${theme.colors.borderBaseSubdued} solid;
+  position: relative;
   display: flex;
   flex-direction: column;
-  width: ${SIDE_PANEL_WIDTH}px;
+  width: ${SIDE_PANEL_WIDTH - SIDE_PANEL_CONTENT_GAP}px;
+  margin-bottom: ${layoutVar('application.marginBottom', '0px')};
+  background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+  border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+  border: ${getHighContrastBorder(euiThemeContext)};
+  ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
 `;
 
 export interface SidePanelIds {
@@ -57,9 +59,12 @@ export interface SidePanelProps {
  * Shows only in expanded mode.
  */
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
   const scrollStyles = useScroll();
-  const wrapperStyles = useMemo(() => getWrapperStyles(euiTheme), [euiTheme]);
+  const wrapperStyles = useMemo(
+    () => getSidePanelWrapperStyles(euiThemeContext),
+    [euiThemeContext]
+  );
   const secondaryNavigationInstructionsId = useGeneratedHtmlId({
     prefix: 'secondary-navigation-instructions',
   });
@@ -114,9 +119,10 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
         hasShadow={false}
         role="region"
+        color="transparent"
       >
         <EuiSplitPanel.Inner
-          color="subdued"
+          color="transparent"
           css={navigationPanelStyles}
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelContent`}
           onKeyDown={handleRovingIndex}
@@ -126,7 +132,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
           {renderChildren()}
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner
-          color="subdued"
+          color="transparent"
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelFooter`}
           paddingSize="none"
           grow={false}

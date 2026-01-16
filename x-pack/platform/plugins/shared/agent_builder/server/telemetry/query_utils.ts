@@ -68,10 +68,15 @@ export class QueryUtils {
   /**
    * Get all usage counters for a specific domain
    * @param domainId - Domain identifier (e.g., 'agent_builder')
+   * @param lookbackMs - Optional lookback window in milliseconds (defaults to last 24h)
    * @returns Array of usage counter data
    */
-  async getCountersByDomain(domainId: string): Promise<UsageCounterData[]> {
+  async getCountersByDomain(
+    domainId: string,
+    lookbackMs: number = 24 * 60 * 60 * 1000
+  ): Promise<UsageCounterData[]> {
     try {
+      const fromDate = new Date(Date.now() - lookbackMs).toISOString();
       const { saved_objects: savedObjects } = await this.soClient.find<{
         domainId: string;
         counterName: string;
@@ -80,7 +85,7 @@ export class QueryUtils {
       }>({
         type: 'usage-counter',
         perPage: 10000,
-        filter: `usage-counter.attributes.domainId:"${domainId}"`,
+        filter: `usage-counter.attributes.domainId:"${domainId}" and usage-counter.updated_at >= "${fromDate}"`,
       });
 
       return savedObjects.map((so) => ({
@@ -99,11 +104,16 @@ export class QueryUtils {
    * Get usage counters filtered by name prefix
    * @param domainId - Domain identifier
    * @param prefix - Counter name prefix (e.g., 'tool_call_')
+   * @param lookbackMs
    * @returns Map of counter name → count
    */
-  async getCountersByPrefix(domainId: string, prefix: string): Promise<Map<string, number>> {
+  async getCountersByPrefix(
+    domainId: string,
+    prefix: string,
+    lookbackMs: number = 24 * 60 * 60 * 1000
+  ): Promise<Map<string, number>> {
     try {
-      const allCounters = await this.getCountersByDomain(domainId);
+      const allCounters = await this.getCountersByDomain(domainId, lookbackMs);
       const filtered = allCounters.filter((counter) => counter.counterName.startsWith(prefix));
 
       const result = new Map<string, number>();
@@ -642,6 +652,265 @@ export class QueryUtils {
     } catch (error) {
       if (!isIndexNotFoundError(error)) {
         this.logger.warn(`Failed to fetch latency by agent: ${error.message}`);
+      }
+      return [];
+    }
+  }
+
+  /**
+   * Get token consumption grouped by model
+   */
+  async getTokensByModel(): Promise<
+    Array<{
+      model: string;
+      total_tokens: number;
+      avg_tokens_per_round: number;
+      sample_count: number;
+    }>
+  > {
+    try {
+      const conversationIndexName = chatSystemIndex('conversations');
+      const response = await this.esClient.search({
+        index: conversationIndexName,
+        size: 0,
+        aggs: {
+          all_rounds: {
+            nested: {
+              path: 'conversation_rounds',
+            },
+            aggs: {
+              by_model: {
+                terms: {
+                  field: 'conversation_rounds.model_usage.model',
+                  size: 50,
+                  missing: 'unknown',
+                },
+                aggs: {
+                  input_tokens: {
+                    sum: {
+                      field: 'conversation_rounds.model_usage.input_tokens',
+                    },
+                  },
+                  output_tokens: {
+                    sum: {
+                      field: 'conversation_rounds.model_usage.output_tokens',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const buckets = (response.aggregations?.all_rounds as any)?.by_model?.buckets || [];
+
+      const results: Array<{
+        model: string;
+        total_tokens: number;
+        avg_tokens_per_round: number;
+        sample_count: number;
+      }> = [];
+
+      for (const bucket of buckets) {
+        const inputTokens = bucket.input_tokens?.value || 0;
+        const outputTokens = bucket.output_tokens?.value || 0;
+        const totalTokens = inputTokens + outputTokens;
+        const sampleCount = bucket.doc_count || 0;
+        const avgTokensPerRound =
+          sampleCount > 0 ? Math.round((totalTokens / sampleCount) * 100) / 100 : 0;
+
+        results.push({
+          model: bucket.key as string,
+          total_tokens: Math.round(totalTokens),
+          avg_tokens_per_round: avgTokensPerRound,
+          sample_count: sampleCount,
+        });
+      }
+
+      results.sort((a, b) => b.total_tokens - a.total_tokens);
+
+      return results;
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch tokens by model: ${error.message}`);
+      }
+      return [];
+    }
+  }
+
+  /**
+   * Get query-to-result time (TTLT) grouped by model
+   */
+  async getQueryToResultTimeByModel(): Promise<
+    Array<{
+      model: string;
+      p50: number;
+      p75: number;
+      p90: number;
+      p95: number;
+      p99: number;
+      mean: number;
+      total_samples: number;
+      sample_count: number;
+    }>
+  > {
+    try {
+      const conversationIndexName = chatSystemIndex('conversations');
+      const response = await this.esClient.search({
+        index: conversationIndexName,
+        size: 0,
+        aggs: {
+          all_rounds: {
+            nested: {
+              path: 'conversation_rounds',
+            },
+            aggs: {
+              by_model: {
+                terms: {
+                  field: 'conversation_rounds.model_usage.model',
+                  size: 50,
+                  missing: 'unknown',
+                },
+                aggs: {
+                  ttl_percentiles: {
+                    percentiles: {
+                      field: 'conversation_rounds.time_to_last_token',
+                      percents: [50, 75, 90, 95, 99],
+                    },
+                  },
+                  ttl_avg: {
+                    avg: {
+                      field: 'conversation_rounds.time_to_last_token',
+                    },
+                  },
+                  ttl_count: {
+                    value_count: {
+                      field: 'conversation_rounds.time_to_last_token',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const buckets = (response.aggregations?.all_rounds as any)?.by_model?.buckets || [];
+
+      const results: Array<{
+        model: string;
+        p50: number;
+        p75: number;
+        p90: number;
+        p95: number;
+        p99: number;
+        mean: number;
+        total_samples: number;
+        sample_count: number;
+      }> = [];
+
+      for (const bucket of buckets) {
+        const percentiles = bucket.ttl_percentiles?.values || {};
+        results.push({
+          model: bucket.key as string,
+          p50: Math.round(percentiles['50.0'] || 0),
+          p75: Math.round(percentiles['75.0'] || 0),
+          p90: Math.round(percentiles['90.0'] || 0),
+          p95: Math.round(percentiles['95.0'] || 0),
+          p99: Math.round(percentiles['99.0'] || 0),
+          mean: Math.round(bucket.ttl_avg?.value || 0),
+          total_samples: bucket.ttl_count?.value || 0,
+          sample_count: bucket.doc_count || 0,
+        });
+      }
+
+      results.sort((a, b) => b.sample_count - a.sample_count);
+
+      return results;
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch query-to-result time by model: ${error.message}`);
+      }
+      return [];
+    }
+  }
+
+  /**
+   * Get tool call counts grouped by model based on round steps
+   */
+  async getToolCallsByModel(): Promise<
+    Array<{
+      model: string;
+      count: number;
+    }>
+  > {
+    try {
+      const conversationIndexName = chatSystemIndex('conversations');
+      const response = await this.esClient.search({
+        index: conversationIndexName,
+        size: 0,
+        aggs: {
+          tool_calls_by_model: {
+            scripted_metric: {
+              init_script: 'state.modelCalls = new HashMap();',
+              map_script: `
+                def rounds = params._source.conversation_rounds;
+                if (rounds == null) return;
+                for (def round : rounds) {
+                  def modelUsage = round.model_usage;
+                  def model = (modelUsage != null && modelUsage.model != null) ? modelUsage.model : 'unknown';
+                  def steps = round.steps;
+                  if (steps == null) continue;
+                  int callCount = 0;
+                  for (def step : steps) {
+                    if (step.type != null && step.type == 'tool_call') {
+                      callCount += 1;
+                    }
+                  }
+                  if (callCount == 0) continue;
+                  def current = state.modelCalls.get(model);
+                  if (current == null) {
+                    state.modelCalls.put(model, callCount);
+                  } else {
+                    state.modelCalls.put(model, current + callCount);
+                  }
+                }
+              `,
+              combine_script: 'return state.modelCalls;',
+              reduce_script: `
+                Map combined = new HashMap();
+                for (state in states) {
+                  for (entry in state.entrySet()) {
+                    def model = entry.getKey();
+                    def value = entry.getValue();
+                    if (combined.containsKey(model)) {
+                      combined.put(model, combined.get(model) + value);
+                    } else {
+                      combined.put(model, value);
+                    }
+                  }
+                }
+                return combined;
+              `,
+            },
+          },
+        },
+      });
+
+      const aggregated = (response.aggregations as any)?.tool_calls_by_model?.value || {};
+      const results: Array<{ model: string; count: number }> = [];
+
+      for (const [model, count] of Object.entries(aggregated)) {
+        results.push({ model, count: Number(count) });
+      }
+
+      results.sort((a, b) => b.count - a.count);
+
+      return results;
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch tool calls by model: ${error.message}`);
       }
       return [];
     }
