@@ -24,6 +24,8 @@
           "(currentTime: number, interval: moment.Duration, modulate: boolean) => number"
         ],
         "path": "src/core/packages/logging/server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               "number"
             ],
             "path": "src/core/packages/logging/server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -53,6 +57,8 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/logging/server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,6 +74,8 @@
               "boolean"
             ],
             "path": "src/core/packages/logging/server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -86,6 +94,8 @@
         "label": "PrebootDeps",
         "description": [],
         "path": "src/core/packages/logging/server-internal/src/logging_service.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,6 +110,8 @@
               "ILoggingSystem"
             ],
             "path": "src/core/packages/logging/server-internal/src/logging_service.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -148,6 +160,8 @@
           "; }>>"
         ],
         "path": "src/core/packages/logging/server-internal/src/appenders/appenders.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -190,6 +204,8 @@
           "<Readonly<{} & { name: string; level: \"info\" | \"error\" | \"off\" | \"all\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "src/core/packages/logging/server-internal/src/logging_config.ts",
+        "lineNumber": 102,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -238,6 +254,8 @@
           "<\"info\" | \"error\" | \"off\" | \"all\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\">; }>"
         ],
         "path": "src/core/packages/logging/server-internal/src/logging_config.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

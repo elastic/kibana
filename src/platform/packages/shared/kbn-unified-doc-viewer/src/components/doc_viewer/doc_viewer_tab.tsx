@@ -7,59 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import type { DocViewerComponent, DocViewRenderProps } from '../../types';
+import type { DocView, DocViewRenderProps } from '../../types';
 import type { DocViewerProps } from './doc_viewer';
 
 interface Props {
-  id: string;
+  docView: DocView;
   renderProps: DocViewRenderProps;
-  title: string;
-  component: DocViewerComponent;
   initialDocViewerState?: DocViewerProps['initialDocViewerState'];
   onInitialDocViewerStateChange?: DocViewerProps['onInitialDocViewerStateChange'];
 }
 
-type ExtractState<T> = T extends DocViewerComponent<infer TState> ? Partial<TState> : never;
+type ExtractState<T> = T extends DocView<infer TState> ? TState | undefined : never;
 
 /**
  * Renders the tab content of a doc view.
  * Displays an error message when it encounters exceptions, thanks to
  * Error Boundaries.
  */
-export const DocViewerTab = (props: Props) => {
-  const {
-    id,
-    component: Component,
-    renderProps,
-    title,
-    initialDocViewerState,
-    onInitialDocViewerStateChange,
-  } = props;
+export const DocViewerTab = ({
+  docView,
+  renderProps,
+  initialDocViewerState,
+  onInitialDocViewerStateChange,
+}: Props) => {
+  const initialState = useMemo(
+    () => initialDocViewerState?.docViewerTabsState?.[docView.id] as ExtractState<typeof docView>,
+    [initialDocViewerState, docView.id]
+  );
 
   const onInitialStateChange = useCallback(
-    (initialState: ExtractState<typeof Component>) => {
+    (state: object) => {
       onInitialDocViewerStateChange?.({
         ...initialDocViewerState,
         docViewerTabsState: {
           ...initialDocViewerState?.docViewerTabsState,
-          [id]: initialState,
+          [docView.id]: state,
         },
       });
     },
-    [id, initialDocViewerState, onInitialDocViewerStateChange]
+    [docView.id, initialDocViewerState, onInitialDocViewerStateChange]
   );
 
   return (
-    <KibanaSectionErrorBoundary sectionName={title}>
-      <Component
-        initialState={
-          initialDocViewerState?.docViewerTabsState?.[id] as ExtractState<typeof Component>
-        }
-        onInitialStateChange={onInitialStateChange}
-        {...renderProps}
-      />
+    <KibanaSectionErrorBoundary sectionName={docView.title}>
+      {docView.render({
+        ...renderProps,
+        initialState,
+        onInitialStateChange,
+      })}
     </KibanaSectionErrorBoundary>
   );
 };

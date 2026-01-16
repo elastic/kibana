@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
+import type { ReactElement } from 'react';
 import type { DocViewsRegistry } from './doc_views_registry';
 
 /**
@@ -61,19 +62,14 @@ export interface DocViewRenderProps {
   decreaseAvailableHeightBy?: number;
 }
 
-export type DocViewerComponentProps<TState extends object = object> = DocViewRenderProps &
-  RestorableStateProviderProps<TState>;
-
-export type DocViewerComponent<TState extends object = object> = React.FC<
-  DocViewerComponentProps<TState>
->;
+export type DocViewRenderFunction<TState extends object = object> = (
+  props: DocViewRenderProps & RestorableStateProviderProps<TState>
+) => ReactElement;
 
 export interface DocView<TState extends object = object> {
   id: string;
   order: number;
   title: string;
-  component: DocViewerComponent<TState>;
   enabled?: boolean;
+  render: DocViewRenderFunction<TState>;
 }
-
-export type DocViewFactory<TState extends object = object> = () => DocView<TState>;

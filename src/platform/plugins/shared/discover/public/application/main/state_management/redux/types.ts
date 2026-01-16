@@ -208,3 +208,8 @@ export interface DiscoverInternalState {
     unsafeCurrentId: string;
   };
 }
+
+export interface UpdateESQLQueryActionPayload {
+  tabId: string;
+  queryOrUpdater: string | ((prevQuery: string) => string);
+}
