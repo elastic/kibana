@@ -23,7 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
-  describe('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/248913
+  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let agentId = '';
     let t1AnalystSupertest: TestAgent;
