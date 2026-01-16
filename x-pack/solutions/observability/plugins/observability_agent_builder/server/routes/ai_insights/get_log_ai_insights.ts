@@ -116,7 +116,6 @@ export async function getLogAiInsights({
       name: 'CorrelatedLogSequence',
       handler: async () => {
         try {
-
           const { sequences } = await getCorrelatedLogs({
             core,
             logger,
