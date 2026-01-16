@@ -50,6 +50,7 @@ export function registerStartOAuthRoute({
     },
     async (context, request, response) => {
       const earsUrl = config.ears?.url;
+      const allowInsecure = config.ears?.allow_insecure ?? true;
 
       if (!earsUrl) {
         return response.customError({
@@ -64,14 +65,19 @@ export function registerStartOAuthRoute({
       const { scope } = request.body;
 
       try {
-        const earsResponse = await fetch(`${earsUrl}/oauth/start/${provider}`, {
+        const fetchOptions: RequestInit & { dispatcher?: Agent } = {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ scope }),
-          dispatcher: insecureAgent,
-        });
+        };
+
+        if (allowInsecure) {
+          fetchOptions.dispatcher = insecureAgent;
+        }
+
+        const earsResponse = await fetch(`${earsUrl}/oauth/start/${provider}`, fetchOptions);
 
         if (!earsResponse.ok) {
           const errorText = await earsResponse.text();

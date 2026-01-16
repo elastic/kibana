@@ -22,7 +22,7 @@ const sectionGapStyles = ({ euiTheme }: UseEuiTheme) => ({
 
 export const WorkplaceAIHomeView: React.FC<{}> = () => {
   const config = useWorkplaceAIConfig();
-  const isEarsConfigured = !!config.ears?.url;
+  const isEarsUiEnabled = config.ears?.ui_enabled;
 
   return (
     <KibanaPageTemplate data-test-subj="workplaceAIHomePage">
@@ -35,7 +35,7 @@ export const WorkplaceAIHomeView: React.FC<{}> = () => {
 
         <ExploreWorkplaceAI />
 
-        {isEarsConfigured && (
+        {isEarsUiEnabled && (
           <>
             <div css={sectionGapStyles} />
             <EarsConnectionsSection />

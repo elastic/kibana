@@ -47,6 +47,7 @@ export function registerFetchSecretsRoute({
     },
     async (context, request, response) => {
       const earsUrl = config.ears?.url;
+      const allowInsecure = config.ears?.allow_insecure ?? true;
 
       if (!earsUrl) {
         return response.customError({
@@ -60,15 +61,20 @@ export function registerFetchSecretsRoute({
       const { request_id: requestId } = request.query;
 
       try {
+        const fetchOptions: RequestInit & { dispatcher?: Agent } = {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        };
+
+        if (allowInsecure) {
+          fetchOptions.dispatcher = insecureAgent;
+        }
+
         const earsResponse = await fetch(
           `${earsUrl}/oauth/fetch_request_secrets?request_id=${encodeURIComponent(requestId)}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            dispatcher: insecureAgent,
-          }
+          fetchOptions
         );
 
         if (!earsResponse.ok) {

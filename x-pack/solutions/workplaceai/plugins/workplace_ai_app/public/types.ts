@@ -36,5 +36,7 @@ export interface WorkplaceAIAppPluginStartDependencies {
 export interface WorkplaceAIClientConfig {
   ears: {
     url?: string;
+    ui_enabled: boolean;
+    allow_insecure: boolean;
   };
 }

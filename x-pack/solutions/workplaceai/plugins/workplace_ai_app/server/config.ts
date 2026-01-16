@@ -14,14 +14,14 @@ const configSchema = schema.object({
   ears: schema.object(
     {
       url: schema.maybe(schema.string()),
+      ui_enabled: schema.boolean({ defaultValue: false }),
+      allow_insecure: schema.boolean({ defaultValue: true }),
     },
     { defaultValue: {} }
   ),
 });
 
 export type WorkplaceAIAppConfig = TypeOf<typeof configSchema>;
-
-export type WorkplaceAITracingConfig = WorkplaceAIAppConfig['tracing'];
 
 export type WorkplaceAIEarsConfig = WorkplaceAIAppConfig['ears'];
 
