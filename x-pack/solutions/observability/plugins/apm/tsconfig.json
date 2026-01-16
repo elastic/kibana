@@ -151,6 +151,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/kql",
+    "@kbn/slo-schema",
+    "@kbn/slo-plugin",
   ],
   "exclude": ["target/**/*"]
 }
