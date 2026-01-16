@@ -6,7 +6,7 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import type { EsqlRule } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { EsqlRuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
 
 export const defaultSchedule: RuleSchedule = {
@@ -15,7 +15,7 @@ export const defaultSchedule: RuleSchedule = {
   to: 'now',
 };
 
-const defaultRuleValues: Partial<EsqlRule> = {
+const defaultRuleValues: Partial<EsqlRuleCreateProps> = {
   references: [],
   severity_mapping: [],
   risk_score_mapping: [],
@@ -36,7 +36,7 @@ const defaultRuleValues: Partial<EsqlRule> = {
 
 export const RuleCreationAnnotation = Annotation.Root({
   userQuery: Annotation<string>(),
-  rule: Annotation<Partial<EsqlRule>>({
+  rule: Annotation<Partial<EsqlRuleCreateProps>>({
     default: () => defaultRuleValues,
     reducer: (current, update) => {
       return { ...current, ...update };
