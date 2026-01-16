@@ -89,8 +89,11 @@ export const useEditActiveSourceFlyout = ({
       });
     },
     onSuccess: (data, variables) => {
-      // Invalidate cache to refresh the table
+      // Invalidate both caches to refresh the table and edit flyout
       queryClient.invalidateQueries(queryKeys.dataConnectors.list());
+      if (stackConnectorId) {
+        queryClient.invalidateQueries(queryKeys.stackConnectors.byId(stackConnectorId));
+      }
 
       toasts.addSuccess(
         i18n.translate('xpack.dataConnectors.hooks.useEditActiveSourceFlyout.updateSuccessText', {
@@ -101,9 +104,8 @@ export const useEditActiveSourceFlyout = ({
         })
       );
 
-      // Success! Call callback and close flyout
+      // Call user callback
       onConnectorUpdated?.();
-      closeFlyout();
     },
     onError: (error: Error) => {
       toasts.addError(error, {
@@ -124,28 +126,37 @@ export const useEditActiveSourceFlyout = ({
         return;
       }
 
-      // If connector name changed, update data connector name
+      // Close flyout immediately to avoid flicker
+      closeFlyout();
+
+      // If connector name changed, update data connector name in background
       if (updatedConnector.name !== activeSource.name) {
         updateDataConnectorMutation.mutate({
           id: activeSource.id,
           name: updatedConnector.name,
         });
       } else {
-        // No name change, just close and call callback
+        // No name change, just call callback
         onConnectorUpdated?.();
-        closeFlyout();
       }
     },
     [activeSource, onConnectorUpdated, closeFlyout, updateDataConnectorMutation]
   );
 
   const flyout = useMemo(() => {
-    if (!isOpen || !stackConnector || isLoadingConnector) {
+    if (!isOpen || !stackConnector || isLoadingConnector || !activeSource) {
       return null;
     }
 
+    // Override stack connector name with data source name
+    // This ensures the flyout shows the data source name, not the stack connector name
+    const connectorWithDataSourceName = {
+      ...stackConnector,
+      name: activeSource.name,
+    };
+
     return triggersActionsUi.getEditConnectorFlyout({
-      connector: stackConnector,
+      connector: connectorWithDataSourceName,
       onClose: closeFlyout,
       onConnectorUpdated: handleConnectorUpdated,
     });
@@ -153,6 +164,7 @@ export const useEditActiveSourceFlyout = ({
     isOpen,
     stackConnector,
     isLoadingConnector,
+    activeSource,
     closeFlyout,
     handleConnectorUpdated,
     triggersActionsUi,
