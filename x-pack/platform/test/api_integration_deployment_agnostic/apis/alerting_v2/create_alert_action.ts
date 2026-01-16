@@ -122,7 +122,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(action!.alert_series_id).to.be('test-alert-series-id');
       expect(action!.action_type).to.be('ack');
       expect(action!.episode_id).to.be(getLatestTransition().episode_id);
-      expect(action!.rule_id).to.be(alertEvent['rule.id']);
+      expect(action!.rule_id).to.be(alertEvent.rule.id);
       expect(action!.last_series_event_timestamp).to.be(alertEvent['@timestamp']);
     });
 

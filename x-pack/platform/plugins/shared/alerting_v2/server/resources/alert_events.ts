@@ -61,12 +61,14 @@ export const alertEventSchema = z.object({
     id: z.string(),
     tags: z.array(z.string()),
   }),
-  grouping: z.object({
-    key: z.string(),
-    value: z.string(),
-  }),
+  grouping: z
+    .object({
+      key: z.string(),
+      value: z.string(),
+    })
+    .optional(),
   data: z.record(z.string(), z.any()),
-  parent_rule_id: z.string(),
+  parent_rule_id: z.string().optional(),
   status: z.string(),
   alert_id: z.string(),
   alert_series_id: z.string(),

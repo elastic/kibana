@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-export interface AlertEvent {
-  '@timestamp': string;
-  alert_id: string;
-  alert_series_id: string;
-  'rule.id': string;
-  status: string;
-  source: string;
-  tags: string[];
-}
+import type { AlertEvent } from '../../../../../plugins/shared/alerting_v2/server/resources/alert_events';
 
 export const createAlertEvent = (overrides?: Partial<AlertEvent>): AlertEvent => ({
   '@timestamp': new Date().toISOString(),
+  scheduled_timestamp: new Date().toISOString(),
   alert_id: 'test-alert-id',
   alert_series_id: 'test-alert-series-id',
-  'rule.id': 'test-rule-id',
+  parent_rule_id: undefined,
+  rule: {
+    id: 'test-rule-id',
+    tags: [],
+  },
+  grouping: {
+    key: 'instance.id',
+    value: 'i-1234567890abcdef0',
+  },
+  data: {},
   status: 'active',
   source: 'test-source',
   tags: ['alert-tag-1', 'alert-tag-2'],

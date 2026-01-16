@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createAlertEvent, type AlertEvent } from './alert_event';
+export { createAlertEvent } from './alert_event';
 export { createAlertTransition, type AlertTransition } from './alert_transition';
