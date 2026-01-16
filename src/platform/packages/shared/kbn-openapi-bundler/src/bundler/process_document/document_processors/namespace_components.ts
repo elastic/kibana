@@ -61,21 +61,21 @@ export function createNamespaceComponentsProcessor(pointer: string): DocumentNod
     // `components.securitySchemes` items which should be handled.
     onNodeLeave(node, context) {
       // Handle mappings
-      if (context.parentKey === 'mapping' && isPlainObjectType(node)) {
-        for (const key of Object.keys(node)) {
-          const maybeRef = node[key];
+      // if (context.parentKey === 'mapping' && isPlainObjectType(node)) {
+      //   for (const key of Object.keys(node)) {
+      //     const maybeRef = node[key];
 
-          if (typeof maybeRef !== 'string' || !isLocalRef(maybeRef)) {
-            throw new Error(
-              `Expected mappings to have local references but got "${maybeRef}" in ${JSON.stringify(
-                node
-              )}`
-            );
-          }
+      //     if (typeof maybeRef !== 'string' || !isLocalRef(maybeRef)) {
+      //       throw new Error(
+      //         `Expected mappings to have local references but got "${maybeRef}" in ${JSON.stringify(
+      //           node
+      //         )}`
+      //       );
+      //     }
 
-          node[key] = decorateRefBaseName(maybeRef, namespace);
-        }
-      }
+      //     node[key] = decorateRefBaseName(maybeRef, namespace);
+      //   }
+      // }
 
       if ('security' in node && Array.isArray(node.security)) {
         for (const securityRequirements of node.security) {
