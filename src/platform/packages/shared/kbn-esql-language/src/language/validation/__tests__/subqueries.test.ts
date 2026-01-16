@@ -50,9 +50,7 @@ describe('Subqueries Validation', () => {
       await expectErrors('FROM index, (FROM remote-ccs:indexes)', [
         'Unknown index "remote-ccs:indexes"',
       ]);
-      // await expectErrors('FROM index, (FROM remote-*:indexes*)', [
-      //   'Unknown index "remote-*:indexes*"',
-      // ]); // TODO: ES no longer returns error for wildcard patterns that don't match - see https://github.com/elastic/kibana/issues/217119
+      await expectErrors('FROM index, (FROM remote-*:indexes*)', []);
     });
 
     it('should validate custom command validation inside deeply nested subqueries', async () => {
