@@ -17,6 +17,7 @@ import {
   getVarsControlledByVarGroups,
   shouldShowVar,
   computeDefaultVarGroupSelections,
+  isVarRequiredByVarGroup,
 } from './var_group_selector';
 
 const mockVarGroup: RegistryVarGroup = {
@@ -328,6 +329,117 @@ describe('VarGroupSelector', () => {
       expect(options.find((o) => o.value === 'cloud_connectors')).toBeUndefined();
       // assume_role should be visible in default mode
       expect(options.find((o) => o.value === 'assume_role')).toBeDefined();
+    });
+  });
+
+  describe('isVarRequiredByVarGroup', () => {
+    const requiredVarGroup: RegistryVarGroup = {
+      name: 'auth_method',
+      title: 'Authentication',
+      selector_title: 'Select method',
+      required: true,
+      options: [
+        {
+          name: 'api_key',
+          title: 'API Key',
+          vars: ['api_key', 'api_url'],
+        },
+        {
+          name: 'oauth',
+          title: 'OAuth',
+          vars: ['client_id', 'client_secret'],
+        },
+      ],
+    };
+
+    const optionalVarGroup: RegistryVarGroup = {
+      name: 'compression',
+      title: 'Compression',
+      selector_title: 'Select type',
+      required: false,
+      options: [
+        {
+          name: 'gzip',
+          title: 'Gzip',
+          vars: ['compression_level'],
+        },
+        {
+          name: 'none',
+          title: 'None',
+          vars: [],
+        },
+      ],
+    };
+
+    it('should return true for var in selected option of required var_group', () => {
+      const selections = { auth_method: 'api_key' };
+      expect(isVarRequiredByVarGroup('api_key', [requiredVarGroup], selections)).toBe(true);
+      expect(isVarRequiredByVarGroup('api_url', [requiredVarGroup], selections)).toBe(true);
+    });
+
+    it('should return false for var not in selected option of required var_group', () => {
+      const selections = { auth_method: 'api_key' };
+      expect(isVarRequiredByVarGroup('client_id', [requiredVarGroup], selections)).toBe(false);
+      expect(isVarRequiredByVarGroup('client_secret', [requiredVarGroup], selections)).toBe(false);
+    });
+
+    it('should return false for var in optional var_group', () => {
+      const selections = { compression: 'gzip' };
+      expect(isVarRequiredByVarGroup('compression_level', [optionalVarGroup], selections)).toBe(
+        false
+      );
+    });
+
+    it('should return false for var not controlled by any var_group', () => {
+      const selections = { auth_method: 'api_key' };
+      expect(isVarRequiredByVarGroup('proxy_url', [requiredVarGroup], selections)).toBe(false);
+    });
+
+    it('should return false when varGroups is empty', () => {
+      expect(isVarRequiredByVarGroup('api_key', [], { auth_method: 'api_key' })).toBe(false);
+    });
+
+    it('should return false when varGroupSelections is empty', () => {
+      expect(isVarRequiredByVarGroup('api_key', [requiredVarGroup], {})).toBe(false);
+    });
+
+    it('should return true when oauth option is selected', () => {
+      const selections = { auth_method: 'oauth' };
+      expect(isVarRequiredByVarGroup('client_id', [requiredVarGroup], selections)).toBe(true);
+      expect(isVarRequiredByVarGroup('client_secret', [requiredVarGroup], selections)).toBe(true);
+      // api_key vars should not be required when oauth is selected
+      expect(isVarRequiredByVarGroup('api_key', [requiredVarGroup], selections)).toBe(false);
+    });
+
+    it('should handle multiple var_groups with mixed required settings', () => {
+      const selections = { auth_method: 'api_key', compression: 'gzip' };
+      // Required var_group var should be required
+      expect(isVarRequiredByVarGroup('api_key', [requiredVarGroup, optionalVarGroup], selections)).toBe(
+        true
+      );
+      // Optional var_group var should not be required
+      expect(
+        isVarRequiredByVarGroup('compression_level', [requiredVarGroup, optionalVarGroup], selections)
+      ).toBe(false);
+    });
+
+    it('should handle var_group without required field (defaults to false)', () => {
+      const varGroupWithoutRequired: RegistryVarGroup = {
+        name: 'test',
+        title: 'Test',
+        selector_title: 'Select',
+        // Note: no required field
+        options: [
+          {
+            name: 'opt1',
+            title: 'Option 1',
+            vars: ['var1'],
+          },
+        ],
+      };
+
+      const selections = { test: 'opt1' };
+      expect(isVarRequiredByVarGroup('var1', [varGroupWithoutRequired], selections)).toBe(false);
     });
   });
 });
