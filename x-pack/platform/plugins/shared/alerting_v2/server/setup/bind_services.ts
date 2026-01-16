@@ -8,14 +8,13 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
-import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import { RulesClient } from '../lib/rules_client';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { LoggerService } from '../lib/services/logger_service/logger_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import { AlertingRetryService } from '../lib/services/retry_service';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
-import { TaskRunScopeService } from '../lib/services/task_run_scope_service/task_run_scope_service';
+import { TaskRunnerFactory } from '../lib/services/task_run_scope_service/create_task_runner';
 import { StorageService } from '../lib/services/storage_service/storage_service';
 import {
   StorageServiceInternalToken,
@@ -47,9 +46,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return elasticsearch.client.asScoped(request).asCurrentUser;
     })
     .inRequestScope();
-  bind(TaskRunScopeService).toSelf().inSingletonScope();
+  bind(TaskRunnerFactory).toSelf().inSingletonScope();
   bind(RulesSavedObjectService).toSelf().inRequestScope();
-  bind(RuleExecutorTaskDefinition).toSelf().inSingletonScope();
 
   bind(QueryService)
     .toDynamicValue(({ get }) => {

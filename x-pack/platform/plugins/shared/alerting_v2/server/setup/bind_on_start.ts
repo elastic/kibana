@@ -12,7 +12,7 @@ import { ResourceManager } from '../lib/services/resource_service/resource_manag
 import { initializeResources } from '../resources/register_resources';
 import { LoggerService } from '../lib/services/logger_service/logger_service';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
-import { TaskRunScopeService } from '../lib/services/task_run_scope_service/task_run_scope_service';
+import { TaskRunnerFactory } from '../lib/services/task_run_scope_service/create_task_runner';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue((container) => {
@@ -26,8 +26,8 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       esClient,
     });
 
-    const taskRunScopeService = container.get(TaskRunScopeService);
+    const taskRunnerFactory = container.get(TaskRunnerFactory);
     const injection = container.get(CoreStart('injection'));
-    taskRunScopeService.initialize(injection);
+    taskRunnerFactory.initialize(injection);
   });
 }

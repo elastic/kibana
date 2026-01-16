@@ -8,9 +8,11 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-server';
-import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
+import { registerRuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
+import { TaskRunnerFactory } from '../lib/services/task_run_scope_service/create_task_runner';
+import type { AlertingServerSetupDependencies } from '../types';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -23,6 +25,9 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       logger,
     });
 
-    container.get(RuleExecutorTaskDefinition).register();
+    registerRuleExecutorTaskDefinition({
+      taskManager: container.get(PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager')),
+      taskRunnerFactory: container.get(TaskRunnerFactory),
+    });
   });
 }
