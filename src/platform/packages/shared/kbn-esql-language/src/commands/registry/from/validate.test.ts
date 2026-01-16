@@ -73,7 +73,6 @@ describe('FROM Validation', () => {
         fromExpectErrors(`FROM index, missingIndex`, ['Unknown index "missingIndex"']);
         fromExpectErrors(`from average()`, ['Unknown index "average"']);
         fromExpectErrors(`fRom custom_function()`, ['Unknown index "custom_function"']);
-        fromExpectErrors(`FROM indexes*`, ['Unknown index "indexes*"']);
         fromExpectErrors('from numberField', ['Unknown index "numberField"']);
         fromExpectErrors('FROM policy', ['Unknown index "policy"']);
 
@@ -82,11 +81,11 @@ describe('FROM Validation', () => {
         fromExpectErrors('FROM *missingIndex, missingIndex2, index', [
           'Unknown index "missingIndex2"',
         ]);
-        fromExpectErrors('FROM missingIndex*', ['Unknown index "missingIndex*"']);
-        fromExpectErrors('FROM *missingIndex, missing*Index2', [
-          'Unknown index "*missingIndex"',
-          'Unknown index "missing*Index2"',
-        ]);
+      });
+      test('no errors on unknown index if using wildcards', () => {
+        fromExpectErrors(`FROM indexes*`, []);
+        fromExpectErrors('FROM missingIndex*', []);
+        fromExpectErrors('FROM *missingIndex, missing*Index2', []);
       });
     });
 
@@ -111,12 +110,14 @@ describe('FROM Validation', () => {
   describe('CCS indices', () => {
     describe('... <sources> ...', () => {
       test('display errors on unknown indices', () => {
-        fromExpectErrors('fRoM remote-*:indexes*', ['Unknown index "remote-*:indexes*"']);
-        fromExpectErrors('fRoM remote-*:indexes', ['Unknown index "remote-*:indexes"']);
         fromExpectErrors('fRoM remote-ccs:indexes', ['Unknown index "remote-ccs:indexes"']);
         fromExpectErrors('fRoM a_index, remote-ccs:indexes', [
           'Unknown index "remote-ccs:indexes"',
         ]);
+      });
+      test('no errors on unknown index if using wildcards', () => {
+        fromExpectErrors('fRoM remote-*:indexes*', []);
+        fromExpectErrors('fRoM remote-*:indexes', []);
       });
     });
 
@@ -125,7 +126,7 @@ describe('FROM Validation', () => {
         fromExpectErrors(`from remote-ccs:indexes METADATA _id`, [
           'Unknown index "remote-ccs:indexes"',
         ]);
-        fromExpectErrors(`from *:indexes METADATA _id`, ['Unknown index "*:indexes"']);
+        fromExpectErrors(`from *:indexes METADATA _id`, []);
       });
     });
   });
