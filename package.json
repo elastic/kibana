@@ -73,7 +73,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "22.21.1",
+    "node": "22.22.0",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -1297,7 +1297,7 @@
     "diff": "8.0.2",
     "dom-to-image-more": "3.6.0",
     "dompurify": "3.3.0",
-    "dotenv": "16.5.0",
+    "dotenv": "17.2.3",
     "elastic-apm-node": "4.15.0",
     "email-addresses": "5.0.0",
     "eventsource-parser": "3.0.6",
@@ -1455,7 +1455,7 @@
     "type-fest": "4.41.0",
     "typescript-fsa": "3.0.0",
     "typescript-fsa-reducers": "1.2.2",
-    "undici": "6.22.0",
+    "undici": "6.23.0",
     "unidiff": "1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "9.1.0",
