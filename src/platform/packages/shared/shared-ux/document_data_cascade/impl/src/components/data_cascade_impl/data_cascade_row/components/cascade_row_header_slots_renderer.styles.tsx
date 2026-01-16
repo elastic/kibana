@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { type UseEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
+import { type UseEuiTheme, euiShadow, useEuiTheme } from '@elastic/eui';
 
 export interface ScrollState {
   isScrollable: boolean;
@@ -49,11 +49,8 @@ const useSlotContainerInnerStyles = (
     return { 'mask-image': maskStyle };
   }, [scrollState, euiTheme.size.m]);
 
-  const scrollOverflowStyles = useEuiOverflowScroll('x', true);
-
   return css`
     overflow-x: auto;
-    ${scrollOverflowStyles}
     scrollbar-width: none;
     scroll-behavior: smooth;
     &::-webkit-scrollbar {
@@ -63,10 +60,42 @@ const useSlotContainerInnerStyles = (
   `;
 };
 
-export const useStyles = (euiTheme: UseEuiTheme['euiTheme'], scrollState: ScrollState) => {
-  const slotContainerInnerStyles = useSlotContainerInnerStyles(euiTheme, scrollState);
+export const useStyles = (scrollState: ScrollState) => {
+  const euiThemeContext = useEuiTheme();
+
+  const slotContainerInnerStyles = useSlotContainerInnerStyles(
+    euiThemeContext.euiTheme,
+    scrollState
+  );
+
+  const shadow = euiShadow(euiThemeContext, 'xl', { direction: 'down' });
+
+  const slotsScrollButtonBaseStyles = css([
+    {
+      position: 'absolute',
+      // raise the button higher than the stacking index of the slot container
+      zIndex: 1,
+      margin: euiThemeContext.euiTheme.size.xxs,
+    },
+    shadow,
+  ]);
 
   return {
+    slotsContainerWrapper: css({
+      position: 'relative',
+    }),
+    slotsLeftScrollButton: css([
+      slotsScrollButtonBaseStyles,
+      {
+        left: 0,
+      },
+    ]),
+    slotsRightScrollButton: css([
+      slotsScrollButtonBaseStyles,
+      {
+        right: 0,
+      },
+    ]),
     slotsContainer: css`
       min-width: 0;
       width: 100%;
@@ -83,8 +112,8 @@ export const useStyles = (euiTheme: UseEuiTheme['euiTheme'], scrollState: Scroll
     slotItemWrapper: css({
       justifyContent: 'center',
       alignItems: 'center',
-      borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-      paddingLeft: euiTheme.size.s,
+      borderLeft: `${euiThemeContext.euiTheme.border.width.thin} solid ${euiThemeContext.euiTheme.border.color}`,
+      paddingLeft: euiThemeContext.euiTheme.size.s,
       flexGrow: 0,
 
       '& > *': {

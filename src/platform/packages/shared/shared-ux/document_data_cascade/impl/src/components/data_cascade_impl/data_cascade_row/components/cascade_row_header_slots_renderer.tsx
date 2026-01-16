@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { type CascadeSizing } from '../../types';
 import {
   useStyles as useCascadeRowHeaderSlotsRendererStyles,
@@ -39,7 +39,6 @@ const CascadeRowHeaderSlotsRenderer = ({
   headerMetaSlots: React.ReactNode[];
   size: CascadeSizing;
 }) => {
-  const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState<ScrollState>({
     isScrollable: false,
@@ -47,7 +46,7 @@ const CascadeRowHeaderSlotsRenderer = ({
     canScrollRight: false,
   });
 
-  const styles = useCascadeRowHeaderSlotsRendererStyles(euiTheme, scrollState);
+  const styles = useCascadeRowHeaderSlotsRendererStyles(scrollState);
 
   const updateScrollState = useCallback(() => {
     setScrollState(calculateScrollState(containerRef.current));
@@ -99,21 +98,33 @@ const CascadeRowHeaderSlotsRenderer = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-      {scrollState.isScrollable && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="arrowLeft"
-            color="text"
-            size="xs"
-            disabled={!scrollState.canScrollLeft}
-            aria-label={scrollLeftLabel}
-            onClick={scrollLeft}
-            data-test-subj="cascadeHeaderSlots-scrollLeft"
-          />
-        </EuiFlexItem>
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      wrap={false}
+      css={styles.slotsContainerWrapper}
+      className="eui-xScrollWithShadows"
+    >
+      {scrollState.isScrollable && scrollState.canScrollLeft && (
+        <EuiButtonIcon
+          iconType="arrowLeft"
+          color="text"
+          size="xs"
+          aria-label={scrollLeftLabel}
+          display="base"
+          onClick={scrollLeft}
+          data-test-subj="cascadeHeaderSlots-scrollLeft"
+          css={styles.slotsLeftScrollButton}
+        />
       )}
-      <EuiFlexItem grow ref={containerRef} onScroll={handleScroll} css={styles.slotsContainer}>
+      <EuiFlexItem
+        grow
+        ref={containerRef}
+        onScroll={handleScroll}
+        css={styles.slotsContainer}
+        tabIndex={0}
+      >
         <EuiFlexGroup
           css={styles.slotsContainerInner}
           gutterSize={size}
@@ -128,18 +139,17 @@ const CascadeRowHeaderSlotsRenderer = ({
           ))}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {scrollState.isScrollable && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="arrowRight"
-            color="text"
-            size="xs"
-            disabled={!scrollState.canScrollRight}
-            aria-label={scrollRightLabel}
-            onClick={scrollRight}
-            data-test-subj="cascadeHeaderSlots-scrollRight"
-          />
-        </EuiFlexItem>
+      {scrollState.isScrollable && scrollState.canScrollRight && (
+        <EuiButtonIcon
+          iconType="arrowRight"
+          color="text"
+          size="xs"
+          aria-label={scrollRightLabel}
+          display="base"
+          onClick={scrollRight}
+          data-test-subj="cascadeHeaderSlots-scrollRight"
+          css={styles.slotsRightScrollButton}
+        />
       )}
     </EuiFlexGroup>
   );
