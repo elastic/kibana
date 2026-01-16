@@ -22,6 +22,14 @@ export interface CategoriesResponse {
   mainCategoriesMap: CategoryGroup[];
 }
 
+export interface RelatedIntegrationRuleResponse {
+  related_integrations?: Array<{
+    package: string;
+    version?: string;
+    integration?: string;
+  }>;
+}
+
 export interface SiemReadinessPackageInfo {
   id: string;
   name: string;
