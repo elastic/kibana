@@ -5,42 +5,20 @@
  * 2.0.
  */
 
+import { WARNING_AND_ABOVE_VALUES } from '../../utils/ecs_otel_fields';
+
 /**
- * Handler utility functions for identifying log severity levels based on ECS and OTel standards.
- *
  * These functions analyze individual log entry objects to determine if they are:
  * - Warning or above (warn, error, critical, fatal) - using isWarningOrAbove()
- *
- * Supports multiple log formats:
- * - ECS standard field (log.level) - aliases handle mapping from other fields
- * - OpenTelemetry fields (severity_number, SeverityText, attributes.*)
- * - HTTP status codes
- * - Error/exception indicators in field names
  */
 
-const WARNING_AND_ABOVE_LEVELS = new Set([
-  'alert',
-  'crit',
-  'critical',
-  'emergency',
-  'err',
-  'error',
-  'fatal',
-  'severe',
-  'warn',
-  'warning',
-]);
-
-/**
- * Check if a log entry is warning or above (warn, error, critical, fatal) or has error indicators.
- */
 export function isWarningOrAbove(logEntry: Record<string, unknown>): boolean {
-  // 1. Check log.level (aliases handle mapping from other fields)
-  // Handle both flattened {log.level: level} and nested {log: {level: level}} formats
+  // 1. Check log level fields (log.level, level, etc.)
   const level =
     (logEntry['log.level'] as string | undefined) ??
     ((logEntry.log as Record<string, unknown> | undefined)?.level as string | undefined);
-  if (typeof level === 'string' && WARNING_AND_ABOVE_LEVELS.has(level.toLowerCase())) {
+
+  if (typeof level === 'string' && WARNING_AND_ABOVE_VALUES.includes(level.toLowerCase())) {
     return true;
   }
 
@@ -52,25 +30,6 @@ export function isWarningOrAbove(logEntry: Record<string, unknown>): boolean {
   for (const key of Object.keys(logEntry)) {
     if (key.startsWith('error.') && logEntry[key] != null) {
       return true;
-    }
-  }
-
-  // 4. Check message and body.text fields for error/exception keywords
-  const message = logEntry.message;
-  if (typeof message === 'string') {
-    const lowerMessage = message.toLowerCase();
-    if (lowerMessage.includes('error') || lowerMessage.includes('exception')) {
-      return true;
-    }
-  }
-
-  // 5. Check if any field value contains 'error' or 'exception'
-  for (const value of Object.values(logEntry)) {
-    if (typeof value === 'string') {
-      const lowerValue = value.toLowerCase();
-      if (lowerValue.includes('error') || lowerValue.includes('exception')) {
-        return true;
-      }
     }
   }
 

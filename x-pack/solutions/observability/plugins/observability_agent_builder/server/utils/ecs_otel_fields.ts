@@ -17,7 +17,7 @@ const LOG_LEVEL_TEXT_FIELDS = [
 ] as const;
 
 // Warning+ severity values (warn, error, critical, fatal)
-const WARNING_AND_ABOVE_VALUES = [
+export const WARNING_AND_ABOVE_VALUES = [
   'ALERT',
   'CRIT',
   'CRITICAL',
