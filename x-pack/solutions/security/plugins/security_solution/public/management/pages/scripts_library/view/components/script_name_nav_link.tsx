@@ -11,7 +11,7 @@ import { EuiLink } from '@elastic/eui';
 interface ScriptNameNavLinkProps {
   name: string;
   href: string;
-  'data-test-subj': string;
+  'data-test-subj'?: string;
 }
 
 export const ScriptNameNavLink = memo<ScriptNameNavLinkProps>(

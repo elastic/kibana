@@ -7,9 +7,11 @@
 
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { OS_TITLES } from '../../../../common/translations';
+import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
 
 export interface ScriptTablePlatformBadgesProps {
-  platforms?: string[];
+  platforms?: SupportedHostOsType[];
   'data-test-subj'?: string;
 }
 export const ScriptTablePlatformBadges = memo<ScriptTablePlatformBadgesProps>(
@@ -18,7 +20,7 @@ export const ScriptTablePlatformBadges = memo<ScriptTablePlatformBadgesProps>(
       <EuiFlexGroup gutterSize="s" wrap responsive={false} data-test-subj={dataTestSubj}>
         {platforms?.map((platform) => (
           <EuiFlexItem grow={false} key={platform}>
-            <EuiBadge color="hollow">{platform}</EuiBadge>
+            <EuiBadge color="hollow">{OS_TITLES[platform]}</EuiBadge>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

@@ -18,7 +18,7 @@ interface ErrorType {
   message: string;
 }
 
-export const useGetEndpointScriptsLibrary = (
+export const useGetEndpointScriptsList = (
   query: ListScriptsRequestQuery,
   options: UseQueryOptions<EndpointScriptListApiResponse, IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<EndpointScriptListApiResponse, IHttpFetchError<ErrorType>> => {
@@ -29,36 +29,16 @@ export const useGetEndpointScriptsLibrary = (
     ...options,
     keepPreviousData: true,
     queryFn: async () => {
-      return http
-        .get<EndpointScriptListApiResponse>(SCRIPTS_LIBRARY_ROUTE, {
-          version: '2023-10-31',
-          query: {
-            page: query?.page ?? 1,
-            pageSize: query?.pageSize ?? 10,
-            sortField: query?.sortField,
-            sortDirection: query?.sortDirection,
-            kuery: query?.kuery,
-          },
-        })
-        .catch((error) => {
-          // if the error is a 404 or index not found exception, return an empty response
-          // this is to handle the case where the endpoint action index does not exist yet
-          // and avoid showing an error to the user in that case
-          if (
-            error.body.statusCode === 404 ||
-            error.body.message.includes('index_not_found_exception')
-          ) {
-            return {
-              data: [],
-              page: 1,
-              pageSize: query?.pageSize ?? 10,
-              total: 0,
-              sortField: query?.sortField,
-              sortDirection: query?.sortDirection,
-            };
-          }
-          return error;
-        });
+      return http.get<EndpointScriptListApiResponse>(SCRIPTS_LIBRARY_ROUTE, {
+        version: '2023-10-31',
+        query: {
+          page: query?.page ?? 1,
+          pageSize: query?.pageSize ?? 10,
+          sortField: query?.sortField,
+          sortDirection: query?.sortDirection,
+          kuery: query?.kuery,
+        },
+      });
     },
   });
 };
