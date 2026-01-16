@@ -6,6 +6,7 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -109,12 +110,13 @@ export class InventoryPage {
   }
 
   public async goToTime(time: string) {
-    // eslint-disable-next-line playwright/no-force-option
-    await this.datePickerInput.fill(time, { force: true });
-    if ((await this.datePickerInput.inputValue()) !== time) {
+    let inputValue = '';
+    do {
       // eslint-disable-next-line playwright/no-force-option
       await this.datePickerInput.fill(time, { force: true });
-    }
+      inputValue = await this.datePickerInput.inputValue();
+    } while (inputValue !== time);
+    await expect(this.datePickerInput).toHaveValue(time);
     await this.datePickerInput.press('Escape');
     await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
