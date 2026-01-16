@@ -126,7 +126,7 @@ async function validateAst(
    * The reason is that building the list of columns available in each command requires
    * the full command subsequence that precedes that command.
    */
-  const subqueries = getSubqueriesToValidate(rootCommands);
+  const subqueries = getSubqueriesToValidate(rootCommands, headerCommands);
   for (const subquery of subqueries) {
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
@@ -135,17 +135,8 @@ async function validateAst(
         ? subquery
         : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
-    const queryColumnsOptions = {
-      ...options,
-      unmappedFieldsStrategy: unmappedFieldsStrategyFromHeader,
-    };
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(
-          subqueryForColumns,
-          queryString,
-          callbacks,
-          queryColumnsOptions
-        ).asMap()
+      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
