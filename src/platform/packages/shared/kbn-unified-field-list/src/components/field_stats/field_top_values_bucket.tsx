@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { EMPTY_LABEL, NULL_LABEL, MISSING_TOKEN } from '@kbn/field-formats-common';
+import { EMPTY_LABEL, MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldTopValuesBucketParams {
@@ -150,8 +150,6 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                     ? i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
                         defaultMessage: 'Other',
                       })
-                    : formattedFieldValue === MISSING_TOKEN
-                    ? NULL_LABEL
                     : formattedFieldValue === ''
                     ? EMPTY_LABEL
                     : '-'}
@@ -181,7 +179,11 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 <EuiButtonIcon
                   iconSize="s"
                   iconType="plusInCircle"
-                  onClick={() => onAddFilter(field, fieldValue, '+')}
+                  onClick={() =>
+                    fieldValue === MISSING_TOKEN
+                      ? onAddFilter('_exists_', field.name, '-')
+                      : onAddFilter(field, fieldValue, '+')
+                  }
                   aria-label={filterForLabel}
                   data-test-subj={`plus-${fieldLabel}-${fieldValue}`}
                   style={{
@@ -198,7 +200,11 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 <EuiButtonIcon
                   iconSize="s"
                   iconType="minusInCircle"
-                  onClick={() => onAddFilter(field, fieldValue, '-')}
+                  onClick={() =>
+                    fieldValue === MISSING_TOKEN
+                      ? onAddFilter('_exists_', field.name, '+')
+                      : onAddFilter(field, fieldValue, '-')
+                  }
                   aria-label={filterOutLabel}
                   data-test-subj={`minus-${fieldLabel}-${fieldValue}`}
                   style={{

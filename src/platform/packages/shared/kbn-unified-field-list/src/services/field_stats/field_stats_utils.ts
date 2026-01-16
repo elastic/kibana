@@ -12,6 +12,7 @@ import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { FieldStatsResponse } from '../../types';
 import { getFieldExampleBuckets, getFieldValues } from '../field_examples_calculator';
 import {
@@ -320,7 +321,7 @@ export async function getStringSamples(
             // 25 is the default shard size set for size:10 by Elasticsearch.
             // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
             shard_size: size <= 10 ? 25 : undefined,
-            missing: '__missing__',
+            missing: MISSING_TOKEN,
           },
         },
       },
