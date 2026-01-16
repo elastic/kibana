@@ -10,6 +10,7 @@ import yaml from 'js-yaml';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { pickDefined } from './pick';
+import { isRecord, isString } from './type_guards';
 
 const PUBLIC_API_VERSION = '2023-10-31';
 
@@ -29,11 +30,33 @@ export interface RulesetFile {
 
 export const readRulesetFile = (rulesetPath: string): RulesetFile => {
   const raw = fs.readFileSync(rulesetPath, 'utf8');
-  const parsed = yaml.load(raw) as unknown as RulesetFile;
-  if (!parsed || !Array.isArray(parsed.rules)) {
+  const parsed: unknown = yaml.load(raw);
+  if (!isRecord(parsed) || !Array.isArray(parsed.rules)) {
     throw new Error(`Invalid ruleset file: ${rulesetPath}`);
   }
-  return parsed;
+
+  const rules: RulesetRuleSpec[] = parsed.rules.map((r, idx) => {
+    if (!isRecord(r)) {
+      throw new Error(`Invalid ruleset file: ${rulesetPath} (rules[${idx}] is not an object)`);
+    }
+    const id = r.id;
+    if (!isString(id) || id.length === 0) {
+      throw new Error(`Invalid ruleset file: ${rulesetPath} (rules[${idx}].id must be a string)`);
+    }
+
+    const ruleId = isString(r.rule_id) ? r.rule_id : undefined;
+    const match = (() => {
+      if (!isRecord(r.match)) return undefined;
+      const tokens = r.match.name_contains_any;
+      if (!Array.isArray(tokens)) return undefined;
+      const filtered = tokens.filter(isString);
+      return filtered.length > 0 ? { name_contains_any: filtered } : undefined;
+    })();
+
+    return { id, rule_id: ruleId, match };
+  });
+
+  return { rules };
 };
 
 const scoreByNameTokens = ({

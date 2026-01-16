@@ -7,6 +7,14 @@
 
 import fs from 'fs';
 import { pickDefined } from './pick';
+import { isRecord } from './type_guards';
+
+export interface InsightsRuleCreateProps extends Record<string, unknown> {
+  interval?: string;
+  from?: string;
+  to?: string;
+  rule_name_override?: unknown;
+}
 
 /**
  * Reads the vendored `endpoint_alert.ndjson` export and returns a rule preview/create payload.
@@ -15,13 +23,17 @@ import { pickDefined } from './pick';
  */
 export const loadInsightsRuleCreateProps = (
   ruleExportNdjsonPath: string
-): Record<string, unknown> => {
+): InsightsRuleCreateProps => {
   const firstLine = fs.readFileSync(ruleExportNdjsonPath, 'utf8').split('\n').find(Boolean);
   if (!firstLine) throw new Error(`Invalid rule export file (empty): ${ruleExportNdjsonPath}`);
-  const rule = JSON.parse(firstLine) as Record<string, unknown>;
+  const parsed: unknown = JSON.parse(firstLine);
+  if (!isRecord(parsed)) {
+    throw new Error(`Invalid rule export NDJSON (expected object): ${ruleExportNdjsonPath}`);
+  }
+  const rule: Record<string, unknown> = parsed;
 
   // Query rule create props (subset)
-  return pickDefined(rule, [
+  const picked: InsightsRuleCreateProps = pickDefined(rule, [
     'name',
     'description',
     'tags',
@@ -50,4 +62,5 @@ export const loadInsightsRuleCreateProps = (
     'actions',
     'meta',
   ]);
+  return picked;
 };

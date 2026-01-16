@@ -30,8 +30,7 @@ const UpdateCaseTimestampsBody = z.object({
  */
 export const registerDataGeneratorRoutes = (
   router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>,
-  isDev: boolean
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.versioned
     .put({
@@ -53,10 +52,6 @@ export const registerDataGeneratorRoutes = (
       },
       async (context, request, response) => {
         try {
-          if (!isDev) {
-            return response.notFound();
-          }
-
           const [coreStart, pluginsStart] = await getStartServices();
           if (!pluginsStart.cases) {
             return response.notFound();

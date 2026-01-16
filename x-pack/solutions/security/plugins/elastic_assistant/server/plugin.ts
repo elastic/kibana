@@ -73,12 +73,14 @@ export class ElasticAssistantPlugin
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
+  private readonly isDev: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = initializerContext.logger.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.config = initializerContext.config.get<ConfigSchema>();
+    this.isDev = initializerContext.env.mode.dev;
   }
 
   public setup(
@@ -135,7 +137,8 @@ export class ElasticAssistantPlugin
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    registerRoutes(router, this.logger, this.config);
+    const enableDataGeneratorRoutes = this.isDev || plugins.cloud?.isElasticStaffOwned === true;
+    registerRoutes(router, this.logger, this.config, enableDataGeneratorRoutes);
 
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.

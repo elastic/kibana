@@ -173,7 +173,7 @@ describe('registerRoutes', () => {
     jest.clearAllMocks();
 
     server = serverMock.create();
-    registerRoutes(server.router, loggerMock, config);
+    registerRoutes(server.router, loggerMock, config, false);
   });
 
   it('should call `findAlertSummaryRouteMock`', () => {

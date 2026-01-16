@@ -136,3 +136,123 @@ export const createAttackDiscoveryAlerts = async ({
     throw err;
   }
 };
+
+/**
+ * Data generator variant: backdate alert timestamps based on each AttackDiscovery's timestamp (when present).
+ *
+ * The default implementation timestamps all generated Attack Discovery alerts at "now", which is correct for
+ * real attack discovery generation. The data generator wants deterministic historical timelines, so we
+ * backdate `@timestamp` and `kibana.alert.start` per discovery.
+ */
+export const createAttackDiscoveryAlertsForDataGenerator = async ({
+  adhocAttackDiscoveryDataClient,
+  authenticatedUser,
+  createAttackDiscoveryAlertsParams,
+  logger,
+  spaceId,
+}: CreateAttackDiscoveryAlerts): Promise<AttackDiscoveryApiAlert[]> => {
+  const attackDiscoveryAlertsIndex = adhocAttackDiscoveryDataClient.indexNameWithNamespace(spaceId);
+  const readDataClient = adhocAttackDiscoveryDataClient.getReader({ namespace: spaceId });
+  const writeDataClient = await adhocAttackDiscoveryDataClient.getWriter({ namespace: spaceId });
+
+  const { attackDiscoveries, ...restParams } = createAttackDiscoveryAlertsParams;
+
+  const alertDocuments = attackDiscoveries.flatMap((attackDiscovery) => {
+    const desiredNow = (() => {
+      const ts = attackDiscovery.timestamp;
+      if (typeof ts !== 'string' || ts.length === 0) return new Date();
+      const d = new Date(ts);
+      return Number.isFinite(d.getTime()) ? d : new Date();
+    })();
+
+    return transformToAlertDocuments({
+      authenticatedUser,
+      createAttackDiscoveryAlertsParams: {
+        ...restParams,
+        attackDiscoveries: [attackDiscovery],
+      },
+      now: desiredNow,
+      spaceId,
+    });
+  });
+
+  if (isEmpty(alertDocuments)) {
+    logger.debug(
+      () =>
+        `No Attack discovery alerts to create for index ${attackDiscoveryAlertsIndex} in createAttackDiscoveryAlertsForDataGenerator`
+    );
+
+    return [];
+  }
+
+  const alertIds = alertDocuments.map(
+    (alertDocument) => alertDocument[ALERT_UUID] ?? DEBUG_LOG_ID_PLACEHOLDER
+  );
+
+  try {
+    logger.debug(
+      () =>
+        `Creating Attack discovery alerts (data generator) in index ${attackDiscoveryAlertsIndex} with alert ids: ${alertIds.join(
+          ', '
+        )}`
+    );
+
+    const body = alertDocuments.flatMap((alertDocument) => [
+      {
+        create: {
+          _id: alertDocument[ALERT_UUID] ?? uuidv4(),
+        },
+      },
+      alertDocument,
+    ]);
+
+    const resp = await writeDataClient.bulk({
+      body,
+      refresh: true,
+    });
+
+    const bulkResponse = resp?.body;
+    if (!bulkResponse) {
+      logger.info(`Rule data client returned undefined as a result of the bulk operation.`);
+      return [];
+    }
+
+    const createdDocumentIds = getCreatedDocumentIds(bulkResponse);
+
+    if (bulkResponse.errors) {
+      const errorDetails = bulkResponse.items.flatMap((item) => {
+        const error = item.create?.error;
+
+        if (error == null) {
+          return [];
+        }
+
+        const id = item.create?._id != null ? ` id: ${item.create._id}` : '';
+        const details = `\nError bulk inserting attack discovery alert${id} ${error.reason}`;
+        return [details];
+      });
+
+      const allErrorDetails = errorDetails.join(', ');
+      throw new Error(`Failed to bulk insert Attack discovery alerts ${allErrorDetails}`);
+    }
+
+    const { enableFieldRendering, withReplacements } = createAttackDiscoveryAlertsParams;
+
+    return getCreatedAttackDiscoveryAlerts({
+      attackDiscoveryAlertsIndex,
+      createdDocumentIds,
+      enableFieldRendering,
+      logger,
+      readDataClient,
+      withReplacements,
+    });
+  } catch (err) {
+    logger.error(
+      `Error creating Attack discovery alerts (data generator) in index ${attackDiscoveryAlertsIndex}: ${err} with alert ids: ${alertIds.join(
+        ', '
+      )}`
+    );
+
+    throw err;
+  }
+};

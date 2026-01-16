@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { resolveRulesetForInstall } from './ruleset';
 
 describe('resolveRulesetForInstall', () => {
@@ -35,10 +35,12 @@ describe('resolveRulesetForInstall', () => {
     createdFiles.length = 0;
   });
 
-  const log = {
-    info: jest.fn(),
-    warning: jest.fn(),
-  } as unknown as ToolingLog;
+  const log = new ToolingLog({
+    level: 'silent',
+    writeTo: {
+      write: () => {},
+    },
+  });
 
   it('resolves a rule when any token matches', () => {
     const rulesetPath = createRulesetFile(

@@ -7,19 +7,10 @@
 
 import { v5 as uuidv5 } from 'uuid';
 import type { Client } from '@elastic/elasticsearch';
-import type {
-  BulkOperationType,
-  BulkResponseItem,
-  MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AuthenticatedUser } from '@kbn/core/server';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import { transformToAlertDocuments } from '@kbn/elastic-assistant-plugin/server/lib/attack_discovery/persistence/transforms/transform_to_alert_documents';
-import { attackDiscoveryAlertFieldMap } from '@kbn/elastic-assistant-plugin/server/lib/attack_discovery/schedules/fields';
+import type { KbnClient } from '@kbn/test';
 
-const ALERT_UUID = 'kibana.alert.uuid';
 const ID_NAMESPACE = '3c0de8b5-1a9d-4d9f-9e2a-2fb3a58d6f9f';
 
 // IMPORTANT:
@@ -249,92 +240,27 @@ const groupAlertsToDiscoveries = ({
   return discoveries;
 };
 
-const getAdhocAttackDiscoveryBackingIndex = (
-  spaceId: string
-): {
-  internalAlias: string;
-  publicAlias: string;
-  backingIndex: string;
-} => {
-  // Matches the rule-registry created index naming used by the Elastic Assistant plugin for ad-hoc discoveries.
-  // Example: .internal.adhoc.alerts-security.attack.discovery.alerts-default-000001
-  const publicAlias = `.adhoc.alerts-security.attack.discovery.alerts-${spaceId}`;
-  const internalAlias = `.internal${publicAlias}`;
-  return { internalAlias, publicAlias, backingIndex: `${internalAlias}-000001` };
-};
-
-const ensureAdhocAttackDiscoveryIndex = async ({
-  esClient,
-  log,
-  spaceId,
+const createAttackDiscoveriesViaKibana = async ({
+  kbnClient,
+  params,
 }: {
-  esClient: Client;
-  log: ToolingLog;
-  spaceId: string;
-}): Promise<string> => {
-  const { internalAlias, publicAlias, backingIndex } = getAdhocAttackDiscoveryBackingIndex(spaceId);
-
-  const exists = await esClient.indices.exists({ index: backingIndex });
-  if (exists) {
-    // Our ad-hoc index is expected to behave like rule-registry managed indices, which include ECS mappings.
-    // If the index was created without ECS mappings, strict mappings will reject documents that contain `ecs.*`.
-    await esClient.indices.putMapping({
-      index: backingIndex,
-      properties: {
-        ecs: {
-          type: 'object',
-          properties: {
-            version: { type: 'keyword' },
-          },
-        },
-      },
-    });
-
-    // Ensure both aliases exist. The Attack Discovery server routes use the public alias
-    // (e.g. ".adhoc.alerts-security.attack.discovery.alerts-default"), while the backing
-    // indices live under ".internal.*".
-    await esClient.indices.putAlias({ index: backingIndex, name: internalAlias });
-    await esClient.indices.putAlias({ index: backingIndex, name: publicAlias });
-    return backingIndex;
-  }
-
-  log.info(`Creating ad-hoc Attack Discovery backing index: ${backingIndex}`);
-
-  const baseMappings: MappingTypeMapping = mappingFromFieldMap(attackDiscoveryAlertFieldMap);
-  const mappings: MappingTypeMapping = {
-    ...baseMappings,
-    properties: {
-      ...(baseMappings?.properties ?? {}),
-      ecs: {
-        type: 'object',
-        properties: {
-          version: { type: 'keyword' },
-        },
-      },
+  kbnClient: KbnClient;
+  params: Record<string, unknown>;
+}) => {
+  await kbnClient.request({
+    method: 'POST',
+    path: '/internal/elastic_assistant/data_generator/attack_discoveries/_create',
+    headers: {
+      'kbn-xsrf': 'true',
+      'elastic-api-version': '1',
     },
-  };
-
-  await esClient.indices.create({
-    index: backingIndex,
-    // Keep this hidden like other internal alert indices
-    settings: {
-      index: {
-        hidden: true,
-      },
-    },
-    mappings,
-    aliases: {
-      // The alias is what callers typically use for reads; keeping it aligned with Kibana conventions helps UX.
-      [internalAlias]: {},
-      [publicAlias]: {},
-    },
+    body: params,
   });
-
-  return backingIndex;
 };
 
 export const generateAndIndexAttackDiscoveries = async ({
   esClient,
+  kbnClient,
   log,
   spaceId,
   alertsIndex,
@@ -342,6 +268,7 @@ export const generateAndIndexAttackDiscoveries = async ({
   opts,
 }: {
   esClient: Client;
+  kbnClient: KbnClient;
   log: ToolingLog;
   spaceId: string;
   alertsIndex: string;
@@ -367,27 +294,6 @@ export const generateAndIndexAttackDiscoveries = async ({
   }
 
   const discoveryGroups = groupAlertsToDiscoveries({ alerts, maxDiscoveries });
-  const attackDiscoveryIndex = await ensureAdhocAttackDiscoveryIndex({ esClient, log, spaceId });
-
-  log.info(
-    `Generating ${discoveryGroups.length} synthetic Attack Discoveries into ${attackDiscoveryIndex}`
-  );
-
-  const authenticatedUser: AuthenticatedUser = {
-    // IMPORTANT:
-    // The Attack Discovery "find" API filters results to the current user unless "shared" is requested.
-    // If we attribute docs to a different username, they won't show up in the UI for the logged-in user.
-    username: authenticatedUsername,
-    roles: [],
-    enabled: true,
-    authentication_realm: { name: 'scripts', type: 'scripts' },
-    lookup_realm: { name: 'scripts', type: 'scripts' },
-    authentication_provider: { type: 'scripts', name: 'scripts' },
-    authentication_type: 'realm',
-    elastic_cloud_user: false,
-    // `profile_uid` is only used if `username` is empty; keep it stable anyway.
-    profile_uid: authenticatedUsername,
-  };
 
   const commonParams = {
     alertsContextCount: 0,
@@ -403,9 +309,9 @@ export const generateAndIndexAttackDiscoveries = async ({
     withReplacements: false,
   };
 
-  const bulkBody: Array<Record<string, unknown>> = [];
   const generatedGroups: GeneratedAttackDiscoveryGroup[] = [];
 
+  const attackDiscoveries: AttackDiscovery[] = [];
   for (const g of discoveryGroups) {
     const discoveryKey = [
       spaceId,
@@ -445,48 +351,22 @@ export const generateAndIndexAttackDiscoveries = async ({
       ...g,
       title,
     });
-
-    const now = new Date(g.discoveryTimeIso);
-    const docs = transformToAlertDocuments({
-      authenticatedUser,
-      createAttackDiscoveryAlertsParams: {
-        ...commonParams,
-        alertsContextCount: g.alertIds.length,
-        attackDiscoveries: [attack],
-        // Deterministic so repeated runs overwrite the same docs.
-        generationUuid,
-      },
-      now,
-      spaceId,
-    });
-
-    for (let i = 0; i < docs.length; i++) {
-      const doc = docs[i] as unknown as Record<string, unknown>;
-      const id = uuidv5(`${discoveryKey}|doc:${i}`, ID_NAMESPACE);
-      // Force deterministic ids regardless of any internal transform behavior.
-      doc[ALERT_UUID] = id;
-
-      // Use "index" so repeated runs are idempotent (same deterministic ids).
-      bulkBody.push({ index: { _index: attackDiscoveryIndex, _id: id } }, doc);
-    }
+    attackDiscoveries.push(attack);
   }
 
-  const resp = await esClient.bulk({ refresh: true, body: bulkBody });
-  if (resp.errors) {
-    const first = (resp.items ?? []).find(
-      (item: Partial<Record<BulkOperationType, BulkResponseItem>>) => {
-        const op = item.index ?? item.create ?? item.update ?? item.delete;
-        return Boolean(op?.error);
-      }
-    );
-    const op = first?.index ?? first?.create ?? first?.update ?? first?.delete;
-    if (op?.error) {
-      log.error(
-        `Attack Discovery bulk indexing error (status=${op.status}): ${JSON.stringify(op.error)}`
-      );
-    }
-    throw new Error(`Failed to index Attack Discoveries into ${attackDiscoveryIndex}`);
-  }
+  const generationUuid = uuidv5(
+    `${spaceId}|${authenticatedUsername}|${opts.startMs}|${opts.endMs}|${attackDiscoveries.length}`,
+    ID_NAMESPACE
+  );
+  await createAttackDiscoveriesViaKibana({
+    kbnClient,
+    params: {
+      ...commonParams,
+      alertsContextCount: Math.max(0, alerts.length),
+      attackDiscoveries,
+      generationUuid,
+    },
+  });
 
   return generatedGroups;
 };

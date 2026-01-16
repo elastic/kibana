@@ -481,6 +481,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType()));
 
     // TODO We need to get the endpoint routes inside of initRoutes
+    const enableDataGeneratorRoutes =
+      pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
     initRoutes(
       router,
       config,
@@ -498,7 +500,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.isServerless,
       core.docLinks,
       this.endpointContext,
-      pluginContext.env.mode.dev
+      enableDataGeneratorRoutes
     );
 
     registerEndpointRoutes(router, this.endpointContext);

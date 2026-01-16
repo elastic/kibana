@@ -54,6 +54,7 @@ import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plu
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type {
   GetAIAssistantKnowledgeBaseDataClientParams,
@@ -129,6 +130,7 @@ export interface ElasticAssistantPluginStart {
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   alerting: AlertingServerSetup;
+  cloud?: CloudSetup;
   eventLog: IEventLogService; // for writing to the event log
   ml: MlPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;

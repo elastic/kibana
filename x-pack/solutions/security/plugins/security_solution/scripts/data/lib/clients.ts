@@ -10,11 +10,24 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 
+export type StackAuth =
+  | {
+      type: 'basic';
+      username: string;
+      password: string;
+    }
+  | {
+      type: 'apiKey';
+      /**
+       * Base64-encoded Elasticsearch API key value (without the "ApiKey " prefix).
+       */
+      apiKey: string;
+    };
+
 export interface StackConnectionOptions {
   kibanaUrl: string;
   elasticsearchUrl: string;
-  username: string;
-  password: string;
+  auth: StackAuth;
   spaceId?: string;
 }
 
@@ -27,20 +40,50 @@ const buildUrlWithCredentials = (url: string, username: string, password: string
 
 export const createEsClient = ({
   elasticsearchUrl,
-  username,
-  password,
+  auth,
 }: StackConnectionOptions): Client => {
+  const isHttps = (() => {
+    try {
+      return new URL(elasticsearchUrl).protocol === 'https:';
+    } catch {
+      return false;
+    }
+  })();
+
   return new Client({
     node: elasticsearchUrl,
-    auth: { username, password },
+    auth:
+      auth.type === 'apiKey'
+        ? { apiKey: auth.apiKey }
+        : { username: auth.username, password: auth.password },
     requestTimeout: 60_000,
+    // Local serverless dev often uses self-signed TLS on https://localhost:9200
+    ...(isHttps ? { tls: { rejectUnauthorized: false } } : {}),
   });
 };
 
+class AuthenticatedKbnClient extends KbnClient {
+  private readonly defaultHeaders: Record<string, string>;
+
+  constructor(options: KbnClientOptions, defaultHeaders: Record<string, string>) {
+    super(options);
+    this.defaultHeaders = defaultHeaders;
+  }
+
+  public override async request<T>(options: Parameters<KbnClient['request']>[0]) {
+    return await super.request<T>({
+      ...options,
+      headers: {
+        ...this.defaultHeaders,
+        ...(options.headers ?? {}),
+      },
+    });
+  }
+}
+
 export const createKbnClient = ({
   kibanaUrl,
-  username,
-  password,
+  auth,
   spaceId,
   log,
 }: StackConnectionOptions & { log: ToolingLog }): KbnClient => {
@@ -53,10 +96,22 @@ export const createKbnClient = ({
     base.pathname = `${basePath}/s/${spaceId}`;
     return base.toString();
   })();
+
+  if (auth.type === 'basic') {
+    const options: KbnClientOptions = {
+      log,
+      // KbnClient uses the URL (including credentials) to do basic auth.
+      url: buildUrlWithCredentials(url, auth.username, auth.password),
+    };
+    return new KbnClient(options);
+  }
+
   const options: KbnClientOptions = {
     log,
-    // KbnClient uses the URL (including credentials) to do basic auth.
-    url: buildUrlWithCredentials(url, username, password),
+    url,
   };
-  return new KbnClient(options);
+
+  return new AuthenticatedKbnClient(options, {
+    Authorization: `ApiKey ${auth.apiKey}`,
+  });
 };

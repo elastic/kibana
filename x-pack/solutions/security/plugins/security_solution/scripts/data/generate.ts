@@ -11,6 +11,7 @@ import fs from 'fs';
 import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import datemath from '@kbn/datemath';
+import { asyncForEach } from '@kbn/std';
 import type { Client } from '@elastic/elasticsearch';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KbnClient } from '@kbn/test';
@@ -18,6 +19,8 @@ import type { KbnClient } from '@kbn/test';
 import { createEsClient, createKbnClient } from './lib/clients';
 import type { EpisodeDocs, EpisodeFileSet, ScaledDoc } from './lib/episodes';
 import { loadEpisode, scaleEpisodes } from './lib/episodes';
+import type { StackAuth } from './lib/clients';
+import { formatError, getStatusCode } from './lib/type_guards';
 import {
   dateSuffixesBetween,
   ensureIndex,
@@ -44,7 +47,64 @@ const NOISE_DIR = scriptsDataDir('episodes', 'noise');
 const MAPPING_PATH = path.join(ATTACKS_DIR, 'mapping.json');
 const DATA_GENERATOR_CASE_TAG = 'data-generator';
 
-const formatError = (e: unknown): string => String((e as Error).message ?? e);
+const normalizeApiKey = (input: string): string => input.trim().replace(/^ApiKey\s+/i, '');
+
+const looksLikeLogsDataStreamPrefix = (indexPrefix: string): boolean => {
+  // Built-in/serverless "logs" composable templates commonly target data streams only with patterns like `logs-*-*`.
+  // If indexPrefix itself matches `logs-*-*`, then `${indexPrefix}.events...` will also match and ES will reject
+  // concrete index creation with:
+  // "cannot create index ... because it matches with template [logs] that creates data streams only"
+  return /^logs-[^-]+-/.test(indexPrefix);
+};
+
+const ensureDetectionsInitialized = async ({
+  kbnClient,
+  log,
+}: {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+}) => {
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: '/api/detection_engine/index',
+      headers: {
+        'kbn-xsrf': 'true',
+        'elastic-api-version': '2023-10-31',
+      },
+    });
+  } catch (e) {
+    // Lack of privileges is common in dev serverless. We'll detect missing indices later and skip alerts cleanly.
+    log.warning(
+      `Detections index initialization request failed (may be missing privileges); continuing. ${formatError(
+        e
+      )}`
+    );
+  }
+};
+
+const alertsDataStreamExists = async ({
+  esClient,
+  spaceId,
+}: {
+  esClient: Client;
+  spaceId: string;
+}): Promise<boolean> => {
+  const dest = `.alerts-security.alerts-${spaceId}`;
+  try {
+    await esClient.indices.getDataStream({ name: dest });
+    return true;
+  } catch (e) {
+    const status = getStatusCode(e);
+    if (status === 404) return false;
+    // Fallback for non-serverless (alias/index)
+    try {
+      return await esClient.indices.exists({ index: dest });
+    } catch {
+      throw e;
+    }
+  }
+};
 
 const parseDateMathOrThrow = (input: string, nowMs: number): number => {
   if (input === 'now') return nowMs;
@@ -402,9 +462,9 @@ const ensureGeneratorIndices = async ({
 }) => {
   for (const ep of episodeIds) {
     const idx = episodeIndexNames({ episodeId: ep, endMs, indexPrefix });
-    await ensureIndex({ esClient, index: idx.endpointEvents, mappingPath: MAPPING_PATH, log });
-    await ensureIndex({ esClient, index: idx.endpointAlerts, mappingPath: MAPPING_PATH, log });
-    await ensureIndex({ esClient, index: idx.insightsAlerts, mappingPath: MAPPING_PATH, log });
+    await asyncForEach(Object.values(idx), async (index) => {
+      await ensureIndex({ esClient, index, mappingPath: MAPPING_PATH, log });
+    });
   }
 };
 
@@ -458,8 +518,7 @@ const cleanGeneratedData = async ({
     for (let i = 0; i < episodeIndices.length; i += batchSize) {
       const batch = episodeIndices.slice(i, i + batchSize);
       await esClient.indices.delete({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        index: batch as any,
+        index: batch,
         ignore_unavailable: true,
       });
     }
@@ -569,7 +628,7 @@ const ensurePreviewAlertsIndex = async ({
   const resolveBackingIndexFromAlias = async (alias: string): Promise<string | undefined> => {
     try {
       const resp = await esClient.indices.getAlias({ name: alias });
-      const indices = Object.keys(resp as Record<string, unknown>);
+      const indices = Object.keys(resp);
       return indices.sort()[0];
     } catch (e) {
       // Alias might not exist (404) or caller might not have privileges.
@@ -590,8 +649,10 @@ const ensurePreviewAlertsIndex = async ({
   }
 
   try {
-    const mappingResp = await esClient.indices.getMapping({ index: realAlertsBackingIndex });
-    const mapping = (mappingResp as IndicesGetMappingResponse)[realAlertsBackingIndex]?.mappings;
+    const mappingResp: IndicesGetMappingResponse = await esClient.indices.getMapping({
+      index: realAlertsBackingIndex,
+    });
+    const mapping = mappingResp[realAlertsBackingIndex]?.mappings;
 
     log.info(`Recreating missing preview alerts backing index: ${previewBackingIndex}`);
     await esClient.indices.create({
@@ -665,7 +726,7 @@ const bulkIndexStreamed = async ({
           : idx.insightsAlerts;
 
       const buf = ensureBuf(index);
-      buf.push(item.doc as Record<string, unknown>);
+      buf.push(item.doc);
       if (buf.length >= 1000) await flush(index);
     }
   }
@@ -698,14 +759,27 @@ const bulkIndexStreamed = async ({
 };
 
 export const cli = () => {
+  type CliFlags = Record<string, unknown>;
+  const getStringFlag = (flags: CliFlags, name: string): string => {
+    const v = flags[name];
+    if (typeof v === 'string') return v;
+    throw new Error(`Missing required --${name} (expected string)`);
+  };
+  const getOptionalStringFlag = (flags: CliFlags, name: string): string | undefined => {
+    const v = flags[name];
+    if (v == null) return undefined;
+    if (typeof v === 'string') return v;
+    throw new Error(`Invalid --${name} (expected string)`);
+  };
+
   run(
     // eslint-disable-next-line complexity
     async (cliContext) => {
       const log = cliContext.log;
 
       const nowMs = Date.now();
-      const startMs = parseDateMathOrThrow(cliContext.flags['start-date'] as string, nowMs);
-      const endMs = parseDateMathOrThrow(cliContext.flags['end-date'] as string, nowMs);
+      const startMs = parseDateMathOrThrow(getStringFlag(cliContext.flags, 'start-date'), nowMs);
+      const endMs = parseDateMathOrThrow(getStringFlag(cliContext.flags, 'end-date'), nowMs);
 
       const events = Number(cliContext.flags.n ?? cliContext.flags.events ?? 100);
       const hosts = Number(cliContext.flags.h ?? cliContext.flags.hosts ?? 5);
@@ -737,29 +811,46 @@ export const cli = () => {
         );
       }
 
-      const episodes = parseEpisodesFlag(cliContext.flags.episodes as string | undefined);
+      const episodes = parseEpisodesFlag(getOptionalStringFlag(cliContext.flags, 'episodes'));
       const episodeIds = [...episodes].sort();
 
-      const kibanaUrl = cliContext.flags.kibanaUrl as string;
-      const elasticsearchUrl = cliContext.flags.elasticsearchUrl as string;
-      const username = cliContext.flags.username as string;
-      const password = cliContext.flags.password as string;
-      const spaceId = cliContext.flags.spaceId as string | undefined;
-      const indexPrefix = (cliContext.flags.indexPrefix as string | undefined) ?? 'logs-endpoint';
+      const kibanaUrl = getStringFlag(cliContext.flags, 'kibanaUrl');
+      const elasticsearchUrl = getStringFlag(cliContext.flags, 'elasticsearchUrl');
+      const username = getStringFlag(cliContext.flags, 'username');
+      const password = getStringFlag(cliContext.flags, 'password');
+      const apiKey =
+        getOptionalStringFlag(cliContext.flags, 'apiKey') ??
+        process.env.ES_API_KEY ??
+        process.env.ELASTIC_API_KEY;
+      const spaceId = getOptionalStringFlag(cliContext.flags, 'spaceId');
+      const indexPrefix = getOptionalStringFlag(cliContext.flags, 'indexPrefix') ?? 'logs-endpoint';
+
+      const auth: StackAuth = apiKey
+        ? { type: 'apiKey', apiKey: normalizeApiKey(apiKey) }
+        : { type: 'basic', username, password };
+
+      if (auth.type === 'apiKey' && looksLikeLogsDataStreamPrefix(indexPrefix)) {
+        // Fail fast with actionable guidance. In serverless ES, creating a concrete index that matches
+        // a data-stream-only template is rejected; users commonly hit this by picking prefixes like
+        // `logs-endpoint-generator` (which matches `logs-*-*`).
+        throw new Error(
+          `Invalid --indexPrefix "${indexPrefix}" for serverless/API key mode. ` +
+            `It matches the "logs" data-stream-only templates (e.g. logs-*-*), so Elasticsearch rejects concrete index creation. ` +
+            `Use a prefix that does NOT match logs-*-* (for example: "logs-endpoint_generator" or keep the default "logs-endpoint").`
+        );
+      }
 
       const kbnClient: KbnClient = createKbnClient({
         kibanaUrl,
         elasticsearchUrl,
-        username,
-        password,
+        auth,
         spaceId,
         log,
       });
       const esClient = createEsClient({
         kibanaUrl,
         elasticsearchUrl,
-        username,
-        password,
+        auth,
         spaceId,
       });
 
@@ -783,7 +874,7 @@ export const cli = () => {
         await ensurePrebuiltRulesInstalled({
           kbnClient,
           log,
-          rulesetPath: cliContext.flags.ruleset as string,
+          rulesetPath: getStringFlag(cliContext.flags, 'ruleset'),
         });
       } catch (e) {
         // don’t block generation if the user doesn’t have Kibana privileges.
@@ -824,7 +915,7 @@ export const cli = () => {
 
         const effectiveSpaceId = spaceId && spaceId.length > 0 ? spaceId : 'default';
 
-        const rulesetPath = cliContext.flags.ruleset as string;
+        const rulesetPath = getStringFlag(cliContext.flags, 'ruleset');
         const resolvedRules = await resolveRuleset({
           kbnClient,
           log,
@@ -871,7 +962,7 @@ export const cli = () => {
           targetEvents: events,
           hostCount: hosts,
           userCount: users,
-          seed: cliContext.flags.seed as string | undefined,
+          seed: getOptionalStringFlag(cliContext.flags, 'seed'),
           // Default behavior: concentrate most activity on a small subset of risky hosts/users.
           // This can be tuned later if needed, but is intentionally opinionated to look realistic.
           riskyHostCount: Math.min(2, hosts),
@@ -890,6 +981,10 @@ export const cli = () => {
 
         log.info(`Done indexing episode events/endpoint alerts (and insights-alerts copies).`);
 
+        // In serverless, the Security alerts destination is typically a data stream and may not exist
+        // until detections are initialized. Best-effort initialize here, then verify before preview/copy.
+        await ensureDetectionsInitialized({ kbnClient, log });
+
         // Ensure rules are enabled so generated alerts always reference installed+enabled rules.
         await enableRules({ kbnClient, ids: resolvedRules.map((r) => r.id) });
 
@@ -904,6 +999,15 @@ export const cli = () => {
           return;
         }
 
+        const alertsReady = await alertsDataStreamExists({ esClient, spaceId: effectiveSpaceId });
+        if (!alertsReady) {
+          log.warning(
+            `Security alerts destination (.alerts-security.alerts-${effectiveSpaceId}) does not exist yet. ` +
+              `Initialize detections (Security app) and re-run to generate/copy alerts. Raw data was still indexed.`
+          );
+          return;
+        }
+
         // Baseline: generate a small set of detection alerts using the Insights-style query,
         // then attribute them across ALL rules in the ruleset. This ensures the UI shows alerts
         // tied to each installed+enabled rule, even if some of those rules don't match the dataset.
@@ -914,7 +1018,7 @@ export const cli = () => {
           insightsRuleCreate.from = `now-${previewWindowSeconds}s`;
           insightsRuleCreate.to = 'now';
           // Do not allow endpoint alert message to override rule name in generated detection alerts.
-          delete (insightsRuleCreate as Record<string, unknown>).rule_name_override;
+          delete insightsRuleCreate.rule_name_override;
 
           // PERFORMANCE:
           // Rule Preview is the slowest step. Instead of previewing the same Insights-style query
@@ -931,12 +1035,15 @@ export const cli = () => {
           });
 
           for (const ruleRef of resolvedRules) {
+            const fullRule = await fetchRuleById({ kbnClient, id: ruleRef.id });
+            const riskScore =
+              typeof fullRule.risk_score === 'number' ? fullRule.risk_score : undefined;
             await copyPreviewAlertsToRealAlertsIndex({
               esClient,
               log,
               spaceId: effectiveSpaceId,
               previewId,
-              targetRule: ruleRef,
+              targetRule: { ...ruleRef, risk_score: riskScore },
               timestampRange: { startMs, endMs },
             });
           }
@@ -981,6 +1088,7 @@ export const cli = () => {
         if (shouldGenerateAttackDiscoveries) {
           const discoveries = await generateAndIndexAttackDiscoveries({
             esClient,
+            kbnClient,
             log,
             spaceId: effectiveSpaceId,
             alertsIndex: `.alerts-security.alerts-${effectiveSpaceId}`,
@@ -1022,6 +1130,7 @@ export const cli = () => {
           'elasticsearchUrl',
           'username',
           'password',
+          'apiKey',
           'spaceId',
           'episodes',
           'seed',
@@ -1042,6 +1151,7 @@ export const cli = () => {
           elasticsearchUrl: 'http://127.0.0.1:9200',
           username: 'elastic',
           password: 'changeme',
+          apiKey: undefined,
           events: '100',
           hosts: '5',
           users: '5',
@@ -1076,6 +1186,7 @@ export const cli = () => {
 
         --username                       Kibana/Elasticsearch username (Default: elastic)
         --password                       Kibana/Elasticsearch password (Default: changeme)
+        --apiKey                         Elasticsearch API key (base64, with or without "ApiKey " prefix). Enables API key auth for both Kibana and Elasticsearch. You can also set ES_API_KEY.
         --kibanaUrl                       Kibana URL (Default: http://127.0.0.1:5601)
         --elasticsearchUrl                Elasticsearch URL (Default: http://127.0.0.1:9200)
         --spaceId                         Kibana space id (optional)

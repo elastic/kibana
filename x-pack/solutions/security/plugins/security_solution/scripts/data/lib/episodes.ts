@@ -12,6 +12,7 @@ import { createInterface } from 'readline';
 import { PassThrough } from 'stream';
 import crypto from 'crypto';
 import { faker } from '@faker-js/faker';
+import { isRecord } from './type_guards';
 
 export interface EpisodeFileSet {
   episodeId: string; // e.g. ep1
@@ -40,20 +41,24 @@ const getTimestampMs = (doc: Record<string, unknown>): number | undefined => {
 const getNested = (obj: unknown, path: string[]): unknown => {
   let cur: unknown = obj;
   for (const key of path) {
-    if (!cur || typeof cur !== 'object') return undefined;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cur = (cur as any)[key];
+    if (!isRecord(cur)) return undefined;
+    cur = cur[key];
   }
   return cur;
 };
 
 const setNested = (obj: Record<string, unknown>, path: string[], value: unknown) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let cur: any = obj;
+  let cur: Record<string, unknown> = obj;
   for (let i = 0; i < path.length - 1; i++) {
     const key = path[i];
-    if (cur[key] == null || typeof cur[key] !== 'object') cur[key] = {};
-    cur = cur[key];
+    const next = cur[key];
+    if (!isRecord(next)) {
+      const created: Record<string, unknown> = {};
+      cur[key] = created;
+      cur = created;
+    } else {
+      cur = next;
+    }
   }
   cur[path[path.length - 1]] = value;
 };
@@ -67,7 +72,11 @@ export const readNdjson = async (filePath: string): Promise<Array<Record<string,
   const reader = (async () => {
     for await (const line of rl) {
       if (line) {
-        docs.push(JSON.parse(line) as Record<string, unknown>);
+        const parsed: unknown = JSON.parse(line);
+        if (!isRecord(parsed)) {
+          throw new Error(`Invalid NDJSON line (expected object) in ${filePath}`);
+        }
+        docs.push(parsed);
       }
     }
   })();
@@ -396,7 +405,7 @@ export async function* scaleEpisodes(
         if (producedDataDocs >= opts.targetEvents) break;
         if (producedThisClone >= perCloneTargetEvents) break;
 
-        const cloned = structuredClone(doc) as Record<string, unknown>;
+        const cloned: Record<string, unknown> = structuredClone(doc);
         shiftTimeFieldsInPlace(cloned, deltaMs);
         setHostAndUserInPlace({ doc: cloned, hostName, userName, hostId, agentId });
         rewriteEntityIdsInPlace(cloned, `${cloneKey}:${ep.episodeId}`);
@@ -406,14 +415,14 @@ export async function* scaleEpisodes(
       }
 
       for (const doc of ep.alertDocs) {
-        const cloned = structuredClone(doc) as Record<string, unknown>;
+        const cloned: Record<string, unknown> = structuredClone(doc);
         shiftTimeFieldsInPlace(cloned, deltaMs);
         setHostAndUserInPlace({ doc: cloned, hostName, userName, hostId, agentId });
         rewriteEntityIdsInPlace(cloned, `${cloneKey}:${ep.episodeId}`);
         yield { doc: cloned, kind: 'endpoint_alert', episodeId: ep.episodeId };
 
         // Also write a copy into insights-alerts-* (Insights rule sources from there)
-        const insightsCopy = structuredClone(cloned) as Record<string, unknown>;
+        const insightsCopy: Record<string, unknown> = structuredClone(cloned);
         yield { doc: insightsCopy, kind: 'insights_alert', episodeId: ep.episodeId };
       }
 

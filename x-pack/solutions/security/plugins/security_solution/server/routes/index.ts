@@ -75,7 +75,7 @@ export const initRoutes = (
   isServerless: boolean,
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
-  isDev: boolean
+  enableDataGeneratorRoutes: boolean
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -152,5 +152,7 @@ export const initRoutes = (
 
   registerSiemReadinessRoutes({ router, logger });
 
-  registerDataGeneratorRoutes(router, getStartServices, isDev);
+  if (enableDataGeneratorRoutes) {
+    registerDataGeneratorRoutes(router, getStartServices);
+  }
 };
