@@ -93,3 +93,17 @@ export function getUnmappedFieldsStrategy(
   });
   return unmappedFieldsStrategy;
 }
+
+/**
+ * Returns the type to be assigned to unmapped fields based on the provided strategy.
+ */
+export function getUnmappedFieldType(unmappedFieldsStrategy: UnmappedFieldsStrategy): string {
+  switch (unmappedFieldsStrategy) {
+    case UnmappedFieldsStrategy.LOAD:
+      return 'keyword';
+    case UnmappedFieldsStrategy.NULLIFY:
+      return 'null';
+    default:
+      return 'unknown';
+  }
+}

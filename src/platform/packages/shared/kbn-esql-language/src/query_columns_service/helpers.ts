@@ -26,6 +26,7 @@ import type { ESQLAstQueryExpression } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 import { columnIsPresent } from '../commands/definitions/utils/columns';
+import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -129,12 +130,7 @@ export function getUnmappedFields(
       ) {
         unmappedFields.push({
           name: node.parts.join('.'),
-          // TODO: handle unmapped fields types correctly. For now we treat them as 'unknown'.
-          // If the strategy is NULLIFY return 'null', this can't be done today as null is not well supported on function definitions.
-          // Depends on https://github.com/elastic/elasticsearch/issues/140575
-          // For LOAD strategy it's still not clear which type will come from ES if the source data is not compatible with keyword.
-          // Related issue: https://github.com/elastic/kibana/issues/249157
-          type: 'unknown',
+          type: getUnmappedFieldType(unmappedFieldsStrategy),
           isUnmappedField: true,
           userDefined: false,
         });
@@ -190,7 +186,8 @@ export async function getCurrentQueryAvailableColumns(
       lastCommand,
       fields,
       originalQueryText,
-      additionalFields
+      additionalFields,
+      unmappedFieldsStrategy ?? UnmappedFieldsStrategy.FAIL
     );
   }
   return fields;
