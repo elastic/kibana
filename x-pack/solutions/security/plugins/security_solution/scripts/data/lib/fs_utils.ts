@@ -25,4 +25,3 @@ export const readFirstNonEmptyLineUtf8 = (filePath: string): string | undefined 
 export const readJsonFromFile = (filePath: string): unknown => {
   return JSON.parse(readUtf8File(filePath));
 };
-

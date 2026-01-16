@@ -161,7 +161,9 @@ export const createAttackDiscoveryAlertsForDataGenerator = async ({
   // Use the latest valid discovery timestamp as a proxy for the generator's end-of-window time.
   const fallbackNow = (() => {
     const times = attackDiscoveries
-      .map((d) => (typeof d.timestamp === 'string' && d.timestamp.length > 0 ? new Date(d.timestamp) : null))
+      .map((d) =>
+        typeof d.timestamp === 'string' && d.timestamp.length > 0 ? new Date(d.timestamp) : null
+      )
       .filter((d): d is Date => d != null && Number.isFinite(d.getTime()))
       .map((d) => d.getTime());
     const max = times.length > 0 ? Math.max(...times) : NaN;

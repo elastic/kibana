@@ -38,10 +38,7 @@ const buildUrlWithCredentials = (url: string, username: string, password: string
   return u.toString();
 };
 
-export const createEsClient = ({
-  elasticsearchUrl,
-  auth,
-}: StackConnectionOptions): Client => {
+export const createEsClient = ({ elasticsearchUrl, auth }: StackConnectionOptions): Client => {
   const isHttps = (() => {
     try {
       return new URL(elasticsearchUrl).protocol === 'https:';

@@ -138,15 +138,17 @@ const resolveRulesetAgainstCandidates = <TCandidate, TResolved>({
 
     const best = ranked[0]?.r;
     if (!best) {
-      const msg = `Ruleset entry ${spec.id} did not match any ${matchedLabel} rules by name tokens: ${tokens.join(
-        ', '
-      )}`;
+      const msg = `Ruleset entry ${
+        spec.id
+      } did not match any ${matchedLabel} rules by name tokens: ${tokens.join(', ')}`;
       if (strict) throw new Error(msg);
       log.warning(`${msg}, skipping`);
       continue;
     }
 
-    log.info(`Ruleset ${spec.id} matched ${matchedLabel} rule: ${getName(best)} (${getRuleId(best)})`);
+    log.info(
+      `Ruleset ${spec.id} matched ${matchedLabel} rule: ${getName(best)} (${getRuleId(best)})`
+    );
     resolved.push(toResolved(best));
   }
 
