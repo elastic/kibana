@@ -127,7 +127,8 @@ export const registerDriftSummaryRoute = (
             filterClauses.push({ terms: { 'drift.severity.keyword': severities } });
           }
           if (hostId) {
-            filterClauses.push({ term: { 'host.id.keyword': hostId } });
+            // hostId param is actually entity.id which equals host.name (the identity field)
+            filterClauses.push({ term: { 'host.name.keyword': hostId } });
           }
 
           const baseAggs: Record<string, unknown> = {

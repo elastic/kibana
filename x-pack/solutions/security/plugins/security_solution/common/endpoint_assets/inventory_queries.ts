@@ -53,7 +53,7 @@ SELECT
   physical_memory,
   hardware_vendor,
   hardware_model,
-  hardware_serial
+  hardware_seriald
 FROM system_info;
   `.trim(),
   platform: 'all',
@@ -1759,23 +1759,35 @@ export const getAllInventoryQueries = (): PostureQuery[] => [
  */
 export const CORE_CAASM_PACK_CONFIG = {
   name: 'endpoint-caasm-core',
-  description: 'Core CAASM queries for essential asset visibility. Includes identity, network exposure, and security controls.',
+  description:
+    'Core CAASM queries for essential asset visibility. Includes identity, network exposure, and security controls.',
   enabled: true,
   queries: [
     ...CORE_IDENTITY_QUERIES,
-    ...NETWORK_EXPOSURE_QUERIES.filter(q =>
+    ...NETWORK_EXPOSURE_QUERIES.filter((q) =>
       ['exposure_network_interfaces', 'exposure_active_connections'].includes(q.id)
     ),
     CONTROL_SECURITY_TOOLS_QUERY,
-  ].reduce((acc, query) => {
-    acc[query.id] = {
-      query: query.query,
-      interval: query.interval,
-      platform: query.platform,
-      ecs_mapping: query.ecsMapping,
-    };
-    return acc;
-  }, {} as Record<string, { query: string; interval: number; platform: string; ecs_mapping: Record<string, { field: string }> }>),
+  ].reduce(
+    (acc, query) => {
+      acc[query.id] = {
+        query: query.query,
+        interval: query.interval,
+        platform: query.platform,
+        ecs_mapping: query.ecsMapping,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        query: string;
+        interval: number;
+        platform: string;
+        ecs_mapping: Record<string, { field: string }>;
+      }
+    >
+  ),
 };
 
 /**
@@ -1785,17 +1797,29 @@ export const CORE_CAASM_PACK_CONFIG = {
  */
 export const NETWORK_EXPOSURE_PACK_CONFIG = {
   name: 'endpoint-network-exposure',
-  description: 'Network exposure queries for attack surface mapping. Includes interfaces, connections, routes, and shares.',
+  description:
+    'Network exposure queries for attack surface mapping. Includes interfaces, connections, routes, and shares.',
   enabled: true,
-  queries: NETWORK_EXPOSURE_QUERIES.reduce((acc, query) => {
-    acc[query.id] = {
-      query: query.query,
-      interval: query.interval,
-      platform: query.platform,
-      ecs_mapping: query.ecsMapping,
-    };
-    return acc;
-  }, {} as Record<string, { query: string; interval: number; platform: string; ecs_mapping: Record<string, { field: string }> }>),
+  queries: NETWORK_EXPOSURE_QUERIES.reduce(
+    (acc, query) => {
+      acc[query.id] = {
+        query: query.query,
+        interval: query.interval,
+        platform: query.platform,
+        ecs_mapping: query.ecsMapping,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        query: string;
+        interval: number;
+        platform: string;
+        ecs_mapping: Record<string, { field: string }>;
+      }
+    >
+  ),
 };
 
 /**
@@ -1805,17 +1829,29 @@ export const NETWORK_EXPOSURE_PACK_CONFIG = {
  */
 export const PRIVILEGE_ASSESSMENT_PACK_CONFIG = {
   name: 'endpoint-privilege-assessment',
-  description: 'Privilege assessment queries for identity and access visibility. Includes root users, sudoers, and group membership.',
+  description:
+    'Privilege assessment queries for identity and access visibility. Includes root users, sudoers, and group membership.',
   enabled: true,
-  queries: PRIVILEGE_ASSESSMENT_QUERIES.reduce((acc, query) => {
-    acc[query.id] = {
-      query: query.query,
-      interval: query.interval,
-      platform: query.platform,
-      ecs_mapping: query.ecsMapping,
-    };
-    return acc;
-  }, {} as Record<string, { query: string; interval: number; platform: string; ecs_mapping: Record<string, { field: string }> }>),
+  queries: PRIVILEGE_ASSESSMENT_QUERIES.reduce(
+    (acc, query) => {
+      acc[query.id] = {
+        query: query.query,
+        interval: query.interval,
+        platform: query.platform,
+        ecs_mapping: query.ecsMapping,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        query: string;
+        interval: number;
+        platform: string;
+        ecs_mapping: Record<string, { field: string }>;
+      }
+    >
+  ),
 };
 
 /**
@@ -1825,17 +1861,29 @@ export const PRIVILEGE_ASSESSMENT_PACK_CONFIG = {
  */
 export const UNKNOWN_KNOWNS_PACK_CONFIG = {
   name: 'endpoint-unknown-knowns',
-  description: 'Unknown Knowns queries for dormant risk detection. Includes expiring certs, SYSTEM services, dormant admins.',
+  description:
+    'Unknown Knowns queries for dormant risk detection. Includes expiring certs, SYSTEM services, dormant admins.',
   enabled: true,
-  queries: UNKNOWN_KNOWNS_EXPANDED_QUERIES.reduce((acc, query) => {
-    acc[query.id] = {
-      query: query.query,
-      interval: query.interval,
-      platform: query.platform,
-      ecs_mapping: query.ecsMapping,
-    };
-    return acc;
-  }, {} as Record<string, { query: string; interval: number; platform: string; ecs_mapping: Record<string, { field: string }> }>),
+  queries: UNKNOWN_KNOWNS_EXPANDED_QUERIES.reduce(
+    (acc, query) => {
+      acc[query.id] = {
+        query: query.query,
+        interval: query.interval,
+        platform: query.platform,
+        ecs_mapping: query.ecsMapping,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        query: string;
+        interval: number;
+        platform: string;
+        ecs_mapping: Record<string, { field: string }>;
+      }
+    >
+  ),
 };
 
 /**
@@ -1845,17 +1893,29 @@ export const UNKNOWN_KNOWNS_PACK_CONFIG = {
  */
 export const PERSISTENCE_DETECTION_PACK_CONFIG = {
   name: 'endpoint-persistence-detection',
-  description: 'Persistence detection queries for malware hunting. Includes systemd, cron, WMI, and kernel modules.',
+  description:
+    'Persistence detection queries for malware hunting. Includes systemd, cron, WMI, and kernel modules.',
   enabled: true,
-  queries: PERSISTENCE_MECHANISM_QUERIES.reduce((acc, query) => {
-    acc[query.id] = {
-      query: query.query,
-      interval: query.interval,
-      platform: query.platform,
-      ecs_mapping: query.ecsMapping,
-    };
-    return acc;
-  }, {} as Record<string, { query: string; interval: number; platform: string; ecs_mapping: Record<string, { field: string }> }>),
+  queries: PERSISTENCE_MECHANISM_QUERIES.reduce(
+    (acc, query) => {
+      acc[query.id] = {
+        query: query.query,
+        interval: query.interval,
+        platform: query.platform,
+        ecs_mapping: query.ecsMapping,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        query: string;
+        interval: number;
+        platform: string;
+        ecs_mapping: Record<string, { field: string }>;
+      }
+    >
+  ),
 };
 
 /**
@@ -1865,17 +1925,29 @@ export const PERSISTENCE_DETECTION_PACK_CONFIG = {
  */
 export const SHADOW_IT_PACK_CONFIG = {
   name: 'endpoint-shadow-it',
-  description: 'Shadow IT detection queries. Includes VPN clients, remote access tools, and cloud CLI.',
+  description:
+    'Shadow IT detection queries. Includes VPN clients, remote access tools, and cloud CLI.',
   enabled: true,
-  queries: SHADOW_IT_QUERIES.reduce((acc, query) => {
-    acc[query.id] = {
-      query: query.query,
-      interval: query.interval,
-      platform: query.platform,
-      ecs_mapping: query.ecsMapping,
-    };
-    return acc;
-  }, {} as Record<string, { query: string; interval: number; platform: string; ecs_mapping: Record<string, { field: string }> }>),
+  queries: SHADOW_IT_QUERIES.reduce(
+    (acc, query) => {
+      acc[query.id] = {
+        query: query.query,
+        interval: query.interval,
+        platform: query.platform,
+        ecs_mapping: query.ecsMapping,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        query: string;
+        interval: number;
+        platform: string;
+        ecs_mapping: Record<string, { field: string }>;
+      }
+    >
+  ),
 };
 
 /**
@@ -1887,15 +1959,26 @@ export const CONTAINER_AWARENESS_PACK_CONFIG = {
   name: 'endpoint-container-awareness',
   description: 'Container awareness queries for Docker visibility. Includes containers and images.',
   enabled: true,
-  queries: CONTAINER_QUERIES.reduce((acc, query) => {
-    acc[query.id] = {
-      query: query.query,
-      interval: query.interval,
-      platform: query.platform,
-      ecs_mapping: query.ecsMapping,
-    };
-    return acc;
-  }, {} as Record<string, { query: string; interval: number; platform: string; ecs_mapping: Record<string, { field: string }> }>),
+  queries: CONTAINER_QUERIES.reduce(
+    (acc, query) => {
+      acc[query.id] = {
+        query: query.query,
+        interval: query.interval,
+        platform: query.platform,
+        ecs_mapping: query.ecsMapping,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        query: string;
+        interval: number;
+        platform: string;
+        ecs_mapping: Record<string, { field: string }>;
+      }
+    >
+  ),
 };
 
 /**
@@ -1905,17 +1988,29 @@ export const CONTAINER_AWARENESS_PACK_CONFIG = {
  */
 export const SOFTWARE_SUPPLY_CHAIN_PACK_CONFIG = {
   name: 'endpoint-software-supply-chain',
-  description: 'Software supply chain queries. Includes browser extensions, Python, npm, and Homebrew packages.',
+  description:
+    'Software supply chain queries. Includes browser extensions, Python, npm, and Homebrew packages.',
   enabled: true,
-  queries: SOFTWARE_INVENTORY_QUERIES.reduce((acc, query) => {
-    acc[query.id] = {
-      query: query.query,
-      interval: query.interval,
-      platform: query.platform,
-      ecs_mapping: query.ecsMapping,
-    };
-    return acc;
-  }, {} as Record<string, { query: string; interval: number; platform: string; ecs_mapping: Record<string, { field: string }> }>),
+  queries: SOFTWARE_INVENTORY_QUERIES.reduce(
+    (acc, query) => {
+      acc[query.id] = {
+        query: query.query,
+        interval: query.interval,
+        platform: query.platform,
+        ecs_mapping: query.ecsMapping,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        query: string;
+        interval: number;
+        platform: string;
+        ecs_mapping: Record<string, { field: string }>;
+      }
+    >
+  ),
 };
 
 /**
@@ -1926,17 +2021,29 @@ export const SOFTWARE_SUPPLY_CHAIN_PACK_CONFIG = {
  */
 export const FULL_CAASM_PACK_CONFIG = {
   name: 'endpoint-caasm-full',
-  description: 'Complete CAASM query collection for maximum asset visibility. Includes all categories.',
+  description:
+    'Complete CAASM query collection for maximum asset visibility. Includes all categories.',
   enabled: true,
-  queries: getAllInventoryQueries().reduce((acc, query) => {
-    acc[query.id] = {
-      query: query.query,
-      interval: query.interval,
-      platform: query.platform,
-      ecs_mapping: query.ecsMapping,
-    };
-    return acc;
-  }, {} as Record<string, { query: string; interval: number; platform: string; ecs_mapping: Record<string, { field: string }> }>),
+  queries: getAllInventoryQueries().reduce(
+    (acc, query) => {
+      acc[query.id] = {
+        query: query.query,
+        interval: query.interval,
+        platform: query.platform,
+        ecs_mapping: query.ecsMapping,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        query: string;
+        interval: number;
+        platform: string;
+        ecs_mapping: Record<string, { field: string }>;
+      }
+    >
+  ),
 };
 
 /**

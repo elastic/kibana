@@ -198,17 +198,57 @@ export const hostEntityEngineDescription: EntityDescription = {
     newestValue({ source: 'endpoint.software.launch_daemons_count', mapping: { type: 'integer' } }),
     newestValue({ source: 'endpoint.software.unsigned_apps_count', mapping: { type: 'integer' } }),
 
-    // Hardware
-    newestValue({ source: 'endpoint.hardware.vendor' }),
-    newestValue({ source: 'endpoint.hardware.cpu' }),
-    newestValue({ source: 'endpoint.hardware.model' }),
-    newestValue({ source: 'endpoint.hardware.usb_removable_count', mapping: { type: 'integer' } }),
-    newestValue({ source: 'endpoint.hardware.disk.total_capacity_gb', mapping: { type: 'float' } }),
-    newestValue({ source: 'endpoint.hardware.disk.free_space_gb', mapping: { type: 'float' } }),
+    // ==========================================================================
+    // Hardware Inventory (from transform: endpoint-assets-osquery-*)
+    // Field names match transform output (flattened structure)
+    // ==========================================================================
 
-    // Network exposure
+    // --- System Info (from osquery system_info table) ---
+    newestValue({ source: 'endpoint.hardware.vendor' }),
+    newestValue({ source: 'endpoint.hardware.model' }),
+    newestValue({ source: 'endpoint.hardware.serial' }),
+    newestValue({ source: 'endpoint.hardware.uuid' }),
+
+    // --- CPU (from system_info) - flattened field names from transform ---
+    newestValue({ source: 'endpoint.hardware.cpu' }), // CPU brand string
+    newestValue({ source: 'endpoint.hardware.cpu_cores', mapping: { type: 'integer' } }), // logical cores
+    newestValue({ source: 'endpoint.hardware.cpu_physical_cores', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.hardware.cpu_type' }),
+    newestValue({ source: 'endpoint.hardware.cpu_sockets', mapping: { type: 'integer' } }),
+
+    // --- Memory (from system_info + memory_devices) - flattened ---
+    newestValue({ source: 'endpoint.hardware.memory_gb', mapping: { type: 'float' } }),
+    newestValue({ source: 'endpoint.hardware.memory_type' }),
+    newestValue({ source: 'endpoint.hardware.memory_speed' }),
+
+    // --- Disk (from disk_info) - flattened ---
+    newestValue({ source: 'endpoint.hardware.disk_count', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.hardware.disk_total_gb', mapping: { type: 'float' } }),
+
+    // --- USB Devices - flattened ---
+    newestValue({ source: 'endpoint.hardware.usb_count', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.hardware.usb_removable_count', mapping: { type: 'integer' } }),
+
+    // --- Board/Motherboard (from system_info) - flattened ---
+    newestValue({ source: 'endpoint.hardware.board_vendor' }),
+    newestValue({ source: 'endpoint.hardware.board_model' }),
+
+    // ==========================================================================
+    // Network Hardware (from interface_details, interface_addresses)
+    // ==========================================================================
     newestValue({ source: 'endpoint.network.listening_ports_count', mapping: { type: 'integer' } }),
-    collect({ source: 'endpoint.network.interfaces' }),
+    newestValue({ source: 'endpoint.network.interface_count', mapping: { type: 'integer' } }),
+    collect({ source: 'endpoint.network.mac_addresses' }), // Array of MAC addresses
+    collect({ source: 'endpoint.network.ip_addresses' }), // Array of IP addresses
+
+    // ==========================================================================
+    // Software Inventory Summary (full list stored in endpoint-assets-osquery-*)
+    // ==========================================================================
+    newestValue({ source: 'endpoint.software.installed_count', mapping: { type: 'integer' } }),
+    newestValue({ source: 'endpoint.software.services_count', mapping: { type: 'integer' } }),
+    collect({ source: 'endpoint.software.browsers' }), // Detected browsers
+    collect({ source: 'endpoint.software.security_tools' }), // AV, EDR, etc.
+    collect({ source: 'endpoint.software.remote_access' }), // TeamViewer, AnyDesk (Shadow IT)
 
     // Security detections
     newestValue({

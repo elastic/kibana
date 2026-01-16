@@ -516,6 +516,309 @@ export const getAssetFactsTransformConfig = (namespace: string): TransformPutTra
         },
       },
 
+      'endpoint.hardware.serial': {
+        filter: { exists: { field: 'osquery.hardware_serial' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.hardware_serial' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      'endpoint.hardware.uuid': {
+        filter: { exists: { field: 'osquery.uuid' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.uuid' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      'endpoint.hardware.cpu_physical_cores': {
+        filter: { exists: { field: 'osquery.cpu_physical_cores' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.cpu_physical_cores' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      'endpoint.hardware.cpu_type': {
+        filter: { exists: { field: 'osquery.cpu_type' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.cpu_type' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      'endpoint.hardware.cpu_sockets': {
+        filter: { exists: { field: 'osquery.cpu_sockets' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.cpu_sockets' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      'endpoint.hardware.board_vendor': {
+        filter: { exists: { field: 'osquery.board_vendor' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.board_vendor' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      'endpoint.hardware.board_model': {
+        filter: { exists: { field: 'osquery.board_model' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.board_model' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      // =================================================================
+      // ENDPOINT DISK INVENTORY (from disk_info query)
+      // =================================================================
+      'endpoint.hardware.disk_count': {
+        filter: { exists: { field: 'osquery.size_gb' } },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.name',
+            },
+          },
+        },
+      },
+
+      'endpoint.hardware.disk_total_gb': {
+        filter: { exists: { field: 'osquery.size_gb' } },
+        aggs: {
+          total: {
+            sum: {
+              field: 'osquery.size_gb',
+            },
+          },
+        },
+      },
+
+      // =================================================================
+      // ENDPOINT MEMORY DETAILS (from memory_devices query)
+      // =================================================================
+      'endpoint.hardware.memory_type': {
+        filter: { exists: { field: 'osquery.type' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.type' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      'endpoint.hardware.memory_speed': {
+        filter: { exists: { field: 'osquery.speed' } },
+        aggs: {
+          _value: {
+            top_metrics: {
+              metrics: [{ field: 'osquery.speed' }],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
+        },
+      },
+
+      // =================================================================
+      // ENDPOINT NETWORK (from interface_details, interface_addresses)
+      // =================================================================
+      'endpoint.network.interface_count': {
+        filter: {
+          bool: {
+            must: [{ exists: { field: 'osquery.interface' } }],
+            must_not: [{ term: { 'osquery.mac': '00:00:00:00:00:00' } }],
+          },
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.interface',
+            },
+          },
+        },
+      },
+
+      'endpoint.network.mac_addresses': {
+        filter: {
+          bool: {
+            must: [{ exists: { field: 'osquery.mac' } }],
+            must_not: [
+              { term: { 'osquery.mac': '' } },
+              { term: { 'osquery.mac': '00:00:00:00:00:00' } },
+            ],
+          },
+        },
+        aggs: {
+          macs: {
+            terms: {
+              field: 'osquery.mac',
+              size: 20,
+            },
+          },
+        },
+      },
+
+      'endpoint.network.ip_addresses': {
+        filter: {
+          bool: {
+            must: [{ exists: { field: 'osquery.address' } }],
+            must_not: [
+              { prefix: { 'osquery.address': '127.' } },
+              { prefix: { 'osquery.address': 'fe80:' } },
+              { term: { 'osquery.address': '::1' } },
+            ],
+          },
+        },
+        aggs: {
+          ips: {
+            terms: {
+              field: 'osquery.address',
+              size: 20,
+            },
+          },
+        },
+      },
+
+      // =================================================================
+      // ENDPOINT USB DEVICES
+      // =================================================================
+      'endpoint.hardware.usb_count': {
+        filter: { exists: { field: 'osquery.usb_address' } },
+        aggs: {
+          count: {
+            cardinality: {
+              field: 'osquery.usb_address',
+            },
+          },
+        },
+      },
+
+      'endpoint.hardware.usb_removable_count': {
+        filter: {
+          bool: {
+            must: [
+              { exists: { field: 'osquery.usb_address' } },
+              { term: { 'osquery.removable': '1' } },
+            ],
+          },
+        },
+        aggs: {
+          count: {
+            value_count: {
+              field: 'osquery.usb_address',
+            },
+          },
+        },
+      },
+
+      // =================================================================
+      // ENDPOINT SOFTWARE INVENTORY (browsers, security tools, remote access)
+      // =================================================================
+      'endpoint.software.browsers': {
+        filter: {
+          bool: {
+            should: [
+              { wildcard: { 'osquery.name': '*Chrome*' } },
+              { wildcard: { 'osquery.name': '*Firefox*' } },
+              { wildcard: { 'osquery.name': '*Edge*' } },
+              { wildcard: { 'osquery.name': '*Safari*' } },
+              { wildcard: { 'osquery.name': '*Opera*' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        aggs: {
+          browsers: {
+            terms: {
+              field: 'osquery.name',
+              size: 10,
+            },
+          },
+        },
+      },
+
+      'endpoint.software.security_tools': {
+        filter: {
+          bool: {
+            should: [
+              { wildcard: { 'osquery.name': '*Defender*' } },
+              { wildcard: { 'osquery.name': '*CrowdStrike*' } },
+              { wildcard: { 'osquery.name': '*Carbon Black*' } },
+              { wildcard: { 'osquery.name': '*Sentinel*' } },
+              { wildcard: { 'osquery.name': '*Norton*' } },
+              { wildcard: { 'osquery.name': '*McAfee*' } },
+              { wildcard: { 'osquery.name': '*Kaspersky*' } },
+              { wildcard: { 'osquery.name': '*clamav*' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        aggs: {
+          tools: {
+            terms: {
+              field: 'osquery.name',
+              size: 10,
+            },
+          },
+        },
+      },
+
+      'endpoint.software.remote_access': {
+        filter: {
+          bool: {
+            should: [
+              { wildcard: { 'osquery.name': '*TeamViewer*' } },
+              { wildcard: { 'osquery.name': '*AnyDesk*' } },
+              { wildcard: { 'osquery.name': '*LogMeIn*' } },
+              { wildcard: { 'osquery.name': '*VNC*' } },
+              { wildcard: { 'osquery.name': '*Remote Desktop*' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        aggs: {
+          tools: {
+            terms: {
+              field: 'osquery.name',
+              size: 10,
+            },
+          },
+        },
+      },
+
       // =================================================================
       // ENDPOINT MEMORY (filter: has osquery.memory_total)
       // =================================================================
@@ -1147,9 +1450,22 @@ export const getAssetIndexMapping = () => ({
             properties: {
               cpu: { type: 'keyword' },
               cpu_cores: { type: 'integer' },
+              cpu_physical_cores: { type: 'integer' },
+              cpu_type: { type: 'keyword' },
+              cpu_sockets: { type: 'integer' },
               memory_gb: { type: 'float' },
+              memory_type: { type: 'keyword' },
+              memory_speed: { type: 'keyword' },
               vendor: { type: 'keyword' },
               model: { type: 'keyword' },
+              serial: { type: 'keyword' },
+              uuid: { type: 'keyword' },
+              board_vendor: { type: 'keyword' },
+              board_model: { type: 'keyword' },
+              disk_count: { type: 'integer' },
+              disk_total_gb: { type: 'float' },
+              usb_count: { type: 'integer' },
+              usb_removable_count: { type: 'integer' },
             },
           },
           memory: {
@@ -1164,13 +1480,19 @@ export const getAssetIndexMapping = () => ({
           network: {
             properties: {
               interfaces: { type: 'nested' },
+              interface_count: { type: 'integer' },
               listening_ports_count: { type: 'integer' },
+              mac_addresses: { type: 'keyword' },
+              ip_addresses: { type: 'keyword' },
             },
           },
           software: {
             properties: {
               installed_count: { type: 'integer' },
               services_count: { type: 'integer' },
+              browsers: { type: 'keyword' },
+              security_tools: { type: 'keyword' },
+              remote_access: { type: 'keyword' },
             },
           },
           posture: {
@@ -1522,6 +1844,199 @@ export const getAssetIngestPipeline = (namespace: string) => ({
           if (ctx.endpoint.hardware.model != null && ctx.endpoint.hardware.model._value != null) {
             def v = ctx.endpoint.hardware.model._value;
             if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.model = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.serial != null && ctx.endpoint.hardware.serial._value != null) {
+            def v = ctx.endpoint.hardware.serial._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.serial = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.uuid != null && ctx.endpoint.hardware.uuid._value != null) {
+            def v = ctx.endpoint.hardware.uuid._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.uuid = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.cpu_physical_cores != null && ctx.endpoint.hardware.cpu_physical_cores._value != null) {
+            def v = ctx.endpoint.hardware.cpu_physical_cores._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.cpu_physical_cores = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.cpu_type != null && ctx.endpoint.hardware.cpu_type._value != null) {
+            def v = ctx.endpoint.hardware.cpu_type._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.cpu_type = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.cpu_sockets != null && ctx.endpoint.hardware.cpu_sockets._value != null) {
+            def v = ctx.endpoint.hardware.cpu_sockets._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.cpu_sockets = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.board_vendor != null && ctx.endpoint.hardware.board_vendor._value != null) {
+            def v = ctx.endpoint.hardware.board_vendor._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.board_vendor = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.board_model != null && ctx.endpoint.hardware.board_model._value != null) {
+            def v = ctx.endpoint.hardware.board_model._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.board_model = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.memory_type != null && ctx.endpoint.hardware.memory_type._value != null) {
+            def v = ctx.endpoint.hardware.memory_type._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.memory_type = e.getValue(); break; } } }
+          }
+          if (ctx.endpoint.hardware.memory_speed != null && ctx.endpoint.hardware.memory_speed._value != null) {
+            def v = ctx.endpoint.hardware.memory_speed._value;
+            if (v instanceof Map) { for (e in v.entrySet()) { if (e.getValue() != null) { ctx.endpoint.hardware.memory_speed = e.getValue(); break; } } }
+          }
+
+          // Flatten disk count and total from aggregations
+          if (ctx.endpoint.hardware.disk_count != null && ctx.endpoint.hardware.disk_count instanceof Map) {
+            def dc = ctx.endpoint.hardware.disk_count;
+            if (dc.containsKey('count')) {
+              def countObj = dc.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.hardware.disk_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.hardware.disk_count = countObj;
+              } else {
+                ctx.endpoint.hardware.disk_count = 0;
+              }
+            }
+          }
+          if (ctx.endpoint.hardware.disk_total_gb != null && ctx.endpoint.hardware.disk_total_gb instanceof Map) {
+            def dt = ctx.endpoint.hardware.disk_total_gb;
+            if (dt.containsKey('total')) {
+              def totalObj = dt.total;
+              if (totalObj instanceof Map && totalObj.containsKey('value')) {
+                ctx.endpoint.hardware.disk_total_gb = totalObj.value;
+              } else if (totalObj instanceof Number) {
+                ctx.endpoint.hardware.disk_total_gb = totalObj;
+              } else {
+                ctx.endpoint.hardware.disk_total_gb = 0;
+              }
+            }
+          }
+
+          // Flatten USB counts
+          if (ctx.endpoint.hardware.usb_count != null && ctx.endpoint.hardware.usb_count instanceof Map) {
+            def uc = ctx.endpoint.hardware.usb_count;
+            if (uc.containsKey('count')) {
+              def countObj = uc.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.hardware.usb_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.hardware.usb_count = countObj;
+              } else {
+                ctx.endpoint.hardware.usb_count = 0;
+              }
+            }
+          }
+          if (ctx.endpoint.hardware.usb_removable_count != null && ctx.endpoint.hardware.usb_removable_count instanceof Map) {
+            def urc = ctx.endpoint.hardware.usb_removable_count;
+            if (urc.containsKey('count')) {
+              def countObj = urc.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.hardware.usb_removable_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.hardware.usb_removable_count = countObj;
+              } else {
+                ctx.endpoint.hardware.usb_removable_count = 0;
+              }
+            }
+          }
+
+          // Flatten network interface count
+          if (ctx.endpoint.network.interface_count != null && ctx.endpoint.network.interface_count instanceof Map) {
+            def ic = ctx.endpoint.network.interface_count;
+            if (ic.containsKey('count')) {
+              def countObj = ic.count;
+              if (countObj instanceof Map && countObj.containsKey('value')) {
+                ctx.endpoint.network.interface_count = countObj.value;
+              } else if (countObj instanceof Number) {
+                ctx.endpoint.network.interface_count = countObj;
+              } else {
+                ctx.endpoint.network.interface_count = 0;
+              }
+            }
+          }
+
+          // Flatten network MAC addresses from terms aggregation
+          if (ctx.endpoint.network.mac_addresses != null && ctx.endpoint.network.mac_addresses instanceof Map) {
+            def macObj = ctx.endpoint.network.mac_addresses;
+            if (macObj.containsKey('macs') && macObj.macs instanceof Map && macObj.macs.containsKey('buckets')) {
+              def buckets = macObj.macs.buckets;
+              def macList = new ArrayList();
+              for (bucket in buckets) {
+                if (bucket.containsKey('key')) {
+                  macList.add(bucket.key);
+                }
+              }
+              ctx.endpoint.network.mac_addresses = macList;
+            } else {
+              ctx.endpoint.network.mac_addresses = [];
+            }
+          }
+
+          // Flatten network IP addresses from terms aggregation
+          if (ctx.endpoint.network.ip_addresses != null && ctx.endpoint.network.ip_addresses instanceof Map) {
+            def ipObj = ctx.endpoint.network.ip_addresses;
+            if (ipObj.containsKey('ips') && ipObj.ips instanceof Map && ipObj.ips.containsKey('buckets')) {
+              def buckets = ipObj.ips.buckets;
+              def ipList = new ArrayList();
+              for (bucket in buckets) {
+                if (bucket.containsKey('key')) {
+                  ipList.add(bucket.key);
+                }
+              }
+              ctx.endpoint.network.ip_addresses = ipList;
+            } else {
+              ctx.endpoint.network.ip_addresses = [];
+            }
+          }
+
+          // Flatten software browsers from terms aggregation
+          if (ctx.endpoint.software == null) { ctx.endpoint.software = new HashMap(); }
+          if (ctx.endpoint.software.browsers != null && ctx.endpoint.software.browsers instanceof Map) {
+            def browsersObj = ctx.endpoint.software.browsers;
+            if (browsersObj.containsKey('browsers') && browsersObj.browsers instanceof Map && browsersObj.browsers.containsKey('buckets')) {
+              def buckets = browsersObj.browsers.buckets;
+              def browserList = new ArrayList();
+              for (bucket in buckets) {
+                if (bucket.containsKey('key')) {
+                  browserList.add(bucket.key);
+                }
+              }
+              ctx.endpoint.software.browsers = browserList;
+            } else {
+              ctx.endpoint.software.browsers = [];
+            }
+          }
+
+          // Flatten software security_tools from terms aggregation
+          if (ctx.endpoint.software.security_tools != null && ctx.endpoint.software.security_tools instanceof Map) {
+            def toolsObj = ctx.endpoint.software.security_tools;
+            if (toolsObj.containsKey('tools') && toolsObj.tools instanceof Map && toolsObj.tools.containsKey('buckets')) {
+              def buckets = toolsObj.tools.buckets;
+              def toolList = new ArrayList();
+              for (bucket in buckets) {
+                if (bucket.containsKey('key')) {
+                  toolList.add(bucket.key);
+                }
+              }
+              ctx.endpoint.software.security_tools = toolList;
+            } else {
+              ctx.endpoint.software.security_tools = [];
+            }
+          }
+
+          // Flatten software remote_access from terms aggregation
+          if (ctx.endpoint.software.remote_access != null && ctx.endpoint.software.remote_access instanceof Map) {
+            def remoteObj = ctx.endpoint.software.remote_access;
+            if (remoteObj.containsKey('tools') && remoteObj.tools instanceof Map && remoteObj.tools.containsKey('buckets')) {
+              def buckets = remoteObj.tools.buckets;
+              def remoteList = new ArrayList();
+              for (bucket in buckets) {
+                if (bucket.containsKey('key')) {
+                  remoteList.add(bucket.key);
+                }
+              }
+              ctx.endpoint.software.remote_access = remoteList;
+            } else {
+              ctx.endpoint.software.remote_access = [];
+            }
           }
 
           // Memory fields from filtered aggregations

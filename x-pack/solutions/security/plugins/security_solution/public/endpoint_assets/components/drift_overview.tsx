@@ -29,7 +29,11 @@ import * as i18n from '../pages/translations';
 
 const DEFAULT_RANGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-export const DriftOverview: React.FC = React.memo(() => {
+interface DriftOverviewProps {
+  hostId?: string;
+}
+
+export const DriftOverview: React.FC<DriftOverviewProps> = React.memo(({ hostId }) => {
   const [referenceTime] = useState(() => new Date());
   const [timeFrom, setTimeFrom] = useState<Date>(() => new Date(Date.now() - DEFAULT_RANGE_MS));
   const [timeTo, setTimeTo] = useState<Date>(() => new Date());
@@ -39,10 +43,13 @@ export const DriftOverview: React.FC = React.memo(() => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  const effectiveHostId = hostId || selectedHostId;
+
   const { data: summaryData, loading: summaryLoading, error } = useDriftSummary({
     from: timeFrom,
     to: timeTo,
     histogramInterval: '30m',
+    hostId: effectiveHostId,
   });
 
   const { data: eventsData, loading: eventsLoading, refresh } = useDriftEvents({
@@ -50,14 +57,14 @@ export const DriftOverview: React.FC = React.memo(() => {
     to: timeTo,
     categories: selectedCategories,
     severities: selectedSeverities,
-    hostId: selectedHostId,
+    hostId: effectiveHostId,
     page: page + 1,
     pageSize,
   });
 
   useEffect(() => {
     setPage(0);
-  }, [timeFrom, timeTo, selectedCategories, selectedSeverities, selectedHostId]);
+  }, [timeFrom, timeTo, selectedCategories, selectedSeverities, effectiveHostId]);
 
   const handleTimelineChange = useCallback((from: Date, to: Date) => {
     setTimeFrom(from);
@@ -142,6 +149,7 @@ export const DriftOverview: React.FC = React.memo(() => {
           onHostChange={handleHostChange}
           onRefresh={handleRefresh}
           isLoadingHosts={summaryLoading}
+          hideHostFilter={!!hostId}
         />
       </EuiFlexItem>
 

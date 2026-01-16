@@ -57,6 +57,7 @@ import type { FindingType } from '../../../common/endpoint_assets';
 import { SecurityFindingsDetailFlyout } from '../components/security_findings_detail_flyout';
 import { DriftOverview } from '../../endpoint_assets/components/drift_overview';
 import { UnknownKnownsOverview } from '../../endpoint_assets/components/unknown_knowns_overview.tsx';
+import { ENTITY_ANALYTICS_ENDPOINT_ASSETS_HOST_DETAILS_PATH } from '../../../common/constants';
 
 const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.endpointAssets.pageTitle',
@@ -2397,13 +2398,23 @@ const EndpointAssetsPageComponent: React.FC = () => {
   const [selectedTab, setSelectedTab] = React.useState<TabId>('inventory');
   const [selectedAsset, setSelectedAsset] = useState<EndpointAssetRecord | null>(null);
   const { sourcererDataView: dataView, loading: sourcererLoading } = useSourcererDataView();
+  const { application } = useKibana().services;
 
   const { assets, loading, error, refresh, summary } = useEndpointAssetsFromEntityStore();
   const { summary: privilegesSummary } = usePrivileges();
 
-  const handleAssetClick = useCallback((asset: EndpointAssetRecord) => {
-    setSelectedAsset(asset);
-  }, []);
+  const handleAssetClick = useCallback(
+    (asset: EndpointAssetRecord) => {
+      const hostDetailsPath = ENTITY_ANALYTICS_ENDPOINT_ASSETS_HOST_DETAILS_PATH.replace(
+        ':hostId',
+        encodeURIComponent(asset.id)
+      );
+      application.navigateToApp('securitySolutionUI', {
+        path: hostDetailsPath,
+      });
+    },
+    [application]
+  );
 
   const handleFlyoutClose = useCallback(() => {
     setSelectedAsset(null);

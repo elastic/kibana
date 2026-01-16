@@ -17,6 +17,7 @@ import {
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
   ENTITY_ANALYTICS_ENDPOINT_ASSETS_PATH,
+  ENTITY_ANALYTICS_ENDPOINT_ASSETS_HOST_DETAILS_PATH,
   ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   SecurityPageName,
 } from '../../common/constants';
@@ -27,6 +28,7 @@ import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
 import { EntityAnalyticsEndpointAssetsPage } from './pages/entity_analytics_endpoint_assets_page';
+import { HostDetailsPage } from './pages/host_details_page';
 import { EntityThreatHuntingPage } from './pages/entity_threat_hunting_page';
 
 const EntityAnalyticsManagementWrapper = () => (
@@ -139,9 +141,19 @@ const EntityAnalyticsEndpointAssetsWrapper = () => (
   </PluginTemplateWrapper>
 );
 
+const HostDetailsWrapper = () => (
+  <PluginTemplateWrapper>
+    <HostDetailsPage />
+  </PluginTemplateWrapper>
+);
+
 const EntityAnalyticsEndpointAssetsContainer: React.FC = React.memo(() => {
   return (
     <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_ENDPOINT_ASSETS_HOST_DETAILS_PATH}
+        component={HostDetailsWrapper}
+      />
       <Route
         path={ENTITY_ANALYTICS_ENDPOINT_ASSETS_PATH}
         exact

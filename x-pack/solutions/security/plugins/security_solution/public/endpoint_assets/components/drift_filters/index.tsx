@@ -30,6 +30,7 @@ export interface DriftFiltersProps {
   onHostChange: (hostId: string) => void;
   onRefresh: () => void;
   isLoadingHosts?: boolean;
+  hideHostFilter?: boolean;
 }
 
 const DriftFiltersComponent: React.FC<DriftFiltersProps> = ({
@@ -42,6 +43,7 @@ const DriftFiltersComponent: React.FC<DriftFiltersProps> = ({
   onHostChange,
   onRefresh,
   isLoadingHosts = false,
+  hideHostFilter = false,
 }) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
@@ -58,19 +60,23 @@ const DriftFiltersComponent: React.FC<DriftFiltersProps> = ({
         </EuiFilterGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          <strong>{i18n.DRIFT_FILTER_HOST}:</strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DriftHostFilter
-          availableHosts={availableHosts}
-          selectedHostId={selectedHostId}
-          onHostChange={onHostChange}
-          isLoading={isLoadingHosts}
-        />
-      </EuiFlexItem>
+      {!hideHostFilter && (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <strong>{i18n.DRIFT_FILTER_HOST}:</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DriftHostFilter
+              availableHosts={availableHosts}
+              selectedHostId={selectedHostId}
+              onHostChange={onHostChange}
+              isLoading={isLoadingHosts}
+            />
+          </EuiFlexItem>
+        </>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
