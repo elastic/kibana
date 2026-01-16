@@ -16,7 +16,7 @@ import { getEntitiesIndexName } from '../../lib/entity_analytics/entity_store/ut
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
-import { RISK_SCORE_INSTRUCTION } from './tool_instructions';
+import { RISK_SCORE_INSTRUCTION } from '../utils/entity_tools_instructions';
 
 const entityStoreTimelineSchema = z.object({
   entityType: z

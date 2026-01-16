@@ -20,7 +20,7 @@ import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/co
 import { getRiskIndex } from '../../../common/search_strategy/security_solution/risk_score/common';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
-import { RISK_SCORE_FULL_INSTRUCTIONS } from './tool_instructions';
+import { RISK_SCORE_FULL_INSTRUCTIONS } from '../utils/entity_tools_instructions';
 
 const entityRiskScoreSchema = z.object({
   identifierType: IdentifierType.describe('The type of entity: host, user, service, or generic'),

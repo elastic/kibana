@@ -16,7 +16,7 @@ import { getEntitiesIndexName } from '../../lib/entity_analytics/entity_store/ut
 import { EntityType as EntityTypeEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
-import { RISK_SCORE_INSTRUCTION, RISK_LEVELS_INSTRUCTION } from './tool_instructions';
+import { RISK_SCORE_INSTRUCTION, RISK_LEVELS_INSTRUCTION } from '../utils/entity_tools_instructions';
 
 const RISK_LEVELS = ['Critical', 'High', 'Moderate', 'Low', 'Unknown'] as const;
 const ASSET_CRITICALITY_LEVELS = [
